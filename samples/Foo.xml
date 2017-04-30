@@ -4,7 +4,8 @@
     <function><specifier>public</specifier> <specifier>static</specifier> <type><name>void</name></type> <name>foo</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>y</name></decl></parameter>)</parameter_list> <block>{
 	<decl_stmt><decl><type><name>int</name></type> <name>z</name> <init>= <expr><name>x</name><operator>+</operator><literal type="number">1</literal></expr></init></decl>;</decl_stmt>
 	<if>if <condition>(<expr><name>z</name> <operator>&lt;</operator> <name>y</name></expr>)</condition><then> <block>{
-	    <expr_stmt><expr><name>x</name> <operator>+=</operator> <name>z</name></expr>;</expr_stmt>
+	    <decl_stmt><decl><type><name>int</name></type> <name>a</name> <init>= <expr><name>z</name></expr></init></decl>;</decl_stmt>
+	    <expr_stmt><expr><name>x</name> <operator>+=</operator> <name>a</name></expr>;</expr_stmt>
 	}</block></then></if>
 	<return>return <expr><name>y</name><operator>*</operator><name>z</name></expr>;</return>
     }</block></function>
