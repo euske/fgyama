@@ -1,6 +1,6 @@
 public class Foo {
     
-    public static void foo(int x, int y) {
+    public static void f2(int x, int y) {
 	int z = x+1;
 	if (z < y) {
 	    int a = z;
