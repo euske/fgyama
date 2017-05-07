@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="0.9.5" language="Java" filename="samples/f1.java"><class><specifier>public</specifier> class <name>Foo</name> <block>{
+<unit revision="0.9.5" language="Java" filename="samples/f1.java"><class><specifier>public</specifier> class <name>Foo</name> <block>{
     
     <function><specifier>public</specifier> <specifier>static</specifier> <type><name>void</name></type> <name>f1</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>y</name></decl></parameter>)</parameter_list> <block>{
-	<decl_stmt><decl><type><name>int</name></type> <name>z</name> <init>= <expr><name>x</name><operator>+</operator><name>y</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>int</name></type> <name>z</name> <init>= <expr><name>x</name><operator>+</operator><literal type="number">1</literal></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><name>z</name> <operator>*=</operator> <name>y</name></expr>;</expr_stmt>
 	<return>return <expr><name>z</name></expr>;</return>
     }</block></function>
     
