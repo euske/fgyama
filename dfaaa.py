@@ -15,9 +15,6 @@ class Node:
         self.recv = []
         return
 
-    def __repr__(self):
-        return '<%s>' % self.name()
-
     def name(self):
         return 'Node_%d' % (self.nid)
 
@@ -37,6 +34,16 @@ class ReturnNode(Node):
 
     def name(self):
         return 'ReturnNode_%d' % (self.nid)
+
+class BranchNode(Node):
+
+    def name(self):
+        return 'BranchNode_%d' % (self.nid)
+
+class JoinNode(Node):
+
+    def name(self):
+        return 'JoinNode_%d' % (self.nid)
 
 class VarNode(Node):
 
@@ -59,7 +66,7 @@ class ValueNode(Node):
     def name(self):
         return 'ValueNode_%d_%s_%s' % (self.nid, self.value, self.type)
 
-class OpNode(Node):
+class ExprNode(Node):
 
     OPNAME = {
         '+': 'add',
@@ -68,6 +75,8 @@ class OpNode(Node):
         '/': 'div',
         '%': 'mod',
         '=': 'eq',
+        '<': 'lt',
+        '>': 'gt',
         }
     
     def __init__(self, elem, op):
@@ -77,7 +86,7 @@ class OpNode(Node):
     
     def name(self):
         op = '_'.join( self.OPNAME[c] for c in self.op )
-        return 'OpNode_%d_%s' % (self.nid, op)
+        return 'ExprNode_%d_%s' % (self.nid, op)
     
 class Variable:
 
@@ -128,25 +137,24 @@ def process_expr(scope, bindings, elem):
     for e in elem.getchildren():
         if e.tag == 'name':
             var = scope.lookup(e.text)
-            node = bindings[var]
-            ins[var] = node
-            vals.append(node)
+            src = Node(e)
+            ins[var] = src
+            vals.append(src)
         elif e.tag == 'literal':
             (name, type) = (e.text, e.get('type'))
             node = ValueNode(e, name, type)
             vals.append(node)
         elif e.tag == 'operator':
             ops.append(e.text)
-    if not ops:
-        assert len(vals) == 1
-        return (ins, vals[0])
-    out = OpNode(elem, ''.join(ops))
+    out = ExprNode(elem, ''.join(ops))
     for src in vals:
         src.connect(out)
     return (ins, out)
 
 def process_block(parent, bindings, elem):
     scope = Scope(parent)
+    ins0 = {}
+    outs = {}
     bindings = bindings.copy()
     for stmt in elem.getchildren():
         if stmt.tag == 'decl_stmt':
@@ -159,16 +167,21 @@ def process_block(parent, bindings, elem):
                 expr = init.find('expr')
                 (ins1, out) = process_expr(scope, bindings, expr)
                 for (v0, dst) in ins1.items():
+                    if v0 not in ins0:
+                        ins0[v0] = dst
                     src = bindings[v0]
                     src.connect(dst)
                 dst = VarNode(name, var)
                 out.connect(dst)
                 bindings[var] = dst
+                outs[var] = dst
                 
         elif stmt.tag == 'expr_stmt':
             expr = stmt.find('expr')
             (ins1, out) = process_expr(scope, bindings, expr)
             for (v0, dst) in ins1.items():
+                if v0 not in ins0:
+                    ins0[v0] = dst
                 src = bindings[v0]
                 src.connect(dst)
             name = expr.find('name')
@@ -176,32 +189,60 @@ def process_block(parent, bindings, elem):
             dst = VarNode(name, var)
             out.connect(dst)
             bindings[var] = dst
+            outs[var] = dst
             
         elif stmt.tag == 'return':
             expr = stmt.find('expr')
             (ins1, out) = process_expr(scope, bindings, expr)
             for (v0, dst) in ins1.items():
+                if v0 not in ins0:
+                    ins0[v0] = dst
                 src = bindings[v0]
                 src.connect(dst)
             dst = ReturnNode(expr)
             out.connect(dst)
+            bindings[None] = dst
+            outs[None] = dst
             
         elif stmt.tag == 'if':
+            condition = stmt.find('condition')
+            expr = condition.find('expr')
+            (ins1, out) = process_expr(scope, bindings, expr)
+            for (v0, dst) in ins1.items():
+                if v0 not in ins0:
+                    ins0[v0] = dst
+                src = bindings[v0]
+                branch = BranchNode(stmt)
+                out.connect(branch)
+                src.connect(branch)
+                branch.connect(dst)
             then = stmt.find('then')
-            process_block(scope, bindings, then.find('block'))
-            
+            block = then.find('block')
+            (ins1, outs1) = process_block(scope, bindings, block)
+            for (v0, dst) in ins1.items():
+                if v0 not in ins0:
+                    ins0[v0] = dst
+                src = bindings[v0]
+                join = JoinNode(stmt)
+                out.connect(join)
+                dst.connect(join)
+                join.connect(src)
+            for (v0, src) in outs1.items():
+                bindings[v0] = src
+                
     for var in scope.pop():
-        del bindings[var]
-    return
+        del outs[var]
+        if var in ins0:
+            del ins0[var]
+    return (ins0, outs)
 
-def show_graph(node, visited):
+def visit_graph(node, visited):
     if node in visited: return
     visited.add(node)
     for c in node.send:
-        print (' %s -> %s;' % (node.name(), c.name()))
-        show_graph(c, visited)
+        visit_graph(c, visited)
     for c in node.recv:
-        show_graph(c, visited)
+        visit_graph(c, visited)
     return
 
 def process_func(elem):
@@ -219,7 +260,11 @@ def process_func(elem):
 
     visited = set()
     for node in bindings.values():
-        show_graph(node, visited)
+        visit_graph(node, visited)
+    for node in visited:
+        for c in node.send:
+            print (' N%d -> N%d [label="%s"];' %
+                   (node.nid, c.nid, node.name()))
     return
 
 def process_root(elem):
