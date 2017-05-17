@@ -6,7 +6,7 @@ public class Foo {
 	    int a = z;
 	    x += a;
 	}
-	return y*z;
+	return x*z;
     }
     
 }
