@@ -3,18 +3,18 @@ import sys
 from xml.etree.cElementTree import Element
 from xml.etree.cElementTree import ElementTree
 
-
-##  Exporter
-##  http://graphviz.org/content/dot-language
-##
+def log(*args):
+    print(' '.join(map(str, args)), file=sys.stderr)
+    
 def getattrs(kwargs):
     return ', '.join(
         ( '%s="%s"' % (k,v.replace('"', '\\"'))
           for (k,v) in kwargs.items() if v is not None ))
 
-def get1(d):
-    return list(d.items())[0]
 
+##  Exporter
+##  http://graphviz.org/content/dot-language
+##
 class Exporter:
 
     def __init__(self, fp):
@@ -58,18 +58,33 @@ class Node:
         self.recv = []
         return
 
+    def __repr__(self):
+        return '<%s(%r)>' % (self.__class__.__name__, self.nid)
+
     def name(self):
         return 'Node %d' % (self.nid)
 
     def connect(self, node, label=None):
         if self is node: return
-        #print ('connect', self, node)
+        log('connect', self, node, label)
         self.send[node] = label
         node.recv.append(self)
         return
 
+    def disconnect(self, node):
+        assert node in self.send
+        label = self.send[node]
+        log('disconnect', self, node, label)
+        del self.send[node]
+        node.recv.remove(self)
+        return label
+
 class InnerNode(Node):
 
+    def __init__(self):
+        Node.__init__(self, None)
+        return
+        
     def name(self):
         return ''
 
@@ -79,10 +94,9 @@ class InnerNode(Node):
     def trim(self):
         send = list(self.send.keys())[0]
         recv = self.recv[0]
-        l1 = recv.send[self]
-        l2 = self.send[send]
-        del recv.send[self]
-        send.recv.remove(self)
+        l1 = recv.disconnect(self)
+        l2 = self.disconnect(send)
+        assert l1 is None or l2 is None, (l1,l2)
         recv.connect(send, l1 or l2)
         return
     
@@ -102,24 +116,18 @@ class ReturnNode(Node):
         return 'Return %d' % (self.nid)
 
 class CondNode(Node):
-    pass
-
-class BranchNode(CondNode):
 
     def __init__(self, elem, cond):
-        CondNode.__init__(self, elem)
-        cond.connect(self, 'branch')
+        Node.__init__(self, elem)
+        cond.connect(self, 'cond')
         return
+
+class BranchNode(CondNode):
     
     def name(self):
         return 'Branch %d' % (self.nid)
 
 class JoinNode(CondNode):
-
-    def __init__(self, elem, cond):
-        CondNode.__init__(self, elem)
-        cond.connect(self, 'join')
-        return
     
     def name(self):
         return 'Join %d' % (self.nid)
@@ -212,7 +220,7 @@ def process_expr(elem, scope):
         if e.tag == 'name':  # Variable lookup.
             name = e.text
             var = scope.lookup(name)
-            src = InnerNode(e)
+            src = InnerNode()
             src.connect(output, 'Arg %r' % arg)
             inputs[var] = src
             arg += 1
@@ -231,11 +239,10 @@ def process_expr(elem, scope):
 
 ##  process_block
 ##
-def process_block(elem, parent, bindings):
+def process_block(elem, parent):
     scope = Scope(parent)
-    bindings = bindings.copy()
     inputs = {}  # {var: src}
-    outputs = {}
+    bindings = {}
     for stmt in elem.getchildren():
         if stmt.tag == 'decl_stmt':
             decl = stmt.find('decl')
@@ -246,77 +253,95 @@ def process_block(elem, parent, bindings):
                 sym = decl.find('name')
                 expr = init.find('expr')
                 (ins1, out1) = process_expr(expr, scope)
-                for (var1, dst1) in ins1.items():
-                    if var1 not in inputs:
-                        inputs[var1] = dst1
-                    src = bindings[var1]
-                    src.connect(dst1)
+                for (var1, in1) in ins1.items():
+                    if var1 in bindings:
+                        src = bindings[var1]
+                    elif var1 in inputs:
+                        src = inputs[var1]
+                    else:
+                        src = inputs[var1] = InnerNode()
+                    src.connect(in1)
                 dst = VarNode(sym, var)
                 out1.connect(dst)
                 bindings[var] = dst
-                outputs[var] = dst
                 
         elif stmt.tag == 'expr_stmt':
             expr = stmt.find('expr')
             sym = expr.find('name')
             var = scope.lookup(sym.text)
-            dst = VarNode(sym, var)
             (ins1, out1) = process_expr(expr, scope)
-            for (var1, dst1) in ins1.items():
-                if var1 not in inputs:
-                    inputs[var1] = dst1
-                src = bindings[var1]
-                src.connect(dst1)
+            for (var1, in1) in ins1.items():
+                if var1 in bindings:
+                    src = bindings[var1]
+                elif var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(in1)
+            dst = VarNode(sym, var)
             out1.connect(dst)
             bindings[var] = dst
-            outputs[var] = dst
             
         elif stmt.tag == 'return':
             expr = stmt.find('expr')
-            dst = ReturnNode(stmt)
             (ins1, out1) = process_expr(expr, scope)
-            for (var1, dst1) in ins1.items():
-                if var1 not in inputs:
-                    inputs[var1] = dst1
-                src = bindings[var1]
-                src.connect(dst1)
+            for (var1, in1) in ins1.items():
+                if var1 in bindings:
+                    src = bindings[var1]
+                elif var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(in1)
+            dst = ReturnNode(stmt)
             out1.connect(dst)
-            outputs[None] = dst
+            bindings[None] = dst
             
         elif stmt.tag == 'if':
             condition = stmt.find('condition')
             expr = condition.find('expr')
             (ins1, cond1) = process_expr(expr, scope)
-            for (var1, dst1) in ins1.items():
-                if var1 not in inputs:
-                    inputs[var1] = dst1
-                src = bindings[var1]
-                src.connect(dst1)
+            for (var1, in1) in ins1.items():
+                if var1 in bindings:
+                    src = bindings[var1]
+                elif var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(in1)
             
             then = stmt.find('then')
             block = then.find('block')
-            (ins1, outs1) = process_block(block, scope, bindings)
-            for (var1, dst1) in ins1.items():
-                if var1 not in inputs:
-                    inputs[var1] = dst1
+            (ins1, outs1) = process_block(block, scope)
+            for (var1, in1) in ins1.items():
                 branch = BranchNode(stmt, cond1)
-                branch.connect(dst1)
-                src = bindings[var1]
-                src.connect(branch)
+                branch.connect(in1)
+                if var1 in bindings:
+                    src = bindings[var1]
+                elif var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(branch, 'true')
                 
-            for (var1, src1) in outs1.items():
+            for (var1, out1) in outs1.items():
                 join = JoinNode(stmt, cond1)
-                src1.connect(join)
-                dst = bindings[var1]
-                join.connect(dst)
+                out1.connect(join, 'true')
+                if var1 in bindings:
+                    src = bindings[var1]
+                elif var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(join)
                 bindings[var1] = join
-                outputs[var1] = join
                 
     for var in scope.pop():
-        del outputs[var]
+        if var in bindings:
+            del bindings[var]
         if var in inputs:
             del inputs[var]
-    return (inputs, outputs)
+    return (inputs, bindings)
 
 def visit_graph(node, visited):
     if node in visited: return
@@ -348,8 +373,12 @@ def process_func(exporter, elem):
         dst = VarNode(param, var)
         arg.connect(dst)
         bindings[var] = dst
+        
     block = elem.find('block')
-    process_block(block, scope, bindings)
+    (ins1, outs1) = process_block(block, scope)
+    for (var1, in1) in ins1.items():
+        src = bindings[var1]
+        src.connect(in1)
 
     exporter.open(func_name)
     allnodes = set()
