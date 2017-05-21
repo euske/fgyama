@@ -115,6 +115,11 @@ class ReturnNode(Node):
     def name(self):
         return 'Return %d' % (self.nid)
 
+class LoopNode(Node):
+
+    def name(self):
+        return 'Loop %d' % (self.nid)
+
 class CondNode(Node):
 
     def __init__(self, elem, cond):
@@ -268,7 +273,7 @@ def process_block(elem, parent):
                 for (var1, in1) in ins1.items():
                     getvar(var1).connect(in1)
                 dst = VarNode(sym, var)
-                out1.connect(dst)
+                out1.connect(dst, 'assign')
                 setvar(var, dst)
                 
         elif stmt.tag == 'expr_stmt':
@@ -279,7 +284,7 @@ def process_block(elem, parent):
             for (var1, in1) in ins1.items():
                 getvar(var1).connect(in1)
             dst = VarNode(sym, var)
-            out1.connect(dst)
+            out1.connect(dst, 'assign')
             setvar(var, dst)
             
         elif stmt.tag == 'return':
@@ -288,7 +293,7 @@ def process_block(elem, parent):
             for (var1, in1) in ins1.items():
                 getvar(var1).connect(in1)
             dst = ReturnNode(stmt)
-            out1.connect(dst)
+            out1.connect(dst, 'assign')
             setvar(None, dst)
             
         elif stmt.tag == 'if':
@@ -323,6 +328,39 @@ def process_block(elem, parent):
                     getvar(var1).connect(join)
                     setvar(var1, join)
                 
+        elif stmt.tag == 'while':
+            condition = stmt.find('condition')
+            expr = condition.find('expr')
+            (ins1, cond1) = process_expr(expr, scope)
+            block = stmt.find('block')
+            (ins2, outs2) = process_block(block, scope)
+            loopvars = {}
+            for var2 in outs2.keys():
+                if var2 in ins1 or var2 in ins2:
+                    loop = LoopNode(stmt)
+                    loopvars[var2] = loop
+                    getvar(var2).connect(loop, 'init')
+            for (var1, in1) in ins1.items():
+                if var1 in loopvars:
+                    loopvars[var1].connect(in1)
+                else:
+                    getvar(var1).connect(in1)
+            for (var2, in2) in ins2.items():
+                if var2 in loopvars:
+                    branch = BranchNode(stmt, cond1)
+                    branch.connect(in2)
+                    loopvars[var2].connect(branch, 'true')
+                else:
+                    getvar(var2).connect(in2)
+            for (var2, out2) in outs2.items():
+                if var2 in loopvars:
+                    branch = BranchNode(stmt, cond1)
+                    branch.connect(loopvars[var2], 'cont')
+                    out2.connect(branch, 'false')
+                    setvar(var2, branch)
+                else:
+                    setvar(var2, out2)
+            
     for var in scope.pop():
         assert var not in inputs
         if var in bindings:
