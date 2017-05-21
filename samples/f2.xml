@@ -6,7 +6,9 @@
 	<if>if <condition>(<expr><name>z</name> <operator>&lt;</operator> <name>y</name></expr>)</condition><then> <block>{
 	    <decl_stmt><decl><type><name>int</name></type> <name>a</name> <init>= <expr><name>z</name></expr></init></decl>;</decl_stmt>
 	    <expr_stmt><expr><name>x</name> <operator>+=</operator> <name>a</name></expr>;</expr_stmt>
-	}</block></then></if>
+	}</block></then> <else>else <block>{
+	    <expr_stmt><expr><name>z</name> <operator>=</operator> <literal type="number">2</literal></expr>;</expr_stmt>
+	}</block></else></if>
 	<return>return <expr><name>x</name><operator>*</operator><name>z</name></expr>;</return>
     }</block></function>
     

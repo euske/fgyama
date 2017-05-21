@@ -5,6 +5,8 @@ public class Foo {
 	if (z < y) {
 	    int a = z;
 	    x += a;
+	} else {
+	    z = 2;
 	}
 	return x*z;
     }

@@ -309,6 +309,19 @@ def process_block(elem, parent):
                 out1.connect(join, 'true')
                 getvar(var1).connect(join)
                 setvar(var1, join)
+            els = stmt.find('else')
+            if els:
+                block = els.find('block')
+                (ins1, outs1) = process_block(block, scope)
+                for (var1, in1) in ins1.items():
+                    branch = BranchNode(stmt, cond1)
+                    branch.connect(in1)
+                    getvar(var1).connect(branch, 'false')
+                for (var1, out1) in outs1.items():
+                    join = JoinNode(stmt, cond1)
+                    out1.connect(join, 'false')
+                    getvar(var1).connect(join)
+                    setvar(var1, join)
                 
     for var in scope.pop():
         assert var not in inputs
