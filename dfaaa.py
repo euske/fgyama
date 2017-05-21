@@ -243,6 +243,18 @@ def process_block(elem, parent):
     scope = Scope(parent)
     inputs = {}  # {var: src}
     bindings = {}
+    def getvar(var):
+        if var in bindings:
+            src = bindings[var]
+        elif var in inputs:
+            src = inputs[var]
+        else:
+            src = inputs[var] = InnerNode()
+        return src
+    def setvar(var, dst):
+        bindings[var] = dst
+        return
+    
     for stmt in elem.getchildren():
         if stmt.tag == 'decl_stmt':
             decl = stmt.find('decl')
@@ -254,16 +266,10 @@ def process_block(elem, parent):
                 expr = init.find('expr')
                 (ins1, out1) = process_expr(expr, scope)
                 for (var1, in1) in ins1.items():
-                    if var1 in bindings:
-                        src = bindings[var1]
-                    elif var1 in inputs:
-                        src = inputs[var1]
-                    else:
-                        src = inputs[var1] = InnerNode()
-                    src.connect(in1)
+                    getvar(var1).connect(in1)
                 dst = VarNode(sym, var)
                 out1.connect(dst)
-                bindings[var] = dst
+                setvar(var, dst)
                 
         elif stmt.tag == 'expr_stmt':
             expr = stmt.find('expr')
@@ -271,76 +277,43 @@ def process_block(elem, parent):
             var = scope.lookup(sym.text)
             (ins1, out1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
-                if var1 in bindings:
-                    src = bindings[var1]
-                elif var1 in inputs:
-                    src = inputs[var1]
-                else:
-                    src = inputs[var1] = InnerNode()
-                src.connect(in1)
+                getvar(var1).connect(in1)
             dst = VarNode(sym, var)
             out1.connect(dst)
-            bindings[var] = dst
+            setvar(var, dst)
             
         elif stmt.tag == 'return':
             expr = stmt.find('expr')
             (ins1, out1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
-                if var1 in bindings:
-                    src = bindings[var1]
-                elif var1 in inputs:
-                    src = inputs[var1]
-                else:
-                    src = inputs[var1] = InnerNode()
-                src.connect(in1)
+                getvar(var1).connect(in1)
             dst = ReturnNode(stmt)
             out1.connect(dst)
-            bindings[None] = dst
+            setvar(None, dst)
             
         elif stmt.tag == 'if':
             condition = stmt.find('condition')
             expr = condition.find('expr')
             (ins1, cond1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
-                if var1 in bindings:
-                    src = bindings[var1]
-                elif var1 in inputs:
-                    src = inputs[var1]
-                else:
-                    src = inputs[var1] = InnerNode()
-                src.connect(in1)
-            
+                getvar(var1).connect(in1)
             then = stmt.find('then')
             block = then.find('block')
             (ins1, outs1) = process_block(block, scope)
             for (var1, in1) in ins1.items():
                 branch = BranchNode(stmt, cond1)
                 branch.connect(in1)
-                if var1 in bindings:
-                    src = bindings[var1]
-                elif var1 in inputs:
-                    src = inputs[var1]
-                else:
-                    src = inputs[var1] = InnerNode()
-                src.connect(branch, 'true')
-                
+                getvar(var1).connect(branch, 'true')
             for (var1, out1) in outs1.items():
                 join = JoinNode(stmt, cond1)
                 out1.connect(join, 'true')
-                if var1 in bindings:
-                    src = bindings[var1]
-                elif var1 in inputs:
-                    src = inputs[var1]
-                else:
-                    src = inputs[var1] = InnerNode()
-                src.connect(join)
-                bindings[var1] = join
+                getvar(var1).connect(join)
+                setvar(var1, join)
                 
     for var in scope.pop():
+        assert var not in inputs
         if var in bindings:
             del bindings[var]
-        if var in inputs:
-            del inputs[var]
     return (inputs, bindings)
 
 def visit_graph(node, visited):
