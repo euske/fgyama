@@ -14,7 +14,7 @@ import javax.xml.transform.stream.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
-public class JDTParser extends ASTVisitor {
+public class Java2Xml extends ASTVisitor {
 
     public static void main(String[] args) {
 	String[] classpath = new String[] { "/" };
@@ -41,7 +41,7 @@ public class JDTParser extends ASTVisitor {
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 		Document doc = docBuilder.newDocument();
 		
-		JDTParser visitor = new JDTParser(doc);
+		Java2Xml visitor = new Java2Xml(doc);
 		cu.accept(visitor);
 
 		TransformerFactory transFactory = TransformerFactory.newInstance();
@@ -63,7 +63,7 @@ public class JDTParser extends ASTVisitor {
     private Document _document;
     private Stack<Element> _stack;
 
-    public JDTParser(Document document) {
+    public Java2Xml(Document document) {
 	_document = document;
 	_stack = new Stack<Element>();
     }
@@ -309,8 +309,10 @@ public class JDTParser extends ASTVisitor {
 	    return "WhileStatement";
 	case ASTNode.WILDCARD_TYPE:
 	    return "WildcardType";
+	case 85:		// ???
+	    return "UNKNOWN";
 	default:
-	    return "???";
+	    return null;
 	}
     }
 }
