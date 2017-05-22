@@ -6,7 +6,13 @@
 // java -cp .:org.eclipse.jdt.core.jar:org.eclipse.core.runtime.jar:org.eclipse.equinox.common.jar:org.eclipse.core.resources.jar:org.eclipse.core.jobs.jar:org.eclipse.osgi.jar:org.eclipse.core.contenttype.jar:org.eclipse.equinox.preferences.jar Test
 
 import java.io.*;
+import java.util.*;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 public class JDTParser extends ASTVisitor {
 
@@ -30,12 +36,107 @@ public class JDTParser extends ASTVisitor {
 		parser.setResolveBindings(true);
 		parser.setEnvironment(classpath, null, null, true);
 		CompilationUnit cu = (CompilationUnit)parser.createAST(null);
-		JDTParser visitor = new JDTParser();
+
+		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		Document doc = docBuilder.newDocument();
+		
+		JDTParser visitor = new JDTParser(doc);
 		cu.accept(visitor);
+
+		TransformerFactory transFactory = TransformerFactory.newInstance();
+		Transformer transformer = transFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+		StreamResult result = new StreamResult(System.out);
+		transformer.transform(source, result);
+		
 	    } catch (IOException e) {
-		System.err.println("Error: "+e);
+		e.printStackTrace();
+	    } catch (ParserConfigurationException e) {
+		e.printStackTrace();
+	    } catch (TransformerException e) {
+		e.printStackTrace();
 	    }
 	}
+    }
+
+    private Document _document;
+    private Stack<Element> _stack;
+
+    public JDTParser(Document document) {
+	_document = document;
+	_stack = new Stack<Element>();
+    }
+    
+    public void preVisit(ASTNode node) {
+	int type = node.getNodeType();
+	String name = getNodeTypeName(type);
+	Element elem = _document.createElement(name);
+	if (_stack.empty()) {
+	    _document.appendChild(elem);
+	} else {
+	    appendTop(elem);
+	}
+	_stack.push(elem);
+    }
+    
+    public void postVisit(ASTNode node) {
+	_stack.pop();
+    }
+
+    private void appendTop(Node node) {
+	_stack.peek().appendChild(node);
+    }
+    private void appendAttr(String key, String value) {
+	_stack.peek().setAttribute(key, value);
+    }
+    private void appendText(String text) {
+	appendTop(_document.createTextNode(text));
+    }
+
+    public boolean visit(SimpleName node) {
+	appendText(node.getFullyQualifiedName());
+	return true;
+    }
+    public boolean visit(Modifier node) {
+	appendText(node.getKeyword().toString());
+	return true;
+    }
+    public boolean visit(PrimitiveType node) {
+	appendText(node.getPrimitiveTypeCode().toString());
+	return true;
+    }
+    public boolean visit(BooleanLiteral node) {
+	appendText(Boolean.toString(node.booleanValue()));
+	return true;
+    }
+    public boolean visit(CharacterLiteral node) {
+	appendText(Character.toString(node.charValue()));
+	return true;
+    }
+    public boolean visit(NumberLiteral node) {
+	appendText(node.getToken());
+	return true;
+    }
+    public boolean visit(StringLiteral node) {
+	appendText(node.getLiteralValue());
+	return true;
+    }
+    public boolean visit(InfixExpression node) {
+	appendAttr("operator", node.getOperator().toString());
+	return true;
+    }
+    public boolean visit(PostfixExpression node) {
+	appendAttr("operator", node.getOperator().toString());
+	return true;
+    }
+    public boolean visit(PrefixExpression node) {
+	appendAttr("operator", node.getOperator().toString());
+	return true;
+    }
+    public boolean visit(Assignment node) {
+	appendAttr("operator", node.getOperator().toString());
+	return true;
     }
 
     public static String getNodeTypeName(int type) {
@@ -211,23 +312,5 @@ public class JDTParser extends ASTVisitor {
 	default:
 	    return "???";
 	}
-    }
-    
-    public void preVisit(ASTNode node) {
-	int type = node.getNodeType();
-	System.out.print("<"+getNodeTypeName(type)+">");
-    }
-    public void postVisit(ASTNode node) {
-	int type = node.getNodeType();
-	System.out.print("</"+getNodeTypeName(type)+">");
-    }
-
-    public boolean visit(SimpleName node) {
-	System.out.print(node.getFullyQualifiedName());
-	return true;
-    }
-    public boolean visit(SimpleType node) {
-	System.out.print(node.getName());
-	return true;
     }
 }
