@@ -1,0 +1,44 @@
+<project name="MyProject" default="compile" basedir=".">
+  
+  <property name="src" location="src" />
+  <property name="lib" location="lib" />
+  <property name="build" location="build" />
+  <property name="f" location="src/Java2Xml.java" />
+  
+  <target name="init">
+    <mkdir dir="${build}" />
+  </target>
+
+  <target name="clean">
+    <delete dir="${build}" />
+  </target>
+  
+  <target name="compile" depends="init">
+    <javac srcdir="${src}" destdir="${build}" includeAntRuntime="false">
+      <classpath location="${lib}/org.eclipse.jdt.core.jar" />
+      <classpath location="${lib}/org.eclipse.osgi.jar" />
+      <classpath location="${lib}/org.eclipse.core.runtime.jar" />
+      <classpath location="${lib}/org.eclipse.core.resources.jar" />
+      <classpath location="${lib}/org.eclipse.core.jobs.jar" />
+      <classpath location="${lib}/org.eclipse.core.contenttype.jar" />
+      <classpath location="${lib}/org.eclipse.equinox.common.jar" />
+      <classpath location="${lib}/org.eclipse.equinox.preferences.jar" />
+    </javac>
+  </target>
+
+  <target name="run" depends="compile">
+    <java classname="Java2Xml">
+      <arg file="${f}" />
+      <classpath location="${build}" />
+      <classpath location="${lib}/org.eclipse.jdt.core.jar" />
+      <classpath location="${lib}/org.eclipse.osgi.jar" />
+      <classpath location="${lib}/org.eclipse.core.runtime.jar" />
+      <classpath location="${lib}/org.eclipse.core.resources.jar" />
+      <classpath location="${lib}/org.eclipse.core.jobs.jar" />
+      <classpath location="${lib}/org.eclipse.core.contenttype.jar" />
+      <classpath location="${lib}/org.eclipse.equinox.common.jar" />
+      <classpath location="${lib}/org.eclipse.equinox.preferences.jar" />
+    </java>
+  </target>
+  
+</project>
