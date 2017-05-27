@@ -16,9 +16,25 @@ import org.w3c.dom.*;
 
 public class Java2Xml extends ASTVisitor {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+	List<String> files = new ArrayList<String>();
+	OutputStream output = System.out;
+	for (int i = 0; i < args.length; i++) {
+	    String arg = args[i];
+	    if (arg.equals("--")) {
+		for (; i < args.length; i++) {
+		    files.add(args[i]);
+		}
+	    } else if (arg.equals("-o")) {
+		output = new FileOutputStream(args[i+1]);
+		i++;
+	    } else if (arg.startsWith("-")) {
+	    } else {
+		files.add(arg);
+	    }
+	}
 	String[] classpath = new String[] { "/" };
-	for (String path : args) {
+	for (String path : files) {
 	    System.err.println("Parsing: "+path);
 	    try {
 		BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -49,11 +65,10 @@ public class Java2Xml extends ASTVisitor {
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 		DOMSource source = new DOMSource(doc);
-		StreamResult result = new StreamResult(System.out);
+		StreamResult result = new StreamResult(output);
 		transformer.transform(source, result);
+		output.close();
 		
-	    } catch (IOException e) {
-		e.printStackTrace();
 	    } catch (ParserConfigurationException e) {
 		e.printStackTrace();
 	    } catch (TransformerException e) {

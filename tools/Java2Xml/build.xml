@@ -3,7 +3,8 @@
   <property name="src" location="src" />
   <property name="lib" location="lib" />
   <property name="build" location="build" />
-  <property name="f" location="src/Java2Xml.java" />
+  <property name="fout" location="out.xml" />
+  <property name="fin" location="src/Java2Xml.java" />
   
   <target name="init">
     <mkdir dir="${build}" />
@@ -28,7 +29,9 @@
 
   <target name="run" depends="compile">
     <java classname="Java2Xml">
-      <arg file="${f}" />
+      <arg value="-o" />
+      <arg file="${fout}" />
+      <arg file="${fin}" />
       <classpath location="${build}" />
       <classpath location="${lib}/org.eclipse.jdt.core.jar" />
       <classpath location="${lib}/org.eclipse.osgi.jar" />
