@@ -56,9 +56,13 @@ class Node:
 
     nid_base = 0
 
+    @classmethod
+    def genid(klass):
+        klass.nid_base += 1
+        return klass.nid_base
+
     def __init__(self, elem):
-        Node.nid_base += 1
-        self.nid = Node.nid_base
+        self.nid = Node.genid()
         self.elem = elem
         self.send = {}
         self.recv = []
@@ -119,29 +123,35 @@ class FuncArgNode(Node):
 class ReturnNode(Node):
 
     def name(self):
-        return 'Return %d' % (self.nid)
+        return 'Return'
 
 class LoopNode(Node):
 
+    def __init__(self, elem, cid):
+        Node.__init__(self, elem)
+        self.cid = cid
+        return
+    
     def name(self):
-        return 'Loop %d' % (self.nid)
+        return 'Loop %d' % (self.cid)
 
 class CondNode(Node):
 
-    def __init__(self, elem, cond):
+    def __init__(self, elem, cid, cond):
         Node.__init__(self, elem)
+        self.cid = cid
         cond.connect(self, 'cond')
         return
 
 class BranchNode(CondNode):
     
     def name(self):
-        return 'Branch %d' % (self.nid)
+        return 'Branch %d' % (self.cid)
 
 class JoinNode(CondNode):
     
     def name(self):
-        return 'Join %d' % (self.nid)
+        return 'Join %d' % (self.cid)
 
 class VarNode(Node):
 
@@ -293,6 +303,7 @@ def process_block(elem, parent):
             setvar(None, dst)
             
         elif stmt.tag == 'IfStatement':
+            cid = Node.genid()
             expr = stmt[0]
             (ins1, cond1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
@@ -300,28 +311,29 @@ def process_block(elem, parent):
             then = stmt[1]
             (ins1, outs1) = process_block(then, scope)
             for (var1, in1) in ins1.items():
-                branch = BranchNode(stmt, cond1)
+                branch = BranchNode(stmt, cid, cond1)
                 branch.connect(in1)
                 getvar(var1).connect(branch, 'true')
             for (var1, out1) in outs1.items():
-                join = JoinNode(stmt, cond1)
+                join = JoinNode(stmt, cid, cond1)
                 out1.connect(join, 'true')
-                getvar(var1).connect(join)
+                getvar(var1).connect(join, 'false')
                 setvar(var1, join)
             els = stmt[2]
             if els:
                 (ins1, outs1) = process_block(els, scope)
                 for (var1, in1) in ins1.items():
-                    branch = BranchNode(stmt, cond1)
+                    branch = BranchNode(stmt, cid, cond1)
                     branch.connect(in1)
                     getvar(var1).connect(branch, 'false')
                 for (var1, out1) in outs1.items():
-                    join = JoinNode(stmt, cond1)
+                    join = JoinNode(stmt, cid, cond1)
                     out1.connect(join, 'false')
-                    getvar(var1).connect(join)
+                    getvar(var1).connect(join, 'true')
                     setvar(var1, join)
                 
         elif stmt.tag == 'WhileStatement':
+            cid = Node.genid()
             expr = stmt[0]
             (ins1, cond1) = process_expr(expr, scope)
             block = stmt[1]
@@ -329,7 +341,7 @@ def process_block(elem, parent):
             loopvars = {}
             for var2 in outs2.keys():
                 if var2 in ins1 or var2 in ins2:
-                    loop = LoopNode(stmt)
+                    loop = LoopNode(stmt, cid)
                     loopvars[var2] = loop
                     getvar(var2).connect(loop, 'init')
             for (var1, in1) in ins1.items():
@@ -339,14 +351,14 @@ def process_block(elem, parent):
                     getvar(var1).connect(in1)
             for (var2, in2) in ins2.items():
                 if var2 in loopvars:
-                    branch = BranchNode(stmt, cond1)
+                    branch = BranchNode(stmt, cid, cond1)
                     branch.connect(in2)
                     loopvars[var2].connect(branch, 'true')
                 else:
                     getvar(var2).connect(in2)
             for (var2, out2) in outs2.items():
                 if var2 in loopvars:
-                    branch = BranchNode(stmt, cond1)
+                    branch = BranchNode(stmt, cid, cond1)
                     branch.connect(loopvars[var2], 'cont')
                     out2.connect(branch, 'false')
                     setvar(var2, branch)
@@ -406,7 +418,10 @@ def process_func(exporter, elem):
         exporter.put_node(node.nid, label=node.name())
     for node in allnodes:
         for (c,name) in node.send.items():
-            exporter.put_edge(node.nid, c.nid, label=name)
+            if name == 'cond':
+                exporter.put_edge(node.nid, c.nid, label=name, style='dotted')
+            else:
+                exporter.put_edge(node.nid, c.nid, label=name)
     exporter.close()
     return
 
