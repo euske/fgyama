@@ -1,11 +1,42 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit revision="0.9.5" language="Java" filename="samples/f1.java"><class><specifier>public</specifier> class <name>Foo</name> <block>{
-    
-    <function><specifier>public</specifier> <specifier>static</specifier> <type><name>void</name></type> <name>f1</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>y</name></decl></parameter>)</parameter_list> <block>{
-	<decl_stmt><decl><type><name>int</name></type> <name>z</name> <init>= <expr><name>x</name><operator>+</operator><literal type="number">1</literal></expr></init></decl>;</decl_stmt>
-        <expr_stmt><expr><name>z</name> <operator>*=</operator> <name>y</name></expr>;</expr_stmt>
-	<return>return <expr><name>z</name></expr>;</return>
-    }</block></function>
-    
-}</block></class>
-</unit>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<CompilationUnit>
+  <TypeDeclaration>
+    <Modifier>public</Modifier>
+    <SimpleName>Foo</SimpleName>
+    <MethodDeclaration>
+      <Modifier>public</Modifier>
+      <Modifier>static</Modifier>
+      <PrimitiveType>void</PrimitiveType>
+      <SimpleName>f1</SimpleName>
+      <SingleVariableDeclaration>
+        <PrimitiveType>int</PrimitiveType>
+        <SimpleName>x</SimpleName>
+      </SingleVariableDeclaration>
+      <SingleVariableDeclaration>
+        <PrimitiveType>int</PrimitiveType>
+        <SimpleName>y</SimpleName>
+      </SingleVariableDeclaration>
+      <Block>
+        <VariableDeclarationStatement>
+          <PrimitiveType>int</PrimitiveType>
+          <VariableDeclarationFragment>
+            <SimpleName>z</SimpleName>
+            <InfixExpression operator="+">
+              <SimpleName>x</SimpleName>
+              <NumberLiteral>1</NumberLiteral>
+            </InfixExpression>
+          </VariableDeclarationFragment>
+        </VariableDeclarationStatement>
+        <ExpressionStatement>
+          <Assignment operator="*=">
+            <SimpleName>z</SimpleName>
+            <SimpleName>y</SimpleName>
+          </Assignment>
+        </ExpressionStatement>
+        <ReturnStatement>
+          <SimpleName>z</SimpleName>
+        </ReturnStatement>
+      </Block>
+    </MethodDeclaration>
+  </TypeDeclaration>
+</CompilationUnit>

@@ -1,14 +1,49 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit revision="0.9.5" language="Java" filename="samples/f3.java"><class><specifier>public</specifier> class <name>Foo</name> <block>{
-    
-    <function><specifier>public</specifier> <specifier>static</specifier> <type><name>void</name></type> <name>f3</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>x</name></decl></parameter>)</parameter_list> <block>{
-	<decl_stmt><decl><type><name>int</name></type> <name>y</name> <init>= <expr><literal type="number">1</literal></expr></init></decl>;</decl_stmt>
-	<while>while <condition>(<expr><literal type="number">0</literal> <operator>&lt;</operator> <name>x</name></expr>)</condition> <block>{
-	    <expr_stmt><expr><name>y</name> <operator>*=</operator> <name>x</name></expr>;</expr_stmt>
-	    <expr_stmt><expr><name>x</name> <operator>-=</operator> <literal type="number">1</literal></expr>;</expr_stmt>
-	}</block></while>
-	<return>return <expr><name>y</name></expr>;</return>
-    }</block></function>
-    
-}</block></class>
-</unit>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<CompilationUnit>
+  <TypeDeclaration>
+    <Modifier>public</Modifier>
+    <SimpleName>Foo</SimpleName>
+    <MethodDeclaration>
+      <Modifier>public</Modifier>
+      <Modifier>static</Modifier>
+      <PrimitiveType>void</PrimitiveType>
+      <SimpleName>f3</SimpleName>
+      <SingleVariableDeclaration>
+        <PrimitiveType>int</PrimitiveType>
+        <SimpleName>x</SimpleName>
+      </SingleVariableDeclaration>
+      <Block>
+        <VariableDeclarationStatement>
+          <PrimitiveType>int</PrimitiveType>
+          <VariableDeclarationFragment>
+            <SimpleName>y</SimpleName>
+            <NumberLiteral>1</NumberLiteral>
+          </VariableDeclarationFragment>
+        </VariableDeclarationStatement>
+        <WhileStatement>
+          <InfixExpression operator="&lt;">
+            <NumberLiteral>0</NumberLiteral>
+            <SimpleName>x</SimpleName>
+          </InfixExpression>
+          <Block>
+            <ExpressionStatement>
+              <Assignment operator="*=">
+                <SimpleName>y</SimpleName>
+                <SimpleName>x</SimpleName>
+              </Assignment>
+            </ExpressionStatement>
+            <ExpressionStatement>
+              <Assignment operator="-=">
+                <SimpleName>x</SimpleName>
+                <NumberLiteral>1</NumberLiteral>
+              </Assignment>
+            </ExpressionStatement>
+          </Block>
+        </WhileStatement>
+        <ReturnStatement>
+          <SimpleName>y</SimpleName>
+        </ReturnStatement>
+      </Block>
+    </MethodDeclaration>
+  </TypeDeclaration>
+</CompilationUnit>

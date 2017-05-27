@@ -11,6 +11,12 @@ def getattrs(kwargs):
         ( '%s="%s"' % (k,v.replace('"', '\\"'))
           for (k,v) in kwargs.items() if v is not None ))
 
+def efind(elem, *tags):
+    for e in elem.getchildren():
+        if e.tag in tags:
+            return e
+    return None
+
 
 ##  Exporter
 ##  http://graphviz.org/content/dot-language
@@ -160,17 +166,13 @@ class ConstNode(Node):
 
 class ExprNode(Node):
 
-    def __init__(self, elem):
+    def __init__(self, elem, op):
         Node.__init__(self, elem)
-        self.ops = []
-        return
-
-    def addop(self, op):
-        self.ops.append(op)
+        self.op = op
         return
     
     def name(self):
-        return 'Op %s' % (''.join(self.ops))
+        return 'Op %s' % (self.op)
     
 class Variable:
 
@@ -206,38 +208,32 @@ class Scope:
     def pop(self):
         return self.vars.values()
 
-def get_name(elem):
-    return elem.find('name').text
-
-def get_decl(elem):
-    name = get_name(elem)
-    type = get_name(elem.find('type'))
-    return (name, type)
-
 
 ##  process_expr
 ##
 def process_expr(elem, scope):
     inputs = {}
-    output = ExprNode(elem)
-    arg = 0
-    for e in elem.getchildren():
-        if e.tag == 'name':  # Variable lookup.
-            name = e.text
-            var = scope.lookup(name)
-            src = InnerNode()
-            src.connect(output, 'Arg %r' % arg)
-            inputs[var] = src
-            arg += 1
-            
-        elif e.tag == 'literal':
-            (name, type) = (e.text, e.get('type'))
-            src = ConstNode(e, name, type)
-            src.connect(output, 'Arg %r' % arg)
-            arg += 1
-            
-        elif e.tag == 'operator':
-            output.addop(e.text)
+
+    if elem.tag == 'SimpleName':  # Variable lookup.
+        var = scope.lookup(elem.text)
+        output = InnerNode()
+        inputs[var] = output
+
+    elif elem.tag in ('NumberLiteral', 'StringLiteral', 'BooleanLiteral'):
+        output = ConstNode(elem, elem.text, elem.tag)
+
+    else:
+        op = elem.get('operator')
+        output = ExprNode(elem, op)
+        for (i,e) in enumerate(elem.getchildren()):
+            (ins1,out1) = process_expr(e, scope)
+            for (var1, in1) in ins1.items():
+                if var1 in inputs:
+                    src = inputs[var1]
+                else:
+                    src = inputs[var1] = InnerNode()
+                src.connect(in1)
+            out1.connect(output, 'Arg %d' % i)
             
     return (inputs, output)
 
@@ -261,14 +257,14 @@ def process_block(elem, parent):
         return
     
     for stmt in elem.getchildren():
-        if stmt.tag == 'decl_stmt':
-            decl = stmt.find('decl')
-            (param_name, param_type) = get_decl(decl)
-            var = scope.add(param_name, param_type)
-            init = decl.find('init')
-            if init:
-                sym = decl.find('name')
-                expr = init.find('expr')
+        if stmt.tag == 'VariableDeclarationStatement':
+            param_type = stmt[0].text
+            frag = stmt[1]
+            if frag:
+                sym = frag[0]
+                param_name = sym.text
+                var = scope.add(param_name, param_type)
+                expr = frag[1]
                 (ins1, out1) = process_expr(expr, scope)
                 for (var1, in1) in ins1.items():
                     getvar(var1).connect(in1)
@@ -276,19 +272,19 @@ def process_block(elem, parent):
                 out1.connect(dst, 'assign')
                 setvar(var, dst)
                 
-        elif stmt.tag == 'expr_stmt':
-            expr = stmt.find('expr')
-            sym = expr.find('name')
+        elif stmt.tag == 'ExpressionStatement':
+            assn = stmt[0]
+            sym = assn[0]
             var = scope.lookup(sym.text)
-            (ins1, out1) = process_expr(expr, scope)
+            (ins1, out1) = process_expr(assn, scope)
             for (var1, in1) in ins1.items():
                 getvar(var1).connect(in1)
             dst = VarNode(sym, var)
             out1.connect(dst, 'assign')
             setvar(var, dst)
             
-        elif stmt.tag == 'return':
-            expr = stmt.find('expr')
+        elif stmt.tag == 'ReturnStatement':
+            expr = stmt[0]
             (ins1, out1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
                 getvar(var1).connect(in1)
@@ -296,15 +292,13 @@ def process_block(elem, parent):
             out1.connect(dst, 'assign')
             setvar(None, dst)
             
-        elif stmt.tag == 'if':
-            condition = stmt.find('condition')
-            expr = condition.find('expr')
+        elif stmt.tag == 'IfStatement':
+            expr = stmt[0]
             (ins1, cond1) = process_expr(expr, scope)
             for (var1, in1) in ins1.items():
                 getvar(var1).connect(in1)
-            then = stmt.find('then')
-            block = then.find('block')
-            (ins1, outs1) = process_block(block, scope)
+            then = stmt[1]
+            (ins1, outs1) = process_block(then, scope)
             for (var1, in1) in ins1.items():
                 branch = BranchNode(stmt, cond1)
                 branch.connect(in1)
@@ -314,10 +308,9 @@ def process_block(elem, parent):
                 out1.connect(join, 'true')
                 getvar(var1).connect(join)
                 setvar(var1, join)
-            els = stmt.find('else')
+            els = stmt[2]
             if els:
-                block = els.find('block')
-                (ins1, outs1) = process_block(block, scope)
+                (ins1, outs1) = process_block(els, scope)
                 for (var1, in1) in ins1.items():
                     branch = BranchNode(stmt, cond1)
                     branch.connect(in1)
@@ -328,11 +321,10 @@ def process_block(elem, parent):
                     getvar(var1).connect(join)
                     setvar(var1, join)
                 
-        elif stmt.tag == 'while':
-            condition = stmt.find('condition')
-            expr = condition.find('expr')
+        elif stmt.tag == 'WhileStatement':
+            expr = stmt[0]
             (ins1, cond1) = process_expr(expr, scope)
-            block = stmt.find('block')
+            block = stmt[1]
             (ins2, outs2) = process_block(block, scope)
             loopvars = {}
             for var2 in outs2.keys():
@@ -386,29 +378,30 @@ def trim_graph(nodes):
 
 def process_func(exporter, elem):
     scope = Scope()
-    func_type = get_name(elem.find('type'))
-    func_name = get_name(elem)
-    params = elem.find('parameter_list')
+    func_name = efind(elem, 'SimpleName').text
+    func_type = efind(elem, 'PrimitiveType').text
     bindings = {}
-    for (i,param) in enumerate(params.findall('parameter')):
+    for (i,param) in enumerate(elem.findall('SingleVariableDeclaration')):
         arg = FuncArgNode(param, i)
-        (param_name, param_type) = get_decl(param.find('decl'))
+        param_name = efind(param, 'SimpleName').text
+        param_type = efind(param, 'PrimitiveType').text
         var = scope.add(param_name, param_type)
         dst = VarNode(param, var)
         arg.connect(dst)
         bindings[var] = dst
         
-    block = elem.find('block')
+    block = elem.find('Block')
     (ins1, outs1) = process_block(block, scope)
     for (var1, in1) in ins1.items():
         src = bindings[var1]
         src.connect(in1)
 
-    exporter.open(func_name)
     allnodes = set()
     for node in bindings.values():
         visit_graph(node, allnodes)
     trim_graph(allnodes)
+    
+    exporter.open(func_name)
     for node in allnodes:
         exporter.put_node(node.nid, label=node.name())
     for node in allnodes:
@@ -418,7 +411,7 @@ def process_func(exporter, elem):
     return
 
 def process_root(exporter, elem):
-    for func in elem.iter('function'):
+    for func in elem.iter('MethodDeclaration'):
         process_func(exporter, func)
     return
 
