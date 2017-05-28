@@ -1,7 +1,7 @@
 <project name="MyProject" default="compile" basedir=".">
   
   <property name="src" location="src" />
-  <property name="lib" location="lib" />
+  <property name="lib" location="../../lib" />
   <property name="build" location="build" />
   <property name="fout" location="out.xml" />
   <property name="fin" location="src/Java2Xml.java" />
