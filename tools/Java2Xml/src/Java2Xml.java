@@ -67,14 +67,13 @@ public class Java2Xml extends ASTVisitor {
 		DOMSource source = new DOMSource(doc);
 		StreamResult result = new StreamResult(output);
 		transformer.transform(source, result);
-		output.close();
-		
 	    } catch (ParserConfigurationException e) {
 		e.printStackTrace();
 	    } catch (TransformerException e) {
 		e.printStackTrace();
 	    }
 	}
+	output.close();
     }
 
     private Document _document;
