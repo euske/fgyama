@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.*;
 //
 class UnsupportedSyntax extends Exception {
 
+    static final long serialVersionUID = 1L;
+
     public ASTNode node;
     
     public UnsupportedSyntax(ASTNode node) {
@@ -473,6 +475,7 @@ public class Java2DF extends ASTVisitor {
 	return fset;
     }
     
+    @SuppressWarnings("unchecked")
     public DFFlowSet processBlock(DFGraph graph, Block block, DFScope parent)
 	throws UnsupportedSyntax {
 	DFScope scope = new DFScope(parent);
@@ -538,6 +541,7 @@ public class Java2DF extends ASTVisitor {
 	return bindings.finish(scope);
     }
     
+    @SuppressWarnings("unchecked")
     public DFGraph getGraph(MethodDeclaration node)
 	throws UnsupportedSyntax {
 	// XXX check isContructor()
