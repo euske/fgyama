@@ -28,7 +28,7 @@
     </javac>
   </target>
 
-  <target name="run" depends="compile">
+  <target name="test" depends="compile">
     <java classname="Java2DF">
       <arg value="-o" />
       <arg file="${output}" />

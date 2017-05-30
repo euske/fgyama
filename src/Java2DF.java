@@ -209,7 +209,7 @@ class DFBindings {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.bindings = new HashMap<DFRef, DFNode>();
-	this.retval = new InnerNode(this.graph);
+	this.retval = null;
     }
 
     public DFNode get(DFRef ref) {
@@ -230,6 +230,9 @@ class DFBindings {
     }
 
     public void setReturn(DFNode node) {
+	if (this.retval == null) {
+	    this.retval = new ReturnNode(this.graph);
+	}
 	node.connect(this.retval);
     }
 
@@ -266,6 +269,15 @@ class ProgNode extends DFNode {
     public ProgNode(DFGraph graph, ASTNode node) {
 	super(graph);
 	this.node = node;
+    }
+}
+
+// ReturnNode
+class ReturnNode extends DFNode {
+
+    public ReturnNode(DFGraph graph) {
+	super(graph);
+	this.name = "return";
     }
 }
 
@@ -457,7 +469,7 @@ public class Java2DF extends ASTVisitor {
 	    DFNode lvalue = new InnerNode(graph);
 	    fset.addInput(new DFFlow(ref, lvalue));
 	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
-	    fset.value = new InfixNode(graph, node, op, lvalue, rset.value);
+	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
 	    DFNode lref = new RefNode(graph, assn.getLeftHandSide(), ref);
 	    fset.addOutput(new DFFlow(ref, lref));
 	    fset.value.connect(lref);
@@ -496,11 +508,11 @@ public class Java2DF extends ASTVisitor {
 		    Expression expr = frag.getInitializer();
 		    if (expr != null) {
 			DFFlowSet fset = processExpression(graph, expr, scope);
-			DFNode dst = new RefNode(graph, varName, var);
 			for (DFFlow flow : fset.inputs) {
 			    DFNode src = bindings.get(flow.ref);
 			    src.connect(flow.node);
 			}
+			DFNode dst = new RefNode(graph, varName, var);
 			fset.value.connect(dst);
 			bindings.put(var, dst);
 		    }
