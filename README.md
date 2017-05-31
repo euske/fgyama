@@ -10,5 +10,7 @@ Prerequisites:
 
 How to Use:
 
-    $ ./srcML/srcML.sh --no-namespace-decl samples/Foo.java | python dfaaa.py
+    $ ./srcML/srcML.sh --no-namespace-decl samples/Foo.java |
+      python dfaaa.py |
+      dot -Tsvg -o out.svg
 

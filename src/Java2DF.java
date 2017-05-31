@@ -36,6 +36,9 @@ class DFGraph {
 	return this.nodes.size();
     }
 
+    public void removeNode(DFNode node) {
+        this.nodes.remove(node);
+    }
 }
 
 
@@ -65,6 +68,24 @@ class DFNode {
 	this.send.add(link);
 	dst.recv.add(link);
 	return link;
+    }
+
+    public void remove() {
+        List<DFLink> removed = new ArrayList<DFLink>();
+        for (DFLink link : this.send) {
+            if (link.src == this) {
+                removed.add(link);
+            }
+        }
+        for (DFLink link : this.recv) {
+            if (link.dst == this) {
+                removed.add(link);
+            }
+        }
+        for (DFLink link : removed) {
+            link.disconnect();
+        }
+        this.graph.removeNode(this);
     }
 }
 
@@ -351,17 +372,13 @@ class GraphvizExporter {
 	    this.writer.write("digraph "+graph.name+" {\n");
 	    for (DFNode node : graph.nodes) {
 		this.writer.write(" N"+node.id);
-		if (node.name != null) {
-		    this.writer.write(" [label="+quote(node.name)+"]");
-		}
+                this.writer.write(" [label="+quote(node.name)+"]");
 		this.writer.write(";\n");
 	    }
 	    for (DFNode node : graph.nodes) {
 		for (DFLink link : node.send) {
 		    this.writer.write(" N"+link.src.id+" -> N"+link.dst.id);
-		    if (link.name != null) {
-			this.writer.write(" [label="+quote(link.name)+"]");
-		    }
+                    this.writer.write(" [label="+quote(link.name)+"]");
 		    this.writer.write(";\n");
 		}
 	    }
@@ -372,7 +389,11 @@ class GraphvizExporter {
     }
 
     public static String quote(String s) {
-	return "\"" + s.replace("\"", "\\\"") + "\"";
+        if (s == null) {
+            return "\"\"";
+        } else {
+            return "\"" + s.replace("\"", "\\\"") + "\"";
+        }
     }
 }
 
@@ -416,38 +437,38 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    public DFRef getReference(Expression node, DFScope scope) 
+    public DFRef getReference(Expression expr, DFScope scope) 
 	throws UnsupportedSyntax {
-	if (node instanceof Name) {
-	    Name varName = (Name)node;
+	if (expr instanceof Name) {
+	    Name varName = (Name)expr;
 	    return scope.lookup(varName.getFullyQualifiedName());
 	} else {
-	    throw new UnsupportedSyntax(node);
+	    throw new UnsupportedSyntax(expr);
 	}
     }
 
-    public DFFlowSet processExpression(DFGraph graph, Expression node, DFScope scope)
+    public DFFlowSet processExpression(DFGraph graph, Expression expr, DFScope scope)
 	throws UnsupportedSyntax {
 	DFFlowSet fset = new DFFlowSet();
 
-	if (node instanceof Name) {
+	if (expr instanceof Name) {
 	    // Variable lookup.
-	    DFRef ref = getReference(node, scope);
+	    DFRef ref = getReference(expr, scope);
 	    fset.value = new InnerNode(graph);
 	    fset.addInput(new DFFlow(ref, fset.value));
 	    
-	} else if (node instanceof NumberLiteral) {
+	} else if (expr instanceof NumberLiteral) {
 	    // Cosntant.
-	    String value = ((NumberLiteral)node).getToken();
-	    fset.value = new ConstNode(graph, node, value);
+	    String value = ((NumberLiteral)expr).getToken();
+	    fset.value = new ConstNode(graph, expr, value);
 	    
-	} else if (node instanceof InfixExpression) {
+	} else if (expr instanceof InfixExpression) {
 	    // Infix operator.
-	    InfixExpression expr = (InfixExpression)node;
-	    String op = expr.getOperator().toString();
-	    DFFlowSet lset = processExpression(graph, expr.getLeftOperand(), scope);
-	    DFFlowSet rset = processExpression(graph, expr.getRightOperand(), scope);
-	    fset.value = new InfixNode(graph, node, op, lset.value, rset.value);
+	    InfixExpression infix = (InfixExpression)expr;
+	    String op = infix.getOperator().toString();
+	    DFFlowSet lset = processExpression(graph, infix.getLeftOperand(), scope);
+	    DFFlowSet rset = processExpression(graph, infix.getRightOperand(), scope);
+	    fset.value = new InfixNode(graph, expr, op, lset.value, rset.value);
 	    for (DFFlow flow : lset.inputs) {
 		fset.addInput(flow);
 	    }
@@ -461,18 +482,16 @@ public class Java2DF extends ASTVisitor {
 		fset.addInput(flow);
 	    }
 	    
-	} else if (node instanceof Assignment) {
+	} else if (expr instanceof Assignment) {
 	    // Assignment.
-	    Assignment assn = (Assignment)node;
+	    Assignment assn = (Assignment)expr;
 	    String op = assn.getOperator().toString();
 	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
 	    DFNode lvalue = new InnerNode(graph);
 	    fset.addInput(new DFFlow(ref, lvalue));
 	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
 	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
-	    DFNode lref = new RefNode(graph, assn.getLeftHandSide(), ref);
-	    fset.addOutput(new DFFlow(ref, lref));
-	    fset.value.connect(lref);
+	    fset.addOutput(new DFFlow(ref, fset.value));
 	    for (DFFlow flow : rset.inputs) {
 		fset.addInput(flow);
 	    }
@@ -481,7 +500,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    
 	} else {
-	    throw new UnsupportedSyntax(node);
+	    throw new UnsupportedSyntax(expr);
 	}
 
 	return fset;
@@ -554,11 +573,11 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
-    public DFGraph getGraph(MethodDeclaration node)
+    public DFGraph getGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
 	// XXX check isContructor()
-	Name funcName = node.getName();
-	Type funcType = node.getReturnType2();
+	Name funcName = method.getName();
+	Type funcType = method.getReturnType2();
 	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
 	DFScope scope = new DFScope();
 	DFBindings bindings = new DFBindings(graph);
@@ -566,7 +585,7 @@ public class Java2DF extends ASTVisitor {
 	int i = 0;
 	// XXX check isVarargs()
 	for (SingleVariableDeclaration decl :
-		 (List<SingleVariableDeclaration>) node.parameters()) {
+		 (List<SingleVariableDeclaration>) method.parameters()) {
 	    DFNode param = new ArgNode(graph, decl, i++);
 	    Name paramName = decl.getName();
 	    Type paramType = decl.getType();
@@ -578,12 +597,34 @@ public class Java2DF extends ASTVisitor {
 	    bindings.put(var, dst);
 	}
 
-	Block funcBlock = node.getBody();
+	Block funcBlock = method.getBody();
 	DFFlowSet fset = processBlock(graph, funcBlock, scope);
 	for (DFFlow flow : fset.inputs) {
 	    DFNode src = bindings.get(flow.ref);
 	    src.connect(flow.node);
 	}
+
+        // Cleanup.
+        List<DFNode> removed = new ArrayList<DFNode>();
+        for (DFNode node : graph.nodes) {
+            if (node instanceof InnerNode &&
+                node.send.size() == 1 &&
+                node.recv.size() == 1) {
+                removed.add(node);
+            }
+        }
+        for (DFNode node : removed) {
+            DFLink link0 = node.recv.get(0);
+            DFLink link1 = node.send.get(0);
+            if (link0.name == null || link1.name == null) {
+                node.remove();
+                String name = link0.name;
+                if (name == null) {
+                    name = link1.name;
+                }
+                link0.src.connect(link1.dst, name);
+            }
+        }
 	
 	return graph;
     }
