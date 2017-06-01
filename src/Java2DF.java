@@ -225,6 +225,10 @@ class DFFlowSet {
     public void addFlow(DFFlow flow) {
 	this.flows.add(flow);
     }
+
+    public void addFlowSet(DFFlowSet fset) {
+	this.flows.addAll(fset.flows);
+    }
 }
 
 
@@ -482,12 +486,8 @@ public class Java2DF extends ASTVisitor {
 	    DFFlowSet lset = processExpression(graph, infix.getLeftOperand(), scope);
 	    DFFlowSet rset = processExpression(graph, infix.getRightOperand(), scope);
 	    fset.value = new InfixNode(graph, expr, op, lset.value, rset.value);
-	    for (DFFlow flow : lset.flows) {
-		fset.addFlow(flow);
-	    }
-	    for (DFFlow flow : rset.flows) {
-		fset.addFlow(flow);
-	    }
+	    fset.addFlowSet(lset);
+	    fset.addFlowSet(rset);
 	    
 	} else if (expr instanceof Assignment) {
 	    // Assignment.
@@ -499,9 +499,7 @@ public class Java2DF extends ASTVisitor {
 	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
 	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
 	    fset.addFlow(new DFOutputFlow(fset.value, ref));
-	    for (DFFlow flow : rset.flows) {
-		fset.addFlow(flow);
-	    }
+	    fset.addFlowSet(rset);
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -530,9 +528,7 @@ public class Java2DF extends ASTVisitor {
 		    Name varName = frag.getName();
 		    DFVar var = scope.lookup(varName.getFullyQualifiedName());
 		    DFFlowSet fset1 = processExpression(graph, expr, scope);
-		    for (DFFlow flow : fset1.flows) {
-			fset.addFlow(flow);
-		    }
+		    fset.addFlowSet(fset1);
 		    fset.addFlow(new DFOutputFlow(fset1.value, var));
 		}
 	    }
