@@ -120,11 +120,12 @@ class DFRef {
     public DFScope scope;
     public String name;
     
-    public DFRef(DFScope scope) {
+    public DFRef(DFScope scope, String name) {
 	this.scope = scope;
+	this.name = name;
     }
 
-    public static DFRef RETURN = new DFRef(null);
+    public static DFRef RETURN = new DFRef(null, "RETURN");
 }
 
 
@@ -135,8 +136,7 @@ class DFVar extends DFRef {
     public String type;
 
     public DFVar(DFScope scope, String name, String type) {
-	super(scope);
-	this.name = name;
+	super(scope, name);
 	this.type = type;
     }
 }
@@ -262,16 +262,16 @@ class DFBindings {
     }
 
     public void put(DFRef ref, DFNode node) {
-	if (ref == DFRef.RETURN) {
-	    if (this.retval == null) {
-		this.retval = new ReturnNode(this.graph);
-	    }
-	    node.connect(this.retval);
-	} else {
-	    this.bindings.put(ref, node);
-	}
+	this.bindings.put(ref, node);
     }
 
+    public void setReturn(DFNode node) {
+	if (this.retval == null) {
+	    this.retval = new ReturnNode(this.graph);
+	}
+	node.connect(this.retval);
+    }
+    
     public DFFlowSet finish(DFScope scope) {
 	DFFlowSet fset = new DFFlowSet();
 	for (DFRef ref : scope.pop()) {
@@ -583,9 +583,13 @@ public class Java2DF extends ASTVisitor {
 		    src.connect(input.node);
 		} else if (flow instanceof DFOutputFlow) {
 		    DFOutputFlow output = (DFOutputFlow)flow;
-		    DFNode dst = new RefNode(graph, null, output.ref);
-		    output.node.connect(dst);
-		    bindings.put(output.ref, dst);
+		    if (output.ref == DFRef.RETURN) {
+			bindings.setReturn(output.node);
+		    } else {
+			DFNode dst = new RefNode(graph, null, output.ref);
+			output.node.connect(dst);
+			bindings.put(output.ref, dst);
+		    }
 		}
 	    }
 	}
