@@ -123,6 +123,8 @@ class DFRef {
     public DFRef(DFScope scope) {
 	this.scope = scope;
     }
+
+    public static DFRef RETURN = new DFRef(null);
 }
 
 
@@ -247,14 +249,14 @@ class DFBindings {
     }
 
     public void put(DFRef ref, DFNode node) {
-	this.bindings.put(ref, node);
-    }
-
-    public void setReturn(DFNode node) {
-	if (this.retval == null) {
-	    this.retval = new ReturnNode(this.graph);
+	if (ref == DFRef.RETURN) {
+	    if (this.retval == null) {
+		this.retval = new ReturnNode(this.graph);
+	    }
+	    node.connect(this.retval);
+	} else {
+	    this.bindings.put(ref, node);
 	}
-	node.connect(this.retval);
     }
 
     public DFFlowSet finish(DFScope scope) {
@@ -507,66 +509,87 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
+    public DFFlowSet processStatement(DFGraph graph, Statement stmt, DFScope scope)
+	throws UnsupportedSyntax {
+	DFFlowSet fset;
+	
+	if (stmt instanceof Block) {
+	    // Block.
+	    fset = processBlock(graph, (Block)stmt, scope);
+	    
+	} else if (stmt instanceof VariableDeclarationStatement) {
+	    // Variable assignment;
+	    fset = new DFFlowSet();
+	    VariableDeclarationStatement varStmt = (VariableDeclarationStatement)stmt;
+	    for (VariableDeclarationFragment frag :
+		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
+		Expression expr = frag.getInitializer();
+		if (expr != null) {
+		    Name varName = frag.getName();
+		    DFVar var = scope.lookup(varName.getFullyQualifiedName());
+		    DFFlowSet fset1 = processExpression(graph, expr, scope);
+		    for (DFFlow flow : fset1.inputs) {
+			fset.addInput(flow);
+		    }
+		    for (DFFlow flow : fset1.outputs) {
+			fset.addOutput(flow);
+		    }
+		    fset.addOutput(new DFFlow(var, fset1.value));
+		}
+	    }
+
+	} else if (stmt instanceof ExpressionStatement) {
+	    // Normal expression.
+	    ExpressionStatement exprStmt = (ExpressionStatement)stmt;
+	    Expression expr = exprStmt.getExpression();
+	    fset = processExpression(graph, expr, scope);
+		
+	} else if (stmt instanceof ReturnStatement) {
+	    // Return.
+	    ReturnStatement rtnStmt = (ReturnStatement)stmt;
+	    Expression expr = rtnStmt.getExpression();
+	    fset = processExpression(graph, expr, scope);
+	    fset.addOutput(new DFFlow(DFRef.RETURN, fset.value));
+	    
+	} else {
+	    throw new UnsupportedSyntax(stmt);
+	}
+	
+	return fset;
+    }
+    
+    @SuppressWarnings("unchecked")
     public DFFlowSet processBlock(DFGraph graph, Block block, DFScope parent)
 	throws UnsupportedSyntax {
 	DFScope scope = new DFScope(parent);
 	DFBindings bindings = new DFBindings(graph);
 
+	// Handle all variable declarations first.
 	for (Statement stmt : (List<Statement>) block.statements()) {
-	    
 	    if (stmt instanceof VariableDeclarationStatement) {
-		// Variable declaration.
 		VariableDeclarationStatement varStmt = (VariableDeclarationStatement)stmt;
 		Type varType = varStmt.getType();
 		for (VariableDeclarationFragment frag :
 			 (List<VariableDeclarationFragment>) varStmt.fragments()) {
 		    Name varName = frag.getName();
 		    // XXX check getExtraDimensions()
-		    DFVar var = scope.add(varName.getFullyQualifiedName(),
-					  getTypeName(varType));
-		    Expression expr = frag.getInitializer();
-		    if (expr != null) {
-			DFFlowSet fset = processExpression(graph, expr, scope);
-			for (DFFlow flow : fset.inputs) {
-			    DFNode src = bindings.get(flow.ref);
-			    src.connect(flow.node);
-			}
-			DFNode dst = new RefNode(graph, varName, var);
-			fset.value.connect(dst);
-			bindings.put(var, dst);
-		    }
+		    scope.add(varName.getFullyQualifiedName(), getTypeName(varType));
 		}
-
-	    } else if (stmt instanceof ExpressionStatement) {
-		// Normal expression.
-		ExpressionStatement exprStmt = (ExpressionStatement)stmt;
-		Expression expr = exprStmt.getExpression();
-		DFFlowSet fset = processExpression(graph, expr, scope);
-		for (DFFlow flow : fset.inputs) {
-		    DFNode src = bindings.get(flow.ref);
-		    src.connect(flow.node);
-		}
-		for (DFFlow flow : fset.outputs) {
-		    DFNode dst = new RefNode(graph, null, flow.ref);
-		    flow.node.connect(dst);
-		    bindings.put(flow.ref, dst);
-		}
-		
-	    } else if (stmt instanceof ReturnStatement) {
-		// Return.
-		ReturnStatement rtnStmt = (ReturnStatement)stmt;
-		Expression expr = rtnStmt.getExpression();
-		DFFlowSet fset = processExpression(graph, expr, scope);
-		for (DFFlow flow : fset.inputs) {
-		    DFNode src = bindings.get(flow.ref);
-		    src.connect(flow.node);
-		}
-		bindings.setReturn(fset.value);
-		
-	    } else {
-		throw new UnsupportedSyntax(stmt);
 	    }
-	    
+	}
+
+	// Process each statement.
+	for (Statement stmt : (List<Statement>) block.statements()) {
+	    DFFlowSet fset = processStatement(graph, stmt, scope);
+	    for (DFFlow flow : fset.inputs) {
+		DFNode src = bindings.get(flow.ref);
+		src.connect(flow.node);
+	    }
+	    for (DFFlow flow : fset.outputs) {
+		DFNode dst = new RefNode(graph, null, flow.ref);
+		flow.node.connect(dst);
+		bindings.put(flow.ref, dst);
+	    }
 	}
 
 	return bindings.finish(scope);
