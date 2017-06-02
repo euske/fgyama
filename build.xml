@@ -3,8 +3,8 @@
   <property name="src" location="src" />
   <property name="lib" location="lib" />
   <property name="build" location="build" />
-  <property name="input" location="samples/f1.java" />
-  <property name="output" location="samples/f1.gv" />
+  <property name="input" location="samples/f2.java" />
+  <property name="output" location="samples/f2.gv" />
   
   <target name="init">
     <mkdir dir="${build}" />

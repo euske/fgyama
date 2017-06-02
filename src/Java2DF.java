@@ -255,7 +255,6 @@ class DFBindings {
 	    if (node == null) {
 		node = new InnerNode(this.graph);
 		this.inputs.put(ref, node);
-		this.bindings.put(ref, node);
 	    }
 	}
 	return node;
@@ -346,7 +345,7 @@ class RefNode extends ProgNode {
 // ConstNode
 class ConstNode extends ProgNode {
 
-    String value;
+    public String value;
 
     public ConstNode(DFGraph graph, ASTNode node, String value) {
 	super(graph, node);
@@ -358,9 +357,9 @@ class ConstNode extends ProgNode {
 // InfixNode
 class InfixNode extends ProgNode {
 
-    String op;
-    DFNode lvalue;
-    DFNode rvalue;
+    public String op;
+    public DFNode lvalue;
+    public DFNode rvalue;
 
     public InfixNode(DFGraph graph, ASTNode node,
 		     String op, DFNode lvalue, DFNode rvalue) {
@@ -372,6 +371,37 @@ class InfixNode extends ProgNode {
 	rvalue.connect(this, "R");
     }
 }
+
+// CondNode
+class CondNode extends ProgNode {
+    
+    public DFNode value;
+    
+    public CondNode(DFGraph graph, ASTNode node, DFNode value) {
+	super(graph, node);
+	this.value = value;
+	value.connect(this, "Cond");
+    }
+}
+
+// BranchNode
+class BranchNode extends CondNode {
+
+    public BranchNode(DFGraph graph, ASTNode node, DFNode value) {
+	super(graph, node, value);
+	this.name = "Branch";
+    }
+}
+
+// JoinNode
+class JoinNode extends CondNode {
+
+    public JoinNode(DFGraph graph, ASTNode node, DFNode value) {
+	super(graph, node, value);
+	this.name = "Join";
+    }
+}
+
 
 
 //  GraphvizExporter
@@ -527,9 +557,9 @@ public class Java2DF extends ASTVisitor {
 		if (expr != null) {
 		    Name varName = frag.getName();
 		    DFVar var = scope.lookup(varName.getFullyQualifiedName());
-		    DFFlowSet fset1 = processExpression(graph, expr, scope);
-		    fset.addFlowSet(fset1);
-		    fset.addFlow(new DFOutputFlow(fset1.value, var));
+		    DFFlowSet eset = processExpression(graph, expr, scope);
+		    fset.addFlowSet(eset);
+		    fset.addFlow(new DFOutputFlow(eset.value, var));
 		}
 	    }
 
@@ -545,6 +575,46 @@ public class Java2DF extends ASTVisitor {
 	    Expression expr = rtnStmt.getExpression();
 	    fset = processExpression(graph, expr, scope);
 	    fset.addFlow(new DFOutputFlow(fset.value, DFRef.RETURN));
+	    
+	} else if (stmt instanceof IfStatement) {
+	    // If.
+	    fset = new DFFlowSet();
+	    IfStatement ifStmt = (IfStatement)stmt;
+	    Expression expr = ifStmt.getExpression();
+	    DFFlowSet eset = processExpression(graph, expr, scope);
+	    fset.addFlowSet(eset);
+	    Statement thenStmt = ifStmt.getThenStatement();
+	    for (DFFlow flow : processStatement(graph, thenStmt, scope).flows) {
+		if (flow instanceof DFInputFlow) {
+		    DFInputFlow input = (DFInputFlow)flow;
+		    DFNode branch = new BranchNode(graph, ifStmt, eset.value);
+		    branch.connect(input.node);
+		    fset.addFlow(new DFInputFlow(input.ref, branch));
+		} else if (flow instanceof DFOutputFlow) {
+		    DFOutputFlow output = (DFOutputFlow)flow;
+		    DFNode join = new JoinNode(graph, ifStmt, eset.value);
+		    output.node.connect(join, "true");
+		    fset.addFlow(new DFInputFlow(output.ref, join));
+		    fset.addFlow(new DFOutputFlow(join, output.ref));
+		}
+	    }
+	    Statement elseStmt = ifStmt.getElseStatement();
+	    if (elseStmt != null) {
+		for (DFFlow flow : processStatement(graph, elseStmt, scope).flows) {
+		    if (flow instanceof DFInputFlow) {
+			DFInputFlow input = (DFInputFlow)flow;
+			DFNode branch = new BranchNode(graph, ifStmt, eset.value);
+			branch.connect(input.node);
+			fset.addFlow(new DFInputFlow(input.ref, branch));
+		    } else if (flow instanceof DFOutputFlow) {
+			DFOutputFlow output = (DFOutputFlow)flow;
+			DFNode join = new JoinNode(graph, ifStmt, eset.value);
+			output.node.connect(join, "false");
+			fset.addFlow(new DFInputFlow(output.ref, join));
+			fset.addFlow(new DFOutputFlow(join, output.ref));
+		    }
+		}
+	    }
 	    
 	} else {
 	    throw new UnsupportedSyntax(stmt);
