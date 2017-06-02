@@ -61,11 +61,19 @@ abstract class DFNode {
     abstract public String label();
 
     public DFLink connect(DFNode dst) {
-	return this.connect(dst, null);
+	return this.connect(dst, DFLinkType.DataFlow);
+    }
+    
+    public DFLink connect(DFNode dst, DFLinkType type) {
+	return this.connect(dst, type, null);
     }
     
     public DFLink connect(DFNode dst, String label) {
-	DFLink link = new DFLink(this, dst, label);
+	return this.connect(dst, DFLinkType.DataFlow, label);
+    }
+    
+    public DFLink connect(DFNode dst, DFLinkType type, String label) {
+	DFLink link = new DFLink(this, dst, type, label);
 	this.send.add(link);
 	dst.recv.add(link);
 	return link;
@@ -91,18 +99,28 @@ abstract class DFNode {
 }
 
 
+//  DFLinkType
+//
+enum DFLinkType {
+    DataFlow,
+    ControlFlow,
+}
+
+
 //  DFLink
 //
 class DFLink {
     
     public DFNode src;
     public DFNode dst;
+    public DFLinkType type;
     public String name;
     
-    public DFLink(DFNode src, DFNode dst, String name)
+    public DFLink(DFNode src, DFNode dst, DFLinkType type, String name)
     {
 	this.src = src;
 	this.dst = dst;
+	this.type = type;
 	this.name = name;
     }
 
@@ -401,7 +419,7 @@ abstract class CondNode extends ProgNode {
     public CondNode(DFGraph graph, ASTNode node, DFNode value) {
 	super(graph, node);
 	this.value = value;
-	value.connect(this, "Cond");
+	value.connect(this, DFLinkType.ControlFlow);
     }
 }
 
@@ -452,8 +470,11 @@ class GraphvizExporter {
 	    for (DFNode node : graph.nodes) {
 		for (DFLink link : node.send) {
 		    this.writer.write(" N"+link.src.id+" -> N"+link.dst.id);
-                    this.writer.write(" [label="+quote(link.name)+"]");
-		    this.writer.write(";\n");
+                    this.writer.write(" [label="+quote(link.name));
+		    if (link.type == DFLinkType.ControlFlow) {
+			this.writer.write(", style=dotted");
+		    }
+		    this.writer.write("];\n");
 		}
 	    }
 	    this.writer.write("}\n");
@@ -609,20 +630,31 @@ public class Java2DF extends ASTVisitor {
 	Expression expr = ifStmt.getExpression();
 	DFFlowSet eset = processExpression(graph, expr, scope);
 	fset.addFlowSet(eset);
+
+	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
 	
 	Statement thenStmt = ifStmt.getThenStatement();
 	for (DFFlow flow : processStatement(graph, thenStmt, scope).flows) {
 	    if (flow instanceof DFInputFlow) {
 		DFInputFlow input = (DFInputFlow)flow;
-		DFNode branch = new BranchNode(graph, ifStmt, eset.value);
-		branch.connect(input.node);
-		fset.addFlow(new DFInputFlow(input.ref, branch));
+		DFNode branch = branches.get(input.ref);
+		if (branch == null) {
+		    branch = new BranchNode(graph, ifStmt, eset.value);
+		    fset.addFlow(new DFInputFlow(input.ref, branch));
+		    branches.put(input.ref, branch);
+		}
+		branch.connect(input.node, "then");
 	    } else if (flow instanceof DFOutputFlow) {
 		DFOutputFlow output = (DFOutputFlow)flow;
-		DFNode join = new JoinNode(graph, ifStmt, eset.value);
-		output.node.connect(join, "true");
-		fset.addFlow(new DFInputFlow(output.ref, join));
-		fset.addFlow(new DFOutputFlow(join, output.ref));
+		DFNode join = joins.get(output.ref);
+		if (join == null) {
+		    join = new JoinNode(graph, ifStmt, eset.value);
+		    fset.addFlow(new DFInputFlow(output.ref, join));
+		    fset.addFlow(new DFOutputFlow(join, output.ref));
+		    joins.put(output.ref, join);
+		}
+		output.node.connect(join, "then");
 	    }
 	}
 	
@@ -631,15 +663,23 @@ public class Java2DF extends ASTVisitor {
 	    for (DFFlow flow : processStatement(graph, elseStmt, scope).flows) {
 		if (flow instanceof DFInputFlow) {
 		    DFInputFlow input = (DFInputFlow)flow;
-		    DFNode branch = new BranchNode(graph, ifStmt, eset.value);
-		    branch.connect(input.node);
-		    fset.addFlow(new DFInputFlow(input.ref, branch));
+		    DFNode branch = branches.get(input.ref);
+		    if (branch == null) {
+			branch = new BranchNode(graph, ifStmt, eset.value);
+			fset.addFlow(new DFInputFlow(input.ref, branch));
+			branches.put(input.ref, branch);
+		    }
+		    branch.connect(input.node, "else");
 		} else if (flow instanceof DFOutputFlow) {
 		    DFOutputFlow output = (DFOutputFlow)flow;
-		    DFNode join = new JoinNode(graph, ifStmt, eset.value);
-		    output.node.connect(join, "false");
-		    fset.addFlow(new DFInputFlow(output.ref, join));
-		    fset.addFlow(new DFOutputFlow(join, output.ref));
+		    DFNode join = joins.get(output.ref);
+		    if (join == null) {
+			join = new JoinNode(graph, ifStmt, eset.value);
+			fset.addFlow(new DFInputFlow(output.ref, join));
+			fset.addFlow(new DFOutputFlow(join, output.ref));
+			joins.put(output.ref, join);
+		    }
+		    output.node.connect(join, "else");
 		}
 	    }
 	}
@@ -757,7 +797,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 
-        // Cleanup.
+        // Collapse redundant nodes.
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : graph.nodes) {
             if (node.label() == null &&
@@ -769,13 +809,14 @@ public class Java2DF extends ASTVisitor {
         for (DFNode node : removed) {
             DFLink link0 = node.recv.get(0);
             DFLink link1 = node.send.get(0);
-            if (link0.name == null || link1.name == null) {
+            if (link0.type == link1.type &&
+		(link0.name == null || link1.name == null)) {
                 node.remove();
                 String name = link0.name;
                 if (name == null) {
                     name = link1.name;
                 }
-                link0.src.connect(link1.dst, name);
+                link0.src.connect(link1.dst, link0.type, name);
             }
         }
 	
