@@ -42,6 +42,16 @@ class DFGraph {
 }
 
 
+//  DFNodeType
+//
+enum DFNodeType {
+    Normal,
+    Box,
+    Cond,
+    Loop,
+}
+
+
 //  DFNode
 //
 abstract class DFNode {
@@ -56,6 +66,10 @@ abstract class DFNode {
 	this.id = this.graph.addNode(this);
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Normal;
     }
 
     abstract public String label();
@@ -369,6 +383,10 @@ class BoxNode extends ProgNode {
 	this.ref = ref;
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Box;
+    }
+
     public String label() {
 	return this.ref.name;
     }
@@ -421,6 +439,10 @@ abstract class CondNode extends ProgNode {
 	this.value = value;
 	value.connect(this, DFLinkType.ControlFlow);
     }
+
+    public DFNodeType type() {
+	return DFNodeType.Cond;
+    }
 }
 
 // BranchNode
@@ -464,15 +486,25 @@ class GraphvizExporter {
 	    this.writer.write("digraph "+graph.name+" {\n");
 	    for (DFNode node : graph.nodes) {
 		this.writer.write(" N"+node.id);
-                this.writer.write(" [label="+quote(node.label())+"]");
-		this.writer.write(";\n");
+                this.writer.write(" [label="+quote(node.label()));
+		switch (node.type()) {
+		case Box:
+		    this.writer.write(", shape=box");
+		    break;
+		case Cond:
+		    this.writer.write(", shape=diamond");
+		    break;
+		}
+		this.writer.write("];\n");
 	    }
 	    for (DFNode node : graph.nodes) {
 		for (DFLink link : node.send) {
 		    this.writer.write(" N"+link.src.id+" -> N"+link.dst.id);
                     this.writer.write(" [label="+quote(link.name));
-		    if (link.type == DFLinkType.ControlFlow) {
+		    switch (link.type) {
+		    case ControlFlow:
 			this.writer.write(", style=dotted");
+			break;
 		    }
 		    this.writer.write("];\n");
 		}
