@@ -48,15 +48,18 @@ class DFNode {
 
     public DFGraph graph;
     public int id;
-    public String name;
     public List<DFLink> send;
     public List<DFLink> recv;
     
     public DFNode(DFGraph graph) {
 	this.graph = graph;
+	this.id = this.graph.addNode(this);
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
-	this.id = this.graph.addNode(this);
+    }
+
+    public String label() {
+	return null;
     }
 
     public DFLink connect(DFNode dst) {
@@ -314,7 +317,10 @@ class ReturnNode extends DFNode {
 
     public ReturnNode(DFGraph graph) {
 	super(graph);
-	this.name = "return";
+    }
+
+    public String label() {
+	return "Return";
     }
 }
 
@@ -325,8 +331,11 @@ class ArgNode extends ProgNode {
 
     public ArgNode(DFGraph graph, ASTNode node, int index) {
 	super(graph, node);
-	this.name = "Arg"+index;
 	this.index = index;
+    }
+
+    public String label() {
+	return "Arg "+this.index;
     }
 }
 
@@ -337,8 +346,11 @@ class RefNode extends ProgNode {
     
     public RefNode(DFGraph graph, ASTNode node, DFRef ref) {
 	super(graph, node);
-	this.name = ref.name;
 	this.ref = ref;
+    }
+
+    public String label() {
+	return this.ref.name;
     }
 }
 
@@ -349,8 +361,11 @@ class ConstNode extends ProgNode {
 
     public ConstNode(DFGraph graph, ASTNode node, String value) {
 	super(graph, node);
-	this.name = value;
 	this.value = value;
+    }
+
+    public String label() {
+	return this.value;
     }
 }
 
@@ -364,11 +379,15 @@ class InfixNode extends ProgNode {
     public InfixNode(DFGraph graph, ASTNode node,
 		     String op, DFNode lvalue, DFNode rvalue) {
 	super(graph, node);
-	this.name = op;
+	this.op = op;
 	this.lvalue = lvalue;
 	this.rvalue = rvalue;
 	lvalue.connect(this, "L");
 	rvalue.connect(this, "R");
+    }
+
+    public String label() {
+	return this.op;
     }
 }
 
@@ -389,7 +408,10 @@ class BranchNode extends CondNode {
 
     public BranchNode(DFGraph graph, ASTNode node, DFNode value) {
 	super(graph, node, value);
-	this.name = "Branch";
+    }
+
+    public String label() {
+	return "Branch";
     }
 }
 
@@ -398,7 +420,10 @@ class JoinNode extends CondNode {
 
     public JoinNode(DFGraph graph, ASTNode node, DFNode value) {
 	super(graph, node, value);
-	this.name = "Join";
+    }
+    
+    public String label() {
+	return "Join";
     }
 }
 
@@ -419,7 +444,7 @@ class GraphvizExporter {
 	    this.writer.write("digraph "+graph.name+" {\n");
 	    for (DFNode node : graph.nodes) {
 		this.writer.write(" N"+node.id);
-                this.writer.write(" [label="+quote(node.name)+"]");
+                this.writer.write(" [label="+quote(node.label())+"]");
 		this.writer.write(";\n");
 	    }
 	    for (DFNode node : graph.nodes) {
@@ -705,7 +730,7 @@ public class Java2DF extends ASTVisitor {
         // Cleanup.
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : graph.nodes) {
-            if (node instanceof InnerNode &&
+            if (node.label() == null &&
                 node.send.size() == 1 &&
                 node.recv.size() == 1) {
                 removed.add(node);
