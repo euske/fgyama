@@ -44,7 +44,7 @@ class DFGraph {
 
 //  DFNode
 //
-class DFNode {
+abstract class DFNode {
 
     public DFGraph graph;
     public int id;
@@ -58,9 +58,7 @@ class DFNode {
 	this.recv = new ArrayList<DFLink>();
     }
 
-    public String label() {
-	return null;
-    }
+    abstract public String label();
 
     public DFLink connect(DFNode dst) {
 	return this.connect(dst, null);
@@ -256,7 +254,7 @@ class DFBindings {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
-		node = new InnerNode(this.graph);
+		node = new DistNode(this.graph);
 		this.inputs.put(ref, node);
 	    }
 	}
@@ -293,16 +291,20 @@ class DFBindings {
 }
 
 
-// InnerNode
-class InnerNode extends DFNode {
+// DistNode: a DFNode that distributes a value to multiple nodes.
+class DistNode extends DFNode {
 
-    public InnerNode(DFGraph graph) {
+    public DistNode(DFGraph graph) {
 	super(graph);
+    }
+
+    public String label() {
+	return null;
     }
 }
 
-// ProgNode
-class ProgNode extends DFNode {
+// ProgNode: a DFNode that corresponds to an actual program point.
+abstract class ProgNode extends DFNode {
 
     public ASTNode node;
     
@@ -312,7 +314,7 @@ class ProgNode extends DFNode {
     }
 }
 
-// ReturnNode
+// ReturnNode: represents a return value.
 class ReturnNode extends DFNode {
 
     public ReturnNode(DFGraph graph) {
@@ -324,7 +326,7 @@ class ReturnNode extends DFNode {
     }
 }
 
-// ArgNode
+// ArgNode: represnets a function argument.
 class ArgNode extends ProgNode {
 
     public int index;
@@ -339,12 +341,12 @@ class ArgNode extends ProgNode {
     }
 }
 
-// RefNode
-class RefNode extends ProgNode {
+// BoxNode: corresponds to a certain location in a memory.
+class BoxNode extends ProgNode {
 
     public DFRef ref;
     
-    public RefNode(DFGraph graph, ASTNode node, DFRef ref) {
+    public BoxNode(DFGraph graph, ASTNode node, DFRef ref) {
 	super(graph, node);
 	this.ref = ref;
     }
@@ -354,7 +356,7 @@ class RefNode extends ProgNode {
     }
 }
 
-// ConstNode
+// ConstNode: represents a constant value.
 class ConstNode extends ProgNode {
 
     public String value;
@@ -392,7 +394,7 @@ class InfixNode extends ProgNode {
 }
 
 // CondNode
-class CondNode extends ProgNode {
+abstract class CondNode extends ProgNode {
     
     public DFNode value;
     
@@ -527,8 +529,9 @@ public class Java2DF extends ASTVisitor {
 	if (expr instanceof Name) {
 	    // Variable lookup.
 	    DFRef ref = getReference(expr, scope);
-	    fset.value = new InnerNode(graph);
-	    fset.addFlow(new DFInputFlow(ref, fset.value));
+	    DFNode value = new DistNode(graph);
+	    fset.value = value;
+	    fset.addFlow(new DFInputFlow(ref, value));
 	    
 	} else if (expr instanceof NumberLiteral) {
 	    // Cosntant.
@@ -550,7 +553,7 @@ public class Java2DF extends ASTVisitor {
 	    Assignment assn = (Assignment)expr;
 	    String op = assn.getOperator().toString();
 	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
-	    DFNode lvalue = new InnerNode(graph);
+	    DFNode lvalue = new DistNode(graph);
 	    fset.addFlow(new DFInputFlow(ref, lvalue));
 	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
 	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
@@ -708,7 +711,7 @@ public class Java2DF extends ASTVisitor {
 		    if (output.ref == DFRef.RETURN) {
 			bindings.setReturn(output.node);
 		    } else {
-			DFNode dst = new RefNode(graph, null, output.ref);
+			DFNode dst = new BoxNode(graph, null, output.ref);
 			output.node.connect(dst);
 			bindings.put(output.ref, dst);
 		    }
@@ -739,7 +742,7 @@ public class Java2DF extends ASTVisitor {
 	    // XXX check getExtraDimensions()
 	    DFVar var = scope.add(paramName.getFullyQualifiedName(),
 				  getTypeName(paramType));
-	    DFNode dst = new RefNode(graph, paramName, var);
+	    DFNode dst = new BoxNode(graph, paramName, var);
 	    param.connect(dst);
 	    bindings.put(var, dst);
 	}
