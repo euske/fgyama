@@ -501,7 +501,7 @@ public class Java2DF extends ASTVisitor {
 
     public boolean visit(MethodDeclaration method) {
 	try {
-	    DFGraph graph = getGraph(method);
+	    DFGraph graph = getMethodGraph(method);
 	    exporter.writeGraph(graph);
 	} catch (UnsupportedSyntax e) {
 	    logit("Unsupported: "+e.node);
@@ -519,7 +519,8 @@ public class Java2DF extends ASTVisitor {
 	}
     }
 
-    public DFFlowSet processExpression(DFGraph graph, Expression expr, DFScope scope)
+    public DFFlowSet processExpression
+	(DFGraph graph, Expression expr, DFScope scope)
 	throws UnsupportedSyntax {
 	DFFlowSet fset = new DFFlowSet();
 
@@ -564,52 +565,67 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
-    public DFFlowSet processStatement(DFGraph graph, Statement stmt, DFScope scope)
+    public DFFlowSet processVariableDeclarationStatement
+	(DFGraph graph, VariableDeclarationStatement varStmt, DFScope scope)
 	throws UnsupportedSyntax {
-	DFFlowSet fset;
-	
-	if (stmt instanceof Block) {
-	    // Block.
-	    fset = processBlock(graph, (Block)stmt, scope);
-	    
-	} else if (stmt instanceof VariableDeclarationStatement) {
-	    // Variable assignment;
-	    fset = new DFFlowSet();
-	    VariableDeclarationStatement varStmt = (VariableDeclarationStatement)stmt;
-	    for (VariableDeclarationFragment frag :
-		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		Expression expr = frag.getInitializer();
-		if (expr != null) {
-		    Name varName = frag.getName();
-		    DFVar var = scope.lookup(varName.getFullyQualifiedName());
-		    DFFlowSet eset = processExpression(graph, expr, scope);
-		    fset.addFlowSet(eset);
-		    fset.addFlow(new DFOutputFlow(eset.value, var));
-		}
+	DFFlowSet fset = new DFFlowSet();
+	for (VariableDeclarationFragment frag :
+		 (List<VariableDeclarationFragment>) varStmt.fragments()) {
+	    Expression expr = frag.getInitializer();
+	    if (expr != null) {
+		Name varName = frag.getName();
+		DFVar var = scope.lookup(varName.getFullyQualifiedName());
+		DFFlowSet eset = processExpression(graph, expr, scope);
+		fset.addFlowSet(eset);
+		fset.addFlow(new DFOutputFlow(eset.value, var));
 	    }
+	}
+	return fset;
+    }
 
-	} else if (stmt instanceof ExpressionStatement) {
-	    // Normal expression.
-	    ExpressionStatement exprStmt = (ExpressionStatement)stmt;
-	    Expression expr = exprStmt.getExpression();
-	    fset = processExpression(graph, expr, scope);
-		
-	} else if (stmt instanceof ReturnStatement) {
-	    // Return.
-	    ReturnStatement rtnStmt = (ReturnStatement)stmt;
-	    Expression expr = rtnStmt.getExpression();
-	    fset = processExpression(graph, expr, scope);
-	    fset.addFlow(new DFOutputFlow(fset.value, DFRef.RETURN));
-	    
-	} else if (stmt instanceof IfStatement) {
-	    // If.
-	    fset = new DFFlowSet();
-	    IfStatement ifStmt = (IfStatement)stmt;
-	    Expression expr = ifStmt.getExpression();
-	    DFFlowSet eset = processExpression(graph, expr, scope);
-	    fset.addFlowSet(eset);
-	    Statement thenStmt = ifStmt.getThenStatement();
-	    for (DFFlow flow : processStatement(graph, thenStmt, scope).flows) {
+    public DFFlowSet processExpressionStatement
+	(DFGraph graph, ExpressionStatement exprStmt, DFScope scope)
+	throws UnsupportedSyntax {
+	Expression expr = exprStmt.getExpression();
+	return processExpression(graph, expr, scope);
+    }
+
+    public DFFlowSet processReturnStatement
+	(DFGraph graph, ReturnStatement rtnStmt, DFScope scope)
+	throws UnsupportedSyntax {
+	Expression expr = rtnStmt.getExpression();
+	DFFlowSet fset = processExpression(graph, expr, scope);
+	fset.addFlow(new DFOutputFlow(fset.value, DFRef.RETURN));
+	return fset;
+    }
+    
+    public DFFlowSet processIfStatement
+	(DFGraph graph, IfStatement ifStmt, DFScope scope)
+	throws UnsupportedSyntax {
+	DFFlowSet fset = new DFFlowSet();
+	Expression expr = ifStmt.getExpression();
+	DFFlowSet eset = processExpression(graph, expr, scope);
+	fset.addFlowSet(eset);
+	
+	Statement thenStmt = ifStmt.getThenStatement();
+	for (DFFlow flow : processStatement(graph, thenStmt, scope).flows) {
+	    if (flow instanceof DFInputFlow) {
+		DFInputFlow input = (DFInputFlow)flow;
+		DFNode branch = new BranchNode(graph, ifStmt, eset.value);
+		branch.connect(input.node);
+		fset.addFlow(new DFInputFlow(input.ref, branch));
+	    } else if (flow instanceof DFOutputFlow) {
+		DFOutputFlow output = (DFOutputFlow)flow;
+		DFNode join = new JoinNode(graph, ifStmt, eset.value);
+		output.node.connect(join, "true");
+		fset.addFlow(new DFInputFlow(output.ref, join));
+		fset.addFlow(new DFOutputFlow(join, output.ref));
+	    }
+	}
+	
+	Statement elseStmt = ifStmt.getElseStatement();
+	if (elseStmt != null) {
+	    for (DFFlow flow : processStatement(graph, elseStmt, scope).flows) {
 		if (flow instanceof DFInputFlow) {
 		    DFInputFlow input = (DFInputFlow)flow;
 		    DFNode branch = new BranchNode(graph, ifStmt, eset.value);
@@ -618,28 +634,38 @@ public class Java2DF extends ASTVisitor {
 		} else if (flow instanceof DFOutputFlow) {
 		    DFOutputFlow output = (DFOutputFlow)flow;
 		    DFNode join = new JoinNode(graph, ifStmt, eset.value);
-		    output.node.connect(join, "true");
+		    output.node.connect(join, "false");
 		    fset.addFlow(new DFInputFlow(output.ref, join));
 		    fset.addFlow(new DFOutputFlow(join, output.ref));
 		}
 	    }
-	    Statement elseStmt = ifStmt.getElseStatement();
-	    if (elseStmt != null) {
-		for (DFFlow flow : processStatement(graph, elseStmt, scope).flows) {
-		    if (flow instanceof DFInputFlow) {
-			DFInputFlow input = (DFInputFlow)flow;
-			DFNode branch = new BranchNode(graph, ifStmt, eset.value);
-			branch.connect(input.node);
-			fset.addFlow(new DFInputFlow(input.ref, branch));
-		    } else if (flow instanceof DFOutputFlow) {
-			DFOutputFlow output = (DFOutputFlow)flow;
-			DFNode join = new JoinNode(graph, ifStmt, eset.value);
-			output.node.connect(join, "false");
-			fset.addFlow(new DFInputFlow(output.ref, join));
-			fset.addFlow(new DFOutputFlow(join, output.ref));
-		    }
-		}
-	    }
+	}
+	return fset;
+    }
+
+    public DFFlowSet processStatement
+	(DFGraph graph, Statement stmt, DFScope scope)
+	throws UnsupportedSyntax {
+	DFFlowSet fset;
+	
+	if (stmt instanceof Block) {
+	    fset = processBlock(graph, (Block)stmt, scope);
+	    
+	} else if (stmt instanceof VariableDeclarationStatement) {
+	    fset = processVariableDeclarationStatement
+		(graph, (VariableDeclarationStatement)stmt, scope);
+
+	} else if (stmt instanceof ExpressionStatement) {
+	    fset = processExpressionStatement
+		(graph, (ExpressionStatement)stmt, scope);
+		
+	} else if (stmt instanceof ReturnStatement) {
+	    fset = processReturnStatement
+		(graph, (ReturnStatement)stmt, scope);
+	    
+	} else if (stmt instanceof IfStatement) {
+	    fset = processIfStatement
+		(graph, (IfStatement)stmt, scope);
 	    
 	} else {
 	    throw new UnsupportedSyntax(stmt);
@@ -649,7 +675,8 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
-    public DFFlowSet processBlock(DFGraph graph, Block block, DFScope parent)
+    public DFFlowSet processBlock
+	(DFGraph graph, Block block, DFScope parent)
 	throws UnsupportedSyntax {
 	DFScope scope = new DFScope(parent);
 	DFBindings bindings = new DFBindings(graph);
@@ -693,7 +720,7 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
-    public DFGraph getGraph(MethodDeclaration method)
+    public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
 	// XXX check isContructor()
 	Name funcName = method.getName();
