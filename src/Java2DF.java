@@ -407,6 +407,44 @@ class ConstNode extends ProgNode {
     }
 }
 
+// PrefixNode
+class PrefixNode extends ProgNode {
+
+    public String op;
+    public DFNode value;
+
+    public PrefixNode(DFGraph graph, ASTNode node,
+		      String op, DFNode value) {
+	super(graph, node);
+	this.op = op;
+	this.value = value;
+	value.connect(this, "pre");
+    }
+
+    public String label() {
+	return this.op;
+    }
+}
+
+// PostfixNode
+class PostfixNode extends ProgNode {
+
+    public String op;
+    public DFNode value;
+
+    public PostfixNode(DFGraph graph, ASTNode node,
+		       String op, DFNode value) {
+	super(graph, node);
+	this.op = op;
+	this.value = value;
+	value.connect(this, "post");
+    }
+
+    public String label() {
+	return this.op;
+    }
+}
+
 // InfixNode
 class InfixNode extends ProgNode {
 
@@ -593,22 +631,80 @@ public class Java2DF extends ASTVisitor {
     public DFFlowSet processExpression
 	(DFGraph graph, Expression expr, DFScope scope)
 	throws UnsupportedSyntax {
-	DFFlowSet fset = new DFFlowSet();
 
 	if (expr instanceof Name) {
 	    // Variable lookup.
+	    DFFlowSet fset = new DFFlowSet();
 	    DFRef ref = getReference(expr, scope);
 	    DFNode value = new DistNode(graph);
 	    fset.value = value;
 	    fset.addFlow(new DFInputFlow(ref, value));
+	    return fset;
+	    
+	} else if (expr instanceof BooleanLiteral) {
+	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
+	    boolean value = ((BooleanLiteral)expr).booleanValue();
+	    fset.value = new ConstNode(graph, expr, Boolean.toString(value));
+	    return fset;
+	    
+	} else if (expr instanceof CharacterLiteral) {
+	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
+	    char value = ((CharacterLiteral)expr).charValue();
+	    fset.value = new ConstNode(graph, expr, Character.toString(value));
+	    return fset;
+	    
+	} else if (expr instanceof NullLiteral) {
+	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
+	    fset.value = new ConstNode(graph, expr, "null");
+	    return fset;
 	    
 	} else if (expr instanceof NumberLiteral) {
 	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
 	    String value = ((NumberLiteral)expr).getToken();
 	    fset.value = new ConstNode(graph, expr, value);
+	    return fset;
+	    
+	} else if (expr instanceof StringLiteral) {
+	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
+	    String value = ((StringLiteral)expr).getLiteralValue();
+	    fset.value = new ConstNode(graph, expr, value);
+	    return fset;
+	    
+	} else if (expr instanceof TypeLiteral) {
+	    // Cosntant.
+	    DFFlowSet fset = new DFFlowSet();
+	    Type value = ((TypeLiteral)expr).getType();
+	    fset.value = new ConstNode(graph, expr, getTypeName(value));
+	    return fset;
+	    
+	} else if (expr instanceof PrefixExpression) {
+	    // Prefix operator.
+	    DFFlowSet fset = new DFFlowSet();
+	    PrefixExpression prefix = (PrefixExpression)expr;
+	    String op = prefix.getOperator().toString();
+	    DFFlowSet eset = processExpression(graph, prefix.getOperand(), scope);
+	    fset.value = new PrefixNode(graph, expr, op, eset.value);
+	    fset.addFlowSet(eset);
+	    return fset;
+	    
+	} else if (expr instanceof PostfixExpression) {
+	    // Postfix operator.
+	    DFFlowSet fset = new DFFlowSet();
+	    PostfixExpression postfix = (PostfixExpression)expr;
+	    String op = postfix.getOperator().toString();
+	    DFFlowSet eset = processExpression(graph, postfix.getOperand(), scope);
+	    fset.value = new PostfixNode(graph, expr, op, eset.value);
+	    fset.addFlowSet(eset);
+	    return fset;
 	    
 	} else if (expr instanceof InfixExpression) {
 	    // Infix operator.
+	    DFFlowSet fset = new DFFlowSet();
 	    InfixExpression infix = (InfixExpression)expr;
 	    String op = infix.getOperator().toString();
 	    DFFlowSet lset = processExpression(graph, infix.getLeftOperand(), scope);
@@ -616,9 +712,18 @@ public class Java2DF extends ASTVisitor {
 	    fset.value = new InfixNode(graph, expr, op, lset.value, rset.value);
 	    fset.addFlowSet(lset);
 	    fset.addFlowSet(rset);
+	    return fset;
+	    
+	} else if (expr instanceof ParenthesizedExpression) {
+	    // Parentheses.
+	    DFFlowSet fset = new DFFlowSet();
+	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    fset = processExpression(graph, paren.getExpression(), scope);
+	    return fset;
 	    
 	} else if (expr instanceof Assignment) {
 	    // Assignment.
+	    DFFlowSet fset = new DFFlowSet();
 	    Assignment assn = (Assignment)expr;
 	    String op = assn.getOperator().toString();
 	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
@@ -628,12 +733,11 @@ public class Java2DF extends ASTVisitor {
 	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
 	    fset.addFlow(new DFOutputFlow(fset.value, ref));
 	    fset.addFlowSet(rset);
+	    return fset;
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
 	}
-
-	return fset;
     }
     
     @SuppressWarnings("unchecked")
