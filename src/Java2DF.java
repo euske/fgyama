@@ -469,6 +469,22 @@ class JoinNode extends CondNode {
     }
 }
 
+// LoopNode
+class LoopNode extends ProgNode {
+
+    public LoopNode(DFGraph graph, ASTNode node) {
+	super(graph, node);
+    }
+    
+    public DFNodeType type() {
+	return DFNodeType.Loop;
+    }
+    
+    public String label() {
+	return "Loop";
+    }
+}
+
 
 
 //  GraphvizExporter
@@ -658,13 +674,13 @@ public class Java2DF extends ASTVisitor {
     public DFFlowSet processIfStatement
 	(DFGraph graph, IfStatement ifStmt, DFScope scope)
 	throws UnsupportedSyntax {
-	DFFlowSet fset = new DFFlowSet();
 	Expression expr = ifStmt.getExpression();
 	DFFlowSet eset = processExpression(graph, expr, scope);
-	fset.addFlowSet(eset);
 
 	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
 	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
+	DFFlowSet fset = new DFFlowSet();
+	fset.addFlowSet(eset);
 	
 	Statement thenStmt = ifStmt.getThenStatement();
 	for (DFFlow flow : processStatement(graph, thenStmt, scope).flows) {
@@ -718,35 +734,111 @@ public class Java2DF extends ASTVisitor {
 	return fset;
     }
 
+    public DFFlowSet processWhileStatement
+	(DFGraph graph, WhileStatement whileStmt, DFScope scope)
+	throws UnsupportedSyntax {
+	DFFlowSet fset = new DFFlowSet();
+	
+	Expression expr = whileStmt.getExpression();
+	DFFlowSet eset = processExpression(graph, expr, scope);
+	Statement body = whileStmt.getBody();
+	DFFlowSet bset = processStatement(graph, body, scope);
+
+	Map<DFRef, DFNode> bindings = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> loops = new HashMap<DFRef, DFNode>();
+	
+	for (DFFlow flow : eset.flows) {
+	    if (flow instanceof DFInputFlow) {
+		DFInputFlow input = (DFInputFlow)flow;
+		DFNode loop = loops.get(input.ref);
+		if (loop == null) {
+		    DFNode src = new DistNode(graph);
+		    loop = new LoopNode(graph, whileStmt);
+		    loops.put(input.ref, loop);
+		    src.connect(loop, "init");
+		    fset.addFlow(new DFInputFlow(input.ref, src));
+		}
+		loop.connect(input.node);
+	    } else if (flow instanceof DFOutputFlow) {
+		DFOutputFlow output = (DFOutputFlow)flow;
+		bindings.put(output.ref, output.node);
+	    }
+	}
+	
+	for (DFFlow flow : bset.flows) {
+	    if (flow instanceof DFInputFlow) {
+		DFInputFlow input = (DFInputFlow)flow;
+		DFNode tmp = bindings.get(input.ref);
+		if (tmp != null) {
+		    tmp.connect(input.node);
+		    bindings.remove(input.ref);
+		} else {
+		    DFNode loop = loops.get(input.ref);
+		    if (loop == null) {
+			DFNode src = new DistNode(graph);
+			loop = new LoopNode(graph, whileStmt);
+			loops.put(input.ref, loop);
+			src.connect(loop, "init");
+			fset.addFlow(new DFInputFlow(input.ref, src));
+		    }
+		    DFNode branch = new BranchNode(graph, whileStmt, eset.value);
+		    loop.connect(branch);
+		    branch.connect(input.node, "true");
+		    DFNode dst = new DistNode(graph);
+		    branch.connect(dst, "false");
+		    fset.addFlow(new DFOutputFlow(dst, input.ref));
+		}
+	    } else if (flow instanceof DFOutputFlow) {
+		DFOutputFlow output = (DFOutputFlow)flow;
+		DFNode loop = loops.get(output.ref);
+		if (loop != null) {
+		    output.node.connect(loop, "loop");
+		} else {
+		    fset.addFlow(flow);
+		}
+	    }
+	}
+	
+	for (DFRef ref : bindings.keySet()) {
+	    DFNode node = bindings.get(ref);
+	    fset.addFlow(new DFOutputFlow(node, ref));
+	}
+	return fset;
+    }
+    
     public DFFlowSet processStatement
 	(DFGraph graph, Statement stmt, DFScope scope)
 	throws UnsupportedSyntax {
-	DFFlowSet fset;
 	
 	if (stmt instanceof Block) {
-	    fset = processBlock(graph, (Block)stmt, scope);
+	    return processBlock(graph, (Block)stmt, scope);
+
+	} else if (stmt instanceof EmptyStatement) {
+	    return new DFFlowSet();
 	    
 	} else if (stmt instanceof VariableDeclarationStatement) {
-	    fset = processVariableDeclarationStatement
+	    return processVariableDeclarationStatement
 		(graph, (VariableDeclarationStatement)stmt, scope);
 
 	} else if (stmt instanceof ExpressionStatement) {
-	    fset = processExpressionStatement
+	    return processExpressionStatement
 		(graph, (ExpressionStatement)stmt, scope);
 		
 	} else if (stmt instanceof ReturnStatement) {
-	    fset = processReturnStatement
+	    return processReturnStatement
 		(graph, (ReturnStatement)stmt, scope);
 	    
 	} else if (stmt instanceof IfStatement) {
-	    fset = processIfStatement
+	    return processIfStatement
 		(graph, (IfStatement)stmt, scope);
+	    
+	} else if (stmt instanceof WhileStatement) {
+	    return processWhileStatement
+		(graph, (WhileStatement)stmt, scope);
 	    
 	} else {
 	    throw new UnsupportedSyntax(stmt);
 	}
-	
-	return fset;
     }
     
     @SuppressWarnings("unchecked")
