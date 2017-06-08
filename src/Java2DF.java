@@ -257,16 +257,16 @@ class DFFlowSet {
 	_outputs = new ArrayList<DFOutputFlow>();
     }
 
-    public void addInputFlow(DFInputFlow flow) {
-	_inputs.add(flow);
+    public void addInputFlow(DFRef ref, DFNode node) {
+	_inputs.add(new DFInputFlow(ref, node));
     }
 
     public List<DFInputFlow> inputs() {
 	return _inputs;
     }
 
-    public void addOutputFlow(DFOutputFlow flow) {
-	_outputs.add(flow);
+    public void addOutputFlow(DFNode node, DFRef ref) {
+	_outputs.add(new DFOutputFlow(node, ref));
     }
 
     public List<DFOutputFlow> outputs() {
@@ -326,11 +326,11 @@ class DFBindings {
 	}
 	for (DFRef ref : this.inputs.keySet()) {
 	    DFNode node = this.inputs.get(ref);
-	    fset.addInputFlow(new DFInputFlow(ref, node));
+	    fset.addInputFlow(ref, node);
 	}
 	for (DFRef ref : this.bindings.keySet()) {
 	    DFNode node = this.bindings.get(ref);
-	    fset.addOutputFlow(new DFOutputFlow(node, ref));
+	    fset.addOutputFlow(node, ref);
 	}
 	return fset;
     }
@@ -653,7 +653,7 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = getReference(expr, scope);
 	    DFNode value = new DistNode(graph);
 	    fset.value = value;
-	    fset.addInputFlow(new DFInputFlow(ref, value));
+	    fset.addInputFlow(ref, value);
 	    return fset;
 	    
 	} else if (expr instanceof BooleanLiteral) {
@@ -743,10 +743,10 @@ public class Java2DF extends ASTVisitor {
 	    String op = assn.getOperator().toString();
 	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
 	    DFNode lvalue = new DistNode(graph);
-	    fset.addInputFlow(new DFInputFlow(ref, lvalue));
+	    fset.addInputFlow(ref, lvalue);
 	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
 	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
-	    fset.addOutputFlow(new DFOutputFlow(fset.value, ref));
+	    fset.addOutputFlow(fset.value, ref);
 	    fset.addFlowSet(rset);
 	    return fset;
 	    
@@ -768,7 +768,7 @@ public class Java2DF extends ASTVisitor {
 		DFVar var = scope.lookup(varName.getFullyQualifiedName());
 		DFFlowSet eset = processExpression(graph, expr, scope);
 		fset.addFlowSet(eset);
-		fset.addOutputFlow(new DFOutputFlow(eset.value, var));
+		fset.addOutputFlow(eset.value, var);
 	    }
 	}
 	return fset;
@@ -786,7 +786,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	Expression expr = rtnStmt.getExpression();
 	DFFlowSet fset = processExpression(graph, expr, scope);
-	fset.addOutputFlow(new DFOutputFlow(fset.value, DFRef.RETURN));
+	fset.addOutputFlow(fset.value, DFRef.RETURN);
 	return fset;
     }
     
@@ -807,7 +807,7 @@ public class Java2DF extends ASTVisitor {
 	    DFNode branch = branches.get(input.ref);
 	    if (branch == null) {
 		branch = new BranchNode(graph, ifStmt, eset.value);
-		fset.addInputFlow(new DFInputFlow(input.ref, branch));
+		fset.addInputFlow(input.ref, branch);
 		branches.put(input.ref, branch);
 	    }
 	    branch.connect(input.node, "then");
@@ -816,8 +816,8 @@ public class Java2DF extends ASTVisitor {
 	    DFNode join = joins.get(output.ref);
 	    if (join == null) {
 		join = new JoinNode(graph, ifStmt, eset.value);
-		fset.addInputFlow(new DFInputFlow(output.ref, join));
-		fset.addOutputFlow(new DFOutputFlow(join, output.ref));
+		fset.addInputFlow(output.ref, join);
+		fset.addOutputFlow(join, output.ref);
 		joins.put(output.ref, join);
 	    }
 	    output.node.connect(join, "then");
@@ -830,7 +830,7 @@ public class Java2DF extends ASTVisitor {
 		DFNode branch = branches.get(input.ref);
 		if (branch == null) {
 		    branch = new BranchNode(graph, ifStmt, eset.value);
-		    fset.addInputFlow(new DFInputFlow(input.ref, branch));
+		    fset.addInputFlow(input.ref, branch);
 		    branches.put(input.ref, branch);
 		}
 		branch.connect(input.node, "else");
@@ -839,8 +839,8 @@ public class Java2DF extends ASTVisitor {
 		DFNode join = joins.get(output.ref);
 		if (join == null) {
 		    join = new JoinNode(graph, ifStmt, eset.value);
-		    fset.addInputFlow(new DFInputFlow(output.ref, join));
-		    fset.addOutputFlow(new DFOutputFlow(join, output.ref));
+		    fset.addInputFlow(output.ref, join);
+		    fset.addOutputFlow(join, output.ref);
 		    joins.put(output.ref, join);
 		}
 		output.node.connect(join, "else");
@@ -866,10 +866,10 @@ public class Java2DF extends ASTVisitor {
 	    DFNode loop = loops.get(input.ref);
 	    if (loop == null) {
 		DFNode src = new DistNode(graph);
+		fset.addInputFlow(input.ref, src);
 		loop = new LoopNode(graph, whileStmt);
 		loops.put(input.ref, loop);
 		src.connect(loop, "init");
-		fset.addInputFlow(new DFInputFlow(input.ref, src));
 	    }
 	    loop.connect(input.node);
 	}
@@ -878,40 +878,55 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFInputFlow input : bset.inputs()) {
-	    DFNode tmp = bindings.get(input.ref);
-	    if (tmp != null) {
-		tmp.connect(input.node);
-		bindings.remove(input.ref);
-	    } else {
-		DFNode loop = loops.get(input.ref);
-		if (loop == null) {
-		    DFNode src = new DistNode(graph);
-		    loop = new LoopNode(graph, whileStmt);
-		    loops.put(input.ref, loop);
-		    src.connect(loop, "init");
-		    fset.addInputFlow(new DFInputFlow(input.ref, src));
+	    DFNode loop = loops.get(input.ref);
+	    if (loop == null) {
+		DFNode src = bindings.get(input.ref);
+		if (src != null) {
+		    bindings.remove(input.ref);
+		} else {
+		    src = new DistNode(graph);
+		    fset.addInputFlow(input.ref, src);
 		}
-		DFNode branch = new BranchNode(graph, whileStmt, eset.value);
-		loop.connect(branch);
-		branch.connect(input.node, "true");
-		DFNode dst = new DistNode(graph);
-		branch.connect(dst, "false");
-		fset.addOutputFlow(new DFOutputFlow(dst, input.ref));
+		loop = new LoopNode(graph, whileStmt);
+		loops.put(input.ref, loop);
+		src.connect(loop, "init");
 	    }
+	    DFNode branch = new BranchNode(graph, whileStmt, eset.value);
+	    loop.connect(branch);
+	    branch.connect(input.node, "true");
+	    DFNode dst = new DistNode(graph);
+	    branch.connect(dst, "false");
+	    fset.addOutputFlow(dst, input.ref);
 	}
 	for (DFOutputFlow output : bset.outputs()) {
 	    DFNode loop = loops.get(output.ref);
 	    if (loop != null) {
 		output.node.connect(loop, "loop");
 	    } else {
-		fset.addOutputFlow(output);
+		fset.addOutputFlow(output.node, output.ref);
 	    }
 	}
 	
 	for (DFRef ref : bindings.keySet()) {
 	    DFNode node = bindings.get(ref);
-	    fset.addOutputFlow(new DFOutputFlow(node, ref));
+	    fset.addOutputFlow(node, ref);
 	}
+	return fset;
+    }
+
+    @SuppressWarnings("unchecked")
+    public DFFlowSet processForStatement
+	(DFGraph graph, ForStatement forStmt, DFScope scope)
+	throws UnsupportedSyntax {
+	DFFlowSet fset = new DFFlowSet();
+
+	// Process each initializer.
+	DFBindings bindings = new DFBindings(graph);
+	for (Expression expr : (List<Expression>) forStmt.initializers()) {
+	    DFFlowSet eset = processExpression(graph, expr, scope);
+	    chainFlowSet(graph, bindings, eset);
+	}
+	
 	return fset;
     }
     
@@ -945,8 +960,30 @@ public class Java2DF extends ASTVisitor {
 	    return processWhileStatement
 		(graph, (WhileStatement)stmt, scope);
 	    
+	} else if (stmt instanceof ForStatement) {
+	    return processForStatement
+		(graph, (ForStatement)stmt, scope);
+	    
 	} else {
 	    throw new UnsupportedSyntax(stmt);
+	}
+    }
+
+    public void chainFlowSet
+	(DFGraph graph, DFBindings bindings, DFFlowSet fset) 
+	throws UnsupportedSyntax {
+	for (DFInputFlow input : fset.inputs()) {
+	    DFNode src = bindings.get(input.ref);
+	    src.connect(input.node);
+	}
+	for (DFOutputFlow output : fset.outputs()) {
+	    if (output.ref == DFRef.RETURN) {
+		bindings.setReturn(output.node);
+	    } else {
+		DFNode dst = new BoxNode(graph, null, output.ref);
+		output.node.connect(dst);
+		bindings.put(output.ref, dst);
+	    }
 	}
     }
     
@@ -955,7 +992,6 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, Block block, DFScope parent)
 	throws UnsupportedSyntax {
 	DFScope scope = new DFScope(parent);
-	DFBindings bindings = new DFBindings(graph);
 
 	// Handle all variable declarations first.
 	for (Statement stmt : (List<Statement>) block.statements()) {
@@ -972,21 +1008,10 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process each statement.
+	DFBindings bindings = new DFBindings(graph);
 	for (Statement stmt : (List<Statement>) block.statements()) {
 	    DFFlowSet fset = processStatement(graph, stmt, scope);
-	    for (DFInputFlow input : fset.inputs()) {
-		DFNode src = bindings.get(input.ref);
-		src.connect(input.node);
-	    }
-	    for (DFOutputFlow output : fset.outputs()) {
-		if (output.ref == DFRef.RETURN) {
-		    bindings.setReturn(output.node);
-		} else {
-		    DFNode dst = new BoxNode(graph, null, output.ref);
-		    output.node.connect(dst);
-		    bindings.put(output.ref, dst);
-		}
-	    }
+	    chainFlowSet(graph, bindings, fset);
 	}
 
 	return bindings.finish(scope);
