@@ -309,7 +309,9 @@ class DFBindings {
     }
 
     public void put(DFRef ref, DFNode node) {
-	this.bindings.put(ref, node);
+	DFNode box = new BoxNode(this.graph, ref);
+	node.connect(box);
+	this.bindings.put(ref, box);
     }
 
     public void setReturn(DFNode node) {
@@ -373,6 +375,25 @@ class ReturnNode extends DFNode {
     }
 }
 
+// BoxNode: corresponds to a certain location in a memory.
+class BoxNode extends DFNode {
+
+    public DFRef ref;
+    
+    public BoxNode(DFGraph graph, DFRef ref) {
+	super(graph);
+	this.ref = ref;
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Box;
+    }
+
+    public String label() {
+	return this.ref.name;
+    }
+}
+
 // ArgNode: represnets a function argument.
 class ArgNode extends ProgNode {
 
@@ -385,25 +406,6 @@ class ArgNode extends ProgNode {
 
     public String label() {
 	return "Arg "+this.index;
-    }
-}
-
-// BoxNode: corresponds to a certain location in a memory.
-class BoxNode extends ProgNode {
-
-    public DFRef ref;
-    
-    public BoxNode(DFGraph graph, ASTNode node, DFRef ref) {
-	super(graph, node);
-	this.ref = ref;
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Box;
-    }
-
-    public String label() {
-	return this.ref.name;
     }
 }
 
@@ -980,9 +982,7 @@ public class Java2DF extends ASTVisitor {
 	    if (output.ref == DFRef.RETURN) {
 		bindings.setReturn(output.node);
 	    } else {
-		DFNode dst = new BoxNode(graph, null, output.ref);
-		output.node.connect(dst);
-		bindings.put(output.ref, dst);
+		bindings.put(output.ref, output.node);
 	    }
 	}
     }
@@ -1037,9 +1037,7 @@ public class Java2DF extends ASTVisitor {
 	    // XXX check getExtraDimensions()
 	    DFVar var = scope.add(paramName.getFullyQualifiedName(),
 				  getTypeName(paramType));
-	    DFNode dst = new BoxNode(graph, paramName, var);
-	    param.connect(dst);
-	    bindings.put(var, dst);
+	    bindings.put(var, param);
 	}
 
 	Block funcBlock = method.getBody();
