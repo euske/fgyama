@@ -180,15 +180,24 @@ class DFVar extends DFRef {
 class DFScope {
 
     public DFScope parent;
+    public DFGraph graph;
+    
     public Map<String, DFVar> vars;
+    public Map<DFRef, DFNode> inputs;
+    public Map<DFRef, DFNode> outputs;
+    public DFNode retval;
 
-    public DFScope() {
-	this(null);
+    public DFScope(DFGraph graph) {
+	this(graph, null);
     }
     
-    public DFScope(DFScope parent) {
+    public DFScope(DFGraph graph, DFScope parent) {
+	this.graph = graph;
 	this.parent = parent;
 	this.vars = new HashMap<String, DFVar>();
+	this.inputs = new HashMap<DFRef, DFNode>();
+	this.outputs = new HashMap<DFRef, DFNode>();
+	this.retval = null;
     }
 
     public DFVar add(String name, String type) {
@@ -208,8 +217,45 @@ class DFScope {
 	}
     }
 
-    public Collection<DFVar> pop() {
-	return this.vars.values();
+    public DFNode get(DFRef ref) {
+	DFNode node = this.outputs.get(ref);
+	if (node == null) {
+	    node = this.inputs.get(ref);
+	    if (node == null) {
+		node = new DistNode(this.graph);
+		this.inputs.put(ref, node);
+	    }
+	}
+	return node;
+    }
+
+    public void put(DFRef ref, DFNode node) {
+	DFNode box = new BoxNode(this.graph, ref);
+	node.connect(box);
+	this.outputs.put(ref, box);
+    }
+
+    public void setReturn(DFNode node) {
+	if (this.retval == null) {
+	    this.retval = new ReturnNode(this.graph);
+	}
+	node.connect(this.retval);
+    }
+
+    public DFFlowSet finish() {
+	DFFlowSet fset = new DFFlowSet();
+	for (DFRef ref : this.vars.values()) {
+	    this.outputs.remove(ref);
+	}
+	for (DFRef ref : this.inputs.keySet()) {
+	    DFNode node = this.inputs.get(ref);
+	    fset.addInputFlow(ref, node);
+	}
+	for (DFRef ref : this.outputs.keySet()) {
+	    DFNode node = this.outputs.get(ref);
+	    fset.addOutputFlow(node, ref);
+	}
+	return fset;
     }
 }
 
@@ -277,66 +323,6 @@ class DFFlowSet {
 	_inputs.addAll(fset._inputs);
 	_outputs.addAll(fset._outputs);
     }
-}
-
-
-//  DFBindings
-//
-class DFBindings {
-
-    public DFGraph graph;
-    public Map<DFRef, DFNode> inputs;
-    public Map<DFRef, DFNode> bindings;
-    public DFNode retval;
-
-    public DFBindings(DFGraph graph) {
-	this.graph = graph;
-	this.inputs = new HashMap<DFRef, DFNode>();
-	this.bindings = new HashMap<DFRef, DFNode>();
-	this.retval = null;
-    }
-
-    public DFNode get(DFRef ref) {
-	DFNode node = this.bindings.get(ref);
-	if (node == null) {
-	    node = this.inputs.get(ref);
-	    if (node == null) {
-		node = new DistNode(this.graph);
-		this.inputs.put(ref, node);
-	    }
-	}
-	return node;
-    }
-
-    public void put(DFRef ref, DFNode node) {
-	DFNode box = new BoxNode(this.graph, ref);
-	node.connect(box);
-	this.bindings.put(ref, box);
-    }
-
-    public void setReturn(DFNode node) {
-	if (this.retval == null) {
-	    this.retval = new ReturnNode(this.graph);
-	}
-	node.connect(this.retval);
-    }
-    
-    public DFFlowSet finish(DFScope scope) {
-	DFFlowSet fset = new DFFlowSet();
-	for (DFRef ref : scope.pop()) {
-	    this.bindings.remove(ref);
-	}
-	for (DFRef ref : this.inputs.keySet()) {
-	    DFNode node = this.inputs.get(ref);
-	    fset.addInputFlow(ref, node);
-	}
-	for (DFRef ref : this.bindings.keySet()) {
-	    DFNode node = this.bindings.get(ref);
-	    fset.addOutputFlow(node, ref);
-	}
-	return fset;
-    }
-
 }
 
 
@@ -923,10 +909,9 @@ public class Java2DF extends ASTVisitor {
 	DFFlowSet fset = new DFFlowSet();
 
 	// Process each initializer.
-	DFBindings bindings = new DFBindings(graph);
 	for (Expression expr : (List<Expression>) forStmt.initializers()) {
 	    DFFlowSet eset = processExpression(graph, expr, scope);
-	    chainFlowSet(graph, bindings, eset);
+	    chainFlowSet(graph, scope, eset);
 	}
 	
 	return fset;
@@ -972,17 +957,17 @@ public class Java2DF extends ASTVisitor {
     }
 
     public void chainFlowSet
-	(DFGraph graph, DFBindings bindings, DFFlowSet fset) 
+	(DFGraph graph, DFScope scope, DFFlowSet fset) 
 	throws UnsupportedSyntax {
 	for (DFInputFlow input : fset.inputs()) {
-	    DFNode src = bindings.get(input.ref);
+	    DFNode src = scope.get(input.ref);
 	    src.connect(input.node);
 	}
 	for (DFOutputFlow output : fset.outputs()) {
 	    if (output.ref == DFRef.RETURN) {
-		bindings.setReturn(output.node);
+		scope.setReturn(output.node);
 	    } else {
-		bindings.put(output.ref, output.node);
+		scope.put(output.ref, output.node);
 	    }
 	}
     }
@@ -991,7 +976,7 @@ public class Java2DF extends ASTVisitor {
     public DFFlowSet processBlock
 	(DFGraph graph, Block block, DFScope parent)
 	throws UnsupportedSyntax {
-	DFScope scope = new DFScope(parent);
+	DFScope scope = new DFScope(graph, parent);
 
 	// Handle all variable declarations first.
 	for (Statement stmt : (List<Statement>) block.statements()) {
@@ -1008,13 +993,12 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process each statement.
-	DFBindings bindings = new DFBindings(graph);
 	for (Statement stmt : (List<Statement>) block.statements()) {
 	    DFFlowSet fset = processStatement(graph, stmt, scope);
-	    chainFlowSet(graph, bindings, fset);
+	    chainFlowSet(graph, scope, fset);
 	}
 
-	return bindings.finish(scope);
+	return scope.finish();
     }
     
     @SuppressWarnings("unchecked")
@@ -1024,8 +1008,7 @@ public class Java2DF extends ASTVisitor {
 	Name funcName = method.getName();
 	Type funcType = method.getReturnType2();
 	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
-	DFScope scope = new DFScope();
-	DFBindings bindings = new DFBindings(graph);
+	DFScope scope = new DFScope(graph);
 	
 	int i = 0;
 	// XXX check isVarargs()
@@ -1037,13 +1020,13 @@ public class Java2DF extends ASTVisitor {
 	    // XXX check getExtraDimensions()
 	    DFVar var = scope.add(paramName.getFullyQualifiedName(),
 				  getTypeName(paramType));
-	    bindings.put(var, param);
+	    scope.put(var, param);
 	}
 
 	Block funcBlock = method.getBody();
 	DFFlowSet fset = processBlock(graph, funcBlock, scope);
 	for (DFInputFlow input : fset.inputs()) {
-	    DFNode src = bindings.get(input.ref);
+	    DFNode src = scope.get(input.ref);
 	    src.connect(input.node);
 	}
 
