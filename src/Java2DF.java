@@ -591,6 +591,7 @@ public class Java2DF extends ASTVisitor {
 	}
     }
 
+    @SuppressWarnings("unchecked")
     public DFComponent processExpression
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
 	throws UnsupportedSyntax {
@@ -674,6 +675,23 @@ public class Java2DF extends ASTVisitor {
 	    DFNode box = new BoxNode(graph, assn, ref, rvalue);
 	    compo.put(ref, box);
 	    compo.value = box;
+
+	} else if (expr instanceof VariableDeclarationExpression) {
+	    // Variable declaration.
+	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
+	    Type varType = decl.getType();
+	    for (VariableDeclarationFragment frag :
+		     (List<VariableDeclarationFragment>) decl.fragments()) {
+		Expression init = frag.getInitializer();
+		if (init != null) {
+		    Name varName = frag.getName();
+		    DFVar var = scope.add(varName.getFullyQualifiedName(),
+					  getTypeName(varType));
+		    compo = processExpression(graph, scope, compo, init);
+		    DFNode box = new BoxNode(graph, frag, var, compo.value);
+		    compo.put(var, box);
+		}
+	    }
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -682,6 +700,132 @@ public class Java2DF extends ASTVisitor {
 	return compo;
     }
     
+    public DFComponent processConditional
+	(DFGraph graph, DFScope scope, DFComponent compo, Statement stmt,
+	 DFNode condValue, DFComponent trueCompo, DFComponent falseCompo) {
+	
+	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
+	
+	for (Map.Entry<DFRef, DFNode> entry : trueCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode branch = branches.get(ref);
+	    if (branch == null) {
+		branch = new BranchNode(graph, stmt, condValue);
+		branches.put(ref, branch);
+		compo.get(ref).connect(branch);
+	    }
+	    branch.connect(src, "true");
+	}
+	for (Map.Entry<DFRef, DFNode> entry : trueCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    DFNode join = joins.get(ref);
+	    if (join == null) {
+		join = new JoinNode(graph, stmt, condValue);
+		joins.put(ref, join);
+		compo.get(ref).connect(join);
+		compo.put(ref, join);
+	    }
+	    dst.connect(join, "true");
+	}
+	
+	if (falseCompo != null) {
+	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.inputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode src = entry.getValue();
+		DFNode branch = branches.get(ref);
+		if (branch == null) {
+		    branch = new BranchNode(graph, stmt, condValue);
+		    branches.put(ref, branch);
+		    compo.get(ref).connect(branch);
+		}
+		branch.connect(src, "else");
+	    }
+	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.outputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode dst = entry.getValue();
+		DFNode join = joins.get(ref);
+		if (join == null) {
+		    join = new JoinNode(graph, stmt, condValue);
+		    joins.put(ref, join);
+		    compo.get(ref).connect(join);
+		    compo.put(ref, join);
+		}
+		dst.connect(join, "else");
+	    }
+	}
+	
+	return compo;
+    }
+
+    public DFComponent processLoop
+	(DFGraph graph, DFScope scope, DFComponent compo, Statement stmt, 
+	 DFComponent exprCompo, DFComponent bodyCompo)
+	throws UnsupportedSyntax {
+	
+	DFNode condValue = exprCompo.value;
+	Map<DFRef, DFNode> bindings = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> loops = new HashMap<DFRef, DFNode>();
+	
+	for (Map.Entry<DFRef, DFNode> entry : exprCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode loop = loops.get(ref);
+	    if (loop == null) {
+		DFNode node = compo.get(ref);
+		loop = new LoopNode(graph, stmt, node);
+		loops.put(ref, loop);
+	    }
+	    loop.connect(src);
+	}
+	for (Map.Entry<DFRef, DFNode> entry : exprCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    bindings.put(ref, dst);
+	}
+	
+	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode loop = loops.get(ref);
+	    if (loop == null) {
+		DFNode node = bindings.get(ref);
+		if (node != null) {
+		    bindings.remove(ref);
+		} else {
+		    node = compo.get(ref);
+		}
+		loop = new LoopNode(graph, stmt, node);
+		loops.put(ref, loop);
+	    }
+	    DFNode branch = new BranchNode(graph, stmt, condValue);
+	    loop.connect(branch);
+	    branch.connect(src, "true");
+	    DFNode dst = new DistNode(graph);
+	    branch.connect(dst, "false");
+	    compo.put(ref, dst);
+	}
+	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    DFNode loop = loops.get(ref);
+	    if (loop != null) {
+		dst.connect(loop, "loop");
+	    } else {
+		compo.put(ref, dst);
+	    }
+	}
+	
+	for (Map.Entry<DFRef, DFNode> entry : bindings.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    compo.put(ref, dst);
+	}
+	return compo;
+    }
+
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement
 	(DFGraph graph, DFScope scope, DFComponent compo,
@@ -690,12 +834,12 @@ public class Java2DF extends ASTVisitor {
 	Type varType = varStmt.getType();
 	for (VariableDeclarationFragment frag :
 		 (List<VariableDeclarationFragment>) varStmt.fragments()) {
-	    Expression expr = frag.getInitializer();
-	    if (expr != null) {
+	    Expression init = frag.getInitializer();
+	    if (init != null) {
 		Name varName = frag.getName();
 		DFVar var = scope.add(varName.getFullyQualifiedName(),
 				      getTypeName(varType));
-		compo = processExpression(graph, scope, compo, expr);
+		compo = processExpression(graph, scope, compo, init);
 		DFNode box = new BoxNode(graph, frag, var, compo.value);
 		compo.put(var, box);
 	    }
@@ -735,64 +879,17 @@ public class Java2DF extends ASTVisitor {
 	DFComponent thenCompo = new DFComponent(graph);
 	thenCompo = processStatement(graph, scope, thenCompo, thenStmt);
 	
-	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
-	for (Map.Entry<DFRef, DFNode> entry : thenCompo.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
-	    DFNode branch = branches.get(ref);
-	    if (branch == null) {
-		branch = new BranchNode(graph, ifStmt, evalue);
-		branches.put(ref, branch);
-		compo.get(ref).connect(branch);
-	    }
-	    branch.connect(src, "then");
-	}
-	for (Map.Entry<DFRef, DFNode> entry : thenCompo.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    DFNode join = joins.get(ref);
-	    if (join == null) {
-		join = new JoinNode(graph, ifStmt, evalue);
-		joins.put(ref, join);
-		compo.get(ref).connect(join);
-		compo.put(ref, join);
-	    }
-	    dst.connect(join, "then");
-	}
-	
 	Statement elseStmt = ifStmt.getElseStatement();
+	DFComponent elseCompo = null;
 	if (elseStmt != null) {
-	    DFComponent elseCompo = new DFComponent(graph);
+	    elseCompo = new DFComponent(graph);
 	    elseCompo = processStatement(graph, scope, elseCompo, elseStmt);
-	    for (Map.Entry<DFRef, DFNode> entry : elseCompo.inputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode src = entry.getValue();
-		DFNode branch = branches.get(ref);
-		if (branch == null) {
-		    branch = new BranchNode(graph, ifStmt, evalue);
-		    branches.put(ref, branch);
-		    compo.get(ref).connect(branch);
-		}
-		branch.connect(src, "else");
-	    }
-	    for (Map.Entry<DFRef, DFNode> entry : elseCompo.outputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode dst = entry.getValue();
-		DFNode join = joins.get(ref);
-		if (join == null) {
-		    join = new JoinNode(graph, ifStmt, evalue);
-		    joins.put(ref, join);
-		    compo.get(ref).connect(join);
-		    compo.put(ref, join);
-		}
-		dst.connect(join, "else");
-	    }
 	}
-	
-	return compo;
-    }
 
+	return processConditional(graph, scope, compo, ifStmt,
+				  evalue, thenCompo, elseCompo);
+    }
+	
     public DFComponent processWhileStatement
 	(DFGraph graph, DFScope scope, DFComponent compo,
 	 WhileStatement whileStmt)
@@ -801,78 +898,38 @@ public class Java2DF extends ASTVisitor {
 	Expression expr = whileStmt.getExpression();
 	DFComponent exprCompo = new DFComponent(graph);
 	exprCompo = processExpression(graph, scope, exprCompo, expr);
-	DFNode evalue = exprCompo.value;
 	
 	Statement body = whileStmt.getBody();
 	DFComponent bodyCompo = new DFComponent(graph);
 	bodyCompo = processStatement(graph, scope, bodyCompo, body);
 
-	Map<DFRef, DFNode> bindings = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> loops = new HashMap<DFRef, DFNode>();
-	for (Map.Entry<DFRef, DFNode> entry : exprCompo.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
-	    DFNode loop = loops.get(ref);
-	    if (loop == null) {
-		DFNode node = compo.get(ref);
-		loop = new LoopNode(graph, whileStmt, node);
-		loops.put(ref, loop);
-	    }
-	    loop.connect(src);
-	}
-	for (Map.Entry<DFRef, DFNode> entry : exprCompo.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    bindings.put(ref, dst);
-	}
-	
-	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
-	    DFNode loop = loops.get(ref);
-	    if (loop == null) {
-		DFNode node = bindings.get(ref);
-		if (node != null) {
-		    bindings.remove(ref);
-		} else {
-		    node = compo.get(ref);
-		}
-		loop = new LoopNode(graph, whileStmt, node);
-		loops.put(ref, loop);
-	    }
-	    DFNode branch = new BranchNode(graph, whileStmt, evalue);
-	    loop.connect(branch);
-	    branch.connect(src, "true");
-	    DFNode dst = new DistNode(graph);
-	    branch.connect(dst, "false");
-	    compo.put(ref, dst);
-	}
-	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    DFNode loop = loops.get(ref);
-	    if (loop != null) {
-		dst.connect(loop, "loop");
-	    } else {
-		compo.put(ref, dst);
-	    }
-	}
-	
-	for (Map.Entry<DFRef, DFNode> entry : bindings.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    compo.put(ref, dst);
-	}
-	return compo;
+	return processLoop(graph, scope, compo, whileStmt,
+			   exprCompo, bodyCompo);
     }
-
+    
     @SuppressWarnings("unchecked")
     public DFComponent processForStatement
 	(DFGraph graph, DFScope scope, DFComponent compo,
 	 ForStatement forStmt)
 	throws UnsupportedSyntax {
+
+	for (Expression init : (List<Expression>) forStmt.initializers()) {
+	    compo = processExpression(graph, scope, compo, init);
+	}
 	
-	return compo;
+	Expression expr = forStmt.getExpression();
+	DFComponent exprCompo = new DFComponent(graph);
+	exprCompo = processExpression(graph, scope, exprCompo, expr);
+	
+	Statement body = forStmt.getBody();
+	DFComponent bodyCompo = new DFComponent(graph);
+	bodyCompo = processStatement(graph, scope, bodyCompo, body);
+	for (Expression update : (List<Expression>) forStmt.updaters()) {
+	    bodyCompo = processExpression(graph, scope, bodyCompo, update);
+	}
+	
+	return processLoop(graph, scope, compo, forStmt,
+			   exprCompo, bodyCompo);
     }
     
     public DFComponent processStatement
