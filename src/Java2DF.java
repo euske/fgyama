@@ -158,6 +158,7 @@ class DFRef {
 	this.name = name;
     }
 
+    public static DFRef THIS = new DFRef(null, "THIS");
     public static DFRef RETURN = new DFRef(null, "RETURN");
 }
 
@@ -204,7 +205,7 @@ class DFScope {
 	} else if (this.parent != null) {
 	    return this.parent.lookup(name);
 	} else {
-	    return null;
+	    return this.add(name, null);
 	}
     }
 
@@ -468,8 +469,12 @@ class JoinNode extends CondNode {
 // LoopNode
 class LoopNode extends ProgNode {
 
-    public LoopNode(DFGraph graph, ASTNode node) {
+    public DFNode init;
+    
+    public LoopNode(DFGraph graph, ASTNode node, DFNode init) {
 	super(graph, node);
+	this.init = init;
+	init.connect(this, "init");
     }
     
     public DFNodeType type() {
@@ -595,32 +600,37 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = getReference(expr, scope);
 	    compo.value = compo.get(ref);
 	    
+	} else if (expr instanceof ThisExpression) {
+	    // "this".
+	    DFRef ref = DFRef.THIS;
+	    compo.value = compo.get(ref);
+	    
 	} else if (expr instanceof BooleanLiteral) {
-	    // Cosntant.
+	    // Boolean cosntant.
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
 	    compo.value = new ConstNode(graph, expr, Boolean.toString(value));
 	    
 	} else if (expr instanceof CharacterLiteral) {
-	    // Cosntant.
+	    // Char cosntant.
 	    char value = ((CharacterLiteral)expr).charValue();
 	    compo.value = new ConstNode(graph, expr, Character.toString(value));
 	    
 	} else if (expr instanceof NullLiteral) {
-	    // Cosntant.
+	    // Null cosntant.
 	    compo.value = new ConstNode(graph, expr, "null");
 	    
 	} else if (expr instanceof NumberLiteral) {
-	    // Cosntant.
+	    // Number cosntant.
 	    String value = ((NumberLiteral)expr).getToken();
 	    compo.value = new ConstNode(graph, expr, value);
 	    
 	} else if (expr instanceof StringLiteral) {
-	    // Cosntant.
+	    // String cosntant.
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    compo.value = new ConstNode(graph, expr, value);
 	    
 	} else if (expr instanceof TypeLiteral) {
-	    // Cosntant.
+	    // Type name cosntant.
 	    Type value = ((TypeLiteral)expr).getType();
 	    compo.value = new ConstNode(graph, expr, getTypeName(value));
 	    
@@ -804,9 +814,9 @@ public class Java2DF extends ASTVisitor {
 	    DFNode src = entry.getValue();
 	    DFNode loop = loops.get(ref);
 	    if (loop == null) {
-		loop = new LoopNode(graph, whileStmt);
+		DFNode node = compo.get(ref);
+		loop = new LoopNode(graph, whileStmt, node);
 		loops.put(ref, loop);
-		compo.get(ref).connect(loop, "init");
 	    }
 	    loop.connect(src);
 	}
@@ -827,9 +837,8 @@ public class Java2DF extends ASTVisitor {
 		} else {
 		    node = compo.get(ref);
 		}
-		loop = new LoopNode(graph, whileStmt);
+		loop = new LoopNode(graph, whileStmt, node);
 		loops.put(ref, loop);
-		node.connect(loop, "init");
 	    }
 	    DFNode branch = new BranchNode(graph, whileStmt, evalue);
 	    loop.connect(branch);
