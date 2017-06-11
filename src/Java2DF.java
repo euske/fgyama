@@ -180,24 +180,15 @@ class DFVar extends DFRef {
 class DFScope {
 
     public DFScope parent;
-    public DFGraph graph;
-    
     public Map<String, DFVar> vars;
-    public Map<DFRef, DFNode> inputs;
-    public Map<DFRef, DFNode> outputs;
-    public DFNode retval;
 
-    public DFScope(DFGraph graph) {
-	this(graph, null);
+    public DFScope() {
+	this(null);
     }
     
-    public DFScope(DFGraph graph, DFScope parent) {
-	this.graph = graph;
+    public DFScope(DFScope parent) {
 	this.parent = parent;
 	this.vars = new HashMap<String, DFVar>();
-	this.inputs = new HashMap<DFRef, DFNode>();
-	this.outputs = new HashMap<DFRef, DFNode>();
-	this.retval = null;
     }
 
     public DFVar add(String name, String type) {
@@ -217,6 +208,28 @@ class DFScope {
 	}
     }
 
+    public Collection<DFVar> vars() {
+	return this.vars.values();
+    }
+}
+
+
+//  DFComponent
+//
+class DFComponent {
+
+    public DFGraph graph;
+    public Map<DFRef, DFNode> inputs;
+    public Map<DFRef, DFNode> outputs;
+    public DFNode value;
+    
+    public DFComponent(DFGraph graph) {
+	this.graph = graph;
+	this.inputs = new HashMap<DFRef, DFNode>();
+	this.outputs = new HashMap<DFRef, DFNode>();
+	this.value = null;
+    }
+
     public DFNode get(DFRef ref) {
 	DFNode node = this.outputs.get(ref);
 	if (node == null) {
@@ -230,98 +243,28 @@ class DFScope {
     }
 
     public void put(DFRef ref, DFNode node) {
-	DFNode box = new BoxNode(this.graph, ref);
-	node.connect(box);
-	this.outputs.put(ref, box);
+	
+	this.outputs.put(ref, node);
     }
 
-    public void setReturn(DFNode node) {
-	if (this.retval == null) {
-	    this.retval = new ReturnNode(this.graph);
-	}
-	node.connect(this.retval);
-    }
-
-    public DFFlowSet finish() {
-	DFFlowSet fset = new DFFlowSet();
-	for (DFRef ref : this.vars.values()) {
+    public void finish(DFScope scope) {
+	for (DFRef ref : scope.vars()) {
+	    this.inputs.remove(ref);
 	    this.outputs.remove(ref);
 	}
-	for (DFRef ref : this.inputs.keySet()) {
-	    DFNode node = this.inputs.get(ref);
-	    fset.addInputFlow(ref, node);
-	}
+    }
+    
+    public void connect(DFComponent next) {
 	for (DFRef ref : this.outputs.keySet()) {
-	    DFNode node = this.outputs.get(ref);
-	    fset.addOutputFlow(node, ref);
+	    DFNode node = this.inputs.get(ref);
+	    node.connect(next.inputs.get(ref));
 	}
-	return fset;
-    }
-}
-
-
-//  DFFlow
-//
-class DFFlow {
-}
-
-class DFInputFlow extends DFFlow {
-
-    public DFRef ref;
-    public DFNode node;
-
-    public DFInputFlow(DFRef ref, DFNode node) {
-	this.ref = ref;
-	this.node = node;
-    }
-
-}
-
-class DFOutputFlow extends DFFlow {
-
-    public DFNode node;
-    public DFRef ref;
-
-    public DFOutputFlow(DFNode node, DFRef ref) {
-	this.node = node;
-	this.ref = ref;
-    }
-
-}
-
-
-//  DFFlowSet
-//
-class DFFlowSet {
-
-    private List<DFInputFlow> _inputs;
-    private List<DFOutputFlow> _outputs;
-    public DFNode value;
-
-    public DFFlowSet() {
-	_inputs = new ArrayList<DFInputFlow>();
-	_outputs = new ArrayList<DFOutputFlow>();
-    }
-
-    public void addInputFlow(DFRef ref, DFNode node) {
-	_inputs.add(new DFInputFlow(ref, node));
-    }
-
-    public List<DFInputFlow> inputs() {
-	return _inputs;
-    }
-
-    public void addOutputFlow(DFNode node, DFRef ref) {
-	_outputs.add(new DFOutputFlow(node, ref));
-    }
-
-    public List<DFOutputFlow> outputs() {
-	return _outputs;
-    }
-
-    public void addFlowSet(DFFlowSet fset) {
-	_inputs.addAll(fset._inputs);
-	_outputs.addAll(fset._outputs);
+	for (DFRef ref : this.inputs.keySet()) {
+	    if (!this.outputs.containsKey(ref)) {
+		DFNode node = this.inputs.get(ref);
+		node.connect(next.inputs.get(ref));
+	    }
+	}
     }
 }
 
@@ -349,37 +292,6 @@ abstract class ProgNode extends DFNode {
     }
 }
 
-// ReturnNode: represents a return value.
-class ReturnNode extends DFNode {
-
-    public ReturnNode(DFGraph graph) {
-	super(graph);
-    }
-
-    public String label() {
-	return "Return";
-    }
-}
-
-// BoxNode: corresponds to a certain location in a memory.
-class BoxNode extends DFNode {
-
-    public DFRef ref;
-    
-    public BoxNode(DFGraph graph, DFRef ref) {
-	super(graph);
-	this.ref = ref;
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Box;
-    }
-
-    public String label() {
-	return this.ref.name;
-    }
-}
-
 // ArgNode: represnets a function argument.
 class ArgNode extends ProgNode {
 
@@ -392,6 +304,49 @@ class ArgNode extends ProgNode {
 
     public String label() {
 	return "Arg "+this.index;
+    }
+}
+
+// BoxNode: corresponds to a certain location in a memory.
+class BoxNode extends ProgNode {
+
+    public DFRef ref;
+    public DFNode value;
+    
+    public BoxNode(DFGraph graph, ASTNode node,
+		   DFRef ref, DFNode value) {
+	super(graph, node);
+	this.ref = ref;
+	this.value = value;
+	value.connect(this, "assign");
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Box;
+    }
+
+    public String label() {
+	return this.ref.name;
+    }
+}
+
+// ReturnNode: represents a return value.
+class ReturnNode extends ProgNode {
+
+    public DFNode value;
+    
+    public ReturnNode(DFGraph graph, ASTNode node, DFNode value) {
+	super(graph, node);
+	this.value = value;
+	value.connect(this, "return");
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Box;
+    }
+
+    public String label() {
+	return "Return";
     }
 }
 
@@ -631,385 +586,345 @@ public class Java2DF extends ASTVisitor {
 	}
     }
 
-    public DFFlowSet processExpression
-	(DFGraph graph, Expression expr, DFScope scope)
+    public DFComponent processExpression
+	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
 	throws UnsupportedSyntax {
 
 	if (expr instanceof Name) {
 	    // Variable lookup.
-	    DFFlowSet fset = new DFFlowSet();
 	    DFRef ref = getReference(expr, scope);
-	    DFNode value = new DistNode(graph);
-	    fset.value = value;
-	    fset.addInputFlow(ref, value);
-	    return fset;
+	    compo.value = compo.get(ref);
 	    
 	} else if (expr instanceof BooleanLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
-	    fset.value = new ConstNode(graph, expr, Boolean.toString(value));
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, Boolean.toString(value));
 	    
 	} else if (expr instanceof CharacterLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
 	    char value = ((CharacterLiteral)expr).charValue();
-	    fset.value = new ConstNode(graph, expr, Character.toString(value));
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, Character.toString(value));
 	    
 	} else if (expr instanceof NullLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
-	    fset.value = new ConstNode(graph, expr, "null");
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, "null");
 	    
 	} else if (expr instanceof NumberLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
 	    String value = ((NumberLiteral)expr).getToken();
-	    fset.value = new ConstNode(graph, expr, value);
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, value);
 	    
 	} else if (expr instanceof StringLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
 	    String value = ((StringLiteral)expr).getLiteralValue();
-	    fset.value = new ConstNode(graph, expr, value);
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, value);
 	    
 	} else if (expr instanceof TypeLiteral) {
 	    // Cosntant.
-	    DFFlowSet fset = new DFFlowSet();
 	    Type value = ((TypeLiteral)expr).getType();
-	    fset.value = new ConstNode(graph, expr, getTypeName(value));
-	    return fset;
+	    compo.value = new ConstNode(graph, expr, getTypeName(value));
 	    
 	} else if (expr instanceof PrefixExpression) {
 	    // Prefix operator.
-	    DFFlowSet fset = new DFFlowSet();
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    String op = prefix.getOperator().toString();
-	    DFFlowSet eset = processExpression(graph, prefix.getOperand(), scope);
-	    fset.value = new PrefixNode(graph, expr, op, eset.value);
-	    fset.addFlowSet(eset);
-	    return fset;
+	    compo = processExpression(graph, scope, compo, prefix.getOperand());
+	    compo.value = new PrefixNode(graph, expr, op, compo.value);
 	    
 	} else if (expr instanceof PostfixExpression) {
 	    // Postfix operator.
-	    DFFlowSet fset = new DFFlowSet();
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    String op = postfix.getOperator().toString();
-	    DFFlowSet eset = processExpression(graph, postfix.getOperand(), scope);
-	    fset.value = new PostfixNode(graph, expr, op, eset.value);
-	    fset.addFlowSet(eset);
-	    return fset;
+	    compo = processExpression(graph, scope, compo, postfix.getOperand());
+	    compo.value = new PostfixNode(graph, expr, op, compo.value);
 	    
 	} else if (expr instanceof InfixExpression) {
 	    // Infix operator.
-	    DFFlowSet fset = new DFFlowSet();
 	    InfixExpression infix = (InfixExpression)expr;
 	    String op = infix.getOperator().toString();
-	    DFFlowSet lset = processExpression(graph, infix.getLeftOperand(), scope);
-	    DFFlowSet rset = processExpression(graph, infix.getRightOperand(), scope);
-	    fset.value = new InfixNode(graph, expr, op, lset.value, rset.value);
-	    fset.addFlowSet(lset);
-	    fset.addFlowSet(rset);
-	    return fset;
+	    compo = processExpression(graph, scope, compo, infix.getLeftOperand());
+	    DFNode lvalue = compo.value;
+	    compo = processExpression(graph, scope, compo, infix.getRightOperand());
+	    DFNode rvalue = compo.value;
+	    compo.value = new InfixNode(graph, expr, op, lvalue, rvalue);
 	    
 	} else if (expr instanceof ParenthesizedExpression) {
 	    // Parentheses.
-	    DFFlowSet fset = new DFFlowSet();
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    fset = processExpression(graph, paren.getExpression(), scope);
-	    return fset;
+	    compo = processExpression(graph, scope, compo, paren.getExpression());
 	    
 	} else if (expr instanceof Assignment) {
 	    // Assignment.
-	    DFFlowSet fset = new DFFlowSet();
 	    Assignment assn = (Assignment)expr;
 	    String op = assn.getOperator().toString();
 	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
-	    DFNode lvalue = new DistNode(graph);
-	    fset.addInputFlow(ref, lvalue);
-	    DFFlowSet rset = processExpression(graph, assn.getRightHandSide(), scope);
-	    fset.value = new InfixNode(graph, assn, op, lvalue, rset.value);
-	    fset.addOutputFlow(fset.value, ref);
-	    fset.addFlowSet(rset);
-	    return fset;
+	    DFNode lvalue = compo.get(ref);
+	    compo = processExpression(graph, scope, compo, assn.getRightHandSide());
+	    DFNode rvalue = new InfixNode(graph, assn, op, lvalue, compo.value);
+	    DFNode box = new BoxNode(graph, assn, ref, rvalue);
+	    compo.put(ref, box);
+	    compo.value = box;
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
 	}
+	
+	return compo;
     }
     
     @SuppressWarnings("unchecked")
-    public DFFlowSet processVariableDeclarationStatement
-	(DFGraph graph, VariableDeclarationStatement varStmt, DFScope scope)
+    public DFComponent processVariableDeclarationStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
-	DFFlowSet fset = new DFFlowSet();
+	Type varType = varStmt.getType();
 	for (VariableDeclarationFragment frag :
 		 (List<VariableDeclarationFragment>) varStmt.fragments()) {
 	    Expression expr = frag.getInitializer();
 	    if (expr != null) {
 		Name varName = frag.getName();
-		DFVar var = scope.lookup(varName.getFullyQualifiedName());
-		DFFlowSet eset = processExpression(graph, expr, scope);
-		fset.addFlowSet(eset);
-		fset.addOutputFlow(eset.value, var);
+		DFVar var = scope.add(varName.getFullyQualifiedName(),
+				      getTypeName(varType));
+		compo = processExpression(graph, scope, compo, expr);
+		DFNode box = new BoxNode(graph, frag, var, compo.value);
+		compo.put(var, box);
 	    }
 	}
-	return fset;
+	return compo;
     }
 
-    public DFFlowSet processExpressionStatement
-	(DFGraph graph, ExpressionStatement exprStmt, DFScope scope)
+    public DFComponent processExpressionStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 ExpressionStatement exprStmt)
 	throws UnsupportedSyntax {
 	Expression expr = exprStmt.getExpression();
-	return processExpression(graph, expr, scope);
+	return processExpression(graph, scope, compo, expr);
     }
 
-    public DFFlowSet processReturnStatement
-	(DFGraph graph, ReturnStatement rtnStmt, DFScope scope)
+    public DFComponent processReturnStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 ReturnStatement rtnStmt)
 	throws UnsupportedSyntax {
 	Expression expr = rtnStmt.getExpression();
-	DFFlowSet fset = processExpression(graph, expr, scope);
-	fset.addOutputFlow(fset.value, DFRef.RETURN);
-	return fset;
+	compo = processExpression(graph, scope, compo, expr);
+	DFNode rtrn = new ReturnNode(graph, rtnStmt, compo.value);
+	compo.put(DFRef.RETURN, rtrn);
+	return compo;
     }
     
-    public DFFlowSet processIfStatement
-	(DFGraph graph, IfStatement ifStmt, DFScope scope)
+    public DFComponent processIfStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 IfStatement ifStmt)
 	throws UnsupportedSyntax {
+	
 	Expression expr = ifStmt.getExpression();
-	DFFlowSet eset = processExpression(graph, expr, scope);
-
-	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
-	DFFlowSet fset = new DFFlowSet();
-	fset.addFlowSet(eset);
+	compo = processExpression(graph, scope, compo, expr);
+	DFNode evalue = compo.value;
 	
 	Statement thenStmt = ifStmt.getThenStatement();
-	DFFlowSet thenFlow = processStatement(graph, thenStmt, scope);
-	for (DFInputFlow input : thenFlow.inputs()) {
-	    DFNode branch = branches.get(input.ref);
+	DFComponent thenCompo = new DFComponent(graph);
+	thenCompo = processStatement(graph, scope, thenCompo, thenStmt);
+	
+	Map<DFRef, DFNode> branches = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> joins = new HashMap<DFRef, DFNode>();
+	for (Map.Entry<DFRef, DFNode> entry : thenCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode branch = branches.get(ref);
 	    if (branch == null) {
-		branch = new BranchNode(graph, ifStmt, eset.value);
-		fset.addInputFlow(input.ref, branch);
-		branches.put(input.ref, branch);
+		branch = new BranchNode(graph, ifStmt, evalue);
+		branches.put(ref, branch);
+		compo.get(ref).connect(branch);
 	    }
-	    branch.connect(input.node, "then");
+	    branch.connect(src, "then");
 	}
-	for (DFOutputFlow output : thenFlow.outputs()) {
-	    DFNode join = joins.get(output.ref);
+	for (Map.Entry<DFRef, DFNode> entry : thenCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    DFNode join = joins.get(ref);
 	    if (join == null) {
-		join = new JoinNode(graph, ifStmt, eset.value);
-		fset.addInputFlow(output.ref, join);
-		fset.addOutputFlow(join, output.ref);
-		joins.put(output.ref, join);
+		join = new JoinNode(graph, ifStmt, evalue);
+		joins.put(ref, join);
+		compo.get(ref).connect(join);
+		compo.put(ref, join);
 	    }
-	    output.node.connect(join, "then");
+	    dst.connect(join, "then");
 	}
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	if (elseStmt != null) {
-	    DFFlowSet elseFlow = processStatement(graph, elseStmt, scope);
-	    for (DFInputFlow input : elseFlow.inputs()) {
-		DFNode branch = branches.get(input.ref);
+	    DFComponent elseCompo = new DFComponent(graph);
+	    elseCompo = processStatement(graph, scope, elseCompo, elseStmt);
+	    for (Map.Entry<DFRef, DFNode> entry : elseCompo.inputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode src = entry.getValue();
+		DFNode branch = branches.get(ref);
 		if (branch == null) {
-		    branch = new BranchNode(graph, ifStmt, eset.value);
-		    fset.addInputFlow(input.ref, branch);
-		    branches.put(input.ref, branch);
+		    branch = new BranchNode(graph, ifStmt, evalue);
+		    branches.put(ref, branch);
+		    compo.get(ref).connect(branch);
 		}
-		branch.connect(input.node, "else");
+		branch.connect(src, "else");
 	    }
-	    for (DFOutputFlow output : elseFlow.outputs()) {
-		DFNode join = joins.get(output.ref);
+	    for (Map.Entry<DFRef, DFNode> entry : elseCompo.outputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode dst = entry.getValue();
+		DFNode join = joins.get(ref);
 		if (join == null) {
-		    join = new JoinNode(graph, ifStmt, eset.value);
-		    fset.addInputFlow(output.ref, join);
-		    fset.addOutputFlow(join, output.ref);
-		    joins.put(output.ref, join);
+		    join = new JoinNode(graph, ifStmt, evalue);
+		    joins.put(ref, join);
+		    compo.get(ref).connect(join);
+		    compo.put(ref, join);
 		}
-		output.node.connect(join, "else");
+		dst.connect(join, "else");
 	    }
 	}
-	return fset;
+	
+	return compo;
     }
 
-    public DFFlowSet processWhileStatement
-	(DFGraph graph, WhileStatement whileStmt, DFScope scope)
+    public DFComponent processWhileStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 WhileStatement whileStmt)
 	throws UnsupportedSyntax {
-	DFFlowSet fset = new DFFlowSet();
 	
 	Expression expr = whileStmt.getExpression();
-	DFFlowSet eset = processExpression(graph, expr, scope);
+	DFComponent exprCompo = new DFComponent(graph);
+	exprCompo = processExpression(graph, scope, exprCompo, expr);
+	DFNode evalue = exprCompo.value;
+	
 	Statement body = whileStmt.getBody();
-	DFFlowSet bset = processStatement(graph, body, scope);
+	DFComponent bodyCompo = new DFComponent(graph);
+	bodyCompo = processStatement(graph, scope, bodyCompo, body);
 
 	Map<DFRef, DFNode> bindings = new HashMap<DFRef, DFNode>();
 	Map<DFRef, DFNode> loops = new HashMap<DFRef, DFNode>();
-	
-	for (DFInputFlow input : eset.inputs()) {
-	    DFNode loop = loops.get(input.ref);
+	for (Map.Entry<DFRef, DFNode> entry : exprCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode loop = loops.get(ref);
 	    if (loop == null) {
-		DFNode src = new DistNode(graph);
-		fset.addInputFlow(input.ref, src);
 		loop = new LoopNode(graph, whileStmt);
-		loops.put(input.ref, loop);
-		src.connect(loop, "init");
+		loops.put(ref, loop);
+		compo.get(ref).connect(loop, "init");
 	    }
-	    loop.connect(input.node);
+	    loop.connect(src);
 	}
-	for (DFOutputFlow output : eset.outputs()) {
-	    bindings.put(output.ref, output.node);
+	for (Map.Entry<DFRef, DFNode> entry : exprCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    bindings.put(ref, dst);
 	}
 	
-	for (DFInputFlow input : bset.inputs()) {
-	    DFNode loop = loops.get(input.ref);
+	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    DFNode loop = loops.get(ref);
 	    if (loop == null) {
-		DFNode src = bindings.get(input.ref);
-		if (src != null) {
-		    bindings.remove(input.ref);
+		DFNode node = bindings.get(ref);
+		if (node != null) {
+		    bindings.remove(ref);
 		} else {
-		    src = new DistNode(graph);
-		    fset.addInputFlow(input.ref, src);
+		    node = compo.get(ref);
 		}
 		loop = new LoopNode(graph, whileStmt);
-		loops.put(input.ref, loop);
-		src.connect(loop, "init");
+		loops.put(ref, loop);
+		node.connect(loop, "init");
 	    }
-	    DFNode branch = new BranchNode(graph, whileStmt, eset.value);
+	    DFNode branch = new BranchNode(graph, whileStmt, evalue);
 	    loop.connect(branch);
-	    branch.connect(input.node, "true");
+	    branch.connect(src, "true");
 	    DFNode dst = new DistNode(graph);
 	    branch.connect(dst, "false");
-	    fset.addOutputFlow(dst, input.ref);
+	    compo.put(ref, dst);
 	}
-	for (DFOutputFlow output : bset.outputs()) {
-	    DFNode loop = loops.get(output.ref);
+	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    DFNode loop = loops.get(ref);
 	    if (loop != null) {
-		output.node.connect(loop, "loop");
+		dst.connect(loop, "loop");
 	    } else {
-		fset.addOutputFlow(output.node, output.ref);
+		compo.put(ref, dst);
 	    }
 	}
 	
-	for (DFRef ref : bindings.keySet()) {
-	    DFNode node = bindings.get(ref);
-	    fset.addOutputFlow(node, ref);
+	for (Map.Entry<DFRef, DFNode> entry : bindings.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    compo.put(ref, dst);
 	}
-	return fset;
+	return compo;
     }
 
     @SuppressWarnings("unchecked")
-    public DFFlowSet processForStatement
-	(DFGraph graph, ForStatement forStmt, DFScope scope)
+    public DFComponent processForStatement
+	(DFGraph graph, DFScope scope, DFComponent compo,
+	 ForStatement forStmt)
 	throws UnsupportedSyntax {
-	DFFlowSet fset = new DFFlowSet();
-
-	// Process each initializer.
-	for (Expression expr : (List<Expression>) forStmt.initializers()) {
-	    DFFlowSet eset = processExpression(graph, expr, scope);
-	    chainFlowSet(graph, scope, eset);
-	}
 	
-	return fset;
+	return compo;
     }
     
-    public DFFlowSet processStatement
-	(DFGraph graph, Statement stmt, DFScope scope)
+    public DFComponent processStatement
+	(DFGraph graph, DFScope scope, DFComponent compo, Statement stmt)
 	throws UnsupportedSyntax {
 	
 	if (stmt instanceof Block) {
-	    return processBlock(graph, (Block)stmt, scope);
+	    return processBlock(graph, scope, compo, (Block)stmt);
 
 	} else if (stmt instanceof EmptyStatement) {
-	    return new DFFlowSet();
+	    return compo;
 	    
 	} else if (stmt instanceof VariableDeclarationStatement) {
 	    return processVariableDeclarationStatement
-		(graph, (VariableDeclarationStatement)stmt, scope);
+		(graph, scope, compo, (VariableDeclarationStatement)stmt);
 
 	} else if (stmt instanceof ExpressionStatement) {
 	    return processExpressionStatement
-		(graph, (ExpressionStatement)stmt, scope);
+		(graph, scope, compo, (ExpressionStatement)stmt);
 		
 	} else if (stmt instanceof ReturnStatement) {
 	    return processReturnStatement
-		(graph, (ReturnStatement)stmt, scope);
+		(graph, scope, compo, (ReturnStatement)stmt);
 	    
 	} else if (stmt instanceof IfStatement) {
 	    return processIfStatement
-		(graph, (IfStatement)stmt, scope);
+		(graph, scope, compo, (IfStatement)stmt);
 	    
 	} else if (stmt instanceof WhileStatement) {
 	    return processWhileStatement
-		(graph, (WhileStatement)stmt, scope);
+		(graph, scope, compo, (WhileStatement)stmt);
 	    
 	} else if (stmt instanceof ForStatement) {
 	    return processForStatement
-		(graph, (ForStatement)stmt, scope);
+		(graph, scope, compo, (ForStatement)stmt);
 	    
 	} else {
 	    throw new UnsupportedSyntax(stmt);
 	}
     }
 
-    public void chainFlowSet
-	(DFGraph graph, DFScope scope, DFFlowSet fset) 
-	throws UnsupportedSyntax {
-	for (DFInputFlow input : fset.inputs()) {
-	    DFNode src = scope.get(input.ref);
-	    src.connect(input.node);
-	}
-	for (DFOutputFlow output : fset.outputs()) {
-	    if (output.ref == DFRef.RETURN) {
-		scope.setReturn(output.node);
-	    } else {
-		scope.put(output.ref, output.node);
-	    }
-	}
-    }
-    
     @SuppressWarnings("unchecked")
-    public DFFlowSet processBlock
-	(DFGraph graph, Block block, DFScope parent)
+    public DFComponent processBlock
+	(DFGraph graph, DFScope parent, DFComponent compo, Block block)
 	throws UnsupportedSyntax {
-	DFScope scope = new DFScope(graph, parent);
-
-	// Handle all variable declarations first.
-	for (Statement stmt : (List<Statement>) block.statements()) {
-	    if (stmt instanceof VariableDeclarationStatement) {
-		VariableDeclarationStatement varStmt = (VariableDeclarationStatement)stmt;
-		Type varType = varStmt.getType();
-		for (VariableDeclarationFragment frag :
-			 (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		    Name varName = frag.getName();
-		    // XXX check getExtraDimensions()
-		    scope.add(varName.getFullyQualifiedName(), getTypeName(varType));
-		}
-	    }
-	}
-
-	// Process each statement.
-	for (Statement stmt : (List<Statement>) block.statements()) {
-	    DFFlowSet fset = processStatement(graph, stmt, scope);
-	    chainFlowSet(graph, scope, fset);
-	}
-
-	return scope.finish();
-    }
-    
-    @SuppressWarnings("unchecked")
-    public DFGraph getMethodGraph(MethodDeclaration method)
-	throws UnsupportedSyntax {
-	// XXX check isContructor()
-	Name funcName = method.getName();
-	Type funcType = method.getReturnType2();
-	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
-	DFScope scope = new DFScope(graph);
 	
+	DFScope scope = new DFScope(parent);
+	for (Statement stmt : (List<Statement>) block.statements()) {
+	    compo = processStatement(graph, scope, compo, stmt);
+	}
+	compo.finish(scope);
+	return compo;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public DFComponent processMethodDeclaration
+	(DFGraph graph, DFScope scope, MethodDeclaration method)
+	throws UnsupportedSyntax {
+	DFComponent compo = new DFComponent(graph);
+	// XXX check isContructor()
+	Type funcType = method.getReturnType2();
 	int i = 0;
 	// XXX check isVarargs()
 	for (SingleVariableDeclaration decl :
@@ -1020,15 +935,22 @@ public class Java2DF extends ASTVisitor {
 	    // XXX check getExtraDimensions()
 	    DFVar var = scope.add(paramName.getFullyQualifiedName(),
 				  getTypeName(paramType));
-	    scope.put(var, param);
+	    DFNode box = new BoxNode(graph, decl, var, param);
+	    compo.put(var, box);
 	}
-
+	return compo;
+    }
+    
+    public DFGraph getMethodGraph(MethodDeclaration method)
+	throws UnsupportedSyntax {
+	Name funcName = method.getName();
+	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
+	DFScope scope = new DFScope();
+	
+	DFComponent compo = processMethodDeclaration(graph, scope, method);
+	
 	Block funcBlock = method.getBody();
-	DFFlowSet fset = processBlock(graph, funcBlock, scope);
-	for (DFInputFlow input : fset.inputs()) {
-	    DFNode src = scope.get(input.ref);
-	    src.connect(input.node);
-	}
+	compo = processBlock(graph, scope, compo, funcBlock);
 
         // Collapse redundant nodes.
         List<DFNode> removed = new ArrayList<DFNode>();
