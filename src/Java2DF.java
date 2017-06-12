@@ -551,6 +551,29 @@ class LoopNode extends ProgNode {
     }
 }
 
+// CallNode
+class CallNode extends ProgNode {
+
+    public String name;
+    public List<DFNode> args;
+
+    public CallNode(DFGraph graph, ASTNode node, String name) {
+	super(graph, node);
+	this.name = name;
+	this.args = new ArrayList<DFNode>();
+    }
+
+    public String label() {
+	return this.name+"()";
+    }
+
+    public void take(DFNode arg) {
+	int i = this.args.size();
+	arg.connect(this, "arg"+i);
+	this.args.add(arg);
+    }
+}
+
 
 
 //  GraphvizExporter
@@ -784,6 +807,16 @@ public class Java2DF extends ASTVisitor {
 	    Type varType = decl.getType();
 	    compo = processVariableDeclaration
 		(graph, scope, compo, varType, decl.fragments());
+
+	} else if (expr instanceof MethodInvocation) {
+	    MethodInvocation invoke = (MethodInvocation)expr;
+	    Name methodName = invoke.getName();
+	    CallNode call = new CallNode(graph, invoke, methodName.getFullyQualifiedName());
+	    for (Expression arg : (List<Expression>) invoke.arguments()) {
+		compo = processExpression(graph, scope, compo, arg);
+		call.take(compo.value);
+	    }
+	    compo.value = call;
 	    
 	} else {
 	    // ArrayAccess
@@ -795,7 +828,6 @@ public class Java2DF extends ASTVisitor {
 	    // FieldAccess
 	    // InstanceofExpression
 	    // LambdaExpression
-	    // MethodInvocation
 	    // SuperFieldAccess
 	    // SuperMethodInvocation
 	    // MethodReference
