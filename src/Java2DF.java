@@ -613,7 +613,10 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
 	throws UnsupportedSyntax {
 
-	if (expr instanceof Name) {
+	if (expr instanceof Annotation) {
+	    // Ignore annotations.
+
+	} else if (expr instanceof Name) {
 	    // Variable lookup.
 	    DFRef ref = getReference(expr, scope);
 	    compo.value = compo.get(ref);
@@ -748,7 +751,7 @@ public class Java2DF extends ASTVisitor {
 		    branches.put(ref, branch);
 		    compo.get(ref).connect(branch);
 		}
-		branch.connect(src, "else");
+		branch.connect(src, "false");
 	    }
 	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.outputs.entrySet()) {
 		DFRef ref = entry.getKey();
@@ -760,7 +763,7 @@ public class Java2DF extends ASTVisitor {
 		    compo.get(ref).connect(join);
 		    compo.put(ref, join);
 		}
-		dst.connect(join, "else");
+		dst.connect(join, "false");
 	    }
 	}
 	
