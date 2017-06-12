@@ -3,8 +3,9 @@
   <property name="src" location="src" />
   <property name="lib" location="lib" />
   <property name="build" location="build" />
-  <property name="input" location="samples/f4.java" />
-  <property name="output" location="samples/f4.gv" />
+  <property name="input" location="samples/f2.java" />
+  <property name="out_gv" location="samples/f2.gv" />
+  <property name="out_svg" location="samples/f2.svg" />
   
   <target name="init">
     <mkdir dir="${build}" />
@@ -31,7 +32,7 @@
   <target name="test" depends="compile">
     <java classname="Java2DF">
       <arg value="-o" />
-      <arg file="${output}" />
+      <arg file="${out_gv}" />
       <arg file="${input}" />
       <classpath location="${build}" />
       <classpath location="${lib}/org.eclipse.jdt.core.jar" />
@@ -43,6 +44,12 @@
       <classpath location="${lib}/org.eclipse.equinox.common.jar" />
       <classpath location="${lib}/org.eclipse.equinox.preferences.jar" />
     </java>
+    <exec executable="dot">
+      <arg value="-Tsvg" />
+      <arg value="-o" />
+      <arg file="${out_svg}" />
+      <arg file="${out_gv}" />
+    </exec>
   </target>
   
 </project>
