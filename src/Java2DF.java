@@ -167,9 +167,9 @@ class DFRef {
 //
 class DFVar extends DFRef {
 
-    public String type;
+    public Type type;
 
-    public DFVar(DFScope scope, String name, String type) {
+    public DFVar(DFScope scope, String name, Type type) {
 	super(scope, name);
 	this.type = type;
     }
@@ -192,7 +192,7 @@ class DFScope {
 	this.vars = new HashMap<String, DFVar>();
     }
 
-    public DFVar add(String name, String type) {
+    public DFVar add(String name, Type type) {
 	DFVar var = new DFVar(this, name, type);
 	this.vars.put(name, var);
 	return var;
@@ -591,6 +591,23 @@ public class Java2DF extends ASTVisitor {
 	}
     }
 
+    public DFComponent processVariableDeclaration
+	(DFGraph graph, DFScope scope, DFComponent compo, Type varType,
+	 List<VariableDeclarationFragment> frags)
+	throws UnsupportedSyntax {
+	for (VariableDeclarationFragment frag : frags) {
+	    Expression init = frag.getInitializer();
+	    if (init != null) {
+		Name varName = frag.getName();
+		DFVar var = scope.add(varName.getFullyQualifiedName(), varType);
+		compo = processExpression(graph, scope, compo, init);
+		DFNode box = new BoxNode(graph, frag, var, compo.value);
+		compo.put(var, box);
+	    }
+	}
+	return compo;
+    }
+
     @SuppressWarnings("unchecked")
     public DFComponent processExpression
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
@@ -680,18 +697,8 @@ public class Java2DF extends ASTVisitor {
 	    // Variable declaration.
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
 	    Type varType = decl.getType();
-	    for (VariableDeclarationFragment frag :
-		     (List<VariableDeclarationFragment>) decl.fragments()) {
-		Expression init = frag.getInitializer();
-		if (init != null) {
-		    Name varName = frag.getName();
-		    DFVar var = scope.add(varName.getFullyQualifiedName(),
-					  getTypeName(varType));
-		    compo = processExpression(graph, scope, compo, init);
-		    DFNode box = new BoxNode(graph, frag, var, compo.value);
-		    compo.put(var, box);
-		}
-	    }
+	    compo = processVariableDeclaration
+		(graph, scope, compo, varType, decl.fragments());
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -832,19 +839,8 @@ public class Java2DF extends ASTVisitor {
 	 VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
 	Type varType = varStmt.getType();
-	for (VariableDeclarationFragment frag :
-		 (List<VariableDeclarationFragment>) varStmt.fragments()) {
-	    Expression init = frag.getInitializer();
-	    if (init != null) {
-		Name varName = frag.getName();
-		DFVar var = scope.add(varName.getFullyQualifiedName(),
-				      getTypeName(varType));
-		compo = processExpression(graph, scope, compo, init);
-		DFNode box = new BoxNode(graph, frag, var, compo.value);
-		compo.put(var, box);
-	    }
-	}
-	return compo;
+	return processVariableDeclaration
+	    (graph, scope, compo, varType, varStmt.fragments());
     }
 
     public DFComponent processExpressionStatement
@@ -999,8 +995,7 @@ public class Java2DF extends ASTVisitor {
 	    Name paramName = decl.getName();
 	    Type paramType = decl.getType();
 	    // XXX check getExtraDimensions()
-	    DFVar var = scope.add(paramName.getFullyQualifiedName(),
-				  getTypeName(paramType));
+	    DFVar var = scope.add(paramName.getFullyQualifiedName(), paramType);
 	    DFNode box = new BoxNode(graph, decl, var, param);
 	    compo.put(var, box);
 	}
