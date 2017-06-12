@@ -744,6 +744,24 @@ public class Java2DF extends ASTVisitor {
 		(graph, scope, compo, varType, decl.fragments());
 	    
 	} else {
+	    // ArrayAccess
+	    // ArrayCreation
+	    // ArrayInitializer
+	    // CastExpression
+	    // ClassInstanceCreation
+	    // ConditionalExpression
+	    // FieldAccess
+	    // InstanceofExpression
+	    // LambdaExpression
+	    // MethodInvocation
+	    // SuperFieldAccess
+	    // SuperMethodInvocation
+	    // MethodReference
+	    //  CreationReference
+	    //  ExpressionMethodReference
+	    //  SuperMethodReference
+	    //  TypeMethodReference
+	    
 	    throw new UnsupportedSyntax(expr);
 	}
 	
@@ -975,7 +993,11 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFComponent compo, Statement stmt)
 	throws UnsupportedSyntax {
 	
-	if (stmt instanceof Block) {
+	if (stmt instanceof AssertStatement) {
+	    // Ignore assert.
+	    return compo;
+	    
+	} else if (stmt instanceof Block) {
 	    return processBlock(graph, scope, compo, (Block)stmt);
 
 	} else if (stmt instanceof EmptyStatement) {
@@ -1005,7 +1027,26 @@ public class Java2DF extends ASTVisitor {
 	    return processForStatement
 		(graph, scope, compo, (ForStatement)stmt);
 	    
+	} else if (stmt instanceof SynchronizedStatement) {
+	    // Ignore synchronized.
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+	    return processBlock(graph, scope, compo, syncStmt.getBody());
+	    
 	} else {
+	    // BreakStatement
+	    // ContinueStatement
+	    // DoStatement
+	    // EnhancedForStatement
+	    // SwitchCase
+	    // SwitchStatement
+	    // ThrowStatement
+	    // TryStatement
+	    
+	    // ConstructorInvocation
+	    // LabeledStatement
+	    // SuperConstructorInvocation
+	    // TypeDeclarationStatement
+	    
 	    throw new UnsupportedSyntax(stmt);
 	}
     }
