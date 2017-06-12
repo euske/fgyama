@@ -244,7 +244,6 @@ class DFComponent {
     }
 
     public void put(DFRef ref, DFNode node) {
-	
 	this.outputs.put(ref, node);
     }
 
@@ -369,11 +368,11 @@ class ConstNode extends ProgNode {
 // PrefixNode
 class PrefixNode extends ProgNode {
 
-    public String op;
+    public PrefixExpression.Operator op;
     public DFNode value;
 
     public PrefixNode(DFGraph graph, ASTNode node,
-		      String op, DFNode value) {
+		      PrefixExpression.Operator op, DFNode value) {
 	super(graph, node);
 	this.op = op;
 	this.value = value;
@@ -381,18 +380,18 @@ class PrefixNode extends ProgNode {
     }
 
     public String label() {
-	return this.op;
+	return this.op.toString();
     }
 }
 
 // PostfixNode
 class PostfixNode extends ProgNode {
 
-    public String op;
+    public PostfixExpression.Operator op;
     public DFNode value;
 
     public PostfixNode(DFGraph graph, ASTNode node,
-		       String op, DFNode value) {
+		       PostfixExpression.Operator op, DFNode value) {
 	super(graph, node);
 	this.op = op;
 	this.value = value;
@@ -400,19 +399,20 @@ class PostfixNode extends ProgNode {
     }
 
     public String label() {
-	return this.op;
+	return this.op.toString();
     }
 }
 
 // InfixNode
 class InfixNode extends ProgNode {
 
-    public String op;
+    public InfixExpression.Operator op;
     public DFNode lvalue;
     public DFNode rvalue;
 
     public InfixNode(DFGraph graph, ASTNode node,
-		     String op, DFNode lvalue, DFNode rvalue) {
+		     InfixExpression.Operator op,
+		     DFNode lvalue, DFNode rvalue) {
 	super(graph, node);
 	this.op = op;
 	this.lvalue = lvalue;
@@ -422,7 +422,30 @@ class InfixNode extends ProgNode {
     }
 
     public String label() {
-	return this.op;
+	return this.op.toString();
+    }
+}
+
+// AssignmentNode
+class AssignmentNode extends ProgNode {
+
+    public Assignment.Operator op;
+    public DFNode lvalue;
+    public DFNode rvalue;
+
+    public AssignmentNode(DFGraph graph, ASTNode node,
+			  Assignment.Operator op,
+			  DFNode lvalue, DFNode rvalue) {
+	super(graph, node);
+	this.op = op;
+	this.lvalue = lvalue;
+	this.rvalue = rvalue;
+	lvalue.connect(this, "L");
+	rvalue.connect(this, "R");
+    }
+
+    public String label() {
+	return this.op.toString();
     }
 }
 
@@ -581,7 +604,7 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    public DFRef getReference(Expression expr, DFScope scope) 
+    public DFRef getReference(DFScope scope, Expression expr) 
 	throws UnsupportedSyntax {
 	if (expr instanceof Name) {
 	    Name varName = (Name)expr;
@@ -599,7 +622,7 @@ public class Java2DF extends ASTVisitor {
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		Name varName = frag.getName();
-		DFVar var = scope.add(varName.getFullyQualifiedName(), varType);
+		DFRef var = scope.add(varName.getFullyQualifiedName(), varType);
 		compo = processExpression(graph, scope, compo, init);
 		DFNode box = new BoxNode(graph, frag, var, compo.value);
 		compo.put(var, box);
@@ -618,7 +641,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof Name) {
 	    // Variable lookup.
-	    DFRef ref = getReference(expr, scope);
+	    DFRef ref = getReference(scope, expr);
 	    compo.value = compo.get(ref);
 	    
 	} else if (expr instanceof ThisExpression) {
@@ -658,21 +681,35 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof PrefixExpression) {
 	    // Prefix operator.
 	    PrefixExpression prefix = (PrefixExpression)expr;
-	    String op = prefix.getOperator().toString();
-	    compo = processExpression(graph, scope, compo, prefix.getOperand());
+	    PrefixExpression.Operator op = prefix.getOperator();
+	    Expression operand = prefix.getOperand();
+	    DFRef ref = getReference(scope, operand);
+	    compo = processExpression(graph, scope, compo, operand);
 	    compo.value = new PrefixNode(graph, expr, op, compo.value);
+	    if (op == PrefixExpression.Operator.INCREMENT ||
+		op == PrefixExpression.Operator.DECREMENT) {
+		DFNode box = new BoxNode(graph, expr, ref, compo.value);
+		compo.put(ref, box);
+	    }
 	    
 	} else if (expr instanceof PostfixExpression) {
 	    // Postfix operator.
 	    PostfixExpression postfix = (PostfixExpression)expr;
-	    String op = postfix.getOperator().toString();
-	    compo = processExpression(graph, scope, compo, postfix.getOperand());
-	    compo.value = new PostfixNode(graph, expr, op, compo.value);
+	    PostfixExpression.Operator op = postfix.getOperator();
+	    Expression operand = postfix.getOperand();
+	    DFRef ref = getReference(scope, operand);
+	    compo = processExpression(graph, scope, compo, operand);
+	    DFNode value = new PostfixNode(graph, expr, op, compo.value);
+	    if (op == PostfixExpression.Operator.INCREMENT ||
+		op == PostfixExpression.Operator.DECREMENT) {
+		DFNode box = new BoxNode(graph, expr, ref, value);
+		compo.put(ref, box);
+	    }
 	    
 	} else if (expr instanceof InfixExpression) {
 	    // Infix operator.
 	    InfixExpression infix = (InfixExpression)expr;
-	    String op = infix.getOperator().toString();
+	    InfixExpression.Operator op = infix.getOperator();
 	    compo = processExpression(graph, scope, compo, infix.getLeftOperand());
 	    DFNode lvalue = compo.value;
 	    compo = processExpression(graph, scope, compo, infix.getRightOperand());
@@ -687,11 +724,14 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof Assignment) {
 	    // Assignment.
 	    Assignment assn = (Assignment)expr;
-	    String op = assn.getOperator().toString();
-	    DFRef ref = getReference(assn.getLeftHandSide(), scope);
+	    Assignment.Operator op = assn.getOperator();
+	    DFRef ref = getReference(scope, assn.getLeftHandSide());
 	    DFNode lvalue = compo.get(ref);
 	    compo = processExpression(graph, scope, compo, assn.getRightHandSide());
-	    DFNode rvalue = new InfixNode(graph, assn, op, lvalue, compo.value);
+	    DFNode rvalue = compo.value;
+	    if (op != Assignment.Operator.ASSIGN) {
+		rvalue = new AssignmentNode(graph, assn, op, lvalue, rvalue);
+	    }
 	    DFNode box = new BoxNode(graph, assn, ref, rvalue);
 	    compo.put(ref, box);
 	    compo.value = box;
@@ -998,7 +1038,7 @@ public class Java2DF extends ASTVisitor {
 	    Name paramName = decl.getName();
 	    Type paramType = decl.getType();
 	    // XXX check getExtraDimensions()
-	    DFVar var = scope.add(paramName.getFullyQualifiedName(), paramType);
+	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
 	    DFNode box = new BoxNode(graph, decl, var, param);
 	    compo.put(var, box);
 	}

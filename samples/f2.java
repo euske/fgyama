@@ -8,7 +8,11 @@ public class Foo {
 	} else {
 	    z = 2;
 	}
-	return x*z;
+	if (x == 0) {
+	    return y++;
+	} else {
+	    return x*z;
+	}
     }
     
 }
