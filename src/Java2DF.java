@@ -196,6 +196,7 @@ class DFVar extends DFRef {
 //
 class DFScope {
 
+    public DFScope root;
     public DFScope parent;
     public Map<String, DFVar> vars;
 
@@ -204,6 +205,7 @@ class DFScope {
     }
     
     public DFScope(DFScope parent) {
+	this.root = (parent != null)? parent.root : this;
 	this.parent = parent;
 	this.vars = new HashMap<String, DFVar>();
     }
@@ -233,12 +235,12 @@ class DFScope {
 	}
     }
 
-    public DFVar lookupArray(String name) {
-	return lookup(name+"[]");
+    public DFVar lookupArray() {
+	return this.root.lookup("[]");
     }
     
     public DFVar lookupField(String name) {
-	return lookup("."+name);
+	return this.lookup("."+name);
     }
     
     public Collection<DFVar> vars() {
@@ -396,9 +398,10 @@ class ArrayAssignNode extends SingleAssignNode {
     public DFNode index;
 
     public ArrayAssignNode(DFGraph graph, ASTNode node, DFRef ref,
-			   DFNode index) {
+			   DFNode array, DFNode index) {
 	super(graph, node, ref);
 	this.index = index;
+	array.connect(this, "access");
 	index.connect(this, "index");
     }
 }
@@ -541,10 +544,11 @@ class ArrayAccessNode extends ProgNode {
     public DFNode index;
 
     public ArrayAccessNode(DFGraph graph, ASTNode node,
-			   DFNode value, DFNode index) {
+			   DFNode array, DFNode value, DFNode index) {
 	super(graph, node);
 	this.value = value;
 	this.index = index;
+	array.connect(this, "array");
 	value.connect(this, "access");
 	index.connect(this, "index");
     }
@@ -779,12 +783,9 @@ class GraphvizExporter {
 }
 
 
-
-//  Java2DF
+//  Utility functions.
 // 
-public class Java2DF extends ASTVisitor {
-
-    // Utility functions.
+class Utils {
 
     public static void logit(String s) {
 	System.err.println(s);
@@ -806,6 +807,12 @@ public class Java2DF extends ASTVisitor {
 	    return null;
 	}
     }
+}
+
+
+//  Java2DF
+// 
+public class Java2DF extends ASTVisitor {
 
     // Instance methods.
     
@@ -820,7 +827,7 @@ public class Java2DF extends ASTVisitor {
 	    DFGraph graph = getMethodGraph(method);
 	    exporter.writeGraph(graph);
 	} catch (UnsupportedSyntax e) {
-	    logit("Unsupported: "+e.node);
+	    Utils.logit("Unsupported: "+e.node);
 	}
 	return true;
     }
@@ -855,26 +862,21 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (expr instanceof ArrayAccess) {
 	    // Array assignment.
-	    ArrayAccess aac = (ArrayAccess)expr;
-	    Expression arr = aac.getArray();
-	    DFRef ref;
-	    if (arr instanceof SimpleName) {
-		SimpleName arrName = (SimpleName)arr;
-		ref = scope.lookup(arrName.getIdentifier());
-	    } else {
-		throw new UnsupportedSyntax(expr);
-	    }
-	    compo = processExpression(graph, scope, compo, aac.getIndex());
+	    ArrayAccess aa = (ArrayAccess)expr;
+	    compo = processExpression(graph, scope, compo, aa.getArray());
+	    DFNode array = compo.value;
+	    compo = processExpression(graph, scope, compo, aa.getIndex());
 	    DFNode index = compo.value;
-	    compo.assign = new ArrayAssignNode(graph, expr, ref, index);
+	    DFRef ref = scope.lookupArray();
+	    compo.assign = new ArrayAssignNode(graph, expr, ref, array, index);
 	    
 	} else if (expr instanceof FieldAccess) {
 	    // Field assignment.
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    compo = processExpression(graph, scope, compo, fa.getExpression());
 	    DFNode obj = compo.value;
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    compo.assign = new FieldAssignNode(graph, expr, ref, obj);
 	    
 	} else if (expr instanceof QualifiedName) {
@@ -938,7 +940,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof TypeLiteral) {
 	    // Type name cosntant.
 	    Type value = ((TypeLiteral)expr).getType();
-	    compo.value = new ConstNode(graph, expr, getTypeName(value));
+	    compo.value = new ConstNode(graph, expr, Utils.getTypeName(value));
 	    
 	} else if (expr instanceof PrefixExpression) {
 	    // Prefix operator.
@@ -1049,11 +1051,12 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof ArrayAccess) {
 	    // array access.
 	    ArrayAccess aa = (ArrayAccess)expr;
+	    DFRef ref = scope.lookupArray();
 	    compo = processExpression(graph, scope, compo, aa.getArray());
 	    DFNode array = compo.value;
 	    compo = processExpression(graph, scope, compo, aa.getIndex());
 	    DFNode index = compo.value;
-	    compo.value = new ArrayAccessNode(graph, aa, array, index);
+	    compo.value = new ArrayAccessNode(graph, aa, compo.get(ref), array, index);
 	    
 	} else if (expr instanceof FieldAccess) {
 	    // field access.
@@ -1505,7 +1508,7 @@ public class Java2DF extends ASTVisitor {
 		}
 		reader.close();
 
-		logit("Parsing: "+path);
+		Utils.logit("Parsing: "+path);
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(src.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
