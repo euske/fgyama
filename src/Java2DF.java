@@ -233,6 +233,14 @@ class DFScope {
 	}
     }
 
+    public DFVar lookupArray(String name) {
+	return lookup(name+"[]");
+    }
+    
+    public DFVar lookupField(String name) {
+	return lookup("."+name);
+    }
+    
     public Collection<DFVar> vars() {
 	return this.vars.values();
     }
@@ -275,7 +283,7 @@ class DFComponent {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
-		node = new DistNode(this.graph);
+		node = new SingleAssignNode(this.graph, null, ref);
 		this.inputs.put(ref, node);
 	    }
 	}
@@ -392,6 +400,19 @@ class ArrayAssignNode extends SingleAssignNode {
 	super(graph, node, ref);
 	this.index = index;
 	index.connect(this, "index");
+    }
+}
+
+// FieldAssignNode:
+class FieldAssignNode extends SingleAssignNode {
+
+    public DFNode obj;
+
+    public FieldAssignNode(DFGraph graph, ASTNode node, DFRef ref,
+			   DFNode obj) {
+	super(graph, node, ref);
+	this.obj = obj;
+	obj.connect(this, "index");
     }
 }
 
@@ -516,20 +537,40 @@ class InfixNode extends ProgNode {
 // ArrayAccessNode
 class ArrayAccessNode extends ProgNode {
 
-    public DFNode array;
+    public DFNode value;
     public DFNode index;
 
     public ArrayAccessNode(DFGraph graph, ASTNode node,
-			   DFNode array, DFNode index) {
+			   DFNode value, DFNode index) {
 	super(graph, node);
-	this.array = array;
+	this.value = value;
 	this.index = index;
-	array.connect(this, "access");
+	value.connect(this, "access");
 	index.connect(this, "index");
     }
 
     public String label() {
 	return "[]";
+    }
+}
+
+// FieldAccessNode
+class FieldAccessNode extends ProgNode {
+
+    public DFNode value;
+    public DFNode obj;
+
+    public FieldAccessNode(DFGraph graph, ASTNode node,
+			   DFNode value, DFNode obj) {
+	super(graph, node);
+	this.value = value;
+	this.obj = obj;
+	value.connect(this, "access");
+	obj.connect(this, "index");
+    }
+
+    public String label() {
+	return ".";
     }
 }
 
@@ -791,8 +832,8 @@ public class Java2DF extends ASTVisitor {
 	for (VariableDeclarationFragment frag : frags) {
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
-		Name varName = frag.getName();
-		DFRef var = scope.add(varName.getFullyQualifiedName(), varType);
+		SimpleName varName = frag.getName();
+		DFRef var = scope.add(varName.getIdentifier(), varType);
 		compo = processExpression(graph, scope, compo, init);
 		BoxNode box = new SingleAssignNode(graph, frag, var);
 		box.take(compo.value);
@@ -806,10 +847,10 @@ public class Java2DF extends ASTVisitor {
     public DFComponent processExpressionLeft
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
 	throws UnsupportedSyntax {
-	if (expr instanceof Name) {
+	if (expr instanceof SimpleName) {
 	    // Single value assignment.
-	    Name varName = (Name)expr;
-	    DFRef ref = scope.lookup(varName.getFullyQualifiedName());
+	    SimpleName varName = (SimpleName)expr;
+	    DFRef ref = scope.lookup(varName.getIdentifier());
 	    compo.assign = new SingleAssignNode(graph, expr, ref);
 	    
 	} else if (expr instanceof ArrayAccess) {
@@ -817,15 +858,33 @@ public class Java2DF extends ASTVisitor {
 	    ArrayAccess aac = (ArrayAccess)expr;
 	    Expression arr = aac.getArray();
 	    DFRef ref;
-	    if (arr instanceof Name) {
-		Name arrName = (Name)arr;
-		ref = scope.lookup(arrName.getFullyQualifiedName());
+	    if (arr instanceof SimpleName) {
+		SimpleName arrName = (SimpleName)arr;
+		ref = scope.lookup(arrName.getIdentifier());
 	    } else {
 		throw new UnsupportedSyntax(expr);
 	    }
 	    compo = processExpression(graph, scope, compo, aac.getIndex());
 	    DFNode index = compo.value;
 	    compo.assign = new ArrayAssignNode(graph, expr, ref, index);
+	    
+	} else if (expr instanceof FieldAccess) {
+	    // Field assignment.
+	    FieldAccess fa = (FieldAccess)expr;
+	    SimpleName fieldName = fa.getName();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    compo = processExpression(graph, scope, compo, fa.getExpression());
+	    DFNode obj = compo.value;
+	    compo.assign = new FieldAssignNode(graph, expr, ref, obj);
+	    
+	} else if (expr instanceof QualifiedName) {
+	    // Qualified name = Field assignment.
+	    QualifiedName qn = (QualifiedName)expr;
+	    SimpleName fieldName = qn.getName();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    compo = processExpression(graph, scope, compo, qn.getQualifier());
+	    DFNode obj = compo.value;
+	    compo.assign = new FieldAssignNode(graph, expr, ref, obj);
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -841,10 +900,10 @@ public class Java2DF extends ASTVisitor {
 	if (expr instanceof Annotation) {
 	    // Ignore annotations.
 
-	} else if (expr instanceof Name) {
+	} else if (expr instanceof SimpleName) {
 	    // Variable lookup.
-	    Name varName = (Name)expr;
-	    DFRef ref = scope.lookup(varName.getFullyQualifiedName());
+	    SimpleName varName = (SimpleName)expr;
+	    DFRef ref = scope.lookup(varName.getIdentifier());
 	    compo.value = compo.get(ref);
 	    
 	} else if (expr instanceof ThisExpression) {
@@ -952,8 +1011,8 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof MethodInvocation) {
 	    // Function call.
 	    MethodInvocation invoke = (MethodInvocation)expr;
-	    Name methodName = invoke.getName();
-	    CallNode call = new CallNode(graph, invoke, methodName.getFullyQualifiedName());
+	    SimpleName methodName = invoke.getName();
+	    CallNode call = new CallNode(graph, invoke, methodName.getIdentifier());
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		compo = processExpression(graph, scope, compo, arg);
 		call.take(compo.value);
@@ -996,11 +1055,28 @@ public class Java2DF extends ASTVisitor {
 	    DFNode index = compo.value;
 	    compo.value = new ArrayAccessNode(graph, aa, array, index);
 	    
+	} else if (expr instanceof FieldAccess) {
+	    // field access.
+	    FieldAccess fa = (FieldAccess)expr;
+	    SimpleName fieldName = fa.getName();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    compo = processExpression(graph, scope, compo, fa.getExpression());
+	    DFNode obj = compo.value;
+	    compo.value = new FieldAccessNode(graph, fa, compo.get(ref), obj);
+	    
+	} else if (expr instanceof QualifiedName) {
+	    // Qualified name = Field assignment.
+	    QualifiedName qn = (QualifiedName)expr;
+	    SimpleName fieldName = qn.getName();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    compo = processExpression(graph, scope, compo, qn.getQualifier());
+	    DFNode obj = compo.value;
+	    compo.value = new FieldAccessNode(graph, qn, compo.get(ref), obj);
+	    
 	} else {
 	    // CastExpression
 	    // ClassInstanceCreation
 	    // ConditionalExpression
-	    // FieldAccess
 	    // InstanceofExpression
 	    
 	    // LambdaExpression
@@ -1345,7 +1421,7 @@ public class Java2DF extends ASTVisitor {
 	for (SingleVariableDeclaration decl :
 		 (List<SingleVariableDeclaration>) method.parameters()) {
 	    DFNode param = new ArgNode(graph, decl, i++);
-	    Name paramName = decl.getName();
+	    SimpleName paramName = decl.getName();
 	    Type paramType = decl.getType();
 	    // XXX check getExtraDimensions()
 	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
@@ -1358,7 +1434,7 @@ public class Java2DF extends ASTVisitor {
     
     public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
-	Name funcName = method.getName();
+	SimpleName funcName = method.getName();
 	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
 	DFScope scope = new DFScope();
 	
