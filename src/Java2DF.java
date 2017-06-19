@@ -257,7 +257,7 @@ class DFComponent {
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
     public DFNode value;
-    public BoxNode assign;
+    public AssignNode assign;
     
     public DFComponent(DFGraph graph) {
 	this.graph = graph;
@@ -356,12 +356,12 @@ class ArgNode extends ProgNode {
     }
 }
 
-// BoxNode: corresponds to a certain location in a memory.
-abstract class BoxNode extends ProgNode {
+// AssignNode: corresponds to a certain location in a memory.
+abstract class AssignNode extends ProgNode {
 
     public DFRef ref;
     
-    public BoxNode(DFGraph graph, ASTNode node, DFRef ref) {
+    public AssignNode(DFGraph graph, ASTNode node, DFRef ref) {
 	super(graph, node);
 	this.ref = ref;
     }
@@ -378,7 +378,7 @@ abstract class BoxNode extends ProgNode {
 }
 
 // SingleAssignNode:
-class SingleAssignNode extends BoxNode {
+class SingleAssignNode extends AssignNode {
 
     public DFNode value;
     
@@ -579,16 +579,16 @@ class FieldAccessNode extends ProgNode {
 }
 
 
-// AssignmentNode
-class AssignmentNode extends ProgNode {
+// AssnOpNode
+class AssnOpNode extends ProgNode {
 
     public Assignment.Operator op;
     public DFNode lvalue;
     public DFNode rvalue;
 
-    public AssignmentNode(DFGraph graph, ASTNode node,
-			  Assignment.Operator op,
-			  DFNode lvalue, DFNode rvalue) {
+    public AssnOpNode(DFGraph graph, ASTNode node,
+		      Assignment.Operator op,
+		      DFNode lvalue, DFNode rvalue) {
 	super(graph, node);
 	this.op = op;
 	this.lvalue = lvalue;
@@ -842,9 +842,9 @@ public class Java2DF extends ASTVisitor {
 		SimpleName varName = frag.getName();
 		DFRef var = scope.add(varName.getIdentifier(), varType);
 		compo = processExpression(graph, scope, compo, init);
-		BoxNode box = new SingleAssignNode(graph, frag, var);
-		box.take(compo.value);
-		compo.put(var, box);
+		AssignNode assign = new SingleAssignNode(graph, frag, var);
+		assign.take(compo.value);
+		compo.put(assign.ref, assign);
 	    }
 	}
 	return compo;
@@ -948,7 +948,7 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
 	    compo = processExpressionLeft(graph, scope, compo, operand);
-	    BoxNode assign = compo.assign;
+	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
 	    DFNode value = new PrefixNode(graph, expr, op, compo.value);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
@@ -964,7 +964,7 @@ public class Java2DF extends ASTVisitor {
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
 	    compo = processExpressionLeft(graph, scope, compo, operand);
-	    BoxNode assign = compo.assign;
+	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
@@ -992,12 +992,12 @@ public class Java2DF extends ASTVisitor {
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
 	    compo = processExpressionLeft(graph, scope, compo, assn.getLeftHandSide());
-	    BoxNode assign = compo.assign;
+	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, assn.getRightHandSide());
 	    DFNode rvalue = compo.value;
 	    if (op != Assignment.Operator.ASSIGN) {
 		DFNode lvalue = compo.get(assign.ref);
-		rvalue = new AssignmentNode(graph, assn, op, lvalue, rvalue);
+		rvalue = new AssnOpNode(graph, assn, op, lvalue, rvalue);
 	    }
 	    assign.take(rvalue);
 	    compo.put(assign.ref, assign);
@@ -1437,7 +1437,7 @@ public class Java2DF extends ASTVisitor {
 	    Type paramType = decl.getType();
 	    // XXX check getExtraDimensions()
 	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
-	    BoxNode assign = new SingleAssignNode(graph, decl, var);
+	    AssignNode assign = new SingleAssignNode(graph, decl, var);
 	    assign.take(param);
 	    compo.put(assign.ref, assign);
 	}
