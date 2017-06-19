@@ -1379,16 +1379,25 @@ public class Java2DF extends ASTVisitor {
 	    // Ignore synchronized.
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
 	    return processBlock(graph, scope, compo, syncStmt.getBody());
+
+	} else if (stmt instanceof TryStatement) {
+	    // XXX Ignore try...catch (for now).
+	    TryStatement tryStmt = (TryStatement)stmt;
+	    compo = processBlock(graph, scope, compo, tryStmt.getBody());
+	    if (tryStmt.getFinally() != null) {
+		compo = processBlock(graph, scope, compo, tryStmt.getFinally());
+	    }
+	    return compo;
 	    
 	} else {
 	    // BreakStatement
 	    // ContinueStatement
+	    
 	    // DoStatement
 	    // EnhancedForStatement
 	    // SwitchCase
 	    // SwitchStatement
 	    // ThrowStatement
-	    // TryStatement
 	    
 	    // ConstructorInvocation
 	    // LabeledStatement
