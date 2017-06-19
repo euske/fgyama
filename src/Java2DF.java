@@ -68,6 +68,10 @@ abstract class DFNode {
 	this.recv = new ArrayList<DFLink>();
     }
 
+    public String toString() {
+	return ("<DFNode("+this.id+") "+this.label()+">");
+    }
+
     public DFNodeType type() {
 	return DFNodeType.Normal;
     }
@@ -138,6 +142,10 @@ class DFLink {
 	this.name = name;
     }
 
+    public String toString() {
+	return ("<DFLink: "+this.src+"-("+this.name+")-"+this.dst+">");
+    }
+
     public void disconnect()
     {
 	this.src.send.remove(this);
@@ -158,6 +166,10 @@ class DFRef {
 	this.name = name;
     }
 
+    public String toString() {
+	return ("<DFRef: "+this.name+">");
+    }
+
     public static DFRef THIS = new DFRef(null, "THIS");
     public static DFRef RETURN = new DFRef(null, "RETURN");
 }
@@ -172,6 +184,10 @@ class DFVar extends DFRef {
     public DFVar(DFScope scope, String name, Type type) {
 	super(scope, name);
 	this.type = type;
+    }
+
+    public String toString() {
+	return ("<DFVar: "+this.name+"("+this.type+")>");
     }
 }
 
@@ -190,6 +206,14 @@ class DFScope {
     public DFScope(DFScope parent) {
 	this.parent = parent;
 	this.vars = new HashMap<String, DFVar>();
+    }
+
+    public String toString() {
+	StringBuilder vars = new StringBuilder();
+	for (DFVar var : this.vars.values()) {
+	    vars.append(" "+var);
+	}
+	return ("<DFScope:"+vars+">");
     }
 
     public DFVar add(String name, Type type) {
@@ -229,6 +253,19 @@ class DFComponent {
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
 	this.value = null;
+    }
+
+    public String toString() {
+	StringBuilder inputs = new StringBuilder();
+	for (Map.Entry<DFRef, DFNode> entry : this.inputs.entrySet()) {
+	    inputs.append(" "+entry.getKey()+":"+entry.getValue());
+	}
+	StringBuilder outputs = new StringBuilder();
+	for (Map.Entry<DFRef, DFNode> entry : this.outputs.entrySet()) {
+	    outputs.append(" "+entry.getKey()+":"+entry.getValue());
+	}
+	return ("<DFComponent: inputs="+inputs+", outputs="+
+		outputs+", value="+this.value+">");
     }
 
     public DFNode get(DFRef ref) {
