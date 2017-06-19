@@ -247,12 +247,14 @@ class DFComponent {
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
     public DFNode value;
+    public BoxNode assign;
     
     public DFComponent(DFGraph graph) {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
 	this.value = null;
+	this.assign = null;
     }
 
     public String toString() {
@@ -345,7 +347,7 @@ class ArgNode extends ProgNode {
 }
 
 // BoxNode: corresponds to a certain location in a memory.
-class BoxNode extends ProgNode {
+abstract class BoxNode extends ProgNode {
 
     public DFRef ref;
     
@@ -361,6 +363,8 @@ class BoxNode extends ProgNode {
     public String label() {
 	return this.ref.name;
     }
+
+    abstract public void take(DFNode value);
 }
 
 // SingleAssignNode:
@@ -368,11 +372,26 @@ class SingleAssignNode extends BoxNode {
 
     public DFNode value;
     
-    public SingleAssignNode(DFGraph graph, ASTNode node,
-			    DFRef ref, DFNode value) {
+    public SingleAssignNode(DFGraph graph, ASTNode node, DFRef ref) {
 	super(graph, node, ref);
+    }
+
+    public void take(DFNode value) {
 	this.value = value;
 	value.connect(this, "assign");
+    }
+}
+
+// ArrayAssignNode:
+class ArrayAssignNode extends SingleAssignNode {
+
+    public DFNode index;
+
+    public ArrayAssignNode(DFGraph graph, ASTNode node, DFRef ref,
+			   DFNode index) {
+	super(graph, node, ref);
+	this.index = index;
+	index.connect(this, "index");
     }
 }
 
@@ -505,7 +524,7 @@ class ArrayAccessNode extends ProgNode {
 	super(graph, node);
 	this.array = array;
 	this.index = index;
-	array.connect(this, "array");
+	array.connect(this, "access");
 	index.connect(this, "index");
     }
 
@@ -765,21 +784,6 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    public DFRef getReference(DFScope scope, Expression expr) 
-	throws UnsupportedSyntax {
-	// XXX getReference -> processReference
-	if (expr instanceof Name) {
-	    Name varName = (Name)expr;
-	    return scope.lookup(varName.getFullyQualifiedName());
-	} else if (expr instanceof ArrayAccess) {
-	    ArrayAccess aa = (ArrayAccess)expr;
-	    // XXX index is ignored (for now).
-	    return getReference(scope, aa.getArray());
-	} else {
-	    throw new UnsupportedSyntax(expr);
-	}
-    }
-
     public DFComponent processVariableDeclaration
 	(DFGraph graph, DFScope scope, DFComponent compo, Type varType,
 	 List<VariableDeclarationFragment> frags)
@@ -790,13 +794,45 @@ public class Java2DF extends ASTVisitor {
 		Name varName = frag.getName();
 		DFRef var = scope.add(varName.getFullyQualifiedName(), varType);
 		compo = processExpression(graph, scope, compo, init);
-		DFNode box = new SingleAssignNode(graph, frag, var, compo.value);
+		BoxNode box = new SingleAssignNode(graph, frag, var);
+		box.take(compo.value);
 		compo.put(var, box);
 	    }
 	}
 	return compo;
     }
 
+    @SuppressWarnings("unchecked")
+    public DFComponent processExpressionLeft
+	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
+	throws UnsupportedSyntax {
+	if (expr instanceof Name) {
+	    // Single value assignment.
+	    Name varName = (Name)expr;
+	    DFRef ref = scope.lookup(varName.getFullyQualifiedName());
+	    compo.assign = new SingleAssignNode(graph, expr, ref);
+	    
+	} else if (expr instanceof ArrayAccess) {
+	    // Array assignment.
+	    ArrayAccess aac = (ArrayAccess)expr;
+	    Expression arr = aac.getArray();
+	    DFRef ref;
+	    if (arr instanceof Name) {
+		Name arrName = (Name)arr;
+		ref = scope.lookup(arrName.getFullyQualifiedName());
+	    } else {
+		throw new UnsupportedSyntax(expr);
+	    }
+	    compo = processExpression(graph, scope, compo, aac.getIndex());
+	    DFNode index = compo.value;
+	    compo.assign = new ArrayAssignNode(graph, expr, ref, index);
+	    
+	} else {
+	    throw new UnsupportedSyntax(expr);
+	}
+	return compo;
+    }
+    
     @SuppressWarnings("unchecked")
     public DFComponent processExpression
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
@@ -807,7 +843,8 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof Name) {
 	    // Variable lookup.
-	    DFRef ref = getReference(scope, expr);
+	    Name varName = (Name)expr;
+	    DFRef ref = scope.lookup(varName.getFullyQualifiedName());
 	    compo.value = compo.get(ref);
 	    
 	} else if (expr instanceof ThisExpression) {
@@ -849,27 +886,29 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    DFRef ref = getReference(scope, operand);
+	    compo = processExpressionLeft(graph, scope, compo, operand);
+	    BoxNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
-	    compo.value = new PrefixNode(graph, expr, op, compo.value);
+	    DFNode value = new PrefixNode(graph, expr, op, compo.value);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
-		DFNode box = new SingleAssignNode(graph, expr, ref, compo.value);
-		compo.put(ref, box);
+		assign.take(value);
+		compo.put(assign.ref, assign);
 	    }
+	    compo.value = value;
 	    
 	} else if (expr instanceof PostfixExpression) {
 	    // Postfix operator.
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
-	    DFRef ref = getReference(scope, operand);
+	    compo = processExpressionLeft(graph, scope, compo, operand);
+	    BoxNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
-	    DFNode value = new PostfixNode(graph, expr, op, compo.value);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
-		DFNode box = new SingleAssignNode(graph, expr, ref, value);
-		compo.put(ref, box);
+		assign.take(new PostfixNode(graph, expr, op, compo.value));
+		compo.put(assign.ref, assign);
 	    }
 	    
 	} else if (expr instanceof InfixExpression) {
@@ -891,16 +930,17 @@ public class Java2DF extends ASTVisitor {
 	    // Assignment.
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
-	    DFRef ref = getReference(scope, assn.getLeftHandSide());
+	    compo = processExpressionLeft(graph, scope, compo, assn.getLeftHandSide());
+	    BoxNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, assn.getRightHandSide());
 	    DFNode rvalue = compo.value;
 	    if (op != Assignment.Operator.ASSIGN) {
-		DFNode lvalue = compo.get(ref);
+		DFNode lvalue = compo.get(assign.ref);
 		rvalue = new AssignmentNode(graph, assn, op, lvalue, rvalue);
 	    }
-	    DFNode box = new SingleAssignNode(graph, assn, ref, rvalue);
-	    compo.put(ref, box);
-	    compo.value = box;
+	    assign.take(rvalue);
+	    compo.put(assign.ref, assign);
+	    compo.value = assign;
 
 	} else if (expr instanceof VariableDeclarationExpression) {
 	    // Variable declaration.
@@ -926,6 +966,9 @@ public class Java2DF extends ASTVisitor {
 	    for (Expression dim : (List<Expression>) ac.dimensions()) {
 		compo = processExpression(graph, scope, compo, dim);
 		// XXX compo.value is not used (for now).
+		if (compo.value != null) {
+		    graph.removeNode(compo.value);
+		}
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
@@ -1306,8 +1349,9 @@ public class Java2DF extends ASTVisitor {
 	    Type paramType = decl.getType();
 	    // XXX check getExtraDimensions()
 	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
-	    DFNode box = new SingleAssignNode(graph, decl, var, param);
-	    compo.put(var, box);
+	    BoxNode assign = new SingleAssignNode(graph, decl, var);
+	    assign.take(param);
+	    compo.put(assign.ref, assign);
 	}
 	return compo;
     }
