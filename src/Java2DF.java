@@ -256,6 +256,7 @@ class DFComponent {
     public DFGraph graph;
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
+    public Map<DFRef, LoopJoinNode> loopjoins;
     public DFNode value;
     public AssignNode assign;
     
@@ -263,6 +264,7 @@ class DFComponent {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
+	this.loopjoins = new HashMap<DFRef, LoopJoinNode>();
 	this.value = null;
 	this.assign = null;
     }
@@ -285,6 +287,7 @@ class DFComponent {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
+		// Retconn. assignment.
 		node = new SingleAssignNode(this.graph, null, ref);
 		this.inputs.put(ref, node);
 	    }
@@ -296,23 +299,33 @@ class DFComponent {
 	this.outputs.put(ref, node);
     }
 
+    public void setBreak() {
+	setBreak(this.inputs);
+	setBreak(this.outputs);
+    }
+    public void setBreak(Map<DFRef, DFNode> nodes) {
+	for (Map.Entry<DFRef, DFNode> entry : nodes.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode node = entry.getValue();
+	    LoopJoinNode join;
+	    if (this.loopjoins.containsKey(ref)) {
+		join = this.loopjoins.get(ref);
+	    } else {
+		join = new LoopJoinNode(this.graph, null, ref);
+		this.loopjoins.put(ref, join);
+	    }
+	    join.take(node);
+	}
+    }
+
+    public LoopJoinNode getJoin(DFRef ref) {
+	return this.loopjoins.get(ref);
+    }
+
     public void finish(DFScope scope) {
 	for (DFRef ref : scope.vars()) {
 	    this.inputs.remove(ref);
 	    this.outputs.remove(ref);
-	}
-    }
-    
-    public void connect(DFComponent next) {
-	for (DFRef ref : this.outputs.keySet()) {
-	    DFNode node = this.inputs.get(ref);
-	    node.connect(next.inputs.get(ref));
-	}
-	for (DFRef ref : this.inputs.keySet()) {
-	    if (!this.outputs.containsKey(ref)) {
-		DFNode node = this.inputs.get(ref);
-		node.connect(next.inputs.get(ref));
-	    }
 	}
     }
 }
@@ -701,6 +714,33 @@ class LoopNode extends ProgNode {
 
     public void enter(DFNode cont) {
 	cont.connect(this, "cont");
+    }
+}
+
+// LoopJoinNode
+class LoopJoinNode extends ProgNode {
+
+    public DFRef ref;
+    public List<DFNode> nodes;
+    
+    public LoopJoinNode(DFGraph graph, ASTNode node, DFRef ref) {
+	super(graph, node);
+	this.ref = ref;
+	this.nodes = new ArrayList<DFNode>();
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Cond;
+    }
+    
+    public String label() {
+	return "LoopJoin:"+this.ref.name;
+    }
+    
+    public void take(DFNode node) {
+	int i = this.nodes.size();
+	node.connect(this, "break"+i);
+	this.nodes.add(node);
     }
 }
 
@@ -1216,7 +1256,13 @@ public class Java2DF extends ASTVisitor {
 		loop.enter(cont);
 		DFNode exit = new DistNode(graph);
 		branch.send(false, exit);
-		compo.put(ref, exit);
+		LoopJoinNode join = compo.getJoin(ref);
+		if (join != null) {
+		    join.take(exit);
+		    compo.put(ref, join);
+		} else {
+		    compo.put(ref, exit);
+		}
 	    } else {		
 		compo.put(ref, tmp);
 	    }
@@ -1389,8 +1435,16 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    return compo;
 	    
+	} else if (stmt instanceof BreakStatement) {
+	    // break from the loop.
+	    BreakStatement breakStmt = (BreakStatement)stmt;
+	    // XXX ignore label
+	    // SimpleName labelName = breakStmt.getLabel();
+	    compo.setBreak();
+	    return compo;
+	    
 	} else {
-	    // BreakStatement
+	    
 	    // ContinueStatement
 	    
 	    // DoStatement
