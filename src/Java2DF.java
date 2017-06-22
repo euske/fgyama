@@ -287,8 +287,7 @@ class DFComponent {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
-		// Retconn. assignment.
-		node = new SingleAssignNode(this.graph, null, ref);
+		node = new DistNode(this.graph);
 		this.inputs.put(ref, node);
 	    }
 	}
@@ -1204,87 +1203,47 @@ public class Java2DF extends ASTVisitor {
 
     public DFComponent processLoop
 	(DFGraph graph, DFScope scope, DFComponent compo, Statement stmt, 
-	 DFComponent exprCompo, DFComponent bodyCompo)
+	 DFNode condValue, DFComponent loopCompo)
 	throws UnsupportedSyntax {
 	
-	DFNode condValue = exprCompo.value;
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
 	Map<DFRef, DFNode> temps = new HashMap<DFRef, DFNode>();
 	
-	for (Map.Entry<DFRef, DFNode> entry : exprCompo.inputs.entrySet()) {
+	for (Map.Entry<DFRef, DFNode> entry : loopCompo.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    LoopNode loop = loops.get(ref);
-	    if (loop == null) {
-		DFNode src = compo.get(ref);
-		loop = new LoopNode(graph, stmt, ref, src);
-		loops.put(ref, loop);
-	    }
-	    loop.connect(dst);
-	}
-	for (Map.Entry<DFRef, DFNode> entry : exprCompo.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode tmp = entry.getValue();
-	    temps.put(ref, tmp);
-	}
-	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    DFNode tmp = temps.get(ref);
-	    if (tmp != null) {
-		temps.remove(ref);
-		tmp.connect(dst);
+	    DFNode input = entry.getValue();
+	    DFNode output = loopCompo.outputs.get(ref);
+	    DFNode src = compo.get(ref);
+	    if (output == null) {
+		// ref is not a loop variable.
+		src.connect(input);
 	    } else {
-		LoopNode loop = loops.get(ref);
-		if (loop == null) {
-		    DFNode src = compo.get(ref);
-		    loop = new LoopNode(graph, stmt, ref, src);
-		    loops.put(ref, loop);
-		}
-		loop.connect(dst);
-	    }
-	}
-	for (Map.Entry<DFRef, DFNode> entry : temps.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode tmp = entry.getValue();
-	    LoopNode loop = loops.get(ref);
-	    if (loop != null) {
+		// ref is a loop variable.
+		LoopNode loop = new LoopNode(graph, stmt, ref, src);
+		loops.put(ref, loop);
+		loop.connect(input);
+		
 		BranchNode branch = new BranchNode(graph, stmt, condValue);
-		tmp.connect(branch);
-		DFNode cont = new DistNode(graph);
-		branch.send(true, cont);
-		loop.enter(cont);
-		DFNode exit = new DistNode(graph);
-		branch.send(false, exit);
-		LoopJoinNode join = compo.getJoin(ref);
-		if (join != null) {
-		    join.take(exit);
-		    compo.put(ref, join);
-		} else {
-		    compo.put(ref, exit);
-		}
-	    } else {		
-		compo.put(ref, tmp);
-	    }
-	}
-	for (Map.Entry<DFRef, DFNode> entry : bodyCompo.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    LoopNode loop = loops.get(ref);
-	    if (loop != null) {
-		BranchNode branch = new BranchNode(graph, stmt, condValue);
-		dst.connect(branch);
+		output.connect(branch);
 		DFNode cont = new DistNode(graph);
 		branch.send(true, cont);
 		loop.enter(cont);
 		DFNode exit = new DistNode(graph);
 		branch.send(false, exit);
 		compo.put(ref, exit);
-	    } else {		
-		compo.put(ref, dst);
 	    }
 	}
 	
+	for (Map.Entry<DFRef, DFNode> entry : loopCompo.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode output = entry.getValue();
+	    DFNode input = loopCompo.inputs.get(ref);
+	    if (input == null) {
+		// ref is not a loop variable.
+		compo.put(ref, output);
+	    }
+	}
+
 	return compo;
     }
 
@@ -1346,16 +1305,14 @@ public class Java2DF extends ASTVisitor {
 	 WhileStatement whileStmt)
 	throws UnsupportedSyntax {
 	
-	Expression expr = whileStmt.getExpression();
-	DFComponent exprCompo = new DFComponent(graph);
-	exprCompo = processExpression(graph, scope, exprCompo, expr);
-	
-	Statement body = whileStmt.getBody();
-	DFComponent bodyCompo = new DFComponent(graph);
-	bodyCompo = processStatement(graph, scope, bodyCompo, body);
-
+	DFComponent loopCompo = new DFComponent(graph);
+	loopCompo = processExpression(graph, scope, loopCompo,
+				      whileStmt.getExpression());
+	DFNode condValue = loopCompo.value;
+	loopCompo = processStatement(graph, scope, loopCompo, 
+				     whileStmt.getBody());
 	return processLoop(graph, scope, compo, whileStmt,
-			   exprCompo, bodyCompo);
+			   condValue, loopCompo);
     }
     
     @SuppressWarnings("unchecked")
@@ -1368,19 +1325,18 @@ public class Java2DF extends ASTVisitor {
 	    compo = processExpression(graph, scope, compo, init);
 	}
 	
-	Expression expr = forStmt.getExpression();
-	DFComponent exprCompo = new DFComponent(graph);
-	exprCompo = processExpression(graph, scope, exprCompo, expr);
-	
-	Statement body = forStmt.getBody();
-	DFComponent bodyCompo = new DFComponent(graph);
-	bodyCompo = processStatement(graph, scope, bodyCompo, body);
+	DFComponent loopCompo = new DFComponent(graph);
+	loopCompo = processExpression(graph, scope, loopCompo, 
+				      forStmt.getExpression());
+	DFNode condValue = loopCompo.value;
+	loopCompo = processStatement(graph, scope, loopCompo,
+				     forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
-	    bodyCompo = processExpression(graph, scope, bodyCompo, update);
+	    loopCompo = processExpression(graph, scope, loopCompo, update);
 	}
 	
 	return processLoop(graph, scope, compo, forStmt,
-			   exprCompo, bodyCompo);
+			   condValue, loopCompo);
     }
     
     public DFComponent processStatement
