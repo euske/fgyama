@@ -930,7 +930,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public DFFrame processExpressionLeft
+    public DFFrame processAssignment
 	(DFScope scope, DFFrame frame, Expression expr)
 	throws UnsupportedSyntax {
 	if (expr instanceof SimpleName) {
@@ -953,6 +953,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName fieldName = qn.getName();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    frame.addOutput(ref);
+	    
 	    
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -991,13 +992,13 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof PrefixExpression) {
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    Expression operand = prefix.getOperand();
-	    frame = processExpressionLeft(scope, frame, operand);
+	    frame = processAssignment(scope, frame, operand);
 	    frame = processExpression(scope, frame, operand);
 	    
 	} else if (expr instanceof PostfixExpression) {
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    Expression operand = postfix.getOperand();
-	    frame = processExpressionLeft(scope, frame, operand);
+	    frame = processAssignment(scope, frame, operand);
 	    frame = processExpression(scope, frame, operand);
 	    
 	} else if (expr instanceof InfixExpression) {
@@ -1011,7 +1012,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (expr instanceof Assignment) {
 	    Assignment assn = (Assignment)expr;
-	    frame = processExpressionLeft(scope, frame, assn.getLeftHandSide());
+	    frame = processAssignment(scope, frame, assn.getLeftHandSide());
 	    frame = processExpression(scope, frame, assn.getRightHandSide());
 
 	} else if (expr instanceof VariableDeclarationExpression) {
@@ -1302,7 +1303,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public DFComponent processExpressionLeft
+    public DFComponent processAssignment
 	(DFGraph graph, DFScope scope, DFComponent compo, Expression expr)
 	throws UnsupportedSyntax {
 	if (expr instanceof SimpleName) {
@@ -1398,7 +1399,7 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    compo = processExpressionLeft(graph, scope, compo, operand);
+	    compo = processAssignment(graph, scope, compo, operand);
 	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
 	    DFNode value = new PrefixNode(graph, expr, op, compo.value);
@@ -1414,7 +1415,7 @@ public class Java2DF extends ASTVisitor {
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
-	    compo = processExpressionLeft(graph, scope, compo, operand);
+	    compo = processAssignment(graph, scope, compo, operand);
 	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
@@ -1442,7 +1443,7 @@ public class Java2DF extends ASTVisitor {
 	    // Assignment.
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
-	    compo = processExpressionLeft(graph, scope, compo, assn.getLeftHandSide());
+	    compo = processAssignment(graph, scope, compo, assn.getLeftHandSide());
 	    AssignNode assign = compo.assign;
 	    compo = processExpression(graph, scope, compo, assn.getRightHandSide());
 	    DFNode rvalue = compo.value;
