@@ -256,49 +256,47 @@ class DFScope {
 }
 
 
-//  DFFrame
+//  DFLabel
 //
-class DFFrame {
+class DFLabel {
 
-    public Set<DFRef> inputs;
-    public Set<DFRef> outputs;
-    
-    public DFFrame() {
-	this.inputs = new HashSet<DFRef>();
-	this.outputs = new HashSet<DFRef>();
+    public String name;
+
+    public DFLabel(String name) {
+	this.name = name;
     }
 
     public String toString() {
-	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : this.inputs) {
-	    inputs.append(" "+ref);
+	return this.name+":";
+    }
+    
+    public static DFLabel BREAK = new DFLabel("BREAK");
+    public static DFLabel CONTINUE = new DFLabel("CONTINUE");
+}
+
+
+//  DFSnapshot
+//
+class DFSnapshot {
+
+    public DFLabel label;
+    public Map<DFRef, DFNode> nodes;
+
+    public DFSnapshot(DFLabel label) {
+	this.label = label;
+	this.nodes = new HashMap<DFRef, DFNode>();
+    }
+
+    public String toString() {
+	StringBuilder nodes = new StringBuilder();
+	for (Map.Entry<DFRef, DFNode> entry : this.nodes.entrySet()) {
+	    nodes.append(" "+entry.getKey()+":"+entry.getValue());
 	}
-	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : this.outputs) {
-	    outputs.append(" "+ref);
-	}
-	return ("<DFFrame: inputs="+inputs+", outputs="+outputs+">");
+	return ("<DFSnapshot("+this.label+") nodes="+nodes+">");
     }
 
-    public void addInput(DFRef ref) {
-	if (!this.outputs.contains(ref)) {
-	    this.inputs.add(ref);
-	}
-    }
-
-    public void addOutput(DFRef ref) {
-	this.outputs.add(ref);
-    }
-
-    public void removeRef(DFRef ref) {
-	this.inputs.remove(ref);
-	this.outputs.remove(ref);
-    }
-
-    public Set<DFRef> getLoopRefs() {
-	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
-	refs.retainAll(this.outputs);
-	return refs;
+    public void add(DFRef ref, DFNode node) {
+	this.nodes.put(ref, node);
     }
 }
 
@@ -310,7 +308,7 @@ class DFComponent {
     public DFGraph graph;
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
-    public Map<DFRef, LoopJoinNode> loopjoins;
+    public List<DFSnapshot> snapshots;
     public DFNode value;
     public AssignNode assign;
     
@@ -318,7 +316,7 @@ class DFComponent {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
-	this.loopjoins = new HashMap<DFRef, LoopJoinNode>();
+	this.snapshots = new ArrayList<DFSnapshot>();
 	this.value = null;
 	this.assign = null;
     }
@@ -357,27 +355,24 @@ class DFComponent {
 	this.outputs.remove(ref);
     }
 
-    public void setBreak() {
-	setBreak(this.inputs);
-	setBreak(this.outputs);
-    }
-    public void setBreak(Map<DFRef, DFNode> nodes) {
-	for (Map.Entry<DFRef, DFNode> entry : nodes.entrySet()) {
+    public DFSnapshot snapshot(DFLabel label) {
+	DFSnapshot snapshot = new DFSnapshot(label);
+	for (Map.Entry<DFRef, DFNode> entry : this.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode node = entry.getValue();
-	    LoopJoinNode join;
-	    if (this.loopjoins.containsKey(ref)) {
-		join = this.loopjoins.get(ref);
-	    } else {
-		join = new LoopJoinNode(this.graph, null, ref);
-		this.loopjoins.put(ref, join);
-	    }
-	    join.take(node);
+	    snapshot.add(ref, node);
 	}
+	for (Map.Entry<DFRef, DFNode> entry : this.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode node = entry.getValue();
+	    snapshot.add(ref, node);
+	}
+	this.snapshots.add(snapshot);
+	return snapshot;
     }
-
-    public LoopJoinNode getJoin(DFRef ref) {
-	return this.loopjoins.get(ref);
+    
+    public void mergeSnapshots(DFComponent compo) {
+	this.snapshots.addAll(compo.snapshots);
     }
 }
 
@@ -1305,6 +1300,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    branch.send(true, src);
 	}
+	compo.mergeSnapshots(trueCompo);
 	if (falseCompo != null) {
 	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.inputs.entrySet()) {
 		DFRef ref = entry.getKey();
@@ -1317,6 +1313,7 @@ public class Java2DF extends ASTVisitor {
 		}
 		branch.send(false, src);
 	    }
+	    compo.mergeSnapshots(falseCompo);
 	}
 	
 	for (Map.Entry<DFRef, DFNode> entry : trueCompo.outputs.entrySet()) {
@@ -1358,7 +1355,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
-	Map<DFRef, DFNode> temps = new HashMap<DFRef, DFNode>();
+	Map<DFRef, LoopJoinNode> joins = new HashMap<DFRef, LoopJoinNode>();
 	
 	for (Map.Entry<DFRef, DFNode> entry : loopCompo.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
@@ -1395,6 +1392,25 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 
+	for (DFSnapshot snapshot : loopCompo.snapshots) {
+	    for (Map.Entry<DFRef, LoopNode> entry : loops.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode node = snapshot.nodes.get(ref);
+		if (node == null) {
+		    node = entry.getValue();
+		}
+		LoopJoinNode join = joins.get(ref);
+		if (join == null) {
+		    join = new LoopJoinNode(graph, stmt, ref);
+		    joins.put(ref, join);
+		}
+		if (snapshot.label == DFLabel.BREAK) {
+		    join.take(node);
+		    compo.put(ref, join);
+		}
+	    }
+	}
+	
 	return compo;
     }
 
@@ -1561,13 +1577,13 @@ public class Java2DF extends ASTVisitor {
 	    // XXX ignore label (for now).
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    // SimpleName labelName = breakStmt.getLabel();
-	    compo.setBreak();
+	    compo.snapshot(DFLabel.BREAK);
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    // XXX ignore label (for now).
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    // SimpleName labelName = contStmt.getLabel();
-	    compo.setBreak();
+	    compo.snapshot(DFLabel.CONTINUE);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    // XXX ignore label (for now).
@@ -1704,6 +1720,7 @@ public class Java2DF extends ASTVisitor {
 		String path = args[++i];
 		try {
 		    output = new FileOutputStream(path);
+		    Utils.logit("Exporting: "+path);
 		} catch (IOException e) {
 		    System.err.println("Cannot open output file: "+path);
 		}

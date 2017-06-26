@@ -4,11 +4,10 @@ public class Foo {
 	int z = 1;
 	while (0 < y) {
 	    z *= x;
-	    y -= 1;
 	    if (y == 1) {
-		y = 2;
 		break;
 	    }
+	    y -= 1;
 	}
 	return z;
     }
