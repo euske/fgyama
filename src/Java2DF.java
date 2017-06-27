@@ -805,12 +805,15 @@ class LoopNode extends ProgNode {
 class LoopJoinNode extends ProgNode {
 
     public DFRef ref;
+    public DFNode exit;
     public List<DFNode> nodes;
     
-    public LoopJoinNode(DFGraph graph, ASTNode node, DFRef ref) {
+    public LoopJoinNode(DFGraph graph, ASTNode node, DFRef ref, DFNode exit) {
 	super(graph, node);
 	this.ref = ref;
 	this.nodes = new ArrayList<DFNode>();
+	this.exit = exit;
+	exit.connect(this, "exit");
     }
 
     public DFNodeType type() {
@@ -821,9 +824,9 @@ class LoopJoinNode extends ProgNode {
 	return "LoopJoin:"+this.ref.name;
     }
     
-    public void take(DFNode node) {
+    public void take(DFNode node, DFLabel label) {
 	int i = this.nodes.size();
-	node.connect(this, "break"+i);
+	node.connect(this, label.name+":"+i);
 	this.nodes.add(node);
     }
 }
@@ -973,17 +976,6 @@ public class Java2DF extends ASTVisitor {
 
     public Java2DF(GraphvizExporter exporter) {
 	this.exporter = exporter;
-    }
-
-    public boolean visit(MethodDeclaration method) {
-	try {
-	    DFGraph graph = getMethodGraph(method);
-	    exporter.writeGraph(graph);
-	} catch (UnsupportedSyntax e) {
-	    String name = e.node.getClass().getName();
-	    Utils.logit("Unsupported("+name+"): "+e.node);
-	}
-	return true;
     }
 
     public DFComponent processVariableDeclaration
@@ -1395,17 +1387,18 @@ public class Java2DF extends ASTVisitor {
 	for (DFSnapshot snapshot : loopCompo.snapshots) {
 	    for (Map.Entry<DFRef, LoopNode> entry : loops.entrySet()) {
 		DFRef ref = entry.getKey();
-		DFNode node = snapshot.nodes.get(ref);
-		if (node == null) {
-		    node = entry.getValue();
+		DFNode src = entry.getValue();
+		DFNode dst = snapshot.nodes.get(ref);
+		if (dst == null) {
+		    dst = entry.getValue();
 		}
 		LoopJoinNode join = joins.get(ref);
 		if (join == null) {
-		    join = new LoopJoinNode(graph, stmt, ref);
+		    join = new LoopJoinNode(graph, stmt, ref, src);
 		    joins.put(ref, join);
 		}
+		join.take(dst, snapshot.label);
 		if (snapshot.label == DFLabel.BREAK) {
-		    join.take(node);
 		    compo.put(ref, join);
 		}
 	    }
@@ -1670,8 +1663,8 @@ public class Java2DF extends ASTVisitor {
     
     public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
-	SimpleName funcName = method.getName();
-	DFGraph graph = new DFGraph(funcName.getFullyQualifiedName());
+	String funcName = method.getName().getFullyQualifiedName();
+	DFGraph graph = new DFGraph(funcName);
 	DFScope scope = new DFScope();
 	
 	DFComponent compo = processMethodDeclaration(graph, scope, method);
@@ -1703,6 +1696,22 @@ public class Java2DF extends ASTVisitor {
         }
 	
 	return graph;
+    }
+
+    public boolean visit(MethodDeclaration method) {
+	String funcName = method.getName().getFullyQualifiedName();
+	try {
+	    DFGraph graph = getMethodGraph(method);
+	    if (this.exporter != null) {
+		this.exporter.writeGraph(graph);
+	    }
+	    Utils.logit("success: "+funcName);
+	} catch (UnsupportedSyntax e) {
+	    String name = e.node.getClass().getName();
+	    Utils.logit("Unsupported("+name+"): "+e.node);
+	    Utils.logit("fail: "+funcName);
+	}
+	return true;
     }
 
     // main
