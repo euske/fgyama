@@ -487,7 +487,9 @@ class ReturnNode extends ProgNode {
     public ReturnNode(DFGraph graph, ASTNode node, DFNode value) {
 	super(graph, node);
 	this.value = value;
-	value.connect(this, "return");
+	if (value != null) {
+	    value.connect(this, "return");
+	}
     }
 
     public DFNodeType type() {
@@ -1430,8 +1432,12 @@ public class Java2DF extends ASTVisitor {
 	 ReturnStatement rtnStmt)
 	throws UnsupportedSyntax {
 	Expression expr = rtnStmt.getExpression();
-	compo = processExpression(graph, scope, compo, expr);
-	DFNode rtrn = new ReturnNode(graph, rtnStmt, compo.value);
+	DFNode value = null;
+	if (expr != null) {
+	    compo = processExpression(graph, scope, compo, expr);
+	    value = compo.value;
+	}
+	DFNode rtrn = new ReturnNode(graph, rtnStmt, value);
 	compo.put(DFRef.RETURN, rtrn);
 	return compo;
     }
@@ -1486,9 +1492,14 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	DFComponent loopCompo = new DFComponent(graph);
-	loopCompo = processExpression(graph, scope, loopCompo, 
-				      forStmt.getExpression());
+	Expression expr = forStmt.getExpression();
 	DFNode condValue = loopCompo.value;
+	if (expr != null) {
+	    loopCompo = processExpression(graph, scope, loopCompo, expr);
+	    condValue = loopCompo.value;
+	} else {
+	    condValue = new ConstNode(graph, null, "true");
+	}
 	loopCompo = processStatement(graph, scope, loopCompo,
 				     forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
@@ -1631,8 +1642,11 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	
 	DFScope scope = new DFScope(parent);
-	for (Statement stmt : (List<Statement>) block.statements()) {
-	    compo = processStatement(graph, scope, compo, stmt);
+	List<Statement> statements = (List<Statement>) block.statements();
+	if (statements != null) {
+	    for (Statement stmt : statements) {
+		compo = processStatement(graph, scope, compo, stmt);
+	    }
 	}
 	scope.finish(compo);
 	return compo;
@@ -1670,6 +1684,9 @@ public class Java2DF extends ASTVisitor {
 	DFComponent compo = processMethodDeclaration(graph, scope, method);
 	
 	Block funcBlock = method.getBody();
+	// Ignore method prototypes.
+	if (funcBlock == null) return null;
+				   
 	compo = processBlock(graph, scope, compo, funcBlock);
 
         // Collapse redundant nodes.
@@ -1702,10 +1719,12 @@ public class Java2DF extends ASTVisitor {
 	String funcName = method.getName().getFullyQualifiedName();
 	try {
 	    DFGraph graph = getMethodGraph(method);
-	    if (this.exporter != null) {
-		this.exporter.writeGraph(graph);
+	    if (graph != null) {
+		Utils.logit("success: "+funcName);
+		if (this.exporter != null) {
+		    this.exporter.writeGraph(graph);
+		}
 	    }
-	    Utils.logit("success: "+funcName);
 	} catch (UnsupportedSyntax e) {
 	    String name = e.node.getClass().getName();
 	    Utils.logit("Unsupported("+name+"): "+e.node);
