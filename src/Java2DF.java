@@ -11,10 +11,10 @@ class UnsupportedSyntax extends Exception {
 
     static final long serialVersionUID = 1L;
 
-    public ASTNode node;
+    public ASTNode ast;
     
-    public UnsupportedSyntax(ASTNode node) {
-	this.node = node;
+    public UnsupportedSyntax(ASTNode ast) {
+	this.ast = ast;
     }
 }
 
@@ -392,11 +392,11 @@ class DistNode extends DFNode {
 // ProgNode: a DFNode that corresponds to an actual program point.
 abstract class ProgNode extends DFNode {
 
-    public ASTNode node;
+    public ASTNode ast;
     
-    public ProgNode(DFGraph graph, ASTNode node) {
+    public ProgNode(DFGraph graph, ASTNode ast) {
 	super(graph);
-	this.node = node;
+	this.ast = ast;
     }
 }
 
@@ -405,8 +405,8 @@ class ArgNode extends ProgNode {
 
     public int index;
 
-    public ArgNode(DFGraph graph, ASTNode node, int index) {
-	super(graph, node);
+    public ArgNode(DFGraph graph, ASTNode ast, int index) {
+	super(graph, ast);
 	this.index = index;
     }
 
@@ -420,8 +420,8 @@ abstract class AssignNode extends ProgNode {
 
     public DFRef ref;
     
-    public AssignNode(DFGraph graph, ASTNode node, DFRef ref) {
-	super(graph, node);
+    public AssignNode(DFGraph graph, ASTNode ast, DFRef ref) {
+	super(graph, ast);
 	this.ref = ref;
     }
 
@@ -441,8 +441,8 @@ class SingleAssignNode extends AssignNode {
 
     public DFNode value;
     
-    public SingleAssignNode(DFGraph graph, ASTNode node, DFRef ref) {
-	super(graph, node, ref);
+    public SingleAssignNode(DFGraph graph, ASTNode ast, DFRef ref) {
+	super(graph, ast, ref);
     }
 
     public void take(DFNode value) {
@@ -456,9 +456,9 @@ class ArrayAssignNode extends SingleAssignNode {
 
     public DFNode index;
 
-    public ArrayAssignNode(DFGraph graph, ASTNode node, DFRef ref,
+    public ArrayAssignNode(DFGraph graph, ASTNode ast, DFRef ref,
 			   DFNode array, DFNode index) {
-	super(graph, node, ref);
+	super(graph, ast, ref);
 	this.index = index;
 	array.connect(this, "access");
 	index.connect(this, "index");
@@ -470,9 +470,9 @@ class FieldAssignNode extends SingleAssignNode {
 
     public DFNode obj;
 
-    public FieldAssignNode(DFGraph graph, ASTNode node, DFRef ref,
+    public FieldAssignNode(DFGraph graph, ASTNode ast, DFRef ref,
 			   DFNode obj) {
-	super(graph, node, ref);
+	super(graph, ast, ref);
 	this.obj = obj;
 	obj.connect(this, "index");
     }
@@ -484,8 +484,8 @@ class ReturnNode extends ProgNode {
 
     public DFNode value;
     
-    public ReturnNode(DFGraph graph, ASTNode node, DFNode value) {
-	super(graph, node);
+    public ReturnNode(DFGraph graph, ASTNode ast, DFNode value) {
+	super(graph, ast);
 	this.value = value;
 	if (value != null) {
 	    value.connect(this, "return");
@@ -506,8 +506,8 @@ class ConstNode extends ProgNode {
 
     public String value;
 
-    public ConstNode(DFGraph graph, ASTNode node, String value) {
-	super(graph, node);
+    public ConstNode(DFGraph graph, ASTNode ast, String value) {
+	super(graph, ast);
 	this.value = value;
     }
 
@@ -521,8 +521,8 @@ class ArrayValueNode extends ProgNode {
 
     public List<DFNode> values;
 
-    public ArrayValueNode(DFGraph graph, ASTNode node) {
-	super(graph, node);
+    public ArrayValueNode(DFGraph graph, ASTNode ast) {
+	super(graph, ast);
 	this.values = new ArrayList<DFNode>();
     }
 
@@ -543,9 +543,9 @@ class PrefixNode extends ProgNode {
     public PrefixExpression.Operator op;
     public DFNode value;
 
-    public PrefixNode(DFGraph graph, ASTNode node,
+    public PrefixNode(DFGraph graph, ASTNode ast,
 		      PrefixExpression.Operator op, DFNode value) {
-	super(graph, node);
+	super(graph, ast);
 	this.op = op;
 	this.value = value;
 	value.connect(this, "pre");
@@ -562,9 +562,9 @@ class PostfixNode extends ProgNode {
     public PostfixExpression.Operator op;
     public DFNode value;
 
-    public PostfixNode(DFGraph graph, ASTNode node,
+    public PostfixNode(DFGraph graph, ASTNode ast,
 		       PostfixExpression.Operator op, DFNode value) {
-	super(graph, node);
+	super(graph, ast);
 	this.op = op;
 	this.value = value;
 	value.connect(this, "post");
@@ -582,10 +582,10 @@ class InfixNode extends ProgNode {
     public DFNode lvalue;
     public DFNode rvalue;
 
-    public InfixNode(DFGraph graph, ASTNode node,
+    public InfixNode(DFGraph graph, ASTNode ast,
 		     InfixExpression.Operator op,
 		     DFNode lvalue, DFNode rvalue) {
-	super(graph, node);
+	super(graph, ast);
 	this.op = op;
 	this.lvalue = lvalue;
 	this.rvalue = rvalue;
@@ -604,9 +604,9 @@ class ArrayAccessNode extends ProgNode {
     public DFNode value;
     public DFNode index;
 
-    public ArrayAccessNode(DFGraph graph, ASTNode node,
+    public ArrayAccessNode(DFGraph graph, ASTNode ast,
 			   DFNode array, DFNode value, DFNode index) {
-	super(graph, node);
+	super(graph, ast);
 	this.value = value;
 	this.index = index;
 	array.connect(this, "array");
@@ -625,9 +625,9 @@ class FieldAccessNode extends ProgNode {
     public DFNode value;
     public DFNode obj;
 
-    public FieldAccessNode(DFGraph graph, ASTNode node,
+    public FieldAccessNode(DFGraph graph, ASTNode ast,
 			   DFNode value, DFNode obj) {
-	super(graph, node);
+	super(graph, ast);
 	this.value = value;
 	this.obj = obj;
 	value.connect(this, "access");
@@ -645,9 +645,9 @@ class TypeCastNode extends ProgNode {
     public Type type;
     public DFNode value;
     
-    public TypeCastNode(DFGraph graph, ASTNode node,
+    public TypeCastNode(DFGraph graph, ASTNode ast,
 			Type type, DFNode value) {
-	super(graph, node);
+	super(graph, ast);
 	this.type = type;
 	this.value = value;
 	value.connect(this, "cast");
@@ -664,9 +664,9 @@ class InstanceofNode extends ProgNode {
     public Type type;
     public DFNode value;
     
-    public InstanceofNode(DFGraph graph, ASTNode node,
+    public InstanceofNode(DFGraph graph, ASTNode ast,
 			  Type type, DFNode value) {
-	super(graph, node);
+	super(graph, ast);
 	this.type = type;
 	this.value = value;
 	value.connect(this, "instanceof");
@@ -685,10 +685,10 @@ class AssnOpNode extends ProgNode {
     public DFNode lvalue;
     public DFNode rvalue;
 
-    public AssnOpNode(DFGraph graph, ASTNode node,
+    public AssnOpNode(DFGraph graph, ASTNode ast,
 		      Assignment.Operator op,
 		      DFNode lvalue, DFNode rvalue) {
-	super(graph, node);
+	super(graph, ast);
 	this.op = op;
 	this.lvalue = lvalue;
 	this.rvalue = rvalue;
@@ -706,8 +706,8 @@ abstract class CondNode extends ProgNode {
     
     public DFNode value;
     
-    public CondNode(DFGraph graph, ASTNode node, DFNode value) {
-	super(graph, node);
+    public CondNode(DFGraph graph, ASTNode ast, DFNode value) {
+	super(graph, ast);
 	this.value = value;
 	value.connect(this, DFLinkType.ControlFlow);
     }
@@ -720,8 +720,8 @@ abstract class CondNode extends ProgNode {
 // BranchNode
 class BranchNode extends CondNode {
 
-    public BranchNode(DFGraph graph, ASTNode node, DFNode value) {
-	super(graph, node, value);
+    public BranchNode(DFGraph graph, ASTNode ast, DFNode value) {
+	super(graph, ast, value);
     }
 
     public String label() {
@@ -744,8 +744,8 @@ class JoinNode extends CondNode {
     public boolean recvTrue = false;
     public boolean recvFalse = false;
     
-    public JoinNode(DFGraph graph, ASTNode node, DFNode value, DFRef ref) {
-	super(graph, node, value);
+    public JoinNode(DFGraph graph, ASTNode ast, DFNode value, DFRef ref) {
+	super(graph, ast, value);
 	this.ref = ref;
     }
     
@@ -783,8 +783,8 @@ class LoopNode extends ProgNode {
     public DFRef ref;
     public DFNode init;
     
-    public LoopNode(DFGraph graph, ASTNode node, DFRef ref, DFNode init) {
-	super(graph, node);
+    public LoopNode(DFGraph graph, ASTNode ast, DFRef ref, DFNode init) {
+	super(graph, ast);
 	this.ref = ref;
 	this.init = init;
 	init.connect(this, "init");
@@ -810,8 +810,8 @@ class LoopJoinNode extends ProgNode {
     public DFNode exit;
     public List<DFNode> nodes;
     
-    public LoopJoinNode(DFGraph graph, ASTNode node, DFRef ref, DFNode exit) {
-	super(graph, node);
+    public LoopJoinNode(DFGraph graph, ASTNode ast, DFRef ref, DFNode exit) {
+	super(graph, ast);
 	this.ref = ref;
 	this.nodes = new ArrayList<DFNode>();
 	this.exit = exit;
@@ -839,8 +839,8 @@ abstract class CallNode extends ProgNode {
     public DFNode obj;
     public List<DFNode> args;
 
-    public CallNode(DFGraph graph, ASTNode node, DFNode obj) {
-	super(graph, node);
+    public CallNode(DFGraph graph, ASTNode ast, DFNode obj) {
+	super(graph, ast);
 	this.obj = obj;
 	this.args = new ArrayList<DFNode>();
 	if (obj != null) {
@@ -860,8 +860,8 @@ class MethodCallNode extends CallNode {
 
     public String name;
 
-    public MethodCallNode(DFGraph graph, ASTNode node, DFNode obj, String name) {
-	super(graph, node, obj);
+    public MethodCallNode(DFGraph graph, ASTNode ast, DFNode obj, String name) {
+	super(graph, ast, obj);
 	this.name = name;
     }
     
@@ -875,8 +875,8 @@ class CreateObjectNode extends CallNode {
 
     public Type type;
 
-    public CreateObjectNode(DFGraph graph, ASTNode node, DFNode obj, Type type) {
-	super(graph, node, obj);
+    public CreateObjectNode(DFGraph graph, ASTNode ast, DFNode obj, Type type) {
+	super(graph, ast, obj);
 	this.type = type;
     }
     
@@ -1726,8 +1726,8 @@ public class Java2DF extends ASTVisitor {
 		}
 	    }
 	} catch (UnsupportedSyntax e) {
-	    String name = e.node.getClass().getName();
-	    Utils.logit("Unsupported("+name+"): "+e.node);
+	    String name = e.ast.getClass().getName();
+	    Utils.logit("Unsupported("+name+"): "+e.ast);
 	    Utils.logit("fail: "+funcName);
 	}
 	return true;
