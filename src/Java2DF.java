@@ -214,6 +214,7 @@ class DFScopeMap {
 class DFScope {
 
     public DFScope parent;
+    public List<DFScope> children;
     public Map<String, DFVar> vars;
 
     public Set<DFRef> inputs;
@@ -230,6 +231,10 @@ class DFScope {
     
     public DFScope(DFScope parent) {
 	this.parent = parent;
+	if (parent != null) {
+	    parent.children.add(this);
+	}
+	this.children = new ArrayList<DFScope>();
 	this.vars = new HashMap<String, DFVar>();
 	this.inputs = new HashSet<DFRef>();
 	this.outputs = new HashSet<DFRef>();
@@ -241,6 +246,32 @@ class DFScope {
 	    vars.append(" "+var);
 	}
 	return ("<DFScope:"+vars+">");
+    }
+
+    public void dump() {
+	dump(System.out, "");
+    }
+    
+    public void dump(PrintStream out, String indent) {
+	out.println(indent+"{");
+	String i2 = indent + "  ";
+	StringBuilder inputs = new StringBuilder();
+	for (DFRef ref : this.inputs) {
+	    inputs.append(" "+ref);
+	}
+	out.println(i2+"inputs:"+inputs);
+	StringBuilder outputs = new StringBuilder();
+	for (DFRef ref : this.outputs) {
+	    outputs.append(" "+ref);
+	}
+	out.println(i2+"outputs:"+outputs);
+	for (DFVar var : this.vars.values()) {
+	    out.println(i2+var);
+	}
+	for (DFScope scope : this.children) {
+	    scope.dump(out, i2);
+	}
+	out.println(indent+"}");
     }
 
     public void finish(DFComponent compo) {
@@ -1984,10 +2015,11 @@ public class Java2DF extends ASTVisitor {
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
 		SimpleName varName = frag.getName();
-		scope.add(varName.getIdentifier(), varType);
+		DFRef ref = scope.add(varName.getIdentifier(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
 		    buildScope(map, scope, expr);
+		    scope.addOutput(ref);
 		}
 	    }
 
@@ -2031,23 +2063,28 @@ public class Java2DF extends ASTVisitor {
 	    ArrayAccess aa = (ArrayAccess)ast;
 	    buildScope(map, scope, aa.getArray());
 	    buildScope(map, scope, aa.getIndex());
+	    DFRef ref = scope.lookupArray();
+	    scope.addInput(ref);
 	    
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    buildScope(map, scope, fa.getExpression());
-	    scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    scope.addInput(ref);
 	    
 	} else if (ast instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
 	    SimpleName fieldName = sfa.getName();
-	    scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    scope.addInput(ref);
 	    
 	} else if (ast instanceof QualifiedName) {
 	    QualifiedName qn = (QualifiedName)ast;
 	    SimpleName fieldName = qn.getName();
-	    scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    buildScope(map, scope, qn.getQualifier());
+	    scope.addInput(ref);
 	    
 	} else if (ast instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)ast;
@@ -2136,13 +2173,17 @@ public class Java2DF extends ASTVisitor {
 	String funcName = method.getName().getFullyQualifiedName();
 	DFGraph graph = new DFGraph(funcName);
 	DFScope scope = new DFScope();
-	
+
 	DFComponent compo = processMethodDeclaration(graph, scope, method);
 	
 	Block funcBlock = method.getBody();
 	// Ignore method prototypes.
 	if (funcBlock == null) return null;
 				   
+	DFScopeMap map = new DFScopeMap();
+	buildScope(map, scope, funcBlock);
+	scope.dump();
+	
 	compo = processBlock(graph, scope, compo, funcBlock);
 
         // Collapse redundant nodes.
