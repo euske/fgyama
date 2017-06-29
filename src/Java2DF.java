@@ -169,10 +169,6 @@ class DFRef {
     public String toString() {
 	return ("<DFRef: "+this.name+">");
     }
-
-    public static DFRef THIS = new DFRef(null, "THIS");
-    public static DFRef SUPER = new DFRef(null, "SUPER");
-    public static DFRef RETURN = new DFRef(null, "RETURN");
 }
 
 
@@ -193,22 +189,50 @@ class DFVar extends DFRef {
 }
 
 
+//  DFScopeMap
+//
+class DFScopeMap {
+
+    public Map<ASTNode, DFScope> scopes;
+
+    public DFScopeMap() {
+	this.scopes = new HashMap<ASTNode, DFScope>();
+    }
+
+    public void put(ASTNode ast, DFScope scope) {
+	this.scopes.put(ast, scope);
+    }
+
+    public DFScope get(ASTNode ast) {
+	return this.scopes.get(ast);
+    }
+}
+
+    
 //  DFScope
 //
 class DFScope {
 
-    public DFScope root;
     public DFScope parent;
     public Map<String, DFVar> vars;
+
+    public Set<DFRef> inputs;
+    public Set<DFRef> outputs;
 
     public DFScope() {
 	this(null);
     }
+
+    public static DFRef THIS = new DFRef(null, "THIS");
+    public static DFRef SUPER = new DFRef(null, "SUPER");
+    public static DFRef RETURN = new DFRef(null, "RETURN");
+    public static DFRef ARRAY = new DFRef(null, "[]");
     
     public DFScope(DFScope parent) {
-	this.root = (parent != null)? parent.root : this;
 	this.parent = parent;
 	this.vars = new HashMap<String, DFVar>();
+	this.inputs = new HashSet<DFRef>();
+	this.outputs = new HashSet<DFRef>();
     }
 
     public String toString() {
@@ -231,7 +255,7 @@ class DFScope {
 	return var;
     }
 
-    public DFVar lookup(String name) {
+    public DFRef lookup(String name) {
 	DFVar var = this.vars.get(name);
 	if (var != null) {
 	    return var;
@@ -242,17 +266,44 @@ class DFScope {
 	}
     }
 
-    public DFVar lookupArray() {
-	return this.root.lookup("[]");
+    public DFRef lookupThis() {
+	return THIS;
     }
     
-    public DFVar lookupField(String name) {
+    public DFRef lookupSuper() {
+	return SUPER;
+    }
+    
+    public DFRef lookupReturn() {
+	return RETURN;
+    }
+    
+    public DFRef lookupArray() {
+	return ARRAY;
+    }
+    
+    public DFRef lookupField(String name) {
 	return this.lookup("."+name);
     }
     
     public Collection<DFVar> vars() {
 	return this.vars.values();
     }
+
+    public void addInput(DFRef ref) {
+	if (this.parent != null) {
+	    this.parent.addInput(ref);
+	}
+	this.inputs.add(ref);
+    }
+
+    public void addOutput(DFRef ref) {
+	if (this.parent != null) {
+	    this.parent.addOutput(ref);
+	}
+	this.outputs.add(ref);
+    }
+
 }
 
 
@@ -1051,8 +1102,7 @@ public class Java2DF extends ASTVisitor {
 	    compo.value = compo.get(ref);
 	    
 	} else if (expr instanceof ThisExpression) {
-	    DFRef ref = DFRef.THIS;
-	    compo.value = compo.get(ref);
+	    compo.value = compo.get(scope.lookupThis());
 	    
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
@@ -1159,7 +1209,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation si = (SuperMethodInvocation)expr;
 	    SimpleName methodName = si.getName();
-	    DFNode obj = compo.get(DFRef.SUPER);
+	    DFNode obj = compo.get(scope.lookupSuper());
 	    MethodCallNode call = new MethodCallNode
 		(graph, si, obj, methodName.getIdentifier());
 	    for (Expression arg : (List<Expression>) si.arguments()) {
@@ -1215,7 +1265,7 @@ public class Java2DF extends ASTVisitor {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    DFNode obj = compo.get(DFRef.SUPER);
+	    DFNode obj = compo.get(scope.lookupSuper());
 	    compo.value = new FieldAccessNode(graph, sfa, compo.get(ref), obj);
 	    
 	} else if (expr instanceof QualifiedName) {
@@ -1438,7 +1488,8 @@ public class Java2DF extends ASTVisitor {
 	    value = compo.value;
 	}
 	DFNode rtrn = new ReturnNode(graph, rtnStmt, value);
-	compo.put(DFRef.RETURN, rtrn);
+	DFRef ref = scope.lookupReturn();
+	compo.put(ref, rtrn);
 	return compo;
     }
     
@@ -1657,22 +1708,427 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, MethodDeclaration method)
 	throws UnsupportedSyntax {
 	DFComponent compo = new DFComponent(graph);
-	// XXX check isContructor()
-	Type funcType = method.getReturnType2();
+	// XXX ignore isContructor()
+	// XXX ignore getReturnType2()
 	int i = 0;
-	// XXX check isVarargs()
+	// XXX ignore isVarargs()
 	for (SingleVariableDeclaration decl :
 		 (List<SingleVariableDeclaration>) method.parameters()) {
 	    DFNode param = new ArgNode(graph, decl, i++);
 	    SimpleName paramName = decl.getName();
+	    // XXX ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
-	    // XXX check getExtraDimensions()
 	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
 	    AssignNode assign = new SingleAssignNode(graph, decl, var);
 	    assign.take(param);
 	    compo.put(assign.ref, assign);
 	}
 	return compo;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void buildScope(DFScopeMap map, DFScope scope, Statement ast)
+	throws UnsupportedSyntax {
+	
+	if (ast instanceof AssertStatement) {
+
+	} else if (ast instanceof Block) {
+	    Block block = (Block)ast;
+	    DFScope child = new DFScope(scope);
+	    for (Statement stmt :
+		     (List<Statement>) block.statements()) {
+		buildScope(map, child, stmt);
+	    }
+	    
+	} else if (ast instanceof EmptyStatement) {
+	    
+	} else if (ast instanceof VariableDeclarationStatement) {
+	    VariableDeclarationStatement varStmt =
+		(VariableDeclarationStatement)ast;
+	    // XXX ignore modifiers and dimensions.
+	    Type varType = varStmt.getType();
+	    for (VariableDeclarationFragment frag :
+		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
+		SimpleName varName = frag.getName();
+		scope.add(varName.getIdentifier(), varType);
+		Expression expr = frag.getInitializer();
+		if (expr != null) {
+		    buildScope(map, scope, expr);
+		}
+	    }
+
+	} else if (ast instanceof ExpressionStatement) {
+	    ExpressionStatement exprStmt = (ExpressionStatement)ast;
+	    Expression expr = exprStmt.getExpression();
+	    buildScope(map, scope, expr);
+	    
+	} else if (ast instanceof ReturnStatement) {
+	    ReturnStatement returnStmt = (ReturnStatement)ast;
+	    Expression expr = returnStmt.getExpression();
+	    if (expr != null) {
+		buildScope(map, scope, expr);
+	    }
+	    
+	} else if (ast instanceof IfStatement) {
+	    IfStatement ifStmt = (IfStatement)ast;
+	    Expression expr = ifStmt.getExpression();
+	    buildScope(map, scope, expr);
+	    Statement thenStmt = ifStmt.getThenStatement();
+	    buildScope(map, scope, thenStmt);
+	    Statement elseStmt = ifStmt.getElseStatement();
+	    if (elseStmt != null) {
+		buildScope(map, scope, elseStmt);
+	    }
+	    
+	} else if (ast instanceof SwitchStatement) {
+	    SwitchStatement switchStmt = (SwitchStatement)ast;
+	    Expression expr = switchStmt.getExpression();
+	    buildScope(map, scope, expr);
+	    for (Statement stmt :
+		     (List<Statement>) switchStmt.statements()) {
+		buildScope(map, scope, stmt);
+	    }
+	    
+	} else if (ast instanceof SwitchCase) {
+	    SwitchCase switchCase = (SwitchCase)ast;
+	    Expression expr = switchCase.getExpression();
+	    if (expr != null) {
+		buildScope(map, scope, expr);
+	    }
+	    
+	} else if (ast instanceof WhileStatement) {
+	    WhileStatement whileStmt = (WhileStatement)ast;
+	    // Create a new scope.
+	    DFScope child = new DFScope(scope);
+	    Expression expr = whileStmt.getExpression();
+	    buildScope(map, child, expr);
+	    Statement stmt = whileStmt.getBody();
+	    buildScope(map, child, stmt);
+	    
+	} else if (ast instanceof DoStatement) {
+	    DoStatement doStmt = (DoStatement)ast;
+	    // Create a new scope.
+	    DFScope child = new DFScope(scope);
+	    Statement stmt = doStmt.getBody();
+	    buildScope(map, child, stmt);
+	    Expression expr = doStmt.getExpression();
+	    buildScope(map, child, expr);
+	    
+	} else if (ast instanceof ForStatement) {
+	    ForStatement forStmt = (ForStatement)ast;
+	    // Create a new scope.
+	    DFScope child = new DFScope(scope);
+	    for (Expression init :
+		     (List<Expression>) forStmt.initializers()) {
+		buildScope(map, child, init);
+	    }
+	    Expression expr = forStmt.getExpression();
+	    if (expr != null) {
+		buildScope(map, child, expr);
+	    }
+	    Statement stmt = forStmt.getBody();
+	    buildScope(map, child, stmt);
+	    for (Expression update :
+		     (List<Expression>) forStmt.updaters()) {
+		buildScope(map, child, update);
+	    }
+	    
+	} else if (ast instanceof EnhancedForStatement) {
+	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+	    // Create a new scope.
+	    DFScope child = new DFScope(scope);
+	    SingleVariableDeclaration decl = eForStmt.getParameter();
+	    // XXX ignore modifiers and dimensions.
+	    Type varType = decl.getType();
+	    SimpleName varName = decl.getName();
+	    child.add(varName.getIdentifier(), varType);
+	    Expression expr = eForStmt.getExpression();
+	    if (expr != null) {
+		buildScope(map, child, expr);
+	    }
+	    Statement stmt = eForStmt.getBody();
+	    buildScope(map, child, stmt);
+	    
+	} else if (ast instanceof BreakStatement) {
+	    
+	} else if (ast instanceof ContinueStatement) {
+	    
+	} else if (ast instanceof LabeledStatement) {
+	    LabeledStatement labeledStmt = (LabeledStatement)ast;
+	    Statement stmt = labeledStmt.getBody();
+	    buildScope(map, scope, stmt);
+	    
+	} else if (ast instanceof SynchronizedStatement) {
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+	    Block block = syncStmt.getBody();
+	    buildScope(map, scope, block);
+
+	} else if (ast instanceof TryStatement) {
+	    TryStatement tryStmt = (TryStatement)ast;
+	    Block block = tryStmt.getBody();
+	    buildScope(map, scope, block);
+	    for (CatchClause cc :
+		     (List<CatchClause>) tryStmt.catchClauses()) {
+		// Create a new scope.
+		DFScope child = new DFScope(scope);
+		SingleVariableDeclaration decl = cc.getException();
+		// XXX ignore modifiers and dimensions.
+		Type varType = decl.getType();
+		SimpleName varName = decl.getName();
+		child.add(varName.getIdentifier(), varType);
+		buildScope(map, child, cc.getBody());
+	    }
+	    Block finBlock = tryStmt.getFinally();
+	    if (finBlock != null) {
+		buildScope(map, scope, finBlock);
+	    }
+	    
+	} else if (ast instanceof ThrowStatement) {
+	    ThrowStatement throwStmt = (ThrowStatement)ast;
+	    Expression expr = throwStmt.getExpression();
+	    if (expr != null) {
+		buildScope(map, scope, expr);
+	    }
+	    
+	} else if (ast instanceof ConstructorInvocation) {
+	    ConstructorInvocation ci = (ConstructorInvocation)ast;
+	    for (Expression expr :
+		     (List<Expression>) ci.arguments()) {
+		buildScope(map, scope, expr);
+	    }
+	    
+	} else if (ast instanceof SuperConstructorInvocation) {
+	    SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
+	    for (Expression expr :
+		     (List<Expression>) sci.arguments()) {
+		buildScope(map, scope, expr);
+	    }
+	} else {
+	    // TypeDeclarationStatement
+	    throw new UnsupportedSyntax(ast);
+	    
+	}
+	
+	map.put(ast, scope);
+    }
+	
+    @SuppressWarnings("unchecked")
+    public void buildScope(DFScopeMap map, DFScope scope, Expression ast)
+	throws UnsupportedSyntax {
+	
+	if (ast instanceof Annotation) {
+
+	} else if (ast instanceof SimpleName) {
+	    SimpleName varName = (SimpleName)ast;
+	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    scope.addInput(ref);
+	    
+	} else if (ast instanceof ThisExpression) {
+	    scope.addInput(scope.lookupThis());
+	    
+	} else if (ast instanceof BooleanLiteral) {
+	    
+	} else if (ast instanceof CharacterLiteral) {
+	    
+	} else if (ast instanceof NullLiteral) {
+	    
+	} else if (ast instanceof NumberLiteral) {
+	    
+	} else if (ast instanceof StringLiteral) {
+	    
+	} else if (ast instanceof TypeLiteral) {
+	    
+	} else if (ast instanceof PrefixExpression) {
+	    PrefixExpression prefix = (PrefixExpression)ast;
+	    PrefixExpression.Operator op = prefix.getOperator();
+	    Expression operand = prefix.getOperand();
+	    buildScope(map, scope, operand);
+	    if (op == PrefixExpression.Operator.INCREMENT ||
+		op == PrefixExpression.Operator.DECREMENT) {
+		buildScopeLeft(map, scope, operand);
+	    }
+	    
+	} else if (ast instanceof PostfixExpression) {
+	    PostfixExpression postfix = (PostfixExpression)ast;
+	    PostfixExpression.Operator op = postfix.getOperator();
+	    Expression operand = postfix.getOperand();
+	    buildScope(map, scope, operand);
+	    if (op == PostfixExpression.Operator.INCREMENT ||
+		op == PostfixExpression.Operator.DECREMENT) {
+		buildScopeLeft(map, scope, operand);
+	    }
+	    
+	} else if (ast instanceof InfixExpression) {
+	    InfixExpression infix = (InfixExpression)ast;
+	    InfixExpression.Operator op = infix.getOperator();
+	    Expression loperand = infix.getLeftOperand();
+	    buildScope(map, scope, loperand);
+	    Expression roperand = infix.getRightOperand();
+	    buildScope(map, scope, roperand);
+    
+	} else if (ast instanceof ParenthesizedExpression) {
+	    ParenthesizedExpression paren = (ParenthesizedExpression)ast;
+	    buildScope(map, scope, paren.getExpression());
+	    
+	} else if (ast instanceof Assignment) {
+	    Assignment assn = (Assignment)ast;
+	    Assignment.Operator op = assn.getOperator();
+	    buildScope(map, scope, assn.getLeftHandSide());
+	    buildScope(map, scope, assn.getRightHandSide());
+	    buildScopeLeft(map, scope, assn.getLeftHandSide());
+
+	} else if (ast instanceof VariableDeclarationExpression) {
+	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
+	    // XXX ignore modifiers and dimensions.
+	    Type varType = decl.getType();
+	    for (VariableDeclarationFragment frag :
+		     (List<VariableDeclarationFragment>) decl.fragments()) {
+		SimpleName varName = frag.getName();
+		scope.add(varName.getIdentifier(), varType);
+		Expression expr = frag.getInitializer();
+		if (expr != null) {
+		    buildScope(map, scope, expr);
+		}
+	    }
+
+	} else if (ast instanceof MethodInvocation) {
+	    MethodInvocation invoke = (MethodInvocation)ast;
+	    Expression expr = invoke.getExpression();
+	    if (expr != null) {
+		buildScope(map, scope, expr);
+	    }
+	    for (Expression arg :
+		     (List<Expression>) invoke.arguments()) {
+		buildScope(map, scope, arg);
+	    }
+	    
+	} else if (ast instanceof SuperMethodInvocation) {
+	    SuperMethodInvocation si = (SuperMethodInvocation)ast;
+	    for (Expression arg :
+		     (List<Expression>) si.arguments()) {
+		buildScope(map, scope, arg);
+	    }
+	    
+	} else if (ast instanceof ArrayCreation) {
+	    ArrayCreation ac = (ArrayCreation)ast;
+	    for (Expression dim :
+		     (List<Expression>) ac.dimensions()) {
+		buildScope(map, scope, dim);
+	    }
+	    ArrayInitializer init = ac.getInitializer();
+	    if (init != null) {
+		buildScope(map, scope, init);
+	    }
+	    
+	} else if (ast instanceof ArrayInitializer) {
+	    ArrayInitializer init = (ArrayInitializer)ast;
+	    for (Expression expr :
+		     (List<Expression>) init.expressions()) {
+		buildScope(map, scope, expr);
+	    }
+	    
+	} else if (ast instanceof ArrayAccess) {
+	    ArrayAccess aa = (ArrayAccess)ast;
+	    buildScope(map, scope, aa.getArray());
+	    buildScope(map, scope, aa.getIndex());
+	    
+	} else if (ast instanceof FieldAccess) {
+	    FieldAccess fa = (FieldAccess)ast;
+	    SimpleName fieldName = fa.getName();
+	    buildScope(map, scope, fa.getExpression());
+	    scope.lookupField(fieldName.getIdentifier());
+	    
+	} else if (ast instanceof SuperFieldAccess) {
+	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
+	    SimpleName fieldName = sfa.getName();
+	    scope.lookupField(fieldName.getIdentifier());
+	    
+	} else if (ast instanceof QualifiedName) {
+	    QualifiedName qn = (QualifiedName)ast;
+	    SimpleName fieldName = qn.getName();
+	    scope.lookupField(fieldName.getIdentifier());
+	    buildScope(map, scope, qn.getQualifier());
+	    
+	} else if (ast instanceof CastExpression) {
+	    CastExpression cast = (CastExpression)ast;
+	    buildScope(map, scope, cast.getExpression());
+	    
+	} else if (ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
+	    Expression expr = cstr.getExpression();
+	    if (expr != null) {
+		buildScope(map, scope, expr);
+	    }
+	    for (Expression arg :
+		     (List<Expression>) cstr.arguments()) {
+		buildScope(map, scope, arg);
+	    }
+	    ASTNode anon = cstr.getAnonymousClassDeclaration();
+	    if (anon != null) {
+		throw new UnsupportedSyntax(anon);
+	    }
+	    
+	} else if (ast instanceof ConditionalExpression) {
+	    ConditionalExpression cond = (ConditionalExpression)ast;
+	    buildScope(map, scope, cond.getExpression());
+	    buildScope(map, scope, cond.getThenExpression());
+	    buildScope(map, scope, cond.getElseExpression());
+	    
+	} else if (ast instanceof InstanceofExpression) {
+	    InstanceofExpression instof = (InstanceofExpression)ast;
+	    buildScope(map, scope, instof.getLeftOperand());
+	    
+	} else {
+	    // AnonymousClassDeclaration
+	    // LambdaExpression
+	    // MethodReference
+	    //  CreationReference
+	    //  ExpressionMethodReference
+	    //  SuperMethodReference
+	    //  TypeMethodReference
+	    throw new UnsupportedSyntax(ast);
+	    
+	}
+
+	map.put(ast, scope);
+    }
+
+    @SuppressWarnings("unchecked")
+    public void buildScopeLeft(DFScopeMap map, DFScope scope, Expression ast)
+	throws UnsupportedSyntax {
+	
+	if (ast instanceof SimpleName) {
+	    SimpleName varName = (SimpleName)ast;
+	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    scope.addOutput(ref);
+	    
+	} else if (ast instanceof ArrayAccess) {
+	    ArrayAccess aa = (ArrayAccess)ast;
+	    buildScope(map, scope, aa.getArray());
+	    buildScope(map, scope, aa.getIndex());
+	    DFRef ref = scope.lookupArray();
+	    scope.addOutput(ref);
+	    
+	} else if (ast instanceof FieldAccess) {
+	    FieldAccess fa = (FieldAccess)ast;
+	    SimpleName fieldName = fa.getName();
+	    buildScope(map, scope, fa.getExpression());
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    scope.addOutput(ref);
+	    
+	} else if (ast instanceof QualifiedName) {
+	    QualifiedName qn = (QualifiedName)ast;
+	    SimpleName fieldName = qn.getName();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    buildScope(map, scope, qn.getQualifier());
+	    scope.addOutput(ref);
+	    
+	} else {
+	    throw new UnsupportedSyntax(ast);
+	    
+	}
+
+	map.put(ast, scope);
     }
     
     public DFGraph getMethodGraph(MethodDeclaration method)
