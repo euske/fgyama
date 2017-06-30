@@ -395,6 +395,32 @@ class DFSnapshot {
 }
 
 
+//  DFFrame
+//
+class DFFrame {
+
+    public DFFrame parent;
+    public DFScope scope;
+    public List<DFSnapshot> snapshots;
+    
+    public DFFrame(DFFrame parent, DFScope scope) {
+	this.parent = parent;
+	this.scope = scope;
+	this.snapshots = new ArrayList<DFSnapshot>();
+    }
+
+    public DFSnapshot snapshot(DFLabel label, DFComponent compo) {
+	DFSnapshot snapshot = new DFSnapshot(label);
+	for (DFRef ref : this.scope.getLoopRefs()) {
+	    DFNode node = compo.get(ref);
+	    snapshot.add(ref, node);
+	}
+	this.snapshots.add(snapshot);
+	return snapshot;
+    }
+}
+
+
 //  DFComponent
 //
 class DFComponent {
@@ -402,7 +428,6 @@ class DFComponent {
     public DFGraph graph;
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
-    public List<DFSnapshot> snapshots;
     public DFNode value;
     public AssignNode assign;
     
@@ -410,7 +435,6 @@ class DFComponent {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
-	this.snapshots = new ArrayList<DFSnapshot>();
 	this.value = null;
 	this.assign = null;
     }
@@ -447,26 +471,6 @@ class DFComponent {
     public void removeRef(DFRef ref) {
 	this.inputs.remove(ref);
 	this.outputs.remove(ref);
-    }
-
-    public DFSnapshot snapshot(DFLabel label) {
-	DFSnapshot snapshot = new DFSnapshot(label);
-	for (Map.Entry<DFRef, DFNode> entry : this.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode node = entry.getValue();
-	    snapshot.add(ref, node);
-	}
-	for (Map.Entry<DFRef, DFNode> entry : this.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode node = entry.getValue();
-	    snapshot.add(ref, node);
-	}
-	this.snapshots.add(snapshot);
-	return snapshot;
-    }
-    
-    public void mergeSnapshots(DFComponent compo) {
-	this.snapshots.addAll(compo.snapshots);
     }
 }
 
@@ -1383,14 +1387,12 @@ public class Java2DF extends ASTVisitor {
 	    DFNode src = entry.getValue();
 	    compo.get(ref).connect(src);
 	}
-	compo.mergeSnapshots(trueCompo);
 	if (falseCompo != null) {
 	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.inputs.entrySet()) {
 		DFRef ref = entry.getKey();
 		DFNode src = entry.getValue();
 		compo.get(ref).connect(src);
 	    }
-	    compo.mergeSnapshots(falseCompo);
 	}
 	
 	for (Map.Entry<DFRef, DFNode> entry : trueCompo.outputs.entrySet()) {
@@ -1427,8 +1429,8 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processLoop
-	(DFGraph graph, DFComponent compo, Statement stmt, 
-	 DFNode condValue, DFComponent loopCompo)
+	(DFGraph graph, DFComponent compo, DFFrame frame, 
+	 Statement stmt, DFNode condValue, DFComponent loopCompo)
 	throws UnsupportedSyntax {
 	
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
@@ -1469,7 +1471,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 
-	for (DFSnapshot snapshot : loopCompo.snapshots) {
+	for (DFSnapshot snapshot : frame.snapshots) {
 	    for (Map.Entry<DFRef, LoopNode> entry : loops.entrySet()) {
 		DFRef ref = entry.getKey();
 		DFNode src = entry.getValue();
@@ -1494,7 +1496,7 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(varStmt);
@@ -1503,7 +1505,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processExpressionStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 ExpressionStatement exprStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(exprStmt);
@@ -1512,7 +1514,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processReturnStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 ReturnStatement rtrnStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(rtrnStmt);
@@ -1529,7 +1531,7 @@ public class Java2DF extends ASTVisitor {
     }
     
     public DFComponent processIfStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 IfStatement ifStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(ifStmt);
@@ -1539,13 +1541,13 @@ public class Java2DF extends ASTVisitor {
 	
 	Statement thenStmt = ifStmt.getThenStatement();
 	DFComponent thenCompo = new DFComponent(graph);
-	thenCompo = processStatement(graph, map, thenCompo, thenStmt);
+	thenCompo = processStatement(graph, map, frame, thenCompo, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFComponent elseCompo = null;
 	if (elseStmt != null) {
 	    elseCompo = new DFComponent(graph);
-	    elseCompo = processStatement(graph, map, elseCompo, elseStmt);
+	    elseCompo = processStatement(graph, map, frame, elseCompo, elseStmt);
 	}
 
 	return processConditional(graph, compo, ifStmt,
@@ -1553,26 +1555,30 @@ public class Java2DF extends ASTVisitor {
     }
 	
     public DFComponent processWhileStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 WhileStatement whileStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(whileStmt);
+	// Create a new frame.
+	frame = new DFFrame(frame, scope);
 	DFComponent loopCompo = new DFComponent(graph);
 	loopCompo = processExpression(graph, scope, loopCompo,
 				      whileStmt.getExpression());
 	DFNode condValue = loopCompo.value;
-	loopCompo = processStatement(graph, map, loopCompo, 
+	loopCompo = processStatement(graph, map, frame, loopCompo, 
 				     whileStmt.getBody());
-	return processLoop(graph, compo, whileStmt,
+	return processLoop(graph, compo, frame, whileStmt,
 			   condValue, loopCompo);
     }
     
     @SuppressWarnings("unchecked")
     public DFComponent processForStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo,
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
 	 ForStatement forStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(forStmt);
+	// Create a new frame.
+	frame = new DFFrame(frame, scope);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    compo = processExpression(graph, scope, compo, init);
 	}
@@ -1586,19 +1592,20 @@ public class Java2DF extends ASTVisitor {
 	} else {
 	    condValue = new ConstNode(graph, null, "true");
 	}
-	loopCompo = processStatement(graph, map, loopCompo,
+	loopCompo = processStatement(graph, map, frame, loopCompo, 
 				     forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
 	    loopCompo = processExpression(graph, scope, loopCompo, update);
 	}
 	
-	return processLoop(graph, compo, forStmt,
+	return processLoop(graph, compo, frame, forStmt,
 			   condValue, loopCompo);
     }
     
     @SuppressWarnings("unchecked")
     public DFComponent processStatement
-	(DFGraph graph, DFScopeMap map, DFComponent compo, Statement stmt)
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent compo,
+	 Statement stmt)
 	throws UnsupportedSyntax {
 	
 	if (stmt instanceof AssertStatement) {
@@ -1607,7 +1614,7 @@ public class Java2DF extends ASTVisitor {
 	    DFScope scope = map.get(stmt);
 	    Block block = (Block)stmt;
 	    for (Statement cstmt : (List<Statement>) block.statements()) {
-		compo = processStatement(graph, map, compo, cstmt);
+		compo = processStatement(graph, map, frame, compo, cstmt);
 	    }
 	    scope.finish(compo);
 
@@ -1615,19 +1622,19 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof VariableDeclarationStatement) {
 	    compo = processVariableDeclarationStatement
-		(graph, map, compo, (VariableDeclarationStatement)stmt);
+		(graph, map, frame, compo, (VariableDeclarationStatement)stmt);
 
 	} else if (stmt instanceof ExpressionStatement) {
 	    compo = processExpressionStatement
-		(graph, map, compo, (ExpressionStatement)stmt);
+		(graph, map, frame, compo, (ExpressionStatement)stmt);
 		
 	} else if (stmt instanceof ReturnStatement) {
 	    compo = processReturnStatement
-		(graph, map, compo, (ReturnStatement)stmt);
+		(graph, map, frame, compo, (ReturnStatement)stmt);
 	    
 	} else if (stmt instanceof IfStatement) {
 	    compo = processIfStatement
-		(graph, map, compo, (IfStatement)stmt);
+		(graph, map, frame, compo, (IfStatement)stmt);
 	    
 	} else if (stmt instanceof SwitchStatement) {
 	    // XXX switch
@@ -1635,8 +1642,9 @@ public class Java2DF extends ASTVisitor {
 	    SwitchStatement switchStmt = (SwitchStatement)stmt;
 	    compo = processExpression(graph, scope, compo, switchStmt.getExpression());
 	    for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
-		compo = processStatement(graph, map, compo, cstmt);
+		compo = processStatement(graph, map, frame, compo, cstmt);
 	    }
+	    scope.finish(compo);
 	    
 	} else if (stmt instanceof SwitchCase) {
 	    // XXX case
@@ -1649,7 +1657,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof WhileStatement) {
 	    compo = processWhileStatement
-		(graph, map, compo, (WhileStatement)stmt);
+		(graph, map, frame, compo, (WhileStatement)stmt);
 	    
 	} else if (stmt instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)stmt;
@@ -1658,46 +1666,49 @@ public class Java2DF extends ASTVisitor {
 	    // doStmt.getExpression();
 	    
 	} else if (stmt instanceof ForStatement) {
-	    DFScope forScope = map.get(stmt);
+	    DFScope scope = map.get(stmt);
 	    compo = processForStatement
-		(graph, map, compo, (ForStatement)stmt);
-	    forScope.finish(compo);
+		(graph, map, frame, compo, (ForStatement)stmt);
+	    scope.finish(compo);
 	    
 	} else if (stmt instanceof EnhancedForStatement) {
-	    DFScope eforScope = map.get(stmt);
+	    DFScope scope = map.get(stmt);
 	    // XXX compo = processEForStatement(graph, map, compo, (EnhancedForStatement)stmt);
-	    eforScope.finish(compo);
+	    scope.finish(compo);
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    // XXX ignore label (for now).
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    // SimpleName labelName = breakStmt.getLabel();
-	    compo.snapshot(DFLabel.BREAK);
+	    frame.snapshot(DFLabel.BREAK, compo);
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    // XXX ignore label (for now).
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    // SimpleName labelName = contStmt.getLabel();
-	    compo.snapshot(DFLabel.CONTINUE);
+	    frame.snapshot(DFLabel.CONTINUE, compo);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    // XXX ignore label (for now).
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
 	    // SimpleName labelName = labeledStmt.getLabel();
-	    compo = processStatement(graph, map, compo, labeledStmt.getBody());
+	    compo = processStatement(graph, map, frame, compo,
+				     labeledStmt.getBody());
 	    
 	} else if (stmt instanceof SynchronizedStatement) {
 	    // Ignore synchronized.
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-	    compo = processStatement(graph, map, compo, syncStmt.getBody());
+	    compo = processStatement(graph, map, frame, compo,
+				     syncStmt.getBody());
 
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore try...catch (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
-	    compo = processStatement(graph, map, compo, tryStmt.getBody());
+	    compo = processStatement(graph, map, frame, compo,
+				     tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		compo = processStatement(graph, map, compo, finBlock);
+		compo = processStatement(graph, map, frame, compo, finBlock);
 	    }
 	    
 	} else if (stmt instanceof ThrowStatement) {
@@ -1788,6 +1799,8 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
+	    // Create a new scope.
+	    scope = new DFScope(scope);
 	    Expression expr = switchStmt.getExpression();
 	    buildScope(map, scope, expr);
 	    for (Statement stmt :
@@ -2187,7 +2200,7 @@ public class Java2DF extends ASTVisitor {
 	scope.dump();
 
 	// Process the function body.
-	compo = processStatement(graph, map, compo, funcBlock);
+	compo = processStatement(graph, map, null, compo, funcBlock);
 
         // Collapse redundant nodes.
         List<DFNode> removed = new ArrayList<DFNode>();
