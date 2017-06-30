@@ -184,7 +184,7 @@ class DFVar extends DFRef {
     }
 
     public String toString() {
-	return ("<DFVar: "+this.name+"("+this.type+")>");
+	return ("<DFVar: "+this.scope.name+"."+this.name+"("+this.type+")>");
     }
 }
 
@@ -213,12 +213,18 @@ class DFScopeMap {
 //
 class DFScope {
 
+    public String name;
     public DFScope parent;
     public List<DFScope> children;
     public Map<String, DFVar> vars;
 
     public Set<DFRef> inputs;
     public Set<DFRef> outputs;
+
+    public static int baseId = 0;
+    public static int genId() {
+	return baseId++;
+    }
 
     public DFScope() {
 	this(null);
@@ -230,6 +236,7 @@ class DFScope {
     public static DFRef ARRAY = new DFRef(null, "[]");
     
     public DFScope(DFScope parent) {
+	this.name = "S"+genId();
 	this.parent = parent;
 	if (parent != null) {
 	    parent.children.add(this);
@@ -245,7 +252,7 @@ class DFScope {
 	for (DFVar var : this.vars.values()) {
 	    vars.append(" "+var);
 	}
-	return ("<DFScope:"+vars+">");
+	return ("<DFScope("+this.name+")"+vars+">");
     }
 
     public void dump() {
@@ -253,7 +260,7 @@ class DFScope {
     }
     
     public void dump(PrintStream out, String indent) {
-	out.println(indent+"{");
+	out.println(indent+this.name+" {");
 	String i2 = indent + "  ";
 	StringBuilder inputs = new StringBuilder();
 	for (DFRef ref : this.inputs) {
@@ -266,7 +273,7 @@ class DFScope {
 	}
 	out.println(i2+"outputs:"+outputs);
 	for (DFVar var : this.vars.values()) {
-	    out.println(i2+var);
+	    out.println(i2+"defined: "+var);
 	}
 	for (DFScope scope : this.children) {
 	    scope.dump(out, i2);
@@ -765,16 +772,16 @@ class InstanceofNode extends ProgNode {
 }
 
 
-// AssnOpNode
-class AssnOpNode extends ProgNode {
+// AssignOpNode
+class AssignOpNode extends ProgNode {
 
     public Assignment.Operator op;
     public DFNode lvalue;
     public DFNode rvalue;
 
-    public AssnOpNode(DFGraph graph, ASTNode ast,
-		      Assignment.Operator op,
-		      DFNode lvalue, DFNode rvalue) {
+    public AssignOpNode(DFGraph graph, ASTNode ast,
+			Assignment.Operator op,
+			DFNode lvalue, DFNode rvalue) {
 	super(graph, ast);
 	this.op = op;
 	this.lvalue = lvalue;
@@ -1068,13 +1075,13 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processVariableDeclaration
-	(DFGraph graph, DFScopeMap map, DFComponent compo, DFScope scope, Type varType,
+	(DFGraph graph, DFScopeMap map, DFComponent compo, DFScope scope, 
 	 List<VariableDeclarationFragment> frags)
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
 	    SimpleName varName = frag.getName();
-	    DFRef var = scope.add(varName.getIdentifier(), varType);
+	    DFRef var = scope.lookup(varName.getIdentifier());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		compo = processExpression(graph, map, compo, init);
@@ -1217,7 +1224,7 @@ public class Java2DF extends ASTVisitor {
 	    DFNode rvalue = compo.value;
 	    if (op != Assignment.Operator.ASSIGN) {
 		DFNode lvalue = compo.get(assign.ref);
-		rvalue = new AssnOpNode(graph, assn, op, lvalue, rvalue);
+		rvalue = new AssignOpNode(graph, assn, op, lvalue, rvalue);
 	    }
 	    assign.take(rvalue);
 	    compo.put(assign.ref, assign);
@@ -1225,9 +1232,8 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
-	    Type varType = decl.getType();
 	    compo = processVariableDeclaration
-		(graph, map, compo, scope, varType, decl.fragments());
+		(graph, map, compo, scope, decl.fragments());
 
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
@@ -1370,32 +1376,21 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScopeMap map, DFComponent compo, Statement stmt,
 	 DFNode condValue, DFComponent trueCompo, DFComponent falseCompo) {
 	
-	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, JoinNode> joins = new HashMap<DFRef, JoinNode>();
+	Utils.logit("conditional: true="+trueCompo);
+	Utils.logit("conditional: false="+falseCompo);
 	
 	for (Map.Entry<DFRef, DFNode> entry : trueCompo.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode src = entry.getValue();
-	    BranchNode branch = branches.get(ref);
-	    if (branch == null) {
-		branch = new BranchNode(graph, stmt, condValue);
-		branches.put(ref, branch);
-		compo.get(ref).connect(branch);
-	    }
-	    branch.send(true, src);
+	    compo.get(ref).connect(src);
 	}
 	compo.mergeSnapshots(trueCompo);
 	if (falseCompo != null) {
 	    for (Map.Entry<DFRef, DFNode> entry : falseCompo.inputs.entrySet()) {
 		DFRef ref = entry.getKey();
 		DFNode src = entry.getValue();
-		BranchNode branch = branches.get(ref);
-		if (branch == null) {
-		    branch = new BranchNode(graph, stmt, condValue);
-		    branches.put(ref, branch);
-		    compo.get(ref).connect(branch);
-		}
-		branch.send(false, src);
+		compo.get(ref).connect(src);
 	    }
 	    compo.mergeSnapshots(falseCompo);
 	}
@@ -1504,10 +1499,9 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScopeMap map, DFComponent compo,
 	 VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
-	Type varType = varStmt.getType();
 	DFScope scope = map.get(varStmt);
 	return processVariableDeclaration
-	    (graph, map, compo, scope, varType, varStmt.fragments());
+	    (graph, map, compo, scope, varStmt.fragments());
     }
 
     public DFComponent processExpressionStatement
@@ -1611,7 +1605,12 @@ public class Java2DF extends ASTVisitor {
 	if (stmt instanceof AssertStatement) {
 	    // Ignore assert.
 	} else if (stmt instanceof Block) {
-	    compo = processBlock(graph, map, compo, (Block)stmt);
+	    DFScope scope = map.get(stmt);
+	    Block block = (Block)stmt;
+	    for (Statement cstmt : (List<Statement>) block.statements()) {
+		compo = processStatement(graph, map, compo, cstmt);
+	    }
+	    scope.finish(compo);
 
 	} else if (stmt instanceof EmptyStatement) {
 	    
@@ -1689,14 +1688,15 @@ public class Java2DF extends ASTVisitor {
 	} else if (stmt instanceof SynchronizedStatement) {
 	    // Ignore synchronized.
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-	    compo = processBlock(graph, map, compo, syncStmt.getBody());
+	    compo = processStatement(graph, map, compo, syncStmt.getBody());
 
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore try...catch (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
-	    compo = processBlock(graph, map, compo, tryStmt.getBody());
-	    if (tryStmt.getFinally() != null) {
-		compo = processBlock(graph, map, compo, tryStmt.getFinally());
+	    compo = processStatement(graph, map, compo, tryStmt.getBody());
+	    Block finBlock = tryStmt.getFinally();
+	    if (finBlock != null) {
+		compo = processStatement(graph, map, compo, finBlock);
 	    }
 	    
 	} else if (stmt instanceof ThrowStatement) {
@@ -1728,34 +1728,22 @@ public class Java2DF extends ASTVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public DFComponent processBlock
-	(DFGraph graph, DFScopeMap map, DFComponent compo, Block block)
-	throws UnsupportedSyntax {
-	
-	DFScope scope = map.get(block);
-	List<Statement> statements = (List<Statement>) block.statements();
-	if (statements != null) {
-	    for (Statement stmt : statements) {
-		compo = processStatement(graph, map, compo, stmt);
-	    }
-	}
-	scope.finish(compo);
-	return compo;
-    }
-    
-    @SuppressWarnings("unchecked")
     public void buildScope(DFScopeMap map, DFScope scope, Statement ast)
 	throws UnsupportedSyntax {
+	
+	map.put(ast, scope);
 	
 	if (ast instanceof AssertStatement) {
 
 	} else if (ast instanceof Block) {
 	    Block block = (Block)ast;
+	    // Create a new scope.
 	    DFScope child = new DFScope(scope);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
 		buildScope(map, child, stmt);
 	    }
+	    map.put(ast, child);
 	    
 	} else if (ast instanceof EmptyStatement) {
 	    
@@ -1821,6 +1809,7 @@ public class Java2DF extends ASTVisitor {
 	    buildScope(map, child, expr);
 	    Statement stmt = whileStmt.getBody();
 	    buildScope(map, child, stmt);
+	    map.put(ast, child);
 	    
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
@@ -1830,6 +1819,7 @@ public class Java2DF extends ASTVisitor {
 	    buildScope(map, child, stmt);
 	    Expression expr = doStmt.getExpression();
 	    buildScope(map, child, expr);
+	    map.put(ast, child);
 	    
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
@@ -1849,6 +1839,7 @@ public class Java2DF extends ASTVisitor {
 		     (List<Expression>) forStmt.updaters()) {
 		buildScope(map, child, update);
 	    }
+	    map.put(ast, child);
 	    
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
@@ -1865,6 +1856,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    Statement stmt = eForStmt.getBody();
 	    buildScope(map, child, stmt);
+	    map.put(ast, child);
 	    
 	} else if (ast instanceof BreakStatement) {
 	    
@@ -1894,6 +1886,7 @@ public class Java2DF extends ASTVisitor {
 		SimpleName varName = decl.getName();
 		child.add(varName.getIdentifier(), varType);
 		buildScope(map, child, cc.getBody());
+		map.put(cc, child);
 	    }
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
@@ -1925,8 +1918,6 @@ public class Java2DF extends ASTVisitor {
 	    throw new UnsupportedSyntax(ast);
 	    
 	}
-	
-	map.put(ast, scope);
     }
 	
     @SuppressWarnings("unchecked")
@@ -1990,9 +1981,11 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof Assignment) {
 	    Assignment assn = (Assignment)ast;
 	    Assignment.Operator op = assn.getOperator();
-	    buildScope(map, scope, assn.getLeftHandSide());
-	    buildScope(map, scope, assn.getRightHandSide());
 	    buildScopeLeft(map, scope, assn.getLeftHandSide());
+	    if (op != Assignment.Operator.ASSIGN) {
+		buildScope(map, scope, assn.getLeftHandSide());
+	    }
+	    buildScope(map, scope, assn.getRightHandSide());
 
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
@@ -2155,9 +2148,10 @@ public class Java2DF extends ASTVisitor {
     }
     
     @SuppressWarnings("unchecked")
-    public DFComponent processMethodDeclaration
+    public DFComponent buildMethodDeclaration
 	(DFGraph graph, DFScope scope, MethodDeclaration method)
 	throws UnsupportedSyntax {
+	
 	DFComponent compo = new DFComponent(graph);
 	// XXX ignore isContructor()
 	// XXX ignore getReturnType2()
@@ -2169,7 +2163,8 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName paramName = decl.getName();
 	    // XXX ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
-	    DFRef var = scope.add(paramName.getFullyQualifiedName(), paramType);
+	    Utils.logit(paramType+" "+paramName.getIdentifier());
+	    DFRef var = scope.add(paramName.getIdentifier(), paramType);
 	    AssignNode assign = new SingleAssignNode(graph, decl, var);
 	    assign.take(param);
 	    compo.put(assign.ref, assign);
@@ -2180,19 +2175,21 @@ public class Java2DF extends ASTVisitor {
     public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
 	String funcName = method.getName().getFullyQualifiedName();
-	DFGraph graph = new DFGraph(funcName);
-	DFScope scope = new DFScope();
-
 	Block funcBlock = method.getBody();
 	// Ignore method prototypes.
 	if (funcBlock == null) return null;
 				   
+	DFGraph graph = new DFGraph(funcName);
+	DFScope scope = new DFScope();
+	
+	// Setup an initial scope.
+	DFComponent compo = buildMethodDeclaration(graph, scope, method);
 	DFScopeMap map = new DFScopeMap();
 	buildScope(map, scope, funcBlock);
 	scope.dump();
-	
-	DFComponent compo = processMethodDeclaration(graph, scope, method);
-	compo = processBlock(graph, map, compo, funcBlock);
+
+	// Process the function body.
+	compo = processStatement(graph, map, compo, funcBlock);
 
         // Collapse redundant nodes.
         List<DFNode> removed = new ArrayList<DFNode>();
