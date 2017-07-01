@@ -120,6 +120,11 @@ class DFScope {
 	    outputs.append(" "+ref);
 	}
 	out.println(i2+"outputs:"+outputs);
+	StringBuilder loops = new StringBuilder();
+	for (DFRef ref : this.getLoopRefs()) {
+	    loops.append(" "+ref);
+	}
+	out.println(i2+"loops:"+loops);
 	for (DFVar var : this.vars.values()) {
 	    out.println(i2+"defined: "+var);
 	}
@@ -882,13 +887,10 @@ class JoinNode extends CondNode {
 class LoopNode extends ProgNode {
 
     public DFRef ref;
-    public DFNode init;
     
-    public LoopNode(DFGraph graph, ASTNode ast, DFRef ref, DFNode init) {
+    public LoopNode(DFGraph graph, ASTNode ast, DFRef ref) {
 	super(graph, ast);
 	this.ref = ref;
-	this.init = init;
-	init.connect(this, "init");
     }
     
     public DFNodeType type() {
@@ -899,6 +901,10 @@ class LoopNode extends ProgNode {
 	return "Loop:"+this.ref.name;
     }
 
+    public void init(DFNode init) {
+	init.connect(this, "init");
+    }
+    
     public void enter(DFNode cont) {
 	cont.connect(this, "cont");
     }
@@ -1435,24 +1441,33 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFComponent cpt, DFFrame frame, 
 	 Statement stmt, DFNode condValue, DFComponent loopCpt)
 	throws UnsupportedSyntax {
-	
+
+	DFScope scope = frame.scope;
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
 	Map<DFRef, LoopJoinNode> joins = new HashMap<DFRef, LoopJoinNode>();
+
+	for (DFRef ref : frame.scope.getLoopRefs()) {
+	    LoopNode loop = new LoopNode(graph, stmt, ref);
+	    loops.put(ref, loop);
+	}
 	
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode input = entry.getValue();
-	    DFNode output = loopCpt.outputs.get(ref);
 	    DFNode src = cpt.get(ref);
-	    if (output == null) {
-		// ref is not a loop variable.
-		src.connect(input);
-	    } else {
-		// ref is a loop variable.
-		LoopNode loop = new LoopNode(graph, stmt, ref, src);
-		loops.put(ref, loop);
+	    LoopNode loop = loops.get(ref);
+	    if (loop != null) {
+		loop.init(src);
 		loop.connect(input);
-		
+	    } else {
+		src.connect(input);
+	    }
+	}
+	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode output = entry.getValue();
+	    LoopNode loop = loops.get(ref);
+	    if (loop != null) {
 		BranchNode branch = new BranchNode(graph, stmt, condValue);
 		output.connect(branch);
 		DFNode cont = new DistNode(graph);
@@ -1461,6 +1476,8 @@ public class Java2DF extends ASTVisitor {
 		DFNode exit = new DistNode(graph);
 		branch.send(false, exit);
 		cpt.put(ref, exit);
+	    } else {
+		cpt.put(ref, output);
 	    }
 	}
 	
