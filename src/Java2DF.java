@@ -247,23 +247,15 @@ class DFLabel {
 class DFSnapshot {
 
     public DFLabel label;
-    public Map<DFRef, DFNode> nodes;
+    public DFNode value;
 
-    public DFSnapshot(DFLabel label) {
+    public DFSnapshot(DFLabel label, DFNode value) {
 	this.label = label;
-	this.nodes = new HashMap<DFRef, DFNode>();
+	this.value = value;
     }
 
     public String toString() {
-	StringBuilder nodes = new StringBuilder();
-	for (Map.Entry<DFRef, DFNode> entry : this.nodes.entrySet()) {
-	    nodes.append(" "+entry.getKey()+":"+entry.getValue());
-	}
-	return ("<DFSnapshot("+this.label+") nodes="+nodes+">");
-    }
-
-    public void add(DFRef ref, DFNode node) {
-	this.nodes.put(ref, node);
+	return ("<DFSnapshot("+this.label+": "+this.value+">");
     }
 }
 
@@ -274,22 +266,32 @@ class DFFrame {
 
     public DFFrame parent;
     public DFScope scope;
-    public List<DFSnapshot> snapshots;
+    public Map<DFRef, DFSnapshot> snapshots;
+    
+    public DFFrame(DFFrame parent) {
+	this(parent, parent.scope);
+    }
     
     public DFFrame(DFFrame parent, DFScope scope) {
 	this.parent = parent;
 	this.scope = scope;
-	this.snapshots = new ArrayList<DFSnapshot>();
+	this.snapshots = new HashMap<DFRef, DFSnapshot>();
     }
 
-    public DFSnapshot snapshot(DFLabel label, DFComponent cpt) {
-	DFSnapshot snapshot = new DFSnapshot(label);
+    public void snapshot(DFLabel label, DFComponent cpt) {
 	for (DFRef ref : this.scope.getLoopRefs()) {
 	    DFNode node = cpt.get(ref);
-	    snapshot.add(ref, node);
+	    DFSnapshot snapshot = new DFSnapshot(label, node);
+	    this.addSnapshot(ref, snapshot);
 	}
-	this.snapshots.add(snapshot);
-	return snapshot;
+    }
+
+    public void addSnapshot(DFRef ref, DFSnapshot snapshot) {
+	this.snapshots.put(ref, snapshot);
+    }
+    
+    public DFSnapshot getSnapshot(DFRef ref) {
+	return this.snapshots.get(ref);
     }
 }
 
@@ -887,10 +889,13 @@ class JoinNode extends CondNode {
 class LoopNode extends ProgNode {
 
     public DFRef ref;
+    public DFNode enter;
     
-    public LoopNode(DFGraph graph, ASTNode ast, DFRef ref) {
+    public LoopNode(DFGraph graph, ASTNode ast, DFRef ref, DFNode enter) {
 	super(graph, ast);
 	this.ref = ref;
+	this.enter = enter;
+	enter.connect(this, "enter");
     }
     
     public DFNodeType type() {
@@ -899,14 +904,6 @@ class LoopNode extends ProgNode {
     
     public String label() {
 	return "Loop:"+this.ref.name;
-    }
-
-    public void init(DFNode init) {
-	init.connect(this, "init");
-    }
-    
-    public void enter(DFNode cont) {
-	cont.connect(this, "cont");
     }
 }
 
@@ -1386,8 +1383,10 @@ public class Java2DF extends ASTVisitor {
     }
     
     public DFComponent processConditional
-	(DFGraph graph, DFComponent cpt, Statement stmt,
-	 DFNode condValue, DFComponent trueCpt, DFComponent falseCpt) {
+	(DFGraph graph, DFComponent cpt, DFFrame frame,
+	 Statement stmt, DFNode condValue,
+	 DFFrame trueFrame, DFComponent trueCpt,
+	 DFFrame falseFrame, DFComponent falseCpt) {
 	
 	Map<DFRef, JoinNode> joins = new HashMap<DFRef, JoinNode>();
 	
@@ -1404,28 +1403,50 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	
+	for (Map.Entry<DFRef, DFSnapshot> entry : trueFrame.snapshots.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFSnapshot snapshot = entry.getValue();
+	    JoinNode join = new JoinNode(graph, stmt, condValue, ref);
+	    join.recv(true, snapshot.value);
+	    frame.addSnapshot(ref, new DFSnapshot(snapshot.label, join));
+	}
 	for (Map.Entry<DFRef, DFNode> entry : trueCpt.outputs.entrySet()) {
 	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    JoinNode join = joins.get(ref);
-	    if (join == null) {
-		join = new JoinNode(graph, stmt, condValue, ref);
-		joins.put(ref, join);
-	    }
-	    join.recv(true, dst);
-	}
-	if (falseCpt != null) {
-	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.outputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode dst = entry.getValue();
+	    DFSnapshot snapshot = trueFrame.getSnapshot(ref);
+	    if (snapshot == null) {
 		JoinNode join = joins.get(ref);
 		if (join == null) {
 		    join = new JoinNode(graph, stmt, condValue, ref);
 		    joins.put(ref, join);
 		}
-		join.recv(false, dst);
+		DFNode dst = entry.getValue();
+		join.recv(true, dst);
 	    }
 	}
+	
+	if (falseCpt != null) {
+	    for (Map.Entry<DFRef, DFSnapshot> entry : falseFrame.snapshots.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFSnapshot snapshot = entry.getValue();
+		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
+		join.recv(false, snapshot.value);
+		frame.addSnapshot(ref, new DFSnapshot(snapshot.label, join));
+	    }
+	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.outputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFSnapshot snapshot = falseFrame.getSnapshot(ref);
+		if (snapshot == null) {
+		    JoinNode join = joins.get(ref);
+		    if (join == null) {
+			join = new JoinNode(graph, stmt, condValue, ref);
+			joins.put(ref, join);
+		    }
+		    DFNode dst = entry.getValue();
+		    join.recv(false, dst);
+		}
+	    }
+	}
+
 	for (Map.Entry<DFRef, JoinNode> entry : joins.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    JoinNode join = entry.getValue();
@@ -1444,70 +1465,59 @@ public class Java2DF extends ASTVisitor {
 
 	DFScope scope = frame.scope;
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
-	Map<DFRef, LoopJoinNode> joins = new HashMap<DFRef, LoopJoinNode>();
-
-	for (DFRef ref : frame.scope.getLoopRefs()) {
-	    LoopNode loop = new LoopNode(graph, stmt, ref);
+	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
+	Map<DFRef, DFNode> exits = new HashMap<DFRef, DFNode>();
+	for (DFRef ref : scope.getLoopRefs()) {
+	    DFNode src = cpt.get(ref);
+	    LoopNode loop = new LoopNode(graph, stmt, ref, src);
 	    loops.put(ref, loop);
+	    BranchNode branch = new BranchNode(graph, stmt, condValue);
+	    branches.put(ref, branch);
+	    branch.send(true, loop);
+	    DFNode exit = new DistNode(graph);
+	    branch.send(false, exit);
+	    exits.put(ref, exit);
 	}
 	
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode input = entry.getValue();
-	    DFNode src = cpt.get(ref);
 	    LoopNode loop = loops.get(ref);
 	    if (loop != null) {
-		loop.init(src);
 		loop.connect(input);
 	    } else {
+		DFNode src = cpt.get(ref);
 		src.connect(input);
 	    }
 	}
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode output = entry.getValue();
-	    LoopNode loop = loops.get(ref);
-	    if (loop != null) {
-		BranchNode branch = new BranchNode(graph, stmt, condValue);
+	    BranchNode branch = branches.get(ref);
+	    if (branch != null) {
 		output.connect(branch);
-		DFNode cont = new DistNode(graph);
-		branch.send(true, cont);
-		loop.enter(cont);
-		DFNode exit = new DistNode(graph);
-		branch.send(false, exit);
+		DFNode exit = exits.get(ref);
 		cpt.put(ref, exit);
 	    } else {
 		cpt.put(ref, output);
 	    }
 	}
 	
-	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
+	for (Map.Entry<DFRef, DFSnapshot> entry : frame.snapshots.entrySet()) {
 	    DFRef ref = entry.getKey();
-	    DFNode output = entry.getValue();
-	    DFNode input = loopCpt.inputs.get(ref);
-	    if (input == null) {
-		// ref is not a loop variable.
-		cpt.put(ref, output);
+	    DFSnapshot snapshot = entry.getValue();
+	    DFNode node = snapshot.value;
+	    if (node instanceof JoinNode) {
+		JoinNode join = (JoinNode)node;
+		if (!join.isClosed()) {
+		    DFNode exit = exits.get(ref);
+		    join.close(exit);
+		}
 	    }
-	}
-
-	for (DFSnapshot snapshot : frame.snapshots) {
-	    for (Map.Entry<DFRef, LoopNode> entry : loops.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode src = entry.getValue();
-		DFNode dst = snapshot.nodes.get(ref);
-		if (dst == null) {
-		    dst = entry.getValue();
-		}
-		LoopJoinNode join = joins.get(ref);
-		if (join == null) {
-		    join = new LoopJoinNode(graph, stmt, ref, src);
-		    joins.put(ref, join);
-		}
-		join.take(dst, snapshot.label);
-		if (snapshot.label == DFLabel.BREAK) {
-		    cpt.put(ref, join);
-		}
+	    if (snapshot.label == DFLabel.BREAK) {
+		cpt.put(ref, node);
+	    } else if (snapshot.label == DFLabel.CONTINUE) {
+		// XXX
 	    }
 	}
 	
@@ -1557,21 +1567,26 @@ public class Java2DF extends ASTVisitor {
 	DFScope scope = map.get(ifStmt);
 	Expression expr = ifStmt.getExpression();
 	cpt = processExpression(graph, scope, cpt, expr);
-	DFNode evalue = cpt.value;
+	DFNode condValue = cpt.value;
 	
 	Statement thenStmt = ifStmt.getThenStatement();
+	DFFrame thenFrame = new DFFrame(frame);
 	DFComponent thenCpt = new DFComponent(graph);
-	thenCpt = processStatement(graph, map, frame, thenCpt, thenStmt);
+	thenCpt = processStatement(graph, map, thenFrame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
+	DFFrame elseFrame = null;
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
+	    elseFrame = new DFFrame(frame);
 	    elseCpt = new DFComponent(graph);
-	    elseCpt = processStatement(graph, map, frame, elseCpt, elseStmt);
+	    elseCpt = processStatement(graph, map, elseFrame, elseCpt, elseStmt);
 	}
 
-	return processConditional(graph, cpt, ifStmt,
-				  evalue, thenCpt, elseCpt);
+	return processConditional(graph, cpt, frame,
+				  ifStmt, condValue,
+				  thenFrame, thenCpt,
+				  elseFrame, elseCpt);
     }
 	
     public DFComponent processWhileStatement
@@ -1700,13 +1715,17 @@ public class Java2DF extends ASTVisitor {
 	    // XXX ignore label (for now).
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    // SimpleName labelName = breakStmt.getLabel();
-	    frame.snapshot(DFLabel.BREAK, cpt);
+	    if (frame != null) {
+		frame.snapshot(DFLabel.BREAK, cpt);
+	    }
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    // XXX ignore label (for now).
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    // SimpleName labelName = contStmt.getLabel();
-	    frame.snapshot(DFLabel.CONTINUE, cpt);
+	    if (frame != null) {
+		frame.snapshot(DFLabel.CONTINUE, cpt);
+	    }
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    // XXX ignore label (for now).
