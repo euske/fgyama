@@ -33,7 +33,8 @@ class DFRef {
     }
 
     public String toString() {
-	return ("<DFRef: "+this.scope.name+"."+this.name+">");
+	String scope = (this.scope == null)? "" : this.scope.name;
+	return ("<DFRef("+scope+"."+this.name+")>");
     }
 }
 
@@ -51,7 +52,7 @@ class DFVar extends DFRef {
     }
 
     public String toString() {
-	return ("<DFVar: "+this.scope.name+"."+this.name+"("+this.type+")>");
+	return ("<DFVar("+this.scope.name+"."+this.name+"): "+this.type+">");
     }
 }
 
@@ -96,11 +97,7 @@ class DFScope {
     }
 
     public String toString() {
-	StringBuilder vars = new StringBuilder();
-	for (DFVar var : this.vars.values()) {
-	    vars.append(" "+var);
-	}
-	return ("<DFScope("+this.name+")"+vars+">");
+	return ("<DFScope("+this.name+")>");
     }
 
     public void dump() {
@@ -242,56 +239,16 @@ class DFLabel {
 }
 
 
-//  DFSnapshot
-//
-class DFSnapshot {
-
-    public DFLabel label;
-    public DFNode value;
-
-    public DFSnapshot(DFLabel label, DFNode value) {
-	this.label = label;
-	this.value = value;
-    }
-
-    public String toString() {
-	return ("<DFSnapshot("+this.label+": "+this.value+">");
-    }
-}
-
-
 //  DFFrame
 //
 class DFFrame {
 
     public DFFrame parent;
-    public DFScope scope;
-    public Map<DFRef, DFSnapshot> snapshots;
+    public Collection<DFRef> loopRefs;
     
-    public DFFrame(DFFrame parent) {
-	this(parent, parent.scope);
-    }
-    
-    public DFFrame(DFFrame parent, DFScope scope) {
+    public DFFrame(DFFrame parent, Collection<DFRef> loopRefs) {
 	this.parent = parent;
-	this.scope = scope;
-	this.snapshots = new HashMap<DFRef, DFSnapshot>();
-    }
-
-    public void snapshot(DFLabel label, DFComponent cpt) {
-	for (DFRef ref : this.scope.getLoopRefs()) {
-	    DFNode node = cpt.get(ref);
-	    DFSnapshot snapshot = new DFSnapshot(label, node);
-	    this.addSnapshot(ref, snapshot);
-	}
-    }
-
-    public void addSnapshot(DFRef ref, DFSnapshot snapshot) {
-	this.snapshots.put(ref, snapshot);
-    }
-    
-    public DFSnapshot getSnapshot(DFRef ref) {
-	return this.snapshots.get(ref);
+	this.loopRefs = loopRefs;
     }
 }
 
@@ -431,6 +388,28 @@ class DFLink {
 }
 
 
+//  DFExit
+//
+class DFExit {
+
+    public DFRef ref;
+    public DFNode node;
+    public DFFrame frame;
+    public DFLabel label;
+
+    public DFExit(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
+	this.ref = ref;
+	this.node = node;
+	this.frame = frame;
+	this.label = label;
+    }
+
+    public String toString() {
+	return (this.ref+":"+this.node+" -> "+this.frame+":"+this.label);
+    }
+}
+
+
 //  DFComponent
 //
 class DFComponent {
@@ -438,6 +417,7 @@ class DFComponent {
     public DFGraph graph;
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
+    public List<DFExit> exits;
     public DFNode value;
     public AssignNode assign;
     
@@ -445,21 +425,36 @@ class DFComponent {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
+	this.exits = new ArrayList<DFExit>();
 	this.value = null;
 	this.assign = null;
     }
 
-    public String toString() {
+    public void dump() {
+	dump(System.out);
+    }
+    
+    public void dump(PrintStream out) {
+	out.println("DFComponent");
 	StringBuilder inputs = new StringBuilder();
-	for (Map.Entry<DFRef, DFNode> entry : this.inputs.entrySet()) {
-	    inputs.append(" "+entry.getKey()+":"+entry.getValue());
+	for (DFRef ref : this.inputs.keySet()) {
+	    inputs.append(" "+ref);
 	}
+	out.println("  inputs:"+inputs);
 	StringBuilder outputs = new StringBuilder();
-	for (Map.Entry<DFRef, DFNode> entry : this.outputs.entrySet()) {
-	    outputs.append(" "+entry.getKey()+":"+entry.getValue());
+	for (DFRef ref : this.outputs.keySet()) {
+	    outputs.append(" "+ref);
 	}
-	return ("<DFComponent: inputs="+inputs+", outputs="+
-		outputs+", value="+this.value+">");
+	out.println("  outputs:"+outputs);
+	for (DFExit exit : this.exits) {
+	    out.println("  exit: "+exit);
+	}
+	if (this.value != null) {
+	    out.println("  value: "+this.value);
+	}
+	if (this.assign != null) {
+	    out.println("  assign: "+this.assign);
+	}
     }
 
     public DFNode get(DFRef ref) {
@@ -478,9 +473,26 @@ class DFComponent {
 	this.outputs.put(ref, node);
     }
 
+    public void jump(DFRef ref, DFFrame frame, DFLabel label) {
+	DFNode node = this.get(ref);
+	this.addExit(new DFExit(ref, node, frame, label));
+	this.outputs.remove(ref);
+    }
+
+    public void addExit(DFExit exit) {
+	this.exits.add(exit);
+    }
+
     public void removeRef(DFRef ref) {
 	this.inputs.remove(ref);
 	this.outputs.remove(ref);
+	List<DFExit> removed = new ArrayList<DFExit>();
+	for (DFExit exit : this.exits) {
+	    if (exit.ref == ref) {
+		removed.add(exit);
+	    }
+	}
+	this.exits.removeAll(removed);
     }
 }
 
@@ -1385,15 +1397,16 @@ public class Java2DF extends ASTVisitor {
     public DFComponent processConditional
 	(DFGraph graph, DFComponent cpt, DFFrame frame,
 	 Statement stmt, DFNode condValue,
-	 DFFrame trueFrame, DFComponent trueCpt,
-	 DFFrame falseFrame, DFComponent falseCpt) {
-	
-	Map<DFRef, JoinNode> joins = new HashMap<DFRef, JoinNode>();
-	
-	for (Map.Entry<DFRef, DFNode> entry : trueCpt.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
-	    cpt.get(ref).connect(src);
+	 DFComponent trueCpt, DFComponent falseCpt) {
+
+	Set<DFRef> refs = new HashSet<DFRef>();
+	if (trueCpt != null) {
+	    for (Map.Entry<DFRef, DFNode> entry : trueCpt.inputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode src = entry.getValue();
+		cpt.get(ref).connect(src);
+	    }
+	    refs.addAll(trueCpt.outputs.keySet());
 	}
 	if (falseCpt != null) {
 	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.inputs.entrySet()) {
@@ -1401,60 +1414,40 @@ public class Java2DF extends ASTVisitor {
 		DFNode src = entry.getValue();
 		cpt.get(ref).connect(src);
 	    }
+	    refs.addAll(falseCpt.outputs.keySet());
 	}
 	
-	for (Map.Entry<DFRef, DFSnapshot> entry : trueFrame.snapshots.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFSnapshot snapshot = entry.getValue();
+	for (DFRef ref : refs) {
 	    JoinNode join = new JoinNode(graph, stmt, condValue, ref);
-	    join.recv(true, snapshot.value);
-	    frame.addSnapshot(ref, new DFSnapshot(snapshot.label, join));
-	}
-	for (Map.Entry<DFRef, DFNode> entry : trueCpt.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFSnapshot snapshot = trueFrame.getSnapshot(ref);
-	    if (snapshot == null) {
-		JoinNode join = joins.get(ref);
-		if (join == null) {
-		    join = new JoinNode(graph, stmt, condValue, ref);
-		    joins.put(ref, join);
-		}
-		DFNode dst = entry.getValue();
-		join.recv(true, dst);
+	    if (trueCpt != null) {
+		join.recv(true, trueCpt.get(ref));
 	    }
-	}
-	
-	if (falseCpt != null) {
-	    for (Map.Entry<DFRef, DFSnapshot> entry : falseFrame.snapshots.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFSnapshot snapshot = entry.getValue();
-		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
-		join.recv(false, snapshot.value);
-		frame.addSnapshot(ref, new DFSnapshot(snapshot.label, join));
+	    if (falseCpt != null) {
+		join.recv(false, falseCpt.get(ref));
 	    }
-	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.outputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFSnapshot snapshot = falseFrame.getSnapshot(ref);
-		if (snapshot == null) {
-		    JoinNode join = joins.get(ref);
-		    if (join == null) {
-			join = new JoinNode(graph, stmt, condValue, ref);
-			joins.put(ref, join);
-		    }
-		    DFNode dst = entry.getValue();
-		    join.recv(false, dst);
-		}
-	    }
-	}
-
-	for (Map.Entry<DFRef, JoinNode> entry : joins.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    JoinNode join = entry.getValue();
-	    if (!join.isClosed()) {
-		join.close(cpt.get(ref));
-	    }
+	    join.close(cpt.get(ref));
 	    cpt.put(ref, join);
 	}
+
+	if (trueCpt != null) {
+	    for (DFExit exit : trueCpt.exits) {
+		DFRef ref = exit.ref;
+		DFNode node = trueCpt.get(ref);
+		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
+		join.recv(true, node);
+		cpt.addExit(new DFExit(ref, join, exit.frame, exit.label));
+	    }
+	}
+	if (falseCpt != null) {
+	    for (DFExit exit : falseCpt.exits) {
+		DFRef ref = exit.ref;
+		DFNode node = falseCpt.get(ref);
+		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
+		join.recv(false, node);
+		cpt.addExit(new DFExit(ref, join, exit.frame, exit.label));
+	    }
+	}
+	
 	return cpt;
     }
 
@@ -1463,11 +1456,10 @@ public class Java2DF extends ASTVisitor {
 	 Statement stmt, DFNode condValue, DFComponent loopCpt)
 	throws UnsupportedSyntax {
 
-	DFScope scope = frame.scope;
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
 	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, DFNode> exits = new HashMap<DFRef, DFNode>();
-	for (DFRef ref : scope.getLoopRefs()) {
+	for (DFRef ref : frame.loopRefs) {
 	    DFNode src = cpt.get(ref);
 	    LoopNode loop = new LoopNode(graph, stmt, ref, src);
 	    loops.put(ref, loop);
@@ -1500,24 +1492,6 @@ public class Java2DF extends ASTVisitor {
 		cpt.put(ref, exit);
 	    } else {
 		cpt.put(ref, output);
-	    }
-	}
-	
-	for (Map.Entry<DFRef, DFSnapshot> entry : frame.snapshots.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFSnapshot snapshot = entry.getValue();
-	    DFNode node = snapshot.value;
-	    if (node instanceof JoinNode) {
-		JoinNode join = (JoinNode)node;
-		if (!join.isClosed()) {
-		    DFNode exit = exits.get(ref);
-		    join.close(exit);
-		}
-	    }
-	    if (snapshot.label == DFLabel.BREAK) {
-		cpt.put(ref, node);
-	    } else if (snapshot.label == DFLabel.CONTINUE) {
-		// XXX
 	    }
 	}
 	
@@ -1570,23 +1544,20 @@ public class Java2DF extends ASTVisitor {
 	DFNode condValue = cpt.value;
 	
 	Statement thenStmt = ifStmt.getThenStatement();
-	DFFrame thenFrame = new DFFrame(frame);
 	DFComponent thenCpt = new DFComponent(graph);
-	thenCpt = processStatement(graph, map, thenFrame, thenCpt, thenStmt);
+	thenCpt = processStatement(graph, map, frame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFFrame elseFrame = null;
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
-	    elseFrame = new DFFrame(frame);
 	    elseCpt = new DFComponent(graph);
-	    elseCpt = processStatement(graph, map, elseFrame, elseCpt, elseStmt);
+	    elseCpt = processStatement(graph, map, frame, elseCpt, elseStmt);
 	}
 
 	return processConditional(graph, cpt, frame,
 				  ifStmt, condValue,
-				  thenFrame, thenCpt,
-				  elseFrame, elseCpt);
+				  thenCpt, elseCpt);
     }
 	
     public DFComponent processWhileStatement
@@ -1595,7 +1566,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(whileStmt);
 	// Create a new frame.
-	frame = new DFFrame(frame, scope);
+	frame = new DFFrame(frame, scope.getLoopRefs());
 	DFComponent loopCpt = new DFComponent(graph);
 	loopCpt = processExpression(graph, scope, loopCpt,
 				    whileStmt.getExpression());
@@ -1613,7 +1584,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(forStmt);
 	// Create a new frame.
-	frame = new DFFrame(frame, scope);
+	frame = new DFFrame(frame, scope.getLoopRefs());
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(graph, scope, cpt, init);
 	}
@@ -1716,7 +1687,9 @@ public class Java2DF extends ASTVisitor {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    // SimpleName labelName = breakStmt.getLabel();
 	    if (frame != null) {
-		frame.snapshot(DFLabel.BREAK, cpt);
+		for (DFRef ref : frame.loopRefs) {
+		    cpt.jump(ref, frame, DFLabel.BREAK);
+		}
 	    }
 	    
 	} else if (stmt instanceof ContinueStatement) {
@@ -1724,7 +1697,9 @@ public class Java2DF extends ASTVisitor {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    // SimpleName labelName = contStmt.getLabel();
 	    if (frame != null) {
-		frame.snapshot(DFLabel.CONTINUE, cpt);
+		for (DFRef ref : frame.loopRefs) {
+		    cpt.jump(ref, frame, DFLabel.CONTINUE);
+		}
 	    }
 	    
 	} else if (stmt instanceof LabeledStatement) {
@@ -1778,6 +1753,7 @@ public class Java2DF extends ASTVisitor {
 	    throw new UnsupportedSyntax(stmt);
 	}
 
+	cpt.dump();
 	return cpt;
     }
 
