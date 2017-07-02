@@ -897,6 +897,32 @@ class JoinNode extends CondNode {
     }
 }
 
+// CaseNode
+class CaseNode extends ProgNode {
+    
+    public DFNode value;
+    
+    public CaseNode(DFGraph graph, ASTNode ast, DFNode value) {
+	super(graph, ast);
+	this.value = value;
+	if (value != null) {
+	    value.connect(this, DFLinkType.ControlFlow);
+	}
+    }
+
+    public String label() {
+	if (this.value != null) {
+	    return "Case";
+	} else {
+	    return "Default";
+	}
+    }
+    
+    public DFNodeType type() {
+	return DFNodeType.Cond;
+    }
+}
+
 // LoopNode
 class LoopNode extends ProgNode {
 
@@ -1421,6 +1447,29 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
+    public DFComponent processCase
+	(DFGraph graph, DFComponent cpt, DFFrame frame,
+	 Statement stmt, DFNode caseNode,
+	 DFComponent caseCpt) {
+
+	for (Map.Entry<DFRef, DFNode> entry : caseCpt.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    cpt.get(ref).connect(src);
+	}
+	
+	for (Map.Entry<DFRef, DFNode> entry : caseCpt.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    JoinNode join = new JoinNode(graph, stmt, caseNode, ref);
+	    join.recv(true, dst);
+	    join.close(cpt.get(ref));
+	    cpt.put(ref, join);
+	}
+	
+	return cpt;
+    }
+
     public DFComponent processLoop
 	(DFGraph graph, DFComponent cpt, DFFrame frame, 
 	 Statement stmt, DFNode condValue, DFComponent loopCpt)
@@ -1546,7 +1595,6 @@ public class Java2DF extends ASTVisitor {
 	thenCpt = processStatement(graph, map, frame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
-	DFFrame elseFrame = null;
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
 	    elseCpt = new DFComponent(graph);
@@ -1558,6 +1606,46 @@ public class Java2DF extends ASTVisitor {
 				  thenCpt, elseCpt);
     }
 	
+    @SuppressWarnings("unchecked")
+    public DFComponent processSwitchStatement
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent cpt,
+	 SwitchStatement switchStmt)
+	throws UnsupportedSyntax {
+	DFScope scope = map.get(switchStmt);
+	cpt = processExpression(graph, scope, cpt, switchStmt.getExpression());
+	DFNode switchValue = cpt.value;
+
+	SwitchCase switchCase = null;
+	DFNode caseNode = null;
+	DFComponent caseCpt = null;
+	for (Statement stmt : (List<Statement>) switchStmt.statements()) {
+	    if (stmt instanceof SwitchCase) {
+		if (caseNode != null && caseCpt != null) {
+		    cpt = processCase(graph, cpt, frame,
+				      switchCase, caseNode, caseCpt);
+		}
+		switchCase = (SwitchCase)stmt;
+		Expression expr = switchCase.getExpression();
+		if (expr != null) {
+		    cpt = processExpression(graph, scope, cpt, expr);
+		    caseNode = new CaseNode(graph, stmt, cpt.value);
+		} else {
+		    caseNode = new CaseNode(graph, stmt, null);
+		}
+		switchValue.connect(caseNode);
+		caseCpt = new DFComponent(graph);
+	    } else if (caseCpt != null) {
+		caseCpt = processStatement(graph, map, frame, caseCpt, stmt);
+	    }
+	}
+	if (caseNode != null && caseCpt != null) {
+	    cpt = processCase(graph, cpt, frame,
+			      switchCase, caseNode, caseCpt);
+	}
+	
+	return cpt;
+    }
+    
     public DFComponent processWhileStatement
 	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent cpt,
 	 WhileStatement whileStmt)
@@ -1641,23 +1729,14 @@ public class Java2DF extends ASTVisitor {
 		(graph, map, frame, cpt, (IfStatement)stmt);
 	    
 	} else if (stmt instanceof SwitchStatement) {
-	    // XXX switch
 	    DFScope scope = map.get(stmt);
-	    SwitchStatement switchStmt = (SwitchStatement)stmt;
-	    cpt = processExpression(graph, scope, cpt, switchStmt.getExpression());
-	    for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
-		cpt = processStatement(graph, map, frame, cpt, cstmt);
-	    }
+	    cpt = processSwitchStatement
+		(graph, map, frame, cpt, (SwitchStatement)stmt);
 	    scope.finish(cpt);
 	    
 	} else if (stmt instanceof SwitchCase) {
-	    // XXX case
-	    DFScope scope = map.get(stmt);
-	    SwitchCase switchCase = (SwitchCase)stmt;
-	    Expression expr = switchCase.getExpression();
-	    if (expr != null) {
-		cpt = processExpression(graph, scope, cpt, expr);
-	    }
+	    // Invalid "case" placement.
+	    throw new UnsupportedSyntax(stmt);
 	    
 	} else if (stmt instanceof WhileStatement) {
 	    cpt = processWhileStatement
