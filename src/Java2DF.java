@@ -388,16 +388,16 @@ class DFLink {
 }
 
 
-//  DFExit
+//  DFMeet
 //
-class DFExit {
+class DFMeet {
 
     public DFRef ref;
     public DFNode node;
     public DFFrame frame;
     public DFLabel label;
 
-    public DFExit(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
+    public DFMeet(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
 	this.ref = ref;
 	this.node = node;
 	this.frame = frame;
@@ -417,7 +417,7 @@ class DFComponent {
     public DFGraph graph;
     public Map<DFRef, DFNode> inputs;
     public Map<DFRef, DFNode> outputs;
-    public List<DFExit> exits;
+    public List<DFMeet> meets;
     public DFNode value;
     public AssignNode assign;
     
@@ -425,7 +425,7 @@ class DFComponent {
 	this.graph = graph;
 	this.inputs = new HashMap<DFRef, DFNode>();
 	this.outputs = new HashMap<DFRef, DFNode>();
-	this.exits = new ArrayList<DFExit>();
+	this.meets = new ArrayList<DFMeet>();
 	this.value = null;
 	this.assign = null;
     }
@@ -446,8 +446,8 @@ class DFComponent {
 	    outputs.append(" "+ref);
 	}
 	out.println("  outputs:"+outputs);
-	for (DFExit exit : this.exits) {
-	    out.println("  exit: "+exit);
+	for (DFMeet meet : this.meets) {
+	    out.println("  meet: "+meet);
 	}
 	if (this.value != null) {
 	    out.println("  value: "+this.value);
@@ -475,24 +475,24 @@ class DFComponent {
 
     public void jump(DFRef ref, DFFrame frame, DFLabel label) {
 	DFNode node = this.get(ref);
-	this.addExit(new DFExit(ref, node, frame, label));
+	this.addMeet(new DFMeet(ref, node, frame, label));
 	this.outputs.remove(ref);
     }
 
-    public void addExit(DFExit exit) {
-	this.exits.add(exit);
+    public void addMeet(DFMeet meet) {
+	this.meets.add(meet);
     }
 
     public void removeRef(DFRef ref) {
 	this.inputs.remove(ref);
 	this.outputs.remove(ref);
-	List<DFExit> removed = new ArrayList<DFExit>();
-	for (DFExit exit : this.exits) {
-	    if (exit.ref == ref) {
-		removed.add(exit);
+	List<DFMeet> removed = new ArrayList<DFMeet>();
+	for (DFMeet meet : this.meets) {
+	    if (meet.ref == ref) {
+		removed.add(meet);
 	    }
 	}
-	this.exits.removeAll(removed);
+	this.meets.removeAll(removed);
     }
 }
 
@@ -916,36 +916,6 @@ class LoopNode extends ProgNode {
     
     public String label() {
 	return "Loop:"+this.ref.name;
-    }
-}
-
-// LoopJoinNode
-class LoopJoinNode extends ProgNode {
-
-    public DFRef ref;
-    public DFNode exit;
-    public List<DFNode> nodes;
-    
-    public LoopJoinNode(DFGraph graph, ASTNode ast, DFRef ref, DFNode exit) {
-	super(graph, ast);
-	this.ref = ref;
-	this.nodes = new ArrayList<DFNode>();
-	this.exit = exit;
-	exit.connect(this, "exit");
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Cond;
-    }
-    
-    public String label() {
-	return "LoopJoin:"+this.ref.name;
-    }
-    
-    public void take(DFNode node, DFLabel label) {
-	int i = this.nodes.size();
-	node.connect(this, label.name+":"+i);
-	this.nodes.add(node);
     }
 }
 
@@ -1430,21 +1400,21 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	if (trueCpt != null) {
-	    for (DFExit exit : trueCpt.exits) {
-		DFRef ref = exit.ref;
+	    for (DFMeet meet : trueCpt.meets) {
+		DFRef ref = meet.ref;
 		DFNode node = trueCpt.get(ref);
 		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
 		join.recv(true, node);
-		cpt.addExit(new DFExit(ref, join, exit.frame, exit.label));
+		cpt.addMeet(new DFMeet(ref, join, meet.frame, meet.label));
 	    }
 	}
 	if (falseCpt != null) {
-	    for (DFExit exit : falseCpt.exits) {
-		DFRef ref = exit.ref;
+	    for (DFMeet meet : falseCpt.meets) {
+		DFRef ref = meet.ref;
 		DFNode node = falseCpt.get(ref);
 		JoinNode join = new JoinNode(graph, stmt, condValue, ref);
 		join.recv(false, node);
-		cpt.addExit(new DFExit(ref, join, exit.frame, exit.label));
+		cpt.addMeet(new DFMeet(ref, join, meet.frame, meet.label));
 	    }
 	}
 	
@@ -1495,6 +1465,20 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	
+	for (DFMeet meet : loopCpt.meets) {
+	    if (meet.frame == frame) {
+		if (meet.label == DFLabel.BREAK) {
+		    DFNode output = cpt.get(meet.ref);
+		    DFNode node = meet.node;
+		    if (node instanceof JoinNode) {
+			((JoinNode)node).close(output);
+		    }
+		    cpt.put(meet.ref, node);
+		}
+	    } else {
+		cpt.addMeet(meet);
+	    }
+	}
 	return cpt;
     }
 
