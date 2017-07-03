@@ -3,9 +3,9 @@
   <property name="src" location="src" />
   <property name="lib" location="lib" />
   <property name="build" location="build" />
-  <property name="input" location="samples/f5.java" />
-  <property name="out_gv" location="samples/f5.gv" />
-  <property name="out_svg" location="samples/f5.svg" />
+  <property name="input" location="samples/f6.java" />
+  <property name="out_gv" location="samples/f6.gv" />
+  <property name="out_svg" location="samples/f6.svg" />
   
   <target name="init">
     <mkdir dir="${build}" />

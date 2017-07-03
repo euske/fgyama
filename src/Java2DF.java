@@ -948,6 +948,22 @@ class LoopNode extends ProgNode {
     }
 }
 
+// IterNode
+class IterNode extends ProgNode {
+
+    public DFNode list;
+    
+    public IterNode(DFGraph graph, ASTNode ast, DFNode list) {
+	super(graph, ast);
+	this.list = list;
+	list.connect(this, "list");
+    }
+    
+    public String label() {
+	return "Iter";
+    }
+}
+
 // CallNode
 abstract class CallNode extends ProgNode {
 
@@ -1255,11 +1271,11 @@ public class Java2DF extends ASTVisitor {
 
 	for (VariableDeclarationFragment frag : frags) {
 	    SimpleName varName = frag.getName();
-	    DFRef var = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookup(varName.getIdentifier());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(graph, scope, cpt, init);
-		AssignNode assign = new SingleAssignNode(graph, frag, var);
+		AssignNode assign = new SingleAssignNode(graph, frag, ref);
 		assign.take(cpt.value);
 		cpt.put(assign.ref, assign);
 	    }
@@ -1705,7 +1721,7 @@ public class Java2DF extends ASTVisitor {
 	
 	DFComponent loopCpt = new DFComponent(graph);
 	Expression expr = forStmt.getExpression();
-	DFNode condValue = loopCpt.value;
+	DFNode condValue;
 	if (expr != null) {
 	    loopCpt = processExpression(graph, scope, loopCpt, expr);
 	    condValue = loopCpt.value;
@@ -1720,6 +1736,32 @@ public class Java2DF extends ASTVisitor {
 	
 	return processLoop(graph, cpt, frame, forStmt,
 			   condValue, loopCpt);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public DFComponent processEnhancedForStatement
+	(DFGraph graph, DFScopeMap map, DFFrame frame, DFComponent cpt,
+	 EnhancedForStatement eForStmt)
+	throws UnsupportedSyntax {
+	DFScope scope = map.get(eForStmt);
+	// Create a new frame.
+	frame = new DFFrame(frame, scope.getLoopRefs());
+	
+	DFComponent loopCpt = new DFComponent(graph);
+	Expression expr = eForStmt.getExpression();
+	loopCpt = processExpression(graph, scope, loopCpt, expr);
+	DFNode iterValue = new IterNode(graph, expr, loopCpt.value);
+	SingleVariableDeclaration decl = eForStmt.getParameter();
+	SimpleName varName = decl.getName();
+	DFRef ref = scope.lookup(varName.getIdentifier());
+	SingleAssignNode assign = new SingleAssignNode(graph, expr, ref);
+	assign.take(iterValue);
+	cpt.put(assign.ref, assign);
+	loopCpt = processStatement(graph, map, frame, loopCpt,
+				   eForStmt.getBody());
+	
+	return processLoop(graph, cpt, frame, eForStmt,
+			   iterValue, loopCpt);
     }
     
     @SuppressWarnings("unchecked")
@@ -1782,7 +1824,8 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof EnhancedForStatement) {
 	    DFScope scope = map.get(stmt);
-	    // XXX cpt = processEForStatement(graph, map, cpt, (EnhancedForStatement)stmt);
+	    cpt = processEnhancedForStatement
+		(graph, map, frame, cpt, (EnhancedForStatement)stmt);
 	    scope.finish(cpt);
 	    
 	} else if (stmt instanceof BreakStatement) {
@@ -2292,8 +2335,8 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName paramName = decl.getName();
 	    // XXX ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
-	    DFRef var = scope.add(paramName.getIdentifier(), paramType);
-	    AssignNode assign = new SingleAssignNode(graph, decl, var);
+	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
+	    AssignNode assign = new SingleAssignNode(graph, decl, ref);
 	    assign.take(param);
 	    cpt.put(assign.ref, assign);
 	}
