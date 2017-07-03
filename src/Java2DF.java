@@ -141,12 +141,12 @@ class DFScope {
 	return this.vars.values();
     }
 
-    public DFRef lookup(String name) {
+    public DFRef lookupVar(String name) {
 	DFVar var = this.vars.get(name);
 	if (var != null) {
 	    return var;
 	} else if (this.parent != null) {
-	    return this.parent.lookup(name);
+	    return this.parent.lookupVar(name);
 	} else {
 	    return this.add(name, null);
 	}
@@ -169,7 +169,7 @@ class DFScope {
     }
     
     public DFRef lookupField(String name) {
-	return this.lookup("."+name);
+	return this.lookupVar("."+name);
     }
     
     public void finish(DFComponent cpt) {
@@ -1271,7 +1271,7 @@ public class Java2DF extends ASTVisitor {
 
 	for (VariableDeclarationFragment frag : frags) {
 	    SimpleName varName = frag.getName();
-	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(varName.getIdentifier());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(graph, scope, cpt, init);
@@ -1291,7 +1291,7 @@ public class Java2DF extends ASTVisitor {
 
 	if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(varName.getIdentifier());
 	    cpt.assign = new SingleAssignNode(graph, expr, ref);
 	    
 	} else if (expr instanceof ArrayAccess) {
@@ -1335,7 +1335,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(varName.getIdentifier());
 	    cpt.value = cpt.get(ref);
 	    
 	} else if (expr instanceof ThisExpression) {
@@ -1753,7 +1753,7 @@ public class Java2DF extends ASTVisitor {
 	DFNode iterValue = new IterNode(graph, expr, loopCpt.value);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
 	SimpleName varName = decl.getName();
-	DFRef ref = scope.lookup(varName.getIdentifier());
+	DFRef ref = scope.lookupVar(varName.getIdentifier());
 	SingleAssignNode assign = new SingleAssignNode(graph, expr, ref);
 	assign.take(iterValue);
 	cpt.put(assign.ref, assign);
@@ -2100,7 +2100,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (ast instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(varName.getIdentifier());
 	    scope.addInput(ref);
 	    
 	} else if (ast instanceof ThisExpression) {
@@ -2287,7 +2287,7 @@ public class Java2DF extends ASTVisitor {
 	
 	if (ast instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookup(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(varName.getIdentifier());
 	    scope.addOutput(ref);
 	    
 	} else if (ast instanceof ArrayAccess) {
