@@ -4,6 +4,7 @@ public class Foo {
 	x = 0;
 	switch (n) {
 	case 1:
+	case 2:
 	    x = 100;
 	    break;
 	default:

@@ -899,19 +899,19 @@ class JoinNode extends CondNode {
 
 // CaseNode
 class CaseNode extends ProgNode {
-    
+
     public DFNode value;
+    public List<DFNode> matches;
     
     public CaseNode(DFGraph graph, ASTNode ast, DFNode value) {
 	super(graph, ast);
 	this.value = value;
-	if (value != null) {
-	    value.connect(this, DFLinkType.ControlFlow);
-	}
+	value.connect(this, "value");
+	this.matches = new ArrayList<DFNode>();
     }
 
     public String label() {
-	if (this.value != null) {
+	if (!this.matches.isEmpty()) {
 	    return "Case";
 	} else {
 	    return "Default";
@@ -920,6 +920,11 @@ class CaseNode extends ProgNode {
     
     public DFNodeType type() {
 	return DFNodeType.Cond;
+    }
+
+    public void add(DFNode node) {
+	this.matches.add(node);
+	node.connect(this);
     }
 }
 
@@ -1616,25 +1621,29 @@ public class Java2DF extends ASTVisitor {
 	DFNode switchValue = cpt.value;
 
 	SwitchCase switchCase = null;
-	DFNode caseNode = null;
+	CaseNode caseNode = null;
 	DFComponent caseCpt = null;
 	for (Statement stmt : (List<Statement>) switchStmt.statements()) {
 	    if (stmt instanceof SwitchCase) {
 		if (caseNode != null && caseCpt != null) {
 		    cpt = processCase(graph, cpt, frame,
 				      switchCase, caseNode, caseCpt);
+		    caseNode = null;
+		    caseCpt = null;
 		}
 		switchCase = (SwitchCase)stmt;
+		if (caseNode == null) {
+		    caseNode = new CaseNode(graph, stmt, switchValue);
+		}
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(graph, scope, cpt, expr);
-		    caseNode = new CaseNode(graph, stmt, cpt.value);
-		} else {
-		    caseNode = new CaseNode(graph, stmt, null);
+		    caseNode.add(cpt.value);
 		}
-		switchValue.connect(caseNode);
-		caseCpt = new DFComponent(graph);
-	    } else if (caseCpt != null) {
+	    } else {
+		if (caseCpt == null) {
+		    caseCpt = new DFComponent(graph);
+		}
 		caseCpt = processStatement(graph, map, frame, caseCpt, stmt);
 	    }
 	}
