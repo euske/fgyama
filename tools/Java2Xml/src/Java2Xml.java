@@ -11,6 +11,7 @@ import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
@@ -46,11 +47,14 @@ public class Java2Xml extends ASTVisitor {
 		}
 		reader.close();
 
+		Map<String, String> options = JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(src.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
+		//parser.setResolveBindings(true);
 		parser.setEnvironment(classpath, null, null, true);
+		parser.setCompilerOptions(options);
 		CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

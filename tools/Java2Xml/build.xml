@@ -16,6 +16,7 @@
   
   <target name="compile" depends="init">
     <javac srcdir="${src}" destdir="${build}" includeAntRuntime="false">
+      <compilerarg value="-Xlint" />
       <classpath location="${lib}/org.eclipse.jdt.core.jar" />
       <classpath location="${lib}/org.eclipse.osgi.jar" />
       <classpath location="${lib}/org.eclipse.core.runtime.jar" />

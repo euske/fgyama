@@ -2,6 +2,7 @@
 //
 import java.io.*;
 import java.util.*;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
@@ -1092,6 +1093,8 @@ class Utils {
 		name += "[]";
 	    }
 	    return name;
+	} else if (type instanceof ParameterizedType) {
+	    return getTypeName(((ParameterizedType)type).getType());
 	} else {
 	    return null;
 	}
@@ -2444,11 +2447,14 @@ public class Java2DF extends ASTVisitor {
 		reader.close();
 
 		Utils.logit("Parsing: "+path);
+		Map<String, String> options = JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(src.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
+		//parser.setResolveBindings(true);
 		parser.setEnvironment(classpath, null, null, true);
+		parser.setCompilerOptions(options);
 		CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 		
 		Java2DF visitor = new Java2DF(exporter);
