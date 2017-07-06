@@ -6,6 +6,51 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+//  Utility functions.
+// 
+class Utils {
+
+    public static void logit(String s) {
+	System.err.println(s);
+    }
+
+    public static String quote(String s) {
+        if (s == null) {
+            return "\"\"";
+        } else {
+            return "\"" + s.replace("\"", "\\\"") + "\"";
+        }
+    }
+
+    public static String indent(int n) {
+	StringBuilder s = new StringBuilder();
+	for (int i = 0; i < n; i++) {
+	    s.append(" ");
+	}
+	return s.toString();
+    }
+
+    public static String getTypeName(Type type) {
+	if (type instanceof PrimitiveType) {
+	    return ((PrimitiveType)type).getPrimitiveTypeCode().toString();
+	} else if (type instanceof SimpleType) {
+	    return ((SimpleType)type).getName().getFullyQualifiedName();
+	} else if (type instanceof ArrayType) {
+	    String name = getTypeName(((ArrayType)type).getElementType());
+	    int ndims = ((ArrayType)type).getDimensions();
+	    for (int i = 0; i < ndims; i++) {
+		name += "[]";
+	    }
+	    return name;
+	} else if (type instanceof ParameterizedType) {
+	    return getTypeName(((ParameterizedType)type).getType());
+	} else {
+	    return null;
+	}
+    }
+}
+
+
 //  UnsupportedSyntax
 //
 class UnsupportedSyntax extends Exception {
@@ -319,13 +364,16 @@ abstract class DFNode {
     public DFNode(DFScope scope) {
 	this.scope = scope;
 	this.id = this.scope.addNode(this);
-	this.name = "N"+scope.name+"_"+id;
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
     }
 
     public String toString() {
-	return ("<DFNode("+this.name+") "+this.label()+">");
+	return ("<DFNode("+this.name()+") "+this.label()+">");
+    }
+
+    public String name() {
+	return ("N"+scope.name+"_"+id);
     }
 
     public DFNodeType type() {
@@ -1053,16 +1101,21 @@ class GraphvizExporter {
     }
 
     public void writeGraph(DFScope scope) {
+	this.writeGraph(scope, 0);
+    }
+    
+    public void writeGraph(DFScope scope, int indent) {
+	String h = Utils.indent(indent);
 	try {
 	    if (scope.parent == null) {
 		this.writer.write("digraph "+scope.name+" {\n");
 	    } else {
-		this.writer.write("subgraph cluster_"+scope.name+" {\n");
+		this.writer.write(h+"subgraph cluster_"+scope.name+" {\n");
 	    }
-	    this.writer.write(" label="+quote(scope.name)+";");
+	    this.writer.write(h+" label="+Utils.quote(scope.name)+";\n");
 	    for (DFNode node : scope.nodes) {
-		this.writer.write(" "+node.name);
-                this.writer.write(" [label="+quote(node.label()));
+		this.writer.write(h+" "+node.name());
+                this.writer.write(" [label="+Utils.quote(node.label()));
 		switch (node.type()) {
 		case Box:
 		    this.writer.write(", shape=box");
@@ -1075,8 +1128,8 @@ class GraphvizExporter {
 	    }
 	    for (DFNode node : scope.nodes) {
 		for (DFLink link : node.send) {
-		    this.writer.write(" "+link.src.name+" -> "+link.dst.name);
-                    this.writer.write(" [label="+quote(link.name));
+		    this.writer.write(h+" "+link.src.name()+" -> "+link.dst.name());
+                    this.writer.write(" [label="+Utils.quote(link.name));
 		    switch (link.type) {
 		    case ControlFlow:
 			this.writer.write(", style=dotted");
@@ -1086,48 +1139,11 @@ class GraphvizExporter {
 		}
 	    }
 	    for (DFScope child : scope.children) {
-		this.writeGraph(child);
+		this.writeGraph(child, indent+1);
 	    }
-	    this.writer.write("}\n");
+	    this.writer.write(h+"}\n");
 	    this.writer.flush();
 	} catch (IOException e) {
-	}
-    }
-
-    public static String quote(String s) {
-        if (s == null) {
-            return "\"\"";
-        } else {
-            return "\"" + s.replace("\"", "\\\"") + "\"";
-        }
-    }
-}
-
-
-//  Utility functions.
-// 
-class Utils {
-
-    public static void logit(String s) {
-	System.err.println(s);
-    }
-
-    public static String getTypeName(Type type) {
-	if (type instanceof PrimitiveType) {
-	    return ((PrimitiveType)type).getPrimitiveTypeCode().toString();
-	} else if (type instanceof SimpleType) {
-	    return ((SimpleType)type).getName().getFullyQualifiedName();
-	} else if (type instanceof ArrayType) {
-	    String name = getTypeName(((ArrayType)type).getElementType());
-	    int ndims = ((ArrayType)type).getDimensions();
-	    for (int i = 0; i < ndims; i++) {
-		name += "[]";
-	    }
-	    return name;
-	} else if (type instanceof ParameterizedType) {
-	    return getTypeName(((ParameterizedType)type).getType());
-	} else {
-	    return null;
 	}
     }
 }
