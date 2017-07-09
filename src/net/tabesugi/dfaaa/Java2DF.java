@@ -400,7 +400,23 @@ class SingleAssignNode extends AssignNode {
 
     public void take(DFNode value) {
 	this.value = value;
-	value.connect(this, "assign");
+	value.connect(this);
+    }
+}
+
+// ReturnNode: represents a return value.
+class ReturnNode extends SingleAssignNode {
+
+    public ReturnNode(DFScope scope, DFRef ref, ASTNode ast) {
+	super(scope, ref, ast);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Box;
+    }
+
+    public String label() {
+	return "Return";
     }
 }
 
@@ -413,7 +429,7 @@ class ArrayAssignNode extends SingleAssignNode {
 			   DFNode array, DFNode index) {
 	super(scope, ref, ast);
 	this.index = index;
-	array.connect(this, "access");
+	array.connect(this, "array");
 	index.connect(this, "index");
     }
 }
@@ -431,29 +447,6 @@ class FieldAssignNode extends SingleAssignNode {
     }
 }
 
-// ReturnNode: represents a return value.
-class ReturnNode extends ProgNode {
-
-    public DFNode value;
-    
-    public ReturnNode(DFScope scope, DFRef ref, ASTNode ast,
-		      DFNode value) {
-	super(scope, ref, ast);
-	this.value = value;
-	if (value != null) {
-	    value.connect(this, "return");
-	}
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Box;
-    }
-
-    public String label() {
-	return "Return";
-    }
-}
-
 // ArrayAccessNode
 class ArrayAccessNode extends ProgNode {
 
@@ -466,7 +459,7 @@ class ArrayAccessNode extends ProgNode {
 	this.value = value;
 	this.index = index;
 	array.connect(this, "array");
-	value.connect(this, "access");
+	value.connect(this, "value");
 	index.connect(this, "index");
     }
 
@@ -486,7 +479,7 @@ class FieldAccessNode extends ProgNode {
 	super(scope, ref, ast);
 	this.value = value;
 	this.obj = obj;
-	value.connect(this, "access");
+	value.connect(this, "value");
 	obj.connect(this, "index");
     }
 
@@ -506,7 +499,7 @@ class PrefixNode extends ProgNode {
 	super(scope, ref, ast);
 	this.op = op;
 	this.value = value;
-	value.connect(this, "pre");
+	value.connect(this);
     }
 
     public String label() {
@@ -525,7 +518,7 @@ class PostfixNode extends ProgNode {
 	super(scope, ref, ast);
 	this.op = op;
 	this.value = value;
-	value.connect(this, "post");
+	value.connect(this);
     }
 
     public String label() {
@@ -618,7 +611,7 @@ class TypeCastNode extends ProgNode {
 	super(scope, null, ast);
 	this.type = type;
 	this.value = value;
-	value.connect(this, "cast");
+	value.connect(this);
     }
 
     public String label() {
@@ -637,7 +630,7 @@ class InstanceofNode extends ProgNode {
 	super(scope, null, ast);
 	this.type = type;
 	this.value = value;
-	value.connect(this, "instanceof");
+	value.connect(this);
     }
 
     public String label() {
@@ -655,7 +648,7 @@ class CaseNode extends ProgNode {
 		    DFNode value) {
 	super(scope, null, ast);
 	this.value = value;
-	value.connect(this, "match");
+	value.connect(this);
 	this.matches = new ArrayList<DFNode>();
     }
 
@@ -665,10 +658,6 @@ class CaseNode extends ProgNode {
 	} else {
 	    return "Default";
 	}
-    }
-    
-    public DFNodeType type() {
-	return DFNodeType.Cond;
     }
 
     public void add(DFNode node) {
@@ -709,7 +698,7 @@ abstract class CondNode extends ProgNode {
 		    DFNode value) {
 	super(scope, ref, ast);
 	this.value = value;
-	value.connect(this, DFLinkType.ControlFlow);
+	value.connect(this, DFLinkType.ControlFlow, "cond");
     }
 
     public DFNodeType type() {
@@ -807,7 +796,7 @@ class IterNode extends ProgNode {
 		    DFNode list) {
 	super(scope, ref, ast);
 	this.list = list;
-	list.connect(this, "list");
+	list.connect(this);
     }
     
     public String label() {
@@ -1608,7 +1597,8 @@ public class Java2DF extends ASTVisitor {
 	    value = cpt.value;
 	}
 	DFRef ref = scope.lookupReturn();
-	DFNode rtrn = new ReturnNode(scope, ref, rtrnStmt, value);
+	ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
+	rtrn.take(value);
 	cpt.put(ref, rtrn);
 	return cpt;
     }
