@@ -7,51 +7,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  Utility functions.
-// 
-class Utils {
-
-    public static void logit(String s) {
-	System.err.println(s);
-    }
-
-    public static String quote(String s) {
-        if (s == null) {
-            return "\"\"";
-        } else {
-            return "\"" + s.replace("\"", "\\\"") + "\"";
-        }
-    }
-
-    public static String indent(int n) {
-	StringBuilder s = new StringBuilder();
-	for (int i = 0; i < n; i++) {
-	    s.append(" ");
-	}
-	return s.toString();
-    }
-
-    public static String getTypeName(Type type) {
-	if (type instanceof PrimitiveType) {
-	    return ((PrimitiveType)type).getPrimitiveTypeCode().toString();
-	} else if (type instanceof SimpleType) {
-	    return ((SimpleType)type).getName().getFullyQualifiedName();
-	} else if (type instanceof ArrayType) {
-	    String name = getTypeName(((ArrayType)type).getElementType());
-	    int ndims = ((ArrayType)type).getDimensions();
-	    for (int i = 0; i < ndims; i++) {
-		name += "[]";
-	    }
-	    return name;
-	} else if (type instanceof ParameterizedType) {
-	    return getTypeName(((ParameterizedType)type).getType());
-	} else {
-	    return null;
-	}
-    }
-}
-
-
 //  UnsupportedSyntax
 //
 class UnsupportedSyntax extends Exception {
@@ -2441,6 +2396,7 @@ public class Java2DF extends ASTVisitor {
 
     // main
     public static void main(String[] args) throws IOException {
+	
 	String[] classpath = new String[] { "/" };
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
@@ -2466,34 +2422,22 @@ public class Java2DF extends ASTVisitor {
 	
 	GraphvizExporter exporter = new GraphvizExporter(output);
 	for (String path : files) {
-	    try {
-		BufferedReader reader = new BufferedReader(new FileReader(path));
-		String src = "";
-		while (true) {
-		    String line = reader.readLine();
-		    if (line == null) break;
-		    src += line+"\n";
-		}
-		reader.close();
+	    Utils.logit("Parsing: "+path);
+	    String src = Utils.readFile(path);
 
-		Utils.logit("Parsing: "+path);
-		Map<String, String> options = JavaCore.getOptions();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(src.toCharArray());
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		//parser.setResolveBindings(true);
-		parser.setEnvironment(classpath, null, null, true);
-		parser.setCompilerOptions(options);
-		CompilationUnit cu = (CompilationUnit)parser.createAST(null);
-		
-		Java2DF visitor = new Java2DF(exporter);
-		cu.accept(visitor);
-	    } catch (IOException e) {
-		System.err.println("Cannot open input file: "+path);
-	    }
+	    Map<String, String> options = JavaCore.getOptions();
+	    JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+	    ASTParser parser = ASTParser.newParser(AST.JLS8);
+	    parser.setSource(src.toCharArray());
+	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
+	    //parser.setResolveBindings(true);
+	    parser.setEnvironment(classpath, null, null, true);
+	    parser.setCompilerOptions(options);
+	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
+	    
+	    Java2DF visitor = new Java2DF(exporter);
+	    cu.accept(visitor);
 	}
-
 	output.close();
     }
 }
