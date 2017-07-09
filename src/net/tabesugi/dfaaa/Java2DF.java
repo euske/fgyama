@@ -411,10 +411,6 @@ class ReturnNode extends SingleAssignNode {
 	super(scope, ref, ast);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Box;
-    }
-
     public String label() {
 	return "Return";
     }
@@ -1134,7 +1130,9 @@ public class Java2DF extends ASTVisitor {
 	    if (falseCpt != null && falseCpt.outputs.containsKey(ref)) {
 		join.recv(false, falseCpt.get(ref));
 	    }
-	    join.close(cpt.get(ref));
+	    if (!join.isClosed()) {
+		join.close(cpt.get(ref));
+	    }
 	    cpt.put(ref, join);
 	}
 
