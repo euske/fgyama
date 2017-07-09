@@ -10,6 +10,7 @@
   <property name="input" location="samples/f1.java" />
   <property name="out_svg" location="${tmpDir}/out.svg" />
   <property name="out_gv" location="${tmpDir}/out.gv" />
+  <property name="out_xml" location="${tmpDir}/out.xml" />
   
   <path id="build.classpath">
     <pathelement location="${libDir}/junit-3.8.1.jar"/>
@@ -64,6 +65,16 @@
       <arg file="${out_svg}" />
       <arg file="${out_gv}" />
     </exec>
+  </target>
+  
+  <target name="Java2Xml" depends="compile">
+    <java classname="net.tabesugi.dfaaa.Java2Xml">
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+      <arg value="-o" />
+      <arg file="${out_xml}" />
+      <arg file="${input}" />
+    </java>
   </target>
   
   <target name="package" depends="compile">
