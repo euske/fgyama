@@ -1,48 +1,62 @@
-<project name="MyProject" default="compile" basedir=".">
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Java2DF" default="compile" basedir=".">
   
-  <property name="src" location="src" />
-  <property name="lib" location="lib" />
-  <property name="build" location="build" />
+  <property file="build.properties" />
+  <property name="srcDir" location="src" />
+  <property name="libDir" location="lib" />
+  <property name="tmpDir" location="tmp" />
+  <property name="buildDir" location="target" />
+  
   <property name="input" location="samples/f1.java" />
-  <property name="out_gv" location="samples/f1.gv" />
-  <property name="out_svg" location="samples/f1.svg" />
+  <property name="out_svg" location="${tmpDir}/out.svg" />
+  <property name="out_gv" location="${tmpDir}/out.gv" />
   
-  <target name="init">
-    <mkdir dir="${build}" />
-  </target>
-
+  <path id="build.classpath">
+    <pathelement location="${libDir}/junit-3.8.1.jar"/>
+    <pathelement location="${libDir}/org.eclipse.jdt.core-3.12.3.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.resources-3.11.1.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.expressions-3.5.100.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.runtime-3.12.0.jar"/>
+    <pathelement location="${libDir}/org.eclipse.osgi-3.11.3.jar"/>
+    <pathelement location="${libDir}/org.eclipse.equinox.common-3.8.0.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.jobs-3.8.0.jar"/>
+    <pathelement location="${libDir}/org.eclipse.equinox.registry-3.6.100.jar"/>
+    <pathelement location="${libDir}/org.eclipse.equinox.preferences-3.6.1.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.contenttype-3.5.100.jar"/>
+    <pathelement location="${libDir}/org.eclipse.equinox.app-1.3.400.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.filesystem-1.6.1.jar"/>
+    <pathelement location="${libDir}/org.eclipse.text-3.6.0.jar"/>
+    <pathelement location="${libDir}/org.eclipse.core.commands-3.8.1.jar"/>
+  </path>
+  
   <target name="clean">
-    <delete dir="${build}" />
+    <delete dir="${buildDir}" />
   </target>
   
-  <target name="compile" depends="init">
-    <javac srcdir="${src}" destdir="${build}" includeAntRuntime="false">
+  <target name="compile">
+    <mkdir dir="${buildDir}" />
+    <javac destdir="${buildDir}"
+           nowarn="false" 
+           debug="true" 
+           optimize="false" 
+           deprecation="true" 
+	   includeAntRuntime="false">
       <compilerarg value="-Xlint" />
-      <classpath location="${lib}/org.eclipse.jdt.core.jar" />
-      <classpath location="${lib}/org.eclipse.osgi.jar" />
-      <classpath location="${lib}/org.eclipse.core.runtime.jar" />
-      <classpath location="${lib}/org.eclipse.core.resources.jar" />
-      <classpath location="${lib}/org.eclipse.core.jobs.jar" />
-      <classpath location="${lib}/org.eclipse.core.contenttype.jar" />
-      <classpath location="${lib}/org.eclipse.equinox.common.jar" />
-      <classpath location="${lib}/org.eclipse.equinox.preferences.jar" />
+      <src>
+        <pathelement location="${srcDir}"/>
+      </src>
+      <classpath refid="build.classpath"/>
     </javac>
   </target>
 
-  <target name="test" depends="compile">
+  <target name="run" depends="compile">
+    <mkdir dir="${tmpDir}" />
     <java classname="Java2DF">
       <arg value="-o" />
       <arg file="${out_gv}" />
       <arg file="${input}" />
-      <classpath location="${build}" />
-      <classpath location="${lib}/org.eclipse.jdt.core.jar" />
-      <classpath location="${lib}/org.eclipse.osgi.jar" />
-      <classpath location="${lib}/org.eclipse.core.runtime.jar" />
-      <classpath location="${lib}/org.eclipse.core.resources.jar" />
-      <classpath location="${lib}/org.eclipse.core.jobs.jar" />
-      <classpath location="${lib}/org.eclipse.core.contenttype.jar" />
-      <classpath location="${lib}/org.eclipse.equinox.common.jar" />
-      <classpath location="${lib}/org.eclipse.equinox.preferences.jar" />
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
     </java>
     <exec executable="dot">
       <arg value="-Tsvg" />
@@ -52,4 +66,49 @@
     </exec>
   </target>
   
+  <target name="package" depends="compile">
+    <jar jarfile="Java2DF.jar" 
+         compress="true" 
+         index="false" 
+         basedir="${buildDir}">
+      <manifest>
+        <attribute name="Main-Class" value="net.tabesugi.dfaaa.Java2DF"/>
+      </manifest>
+    </jar>
+  </target>
+  
+  <target name="get-deps" description="Download all dependencies">
+    <mkdir dir="${libDir}"/>
+    <get src="https://repo.maven.apache.org/maven2/junit/junit/3.8.1/junit-3.8.1.jar" 
+         dest="${libDir}/junit-3.8.1.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/jdt/org.eclipse.jdt.core/3.12.3/org.eclipse.jdt.core-3.12.3.jar" 
+         dest="${libDir}/org.eclipse.jdt.core-3.12.3.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.resources/3.11.1/org.eclipse.core.resources-3.11.1.jar" 
+         dest="${libDir}/org.eclipse.core.resources-3.11.1.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.expressions/3.5.100/org.eclipse.core.expressions-3.5.100.jar" 
+         dest="${libDir}/org.eclipse.core.expressions-3.5.100.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.runtime/3.12.0/org.eclipse.core.runtime-3.12.0.jar" 
+         dest="${libDir}/org.eclipse.core.runtime-3.12.0.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.osgi/3.11.3/org.eclipse.osgi-3.11.3.jar" 
+         dest="${libDir}/org.eclipse.osgi-3.11.3.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.equinox.common/3.8.0/org.eclipse.equinox.common-3.8.0.jar" 
+         dest="${libDir}/org.eclipse.equinox.common-3.8.0.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.jobs/3.8.0/org.eclipse.core.jobs-3.8.0.jar" 
+         dest="${libDir}/org.eclipse.core.jobs-3.8.0.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.equinox.registry/3.6.100/org.eclipse.equinox.registry-3.6.100.jar" 
+         dest="${libDir}/org.eclipse.equinox.registry-3.6.100.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.equinox.preferences/3.6.1/org.eclipse.equinox.preferences-3.6.1.jar" 
+         dest="${libDir}/org.eclipse.equinox.preferences-3.6.1.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.contenttype/3.5.100/org.eclipse.core.contenttype-3.5.100.jar" 
+         dest="${libDir}/org.eclipse.core.contenttype-3.5.100.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.equinox.app/1.3.400/org.eclipse.equinox.app-1.3.400.jar" 
+         dest="${libDir}/org.eclipse.equinox.app-1.3.400.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.filesystem/1.6.1/org.eclipse.core.filesystem-1.6.1.jar" 
+         dest="${libDir}/org.eclipse.core.filesystem-1.6.1.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.text/3.6.0/org.eclipse.text-3.6.0.jar" 
+         dest="${libDir}/org.eclipse.text-3.6.0.jar" />
+    <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.commands/3.8.1/org.eclipse.core.commands-3.8.1.jar" 
+         dest="${libDir}/org.eclipse.core.commands-3.8.1.jar" />
+  </target>
+
 </project>

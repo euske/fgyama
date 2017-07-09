@@ -4,13 +4,11 @@ Dataflow Analyzaa
 
 Prerequisites:
 
-  * Python
-  * SrcML http://www.srcml.org/
-  * GraphViz http://graphviz.org/
+  * Java/Ant
+  * Eclipse JDT (automatically downloaded)
+  * Graphviz http://graphviz.org/
 
-How to Use:
+How to Build:
 
-    $ ./srcML/srcML.sh --no-namespace-decl samples/Foo.java |
-      python dfaaa.py |
-      dot -Tsvg -o out.svg
-
+    $ ant get-deps
+    $ ant run -Dinput=samples/f1.java -Doutput=out.svg
