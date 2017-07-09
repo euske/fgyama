@@ -51,7 +51,7 @@
 
   <target name="run" depends="compile">
     <mkdir dir="${tmpDir}" />
-    <java classname="Java2DF">
+    <java classname="net.tabesugi.dfaaa.Java2DF">
       <arg value="-o" />
       <arg file="${out_gv}" />
       <arg file="${input}" />
@@ -67,7 +67,8 @@
   </target>
   
   <target name="package" depends="compile">
-    <jar jarfile="Java2DF.jar" 
+    <mkdir dir="${tmpDir}" />
+    <jar jarfile="${tmpDir}/Java2DF.jar" 
          compress="true" 
          index="false" 
          basedir="${buildDir}">
