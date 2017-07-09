@@ -40,7 +40,8 @@
            nowarn="false" 
            debug="true" 
            optimize="false" 
-           deprecation="true" 
+           deprecation="true"
+	   verbose="false"
 	   includeAntRuntime="false">
       <compilerarg value="-Xlint" />
       <src>
@@ -59,6 +60,8 @@
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
     </java>
+  </target>
+  <target name="graph" depends="run">
     <exec executable="dot">
       <arg value="-Tsvg" />
       <arg value="-o" />

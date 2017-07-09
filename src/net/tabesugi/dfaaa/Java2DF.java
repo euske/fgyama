@@ -383,7 +383,7 @@ abstract class AssignNode extends ProgNode {
     }
 
     public String label() {
-	return this.ref.name;
+	return "assign:"+this.ref.name;
     }
 
     abstract public void take(DFNode value);
@@ -412,7 +412,7 @@ class ReturnNode extends SingleAssignNode {
     }
 
     public String label() {
-	return "Return";
+	return "return";
     }
 }
 
@@ -460,7 +460,7 @@ class ArrayAccessNode extends ProgNode {
     }
 
     public String label() {
-	return "[]";
+	return "array:"+this.ref.name;
     }
 }
 
@@ -499,7 +499,7 @@ class PrefixNode extends ProgNode {
     }
 
     public String label() {
-	return this.op.toString();
+	return this.op.toString()+":"+this.ref.name;
     }
 }
 
@@ -518,7 +518,7 @@ class PostfixNode extends ProgNode {
     }
 
     public String label() {
-	return this.op.toString();
+	return this.op.toString()+":"+this.ref.name;
     }
 }
 
@@ -533,7 +533,7 @@ class ArgNode extends ProgNode {
     }
 
     public String label() {
-	return "Arg "+this.index;
+	return "arg"+this.index;
     }
 }
 
@@ -548,7 +548,7 @@ class ConstNode extends ProgNode {
     }
 
     public String label() {
-	return this.value;
+	return "="+this.value;
     }
 }
 
@@ -630,7 +630,7 @@ class InstanceofNode extends ProgNode {
     }
 
     public String label() {
-	return Utils.getTypeName(this.type);
+	return Utils.getTypeName(this.type)+"?";
     }
 }
 
@@ -650,9 +650,9 @@ class CaseNode extends ProgNode {
 
     public String label() {
 	if (!this.matches.isEmpty()) {
-	    return "Case";
+	    return "case";
 	} else {
-	    return "Default";
+	    return "default";
 	}
     }
 
@@ -681,7 +681,7 @@ class AssignOpNode extends ProgNode {
     }
 
     public String label() {
-	return this.op.toString();
+	return this.op.toString()+":"+this.ref.name;
     }
 }
 
@@ -711,7 +711,7 @@ class BranchNode extends CondNode {
     }
 
     public String label() {
-	return "Branch";
+	return "branch:"+this.ref.name;
     }
 
     public void send(boolean cond, DFNode node) {
@@ -735,7 +735,7 @@ class JoinNode extends CondNode {
     }
     
     public String label() {
-	return "Join";
+	return "join:"+this.ref.name;
     }
     
     public void recv(boolean cond, DFNode node) {
@@ -779,7 +779,7 @@ class LoopNode extends ProgNode {
     }
     
     public String label() {
-	return "Loop:"+this.ref.name;
+	return "loop:"+this.ref.name;
     }
 }
 
@@ -796,7 +796,7 @@ class IterNode extends ProgNode {
     }
     
     public String label() {
-	return "Iter";
+	return "iter:"+this.ref.name;
     }
 }
 
@@ -998,61 +998,109 @@ class DFComponent {
 }
 
 
-//  GraphvizExporter
+//  TextExporter
 //
-class GraphvizExporter {
+class TextExporter {
 
     public BufferedWriter writer;
     
-    public GraphvizExporter(OutputStream stream) {
+    public TextExporter(OutputStream stream) {
 	this.writer = new BufferedWriter(new OutputStreamWriter(stream));
     }
 
-    public void writeGraph(DFScope scope) {
+    public void writeGraph(DFScope scope)
+	throws IOException {
+	if (scope.parent == null) {
+	    this.writer.write("@"+scope.name+"\n");
+	}
+	for (DFNode node : scope.nodes) {
+	    this.writer.write("+"+node.name());
+	    if (node.ref != null) {
+		this.writer.write(","+node.ref.name);
+	    } else {
+		this.writer.write(",");
+	    }
+	    if (node instanceof ProgNode) {
+		ProgNode prognode = (ProgNode)node;
+		ASTNode ast = prognode.ast;
+		if (ast != null) {
+		    int type = ast.getNodeType();
+		    int start = ast.getStartPosition();
+		    int length = ast.getLength();
+		    this.writer.write(","+type+","+start+","+length);
+		}
+	    }
+	    this.writer.newLine();
+	}
+	for (DFNode node : scope.nodes) {
+	    for (DFLink link : node.send) {
+		this.writer.write("-"+link.src.name()+","+link.dst.name());
+		if (link.name != null) {
+		    this.writer.write(","+link.name);;
+		}
+		this.writer.newLine();
+	    }
+	}
+	for (DFScope child : scope.children) {
+	    this.writeGraph(child);
+	}
+	this.writer.flush();
+    }
+}
+
+
+//  GraphvizExporter
+//
+class GraphvizExporter extends TextExporter {
+
+    public GraphvizExporter(OutputStream stream) {
+	super(stream);
+    }
+
+    public void writeGraph(DFScope scope)
+	throws IOException {
 	this.writeGraph(scope, 0);
     }
     
-    public void writeGraph(DFScope scope, int indent) {
+    public void writeGraph(DFScope scope, int indent)
+	throws IOException {
 	String h = Utils.indent(indent);
-	try {
-	    if (scope.parent == null) {
-		this.writer.write("digraph "+scope.name+" {\n");
-	    } else {
-		this.writer.write(h+"subgraph cluster_"+scope.name+" {\n");
+	if (scope.parent == null) {
+	    this.writer.write("digraph "+scope.name+" {\n");
+	} else {
+	    this.writer.write(h+"subgraph cluster_"+scope.name+" {\n");
+	}
+	this.writer.write(h+" label="+Utils.quote(scope.name)+";\n");
+	for (DFNode node : scope.nodes) {
+	    this.writer.write(h+" "+node.name());
+	    this.writer.write(" [label="+Utils.quote(node.label()));
+	    switch (node.type()) {
+	    case Box:
+		this.writer.write(", shape=box");
+		break;
+	    case Cond:
+		this.writer.write(", shape=diamond");
+		break;
 	    }
-	    this.writer.write(h+" label="+Utils.quote(scope.name)+";\n");
-	    for (DFNode node : scope.nodes) {
-		this.writer.write(h+" "+node.name());
-                this.writer.write(" [label="+Utils.quote(node.label()));
-		switch (node.type()) {
-		case Box:
-		    this.writer.write(", shape=box");
-		    break;
-		case Cond:
-		    this.writer.write(", shape=diamond");
+	    this.writer.write("];\n");
+	}
+	for (DFNode node : scope.nodes) {
+	    for (DFLink link : node.send) {
+		this.writer.write(h+" "+link.src.name()+" -> "+link.dst.name());
+		this.writer.write(" [label="+Utils.quote(link.name));
+		switch (link.type) {
+		case ControlFlow:
+		    this.writer.write(", style=dotted");
 		    break;
 		}
 		this.writer.write("];\n");
 	    }
-	    for (DFNode node : scope.nodes) {
-		for (DFLink link : node.send) {
-		    this.writer.write(h+" "+link.src.name()+" -> "+link.dst.name());
-                    this.writer.write(" [label="+Utils.quote(link.name));
-		    switch (link.type) {
-		    case ControlFlow:
-			this.writer.write(", style=dotted");
-			break;
-		    }
-		    this.writer.write("];\n");
-		}
-	    }
-	    for (DFScope child : scope.children) {
-		this.writeGraph(child, indent+1);
-	    }
-	    this.writer.write(h+"}\n");
-	    this.writer.flush();
-	} catch (IOException e) {
 	}
+	for (DFScope child : scope.children) {
+	    this.writeGraph(child, indent+1);
+	}
+	this.writer.write(h+"}\n");
+	this.writer.flush();
     }
 }
 
@@ -1094,9 +1142,9 @@ public class Java2DF extends ASTVisitor {
 
     // Instance methods.
     
-    public GraphvizExporter exporter;
+    public TextExporter exporter;
 
-    public Java2DF(GraphvizExporter exporter) {
+    public Java2DF(TextExporter exporter) {
 	this.exporter = exporter;
     }
 
@@ -1895,7 +1943,6 @@ public class Java2DF extends ASTVisitor {
 	    throw new UnsupportedSyntax(stmt);
 	}
 
-	cpt.dump();
 	return cpt;
     }
 
@@ -2353,7 +2400,7 @@ public class Java2DF extends ASTVisitor {
 	DFComponent cpt = buildMethodDeclaration(scope, method);
 	DFScopeMap map = new DFScopeMap();
 	buildScope(map, scope, funcBlock);
-	scope.dump();
+	//scope.dump();
 
 	// Process the function body.
 	cpt = processStatement(map, null, cpt, funcBlock);
@@ -2373,6 +2420,8 @@ public class Java2DF extends ASTVisitor {
 		    this.exporter.writeGraph(scope);
 		}
 	    }
+	} catch (IOException e) {
+	    e.printStackTrace();
 	} catch (UnsupportedSyntax e) {
 	    String name = e.ast.getClass().getName();
 	    Utils.logit("Unsupported("+name+"): "+e.ast);
@@ -2408,7 +2457,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	
-	GraphvizExporter exporter = new GraphvizExporter(output);
+	TextExporter exporter = new TextExporter(output);
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
