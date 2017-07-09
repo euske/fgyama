@@ -7,20 +7,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  UnsupportedSyntax
-//
-class UnsupportedSyntax extends Exception {
-
-    static final long serialVersionUID = 1L;
-
-    public ASTNode ast;
-    
-    public UnsupportedSyntax(ASTNode ast) {
-	this.ast = ast;
-    }
-}
-
-
 //  DFRef
 //  Place to store a value.
 //
@@ -244,59 +230,6 @@ class DFScope {
 }
 
 
-//  DFScopeMap
-//
-class DFScopeMap {
-
-    public Map<ASTNode, DFScope> scopes;
-
-    public DFScopeMap() {
-	this.scopes = new HashMap<ASTNode, DFScope>();
-    }
-
-    public void put(ASTNode ast, DFScope scope) {
-	this.scopes.put(ast, scope);
-    }
-
-    public DFScope get(ASTNode ast) {
-	return this.scopes.get(ast);
-    }
-}
-
-    
-//  DFLabel
-//
-class DFLabel {
-
-    public String name;
-
-    public DFLabel(String name) {
-	this.name = name;
-    }
-
-    public String toString() {
-	return this.name+":";
-    }
-    
-    public static DFLabel BREAK = new DFLabel("BREAK");
-    public static DFLabel CONTINUE = new DFLabel("CONTINUE");
-}
-
-
-//  DFFrame
-//
-class DFFrame {
-
-    public DFFrame parent;
-    public Collection<DFRef> loopRefs;
-    
-    public DFFrame(DFFrame parent, Collection<DFRef> loopRefs) {
-	this.parent = parent;
-	this.loopRefs = loopRefs;
-    }
-}
-
-
 //  DFNodeType
 //
 enum DFNodeType {
@@ -304,6 +237,43 @@ enum DFNodeType {
     Box,
     Cond,
     Loop,
+}
+
+
+//  DFLinkType
+//
+enum DFLinkType {
+    DataFlow,
+    ControlFlow,
+}
+
+
+//  DFLink
+//
+class DFLink {
+    
+    public DFNode src;
+    public DFNode dst;
+    public DFLinkType type;
+    public String name;
+    
+    public DFLink(DFNode src, DFNode dst, DFLinkType type, String name)
+    {
+	this.src = src;
+	this.dst = dst;
+	this.type = type;
+	this.name = name;
+    }
+
+    public String toString() {
+	return ("<DFLink: "+this.src+"-("+this.name+")-"+this.dst+">");
+    }
+
+    public void disconnect()
+    {
+	this.src.send.remove(this);
+	this.dst.recv.remove(this);
+    }
 }
 
 
@@ -375,153 +345,6 @@ abstract class DFNode {
         this.scope.removeNode(this);
     }
 }
-
-
-//  DFLinkType
-//
-enum DFLinkType {
-    DataFlow,
-    ControlFlow,
-}
-
-
-//  DFLink
-//
-class DFLink {
-    
-    public DFNode src;
-    public DFNode dst;
-    public DFLinkType type;
-    public String name;
-    
-    public DFLink(DFNode src, DFNode dst, DFLinkType type, String name)
-    {
-	this.src = src;
-	this.dst = dst;
-	this.type = type;
-	this.name = name;
-    }
-
-    public String toString() {
-	return ("<DFLink: "+this.src+"-("+this.name+")-"+this.dst+">");
-    }
-
-    public void disconnect()
-    {
-	this.src.send.remove(this);
-	this.dst.recv.remove(this);
-    }
-}
-
-
-//  DFMeet
-//
-class DFMeet {
-
-    public DFRef ref;
-    public DFNode node;
-    public DFFrame frame;
-    public DFLabel label;
-
-    public DFMeet(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
-	this.ref = ref;
-	this.node = node;
-	this.frame = frame;
-	this.label = label;
-    }
-
-    public String toString() {
-	return (this.ref+":"+this.node+" -> "+this.frame+":"+this.label);
-    }
-}
-
-
-//  DFComponent
-//
-class DFComponent {
-
-    public DFScope scope;
-    public Map<DFRef, DFNode> inputs;
-    public Map<DFRef, DFNode> outputs;
-    public List<DFMeet> meets;
-    public DFNode value;
-    public AssignNode assign;
-    
-    public DFComponent(DFScope scope) {
-	this.scope = scope;
-	this.inputs = new HashMap<DFRef, DFNode>();
-	this.outputs = new HashMap<DFRef, DFNode>();
-	this.meets = new ArrayList<DFMeet>();
-	this.value = null;
-	this.assign = null;
-    }
-
-    public void dump() {
-	dump(System.out);
-    }
-    
-    public void dump(PrintStream out) {
-	out.println("DFComponent");
-	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : this.inputs.keySet()) {
-	    inputs.append(" "+ref);
-	}
-	out.println("  inputs:"+inputs);
-	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : this.outputs.keySet()) {
-	    outputs.append(" "+ref);
-	}
-	out.println("  outputs:"+outputs);
-	for (DFMeet meet : this.meets) {
-	    out.println("  meet: "+meet);
-	}
-	if (this.value != null) {
-	    out.println("  value: "+this.value);
-	}
-	if (this.assign != null) {
-	    out.println("  assign: "+this.assign);
-	}
-    }
-
-    public DFNode get(DFRef ref) {
-	DFNode node = this.outputs.get(ref);
-	if (node == null) {
-	    node = this.inputs.get(ref);
-	    if (node == null) {
-		node = new DistNode(this.scope);
-		this.inputs.put(ref, node);
-	    }
-	}
-	return node;
-    }
-
-    public void put(DFRef ref, DFNode node) {
-	this.outputs.put(ref, node);
-    }
-
-    public void jump(DFRef ref, DFFrame frame, DFLabel label) {
-	DFNode node = this.get(ref);
-	this.addMeet(new DFMeet(ref, node, frame, label));
-	this.outputs.remove(ref);
-    }
-
-    public void addMeet(DFMeet meet) {
-	this.meets.add(meet);
-    }
-
-    public void removeRef(DFRef ref) {
-	this.inputs.remove(ref);
-	this.outputs.remove(ref);
-	List<DFMeet> removed = new ArrayList<DFMeet>();
-	for (DFMeet meet : this.meets) {
-	    if (meet.ref == ref) {
-		removed.add(meet);
-	    }
-	}
-	this.meets.removeAll(removed);
-    }
-}
-
 
 // DistNode: a DFNode that distributes a value to multiple nodes.
 class DistNode extends DFNode {
@@ -623,7 +446,6 @@ class FieldAssignNode extends SingleAssignNode {
 	obj.connect(this, "index");
     }
 }
-
 
 // ReturnNode: represents a return value.
 class ReturnNode extends ProgNode {
@@ -822,7 +644,6 @@ class InstanceofNode extends ProgNode {
 	return Utils.getTypeName(this.type);
     }
 }
-
 
 // AssignOpNode
 class AssignOpNode extends ProgNode {
@@ -1045,6 +866,147 @@ class CreateObjectNode extends CallNode {
 }
 
 
+//  DFLabel
+//
+class DFLabel {
+
+    public String name;
+
+    public DFLabel(String name) {
+	this.name = name;
+    }
+
+    public String toString() {
+	return this.name+":";
+    }
+    
+    public static DFLabel BREAK = new DFLabel("BREAK");
+    public static DFLabel CONTINUE = new DFLabel("CONTINUE");
+}
+
+
+//  DFFrame
+//
+class DFFrame {
+
+    public DFFrame parent;
+    public Collection<DFRef> loopRefs;
+    
+    public DFFrame(DFFrame parent, Collection<DFRef> loopRefs) {
+	this.parent = parent;
+	this.loopRefs = loopRefs;
+    }
+}
+
+
+//  DFMeet
+//
+class DFMeet {
+
+    public DFRef ref;
+    public DFNode node;
+    public DFFrame frame;
+    public DFLabel label;
+
+    public DFMeet(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
+	this.ref = ref;
+	this.node = node;
+	this.frame = frame;
+	this.label = label;
+    }
+
+    public String toString() {
+	return (this.ref+":"+this.node+" -> "+this.frame+":"+this.label);
+    }
+}
+
+
+//  DFComponent
+//
+class DFComponent {
+
+    public DFScope scope;
+    public Map<DFRef, DFNode> inputs;
+    public Map<DFRef, DFNode> outputs;
+    public List<DFMeet> meets;
+    public DFNode value;
+    public AssignNode assign;
+    
+    public DFComponent(DFScope scope) {
+	this.scope = scope;
+	this.inputs = new HashMap<DFRef, DFNode>();
+	this.outputs = new HashMap<DFRef, DFNode>();
+	this.meets = new ArrayList<DFMeet>();
+	this.value = null;
+	this.assign = null;
+    }
+
+    public void dump() {
+	dump(System.out);
+    }
+    
+    public void dump(PrintStream out) {
+	out.println("DFComponent");
+	StringBuilder inputs = new StringBuilder();
+	for (DFRef ref : this.inputs.keySet()) {
+	    inputs.append(" "+ref);
+	}
+	out.println("  inputs:"+inputs);
+	StringBuilder outputs = new StringBuilder();
+	for (DFRef ref : this.outputs.keySet()) {
+	    outputs.append(" "+ref);
+	}
+	out.println("  outputs:"+outputs);
+	for (DFMeet meet : this.meets) {
+	    out.println("  meet: "+meet);
+	}
+	if (this.value != null) {
+	    out.println("  value: "+this.value);
+	}
+	if (this.assign != null) {
+	    out.println("  assign: "+this.assign);
+	}
+    }
+
+    public DFNode get(DFRef ref) {
+	DFNode node = this.outputs.get(ref);
+	if (node == null) {
+	    node = this.inputs.get(ref);
+	    if (node == null) {
+		node = new DistNode(this.scope);
+		this.inputs.put(ref, node);
+	    }
+	}
+	return node;
+    }
+
+    public void put(DFRef ref, DFNode node) {
+	this.outputs.put(ref, node);
+    }
+
+    public void jump(DFRef ref, DFFrame frame, DFLabel label) {
+	DFNode node = this.get(ref);
+	this.addMeet(new DFMeet(ref, node, frame, label));
+	this.outputs.remove(ref);
+    }
+
+    public void addMeet(DFMeet meet) {
+	this.meets.add(meet);
+    }
+
+    public void removeRef(DFRef ref) {
+	this.inputs.remove(ref);
+	this.outputs.remove(ref);
+	List<DFMeet> removed = new ArrayList<DFMeet>();
+	for (DFMeet meet : this.meets) {
+	    if (meet.ref == ref) {
+		removed.add(meet);
+	    }
+	}
+	this.meets.removeAll(removed);
+    }
+}
+
 
 //  GraphvizExporter
 //
@@ -1105,9 +1067,40 @@ class GraphvizExporter {
 }
 
 
+//  DFScopeMap
+//
+class DFScopeMap {
+
+    public Map<ASTNode, DFScope> scopes;
+
+    public DFScopeMap() {
+	this.scopes = new HashMap<ASTNode, DFScope>();
+    }
+
+    public void put(ASTNode ast, DFScope scope) {
+	this.scopes.put(ast, scope);
+    }
+
+    public DFScope get(ASTNode ast) {
+	return this.scopes.get(ast);
+    }
+}
+
+    
 //  Java2DF
 // 
 public class Java2DF extends ASTVisitor {
+
+    class UnsupportedSyntax extends Exception {
+
+	static final long serialVersionUID = 1L;
+
+	public ASTNode ast;
+    
+	public UnsupportedSyntax(ASTNode ast) {
+	    this.ast = ast;
+	}
+    }
 
     // Instance methods.
     
