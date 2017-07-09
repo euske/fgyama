@@ -1115,6 +1115,12 @@ class TextExporter {
 	    this.writer.write("+"+scope.name);
 	    this.writer.write(","+node.name());
 	    this.writer.write(","+node.type().ordinal());
+	    String label = node.label();
+	    if (label != null) {
+		this.writer.write(","+label);
+	    } else {
+		this.writer.write(",");
+	    }
 	    if (node.ref != null) {
 		this.writer.write(","+node.ref.name);
 	    } else {

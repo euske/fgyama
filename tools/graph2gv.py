@@ -9,11 +9,12 @@ def q(s):
 
 class Node:
 
-    def __init__(self, scope, nid, ntype, name):
+    def __init__(self, scope, nid, ntype, label, ref):
         self.scope = scope
         self.nid = nid
         self.ntype = ntype
-        self.name = name
+        self.label = label
+        self.ref = ref
         self.send = []
         self.recv = []
         return
@@ -59,7 +60,7 @@ class Graph:
             out.write(h+'subgraph cluster_%s {\n' % scope.sid)
         out.write(h+' label=%s;\n' % q(scope.sid))
         for node in scope.nodes:
-            out.write(h+' %s [label=%s' % (node.nid, q(node.name)))
+            out.write(h+' %s [label=%s' % (node.nid, q(node.label)))
             if node.ntype == 3:
                 out.write(', shape=box')
             elif node.ntype == 5:
@@ -102,11 +103,11 @@ def load_graphs(fp):
             graph.scopes[sid] = scope
         elif line.startswith('+'):
             f = line[1:].split(',')
-            (sid,nid,ntype,name) = f[0:4]
+            (sid,nid,ntype,label,ref) = f[0:5]
             assert graph is not None
             assert sid in graph.scopes
             scope = graph.scopes[sid]
-            node = Node(scope, nid, int(ntype), name)
+            node = Node(scope, nid, int(ntype), label, ref)
             graph.nodes[nid] = node
             scope.nodes.append(node)
         elif line.startswith('-'):
