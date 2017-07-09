@@ -1141,10 +1141,10 @@ public class Java2DF extends ASTVisitor {
 	
 	for (DFRef ref : refs) {
 	    JoinNode join = new JoinNode(scope, ast, condValue);
-	    if (trueCpt != null) {
+	    if (trueCpt != null && trueCpt.outputs.containsKey(ref)) {
 		join.recv(true, trueCpt.get(ref));
 	    }
-	    if (falseCpt != null) {
+	    if (falseCpt != null && falseCpt.outputs.containsKey(ref)) {
 		join.recv(false, falseCpt.get(ref));
 	    }
 	    join.close(cpt.get(ref));
