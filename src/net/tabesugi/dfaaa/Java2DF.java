@@ -233,16 +233,20 @@ class DFScope {
 //  DFNodeType
 //
 enum DFNodeType {
-    Normal,
-    Box,
+    None,
+    Constant,
+    Operator,
+    Assign,
     Cond,
     Loop,
+    Terminal,
 }
 
 
 //  DFLinkType
 //
 enum DFLinkType {
+    None,
     DataFlow,
     ControlFlow,
 }
@@ -304,9 +308,7 @@ abstract class DFNode {
 	return ("N"+this.scope.name+"_"+id);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Normal;
-    }
+    abstract public DFNodeType type();
 
     abstract public String label();
 
@@ -355,6 +357,10 @@ class DistNode extends DFNode {
 	super(scope, ref);
     }
 
+    public DFNodeType type() {
+	return DFNodeType.None;
+    }
+
     public String label() {
 	return null;
     }
@@ -379,7 +385,7 @@ abstract class AssignNode extends ProgNode {
     }
 
     public DFNodeType type() {
-	return DFNodeType.Box;
+	return DFNodeType.Assign;
     }
 
     public String label() {
@@ -409,6 +415,10 @@ class ReturnNode extends SingleAssignNode {
 
     public ReturnNode(DFScope scope, DFRef ref, ASTNode ast) {
 	super(scope, ref, ast);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Terminal;
     }
 
     public String label() {
@@ -459,6 +469,10 @@ class ArrayAccessNode extends ProgNode {
 	index.connect(this, "index");
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
 	return "array:"+this.ref.name;
     }
@@ -477,6 +491,10 @@ class FieldAccessNode extends ProgNode {
 	this.obj = obj;
 	value.connect(this, "value");
 	obj.connect(this, "index");
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Operator;
     }
 
     public String label() {
@@ -498,8 +516,16 @@ class PrefixNode extends ProgNode {
 	value.connect(this);
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
-	return this.op.toString()+":"+this.ref.name;
+	if (this.ref != null) {
+	    return this.op.toString()+":"+this.ref.name;
+	} else {
+	    return this.op.toString();
+	}
     }
 }
 
@@ -517,8 +543,16 @@ class PostfixNode extends ProgNode {
 	value.connect(this);
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
-	return this.op.toString()+":"+this.ref.name;
+	if (this.ref != null) {
+	    return this.op.toString()+":"+this.ref.name;
+	} else {
+	    return this.op.toString();
+	}
     }
 }
 
@@ -530,6 +564,10 @@ class ArgNode extends ProgNode {
     public ArgNode(DFScope scope, ASTNode ast, int index) {
 	super(scope, null, ast);
 	this.index = index;
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Terminal;
     }
 
     public String label() {
@@ -547,6 +585,10 @@ class ConstNode extends ProgNode {
 	this.value = value;
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Constant;
+    }
+
     public String label() {
 	return "="+this.value;
     }
@@ -560,6 +602,10 @@ class ArrayValueNode extends ProgNode {
     public ArrayValueNode(DFScope scope, ASTNode ast) {
 	super(scope, null, ast);
 	this.values = new ArrayList<DFNode>();
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Constant;
     }
 
     public String label() {
@@ -591,6 +637,10 @@ class InfixNode extends ProgNode {
 	rvalue.connect(this, "R");
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
 	return this.op.toString();
     }
@@ -608,6 +658,10 @@ class TypeCastNode extends ProgNode {
 	this.type = type;
 	this.value = value;
 	value.connect(this);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Operator;
     }
 
     public String label() {
@@ -629,6 +683,10 @@ class InstanceofNode extends ProgNode {
 	value.connect(this);
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
 	return Utils.getTypeName(this.type)+"?";
     }
@@ -646,6 +704,10 @@ class CaseNode extends ProgNode {
 	this.value = value;
 	value.connect(this);
 	this.matches = new ArrayList<DFNode>();
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Operator;
     }
 
     public String label() {
@@ -680,8 +742,16 @@ class AssignOpNode extends ProgNode {
 	rvalue.connect(this, "R");
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
-	return this.op.toString()+":"+this.ref.name;
+	if (this.ref != null) {
+	    return this.op.toString()+":"+this.ref.name;
+	} else {
+	    return this.op.toString();
+	}
     }
 }
 
@@ -711,7 +781,11 @@ class BranchNode extends CondNode {
     }
 
     public String label() {
-	return "branch:"+this.ref.name;
+	if (this.ref != null) {
+	    return "branch:"+this.ref.name;
+	} else {
+	    return "branch";
+	}
     }
 
     public void send(boolean cond, DFNode node) {
@@ -735,7 +809,11 @@ class JoinNode extends CondNode {
     }
     
     public String label() {
-	return "join:"+this.ref.name;
+	if (this.ref != null) {
+	    return "join:"+this.ref.name;
+	} else {
+	    return "join";
+	}
     }
     
     public void recv(boolean cond, DFNode node) {
@@ -779,7 +857,11 @@ class LoopNode extends ProgNode {
     }
     
     public String label() {
-	return "loop:"+this.ref.name;
+	if (this.ref != null) {
+	    return "loop:"+this.ref.name;
+	} else {
+	    return "loop";
+	}
     }
 }
 
@@ -795,6 +877,10 @@ class IterNode extends ProgNode {
 	list.connect(this);
     }
     
+    public DFNodeType type() {
+	return DFNodeType.Operator;
+    }
+
     public String label() {
 	return "iter:"+this.ref.name;
     }
@@ -814,6 +900,10 @@ abstract class CallNode extends ProgNode {
 	if (obj != null) {
 	    obj.connect(this, "index");
 	}
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Operator;
     }
 
     public void take(DFNode arg) {
@@ -846,7 +936,7 @@ class CreateObjectNode extends CallNode {
 
     public CreateObjectNode(DFScope scope, ASTNode ast,
 			    DFNode obj, Type type) {
-	super(scope, null, ast, obj);
+	super(scope, null, ast, obj); // 
 	this.type = type;
     }
     
@@ -1008,6 +1098,12 @@ class TextExporter {
 	this.writer = new BufferedWriter(new OutputStreamWriter(stream));
     }
 
+    public void startFile(String path)
+	throws IOException {
+	this.writer.write("#"+path+"\n");
+	this.writer.flush();
+    }
+
     public void writeGraph(DFScope scope)
 	throws IOException {
 	if (scope.parent == null) {
@@ -1015,6 +1111,7 @@ class TextExporter {
 	}
 	for (DFNode node : scope.nodes) {
 	    this.writer.write("+"+node.name());
+	    this.writer.write(","+node.type().ordinal());
 	    if (node.ref != null) {
 		this.writer.write(","+node.ref.name);
 	    } else {
@@ -1035,6 +1132,7 @@ class TextExporter {
 	for (DFNode node : scope.nodes) {
 	    for (DFLink link : node.send) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
+		this.writer.write(","+link.type.ordinal());
 		if (link.name != null) {
 		    this.writer.write(","+link.name);;
 		}
@@ -1043,6 +1141,9 @@ class TextExporter {
 	}
 	for (DFScope child : scope.children) {
 	    this.writeGraph(child);
+	}
+	if (scope.parent == null) {
+	    this.writer.newLine();
 	}
 	this.writer.flush();
     }
@@ -1055,6 +1156,12 @@ class GraphvizExporter extends TextExporter {
 
     public GraphvizExporter(OutputStream stream) {
 	super(stream);
+    }
+
+    public void startFile(String path)
+	throws IOException {
+	this.writer.write("// "+path+"\n");
+	this.writer.flush();
     }
 
     public void writeGraph(DFScope scope)
@@ -1075,7 +1182,7 @@ class GraphvizExporter extends TextExporter {
 	    this.writer.write(h+" "+node.name());
 	    this.writer.write(" [label="+Utils.quote(node.label()));
 	    switch (node.type()) {
-	    case Box:
+	    case Assign:
 		this.writer.write(", shape=box");
 		break;
 	    case Cond:
@@ -1407,26 +1514,26 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    cpt = processAssignment(scope, cpt, operand);
-	    AssignNode assign = cpt.assign;
 	    cpt = processExpression(scope, cpt, operand);
-	    DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.value);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
+		cpt = processAssignment(scope, cpt, operand);
+		AssignNode assign = cpt.assign;
+		DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.value);
 		assign.take(value);
 		cpt.put(assign.ref, assign);
+		cpt.value = value;
 	    }
-	    cpt.value = value;
 	    
 	} else if (expr instanceof PostfixExpression) {
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
 	    cpt = processAssignment(scope, cpt, operand);
-	    AssignNode assign = cpt.assign;
-	    cpt = processExpression(scope, cpt, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
+		AssignNode assign = cpt.assign;
+		cpt = processExpression(scope, cpt, operand);
 		assign.take(new PostfixNode(scope, assign.ref, expr, op, cpt.value));
 		cpt.put(assign.ref, assign);
 	    }
@@ -2426,6 +2533,7 @@ public class Java2DF extends ASTVisitor {
 	    String name = e.ast.getClass().getName();
 	    Utils.logit("Unsupported("+name+"): "+e.ast);
 	    Utils.logit("fail: "+funcName);
+	    //e.printStackTrace();
 	}
 	return true;
     }
@@ -2461,6 +2569,7 @@ public class Java2DF extends ASTVisitor {
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
+	    exporter.startFile(path);
 
 	    Map<String, String> options = JavaCore.getOptions();
 	    JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
