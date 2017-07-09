@@ -6,11 +6,13 @@
   <property name="libDir" location="lib" />
   <property name="tmpDir" location="tmp" />
   <property name="buildDir" location="target" />
+  <property name="toolsDir" location="tools" />
   
   <property name="input" location="samples/f1.java" />
-  <property name="out_svg" location="${tmpDir}/out.svg" />
-  <property name="out_gv" location="${tmpDir}/out.gv" />
   <property name="out_xml" location="${tmpDir}/out.xml" />
+  <property name="out_graph" location="${tmpDir}/out.graph" />
+  <property name="out_gv" location="${tmpDir}/out.gv" />
+  <property name="out_svg" location="${tmpDir}/out.svg" />
   
   <path id="build.classpath">
     <pathelement location="${libDir}/junit-3.8.1.jar"/>
@@ -55,13 +57,19 @@
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.dfaaa.Java2DF">
       <arg value="-o" />
-      <arg file="${out_gv}" />
+      <arg file="${out_graph}" />
       <arg file="${input}" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
     </java>
   </target>
   <target name="graph" depends="run">
+    <exec executable="python">
+      <arg value="${toolsDir}/graph2gv.py" />
+      <arg value="-o" />
+      <arg file="${out_gv}" />
+      <arg file="${out_graph}" />
+    </exec>
     <exec executable="dot">
       <arg value="-Tsvg" />
       <arg value="-o" />

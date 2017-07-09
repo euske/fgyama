@@ -1108,9 +1108,12 @@ class TextExporter {
 	throws IOException {
 	if (scope.parent == null) {
 	    this.writer.write("@"+scope.name+"\n");
+	} else {
+	    this.writer.write(":"+scope.name+","+scope.parent.name+"\n");
 	}
 	for (DFNode node : scope.nodes) {
-	    this.writer.write("+"+node.name());
+	    this.writer.write("+"+scope.name);
+	    this.writer.write(","+node.name());
 	    this.writer.write(","+node.type().ordinal());
 	    if (node.ref != null) {
 		this.writer.write(","+node.ref.name);
@@ -1129,6 +1132,9 @@ class TextExporter {
 	    }
 	    this.writer.newLine();
 	}
+	for (DFScope child : scope.children) {
+	    this.writeGraph(child);
+	}
 	for (DFNode node : scope.nodes) {
 	    for (DFLink link : node.send) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
@@ -1138,9 +1144,6 @@ class TextExporter {
 		}
 		this.writer.newLine();
 	    }
-	}
-	for (DFScope child : scope.children) {
-	    this.writeGraph(child);
 	}
 	if (scope.parent == null) {
 	    this.writer.newLine();
