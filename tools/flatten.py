@@ -13,18 +13,20 @@ BUFSIZ = 2**16
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-p pat] [-o outdir] [zip ...]' % argv[0])
+        print('usage: %s [-p pat] [-o outdir] [-b basename] [zip ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'p:o:')
+        (opts, args) = getopt.getopt(argv[1:], 'p:o:b:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     outdir = '.'
+    basename = None
     pat = None
     for (k, v) in opts:
         if k == '-p': pat = re.compile(v)
         elif k == '-o': outdir = v
+        elif k == '-v': basename = v
     if not args: return usage()
     try:
         os.makedirs(outdir)
@@ -39,7 +41,10 @@ def main(argv):
                 src = info.filename
                 if '/.' in src: continue
                 if pat is not None and not pat.search(src): continue
-                dst = zname+'_'+src.replace('/','_')
+                if basename is None:
+                    dst = zname+'_'+src.replace('/','_')
+                else:
+                    dst = basename+'_'+src.replace('/','_')
                 print('extract: %r -> %r' % (src, dst), file=sys.stderr)
                 fp = zfp.open(src, 'r')
                 path = os.path.join(outdir, dst)
