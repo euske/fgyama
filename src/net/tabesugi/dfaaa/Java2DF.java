@@ -21,8 +21,13 @@ class DFRef {
     }
 
     public String toString() {
-	String scope = (this.scope == null)? "" : this.scope.name;
-	return ("<DFRef("+scope+"."+this.name+")>");
+	return ("<DFRef("+this.label()+")>");
+    }
+
+    public String label() {
+	return ((this.scope == null)?
+		this.name :
+		this.scope.name+"."+this.name);
     }
 }
 
@@ -1122,7 +1127,7 @@ class TextExporter {
 		this.writer.write(",");
 	    }
 	    if (node.ref != null) {
-		this.writer.write(","+node.ref.name);
+		this.writer.write(","+node.ref.label());
 	    } else {
 		this.writer.write(",");
 	    }
