@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 import sys
 
-def q(s):
-    if s:
-        return '"%s"' % s.replace('"',r'\"')
-    else:
-        return '""'
-
 class Node:
 
     def __init__(self, scope, nid, ntype, label, ref):
@@ -17,6 +11,7 @@ class Node:
         self.ref = ref
         self.send = []
         self.recv = []
+        self.ast = None
         return
 
 class Link:
@@ -51,43 +46,19 @@ class Graph:
         self.links = []
         return
 
-    def write(self, out, scope=None, indent=0):
-        h = ' '*indent
-        if scope is None:
-            scope = self.root
-            out.write('digraph %s {\n' % scope.sid)
-        else:
-            out.write(h+'subgraph cluster_%s {\n' % scope.sid)
-        out.write(h+' label=%s;\n' % q(scope.sid))
-        for node in scope.nodes:
-            out.write(h+' %s [label=%s' % (node.nid, q(node.label)))
-            if node.ntype == 3:
-                out.write(', shape=box')
-            elif node.ntype == 5:
-                out.write(', shape=diamond')
-            out.write('];\n')
-        for node in scope.nodes:
-            for link in node.send:
-                out.write(h+' %s -> %s' % (link.src.nid, link.dst.nid))
-                out.write(h+' [label=%s' % q(link.name))
-                if link.ltype == 1:
-                    out.write(', style=dotted')
-                out.write('];\n')
-        for child in scope.children:
-            self.write(out, child, indent+1)
-        out.write(h+'}\n')
-        return
-
 def load_graphs(fp):
     graph = None
     for line in fp:
         line = line.strip()
         if line.startswith('#'):
-            assert graph is None
-            graph = Graph(line[1:])
+            yield line[1:]
+        elif line.startswith('!'):
+            pass
         elif line.startswith('@'):
             sid = line[1:]
-            assert graph is not None
+            if graph is not None:
+                yield graph
+            graph = Graph(sid)
             assert sid not in graph.scopes
             scope = Scope(sid)
             graph.root = scope
@@ -108,6 +79,8 @@ def load_graphs(fp):
             assert sid in graph.scopes
             scope = graph.scopes[sid]
             node = Node(scope, nid, int(ntype), label, ref)
+            if len(f) == 8:
+                node.ast = (int(f[5]),int(f[6]),int(f[7]))
             graph.nodes[nid] = node
             scope.nodes.append(node)
         elif line.startswith('-'):
@@ -121,9 +94,38 @@ def load_graphs(fp):
             assert nid2 in graph.nodes, nid2
             link = Link(graph.nodes[nid1], graph.nodes[nid2], ltype, name)
             graph.links.append(link)
-        elif not line:
-            yield graph
-            graph = None
+    return
+
+def q(s):
+    if s:
+        return '"%s"' % s.replace('"',r'\"')
+    else:
+        return '""'
+
+def write_graph(out, scope, level=0):
+    h = ' '*level
+    if level == 0:
+        out.write('digraph %s {\n' % scope.sid)
+    else:
+        out.write(h+'subgraph cluster_%s {\n' % scope.sid)
+    out.write(h+' label=%s;\n' % q(scope.sid))
+    for node in scope.nodes:
+        out.write(h+' %s [label=%s' % (node.nid, q(node.label)))
+        if node.ntype == 3:
+            out.write(', shape=box')
+        elif node.ntype == 5:
+            out.write(', shape=diamond')
+        out.write('];\n')
+    for node in scope.nodes:
+        for link in node.send:
+            out.write(h+' %s -> %s' % (link.src.nid, link.dst.nid))
+            out.write(h+' [label=%s' % q(link.name))
+            if link.ltype == 1:
+                out.write(', style=dotted')
+            out.write('];\n')
+    for child in scope.children:
+        write_graph(out, child, level=level+1)
+    out.write(h+'}\n')
     return
 
 def main(argv):
@@ -142,7 +144,8 @@ def main(argv):
     if not args: return usage()
     
     for graph in load_graphs(fileinput.input(args)):
-        graph.write(output)
+        if isinstance(graph, Graph):
+            write_graph(output, graph.root)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

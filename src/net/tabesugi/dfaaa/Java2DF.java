@@ -1109,6 +1109,12 @@ class TextExporter {
 	this.writer.flush();
     }
 
+    public void writeFailure(String funcName, String astName)
+	throws IOException {
+	this.writer.write("!"+funcName+","+astName+"\n");
+	this.writer.flush();
+    }
+    
     public void writeGraph(DFScope scope)
 	throws IOException {
 	if (scope.parent == null) {
@@ -1122,7 +1128,7 @@ class TextExporter {
 	    this.writer.write(","+node.type().ordinal());
 	    String label = node.label();
 	    if (label != null) {
-		this.writer.write(","+label);
+		this.writer.write(","+Utils.sanitize(label));
 	    } else {
 		this.writer.write(",");
 	    }
@@ -2534,20 +2540,24 @@ public class Java2DF extends ASTVisitor {
     public boolean visit(MethodDeclaration method) {
 	String funcName = method.getName().getFullyQualifiedName();
 	try {
-	    DFScope scope = getMethodGraph(method);
-	    if (scope != null) {
-		Utils.logit("success: "+funcName);
+	    try {
+		DFScope scope = getMethodGraph(method);
+		if (scope != null) {
+		    Utils.logit("success: "+funcName);
+		    if (this.exporter != null) {
+			this.exporter.writeGraph(scope);
+		    }
+		}
+	    } catch (UnsupportedSyntax e) {
+		String astName = e.ast.getClass().getName();
+		Utils.logit("fail: "+funcName+" (Unsupported: "+astName+") "+e.ast);
+		//e.printStackTrace();
 		if (this.exporter != null) {
-		    this.exporter.writeGraph(scope);
+		    this.exporter.writeFailure(funcName, astName);
 		}
 	    }
 	} catch (IOException e) {
 	    e.printStackTrace();
-	} catch (UnsupportedSyntax e) {
-	    String name = e.ast.getClass().getName();
-	    Utils.logit("Unsupported("+name+"): "+e.ast);
-	    Utils.logit("fail: "+funcName);
-	    //e.printStackTrace();
 	}
 	return true;
     }

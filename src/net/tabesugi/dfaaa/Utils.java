@@ -26,6 +26,15 @@ class Utils {
         }
     }
 
+    public static String sanitize(String s) {
+        if (s == null) {
+            return "";
+        } else {
+            return s.replaceAll("[\\s,]+", "_");
+        }
+	
+    }
+
     public static String indent(int n) {
 	StringBuilder s = new StringBuilder();
 	for (int i = 0; i < n; i++) {
