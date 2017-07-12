@@ -63,7 +63,7 @@ def index_graph(cur, cid, graph):
                 aid = cur.lastrowid
             cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
                         (gid, sid, aid, node.ntype, node.ref, node.label))
-            nids[node] = cur.lastrowid
+            nids[node.nid] = cur.lastrowid
         for child in scope.children:
             index_scope(child, sid, gid)
         return

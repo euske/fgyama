@@ -21,8 +21,6 @@ class Link:
         self.dst = dst
         self.ltype = ltype
         self.name = name
-        src.send.append(self)
-        dst.recv.append(self)
         return
 
 class Scope:
@@ -46,6 +44,14 @@ class Graph:
         self.links = []
         return
 
+    def fixate(self):
+        for link in self.links:
+            assert link.src in self.nodes
+            assert link.dst in self.nodes
+            self.nodes[link.src].send.append(link)
+            self.nodes[link.dst].recv.append(link)
+        return self
+    
 def load_graphs(fp):
     graph = None
     for line in fp:
@@ -57,7 +63,7 @@ def load_graphs(fp):
         elif line.startswith('@'):
             sid = line[1:]
             if graph is not None:
-                yield graph
+                yield graph.fixate()
             graph = Graph(sid)
             assert sid not in graph.scopes
             scope = Scope(sid)
@@ -90,9 +96,7 @@ def load_graphs(fp):
             if 4 <= len(f):
                 name = f[3]
             assert graph is not None
-            assert nid1 in graph.nodes, nid1
-            assert nid2 in graph.nodes, nid2
-            link = Link(graph.nodes[nid1], graph.nodes[nid2], ltype, name)
+            link = Link(nid1, nid2, ltype, name)
             graph.links.append(link)
     return
 
@@ -118,7 +122,7 @@ def write_graph(out, scope, level=0):
         out.write('];\n')
     for node in scope.nodes:
         for link in node.send:
-            out.write(h+' %s -> %s' % (link.src.nid, link.dst.nid))
+            out.write(h+' %s -> %s' % (link.src, link.dst))
             out.write(h+' [label=%s' % q(link.name))
             if link.ltype == 1:
                 out.write(', style=dotted')

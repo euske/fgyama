@@ -1149,9 +1149,6 @@ class TextExporter {
 	    }
 	    this.writer.newLine();
 	}
-	for (DFScope child : scope.children) {
-	    this.writeGraph(child);
-	}
 	for (DFNode node : scope.nodes) {
 	    for (DFLink link : node.send) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
@@ -1161,6 +1158,9 @@ class TextExporter {
 		}
 		this.writer.newLine();
 	    }
+	}
+	for (DFScope child : scope.children) {
+	    this.writeGraph(child);
 	}
 	if (scope.parent == null) {
 	    this.writer.newLine();
