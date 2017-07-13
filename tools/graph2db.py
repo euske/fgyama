@@ -43,6 +43,9 @@ CREATE TABLE DFLink (
     Arg TEXT
 );
 
+CREATE INDEX DFLinkNid0 ON DFLink(Nid0);
+CREATE INDEX DFLinkNid1 ON DFLink(Nid1);
+    
 -- CREATE TABLE Subgraphs (Sgid INTEGER PRIMARY KEY, Nid INTEGER, Pattern TEXT);
 ''')
     return

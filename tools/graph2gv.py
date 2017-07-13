@@ -3,6 +3,14 @@ import sys
 
 class Node:
 
+    N_None = 0
+    N_Constant = 1
+    N_Operator = 2
+    N_Assign = 3
+    N_Cond = 4
+    N_Loop = 5
+    N_Terminal = 6
+
     def __init__(self, scope, nid, ntype, label, ref):
         self.scope = scope
         self.nid = nid
@@ -16,6 +24,10 @@ class Node:
 
 class Link:
 
+    L_None = 0
+    L_DataFlow = 1
+    L_ControlFlow = 2
+    
     def __init__(self, src, dst, ltype, name):
         self.src = src
         self.dst = dst
