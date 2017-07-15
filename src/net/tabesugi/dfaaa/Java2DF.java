@@ -242,7 +242,8 @@ enum DFNodeType {
     Constant,
     Operator,
     Assign,
-    Cond,
+    Branch,
+    Join,
     Loop,
     Terminal,
 }
@@ -254,6 +255,7 @@ enum DFLinkType {
     None,
     DataFlow,
     ControlFlow,
+    Informational,
 }
 
 
@@ -771,10 +773,6 @@ abstract class CondNode extends ProgNode {
 	this.value = value;
 	value.connect(this, DFLinkType.ControlFlow, "cond");
     }
-
-    public DFNodeType type() {
-	return DFNodeType.Cond;
-    }
 }
 
 // BranchNode
@@ -783,6 +781,10 @@ class BranchNode extends CondNode {
     public BranchNode(DFScope scope, DFRef ref, ASTNode ast,
 		      DFNode value) {
 	super(scope, ref, ast, value);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Branch;
     }
 
     public String label() {
@@ -813,6 +815,10 @@ class JoinNode extends CondNode {
 	super(scope, ref, ast, value);
     }
     
+    public DFNodeType type() {
+	return DFNodeType.Branch;
+    }
+
     public String label() {
 	if (this.ref != null) {
 	    return "join:"+this.ref.name;
@@ -1205,7 +1211,8 @@ class GraphvizExporter extends TextExporter {
 	    case Assign:
 		this.writer.write(", shape=box");
 		break;
-	    case Cond:
+	    case Branch:
+	    case Join:
 		this.writer.write(", shape=diamond");
 		break;
 	    }
@@ -1370,6 +1377,7 @@ public class Java2DF extends ASTVisitor {
 	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
 	    branch.send(true, loop);
 	    branch.send(false, exit);
+	    loop.connect(branch, DFLinkType.Informational, "end");
 	    inputs.put(ref, loop);
 	    outputs.put(ref, branch);
 	    exits.put(ref, exit);
