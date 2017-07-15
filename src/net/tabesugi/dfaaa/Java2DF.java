@@ -1000,20 +1000,18 @@ class DFFrame {
 //
 class DFMeet {
 
-    public DFRef ref;
     public DFNode node;
     public DFFrame frame;
     public DFLabel label;
 
-    public DFMeet(DFRef ref, DFNode node, DFFrame frame, DFLabel label) {
-	this.ref = ref;
+    public DFMeet(DFNode node, DFFrame frame, DFLabel label) {
 	this.node = node;
 	this.frame = frame;
 	this.label = label;
     }
 
     public String toString() {
-	return (this.ref+":"+this.node+" -> "+this.frame+":"+this.label);
+	return (this.node+" -> "+this.frame+":"+this.label);
     }
 }
 
@@ -1077,13 +1075,13 @@ class DFComponent {
 	return node;
     }
 
-    public void put(DFRef ref, DFNode node) {
-	this.outputs.put(ref, node);
+    public void put(DFNode node) {
+	this.outputs.put(node.ref, node);
     }
 
     public void jump(DFRef ref, DFFrame frame, DFLabel label) {
 	DFNode node = this.get(ref);
-	this.addMeet(new DFMeet(ref, node, frame, label));
+	this.addMeet(new DFMeet(node, frame, label));
 	this.outputs.remove(ref);
     }
 
@@ -1096,7 +1094,7 @@ class DFComponent {
 	this.outputs.remove(ref);
 	List<DFMeet> removed = new ArrayList<DFMeet>();
 	for (DFMeet meet : this.meets) {
-	    if (meet.ref == ref) {
+	    if (meet.node.ref == ref) {
 		removed.add(meet);
 	    }
 	}
@@ -1258,25 +1256,25 @@ public class Java2DF extends ASTVisitor {
 	    if (!join.isClosed()) {
 		join.close(cpt.get(ref));
 	    }
-	    cpt.put(ref, join);
+	    cpt.put(join);
 	}
 
 	if (trueCpt != null) {
 	    for (DFMeet meet : trueCpt.meets) {
-		DFRef ref = meet.ref;
+		DFRef ref = meet.node.ref;
 		DFNode node = trueCpt.get(ref);
 		JoinNode join = new JoinNode(scope, ref, ast, condValue);
 		join.recv(true, node);
-		cpt.addMeet(new DFMeet(ref, join, meet.frame, meet.label));
+		cpt.addMeet(new DFMeet(join, meet.frame, meet.label));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFMeet meet : falseCpt.meets) {
-		DFRef ref = meet.ref;
+		DFRef ref = meet.node.ref;
 		DFNode node = falseCpt.get(ref);
 		JoinNode join = new JoinNode(scope, ref, ast, condValue);
 		join.recv(false, node);
-		cpt.addMeet(new DFMeet(ref, join, meet.frame, meet.label));
+		cpt.addMeet(new DFMeet(join, meet.frame, meet.label));
 	    }
 	}
 	
@@ -1299,7 +1297,7 @@ public class Java2DF extends ASTVisitor {
 	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
 	    join.recv(true, dst);
 	    join.close(cpt.get(ref));
-	    cpt.put(ref, join);
+	    cpt.put(join);
 	}
 	
 	return cpt;
@@ -1328,12 +1326,12 @@ public class Java2DF extends ASTVisitor {
 	
 	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame == frame && meet.label == DFLabel.CONTINUE) {
-		DFNode loop = inputs.get(meet.ref);
 		DFNode node = meet.node;
+		DFNode loop = inputs.get(node.ref);
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(loop);
 		}
-		inputs.put(meet.ref, node);
+		inputs.put(node.ref, node);
 	    }
 	}
 	
@@ -1356,20 +1354,20 @@ public class Java2DF extends ASTVisitor {
 	    if (branch != null) {
 		output.connect(branch);
 		DFNode exit = exits.get(ref);
-		cpt.put(ref, exit);
+		cpt.put(exit);
 	    } else {
-		cpt.put(ref, output);
+		cpt.put(output);
 	    }
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame == frame && meet.label == DFLabel.BREAK) {
-		DFNode output = cpt.get(meet.ref);
 		DFNode node = meet.node;
+		DFNode output = cpt.get(node.ref);
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(output);
 		}
-		cpt.put(meet.ref, node);
+		cpt.put(node);
 	    }
 	}
 
@@ -1394,7 +1392,7 @@ public class Java2DF extends ASTVisitor {
 		cpt = processExpression(scope, cpt, init);
 		AssignNode assign = new SingleAssignNode(scope, ref, frag);
 		assign.take(cpt.value);
-		cpt.put(assign.ref, assign);
+		cpt.put(assign);
 	    }
 	}
 	return cpt;
@@ -1492,7 +1490,7 @@ public class Java2DF extends ASTVisitor {
 		AssignNode assign = cpt.assign;
 		DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.value);
 		assign.take(value);
-		cpt.put(assign.ref, assign);
+		cpt.put(assign);
 		cpt.value = value;
 	    }
 	    
@@ -1506,7 +1504,7 @@ public class Java2DF extends ASTVisitor {
 		AssignNode assign = cpt.assign;
 		cpt = processExpression(scope, cpt, operand);
 		assign.take(new PostfixNode(scope, assign.ref, expr, op, cpt.value));
-		cpt.put(assign.ref, assign);
+		cpt.put(assign);
 	    }
 	    
 	} else if (expr instanceof InfixExpression) {
@@ -1534,7 +1532,7 @@ public class Java2DF extends ASTVisitor {
 		rvalue = new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue);
 	    }
 	    assign.take(rvalue);
-	    cpt.put(assign.ref, assign);
+	    cpt.put(assign);
 	    cpt.value = assign;
 
 	} else if (expr instanceof VariableDeclarationExpression) {
@@ -1721,7 +1719,7 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = scope.lookupReturn();
 	    ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
 	    rtrn.take(value);
-	    cpt.put(ref, rtrn);
+	    cpt.put(rtrn);
 	}
 	return cpt;
     }
@@ -1878,7 +1876,7 @@ public class Java2DF extends ASTVisitor {
 	DFNode iterValue = new IterNode(scope, ref, expr, loopCpt.value);
 	SingleAssignNode assign = new SingleAssignNode(scope, ref, expr);
 	assign.take(iterValue);
-	cpt.put(assign.ref, assign);
+	cpt.put(assign);
 	loopCpt = processStatement(map, frame, loopCpt,
 				   eForStmt.getBody());
 	
@@ -2459,7 +2457,7 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
 	    AssignNode assign = new SingleAssignNode(scope, ref, decl);
 	    assign.take(param);
-	    cpt.put(assign.ref, assign);
+	    cpt.put(assign);
 	}
 	return cpt;
     }
