@@ -1571,7 +1571,7 @@ public class Java2DF extends ASTVisitor {
 		cpt = processExpression(scope, cpt, dim);
 		// XXX cpt.value is not used (for now).
 		if (cpt.value != null) {
-		    scope.removeNode(cpt.value);
+		    cpt.value.remove();
 		}
 	    }
 	    ArrayInitializer init = ac.getInitializer();
