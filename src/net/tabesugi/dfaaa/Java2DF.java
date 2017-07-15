@@ -254,6 +254,7 @@ enum DFNodeType {
 enum DFLinkType {
     None,
     DataFlow,
+    BackFlow,
     ControlFlow,
     Informational,
 }
@@ -801,12 +802,9 @@ class BranchNode extends CondNode {
 	}
     }
 
-    public void send(boolean cond, DFNode node) {
-	if (cond) {
-	    this.connect(node, "true");
-	} else {
-	    this.connect(node, "false");
-	}
+    public void open(DFNode loop, DFNode exit) {
+	this.connect(loop, DFLinkType.BackFlow, "true");
+	this.connect(exit, "false");
     }
 }
 
@@ -1316,8 +1314,7 @@ public class Java2DF extends ASTVisitor {
 	    DFNode loop = new LoopNode(scope, ref, ast, src);
 	    DFNode exit = new DistNode(scope, ref);
 	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
-	    branch.send(true, loop);
-	    branch.send(false, exit);
+	    branch.open(loop, exit);
 	    loop.connect(branch, DFLinkType.Informational, "end");
 	    inputs.put(ref, loop);
 	    outputs.put(ref, branch);
