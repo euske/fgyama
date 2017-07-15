@@ -299,12 +299,18 @@ abstract class DFNode {
     public List<DFLink> send;
     public List<DFLink> recv;
     
+    public static int baseId = 0;
+    public static int genId() {
+	return baseId++;
+    }
+
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
 	this.ref = ref;
-	this.id = this.scope.addNode(this);
+	this.id = genId();
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
+	this.scope.addNode(this);
     }
 
     public String toString() {
@@ -1568,11 +1574,8 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof ArrayCreation) {
 	    ArrayCreation ac = (ArrayCreation)expr;
 	    for (Expression dim : (List<Expression>) ac.dimensions()) {
-		cpt = processExpression(scope, cpt, dim);
 		// XXX cpt.value is not used (for now).
-		if (cpt.value != null) {
-		    cpt.value.remove();
-		}
+		cpt = processExpression(scope, cpt, dim);
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
