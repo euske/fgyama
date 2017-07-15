@@ -64,13 +64,13 @@
     </java>
   </target>
   <target name="graph" depends="run">
-    <exec executable="python">
+    <exec executable="python" failonerror="true">
       <arg value="${toolsDir}/graph2gv.py" />
       <arg value="-o" />
       <arg file="${out_gv}" />
       <arg file="${out_graph}" />
     </exec>
-    <exec executable="dot">
+    <exec executable="dot" failonerror="true">
       <arg value="-Tsvg" />
       <arg value="-o" />
       <arg file="${out_svg}" />
