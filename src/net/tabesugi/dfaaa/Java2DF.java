@@ -1714,10 +1714,12 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpression(scope, cpt, expr);
 	    value = cpt.value;
 	}
-	DFRef ref = scope.lookupReturn();
-	ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
-	rtrn.take(value);
-	cpt.put(ref, rtrn);
+	if (value != null) {
+	    DFRef ref = scope.lookupReturn();
+	    ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
+	    rtrn.take(value);
+	    cpt.put(ref, rtrn);
+	}
 	return cpt;
     }
     
