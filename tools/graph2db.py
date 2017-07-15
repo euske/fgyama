@@ -2,7 +2,7 @@
 import sys
 import sqlite3
 from graph2gv import load_graphs
-from graph2gv import Graph, Scope, Link, Node
+from graph2gv import SourceFile, Graph, Scope, Link, Node
 
 def build_tables(cur):
     cur.executescript('''
@@ -74,7 +74,7 @@ def index_graph(cur, cid, graph):
     for node in graph.nodes.values():
         for link in node.send:
             cur.execute('INSERT INTO DFLink VALUES (NULL,?,?,?,?);',
-                        (nids[link.src], nids[link.dst], link.ltype, link.name))
+                        (nids[link.srcid], nids[link.dstid], link.ltype, link.name))
     return
 
 def main(argv):
@@ -104,9 +104,9 @@ def main(argv):
             if isinstance(graph, Graph):
                 assert cid is not None
                 index_graph(cur, cid, graph)
-            else:
+            elif isinstance(graph, SourceFile):
                 cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
-                            (graph,))
+                            (graph.name,))
                 cid = cur.lastrowid
     conn.commit()
     return 0

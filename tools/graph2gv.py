@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 import sys
 
+class SourceFile:
+
+    def __init__(self, name):
+        self.name = name
+        return
+
 class Node:
 
     N_None = 0
@@ -23,19 +29,30 @@ class Node:
         self.ast = None
         return
 
+    def __repr__(self):
+        return ('<Node(%s): ntype=%d, ref=%r, label=%r>' %
+                (self.nid, self.ntype, self.ref, self.label))
+
 class Link:
 
     L_None = 0
     L_DataFlow = 1
-    L_ControlFlow = 2
-    L_Informational = 3
+    L_BackFlow = 2
+    L_ControlFlow = 3
+    L_Informational = 4
     
-    def __init__(self, src, dst, ltype, name):
-        self.src = src
-        self.dst = dst
+    def __init__(self, srcid, dstid, ltype, name):
+        self.srcid = srcid
+        self.src =  None
+        self.dstid = dstid
+        self.dst =  None
         self.ltype = ltype
         self.name = name
         return
+
+    def __repr__(self):
+        return ('<Link: ltype=%d, %r-(%r)-%r>' %
+                (self.ltype, self.srcid, self.name, self.dstid))
 
 class Scope:
 
@@ -47,11 +64,15 @@ class Scope:
         self.nodes = []
         self.children = []
         return
+
+    def __repr__(self):
+        return ('<Scope(%s)>' % self.sid)
     
 class Graph:
 
     def __init__(self, name):
         self.name = name
+        self.src = None
         self.root = None
         self.scopes = {}
         self.nodes = {}
@@ -60,18 +81,22 @@ class Graph:
 
     def fixate(self):
         for link in self.links:
-            assert link.src in self.nodes
-            assert link.dst in self.nodes
-            self.nodes[link.src].send.append(link)
-            self.nodes[link.dst].recv.append(link)
+            assert link.srcid in self.nodes
+            assert link.dstid in self.nodes
+            link.src = self.nodes[link.srcid]
+            link.src.send.append(link)
+            link.dst = self.nodes[link.dstid]
+            link.dst.recv.append(link)
         return self
     
 def load_graphs(fp):
     graph = None
+    src = None
     for line in fp:
         line = line.strip()
         if line.startswith('#'):
-            yield line[1:]
+            src = SourceFile(line[1:])
+            yield src
         elif line.startswith('!'):
             pass
         elif line.startswith('@'):
@@ -79,6 +104,7 @@ def load_graphs(fp):
             if graph is not None:
                 yield graph.fixate()
             graph = Graph(sid)
+            graph.src = src
             assert sid not in graph.scopes
             scope = Scope(sid)
             graph.root = scope
@@ -138,7 +164,7 @@ def write_graph(out, scope, level=0):
         out.write('];\n')
     for node in scope.nodes:
         for link in node.send:
-            out.write(h+' %s -> %s' % (link.src, link.dst))
+            out.write(h+' %s -> %s' % (link.srcid, link.dstid))
             out.write(h+' [label=%s' % q(link.name))
             if link.ltype == Link.L_ControlFlow:
                 out.write(', style=dashed')
