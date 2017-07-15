@@ -7,9 +7,10 @@ class Node:
     N_Constant = 1
     N_Operator = 2
     N_Assign = 3
-    N_Cond = 4
-    N_Loop = 5
-    N_Terminal = 6
+    N_Branch = 4
+    N_Join = 5
+    N_Loop = 6
+    N_Terminal = 7
 
     def __init__(self, scope, nid, ntype, label, ref):
         self.scope = scope
@@ -27,6 +28,7 @@ class Link:
     L_None = 0
     L_DataFlow = 1
     L_ControlFlow = 2
+    L_Informational = 3
     
     def __init__(self, src, dst, ltype, name):
         self.src = src
@@ -108,8 +110,10 @@ def load_graphs(fp):
             if 4 <= len(f):
                 name = f[3]
             assert graph is not None
-            link = Link(nid1, nid2, ltype, name)
+            link = Link(nid1, nid2, int(ltype), name)
             graph.links.append(link)
+    if graph is not None:
+        yield graph.fixate()
     return
 
 def q(s):
@@ -127,16 +131,18 @@ def write_graph(out, scope, level=0):
     out.write(h+' label=%s;\n' % q(scope.sid))
     for node in scope.nodes:
         out.write(h+' %s [label=%s' % (node.nid, q(node.label)))
-        if node.ntype == 3:
+        if node.ntype == Node.N_Assign:
             out.write(', shape=box')
-        elif node.ntype == 5:
+        elif node.ntype in (Node.N_Branch, Node.N_Join):
             out.write(', shape=diamond')
         out.write('];\n')
     for node in scope.nodes:
         for link in node.send:
             out.write(h+' %s -> %s' % (link.src, link.dst))
             out.write(h+' [label=%s' % q(link.name))
-            if link.ltype == 1:
+            if link.ltype == Link.L_ControlFlow:
+                out.write(', style=dashed')
+            if link.ltype == Link.L_Informational:
                 out.write(', style=dotted')
             out.write('];\n')
     for child in scope.children:
