@@ -1176,69 +1176,6 @@ class TextExporter {
 }
 
 
-//  GraphvizExporter
-//
-class GraphvizExporter extends TextExporter {
-
-    public GraphvizExporter(OutputStream stream) {
-	super(stream);
-    }
-
-    public void startFile(String path)
-	throws IOException {
-	this.writer.write("// "+path+"\n");
-	this.writer.flush();
-    }
-
-    public void writeGraph(DFScope scope)
-	throws IOException {
-	this.writeGraph(scope, 0);
-    }
-    
-    public void writeGraph(DFScope scope, int indent)
-	throws IOException {
-	String h = Utils.indent(indent);
-	if (scope.parent == null) {
-	    this.writer.write("digraph "+scope.name+" {\n");
-	} else {
-	    this.writer.write(h+"subgraph cluster_"+scope.name+" {\n");
-	}
-	this.writer.write(h+" label="+Utils.quote(scope.name)+";\n");
-	for (DFNode node : scope.nodes) {
-	    this.writer.write(h+" "+node.name());
-	    this.writer.write(" [label="+Utils.quote(node.label()));
-	    switch (node.type()) {
-	    case Assign:
-		this.writer.write(", shape=box");
-		break;
-	    case Branch:
-	    case Join:
-		this.writer.write(", shape=diamond");
-		break;
-	    }
-	    this.writer.write("];\n");
-	}
-	for (DFNode node : scope.nodes) {
-	    for (DFLink link : node.send) {
-		this.writer.write(h+" "+link.src.name()+" -> "+link.dst.name());
-		this.writer.write(" [label="+Utils.quote(link.name));
-		switch (link.type) {
-		case ControlFlow:
-		    this.writer.write(", style=dotted");
-		    break;
-		}
-		this.writer.write("];\n");
-	    }
-	}
-	for (DFScope child : scope.children) {
-	    this.writeGraph(child, indent+1);
-	}
-	this.writer.write(h+"}\n");
-	this.writer.flush();
-    }
-}
-
-
 //  DFScopeMap
 //
 class DFScopeMap {
