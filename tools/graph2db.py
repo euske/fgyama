@@ -2,7 +2,7 @@
 import sys
 import sqlite3
 from graph2gv import load_graphs
-from graph2gv import SourceFile, Graph, Scope, Link, Node
+from graph2gv import Graph, Scope, Link, Node
 
 def build_tables(cur):
     cur.executescript('''
@@ -104,9 +104,9 @@ def main(argv):
             if isinstance(graph, Graph):
                 assert cid is not None
                 index_graph(cur, cid, graph)
-            elif isinstance(graph, SourceFile):
+            elif isinstance(graph, str):
                 cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
-                            (graph.name,))
+                            (graph,))
                 cid = cur.lastrowid
     conn.commit()
     return 0

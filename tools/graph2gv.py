@@ -1,12 +1,101 @@
 #!/usr/bin/env python
 import sys
+import os.path
+
+class SourceDB:
+    
+    def __init__(self, basedir):
+        self.basedir = basedir
+        self._cache = {}
+        return
+
+    def get(self, name):
+        if name in self._cache:
+            src = self._cache[name]
+        else:
+            path = os.path.join(self.basedir, name)
+            with open(path) as fp:
+                data = fp.read()
+            src = SourceFile(name, data)
+            self._cache[name] = src
+        return src
+
+    def show(self, fp=sys.stdout):
+        for src in self._cache.values():
+            src.show(fp)
+        return
 
 class SourceFile:
 
-    def __init__(self, name):
+    def __init__(self, name, data):
         self.name = name
+        self.lines = data.splitlines(True)
+        self._ranges = []
+        return
+    
+    def __repr__(self):
+        return ('<SourceFile(%s)>' %
+                (self.name,))
+
+    def clear(self):
+        self._ranges = []
         return
 
+    def addast(self, ast, anno=None):
+        if ast is not None:
+            (_,i,n) = ast
+            self._ranges.append((i, i+n, anno))
+        return
+    
+    def show(self, fp=sys.stdout,
+             context=1, skip='...',
+             astart=(lambda _: '['),
+             aend=(lambda _: ']'),
+             abody=(lambda _,s: s)):
+        if not self._ranges: return
+        self._ranges.sort(key=lambda x: x[0])
+        selected = {}
+        i0 = 0
+        ri = 0
+        for (lineno,line) in enumerate(self.lines):
+            i1 = i0+len(line)
+            while ri < len(self._ranges):
+                (s,e,anno) = self._ranges[ri]
+                if e <= i0:
+                    ri += 1
+                elif i1 < s:
+                    break
+                else:
+                    assert i0 < e and s <= i1
+                    for dl in range(lineno-context, lineno+context+1):
+                        if dl not in selected:
+                            selected[dl] = []
+                    assert lineno in selected
+                    sel = selected[lineno]
+                    sel.append((s-i0,True,anno))
+                    sel.append((e-i0,False,anno))
+                    break
+            i0 = i1
+        prevline = 0
+        for (lineno,line) in enumerate(self.lines):
+            if lineno not in selected: continue
+            c0 = 0
+            x0 = False
+            s = ''
+            for (c1,x1,anno) in selected[lineno]:
+                s += line[c0:c1]
+                if not x0 and x1:
+                    s += astart(anno)
+                elif x0 and not x1:
+                    s += aend(anno)
+                (c0,x0) = (c1,x1)
+            s += abody(anno, line[c0:])
+            if prevline+1 < lineno:
+                fp.write(skip)
+            prevline = lineno
+            fp.write(s)
+        return
+    
 class Node:
 
     N_None = 0
@@ -95,7 +184,7 @@ def load_graphs(fp):
     for line in fp:
         line = line.strip()
         if line.startswith('#'):
-            src = SourceFile(line[1:])
+            src = line[1:]
             yield src
         elif line.startswith('!'):
             pass
