@@ -239,7 +239,7 @@ class DFScope {
 //
 enum DFNodeType {
     None,
-    Constant,
+    Refer,
     Operator,
     Assign,
     Branch,
@@ -388,6 +388,18 @@ abstract class ProgNode extends DFNode {
     public ProgNode(DFScope scope, DFRef ref, ASTNode ast) {
 	super(scope, ref);
 	this.ast = ast;
+    }
+}
+
+// ReferNode: reference node.
+abstract class ReferNode extends ProgNode {
+
+    public ReferNode(DFScope scope, DFRef ref, ASTNode ast) {
+	super(scope, ref, ast);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Refer;
     }
 }
 
@@ -589,19 +601,15 @@ class ArgNode extends ProgNode {
     }
 }
 
-// ReferNode: represnets a variable reference.
-class ReferNode extends ProgNode {
+// VarRefNode: represnets a variable reference.
+class VarRefNode extends ReferNode {
 
     public DFNode value;
 
-    public ReferNode(DFScope scope, DFRef ref, ASTNode ast, DFNode value) {
+    public VarRefNode(DFScope scope, DFRef ref, ASTNode ast, DFNode value) {
 	super(scope, ref, ast);
 	this.value = value;
 	value.connect(this);
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Constant;
     }
 
     public String label() {
@@ -610,7 +618,7 @@ class ReferNode extends ProgNode {
 }
 
 // ConstNode: represents a constant value.
-class ConstNode extends ProgNode {
+class ConstNode extends ReferNode {
 
     public String value;
 
@@ -619,27 +627,19 @@ class ConstNode extends ProgNode {
 	this.value = value;
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Constant;
-    }
-
     public String label() {
 	return "="+this.value;
     }
 }
 
 // ArrayValueNode: represents an array.
-class ArrayValueNode extends ProgNode {
+class ArrayValueNode extends ReferNode {
 
     public List<DFNode> values;
 
     public ArrayValueNode(DFScope scope, ASTNode ast) {
 	super(scope, null, ast);
 	this.values = new ArrayList<DFNode>();
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Constant;
     }
 
     public String label() {
@@ -1468,11 +1468,11 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
 	    DFRef ref = scope.lookupVar(varName.getIdentifier());
-	    cpt.value = new ReferNode(scope, ref, expr, cpt.get(ref));
+	    cpt.value = new VarRefNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof ThisExpression) {
 	    DFRef ref = scope.lookupThis();
-	    cpt.value = new ReferNode(scope, ref, expr, cpt.get(ref));
+	    cpt.value = new VarRefNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();

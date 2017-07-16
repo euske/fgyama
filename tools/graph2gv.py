@@ -90,7 +90,7 @@ class SourceFile:
                     s += aend(anno)
                 (c0,x0) = (c1,x1)
             s += abody(anno, line[c0:])
-            if prevline+1 < lineno:
+            if prevline+context < lineno:
                 fp.write(skip)
             prevline = lineno
             fp.write(s)
@@ -99,7 +99,7 @@ class SourceFile:
 class Node:
 
     N_None = 0
-    N_Constant = 1
+    N_Refer = 1
     N_Operator = 2
     N_Assign = 3
     N_Branch = 4
@@ -156,6 +156,14 @@ class Scope:
 
     def __repr__(self):
         return ('<Scope(%s)>' % self.sid)
+
+    def walk(self):
+        for n in self.nodes:
+            yield n
+        for child in self.children:
+            for n in child.walk():
+                yield n
+        return
     
 class Graph:
 
