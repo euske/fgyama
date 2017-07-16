@@ -11,4 +11,4 @@ Prerequisites:
 How to Build:
 
     $ ant get-deps
-    $ ant run -Dinput=samples/f1.java -Doutput=out.svg
+    $ ant graph -Dinput=samples/f1.java -Dout_svg=out.svg
