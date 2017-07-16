@@ -422,7 +422,7 @@ abstract class AssignNode extends ProgNode {
     }
 
     public String label() {
-	return "assign:"+this.ref.name;
+	return "assign";
     }
 
     abstract public void take(DFNode value);
@@ -507,7 +507,7 @@ class ArrayAccessNode extends ProgNode {
     }
 
     public String label() {
-	return "array:"+this.ref.name;
+	return "arrayaccess";
     }
 }
 
@@ -531,7 +531,7 @@ class FieldAccessNode extends ProgNode {
     }
 
     public String label() {
-	return ".";
+	return "fieldaccess";
     }
 }
 
@@ -554,11 +554,7 @@ class PrefixNode extends ProgNode {
     }
 
     public String label() {
-	if (this.ref != null) {
-	    return this.op.toString()+":"+this.ref.name;
-	} else {
-	    return this.op.toString();
-	}
+	return this.op.toString();
     }
 }
 
@@ -581,11 +577,7 @@ class PostfixNode extends ProgNode {
     }
 
     public String label() {
-	if (this.ref != null) {
-	    return this.op.toString()+":"+this.ref.name;
-	} else {
-	    return this.op.toString();
-	}
+	return this.op.toString();
     }
 }
 
@@ -604,7 +596,7 @@ class ArgNode extends ProgNode {
     }
 
     public String label() {
-	return "arg"+this.index;
+	return "arg";
     }
 }
 
@@ -620,7 +612,7 @@ class VarRefNode extends ReferNode {
     }
 
     public String label() {
-	return null;
+	return "ref";
     }
 }
 
@@ -787,11 +779,7 @@ class AssignOpNode extends ProgNode {
     }
 
     public String label() {
-	if (this.ref != null) {
-	    return this.op.toString()+":"+this.ref.name;
-	} else {
-	    return this.op.toString();
-	}
+	return this.op.toString();
     }
 }
 
@@ -821,11 +809,7 @@ class BranchNode extends CondNode {
     }
 
     public String label() {
-	if (this.ref != null) {
-	    return "branch:"+this.ref.name;
-	} else {
-	    return "branch";
-	}
+	return "branch";
     }
 
     public void open(DFNode loop, DFNode exit) {
@@ -850,11 +834,7 @@ class JoinNode extends CondNode {
     }
 
     public String label() {
-	if (this.ref != null) {
-	    return "join:"+this.ref.name;
-	} else {
-	    return "join";
-	}
+	return "join";
     }
     
     public void recv(boolean cond, DFNode node) {
@@ -898,11 +878,7 @@ class LoopNode extends ProgNode {
     }
     
     public String label() {
-	if (this.ref != null) {
-	    return "loop:"+this.ref.name;
-	} else {
-	    return "loop";
-	}
+	return "loop";
     }
 }
 
@@ -923,7 +899,7 @@ class IterNode extends ProgNode {
     }
 
     public String label() {
-	return "iter:"+this.ref.name;
+	return "iter";
     }
 }
 
