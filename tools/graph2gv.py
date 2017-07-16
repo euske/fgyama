@@ -130,18 +130,19 @@ class Link:
     L_ControlFlow = 3
     L_Informational = 4
     
-    def __init__(self, srcid, dstid, ltype, name):
+    def __init__(self, srcid, dstid, lid, ltype, name):
         self.srcid = srcid
         self.src =  None
         self.dstid = dstid
         self.dst =  None
+        self.lid = lid
         self.ltype = ltype
         self.name = name
         return
 
     def __repr__(self):
-        return ('<Link: ltype=%d, %r-(%r)-%r>' %
-                (self.ltype, self.srcid, self.name, self.dstid))
+        return ('<Link(%d): ltype=%d, %r-(%r)-%r>' %
+                (self.lid, self.ltype, self.srcid, self.name, self.dstid))
 
 class Scope:
 
@@ -228,12 +229,10 @@ def load_graphs(fp):
             scope.nodes.append(node)
         elif line.startswith('-'):
             f = line[1:].split(',')
-            (nid1,nid2,ltype) = f[0:3]
-            name = None
-            if 4 <= len(f):
-                name = f[3]
+            (nid1,nid2,lid,ltype) = f[0:4]
+            name = f[4] if 5 <= len(f) else None
             assert graph is not None
-            link = Link(nid1, nid2, int(ltype), name)
+            link = Link(nid1, nid2, int(lid), int(ltype), name)
             graph.links.append(link)
     if graph is not None:
         yield graph.fixate()
