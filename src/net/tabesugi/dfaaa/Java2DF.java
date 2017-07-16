@@ -209,7 +209,7 @@ class DFScope {
     public void cleanup() {
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : this.nodes) {
-            if (node.label() == null &&
+            if (node.type() == DFNodeType.None &&
                 node.send.size() == 1 &&
                 node.recv.size() == 1) {
                 removed.add(node);
@@ -586,6 +586,26 @@ class ArgNode extends ProgNode {
 
     public String label() {
 	return "arg"+this.index;
+    }
+}
+
+// ReferNode: represnets a variable reference.
+class ReferNode extends ProgNode {
+
+    public DFNode value;
+
+    public ReferNode(DFScope scope, DFRef ref, ASTNode ast, DFNode value) {
+	super(scope, ref, ast);
+	this.value = value;
+	value.connect(this);
+    }
+
+    public DFNodeType type() {
+	return DFNodeType.Constant;
+    }
+
+    public String label() {
+	return null;
     }
 }
 
@@ -1448,10 +1468,11 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
 	    DFRef ref = scope.lookupVar(varName.getIdentifier());
-	    cpt.value = cpt.get(ref);
+	    cpt.value = new ReferNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof ThisExpression) {
-	    cpt.value = cpt.get(scope.lookupThis());
+	    DFRef ref = scope.lookupThis();
+	    cpt.value = new ReferNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
