@@ -1329,7 +1329,9 @@ public class Java2DF extends ASTVisitor {
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(loop);
 		}
-		inputs.put(node.ref, node);
+		DFNode cont = new DistNode(scope, node.ref);
+		node.connect(cont, 0, DFLinkType.BackFlow);
+		inputs.put(node.ref, cont);
 	    }
 	}
 	
@@ -1491,6 +1493,8 @@ public class Java2DF extends ASTVisitor {
 		assign.take(value);
 		cpt.put(assign);
 		cpt.value = value;
+	    } else {
+		cpt.value = new PrefixNode(scope, null, expr, op, cpt.value);
 	    }
 	    
 	} else if (expr instanceof PostfixExpression) {
