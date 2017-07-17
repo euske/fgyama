@@ -48,7 +48,7 @@ class SourceFile:
         return
     
     def show(self, fp=sys.stdout,
-             context=1, skip='...',
+             context=1, skip='...\n',
              astart=(lambda _: '['),
              aend=(lambda _: ']'),
              abody=(lambda _,s: s)):
@@ -177,6 +177,10 @@ class Graph:
         self.links = []
         return
 
+    def __repr__(self):
+        return ('<Graph(%s), src=%r>' %
+                (self.name, self.src))
+
     def fixate(self):
         for link in self.links:
             assert link.srcid in self.nodes
@@ -252,7 +256,8 @@ def write_graph(out, scope, level=0):
         out.write(h+'subgraph cluster_%s {\n' % scope.sid)
     out.write(h+' label=%s;\n' % q(scope.sid))
     for node in scope.nodes:
-        out.write(h+' %s [label=%s' % (node.nid, q(node.label)))
+        label = node.ref+':'+node.label if node.ref else node.label
+        out.write(h+' %s [label=%s' % (node.nid, q(label)))
         if node.ntype == Node.N_Assign:
             out.write(', shape=box')
         elif node.ntype in (Node.N_Branch, Node.N_Join):
@@ -264,7 +269,9 @@ def write_graph(out, scope, level=0):
             out.write(h+' [label=%s' % q(link.name))
             if link.ltype == Link.L_ControlFlow:
                 out.write(', style=dashed')
-            if link.ltype == Link.L_Informational:
+            elif link.ltype == Link.L_BackFlow:
+                out.write(', style=bold')
+            elif link.ltype == Link.L_Informational:
                 out.write(', style=dotted')
             out.write('];\n')
     for child in scope.children:
