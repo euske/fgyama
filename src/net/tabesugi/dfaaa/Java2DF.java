@@ -1530,11 +1530,8 @@ public class Java2DF extends ASTVisitor {
 	    AssignNode assign = cpt.assign;
 	    cpt = processExpression(scope, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.value;
-	    if (op != Assignment.Operator.ASSIGN) {
-		DFNode lvalue = cpt.get(assign.ref);
-		rvalue = new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue);
-	    }
-	    assign.take(rvalue);
+	    DFNode lvalue = cpt.get(assign.ref);
+	    assign.take(new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue));
 	    cpt.put(assign);
 	    cpt.value = assign;
 
