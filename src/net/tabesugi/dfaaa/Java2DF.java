@@ -812,9 +812,12 @@ class BranchNode extends CondNode {
 	return "branch";
     }
 
-    public void open(DFNode loop, DFNode exit) {
-	this.connect(loop, 1, DFLinkType.BackFlow, "true");
-	this.connect(exit, 2, "false");
+    public void send(boolean cond, DFNode node) {
+	if (cond) {
+	    this.connect(node, 1, "true");
+	} else {
+	    this.connect(node, 2, "false");
+	}
     }
 }
 
@@ -1307,38 +1310,42 @@ public class Java2DF extends ASTVisitor {
 	 ASTNode ast, DFNode condValue, DFComponent loopCpt)
 	throws UnsupportedSyntax {
 
-	Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
+	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
+	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
+	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
 	Map<DFRef, DFNode> exits = new HashMap<DFRef, DFNode>();
 	for (DFRef ref : frame.loopRefs) {
 	    DFNode src = cpt.get(ref);
-	    DFNode loop = new LoopNode(scope, ref, ast, src);
-	    DFNode exit = new DistNode(scope, ref);
+	    LoopNode loop = new LoopNode(scope, ref, ast, src);
 	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
-	    branch.open(loop, exit);
+	    DFNode repeat = new DistNode(scope, ref);
+	    DFNode exit = new DistNode(scope, ref);
 	    loop.connect(branch, 0, DFLinkType.Informational, "end");
-	    inputs.put(ref, loop);
-	    outputs.put(ref, branch);
+	    branch.send(true, repeat);
+	    branch.send(false, exit);
+	    repeat.connect(loop, 0, DFLinkType.BackFlow, "repeat");
+	    loops.put(ref, loop);
+	    branches.put(ref, branch);
+	    repeats.put(ref, repeat);
 	    exits.put(ref, exit);
+	    cpt.put(exit);
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame == frame && meet.label == DFLabel.CONTINUE) {
 		DFNode node = meet.node;
-		DFNode loop = inputs.get(node.ref);
+		DFNode repeat = repeats.get(node.ref);
 		if (node instanceof JoinNode) {
-		    ((JoinNode)node).close(loop);
+		    ((JoinNode)node).close(repeat);
 		}
-		DFNode cont = new DistNode(scope, node.ref);
-		node.connect(cont, 0, DFLinkType.BackFlow);
-		inputs.put(node.ref, cont);
+		repeats.put(node.ref, node);
 	    }
 	}
 	
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode input = entry.getValue();
-	    DFNode loop = inputs.get(ref);
+	    LoopNode loop = loops.get(ref);
 	    if (loop != null) {
 		input.accept(loop);
 	    } else {
@@ -1350,11 +1357,9 @@ public class Java2DF extends ASTVisitor {
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode output = entry.getValue();
-	    DFNode branch = outputs.get(ref);
+	    BranchNode branch = branches.get(ref);
 	    if (branch != null) {
 		branch.accept(output);
-		DFNode exit = exits.get(ref);
-		cpt.put(exit);
 	    } else {
 		cpt.put(output);
 	    }
@@ -1363,11 +1368,12 @@ public class Java2DF extends ASTVisitor {
 	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame == frame && meet.label == DFLabel.BREAK) {
 		DFNode node = meet.node;
-		DFNode output = cpt.get(node.ref);
+		DFNode exit = exits.get(node.ref);
 		if (node instanceof JoinNode) {
-		    ((JoinNode)node).close(output);
+		    ((JoinNode)node).close(exit);
 		}
-		cpt.put(node);
+		exits.put(node.ref, node);
+		cpt.put(exit);
 	    }
 	}
 
