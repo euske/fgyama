@@ -258,24 +258,25 @@ def write_graph(out, scope, level=0):
     for node in scope.nodes:
         label = node.ref+':'+node.label if node.ref else node.label
         out.write(h+' %s [label=%s' % (node.nid, q(label)))
-        if node.ntype == Node.N_Assign:
+        if node.ntype in (Node.N_Operator, Node.N_Terminal):
             out.write(', shape=box')
         elif node.ntype in (Node.N_Branch, Node.N_Join):
             out.write(', shape=diamond')
         out.write('];\n')
-    for node in scope.nodes:
-        for link in node.send:
-            out.write(h+' %s -> %s' % (link.srcid, link.dstid))
-            out.write(h+' [label=%s' % q(link.name))
-            if link.ltype == Link.L_ControlFlow:
-                out.write(', style=dashed')
-            elif link.ltype == Link.L_BackFlow:
-                out.write(', style=bold')
-            elif link.ltype == Link.L_Informational:
-                out.write(', style=invis')
-            out.write('];\n')
     for child in scope.children:
         write_graph(out, child, level=level+1)
+    if level == 0:
+        for node in scope.walk():
+            for link in node.send:
+                out.write(h+' %s -> %s' % (link.srcid, link.dstid))
+                out.write(h+' [label=%s' % q(link.name))
+                if link.ltype == Link.L_ControlFlow:
+                    out.write(', style=dashed')
+                elif link.ltype == Link.L_BackFlow:
+                    out.write(', style=bold')
+                elif link.ltype == Link.L_Informational:
+                    out.write(', style=invis')
+                out.write('];\n')
     out.write(h+'}\n')
     return
 
