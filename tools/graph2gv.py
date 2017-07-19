@@ -272,7 +272,7 @@ def write_graph(out, scope, level=0):
             elif link.ltype == Link.L_BackFlow:
                 out.write(', style=bold')
             elif link.ltype == Link.L_Informational:
-                out.write(', style=dotted')
+                out.write(', style=invis')
             out.write('];\n')
     for child in scope.children:
         write_graph(out, child, level=level+1)
