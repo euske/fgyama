@@ -1005,11 +1005,20 @@ class DFMeet {
     public DFNode node;
     public DFFrame frame;
     public DFLabel label;
+    public DFNode value;
+    public boolean cond;
 
     public DFMeet(DFNode node, DFFrame frame, DFLabel label) {
+	this(node, frame, label, null, false);
+    }
+    
+    public DFMeet(DFNode node, DFFrame frame, DFLabel label,
+		  DFNode value, boolean cond) {
 	this.node = node;
 	this.frame = frame;
 	this.label = label;
+	this.value = value;
+	this.cond = cond;
     }
 
     public String toString() {
@@ -1263,20 +1272,14 @@ public class Java2DF extends ASTVisitor {
 
 	if (trueCpt != null) {
 	    for (DFMeet meet : trueCpt.meets) {
-		DFRef ref = meet.node.ref;
-		DFNode node = trueCpt.get(ref);
-		JoinNode join = new JoinNode(scope, ref, ast, condValue);
-		join.recv(true, node);
-		cpt.addMeet(new DFMeet(join, meet.frame, meet.label));
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.label,
+				       condValue, true));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFMeet meet : falseCpt.meets) {
-		DFRef ref = meet.node.ref;
-		DFNode node = falseCpt.get(ref);
-		JoinNode join = new JoinNode(scope, ref, ast, condValue);
-		join.recv(false, node);
-		cpt.addMeet(new DFMeet(join, meet.frame, meet.label));
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.label,
+				       condValue, false));
 	    }
 	}
 	
@@ -1328,15 +1331,17 @@ public class Java2DF extends ASTVisitor {
 	    branches.put(ref, branch);
 	    repeats.put(ref, repeat);
 	    exits.put(ref, exit);
-	    cpt.put(exit);
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame == frame && meet.label == DFLabel.CONTINUE) {
 		DFNode node = meet.node;
 		DFNode repeat = repeats.get(node.ref);
-		if (node instanceof JoinNode) {
-		    ((JoinNode)node).close(repeat);
+		if (meet.value != null) {
+		    JoinNode join = new JoinNode(scope, node.ref, null, meet.value);
+		    join.recv(meet.cond, node);
+		    join.close(repeat);
+		    node = join;
 		}
 		repeats.put(node.ref, node);
 	    }
@@ -1369,14 +1374,20 @@ public class Java2DF extends ASTVisitor {
 	    if (meet.frame == frame && meet.label == DFLabel.BREAK) {
 		DFNode node = meet.node;
 		DFNode exit = exits.get(node.ref);
-		if (node instanceof JoinNode) {
-		    ((JoinNode)node).close(exit);
+		if (meet.value != null) {
+		    JoinNode join = new JoinNode(scope.parent, node.ref, null, meet.value);
+		    join.recv(meet.cond, node);
+		    join.close(exit);
+		    node = join;
 		}
 		exits.put(node.ref, node);
-		cpt.put(exit);
 	    }
 	}
 
+	for (DFRef ref : frame.loopRefs) {
+	    DFNode exit = exits.get(ref);
+	    cpt.put(exit);
+	}
     	for (DFMeet meet : loopCpt.meets) {
 	    if (meet.frame != frame) {
 		cpt.addMeet(meet);
