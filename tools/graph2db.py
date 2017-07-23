@@ -11,70 +11,110 @@ CREATE TABLE SourceFile (
     FileName TEXT
 );
 
-CREATE TABLE DFScope (
-    Sid INTEGER PRIMARY KEY,
-    Pid INTEGER,
-    Name TEXT
-);
-
 CREATE TABLE ASTNode (
     Aid INTEGER PRIMARY KEY,
-    Type INTEGER,
     Cid INTEGER,
+    Type INTEGER,
     Start INTEGER,
     End INTEGER
 );
 
+CREATE TABLE DFGraph (
+    Gid INTEGER PRIMARY KEY
+);
+
 CREATE TABLE DFNode (
-    Nid INTEGER PRIMARY KEY,
+    Nid INTEGER,
     Gid INTEGER,
-    Sid INTEGER,
     Aid INTEGER,
     Type INTEGER,
     Ref TEXT,
-    Arg TEXT
+    Label TEXT
 );
 
-CREATE TABLE DFLink (
-    Lid INTEGER PRIMARY KEY,
-    Nid0 INTEGER,
-    Nid1 INTEGER,
-    Type INTEGER,
-    Arg TEXT
+CREATE TABLE TreeNode (
+    Nid INTEGER PRIMARY KEY,
+    Pid INTEGER,
+    Label TEXT
 );
 
-CREATE INDEX DFLinkNid0 ON DFLink(Nid0);
-CREATE INDEX DFLinkNid1 ON DFLink(Nid1);
-    
--- CREATE TABLE Subgraphs (Sgid INTEGER PRIMARY KEY, Nid INTEGER, Pattern TEXT);
 ''')
     return
 
-def index_graph(cur, cid, graph):
-    nids = {}
-    def index_scope(scope, pid=0, gid=0):
-        cur.execute('INSERT INTO DFScope VALUES (NULL,?,?);', (pid, scope.sid))
-        sid = cur.lastrowid
-        if pid == 0:
-            gid = sid
-        for node in scope.nodes:
-            aid = None
-            if node.ast is not None:
-                (t,s,e) = node.ast
-                cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?,?);',
-                            (t, cid, s, e))
-                aid = cur.lastrowid
-            cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-                        (gid, sid, aid, node.ntype, node.ref, node.label))
-            nids[node.nid] = cur.lastrowid
-        for child in scope.children:
-            index_scope(child, sid, gid)
-        return
-    index_scope(graph.root)
+def get_label(link, label):
+    node = link.src
+    if node.ntype == Node.N_Terminal and label is not None:
+        return ':'+label
+    elif node.ntype == Node.N_Operator:
+        return node.label
+    elif node.ntype == Node.N_Branch:
+        return 'branch'
+    elif node.ntype == Node.N_Join:
+        return 'join'
+    elif node.ntype == Node.N_Loop:
+        return 'loop'
+    elif node.ntype == Node.N_Refer and not node.recv:
+        return '='+node.label
+    return None
+
+def get_length(node):
+    if node.recv:
+        return 1+max(( get_length(link.src) for link in node.recv ))
+    else:
+        return 0
+
+def find_chain(graph):
+    ends = []
     for node in graph.nodes.values():
-        for link in node.send:
-            cur.execute('INSERT INTO DFLink VALUES (NULL,?,?,?,?);',
-                        (nids[link.srcid], nids[link.dstid], link.ltype, link.name))
+        if node.send: continue
+        length = get_length(node)
+        ends.append((length, node))
+    return sorted(ends, key=lambda x:x[0], reverse=True)
+
+def get_args(graph):
+    labels = {}
+    for node in graph.nodes.values():
+        if node.ntype == Node.N_Terminal and not node.recv:
+            label = 'N%s' % len(labels)
+            labels[node] = label
+    return labels
+
+def index_graph(cur, cid, graph):
+    cur.execute('INSERT INTO DFGraph VALUES (NULL);')
+    gid = cur.lastrowid
+    args = get_args(graph)
+    graph.dump()
+    print (cid, graph, args)
+    def index_node(parent, pid=0):
+        for link in parent.recv:
+            node = link.src
+            label = get_label(link, args.get(node))
+            if label is None:
+                nid = pid
+            else:
+                cur.execute('SELECT Nid FROM TreeNode WHERE Pid=? AND Label=?;',
+                            (pid, label))
+                result = cur.fetchone()
+                if result is not None:
+                    (nid,) = result
+                else:
+                    cur.execute('INSERT INTO TreeNode VALUES (NULL,?,?);',
+                                (pid, label))
+                    nid = cur.lastrowid
+                print (' ',pid, label, '->', nid)
+                aid = 0
+                if node.ast is not None:
+                    (t,s,e) = node.ast
+                    cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?,?);',
+                                (cid, t, s, e))
+                    aid = cur.lastrowid
+                cur.execute('INSERT INTO DFNode VALUES (?,?,?,?,?,?);',
+                            (nid, gid, aid, node.ntype, node.ref, node.label))
+            index_node(node, nid)
+        return
+    for node in graph.nodes.values():
+        if not node.send:
+            index_node(node)
     return
 
 def main(argv):

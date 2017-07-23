@@ -115,6 +115,7 @@ class Node:
         self.ref = ref
         self.send = []
         self.recv = []
+        self.other = []
         self.ast = None
         return
 
@@ -186,27 +187,39 @@ class Graph:
             assert link.srcid in self.nodes
             assert link.dstid in self.nodes
             link.src = self.nodes[link.srcid]
-            link.src.send.append(link)
             link.dst = self.nodes[link.dstid]
-            link.dst.recv.append(link)
+            if link.ltype in (Link.L_DataFlow, Link.L_ControlFlow):
+                link.src.send.append(link)
+                link.dst.recv.append(link)
+            else:
+                link.src.other.append(link)
+                link.dst.other.append(link)
         for node in self.nodes.values():
             node.send.sort(key=lambda link: link.lid)
             node.recv.sort(key=lambda link: link.lid)
         return self
     
     def dump(self, out=sys.stdout):
-        def f(scope, level=0):
-            h = ' '*level
-            out.write(h+'Scope %s:\n' % scope.sid)
-            for node in scope.nodes:
-                label = node.ref+':'+node.label if node.ref else node.label
-                out.write(h+' %s: %s\n' % (node.nid, label))
-                for link in node.send:
-                    out.write(h+' -> %s: %s\n' % (link.dstid, link.name))
-            for child in scope.children:
-                f(child, level=level+1)
+        visited = set()
+        def f(node, level=0):
+            visited.add(node)
+            label = node.ref+':'+node.label if node.ref else node.label
+            out.write('%s: %s\n' % (node.nid, label))
+            out.write(' '*level)
+            for link in node.send:
+                if link.name is None:
+                    out.write(' --> ')
+                else:
+                    out.write(' -%s-> ' % link.name)
+                n = link.dst
+                if n in visited:
+                    out.write('#%s\n' % n.nid)
+                else:
+                    f(n, level=level+1)
             return
-        f(self.root)
+        for node in self.nodes.values():
+            if not node.recv:
+                f(node)
         return
 
 def load_graphs(fp):
@@ -290,11 +303,11 @@ def write_graph(out, scope, level=0):
                 out.write(h+' [label=%s' % q(link.name))
                 if link.ltype == Link.L_ControlFlow:
                     out.write(', style=dashed')
-                elif link.ltype == Link.L_BackFlow:
-                    out.write(', style=bold')
-                elif link.ltype == Link.L_Informational:
-                    out.write(', style=invis')
                 out.write('];\n')
+            for link in node.other:
+                if link.src == node and link.ltype == Link.L_BackFlow:
+                    out.write(h+' %s -> %s' % (link.srcid, link.dstid))
+                    out.write(h+' [label=%s, style=bold];\n' % q(link.name))
     out.write(h+'}\n')
     return
 
