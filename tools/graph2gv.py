@@ -189,8 +189,26 @@ class Graph:
             link.src.send.append(link)
             link.dst = self.nodes[link.dstid]
             link.dst.recv.append(link)
+        for node in self.nodes.values():
+            node.send.sort(key=lambda link: link.lid)
+            node.recv.sort(key=lambda link: link.lid)
         return self
     
+    def dump(self, out=sys.stdout):
+        def f(scope, level=0):
+            h = ' '*level
+            out.write(h+'Scope %s:\n' % scope.sid)
+            for node in scope.nodes:
+                label = node.ref+':'+node.label if node.ref else node.label
+                out.write(h+' %s: %s\n' % (node.nid, label))
+                for link in node.send:
+                    out.write(h+' -> %s: %s\n' % (link.dstid, link.name))
+            for child in scope.children:
+                f(child, level=level+1)
+            return
+        f(self.root)
+        return
+
 def load_graphs(fp):
     graph = None
     src = None
