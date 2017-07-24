@@ -20,11 +20,12 @@ CREATE TABLE ASTNode (
 );
 
 CREATE TABLE DFGraph (
-    Gid INTEGER PRIMARY KEY
+    Gid INTEGER PRIMARY KEY,
+    Name TEXT
 );
 
 CREATE TABLE DFNode (
-    Nid INTEGER,
+    Nid INTEGER PRIMATY KEY,
     Gid INTEGER,
     Aid INTEGER,
     Type INTEGER,
@@ -33,28 +34,59 @@ CREATE TABLE DFNode (
 );
 
 CREATE TABLE TreeNode (
-    Nid INTEGER PRIMARY KEY,
+    Tid INTEGER PRIMARY KEY,
     Pid INTEGER,
-    Label TEXT
+    Key TEXT
 );
 
+CREATE TABLE TreeLeaf (
+    Tid INTEGER,
+    Nid INTEGER
+);
 ''')
     return
 
-def get_label(link, label):
-    node = link.src
-    if node.ntype == Node.N_Terminal and label is not None:
-        return ':'+label
+class DBCache:
+
+    def __init__(self, cur):
+        self.cur = cur
+        self._cache = {}
+        return
+
+    def get(self, pid, key):
+        cur = self.cur
+        k = (pid,key)
+        if k in self._cache:
+            return self._cache[k]
+        cur.execute('SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
+                    (pid, key))
+        result = cur.fetchone()
+        if result is not None:
+            (tid,) = result
+        else:
+            cur.execute('INSERT INTO TreeNode VALUES (NULL,?,?);',
+                             (pid, key))
+            tid = cur.lastrowid
+        self._cache[k] = tid
+        return tid
+
+def get_key(link, node, arg):
+    if link is not None and link.name is not None:
+        s = link.name+':'
+    else:
+        s = ':'
+    if node.ntype == Node.N_Terminal and arg is not None:
+        return s+arg
     elif node.ntype == Node.N_Operator:
-        return node.label
+        return s+node.label
     elif node.ntype == Node.N_Branch:
-        return 'branch'
+        return s+'branch'
     elif node.ntype == Node.N_Join:
-        return 'join'
+        return s+'join'
     elif node.ntype == Node.N_Loop:
-        return 'loop'
+        return s+'loop'
     elif node.ntype == Node.N_Refer and not node.recv:
-        return '='+node.label
+        return s+'='+node.label
     return None
 
 def get_length(node):
@@ -79,42 +111,46 @@ def get_args(graph):
             labels[node] = label
     return labels
 
-def index_graph(cur, cid, graph):
-    cur.execute('INSERT INTO DFGraph VALUES (NULL);')
+def index_graph(db, cur, cid, graph):
+    cur.execute('INSERT INTO DFGraph VALUES (NULL, ?);',
+                (graph.name,))
     gid = cur.lastrowid
     args = get_args(graph)
-    graph.dump()
+    #graph.dump()
     print (cid, graph, args)
-    def index_node(parent, pid=0):
-        for link in parent.recv:
-            node = link.src
-            label = get_label(link, args.get(node))
-            if label is None:
-                nid = pid
-            else:
-                cur.execute('SELECT Nid FROM TreeNode WHERE Pid=? AND Label=?;',
-                            (pid, label))
-                result = cur.fetchone()
-                if result is not None:
-                    (nid,) = result
-                else:
-                    cur.execute('INSERT INTO TreeNode VALUES (NULL,?,?);',
-                                (pid, label))
-                    nid = cur.lastrowid
-                print (' ',pid, label, '->', nid)
-                aid = 0
-                if node.ast is not None:
-                    (t,s,e) = node.ast
-                    cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?,?);',
-                                (cid, t, s, e))
-                    aid = cur.lastrowid
-                cur.execute('INSERT INTO DFNode VALUES (?,?,?,?,?,?);',
-                            (nid, gid, aid, node.ntype, node.ref, node.label))
-            index_node(node, nid)
+    
+    def index_node(node):
+        aid = 0
+        if node.ast is not None:
+            (t,s,e) = node.ast
+            cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?,?);',
+                        (cid, t, s, e))
+            aid = cur.lastrowid
+        cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?);',
+                    (gid, aid, node.ntype, node.ref, node.label))
+        nid = cur.lastrowid
+        return nid
+    
+    def index_tree(link0, node, pids, level=0):
+        nid = index_node(node)
+        key = get_key(link0, node, args.get(node))
+        print (level, nid, key, len(pids))
+        for link1 in node.recv:
+            if key is not None:
+                tids = [0]
+                for pid in pids:
+                    tid = db.get(pid, key)
+                    cur.execute('INSERT INTO TreeLeaf VALUES (?,?);',
+                                (tid, nid))
+                    #print (pid, key, '->', tid, nid)
+                    tids.append(tid)
+                pids = tids
+            index_tree(link1, link1.src, pids, level+1)
         return
+    
     for node in graph.nodes.values():
         if not node.send:
-            index_node(node)
+            index_tree(None, node, [0])
     return
 
 def main(argv):
@@ -138,12 +174,13 @@ def main(argv):
         build_tables(conn)
     except sqlite3.OperationalError:
         pass
+    db = DBCache(cur)
     with fileinput.input(args) as fp:
         cid = None
         for graph in load_graphs(fp):
             if isinstance(graph, Graph):
                 assert cid is not None
-                index_graph(cur, cid, graph)
+                index_graph(db, cur, cid, graph)
             elif isinstance(graph, str):
                 cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
                             (graph,))

@@ -179,8 +179,8 @@ class Graph:
         return
 
     def __repr__(self):
-        return ('<Graph(%s), src=%r>' %
-                (self.name, self.src))
+        return ('<Graph(%s), src=%r (%d nodes, %d links)>' %
+                (self.name, self.src, len(self.nodes), len(self.links)))
 
     def fixate(self):
         for link in self.links:
