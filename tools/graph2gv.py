@@ -133,9 +133,9 @@ class Link:
     
     def __init__(self, srcid, dstid, lid, ltype, name):
         self.srcid = srcid
-        self.src =  None
+        self.src = None
         self.dstid = dstid
-        self.dst =  None
+        self.dst = None
         self.lid = lid
         self.ltype = ltype
         self.name = name
