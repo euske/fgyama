@@ -169,9 +169,9 @@ class Scope:
     
 class Graph:
 
-    def __init__(self, name):
+    def __init__(self, name, src=None):
         self.name = name
-        self.src = None
+        self.src = src
         self.root = None
         self.scopes = {}
         self.nodes = {}
@@ -236,8 +236,7 @@ def load_graphs(fp):
             sid = line[1:]
             if graph is not None:
                 yield graph.fixate()
-            graph = Graph(sid)
-            graph.src = src
+            graph = Graph(sid, src)
             assert sid not in graph.scopes
             scope = Scope(sid)
             graph.root = scope

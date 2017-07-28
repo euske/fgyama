@@ -13,7 +13,6 @@ CREATE TABLE SourceFile (
 
 CREATE TABLE ASTNode (
     Aid INTEGER PRIMARY KEY,
-    Cid INTEGER,
     Type INTEGER,
     Start INTEGER,
     End INTEGER
@@ -21,23 +20,32 @@ CREATE TABLE ASTNode (
 
 CREATE TABLE DFGraph (
     Gid INTEGER PRIMARY KEY,
+    Cid INTEGER,
+    Name TEXT
+);
+
+CREATE TABLE DFScope (
+    Sid INTEGER PRIMARY KEY,
+    Gid INTEGER,
+    Parent INTEGER,
     Name TEXT
 );
 
 CREATE TABLE DFNode (
     Nid INTEGER PRIMARY KEY,
     Gid INTEGER,
+    Sid INTEGER,
     Aid INTEGER,
     Type INTEGER,
-    Ref TEXT,
-    Label TEXT
+    Label TEXT,
+    Ref TEXT
 );
 
 CREATE TABLE DFLink (
     Lid INTEGER PRIMARY KEY,
-    Idx INTEGER,
     Nid0 INTEGER,
     Nid1 INTEGER,
+    Idx INTEGER,
     Type INTEGER,
     Name TEXT
 );
@@ -55,6 +63,33 @@ CREATE TABLE TreeLeaf (
 );
 ''')
     return
+
+def fetch_graph(cur, gid):
+    cur.execute('SELECT Cid,Name FROM DFGraph WHERE Gid=?;', (gid,))
+    (cid,name) = cur.fetchone()
+    cur.execute('SELECT FileName FROM SourceFile WHERE Cid=?;', (cid,))
+    (src,) = cur.fetchone()
+    graph = Graph(name, src)
+    rows = cur.execute('SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;', (gid,))
+    for (sid,parent,name) in rows:
+        scope = Scope(name)
+        graph.scopes[sid] = scope
+    rows = cur.execute('SELECT Nid,Sid,Aid,Type,Label,Ref FROM DFNode WHERE Gid=?;', (gid,))
+    for (nid,sid,aid,ntype,label,ref) in list(rows):
+        scope = graph.scopes[sid]
+        node = Node(scope, nid, ntype, label, ref)
+        rows = cur.execute('SELECT Type,Start,End FROM ASTNode WHERE Aid=?;', (aid,))
+        for (t,s,e) in rows:
+            node.ast = (t,s,e)
+        graph.nodes[nid] = node
+        scope.nodes.append(node)
+    for (nid0,node) in graph.nodes.items():
+        rows = cur.execute('SELECT Nid1,Idx,Type,Name FROM DFLink WHERE Nid0=?;', (nid0,))
+        for (nid1,idx,ltype,name) in rows:
+            link = Link(nid0, nid1, idx, ltype, name)
+            graph.links.append(link)
+    graph.fixate()
+    return graph
 
 class DBCache:
 
@@ -125,23 +160,32 @@ def get_args(graph):
 def index_graph(db, cur, cid, graph):
     print (cid, graph.name)
     #graph.dump()
-    cur.execute('INSERT INTO DFGraph VALUES (NULL, ?);',
-                (graph.name,))
+    cur.execute('INSERT INTO DFGraph VALUES (NULL,?,?);',
+                (cid, graph.name))
     gid = cur.lastrowid
-
+    
     nids = {}
-    def index_node(node):
+    def index_node(sid, node):
         aid = 0
         if node.ast is not None:
-            (t,s,e) = node.ast
-            cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?,?);',
-                        (cid, t, s, e))
+            cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
+                        node.ast)
             aid = cur.lastrowid
-        cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?);',
-                    (gid, aid, node.ntype, node.ref, node.label))
+        cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
+                    (gid, sid, aid, node.ntype, node.ref, node.label))
         nid = cur.lastrowid
         nids[node] = nid
         return nid
+
+    def index_scope(scope, parent=0):
+        cur.execute('INSERT INTO DFScope VALUES (NULL,?,?,?);',
+                    (gid, parent, scope.sid))
+        sid = cur.lastrowid
+        for node in scope.nodes:
+            index_node(sid, node)
+        for child in scope.children:
+            index_scope(child, sid)
+        return
 
     def index_link(link):
         cur.execute('INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
@@ -169,9 +213,8 @@ def index_graph(db, cur, cid, graph):
                 pids = tids
             index_tree(link1, link1.src, pids, level+1)
         return
-    
-    for node in graph.nodes.values():
-        index_node(node)
+
+    index_scope(graph.root)
     for node in graph.nodes.values():
         for link in node.send:
             index_link(link)
@@ -193,7 +236,6 @@ def main(argv):
     dbname = ':memory:'
     for (k, v) in opts:
         if k == '-o': dbname = v
-    if not args: return usage()
 
     conn = sqlite3.connect(dbname)
     cur = conn.cursor()
@@ -201,18 +243,24 @@ def main(argv):
         build_tables(conn)
     except sqlite3.OperationalError:
         pass
-    db = DBCache(cur)
-    with fileinput.input(args) as fp:
-        cid = None
-        for graph in load_graphs(fp):
-            if isinstance(graph, Graph):
-                assert cid is not None
-                index_graph(db, cur, cid, graph)
-            elif isinstance(graph, str):
-                cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
-                            (graph,))
-                cid = cur.lastrowid
-    conn.commit()
+    if args:
+        db = DBCache(cur)
+        with fileinput.input(args) as fp:
+            cid = None
+            for graph in load_graphs(fp):
+                if isinstance(graph, Graph):
+                    assert cid is not None
+                    index_graph(db, cur, cid, graph)
+                elif isinstance(graph, str):
+                    cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
+                                (graph,))
+                    cid = cur.lastrowid
+        conn.commit()
+    else:
+        cur.execute('SELECT Gid FROM DFGraph;')
+        for (gid,) in cur.fetchall():
+            graph = fetch_graph(cur, gid)
+            graph.dump()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
