@@ -43,17 +43,11 @@ def doit(db, graph):
         if var is None: continue
         print ('+', isisolated(loop_end), var)
         src = db.get(graph.src)
-        ranges = []
-        def addast(ast, anno=None):
-            if ast is not None:
-                (_,i,n) = ast
-                ranges.append((i, i+n, anno))
-            return
-        addast(var.ast)
+        asts = [var.ast]
         for n in node.scope.walk():
             if n.ref == ref and n.ntype in (DFNode.N_Refer, DFNode.N_Assign):
-                addast(n.ast)
-        src.show(ranges)
+                asts.append(n.ast)
+        src.showast(asts)
         print ()
     return
 

@@ -30,6 +30,7 @@ CREATE TABLE DFScope (
     Parent INTEGER,
     Name TEXT
 );
+CREATE INDEX DFScopeGidIndex ON DFScope(Gid);
 
 CREATE TABLE DFNode (
     Nid INTEGER PRIMARY KEY,
@@ -40,6 +41,7 @@ CREATE TABLE DFNode (
     Label TEXT,
     Ref TEXT
 );
+CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
 
 CREATE TABLE DFLink (
     Lid INTEGER PRIMARY KEY,
@@ -49,18 +51,21 @@ CREATE TABLE DFLink (
     Type INTEGER,
     Name TEXT
 );
+CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
     
 CREATE TABLE TreeNode (
     Tid INTEGER PRIMARY KEY,
     Pid INTEGER,
     Key TEXT
 );
+CREATE INDEX TreeNodePidAndKeyIndex ON TreeNode(Pid, Key);
 
 CREATE TABLE TreeLeaf (
     Tid INTEGER,
     Gid INTEGER,
     Nid INTEGER
 );
+CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
 ''')
     return
 
@@ -150,7 +155,7 @@ def index_graph(db, cur, cid, graph):
             aid = cur.lastrowid
         cur.execute(
             'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-            (gid, sid, aid, node.ntype, node.ref, node.label))
+            (gid, sid, aid, node.ntype, node.label, node.ref))
         nid = cur.lastrowid
         nids[node] = nid
         return nid
@@ -174,13 +179,12 @@ def index_graph(db, cur, cid, graph):
         return
     
     args = get_args(graph)
-    visited = set()
-    def index_tree(link0, node, pids, level=0):
+    def index_tree(link0, node, pids, visited):
         if node in visited: return
         visited.add(node)
         nid = nids[node]
         key = get_key(link0, node, args.get(node))
-        #print (level, nid, key, len(pids))
+        #print (nid, key, len(pids))
         for link1 in node.recv:
             if key is not None:
                 tids = [0]
@@ -192,7 +196,7 @@ def index_graph(db, cur, cid, graph):
                     #print (pid, key, '->', tid, nid)
                     tids.append(tid)
                 pids = tids
-            index_tree(link1, link1.src, pids, level+1)
+            index_tree(link1, link1.src, pids, visited)
         return
 
     index_scope(graph.root)
@@ -201,7 +205,7 @@ def index_graph(db, cur, cid, graph):
             index_link(link)
     for node in graph.nodes.values():
         if not node.send:
-            index_tree(None, node, [0])
+            index_tree(None, node, [0], set())
     return
 
 def fetch_graph(cur, gid):
@@ -262,18 +266,19 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     
-    conn = None
+    dbname = None
     for (k, v) in opts:
-        if k == '-o':
-            conn = sqlite3.connect(v)
+        if k == '-o': dbname = v
+        
+    for path in args:
+        if path.endswith('.graph'):
+            assert dbname is not None
+            conn = sqlite3.connect(dbname)
             cur = conn.cursor()
             try:
                 build_tables(conn)
             except sqlite3.OperationalError:
                 pass
-        
-    for path in args:
-        if conn is not None:
             db = DBCache(cur)
             with open(path) as fp:
                 cid = None
@@ -287,12 +292,12 @@ def main(argv):
                             (graph,))
                         cid = cur.lastrowid
             conn.commit()
-        else:
+        elif path.endswith('.db'):
             conn = sqlite3.connect(path)
-            cur = conn.cursor()
-            cur.execute('SELECT Gid FROM DFGraph;')
-            for (gid,) in cur.fetchall():
-                graph = fetch_graph(cur, gid)
+            cur1 = conn.cursor()
+            cur2 = conn.cursor()
+            for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
+                graph = fetch_graph(cur2, gid)
                 graph.dump()
             conn.close()
     return 0
