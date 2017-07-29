@@ -14,8 +14,11 @@ class SourceDB:
             src = self._cache[name]
         else:
             path = os.path.join(self.basedir, name)
-            with open(path) as fp:
-                data = fp.read()
+            try:
+                with open(path) as fp:
+                    data = fp.read()
+            except IOError:
+                raise KeyError(name)
             src = SourceFile(name, data)
             self._cache[name] = src
         return src

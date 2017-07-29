@@ -4,13 +4,11 @@ import sqlite3
 from graph2gv import SourceDB, DFGraph, DFLink, DFNode
 from graph2db import get_key, get_args, fetch_graph
 
-def find_graph(cur, gid0, graph, minlevel=3, minnodes=3):
+def find_graph(cur, gid0, graph, minlevel=3, minnodes=5):
     #graph.dump()
     args = get_args(graph)
     
-    def match_tree(pid, link0, node, thread, votes, visited):
-        if node in visited: return
-        visited.add(node)
+    def match_tree(pid, link0, node, match):
         key = get_key(link0, node, args.get(node))
         if key is None:
             tid = pid
@@ -26,20 +24,27 @@ def find_graph(cur, gid0, graph, minlevel=3, minnodes=3):
                 (tid,))
             for (gid,nid) in rows:
                 if gid == gid0: continue
-                if gid in votes:
-                    a = votes[gid]
+                if node in match:
+                    a = match[node]
                 else:
-                    a = votes[gid] = {}
-                a[node] = nid
-            thread.append((node, key))
+                    a = match[node] = {}
+                a[gid] = nid
         for link1 in node.recv:
-            match_tree(tid, link1, link1.src, thread[:], votes, visited)
+            match_tree(tid, link1, link1.src, match)
         return
 
     maxvotes = {}
     def find_tree(node):
+        match = {}
+        match_tree(0, None, node, match)
         votes = {}
-        match_tree(0, None, node, [], votes, set())
+        for (n,gids) in match.items():
+            for (gid,nid) in gids.items():
+                if gid in votes:
+                    a = votes[gid]
+                else:
+                    a = votes[gid] = []
+                a.append((n, nid))
         for (gid,pairs) in votes.items():
             if len(pairs) < minnodes: continue
             if gid in maxvotes and len(pairs) < len(maxvotes[gid]): continue
@@ -83,21 +88,26 @@ def main(argv):
         for (gid0,) in cur0.execute('SELECT Gid FROM DFGraph;'):
             print ('***', gid0)
             graph0 = fetch_graph(cur, gid0)
-            src0 = db.get(graph0.src)
+            try:
+                src0 = db.get(graph0.src)
+            except KeyError:
+                src0 = None
             maxvotes = find_graph(cur, gid0, graph0)
             for (gid1,pairs) in maxvotes.items():
                 print ('=', gid1)
                 graph1 = fetch_graph(cur, gid1)
-                src1 = db.get(graph1.src)
-                ast0 = []
-                ast1 = []
-                for (node0,nid1) in pairs.items():
-                    node1 = graph1.nodes[nid1]
-                    ast0.append(node0.ast)
-                    ast1.append(node1.ast)
-                src0.showast(ast0)
-                src1.showast(ast1)
-                print ()
+                if src0 is not None:
+                    src1 = db.get(graph1.src)
+                    ast0 = []
+                    ast1 = []
+                    for (node0,nid1) in pairs:
+                        node1 = graph1.nodes[nid1]
+                        ast0.append(node0.ast)
+                        ast1.append(node1.ast)
+                    src0.showast(ast0)
+                    print ('---')
+                    src1.showast(ast1)
+                    print ()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
