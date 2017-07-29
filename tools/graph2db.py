@@ -259,35 +259,40 @@ def main(argv):
         (opts, args) = getopt.getopt(argv[1:], 'o:')
     except getopt.GetoptError:
         return usage()
-    dbname = ':memory:'
+    
+    conn = None
     for (k, v) in opts:
-        if k == '-o': dbname = v
-
-    conn = sqlite3.connect(dbname)
-    cur = conn.cursor()
-    try:
-        build_tables(conn)
-    except sqlite3.OperationalError:
-        pass
-    if args:
-        db = DBCache(cur)
-        with fileinput.input(args) as fp:
-            cid = None
-            for graph in load_graphs(fp):
-                if isinstance(graph, DFGraph):
-                    assert cid is not None
-                    index_graph(db, cur, cid, graph)
-                elif isinstance(graph, str):
-                    cur.execute(
-                        'INSERT INTO SourceFile VALUES (NULL,?)',
-                        (graph,))
-                    cid = cur.lastrowid
-        conn.commit()
-    else:
-        cur.execute('SELECT Gid FROM DFGraph;')
-        for (gid,) in cur.fetchall():
-            graph = fetch_graph(cur, gid)
-            graph.dump()
+        if k == '-o':
+            conn = sqlite3.connect(v)
+            cur = conn.cursor()
+            try:
+                build_tables(conn)
+            except sqlite3.OperationalError:
+                pass
+        
+    for path in args:
+        if conn is not None:
+            db = DBCache(cur)
+            with open(path) as fp:
+                cid = None
+                for graph in load_graphs(fp):
+                    if isinstance(graph, DFGraph):
+                        assert cid is not None
+                        index_graph(db, cur, cid, graph)
+                    elif isinstance(graph, str):
+                        cur.execute(
+                            'INSERT INTO SourceFile VALUES (NULL,?)',
+                            (graph,))
+                        cid = cur.lastrowid
+            conn.commit()
+        else:
+            conn = sqlite3.connect(path)
+            cur = conn.cursor()
+            cur.execute('SELECT Gid FROM DFGraph;')
+            for (gid,) in cur.fetchall():
+                graph = fetch_graph(cur, gid)
+                graph.dump()
+            conn.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

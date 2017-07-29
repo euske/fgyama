@@ -30,37 +30,27 @@ class SourceFile:
     def __init__(self, name, data):
         self.name = name
         self.lines = data.splitlines(True)
-        self._ranges = []
         return
     
     def __repr__(self):
         return ('<SourceFile(%s)>' %
                 (self.name,))
 
-    def clear(self):
-        self._ranges = []
-        return
-
-    def addast(self, ast, anno=None):
-        if ast is not None:
-            (_,i,n) = ast
-            self._ranges.append((i, i+n, anno))
-        return
-    
-    def show(self, fp=sys.stdout,
+    def show(self, ranges,
+             fp=sys.stdout,
              context=1, skip='...\n',
              astart=(lambda _: '['),
              aend=(lambda _: ']'),
              abody=(lambda _,s: s)):
-        if not self._ranges: return
-        self._ranges.sort(key=lambda x: x[0])
+        if not ranges: return
+        ranges.sort(key=lambda x: x[0])
         selected = {}
         i0 = 0
         ri = 0
         for (lineno,line) in enumerate(self.lines):
             i1 = i0+len(line)
-            while ri < len(self._ranges):
-                (s,e,anno) = self._ranges[ri]
+            while ri < len(ranges):
+                (s,e,anno) = ranges[ri]
                 if e <= i0:
                     ri += 1
                 elif i1 < s:
