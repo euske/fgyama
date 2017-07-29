@@ -438,7 +438,7 @@ class JoinNode extends CondNode {
     }
     
     public DFNodeType type() {
-	return DFNodeType.Branch;
+	return DFNodeType.Join;
     }
 
     public String label() {
