@@ -64,33 +64,6 @@ CREATE TABLE TreeLeaf (
 ''')
     return
 
-def fetch_graph(cur, gid):
-    cur.execute('SELECT Cid,Name FROM DFGraph WHERE Gid=?;', (gid,))
-    (cid,name) = cur.fetchone()
-    cur.execute('SELECT FileName FROM SourceFile WHERE Cid=?;', (cid,))
-    (src,) = cur.fetchone()
-    graph = Graph(name, src)
-    rows = cur.execute('SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;', (gid,))
-    for (sid,parent,name) in rows:
-        scope = Scope(name)
-        graph.scopes[sid] = scope
-    rows = cur.execute('SELECT Nid,Sid,Aid,Type,Label,Ref FROM DFNode WHERE Gid=?;', (gid,))
-    for (nid,sid,aid,ntype,label,ref) in list(rows):
-        scope = graph.scopes[sid]
-        node = Node(scope, nid, ntype, label, ref)
-        rows = cur.execute('SELECT Type,Start,End FROM ASTNode WHERE Aid=?;', (aid,))
-        for (t,s,e) in rows:
-            node.ast = (t,s,e)
-        graph.nodes[nid] = node
-        scope.nodes.append(node)
-    for (nid0,node) in graph.nodes.items():
-        rows = cur.execute('SELECT Nid1,Idx,Type,Name FROM DFLink WHERE Nid0=?;', (nid0,))
-        for (nid1,idx,ltype,name) in rows:
-            link = Link(nid0, nid1, idx, ltype, name)
-            graph.links.append(link)
-    graph.fixate()
-    return graph
-
 class DBCache:
 
     def __init__(self, cur):
@@ -103,14 +76,16 @@ class DBCache:
         k = (pid,key)
         if k in self._cache:
             return self._cache[k]
-        cur.execute('SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
-                    (pid, key))
+        cur.execute(
+            'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
+            (pid, key))
         result = cur.fetchone()
         if result is not None:
             (tid,) = result
         else:
-            cur.execute('INSERT INTO TreeNode VALUES (NULL,?,?);',
-                        (pid, key))
+            cur.execute(
+                'INSERT INTO TreeNode VALUES (NULL,?,?);',
+                (pid, key))
             tid = cur.lastrowid
         self._cache[k] = tid
         return tid
@@ -160,26 +135,30 @@ def get_args(graph):
 def index_graph(db, cur, cid, graph):
     print (cid, graph.name)
     #graph.dump()
-    cur.execute('INSERT INTO DFGraph VALUES (NULL,?,?);',
-                (cid, graph.name))
+    cur.execute(
+        'INSERT INTO DFGraph VALUES (NULL,?,?);',
+        (cid, graph.name))
     gid = cur.lastrowid
     
     nids = {}
     def index_node(sid, node):
         aid = 0
         if node.ast is not None:
-            cur.execute('INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
-                        node.ast)
+            cur.execute(
+                'INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
+                node.ast)
             aid = cur.lastrowid
-        cur.execute('INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-                    (gid, sid, aid, node.ntype, node.ref, node.label))
+        cur.execute(
+            'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
+            (gid, sid, aid, node.ntype, node.ref, node.label))
         nid = cur.lastrowid
         nids[node] = nid
         return nid
 
     def index_scope(scope, parent=0):
-        cur.execute('INSERT INTO DFScope VALUES (NULL,?,?,?);',
-                    (gid, parent, scope.sid))
+        cur.execute(
+            'INSERT INTO DFScope VALUES (NULL,?,?,?);',
+            (gid, parent, scope.sid))
         sid = cur.lastrowid
         for node in scope.nodes:
             index_node(sid, node)
@@ -188,9 +167,10 @@ def index_graph(db, cur, cid, graph):
         return
 
     def index_link(link):
-        cur.execute('INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
-                    (link.lid, nids[link.src], nids[link.dst],
-                     link.ltype, link.name))
+        cur.execute(
+            'INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
+            (nids[link.src], nids[link.dst], link.lid, 
+             link.ltype, link.name))
         return
     
     args = get_args(graph)
@@ -206,8 +186,9 @@ def index_graph(db, cur, cid, graph):
                 tids = [0]
                 for pid in pids:
                     tid = db.get(pid, key)
-                    cur.execute('INSERT INTO TreeLeaf VALUES (?,?,?);',
-                                (tid, gid, nid))
+                    cur.execute(
+                        'INSERT INTO TreeLeaf VALUES (?,?,?);',
+                        (tid, gid, nid))
                     #print (pid, key, '->', tid, nid)
                     tids.append(tid)
                 pids = tids
@@ -222,6 +203,51 @@ def index_graph(db, cur, cid, graph):
         if not node.send:
             index_tree(None, node, [0])
     return
+
+def fetch_graph(cur, gid):
+    cur.execute(
+        'SELECT Cid,Name FROM DFGraph WHERE Gid=?;',
+        (gid,))
+    (cid,name) = cur.fetchone()
+    cur.execute(
+        'SELECT FileName FROM SourceFile WHERE Cid=?;',
+        (cid,))
+    (src,) = cur.fetchone()
+    graph = Graph(name, src)
+    rows = cur.execute(
+        'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
+        (gid,))
+    pids = {}
+    scopes = graph.scopes
+    for (sid,parent,name) in rows:
+        scope = Scope(name)
+        scopes[sid] = scope
+        pids[sid] = parent
+    for (sid,parent) in pids.items():
+        if parent != 0:
+            scopes[sid].set_parent(scopes[parent])
+    rows = cur.execute(
+        'SELECT Nid,Sid,Aid,Type,Label,Ref FROM DFNode WHERE Gid=?;',
+        (gid,))
+    for (nid,sid,aid,ntype,label,ref) in list(rows):
+        scope = scopes[sid]
+        node = Node(scope, nid, ntype, label, ref)
+        rows = cur.execute(
+            'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
+            (aid,))
+        for (t,s,e) in rows:
+            node.ast = (t,s,e)
+        graph.nodes[nid] = node
+        scope.nodes.append(node)
+    for (nid0,node) in graph.nodes.items():
+        rows = cur.execute(
+            'SELECT Nid1,Idx,Type,Name FROM DFLink WHERE Nid0=?;',
+            (nid0,))
+        for (nid1,idx,ltype,name) in rows:
+            link = Link(nid0, nid1, idx, ltype, name)
+            graph.links.append(link)
+    graph.fixate()
+    return graph
 
 def main(argv):
     import fileinput
@@ -252,8 +278,9 @@ def main(argv):
                     assert cid is not None
                     index_graph(db, cur, cid, graph)
                 elif isinstance(graph, str):
-                    cur.execute('INSERT INTO SourceFile VALUES (NULL,?)',
-                                (graph,))
+                    cur.execute(
+                        'INSERT INTO SourceFile VALUES (NULL,?)',
+                        (graph,))
                     cid = cur.lastrowid
         conn.commit()
     else:

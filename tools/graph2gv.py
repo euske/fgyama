@@ -149,15 +149,19 @@ class Scope:
 
     def __init__(self, sid, parent=None):
         self.sid = sid
-        self.parent = parent
-        if parent is not None:
-            parent.children.append(self)
         self.nodes = []
         self.children = []
+        self.set_parent(parent)
         return
 
     def __repr__(self):
         return ('<Scope(%s)>' % self.sid)
+
+    def set_parent(self, parent):
+        self.parent = parent
+        if parent is not None:
+            parent.children.append(self)
+        return
 
     def walk(self):
         for n in self.nodes:
