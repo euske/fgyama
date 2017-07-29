@@ -96,7 +96,7 @@ class SourceFile:
             fp.write(s)
         return
     
-class Node:
+class DFNode:
 
     N_None = 0
     N_Refer = 1
@@ -107,9 +107,9 @@ class Node:
     N_Loop = 6
     N_Terminal = 7
 
-    def __init__(self, scope, nid, ntype, label, ref):
+    def __init__(self, scope, name, ntype, label, ref):
         self.scope = scope
-        self.nid = nid
+        self.name = name
         self.ntype = ntype
         self.label = label
         self.ref = ref
@@ -120,10 +120,10 @@ class Node:
         return
 
     def __repr__(self):
-        return ('<Node(%s): ntype=%d, ref=%r, label=%r>' %
-                (self.nid, self.ntype, self.ref, self.label))
+        return ('<DFNode(%s): ntype=%d, ref=%r, label=%r>' %
+                (self.name, self.ntype, self.ref, self.label))
 
-class Link:
+class DFLink:
 
     L_None = 0
     L_DataFlow = 1
@@ -131,21 +131,21 @@ class Link:
     L_ControlFlow = 3
     L_Informational = 4
     
-    def __init__(self, srcid, dstid, lid, ltype, name):
+    def __init__(self, srcid, dstid, idx, ltype, name):
         self.srcid = srcid
         self.src = None
         self.dstid = dstid
         self.dst = None
-        self.lid = lid
+        self.idx = idx
         self.ltype = ltype
         self.name = name
         return
 
     def __repr__(self):
-        return ('<Link(%d): ltype=%d, %r-(%r)-%r>' %
-                (self.lid, self.ltype, self.srcid, self.name, self.dstid))
+        return ('<DFLink(%d): ltype=%d, %r-(%r)-%r>' %
+                (self.idx, self.ltype, self.srcid, self.name, self.dstid))
 
-class Scope:
+class DFScope:
 
     def __init__(self, sid, parent=None):
         self.sid = sid
@@ -155,7 +155,7 @@ class Scope:
         return
 
     def __repr__(self):
-        return ('<Scope(%s)>' % self.sid)
+        return ('<DFScope(%s)>' % self.sid)
 
     def set_parent(self, parent):
         self.parent = parent
@@ -171,7 +171,7 @@ class Scope:
                 yield n
         return
     
-class Graph:
+class DFGraph:
 
     def __init__(self, name, src=None):
         self.name = name
@@ -183,7 +183,7 @@ class Graph:
         return
 
     def __repr__(self):
-        return ('<Graph(%s), src=%r (%d nodes, %d links)>' %
+        return ('<DFGraph(%s), src=%r (%d nodes, %d links)>' %
                 (self.name, self.src, len(self.nodes), len(self.links)))
 
     def fixate(self):
@@ -192,15 +192,15 @@ class Graph:
             assert link.dstid in self.nodes
             link.src = self.nodes[link.srcid]
             link.dst = self.nodes[link.dstid]
-            if link.ltype in (Link.L_DataFlow, Link.L_ControlFlow):
+            if link.ltype in (DFLink.L_DataFlow, DFLink.L_ControlFlow):
                 link.src.send.append(link)
                 link.dst.recv.append(link)
             else:
                 link.src.other.append(link)
                 link.dst.other.append(link)
         for node in self.nodes.values():
-            node.send.sort(key=lambda link: link.lid)
-            node.recv.sort(key=lambda link: link.lid)
+            node.send.sort(key=lambda link: link.idx)
+            node.recv.sort(key=lambda link: link.idx)
         return self
     
     def dump(self, out=sys.stdout):
@@ -208,7 +208,7 @@ class Graph:
         def f(node, level=0):
             visited.add(node)
             label = node.ref+':'+node.label if node.ref else node.label
-            out.write('%s: %s\n' % (node.nid, label))
+            out.write('%s: %s\n' % (node.name, label))
             out.write(' '*level)
             for link in node.send:
                 if link.name is None:
@@ -217,7 +217,7 @@ class Graph:
                     out.write(' -%s-> ' % link.name)
                 n = link.dst
                 if n in visited:
-                    out.write('#%s\n' % n.nid)
+                    out.write('#%s\n' % n.name)
                 else:
                     f(n, level=level+1)
             return
@@ -240,9 +240,9 @@ def load_graphs(fp):
             sid = line[1:]
             if graph is not None:
                 yield graph.fixate()
-            graph = Graph(sid, src)
+            graph = DFGraph(sid, src)
             assert sid not in graph.scopes
-            scope = Scope(sid)
+            scope = DFScope(sid)
             graph.root = scope
             graph.scopes[sid] = scope
         elif line.startswith(':'):
@@ -252,7 +252,7 @@ def load_graphs(fp):
             assert sid not in graph.scopes
             assert pid in graph.scopes
             parent = graph.scopes[pid]
-            scope = Scope(sid, parent)
+            scope = DFScope(sid, parent)
             graph.scopes[sid] = scope
         elif line.startswith('+'):
             f = line[1:].split(',')
@@ -260,17 +260,17 @@ def load_graphs(fp):
             assert graph is not None
             assert sid in graph.scopes
             scope = graph.scopes[sid]
-            node = Node(scope, nid, int(ntype), label, ref)
+            node = DFNode(scope, nid, int(ntype), label, ref)
             if len(f) == 8:
                 node.ast = (int(f[5]),int(f[6]),int(f[7]))
             graph.nodes[nid] = node
             scope.nodes.append(node)
         elif line.startswith('-'):
             f = line[1:].split(',')
-            (nid1,nid2,lid,ltype) = f[0:4]
+            (nid1,nid2,idx,ltype) = f[0:4]
             name = f[4] if 5 <= len(f) else None
             assert graph is not None
-            link = Link(nid1, nid2, int(lid), int(ltype), name)
+            link = DFLink(nid1, nid2, int(idx), int(ltype), name)
             graph.links.append(link)
     if graph is not None:
         yield graph.fixate()
@@ -291,10 +291,10 @@ def write_graph(out, scope, level=0):
     out.write(h+' label=%s;\n' % q(scope.sid))
     for node in scope.nodes:
         label = node.ref+':'+node.label if node.ref else node.label
-        out.write(h+' %s [label=%s' % (node.nid, q(label)))
-        if node.ntype in (Node.N_Operator, Node.N_Terminal):
+        out.write(h+' %s [label=%s' % (node.name, q(label)))
+        if node.ntype in (DFNode.N_Operator, DFNode.N_Terminal):
             out.write(', shape=box')
-        elif node.ntype in (Node.N_Branch, Node.N_Join):
+        elif node.ntype in (DFNode.N_Branch, DFNode.N_Join):
             out.write(', shape=diamond')
         out.write('];\n')
     for child in scope.children:
@@ -304,11 +304,11 @@ def write_graph(out, scope, level=0):
             for link in node.send:
                 out.write(h+' %s -> %s' % (link.srcid, link.dstid))
                 out.write(h+' [label=%s' % q(link.name))
-                if link.ltype == Link.L_ControlFlow:
+                if link.ltype == DFLink.L_ControlFlow:
                     out.write(', style=dashed')
                 out.write('];\n')
             for link in node.other:
-                if link.src == node and link.ltype == Link.L_BackFlow:
+                if link.src == node and link.ltype == DFLink.L_BackFlow:
                     out.write(h+' %s -> %s' % (link.srcid, link.dstid))
                     out.write(h+' [label=%s, style=bold];\n' % q(link.name))
     out.write(h+'}\n')
@@ -330,7 +330,7 @@ def main(argv):
     if not args: return usage()
     
     for graph in load_graphs(fileinput.input(args)):
-        if isinstance(graph, Graph):
+        if isinstance(graph, DFGraph):
             write_graph(output, graph.root)
     return 0
 

@@ -2,7 +2,7 @@
 import sys
 import sqlite3
 from graph2gv import load_graphs
-from graph2gv import Graph, Scope, Link, Node
+from graph2gv import DFGraph, DFScope, DFLink, DFNode
 
 def build_tables(cur):
     cur.executescript('''
@@ -95,17 +95,17 @@ def get_key(link, node, arg):
         s = link.name+':'
     else:
         s = ':'
-    if node.ntype == Node.N_Terminal and arg is not None:
+    if node.ntype == DFNode.N_Terminal and arg is not None:
         return s+arg
-    elif node.ntype == Node.N_Operator:
+    elif node.ntype == DFNode.N_Operator:
         return s+node.label
-    elif node.ntype == Node.N_Branch:
+    elif node.ntype == DFNode.N_Branch:
         return s+'branch'
-    elif node.ntype == Node.N_Join:
+    elif node.ntype == DFNode.N_Join:
         return s+'join'
-    elif node.ntype == Node.N_Loop:
+    elif node.ntype == DFNode.N_Loop:
         return s+'loop'
-    elif node.ntype == Node.N_Refer and not node.recv:
+    elif node.ntype == DFNode.N_Refer and not node.recv:
         return s+'='+node.label
     else:
         return None
@@ -127,7 +127,7 @@ def find_chain(graph):
 def get_args(graph):
     labels = {}
     for node in graph.nodes.values():
-        if node.ntype == Node.N_Terminal and not node.recv:
+        if node.ntype == DFNode.N_Terminal and not node.recv:
             label = 'N%s' % len(labels)
             labels[node] = label
     return labels
@@ -169,7 +169,7 @@ def index_graph(db, cur, cid, graph):
     def index_link(link):
         cur.execute(
             'INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
-            (nids[link.src], nids[link.dst], link.lid, 
+            (nids[link.src], nids[link.dst], link.idx, 
              link.ltype, link.name))
         return
     
@@ -213,14 +213,14 @@ def fetch_graph(cur, gid):
         'SELECT FileName FROM SourceFile WHERE Cid=?;',
         (cid,))
     (src,) = cur.fetchone()
-    graph = Graph(name, src)
+    graph = DFGraph(name, src)
     rows = cur.execute(
         'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
         (gid,))
     pids = {}
     scopes = graph.scopes
     for (sid,parent,name) in rows:
-        scope = Scope(name)
+        scope = DFScope(name)
         scopes[sid] = scope
         pids[sid] = parent
     for (sid,parent) in pids.items():
@@ -231,7 +231,7 @@ def fetch_graph(cur, gid):
         (gid,))
     for (nid,sid,aid,ntype,label,ref) in list(rows):
         scope = scopes[sid]
-        node = Node(scope, nid, ntype, label, ref)
+        node = DFNode(scope, nid, ntype, label, ref)
         rows = cur.execute(
             'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
             (aid,))
@@ -244,7 +244,7 @@ def fetch_graph(cur, gid):
             'SELECT Nid1,Idx,Type,Name FROM DFLink WHERE Nid0=?;',
             (nid0,))
         for (nid1,idx,ltype,name) in rows:
-            link = Link(nid0, nid1, idx, ltype, name)
+            link = DFLink(nid0, nid1, idx, ltype, name)
             graph.links.append(link)
     graph.fixate()
     return graph
@@ -274,7 +274,7 @@ def main(argv):
         with fileinput.input(args) as fp:
             cid = None
             for graph in load_graphs(fp):
-                if isinstance(graph, Graph):
+                if isinstance(graph, DFGraph):
                     assert cid is not None
                     index_graph(db, cur, cid, graph)
                 elif isinstance(graph, str):
