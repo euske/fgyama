@@ -39,16 +39,16 @@ class SourceFile:
         return ('<SourceFile(%s)>' %
                 (self.name,))
 
-    def showast(self, asts,
-                fp=sys.stdout,
-                context=1, skip='...\n',
-                astart=(lambda _: '['),
-                aend=(lambda _: ']'),
-                abody=(lambda _,s: s)):
+    def show_nodes(self, nodes,
+                  fp=sys.stdout,
+                  context=1, skip='...\n',
+                  astart=(lambda _: '['),
+                  aend=(lambda _: ']'),
+                  abody=(lambda _,s: s)):
         ranges = []
-        for ast in asts:
-            if ast is None: continue
-            (_,i,n) = ast
+        for node in nodes:
+            if node.ast is None: continue
+            (_,i,n) = node.ast
             ranges.append((i, i+n, None))
         self.show(ranges, fp=fp, context=context, skip=skip,
                   astart=astart, aend=aend, abody=abody)

@@ -86,27 +86,29 @@ def main(argv):
     else:
         cur0 = conn.cursor()
         for (gid0,) in cur0.execute('SELECT Gid FROM DFGraph;'):
-            print ('***', gid0)
             graph0 = fetch_graph(cur, gid0)
+            print ('***', gid0)
             try:
                 src0 = db.get(graph0.src)
             except KeyError:
                 src0 = None
             maxvotes = find_graph(cur, gid0, graph0)
             for (gid1,pairs) in maxvotes.items():
-                print ('=', gid1)
                 graph1 = fetch_graph(cur, gid1)
+                print ('=', gid1)
                 if src0 is not None:
-                    src1 = db.get(graph1.src)
-                    ast0 = []
-                    ast1 = []
+                    try:
+                        src1 = db.get(graph1.src)
+                    except KeyError:
+                        continue
+                    nodes0 = []
+                    nodes1 = []
                     for (node0,nid1) in pairs:
-                        node1 = graph1.nodes[nid1]
-                        ast0.append(node0.ast)
-                        ast1.append(node1.ast)
-                    src0.showast(ast0)
+                        nodes0.append(node0)
+                        nodes1.append(graph1.nodes[nid1])
+                    src0.show_nodes(nodes0)
                     print ('---')
-                    src1.showast(ast1)
+                    src1.show_nodes(nodes1)
                     print ()
     return 0
 

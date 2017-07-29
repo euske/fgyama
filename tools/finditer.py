@@ -43,11 +43,11 @@ def doit(db, graph):
         if var is None: continue
         print ('+', isisolated(loop_end), var)
         src = db.get(graph.src)
-        asts = [var.ast]
+        nodes = [var]
         for n in node.scope.walk():
             if n.ref == ref and n.ntype in (DFNode.N_Refer, DFNode.N_Assign):
-                asts.append(n.ast)
-        src.showast(asts)
+                nodes.append(n)
+        src.show_nodes(nodes)
         print ()
     return
 
