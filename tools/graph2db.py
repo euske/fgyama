@@ -80,19 +80,20 @@ class DBCache:
         cur = self.cur
         k = (pid,key)
         if k in self._cache:
-            return self._cache[k]
-        cur.execute(
-            'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
-            (pid, key))
-        result = cur.fetchone()
-        if result is not None:
-            (tid,) = result
+            tid = self._cache[k]
         else:
             cur.execute(
-                'INSERT INTO TreeNode VALUES (NULL,?,?);',
+                'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
                 (pid, key))
-            tid = cur.lastrowid
-        self._cache[k] = tid
+            result = cur.fetchone()
+            if result is not None:
+                (tid,) = result
+            else:
+                cur.execute(
+                    'INSERT INTO TreeNode VALUES (NULL,?,?);',
+                    (pid, key))
+                tid = cur.lastrowid
+            self._cache[k] = tid
         return tid
 
 def get_key(link, node, arg):
