@@ -158,7 +158,7 @@ def index_graph(db, cur, cid, graph):
     def index_scope(scope, parent=0):
         cur.execute(
             'INSERT INTO DFScope VALUES (NULL,?,?,?);',
-            (gid, parent, scope.sid))
+            (gid, parent, scope.name))
         sid = cur.lastrowid
         for node in scope.nodes:
             index_node(sid, node)
@@ -223,6 +223,8 @@ def fetch_graph(cur, gid):
         scope = DFScope(name)
         scopes[sid] = scope
         pids[sid] = parent
+        if parent == 0:
+            graph.root = scope
     for (sid,parent) in pids.items():
         if parent != 0:
             scopes[sid].set_parent(scopes[parent])

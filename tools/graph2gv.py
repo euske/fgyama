@@ -137,15 +137,15 @@ class DFLink:
 
 class DFScope:
 
-    def __init__(self, sid, parent=None):
-        self.sid = sid
+    def __init__(self, name, parent=None):
+        self.name = name
         self.nodes = []
         self.children = []
         self.set_parent(parent)
         return
 
     def __repr__(self):
-        return ('<DFScope(%s)>' % self.sid)
+        return ('<DFScope(%s)>' % self.name)
 
     def set_parent(self, parent):
         self.parent = parent
@@ -194,26 +194,27 @@ class DFGraph:
         return self
     
     def dump(self, out=sys.stdout):
-        visited = set()
-        def f(node, level=0):
-            visited.add(node)
-            label = node.ref+':'+node.label if node.ref else node.label
-            out.write('%s: %s\n' % (node.name, label))
-            out.write(' '*level)
-            for link in node.send:
-                if link.name is None:
-                    out.write(' --> ')
-                else:
-                    out.write(' -%s-> ' % link.name)
-                n = link.dst
-                if n in visited:
-                    out.write('#%s\n' % n.name)
-                else:
-                    f(n, level=level+1)
-            return
-        for node in self.nodes.values():
-            if not node.recv:
-                f(node)
+        def f(scope):
+            if scope.parent is None:
+                out.write('@%s\n' % (scope.name,))
+            else:
+                out.write(':%s,%s\n' % (scope.name, scope.parent.name))
+            for node in scope.nodes:
+                out.write('+%s,%s,%s,%s,%s' %
+                          (scope.name, node.name, node.ntype, node.label, node.ref))
+                if node.ast is not None:
+                    out.write(',%s,%s,%s' % node.ast)
+                out.write('\n')
+            for node in scope.nodes:
+                for link in (node.send+node.other):
+                    out.write('-%s,%s,%s,%s,%s\n' %
+                              (link.srcid, link.dstid, link.idx, link.ltype, link.name))
+            for child in scope.children:
+                f(child)
+        if self.src is not None:
+            out.write('#%s\n' % (self.src,))
+        f(self.root)
+        out.write('\n')
         return
 
 def load_graphs(fp):
@@ -275,10 +276,10 @@ def q(s):
 def write_graph(out, scope, level=0):
     h = ' '*level
     if level == 0:
-        out.write('digraph %s {\n' % scope.sid)
+        out.write('digraph %s {\n' % scope.name)
     else:
-        out.write(h+'subgraph cluster_%s {\n' % scope.sid)
-    out.write(h+' label=%s;\n' % q(scope.sid))
+        out.write(h+'subgraph cluster_%s {\n' % scope.name)
+    out.write(h+' label=%s;\n' % q(scope.name))
     for node in scope.nodes:
         label = node.ref+':'+node.label if node.ref else node.label
         out.write(h+' %s [label=%s' % (node.name, q(label)))
