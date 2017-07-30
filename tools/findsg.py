@@ -4,7 +4,7 @@ import sqlite3
 from graph2gv import SourceDB, DFGraph, DFLink, DFNode
 from graph2db import get_key, get_args, fetch_graph
 
-def find_graph(cur, gid0, graph, minlevel=3, minnodes=5):
+def find_graph(cur, gid0, graph, minnodes=5, minfanout=3):
     #graph.dump()
     args = get_args(graph)
     
@@ -12,12 +12,13 @@ def find_graph(cur, gid0, graph, minlevel=3, minnodes=5):
         key = get_key(link0, node, args.get(node))
         if key is None:
             tid = pid
+            fanout = 0
         else:
             cur.execute(
                 'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
                 (pid, key))
             result = cur.fetchone()
-            if result is None: return
+            if result is None: return 0
             (tid,) = result
             rows = cur.execute(
                 'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
@@ -29,14 +30,20 @@ def find_graph(cur, gid0, graph, minlevel=3, minnodes=5):
                 else:
                     a = match[node] = {}
                 a[gid] = nid
+            fanout = 1
+        n = 0
         for link1 in node.recv:
-            match_tree(tid, link1, link1.src, match)
-        return
+            f = match_tree(tid, link1, link1.src, match)
+            if 0 < f:
+                n += 1
+                fanout = max(fanout, f)
+        return max(fanout, n)
 
     maxvotes = {}
     def find_tree(node):
         match = {}
-        match_tree(0, None, node, match)
+        fanout = match_tree(0, None, node, match)
+        if fanout < minfanout: return
         votes = {}
         for (n,gids) in match.items():
             for (gid,nid) in gids.items():
@@ -62,15 +69,19 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-b basedir] [graph ...]' % argv[0])
+        print('usage: %s [-b basedir] [-m minnodes] [-f minfanout] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'b:')
+        (opts, args) = getopt.getopt(argv[1:], 'b:m:f:')
     except getopt.GetoptError:
         return usage()
     basedir = '.'
+    minnodes = 5
+    minfanout = 3
     for (k, v) in opts:
         if k == '-b': basedir = v
+        elif k == '-m': minnodes = int(v)
+        elif k == '-f': minfanout = int(v)
     if not args: return usage()
 
     db = SourceDB(basedir)
@@ -82,7 +93,9 @@ def main(argv):
         with fileinput.input(args) as fp:
             for graph in load_graphs(fp):
                 if isinstance(graph, DFGraph):
-                    maxvotes = find_graph(cur, 0, graph)
+                    maxvotes = find_graph(cur, 0, graph,
+                                          minnodes=minnodes,
+                                          minfanout=minfanout)
     else:
         cur0 = conn.cursor()
         for (gid0,) in cur0.execute('SELECT Gid FROM DFGraph;'):
@@ -92,7 +105,9 @@ def main(argv):
                 src0 = db.get(graph0.src)
             except KeyError:
                 src0 = None
-            maxvotes = find_graph(cur, gid0, graph0)
+            maxvotes = find_graph(cur, gid0, graph0,
+                                  minnodes=minnodes,
+                                  minfanout=minfanout)
             for (gid1,pairs) in maxvotes.items():
                 graph1 = fetch_graph(cur, gid1)
                 print ('=', gid1)
