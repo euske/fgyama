@@ -4,7 +4,7 @@ import sqlite3
 from graph2gv import SourceDB, DFGraph, DFLink, DFNode
 from graph2db import get_key, get_args, fetch_graph
 
-def find_graph(cur, gid0, graph, minnodes=5, minfanout=3):
+def find_graph(cur, gid0, graph, minnodes=5, minbranches=3):
     #graph.dump()
     args = get_args(graph)
     
@@ -12,7 +12,7 @@ def find_graph(cur, gid0, graph, minnodes=5, minfanout=3):
         key = get_key(link0, node, args.get(node))
         if key is None:
             tid = pid
-            fanout = 0
+            branches = 0
         else:
             cur.execute(
                 'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
@@ -29,29 +29,29 @@ def find_graph(cur, gid0, graph, minnodes=5, minfanout=3):
                     a = match[node]
                 else:
                     a = match[node] = {}
-                a[gid] = nid
-            fanout = 1
+                a[gid] = (key,nid)
+            branches = 1
         n = 0
         for link1 in node.recv:
             f = match_tree(tid, link1, link1.src, match)
             if 0 < f:
                 n += 1
-                fanout = max(fanout, f)
-        return max(fanout, n)
+                branches = max(branches, f)
+        return max(branches, n)
 
     maxvotes = {}
     def find_tree(node):
         match = {}
-        fanout = match_tree(0, None, node, match)
-        if fanout < minfanout: return
+        branches = match_tree(0, None, node, match)
+        if branches < minbranches: return
         votes = {}
         for (n,gids) in match.items():
-            for (gid,nid) in gids.items():
+            for (gid,m) in gids.items():
                 if gid in votes:
                     a = votes[gid]
                 else:
                     a = votes[gid] = []
-                a.append((n, nid))
+                a.append((n, m))
         for (gid,pairs) in votes.items():
             if len(pairs) < minnodes: continue
             if gid in maxvotes and len(pairs) < len(maxvotes[gid]): continue
@@ -69,24 +69,26 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-b basedir] [-m minnodes] [-f minfanout] [graph ...]' % argv[0])
+        print('usage: %s [-b basedir] [-m minnodes] [-f minbranches] '
+              '[-s gidstart] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'b:m:f:')
+        (opts, args) = getopt.getopt(argv[1:], 'b:m:f:s:')
     except getopt.GetoptError:
         return usage()
-    basedir = '.'
+    srcdb = None
     minnodes = 5
-    minfanout = 3
+    minbranches = 3
+    gidstart = 0
     for (k, v) in opts:
-        if k == '-b': basedir = v
+        if k == '-b': srcdb = SourceDB(v)
         elif k == '-m': minnodes = int(v)
-        elif k == '-f': minfanout = int(v)
+        elif k == '-f': minbranches = int(v)
+        elif k == '-s': gidstart = int(v)
     if not args: return usage()
 
-    db = SourceDB(basedir)
-    dbname = args.pop(0)
-    conn = sqlite3.connect(dbname)
+    indexname = args.pop(0)
+    conn = sqlite3.connect(indexname)
     cur = conn.cursor()
 
     if args:
@@ -95,36 +97,43 @@ def main(argv):
                 if isinstance(graph, DFGraph):
                     maxvotes = find_graph(cur, 0, graph,
                                           minnodes=minnodes,
-                                          minfanout=minfanout)
+                                          minbranches=minbranches)
     else:
         cur0 = conn.cursor()
-        for (gid0,) in cur0.execute('SELECT Gid FROM DFGraph;'):
+        rows = cur0.execute('SELECT Gid FROM DFGraph WHERE ? < Gid;',
+                            (gidstart,))
+        for (gid0,) in rows:
             graph0 = fetch_graph(cur, gid0)
+            src0 = None
+            if srcdb is not None:
+                try:
+                    src0 = srcdb.get(graph0.src)
+                except KeyError:
+                    pass
             print ('***', gid0)
-            try:
-                src0 = db.get(graph0.src)
-            except KeyError:
-                src0 = None
             maxvotes = find_graph(cur, gid0, graph0,
                                   minnodes=minnodes,
-                                  minfanout=minfanout)
+                                  minbranches=minbranches)
+            if maxvotes:
+                print ('+', gid0, ' '.join(str(gid1) for gid1 in maxvotes.keys()))
             for (gid1,pairs) in maxvotes.items():
                 graph1 = fetch_graph(cur, gid1)
-                print ('=', gid1)
-                if src0 is not None:
-                    try:
-                        src1 = db.get(graph1.src)
-                    except KeyError:
-                        continue
-                    nodes0 = []
-                    nodes1 = []
-                    for (node0,nid1) in pairs:
-                        nodes0.append(node0)
-                        nodes1.append(graph1.nodes[nid1])
-                    src0.show_nodes(nodes0)
-                    print ('---')
-                    src1.show_nodes(nodes1)
-                    print ()
+                print ('=', gid0, gid1, '-'.join(k for (n,(k,_)) in pairs))
+                if src0 is None: continue
+                try:
+                    src1 = srcdb.get(graph1.src)
+                except KeyError:
+                    continue
+                nodes0 = []
+                nodes1 = []
+                for (node0,m) in pairs:
+                    (key,nid1) = m
+                    nodes0.append(node0)
+                    nodes1.append(graph1.nodes[nid1])
+                src0.show_nodes(nodes0)
+                print ('---')
+                src1.show_nodes(nodes1)
+                print ()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
