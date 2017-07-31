@@ -4,7 +4,7 @@ import sqlite3
 from graph2gv import SourceDB, DFGraph, DFLink, DFNode
 from graph2db import get_key, get_args, fetch_graph
 
-def find_graph(cur, gid0, graph, minnodes=5, minbranches=3):
+def find_graph(cur, gid0, graph, minnodes=5, minbranches=2):
     #graph.dump()
     args = get_args(graph)
     
@@ -69,24 +69,50 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-b basedir] [-m minnodes] [-f minbranches] '
-              '[-s gidstart] [graph ...]' % argv[0])
+        print('usage: %s [-v] [-b basedir] [-m minnodes] [-f minbranches] '
+              '[-s gidstart] [-n nresults] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'b:m:f:s:')
+        (opts, args) = getopt.getopt(argv[1:], 'vb:m:f:s:n:')
     except getopt.GetoptError:
         return usage()
+    verbose = False
     srcdb = None
     minnodes = 5
     minbranches = 3
     gidstart = 0
+    nresults = 0
     for (k, v) in opts:
-        if k == '-b': srcdb = SourceDB(v)
+        if k == '-v': verbose = True
+        elif k == '-b': srcdb = SourceDB(v)
         elif k == '-m': minnodes = int(v)
         elif k == '-f': minbranches = int(v)
         elif k == '-s': gidstart = int(v)
+        elif k == '-n': nresults = int(v)
     if not args: return usage()
 
+    def show_result(votes, gid0=0, src0=None):
+        print ('+', gid0, ' '.join(str(gid1) for gid1 in votes.keys()))
+        for (gid1,pairs) in votes.items():
+            graph1 = fetch_graph(cur, gid1)
+            print (' =', gid0, gid1, '-'.join(k for (n,(k,_)) in pairs))
+            if src0 is None: continue
+            try:
+                src1 = srcdb.get(graph1.src)
+            except KeyError:
+                continue
+            nodes0 = []
+            nodes1 = []
+            for (node0,m) in pairs:
+                (key,nid1) = m
+                nodes0.append(node0)
+                nodes1.append(graph1.nodes[nid1])
+            src0.show_nodes(nodes0)
+            print ('---')
+            src1.show_nodes(nodes1)
+            print ()
+        return
+    
     indexname = args.pop(0)
     conn = sqlite3.connect(indexname)
     cur = conn.cursor()
@@ -98,6 +124,12 @@ def main(argv):
                     maxvotes = find_graph(cur, 0, graph,
                                           minnodes=minnodes,
                                           minbranches=minbranches)
+                    if maxvotes:
+                        show_result(maxvotes)
+                        if nresults:
+                            nresults -= 1
+                            if nresults == 0: break
+                    
     else:
         cur0 = conn.cursor()
         rows = cur0.execute('SELECT Gid FROM DFGraph WHERE ? < Gid;',
@@ -110,30 +142,17 @@ def main(argv):
                     src0 = srcdb.get(graph0.src)
                 except KeyError:
                     pass
-            print ('***', gid0)
+            if verbose or (gid0 % 100) == 0:
+                sys.stderr.write('*** %d\n' % gid0)
+                sys.stderr.flush()
             maxvotes = find_graph(cur, gid0, graph0,
                                   minnodes=minnodes,
                                   minbranches=minbranches)
             if maxvotes:
-                print ('+', gid0, ' '.join(str(gid1) for gid1 in maxvotes.keys()))
-            for (gid1,pairs) in maxvotes.items():
-                graph1 = fetch_graph(cur, gid1)
-                print ('=', gid0, gid1, '-'.join(k for (n,(k,_)) in pairs))
-                if src0 is None: continue
-                try:
-                    src1 = srcdb.get(graph1.src)
-                except KeyError:
-                    continue
-                nodes0 = []
-                nodes1 = []
-                for (node0,m) in pairs:
-                    (key,nid1) = m
-                    nodes0.append(node0)
-                    nodes1.append(graph1.nodes[nid1])
-                src0.show_nodes(nodes0)
-                print ('---')
-                src1.show_nodes(nodes1)
-                print ()
+                show_result(maxvotes, gid0, src0)
+                if nresults:
+                    nresults -= 1
+                    if nresults == 0: break
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
