@@ -107,8 +107,10 @@ def main(argv):
                 (key,nid1) = m
                 nodes0.append(node0)
                 nodes1.append(graph1.nodes[nid1])
+            print ('#', src0.name)
             src0.show_nodes(nodes0)
             print ('---')
+            print ('#', src1.name)
             src1.show_nodes(nodes1)
             print ()
         return
@@ -132,7 +134,7 @@ def main(argv):
                     
     else:
         cur0 = conn.cursor()
-        rows = cur0.execute('SELECT Gid FROM DFGraph WHERE ? < Gid;',
+        rows = cur0.execute('SELECT Gid FROM DFGraph WHERE ? <= Gid;',
                             (gidstart,))
         for (gid0,) in rows:
             graph0 = fetch_graph(cur, gid0)

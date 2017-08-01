@@ -19,6 +19,8 @@ class SourceDB:
                     data = fp.read()
             except IOError:
                 raise KeyError(name)
+            except UnicodeError:
+                raise KeyError(name)
             src = SourceFile(name, data)
             self._cache[name] = src
         return src
@@ -32,6 +34,7 @@ class SourceFile:
 
     def __init__(self, name, data):
         self.name = name
+        self.data = data
         self.lines = data.splitlines(True)
         return
     
@@ -40,68 +43,67 @@ class SourceFile:
                 (self.name,))
 
     def show_nodes(self, nodes,
-                  fp=sys.stdout,
-                  context=1, skip='...\n',
-                  astart=(lambda _: '['),
-                  aend=(lambda _: ']'),
-                  abody=(lambda _,s: s)):
+                   fp=sys.stdout,
+                   astart=(lambda _: '['),
+                   aend=(lambda _: ']'),
+                   abody=(lambda _,s: s),
+                   ncontext=1, skip='...\n'):
         ranges = []
         for node in nodes:
             if node.ast is None: continue
             (_,i,n) = node.ast
             ranges.append((i, i+n, None))
-        self.show(ranges, fp=fp, context=context, skip=skip,
+        self.show(ranges, fp=fp, ncontext=ncontext, skip=skip,
                   astart=astart, aend=aend, abody=abody)
         return
     
     def show(self, ranges,
              fp=sys.stdout,
-             context=1, skip='...\n',
              astart=(lambda _: '['),
              aend=(lambda _: ']'),
-             abody=(lambda _,s: s)):
+             abody=(lambda _,s: s),
+             ncontext=1, skip='...\n'):
         if not ranges: return
-        ranges.sort(key=lambda x: x[0])
-        selected = {}
-        i0 = 0
-        ri = 0
+        triggers = []
+        for (s,e,anno) in ranges:
+            triggers.append((s,+1,anno))
+            triggers.append((e,-1,anno))
+        triggers.sort(key=lambda x: (x[0],x[1]))
+        lines = {}
+        loc0 = 0
+        i = 0
+        annos = []
         for (lineno,line) in enumerate(self.lines):
-            i1 = i0+len(line)
-            while ri < len(ranges):
-                (s,e,anno) = ranges[ri]
-                if e <= i0:
-                    ri += 1
-                elif i1 < s:
-                    break
+            loc1 = loc0+len(line)
+            pos0 = 0
+            buf = ''
+            while i < len(triggers):
+                (loc,v,anno) = triggers[i]
+                if loc1 < loc: break
+                i += 1
+                pos1 = loc - loc0
+                buf += abody(annos, line[pos0:pos1])
+                pos0 = pos1
+                if 0 < v:
+                    buf += astart(anno)
+                    annos.append(anno)
                 else:
-                    assert i0 < e and s <= i1
-                    for dl in range(lineno-context, lineno+context+1):
-                        if dl not in selected:
-                            selected[dl] = []
-                    assert lineno in selected
-                    sel = selected[lineno]
-                    sel.append((s-i0,True,anno))
-                    sel.append((e-i0,False,anno))
-                    break
-            i0 = i1
-        prevline = 0
-        for (lineno,line) in enumerate(self.lines):
-            if lineno not in selected: continue
-            c0 = 0
-            x0 = False
-            s = ''
-            for (c1,x1,anno) in selected[lineno]:
-                s += line[c0:c1]
-                if not x0 and x1:
-                    s += astart(anno)
-                elif x0 and not x1:
-                    s += aend(anno)
-                (c0,x0) = (c1,x1)
-            s += abody(anno, line[c0:])
-            if prevline+context < lineno:
+                    buf += aend(anno)
+                    annos.remove(anno)
+            if 0 < pos0:
+                buf += abody(annos, line[pos0:])
+                lines[lineno] = buf
+            loc0 = loc1
+        for (lineno,line) in list(lines.items()):
+            for i in range(lineno-ncontext, lineno+ncontext+1):
+                if i not in lines:
+                    lines[i] = self.lines[i]
+        lineno0 = 0
+        for lineno1 in sorted(lines):
+            if lineno0 < lineno1:
                 fp.write(skip)
-            prevline = lineno
-            fp.write(s)
+            fp.write(lines[lineno1])
+            lineno0 = lineno1+1
         return
     
 class DFNode:
