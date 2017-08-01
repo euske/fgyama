@@ -95,7 +95,7 @@ def main(argv):
         print ('+', gid0, ' '.join(str(gid1) for gid1 in votes.keys()))
         for (gid1,pairs) in votes.items():
             graph1 = fetch_graph(cur, gid1)
-            print (' =', gid0, gid1, '-'.join(k for (n,(k,_)) in pairs))
+            print ('=', gid0, gid1, '-'.join(k for (n,(k,_)) in pairs))
             if src0 is None: continue
             try:
                 src1 = srcdb.get(graph1.src)

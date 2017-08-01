@@ -139,12 +139,12 @@ def get_args(graph):
     return labels
 
 def index_graph(db, cur, cid, graph):
-    print (cid, graph.name)
     #graph.dump()
     cur.execute(
         'INSERT INTO DFGraph VALUES (NULL,?,?);',
         (cid, graph.name))
     gid = cur.lastrowid
+    print (cid, gid, graph.name)
     
     nids = {}
     def index_node(sid, node):

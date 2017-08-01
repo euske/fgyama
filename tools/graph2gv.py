@@ -243,14 +243,14 @@ def load_graphs(fp):
     for line in fp:
         line = line.strip()
         if line.startswith('#'):
+            assert graph is None
             src = line[1:]
             yield src
         elif line.startswith('!'):
-            pass
+            graph = None
         elif line.startswith('@'):
+            assert graph is None
             sid = line[1:]
-            if graph is not None:
-                yield graph.fixate()
             graph = DFGraph(sid, src)
             assert sid not in graph.scopes
             scope = DFScope(sid)
@@ -283,6 +283,10 @@ def load_graphs(fp):
             assert graph is not None
             link = DFLink(nid1, nid2, int(idx), int(ltype), name)
             graph.links.append(link)
+        elif not line:
+            if graph is not None:
+                yield graph.fixate()
+            graph = None
     if graph is not None:
         yield graph.fixate()
     return
