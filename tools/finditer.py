@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
-from graph2gv import SourceFile, SourceDB, DFGraph, DFLink, DFNode
-from graph2gv import load_graphs
+from graph import SourceDB, DFGraph, DFLink, DFNode
+from graph import load_graphs
 
 def doit(db, graph):
     for node in graph.nodes.values():
