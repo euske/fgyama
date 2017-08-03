@@ -9,7 +9,7 @@ def q(s):
     else:
         return '""'
 
-def write_gv(out, scope, level=0):
+def write_gv(out, scope, highlight=None, level=0):
     h = ' '*level
     if level == 0:
         out.write('digraph %s {\n' % scope.name)
@@ -23,9 +23,11 @@ def write_gv(out, scope, level=0):
             out.write(', shape=box')
         elif node.ntype in (DFNode.N_Branch, DFNode.N_Join):
             out.write(', shape=diamond')
+        if node.nid in highlight:
+            out.write(', style=filled')
         out.write('];\n')
     for child in scope.children:
-        write_gv(out, child, level=level+1)
+        write_gv(out, child, highlight, level=level+1)
     if level == 0:
         for node in scope.walk():
             for link in node.send:
@@ -45,21 +47,23 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [graph ...]' % argv[0])
+        print('usage: %s [-o output] [-h nid] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:h:')
     except getopt.GetoptError:
         return usage()
     output = sys.stdout
+    highlight = None
     for (k, v) in opts:
         if k == '-o': output = open(v, 'w')
+        elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
     if not args: return usage()
     
     for path in args:
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
-                write_gv(output, graph.root)
+                write_gv(output, graph.root, highlight=highlight)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
