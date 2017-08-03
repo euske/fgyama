@@ -52,7 +52,7 @@ def find_graph(cur, graph, minnodes=5, minbranches=2):
                     a = votes[gid]
                 else:
                     a = votes[gid] = []
-                a.append((n, m))
+                a.append((n.nid, m))
         for (gid,pairs) in votes.items():
             if len(pairs) < minnodes: continue
             if gid in maxvotes and len(pairs) < len(maxvotes[gid]): continue
@@ -101,10 +101,12 @@ def main(argv):
     indexcur = indexconn.cursor()
     
     def show_result(graph0, src0, votes):
-        print ('+', graph0.gid, ' '.join(str(gid1) for gid1 in votes.keys()))
+        print ('+', graph0.gid)
         for (gid1,pairs) in votes.items():
             graph1 = fetch_graph(graphcur, gid1)
-            print ('-', graph0.gid, graph1.gid, '-'.join(k for (n,(k,_)) in pairs))
+            print ('-', graph0.gid, graph1.gid,
+                   '-'.join(k for (_,(k,_)) in pairs),
+                   ','.join('%d:%d' % (n0,n1) for (n0,(_,n1)) in pairs))
             if src0 is None: continue
             try:
                 src1 = srcdb.get(graph1.src)
@@ -125,7 +127,7 @@ def main(argv):
     
     cur1 = graphconn.cursor()
     gids = cur1.execute('SELECT Gid FROM DFGraph WHERE ? <= Gid;', (gidstart,))
-    for (i,(gid0,)) in enumerate(gids):
+    for (gid0,) in gids:
         graph0 = fetch_graph(graphcur, gid0)
         src0 = None
         if srcdb is not None:
@@ -133,14 +135,15 @@ def main(argv):
                 src0 = srcdb.get(graph0.src)
             except KeyError:
                 pass
-        if verbose or (i % 100) == 0:
-            sys.stderr.write('*** %d ***\n' % i)
+        if verbose or (gid0 % 100) == 0:
+            sys.stderr.write('*** %d ***\n' % gid0)
             sys.stderr.flush()
         maxvotes = find_graph(
             indexcur, graph0,
             minnodes=minnodes, minbranches=minbranches)
         if not maxvotes: continue
         show_result(graph0, src0, maxvotes)
+        sys.stdout.flush()
         if nresults is not None:
             nresults -= 1
         if nresults == 0: break
