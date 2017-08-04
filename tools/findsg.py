@@ -3,24 +3,42 @@ import sys
 import sqlite3
 from graph import SourceDB, DFGraph
 from graph import get_graphs, fetch_graph
-from graph2db import get_key, get_args
+from graph2db import get_key, get_terms
 
-def find_graph(cur, graph, minnodes=5, minbranches=2):
-    #graph.dump()
-    args = get_args(graph)
-    
-    def match_tree(pid, link0, node, match):
-        key = get_key(link0, node, args.get(node))
-        if key is None:
-            tid = pid
-            branches = 0
+class TreeCache:
+
+    def __init__(self, cur):
+        self.cur = cur
+        self._cache = {}
+        return
+
+    def get(self, pid, key):
+        cur = self.cur
+        k = (pid,key)
+        if k in self._cache:
+            tid = self._cache[k]
         else:
             cur.execute(
                 'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
                 (pid, key))
             result = cur.fetchone()
-            if result is None: return 0
+            if result is None: return None
             (tid,) = result
+            self._cache[k] = tid
+        return tid
+
+def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
+    #graph.dump()
+    terms = get_terms(graph)
+    
+    def match_tree(pid, link0, node, match):
+        key = get_key(link0, node, terms.get(node))
+        if key is None:
+            tid = pid
+            branches = 0
+        else:
+            tid = cache.get(pid, key)
+            if tid is None: return 0
             rows = cur.execute(
                 'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                 (tid,))
@@ -99,6 +117,8 @@ def main(argv):
     indexname = args.pop(0)
     indexconn = sqlite3.connect(indexname)
     indexcur = indexconn.cursor()
+
+    cache = TreeCache(indexconn.cursor())
     
     def show_result(graph0, src0, votes):
         print ('+', graph0.gid)
@@ -139,7 +159,7 @@ def main(argv):
             sys.stderr.write('*** %d ***\n' % gid0)
             sys.stderr.flush()
         maxvotes = find_graph(
-            indexcur, graph0,
+            cache, indexcur, graph0,
             minnodes=minnodes, minbranches=minbranches)
         if not maxvotes: continue
         show_result(graph0, src0, maxvotes)

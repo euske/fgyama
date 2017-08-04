@@ -4,7 +4,7 @@ import sqlite3
 from graph import DFGraph, DFLink, DFNode
 from graph import get_graphs, build_graph_tables, index_graph
 
-class DBCache:
+class TreeCache:
 
     def __init__(self, cur):
         self.cur = cur
@@ -65,7 +65,7 @@ def find_chain(graph):
         ends.append((length, node))
     return sorted(ends, key=lambda x:x[0], reverse=True)
 
-def get_args(graph):
+def get_terms(graph):
     labels = {}
     for node in graph.nodes.values():
         if node.ntype == DFNode.N_Terminal and not node.recv:
@@ -93,24 +93,24 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
 ''')
     return
 
-def index_graph_tree(dbcache, cur, graph):
+def index_graph_tree(cache, cur, graph):
     print (graph)
-    args = get_args(graph)
+    terms = get_terms(graph)
     
     def index_tree(link0, node, pids, visited):
         if node in visited: return
         visited.add(node)
-        key = get_key(link0, node, args.get(node))
+        key = get_key(link0, node, terms.get(node))
         #print (nid, key, len(pids))
         for link1 in node.recv:
             if key is not None:
                 tids = [0]
                 for pid in pids:
-                    tid = dbcache.get(pid, key)
+                    tid = cache.get(pid, key)
                     cur.execute(
                         'INSERT INTO TreeLeaf VALUES (?,?,?);',
                         (tid, graph.gid, node.nid))
-                    #print (pid, key, '->', tid, nid)
+                    #print (pid, key, '->', tid, node.nid)
                     tids.append(tid)
                 pids = tids
             index_tree(link1, link1.src, pids, visited)
@@ -125,10 +125,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-i index] [graph ...]' % argv[0])
+        print('usage: %s [-o output] [-O index] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:i:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:O:')
     except getopt.GetoptError:
         return usage()
     
@@ -136,7 +136,7 @@ def main(argv):
     indexname = ':memory:'
     for (k, v) in opts:
         if k == '-o': graphname = v
-        elif k == '-i': indexname = v
+        elif k == '-O': indexname = v
         
     graphconn = sqlite3.connect(graphname)
     graphcur = graphconn.cursor()
@@ -152,14 +152,14 @@ def main(argv):
     except sqlite3.OperationalError:
         pass
     
-    dbcache = DBCache(indexcur)
+    cache = TreeCache(indexconn.cursor())
     cid = None
     for path in args:
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
                 assert cid is not None
                 index_graph(graphcur, cid, graph)
-                index_graph_tree(dbcache, indexcur, graph)
+                index_graph_tree(cache, indexcur, graph)
             elif isinstance(graph, str):
                 graphcur.execute(
                     'INSERT INTO SourceFile VALUES (NULL,?)',
