@@ -19,11 +19,11 @@ def write_gv(out, scope, highlight=None, level=0):
     for node in scope.nodes:
         label = node.ref+':'+node.label if node.ref else node.label
         out.write(h+' N%s [label=%s' % (node.nid, q(label)))
-        if node.ntype in (DFNode.N_Operator, DFNode.N_Terminal):
+        if node.ntype in (DFNode.N_Operator, DFNode.N_Terminal, DFNode.N_Const):
             out.write(', shape=box')
         elif node.ntype in (DFNode.N_Branch, DFNode.N_Join):
             out.write(', shape=diamond')
-        if node.nid in highlight:
+        if highlight is not None and node.nid in highlight:
             out.write(', style=filled')
         out.write('];\n')
     for child in scope.children:
@@ -64,6 +64,7 @@ def main(argv):
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
                 write_gv(output, graph.root, highlight=highlight)
+                break
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
