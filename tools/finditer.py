@@ -55,15 +55,15 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-b basedir] [graph ...]' % argv[0])
+        print('usage: %s [-B basedir] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'b:')
+        (opts, args) = getopt.getopt(argv[1:], 'B:')
     except getopt.GetoptError:
         return usage()
     basedir = '.'
     for (k, v) in opts:
-        if k == '-b': basedir = v
+        if k == '-B': basedir = v
     if not args: return usage()
     db = SourceDB(basedir)
     for graph in load_graphs(fileinput.input(args)):

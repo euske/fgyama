@@ -3,111 +3,101 @@ import sys
 import sqlite3
 from graph import SourceDB, DFGraph
 from graph import get_graphs, fetch_graph
-from graph2db import get_key, get_terms
-
-class TreeCache:
-
-    def __init__(self, cur):
-        self.cur = cur
-        self._cache = {}
-        return
-
-    def get(self, pid, key):
-        cur = self.cur
-        k = (pid,key)
-        if k in self._cache:
-            tid = self._cache[k]
-        else:
-            cur.execute(
-                'SELECT Tid FROM TreeNode WHERE Pid=? AND Key=?;',
-                (pid, key))
-            result = cur.fetchone()
-            if result is None: return None
-            (tid,) = result
-            self._cache[k] = tid
-        return tid
+from graph2db import TreeCache, is_key
 
 def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
-    #graph.dump()
-    terms = get_terms(graph)
     
-    def match_tree(pid, link0, node, match):
-        key = get_key(link0, node, terms.get(node))
-        if key is None:
-            tid = pid
-            branches = 0
+    def match_tree(pid, link0, node0, match):
+        if link0 is None:
+            key0 = ''
         else:
+            key0 = link0.label or ''
+        if is_key(node0):
+            key = key0+':'+node0.label
             tid = cache.get(pid, key)
             if tid is None: return 0
             rows = cur.execute(
                 'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                 (tid,))
-            for (gid,nid) in rows:
-                if gid == graph.gid: continue
-                if node in match:
-                    a = match[node]
+            found = [ (gid,nid) for (gid,nid) in rows if graph.gid < gid ]
+            if not found: return 0
+            for (gid,nid) in found:
+                if gid in match:
+                    pairs = match[gid]
                 else:
-                    a = match[node] = {}
-                a[gid] = (key,nid)
+                    pairs = match[gid] = []
+                pairs.append((key, node0, nid))
+            #print ('search:', pid, key, '->', tid, pairs)
+            n = 0
             branches = 1
-        n = 0
-        for link1 in node.recv:
-            f = match_tree(tid, link1, link1.src, match)
-            if 0 < f:
-                n += 1
-                branches = max(branches, f)
+            for link1 in node0.recv:
+                b = match_tree(tid, link1, link1.src, match)
+                if 0 < b:
+                    n += 1
+                    branches = max(branches, b)
+        else:
+            n = 0
+            branches = 0
+            for link1 in node0.recv:
+                b = match_tree(pid, link0, link1.src, match)
+                if 0 < b:
+                    n += 1
+                    branches = max(branches, b)
         return max(branches, n)
 
-    maxvotes = {}
-    def find_tree(node):
-        match = {}
-        branches = match_tree(0, None, node, match)
-        if branches < minbranches: return
-        votes = {}
-        for (n,gids) in match.items():
-            for (gid,m) in gids.items():
-                if gid in votes:
-                    a = votes[gid]
-                else:
-                    a = votes[gid] = []
-                a.append((n.nid, m))
-        for (gid,pairs) in votes.items():
-            if len(pairs) < minnodes: continue
-            if gid in maxvotes and len(pairs) < len(maxvotes[gid]): continue
-            maxvotes[gid] = pairs
-        for link in node.recv:
-            find_tree(link.src)
-        return
+    def filter_pairs(pairs):
+        a = []
+        nodes = set()
+        nids = set()
+        for (key,node,nid) in pairs:
+            if node not in nodes and nid not in nids:
+                nodes.add(node)
+                nids.add(nid)
+                a.append((key,node,nid))
+        return a
     
+    votes = {}
+    def find_tree(root):
+        match = {}
+        branches = match_tree(0, None, root, match)
+        if branches < minbranches: return
+        for (gid,pairs) in match.items():
+            pairs = filter_pairs(pairs)
+            if len(pairs) < minnodes: continue
+            if (gid not in votes) or len(votes[gid]) < len(pairs):
+                votes[gid] = pairs
+        return
+
     for node in graph.nodes.values():
         if not node.send:
             find_tree(node)
-    return maxvotes
+
+    return votes
 
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-v] [-b basedir] [-m minnodes] [-f minbranches] '
-              '[-s gidstart] [-n nresults] [graph ...]' % argv[0])
+        print('usage: %s [-v] [-B basedir] [-n minnodes] [-b minbranches] '
+              '[-s gidstart] [-e gidend] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'vb:m:f:s:n:')
+        (opts, args) = getopt.getopt(argv[1:], 'vB:n:b:s:e:')
     except getopt.GetoptError:
         return usage()
     verbose = False
     srcdb = None
     minnodes = 5
-    minbranches = 3
+    minbranches = 2
     gidstart = 0
-    nresults = None
+    gidend = 0
     for (k, v) in opts:
         if k == '-v': verbose = True
-        elif k == '-b': srcdb = SourceDB(v)
-        elif k == '-m': minnodes = int(v)
-        elif k == '-f': minbranches = int(v)
+        elif k == '-B': srcdb = SourceDB(v)
+        elif k == '-n': minnodes = int(v)
+        elif k == '-b': minbranches = int(v)
         elif k == '-s': gidstart = int(v)
-        elif k == '-n': nresults = int(v)
+        elif k == '-e': gidend = int(v)
     if not args: return usage()
 
     graphname = args.pop(0)
@@ -125,8 +115,8 @@ def main(argv):
         for (gid1,pairs) in votes.items():
             graph1 = fetch_graph(graphcur, gid1)
             print ('-', graph0.gid, graph1.gid,
-                   '-'.join(k for (_,(k,_)) in pairs),
-                   ','.join('%d:%d' % (n0,n1) for (n0,(_,n1)) in pairs))
+                   '-'.join(key for (key,_,_) in pairs),
+                   ','.join('%d:%d' % (node.nid,nid) for (_,node,nid) in pairs))
             if src0 is None: continue
             try:
                 src1 = srcdb.get(graph1.src)
@@ -134,10 +124,9 @@ def main(argv):
                 continue
             nodes0 = []
             nodes1 = []
-            for (node0,m) in pairs:
-                (key,nid1) = m
-                nodes0.append(node0)
-                nodes1.append(graph1.nodes[nid1])
+            for (key,node,nid) in pairs:
+                nodes0.append(node)
+                nodes1.append(graph1.nodes[nid])
             print ('###', src0.name)
             src0.show_nodes(nodes0)
             print ('###', src1.name)
@@ -146,7 +135,12 @@ def main(argv):
         return
     
     cur1 = graphconn.cursor()
-    gids = cur1.execute('SELECT Gid FROM DFGraph WHERE ? <= Gid;', (gidstart,))
+    if gidstart < gidend:
+        gids = cur1.execute('SELECT Gid FROM DFGraph WHERE ? <= Gid AND Gid < ?;',
+                            (gidstart, gidend))
+    else:
+        gids = cur1.execute('SELECT Gid FROM DFGraph WHERE ? <= Gid;',
+                            (gidstart,))
     for (gid0,) in gids:
         graph0 = fetch_graph(graphcur, gid0)
         src0 = None
@@ -164,9 +158,6 @@ def main(argv):
         if not maxvotes: continue
         show_result(graph0, src0, maxvotes)
         sys.stdout.flush()
-        if nresults is not None:
-            nresults -= 1
-        if nresults == 0: break
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
