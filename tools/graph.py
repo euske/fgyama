@@ -210,12 +210,13 @@ class DFNode:
 
     N_None = 0
     N_Refer = 1
-    N_Operator = 2
-    N_Assign = 3
-    N_Branch = 4
-    N_Join = 5
-    N_Loop = 6
-    N_Terminal = 7
+    N_Const = 2
+    N_Operator = 3
+    N_Assign = 4
+    N_Branch = 5
+    N_Join = 6
+    N_Loop = 7
+    N_Terminal = 8
 
     def __init__(self, nid, scope, ntype, label, ref):
         self.nid = nid

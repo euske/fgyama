@@ -222,7 +222,7 @@ class VarRefNode extends ReferNode {
 }
 
 // ConstNode: represents a constant value.
-class ConstNode extends ReferNode {
+class ConstNode extends ProgNode {
 
     public String value;
 
@@ -231,8 +231,12 @@ class ConstNode extends ReferNode {
 	this.value = value;
     }
 
+    public DFNodeType type() {
+	return DFNodeType.Const;
+    }
+    
     public String label() {
-	return "="+this.value;
+	return this.value;
     }
 }
 

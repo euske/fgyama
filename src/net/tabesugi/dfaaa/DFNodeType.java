@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public enum DFNodeType {
     None,
     Refer,
+    Const,
     Operator,
     Assign,
     Branch,
