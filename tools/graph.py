@@ -50,7 +50,7 @@ class SourceFile:
                 (self.name,))
 
     def show_nodes(self, nodes,
-                   fp=sys.stdout,
+                   println=(lambda _,s: sys.stdout.write(s)),
                    astart=(lambda _: '['),
                    aend=(lambda _: ']'),
                    abody=(lambda _,s: s),
@@ -59,13 +59,13 @@ class SourceFile:
         for node in nodes:
             if node.ast is None: continue
             (_,i,n) = node.ast
-            ranges.append((i, i+n, None))
-        self.show(ranges, fp=fp, ncontext=ncontext, skip=skip,
+            ranges.append((i, i+n, node.nid))
+        self.show(ranges, println=println, ncontext=ncontext, skip=skip,
                   astart=astart, aend=aend, abody=abody)
         return
     
     def show(self, ranges,
-             fp=sys.stdout,
+             println=(lambda _,s: sys.stdout.write(s)),
              astart=(lambda _: '['),
              aend=(lambda _: ']'),
              abody=(lambda _,s: s),
@@ -104,12 +104,12 @@ class SourceFile:
         for (lineno,line) in list(lines.items()):
             for i in range(lineno-ncontext, lineno+ncontext+1):
                 if i not in lines:
-                    lines[i] = self.lines[i]
+                    lines[i] = abody(None, self.lines[i])
         lineno0 = 0
         for lineno1 in sorted(lines):
             if lineno0 < lineno1:
-                fp.write(skip)
-            fp.write(lines[lineno1])
+                println(None, skip)
+            println(lineno1, lines[lineno1])
             lineno0 = lineno1+1
         return
 

@@ -75,11 +75,10 @@ def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
     return votes
 
 def main(argv):
-    import fileinput
     import getopt
     def usage():
         print('usage: %s [-v] [-B basedir] [-n minnodes] [-b minbranches] '
-              '[-s gidstart] [-e gidend] [graph ...]' % argv[0])
+              '[-s gidstart] [-e gidend] graph.db index.db' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'vB:n:b:s:e:')
