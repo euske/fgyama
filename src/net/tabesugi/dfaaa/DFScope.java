@@ -83,7 +83,7 @@ public class DFScope {
 	}
 	out.println(i2+"outputs:"+outputs);
 	StringBuilder loops = new StringBuilder();
-	for (DFRef ref : this.getLoopRefs()) {
+	for (DFRef ref : this.getAllRefs()) {
 	    loops.append(" "+ref);
 	}
 	out.println(i2+"loops:"+loops);
@@ -157,7 +157,7 @@ public class DFScope {
 	this.outputs.add(ref);
     }
 
-    public Set<DFRef> getLoopRefs() {
+    public Set<DFRef> getAllRefs() {
 	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
 	refs.retainAll(this.outputs);
 	return refs;

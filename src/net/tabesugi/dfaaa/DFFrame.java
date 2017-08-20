@@ -12,11 +12,11 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     public DFFrame parent;
-    public Collection<DFRef> loopRefs;
+    public Collection<DFRef> savedRefs;
     
-    public DFFrame(DFFrame parent, Collection<DFRef> loopRefs) {
+    public DFFrame(DFFrame parent, Collection<DFRef> savedRefs) {
 	this.parent = parent;
-	this.loopRefs = loopRefs;
+	this.savedRefs = savedRefs;
     }
 }
 
