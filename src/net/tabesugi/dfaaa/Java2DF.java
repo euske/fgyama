@@ -638,28 +638,6 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
-    public DFComponent processCase
-	(DFScope scope, DFComponent cpt, DFFrame frame,
-	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
-
-	for (Map.Entry<DFRef, DFNode> entry : caseCpt.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
-	    src.accept(cpt.get(ref));
-	}
-	
-	for (Map.Entry<DFRef, DFNode> entry : caseCpt.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
-	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
-	    join.recv(true, dst);
-	    join.close(cpt.get(ref));
-	    cpt.put(join);
-	}
-	
-	return cpt;
-    }
-
     public DFComponent processLoop
 	(DFScope scope, DFComponent cpt, DFFrame frame, ASTNode ast, 
 	 DFNode condValue, DFComponent loopCpt, Set<DFRef> loopRefs)
@@ -1118,30 +1096,52 @@ public class Java2DF extends ASTVisitor {
 				  thenCpt, elseCpt);
     }
 	
+    private DFComponent processCase
+	(DFScope scope, DFComponent cpt, DFFrame frame,
+	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
+
+	for (Map.Entry<DFRef, DFNode> entry : caseCpt.inputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode src = entry.getValue();
+	    src.accept(cpt.get(ref));
+	}
+	
+	for (Map.Entry<DFRef, DFNode> entry : caseCpt.outputs.entrySet()) {
+	    DFRef ref = entry.getKey();
+	    DFNode dst = entry.getValue();
+	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
+	    join.recv(true, dst);
+	    join.close(cpt.get(ref));
+	    cpt.put(join);
+	}
+	
+	return cpt;
+    }
+
     @SuppressWarnings("unchecked")
     public DFComponent processSwitchStatement
 	(DFScopeMap map, DFFrame frame, DFComponent cpt,
 	 SwitchStatement switchStmt)
 	throws UnsupportedSyntax {
 	DFScope scope = map.get(switchStmt);
+	// Create a new frame.
+	frame = new DFFrame(frame, scope.getAllRefs());
 	cpt = processExpression(scope, cpt, switchStmt.getExpression());
 	DFNode switchValue = cpt.value;
 
 	SwitchCase switchCase = null;
 	CaseNode caseNode = null;
 	DFComponent caseCpt = null;
-	DFFrame caseFrame = null;
 	for (Statement stmt : (List<Statement>) switchStmt.statements()) {
 	    if (stmt instanceof SwitchCase) {
 		if (caseCpt != null) {
-		    // switchCase, caseNode, caseCpt and caseFrame must be non-null.
-		    cpt = processCase(scope, cpt, caseFrame,
+		    // switchCase, caseNode and caseCpt must be non-null.
+		    cpt = processCase(scope, cpt, frame,
 				      switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(scope, stmt, switchValue);
 		caseCpt = new DFComponent(scope);
-		caseFrame = new DFFrame(frame, scope.getAllRefs());
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(scope, cpt, expr);
@@ -1158,7 +1158,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	if (caseCpt != null) {
-	    cpt = processCase(scope, cpt, caseFrame,
+	    cpt = processCase(scope, cpt, frame,
 			      switchCase, caseNode, caseCpt);
 	}
 	
