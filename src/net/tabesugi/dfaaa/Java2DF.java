@@ -1130,19 +1130,24 @@ public class Java2DF extends ASTVisitor {
 	SwitchCase switchCase = null;
 	CaseNode caseNode = null;
 	DFComponent caseCpt = null;
+	DFFrame caseFrame = null;
 	for (Statement stmt : (List<Statement>) switchStmt.statements()) {
 	    if (stmt instanceof SwitchCase) {
-		if (caseNode != null && caseCpt != null) {
-		    cpt = processCase(scope, cpt, frame,
+		if (caseCpt != null) {
+		    // switchCase, caseNode, caseCpt and caseFrame must be non-null.
+		    cpt = processCase(scope, cpt, caseFrame,
 				      switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(scope, stmt, switchValue);
 		caseCpt = new DFComponent(scope);
+		caseFrame = new DFFrame(frame, scope.getAllRefs());
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(scope, cpt, expr);
 		    caseNode.add(cpt.value);
+		} else {
+		    // "default" case.
 		}
 	    } else {
 		if (caseCpt == null) {
@@ -1152,8 +1157,8 @@ public class Java2DF extends ASTVisitor {
 		caseCpt = processStatement(map, frame, caseCpt, stmt);
 	    }
 	}
-	if (caseNode != null && caseCpt != null) {
-	    cpt = processCase(scope, cpt, frame,
+	if (caseCpt != null) {
+	    cpt = processCase(scope, cpt, caseFrame,
 			      switchCase, caseNode, caseCpt);
 	}
 	
