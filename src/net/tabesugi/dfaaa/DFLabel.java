@@ -20,8 +20,5 @@ public class DFLabel {
     public String toString() {
 	return this.name+":";
     }
-    
-    public static DFLabel BREAK = new DFLabel("BREAK");
-    public static DFLabel CONTINUE = new DFLabel("CONTINUE");
 }
 

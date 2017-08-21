@@ -70,9 +70,9 @@ public class DFComponent {
 	this.outputs.put(node.ref, node);
     }
 
-    public void jump(DFRef ref, DFFrame frame, DFLabel label) {
+    public void jump(DFRef ref, DFFrame frame, DFMeetType type, DFLabel label) {
 	DFNode node = this.get(ref);
-	this.addMeet(new DFMeet(node, frame, label));
+	this.addMeet(new DFMeet(node, frame, type, label));
 	this.outputs.remove(ref);
     }
 

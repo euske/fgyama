@@ -624,14 +624,14 @@ public class Java2DF extends ASTVisitor {
 
 	if (trueCpt != null) {
 	    for (DFMeet meet : trueCpt.meets) {
-		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.label,
-				       condValue, true));
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.type,
+				       meet.label, condValue, true));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFMeet meet : falseCpt.meets) {
-		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.label,
-				       condValue, false));
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.type,
+				       meet.label, condValue, false));
 	    }
 	}
 	
@@ -664,7 +664,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
-	    if (meet.frame == frame && meet.label == DFLabel.CONTINUE) {
+	    if (meet.frame == frame && meet.type == DFMeetType.Continue) {
 		DFNode node = meet.node;
 		DFNode repeat = repeats.get(node.ref);
 		if (meet.value != null) {
@@ -701,7 +701,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
-	    if (meet.frame == frame && meet.label == DFLabel.BREAK) {
+	    if (meet.frame == frame && meet.type == DFMeetType.Break) {
 		DFNode node = meet.node;
 		DFNode exit = exits.get(node.ref);
 		if (meet.value != null) {
@@ -1324,22 +1324,24 @@ public class Java2DF extends ASTVisitor {
 	    scope.finish(cpt);
 	    
 	} else if (stmt instanceof BreakStatement) {
-	    // XXX ignore label (for now).
 	    BreakStatement breakStmt = (BreakStatement)stmt;
-	    // SimpleName labelName = breakStmt.getLabel();
+	    SimpleName labelName = breakStmt.getLabel();
 	    if (frame != null) {
+		DFLabel label = ((labelName == null)? null :
+				 new DFLabel(labelName.getIdentifier()));
 		for (DFRef ref : frame.savedRefs) {
-		    cpt.jump(ref, frame, DFLabel.BREAK);
+		    cpt.jump(ref, frame, DFMeetType.Break, label);
 		}
 	    }
 	    
 	} else if (stmt instanceof ContinueStatement) {
-	    // XXX ignore label (for now).
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
-	    // SimpleName labelName = contStmt.getLabel();
+	    SimpleName labelName = contStmt.getLabel();
 	    if (frame != null) {
+		DFLabel label = ((labelName == null)? null :
+				 new DFLabel(labelName.getIdentifier()));
 		for (DFRef ref : frame.savedRefs) {
-		    cpt.jump(ref, frame, DFLabel.CONTINUE);
+		    cpt.jump(ref, frame, DFMeetType.Continue, label);
 		}
 	    }
 	    
