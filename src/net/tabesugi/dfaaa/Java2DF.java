@@ -624,13 +624,13 @@ public class Java2DF extends ASTVisitor {
 
 	if (trueCpt != null) {
 	    for (DFMeet meet : trueCpt.meets) {
-		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.type,
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.cont,
 				       meet.label, condValue, true));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFMeet meet : falseCpt.meets) {
-		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.type,
+		cpt.addMeet(new DFMeet(meet.node, meet.frame, meet.cont,
 				       meet.label, condValue, false));
 	    }
 	}
@@ -664,7 +664,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
-	    if (meet.frame == frame && meet.type == DFMeetType.Continue) {
+	    if (meet.frame == frame && meet.cont) {
 		DFNode node = meet.node;
 		DFNode repeat = repeats.get(node.ref);
 		if (meet.value != null) {
@@ -701,7 +701,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFMeet meet : loopCpt.meets) {
-	    if (meet.frame == frame && meet.type == DFMeetType.Break) {
+	    if (meet.frame == frame && !meet.cont) {
 		DFNode node = meet.node;
 		DFNode exit = exits.get(node.ref);
 		if (meet.value != null) {
@@ -1330,7 +1330,7 @@ public class Java2DF extends ASTVisitor {
 		DFLabel label = ((labelName == null)? null :
 				 new DFLabel(labelName.getIdentifier()));
 		for (DFRef ref : frame.savedRefs) {
-		    cpt.jump(ref, frame, DFMeetType.Break, label);
+		    cpt.jump(ref, frame, true, label);
 		}
 	    }
 	    
@@ -1341,7 +1341,7 @@ public class Java2DF extends ASTVisitor {
 		DFLabel label = ((labelName == null)? null :
 				 new DFLabel(labelName.getIdentifier()));
 		for (DFRef ref : frame.savedRefs) {
-		    cpt.jump(ref, frame, DFMeetType.Continue, label);
+		    cpt.jump(ref, frame, false, label);
 		}
 	    }
 	    

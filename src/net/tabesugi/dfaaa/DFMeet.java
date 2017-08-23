@@ -13,27 +13,30 @@ public class DFMeet {
 
     public DFNode node;
     public DFFrame frame;
-    public DFMeetType type;
     public DFLabel label;
     public DFNode value;
+    public boolean cont;
     public boolean cond;
 
-    public DFMeet(DFNode node, DFFrame frame, DFMeetType type, DFLabel label) {
-	this(node, frame, type, label, null, false);
+    public DFMeet(DFNode node, DFFrame frame, boolean cont, DFLabel label) {
+	this(node, frame, cont, label, null, false);
     }
     
-    public DFMeet(DFNode node, DFFrame frame, DFMeetType type, DFLabel label, 
+    public DFMeet(DFNode node, DFFrame frame, boolean cont, DFLabel label, 
 		  DFNode value, boolean cond) {
 	this.node = node;
 	this.frame = frame;
-	this.type = type;
+	this.cont = cont;
 	this.label = label;
 	this.value = value;
 	this.cond = cond;
     }
 
     public String toString() {
-	return (this.node+" -> "+this.frame+":"+this.label);
+	if (this.cont) {
+	    return ("continue:"+this.node+" -> "+this.frame+":"+this.label);
+	} else {
+	    return ("break:"+this.node+" -> "+this.frame+":"+this.label);
+	}
     }
 }
-
