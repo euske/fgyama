@@ -37,18 +37,7 @@ public class DFFrame {
 	}
     }
     
-    public DFFrame find(String label) {
-	if (label == null) {
-	    return null;
-	} else if (label.equals(this.label)) {
-	    return this;
-	} else {
-	    return this.parent.find(label);
-	}
-    }
-
     public void addBreak(DFMeet meet) {
-	Utils.logit("addBreak:"+this+", "+meet);
 	this.breaks.add(meet);
     }
 
@@ -58,8 +47,7 @@ public class DFFrame {
 
     public void finish(DFComponent cpt) {
 	for (DFMeet meet : this.breaks) {
-	    Utils.logit("finish:"+this+": "+meet);
-	    if (meet.frame == null || meet.frame == this) {
+	    if (meet.label == null || meet.label.equals(this.label)) {
 		DFNode node = meet.node;
 		if (node instanceof JoinNode) {
 		    DFNode src = cpt.get(node.ref);

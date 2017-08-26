@@ -12,14 +12,14 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMeet {
 
     public DFNode node;
-    public DFFrame frame;
+    public String label;
 
-    public DFMeet(DFNode node, DFFrame frame) {
+    public DFMeet(DFNode node, String label) {
 	this.node = node;
-	this.frame = frame;
+	this.label = label;
     }
 
     public String toString() {
-	return ("<DFMeet: "+this.node+" -> "+this.frame+">");
+	return ("<DFMeet: "+this.node+" -> "+this.label+">");
     }
 }

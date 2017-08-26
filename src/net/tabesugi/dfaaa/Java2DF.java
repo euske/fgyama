@@ -573,13 +573,13 @@ public class Java2DF extends ASTVisitor {
 		DFNode node = meet.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(true, node);
-		frame.addBreak(new DFMeet(join, meet.frame));
+		frame.addBreak(new DFMeet(join, meet.label));
 	    }
 	    for (DFMeet meet : trueFrame.continues) {
 		DFNode node = meet.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(true, node);
-		frame.addContinue(new DFMeet(join, meet.frame));
+		frame.addContinue(new DFMeet(join, meet.label));
 	    }
 	}
 	if (falseFrame != null) {
@@ -587,13 +587,13 @@ public class Java2DF extends ASTVisitor {
 		DFNode node = meet.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(false, node);
-		frame.addBreak(new DFMeet(join, meet.frame));
+		frame.addBreak(new DFMeet(join, meet.label));
 	    }
 	    for (DFMeet meet : falseFrame.continues) {
 		DFNode node = meet.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(false, node);
-		frame.addContinue(new DFMeet(join, meet.frame));
+		frame.addContinue(new DFMeet(join, meet.label));
 	    }
 	}
 	
@@ -627,7 +627,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFMeet meet : loopFrame.continues) {
-	    if (meet.frame == null || meet.frame == loopFrame) {
+	    if (meet.label == null || meet.label.equals(loopFrame.label)) {
 		DFNode node = meet.node;
 		DFNode repeat = repeats.get(node.ref);
 		if (node instanceof JoinNode) {
@@ -1282,10 +1282,9 @@ public class Java2DF extends ASTVisitor {
 	    DFScope scope = map.get(stmt);
 	    SimpleName labelName = breakStmt.getLabel();
 	    String name = (labelName == null)? null : labelName.getIdentifier();
-	    DFFrame goal = frame.find(name);
 	    for (DFRef ref : scope.getAllRefs()) {
 		DFNode node = cpt.get(ref);
-		frame.addBreak(new DFMeet(node, goal));
+		frame.addBreak(new DFMeet(node, name));
 	    }
 	    
 	} else if (stmt instanceof ContinueStatement) {
@@ -1293,10 +1292,9 @@ public class Java2DF extends ASTVisitor {
 	    DFScope scope = map.get(stmt);
 	    SimpleName labelName = contStmt.getLabel();
 	    String name = (labelName == null)? null : labelName.getIdentifier();
-	    DFFrame goal = frame.find(name);
 	    for (DFRef ref : scope.getAllRefs()) {
 		DFNode node = cpt.get(ref);
-		frame.addContinue(new DFMeet(node, goal));
+		frame.addContinue(new DFMeet(node, name));
 	    }
 	    
 	} else if (stmt instanceof LabeledStatement) {
