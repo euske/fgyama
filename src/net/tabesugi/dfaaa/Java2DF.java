@@ -994,26 +994,6 @@ public class Java2DF extends ASTVisitor {
 	return processExpression(scope, cpt, expr);
     }
 
-    public DFComponent processReturnStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
-	 ReturnStatement rtrnStmt)
-	throws UnsupportedSyntax {
-	DFScope scope = map.get(rtrnStmt);
-	Expression expr = rtrnStmt.getExpression();
-	DFNode value = null;
-	if (expr != null) {
-	    cpt = processExpression(scope, cpt, expr);
-	    value = cpt.value;
-	}
-	if (value != null) {
-	    DFRef ref = scope.lookupReturn();
-	    ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
-	    rtrn.take(value);
-	    cpt.put(rtrn);
-	}
-	return cpt;
-    }
-    
     public DFComponent processIfStatement
 	(DFScopeMap map, DFFrame frame, DFComponent cpt,
 	 IfStatement ifStmt)
@@ -1239,10 +1219,6 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpressionStatement
 		(map, frame, cpt, (ExpressionStatement)stmt);
 		
-	} else if (stmt instanceof ReturnStatement) {
-	    cpt = processReturnStatement
-		(map, frame, cpt, (ReturnStatement)stmt);
-	    
 	} else if (stmt instanceof IfStatement) {
 	    cpt = processIfStatement
 		(map, frame, cpt, (IfStatement)stmt);
@@ -1276,6 +1252,22 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processEnhancedForStatement
 		(map, frame, cpt, (EnhancedForStatement)stmt, label);
 	    scope.finish(cpt);
+	    
+	} else if (stmt instanceof ReturnStatement) {
+            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+            DFScope scope = map.get(stmt);
+            Expression expr = rtrnStmt.getExpression();
+            if (expr != null) {
+                cpt = processExpression(scope, cpt, expr);
+                DFRef ref = scope.lookupReturn();
+                ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
+                rtrn.take(cpt.value);
+                frame.addBreak(new DFMeet(rtrn, DFFrame.RETURN));
+            }
+	    for (DFRef ref : scope.getAllRefs()) {
+		DFNode node = cpt.get(ref);
+		frame.addBreak(new DFMeet(node, DFFrame.RETURN));
+	    }
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
@@ -1801,7 +1793,7 @@ public class Java2DF extends ASTVisitor {
 	DFScope scope = new DFScope(funcName);
 	
 	// Setup an initial scope.
-	DFFrame frame = new DFFrame(null, scope.name);
+	DFFrame frame = new DFFrame(null, scope.name, DFFrame.RETURN);
 	DFComponent cpt = buildMethodDeclaration(scope, method);
 	DFScopeMap map = new DFScopeMap();
 	buildScope(map, scope, funcBlock);

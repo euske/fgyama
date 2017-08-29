@@ -16,6 +16,8 @@ public class DFFrame {
     public String label;
     public List<DFMeet> breaks;
     public List<DFMeet> continues;
+
+    public static String RETURN = "@RETURN";
     
     public DFFrame(DFFrame parent, String name) {
 	this(parent, name, null);
