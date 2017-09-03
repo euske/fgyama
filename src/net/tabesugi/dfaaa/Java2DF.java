@@ -1,5 +1,7 @@
-//  Java2DF
-//
+/**
+ * Java2DF
+ * Dataflow analyzer for Java
+ */
 package net.tabesugi.dfaaa;
 import java.io.*;
 import java.util.*;
@@ -522,16 +524,12 @@ class CreateObjectNode extends CallNode {
 // 
 public class Java2DF extends ASTVisitor {
 
-    // Instance methods.
+    /// General graph operations.
     
-    public TextExporter exporter;
-
-    public Java2DF(TextExporter exporter) {
-	this.exporter = exporter;
-    }
-
-    // Combines two components into one.
-    // A JoinNode is added to each variable.
+    /** 
+     * Combines two components into one.
+     * A JoinNode is added to each variable.
+     */
     public DFComponent processConditional
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
 	 DFNode condValue,
@@ -605,7 +603,9 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
-    // Expands the graph for all the loop variables.
+    /** 
+     * Expands the graph for the loop variables.
+     */
     public DFComponent processLoop
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
 	 DFNode condValue,
@@ -683,6 +683,9 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
+    /** 
+     * Creates a new variable node.
+     */
     public DFComponent processVariableDeclaration
 	(DFScope scope, DFComponent cpt, 
 	 List<VariableDeclarationFragment> frags)
@@ -702,6 +705,9 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
+    /** 
+     * Creates an assignment node.
+     */
     @SuppressWarnings("unchecked")
     public DFComponent processAssignment
 	(DFScope scope, DFComponent cpt, 
@@ -741,9 +747,13 @@ public class Java2DF extends ASTVisitor {
 	} else {
 	    throw new UnsupportedSyntax(expr);
 	}
+	
 	return cpt;
     }
-    
+
+    /** 
+     * Creates a value node.
+     */
     @SuppressWarnings("unchecked")
     public DFComponent processExpression
 	(DFScope scope, DFComponent cpt, 
@@ -988,6 +998,8 @@ public class Java2DF extends ASTVisitor {
 	
 	return cpt;
     }
+
+    /// Statement processors.
     
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement
@@ -1037,7 +1049,7 @@ public class Java2DF extends ASTVisitor {
 				  elseFrame, elseCpt);
     }
 	
-    private DFComponent processCase
+    private DFComponent processCaseStatement
 	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
 
@@ -1076,8 +1088,8 @@ public class Java2DF extends ASTVisitor {
 	    if (stmt instanceof SwitchCase) {
 		if (caseCpt != null) {
 		    // switchCase, caseNode and caseCpt must be non-null.
-		    cpt = processCase(scope, switchFrame, cpt,
-				      switchCase, caseNode, caseCpt);
+		    cpt = processCaseStatement(scope, switchFrame, cpt,
+					       switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(scope, stmt, switchValue);
@@ -1098,8 +1110,8 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	if (caseCpt != null) {
-	    cpt = processCase(scope, switchFrame, cpt,
-			      switchCase, caseNode, caseCpt);
+	    cpt = processCaseStatement(scope, switchFrame, cpt,
+				       switchCase, caseNode, caseCpt);
 	}
 	switchFrame.finish(cpt);
 	return cpt;
@@ -1357,6 +1369,9 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
+    /**
+     * Lists all the variables defined inside a block.
+     */
     @SuppressWarnings("unchecked")
     public void buildScope(DFScopeMap map, DFScope scope, Statement ast)
 	throws UnsupportedSyntax {
@@ -1540,6 +1555,9 @@ public class Java2DF extends ASTVisitor {
 	map.put(ast, scope);
     }
 	
+    /**
+     * Lists all the variables defined within an expression.
+     */
     @SuppressWarnings("unchecked")
     public void buildScope(DFScopeMap map, DFScope scope, Expression ast)
 	throws UnsupportedSyntax {
@@ -1729,6 +1747,9 @@ public class Java2DF extends ASTVisitor {
 	map.put(ast, scope);
     }
 
+    /**
+     * Lists all the l-values for an expression.
+     */
     @SuppressWarnings("unchecked")
     public void buildScopeLeft(DFScopeMap map, DFScope scope, Expression ast)
 	throws UnsupportedSyntax {
@@ -1767,6 +1788,9 @@ public class Java2DF extends ASTVisitor {
 	map.put(ast, scope);
     }
     
+    /** 
+     * Creates a graph for an entire method.
+     */
     @SuppressWarnings("unchecked")
     public DFComponent buildMethodDeclaration
 	(DFScope scope, MethodDeclaration method)
@@ -1790,7 +1814,12 @@ public class Java2DF extends ASTVisitor {
 	}
 	return cpt;
     }
-    
+
+    /// Top-level functions.
+
+    /** 
+     * Performs dataflow analysis for a given method.
+     */
     public DFScope getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
 	String funcName = method.getName().getFullyQualifiedName();
@@ -1814,6 +1843,14 @@ public class Java2DF extends ASTVisitor {
         // Collapse redundant nodes.
 	scope.cleanup();
 	return scope;
+    }
+
+    /// ASTVisitor methods.
+    
+    public TextExporter exporter;
+
+    public Java2DF(TextExporter exporter) {
+	this.exporter = exporter;
     }
 
     public boolean visit(MethodDeclaration method) {
@@ -1841,11 +1878,15 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    // main
+    /**
+     * Provides a command line interface.
+     *
+     * Usage: java Java2DF [-o output] input.java ...
+     */
     public static void main(String[] args)
 	throws IOException {
-	
-	String[] classpath = new String[] { "/" };
+
+	// Parse the options.
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
 	for (int i = 0; i < args.length; i++) {
@@ -1867,7 +1908,8 @@ public class Java2DF extends ASTVisitor {
 		files.add(arg);
 	    }
 	}
-	
+
+	// Process files.
 	TextExporter exporter = new TextExporter(output);
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
@@ -1880,7 +1922,7 @@ public class Java2DF extends ASTVisitor {
 	    parser.setSource(src.toCharArray());
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	    //parser.setResolveBindings(true);
-	    parser.setEnvironment(classpath, null, null, true);
+	    parser.setEnvironment(null, null, null, true);
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 	    
