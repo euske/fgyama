@@ -508,7 +508,7 @@ class CreateObjectNode extends CallNode {
 
     public CreateObjectNode(DFScope scope, ASTNode ast,
 			    DFNode obj, Type type) {
-	super(scope, null, ast, obj); // 
+	super(scope, null, ast, obj);
 	this.type = type;
     }
     
@@ -530,7 +530,7 @@ public class Java2DF extends ASTVisitor {
 	this.exporter = exporter;
     }
 
-    // Combine two components into one.
+    // Combines two components into one.
     // A JoinNode is added to each variable.
     public DFComponent processConditional
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
@@ -605,12 +605,15 @@ public class Java2DF extends ASTVisitor {
 	return cpt;
     }
 
+    // Expands the graph for all the loop variables.
     public DFComponent processLoop
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
-	 DFNode condValue, DFFrame loopFrame, DFComponent loopCpt,
+	 DFNode condValue,
+	 DFFrame loopFrame, DFComponent loopCpt,
 	 Set<DFRef> loopRefs)
 	throws UnsupportedSyntax {
 
+	// Add four nodes for each loop variable.
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
 	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
@@ -621,6 +624,7 @@ public class Java2DF extends ASTVisitor {
 	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
 	    DFNode repeat = new DistNode(scope, ref);
 	    DFNode leave = new DistNode(scope, ref);
+	    // LoopNode -> P -> Branch -> [Repeat | Leave]
 	    loop.connect(branch, 0, DFLinkType.Informational, "end");
 	    branch.send(true, repeat);
 	    branch.send(false, leave);
@@ -630,20 +634,8 @@ public class Java2DF extends ASTVisitor {
 	    repeats.put(ref, repeat);
 	    leaves.put(ref, leave);
 	}
-	
-	for (DFExit exit : loopFrame.continues) {
-	    if (exit.label == null || exit.label.equals(loopFrame.label)) {
-		DFNode node = exit.node;
-		DFNode repeat = repeats.get(node.ref);
-		if (node instanceof JoinNode) {
-		    ((JoinNode)node).close(repeat);
-		}
-		repeats.put(node.ref, node);
-	    } else {
-		frame.addContinue(exit);
-	    }
-	}
-	
+
+	// Connect the inputs to the loop.
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.inputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode input = entry.getValue();
@@ -656,6 +648,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	
+	// Connect the outputs to the loop.
 	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
 	    DFRef ref = entry.getKey();
 	    DFNode output = entry.getValue();
@@ -667,10 +660,26 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	
+	// Reconnect the continue statements.
+	for (DFExit exit : loopFrame.continues) {
+	    if (exit.label == null || exit.label.equals(loopFrame.label)) {
+		DFNode node = exit.node;
+		DFNode repeat = repeats.get(node.ref);
+		if (node instanceof JoinNode) {
+		    ((JoinNode)node).close(repeat);
+		}
+		repeats.put(node.ref, node);
+	    } else {
+		frame.addContinue(exit);
+	    }
+	}
+
+	// Handle the leave nodes.
 	for (DFRef ref : loopRefs) {
 	    DFNode leave = leaves.get(ref);
 	    cpt.put(leave);
 	}
+	
 	return cpt;
     }
 
@@ -1205,7 +1214,8 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	
 	if (stmt instanceof AssertStatement) {
-	    // Ignore assert.
+	    // XXX Ignore asserts.
+	    
 	} else if (stmt instanceof Block) {
 	    DFScope scope = map.get(stmt);
 	    Block block = (Block)stmt;
@@ -1355,11 +1365,10 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (ast instanceof Block) {
 	    Block block = (Block)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
-		buildScope(map, scope, stmt);
+		buildScope(map, child, stmt);
 	    }
 	    
 	} else if (ast instanceof EmptyStatement) {
@@ -1404,13 +1413,12 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    Expression expr = switchStmt.getExpression();
-	    buildScope(map, scope, expr);
+	    buildScope(map, child, expr);
 	    for (Statement stmt :
 		     (List<Statement>) switchStmt.statements()) {
-		buildScope(map, scope, stmt);
+		buildScope(map, child, stmt);
 	    }
 	    
 	} else if (ast instanceof SwitchCase) {
@@ -1422,56 +1430,52 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    Expression expr = whileStmt.getExpression();
-	    buildScope(map, scope, expr);
+	    buildScope(map, child, expr);
 	    Statement stmt = whileStmt.getBody();
-	    buildScope(map, scope, stmt);
+	    buildScope(map, child, stmt);
 	    
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    Statement stmt = doStmt.getBody();
-	    buildScope(map, scope, stmt);
+	    buildScope(map, child, stmt);
 	    Expression expr = doStmt.getExpression();
-	    buildScope(map, scope, expr);
+	    buildScope(map, child, expr);
 	    
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
-		buildScope(map, scope, init);
+		buildScope(map, child, init);
 	    }
 	    Expression expr = forStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(map, child, expr);
 	    }
 	    Statement stmt = forStmt.getBody();
-	    buildScope(map, scope, stmt);
+	    buildScope(map, child, stmt);
 	    for (Expression update :
 		     (List<Expression>) forStmt.updaters()) {
-		buildScope(map, scope, update);
+		buildScope(map, child, update);
 	    }
 	    
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    // Create a new scope.
-	    scope = new DFScope(scope);
+	    DFScope child = new DFScope(scope);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX ignore modifiers and dimensions.
 	    Type varType = decl.getType();
 	    SimpleName varName = decl.getName();
-	    scope.add(varName.getIdentifier(), varType);
+	    child.add(varName.getIdentifier(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(map, child, expr);
 	    }
 	    Statement stmt = eForStmt.getBody();
-	    buildScope(map, scope, stmt);
+	    buildScope(map, child, stmt);
 	    
 	} else if (ast instanceof BreakStatement) {
 	    
@@ -1493,7 +1497,6 @@ public class Java2DF extends ASTVisitor {
 	    buildScope(map, scope, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
-		// Create a new scope.
 		DFScope child = new DFScope(scope);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX ignore modifiers and dimensions.
