@@ -13,10 +13,16 @@ public class DFExit {
 
     public DFNode node;
     public String label;
+    public boolean cont;
 
     public DFExit(DFNode node, String label) {
+	this(node, label, false);
+    }
+    
+    public DFExit(DFNode node, String label, boolean cont) {
 	this.node = node;
 	this.label = label;
+	this.cont = cont;
     }
 
     public String toString() {
