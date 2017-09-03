@@ -16,6 +16,7 @@
   
   <path id="build.classpath">
     <pathelement location="${libDir}/junit-3.8.1.jar"/>
+    <pathelement location="${libDir}/sqlite-jdbc-3.20.0.jar"/>
     <pathelement location="${libDir}/org.eclipse.jdt.core-3.12.3.jar"/>
     <pathelement location="${libDir}/org.eclipse.core.resources-3.11.1.jar"/>
     <pathelement location="${libDir}/org.eclipse.core.expressions-3.5.100.jar"/>
@@ -104,6 +105,8 @@
     <mkdir dir="${libDir}"/>
     <get src="https://repo.maven.apache.org/maven2/junit/junit/3.8.1/junit-3.8.1.jar" 
          dest="${libDir}/junit-3.8.1.jar" />
+    <get src="https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/3.20.0/sqlite-jdbc-3.20.0.jar"
+	 dest="${libDir}/sqlite-jdbc-3.20.0.jar" />
     <get src="https://repo.maven.apache.org/maven2/org/eclipse/jdt/org.eclipse.jdt.core/3.12.3/org.eclipse.jdt.core-3.12.3.jar" 
          dest="${libDir}/org.eclipse.jdt.core-3.12.3.jar" />
     <get src="https://repo.maven.apache.org/maven2/org/eclipse/platform/org.eclipse.core.resources/3.11.1/org.eclipse.core.resources-3.11.1.jar" 
