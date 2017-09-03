@@ -947,7 +947,8 @@ public class Java2DF extends ASTVisitor {
 		call.take(cpt.value);
 	    }
 	    cpt.value = call;
-	    // XXX ignore getAnonymousClassDeclaration();
+	    // XXX ignore getAnonymousClassDeclaration()
+	    // It will eventually be picked up as MethodDeclaration.
 	    
 	} else if (expr instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)expr;
@@ -1342,10 +1343,12 @@ public class Java2DF extends ASTVisitor {
 	    for (Expression arg : (List<Expression>) sci.arguments()) {
 		cpt = processExpression(scope, cpt, arg);
 	    }
-		
-	} else {
-	    // TypeDeclarationStatement
+
+	} else if (stmt instanceof TypeDeclarationStatement) {
+	    // Ignore TypeDeclarationStatement because
+	    // it was eventually picked up as MethodDeclaration.
 	    
+	} else {
 	    throw new UnsupportedSyntax(stmt);
 	}
 
@@ -1529,8 +1532,9 @@ public class Java2DF extends ASTVisitor {
 		     (List<Expression>) sci.arguments()) {
 		buildScope(map, scope, expr);
 	    }
+	} else if (ast instanceof TypeDeclarationStatement) {
+
 	} else {
-	    // TypeDeclarationStatement
 	    throw new UnsupportedSyntax(ast);
 	    
 	}
@@ -1700,10 +1704,8 @@ public class Java2DF extends ASTVisitor {
 		     (List<Expression>) cstr.arguments()) {
 		buildScope(map, scope, arg);
 	    }
-	    ASTNode anon = cstr.getAnonymousClassDeclaration();
-	    if (anon != null) {
-		throw new UnsupportedSyntax(anon);
-	    }
+	    // XXX ignore getAnonymousClassDeclaration()
+	    // It will eventually be picked up as MethodDeclaration.
 	    
 	} else if (ast instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)ast;
@@ -1716,7 +1718,6 @@ public class Java2DF extends ASTVisitor {
 	    buildScope(map, scope, instof.getLeftOperand());
 	    
 	} else {
-	    // AnonymousClassDeclaration
 	    // LambdaExpression
 	    // MethodReference
 	    //  CreationReference
