@@ -14,8 +14,8 @@ public class DFFrame {
     public DFFrame parent;
     public String name;
     public String label;
-    public List<DFMeet> breaks;
-    public List<DFMeet> continues;
+    public List<DFExit> breaks;
+    public List<DFExit> continues;
 
     public static String RETURN = "@RETURN";
     
@@ -27,8 +27,8 @@ public class DFFrame {
 	this.parent = parent;
 	this.name = name;
 	this.label = label;
-	this.breaks = new ArrayList<DFMeet>();
-	this.continues = new ArrayList<DFMeet>();
+	this.breaks = new ArrayList<DFExit>();
+	this.continues = new ArrayList<DFExit>();
     }
 
     public String toString() {
@@ -39,18 +39,18 @@ public class DFFrame {
 	}
     }
     
-    public void addBreak(DFMeet meet) {
-	this.breaks.add(meet);
+    public void addBreak(DFExit exit) {
+	this.breaks.add(exit);
     }
 
-    public void addContinue(DFMeet meet) {
-	this.continues.add(meet);
+    public void addContinue(DFExit exit) {
+	this.continues.add(exit);
     }
 
     public void finish(DFComponent cpt) {
-	for (DFMeet meet : this.breaks) {
-	    if (meet.label == null || meet.label.equals(this.label)) {
-		DFNode node = meet.node;
+	for (DFExit exit : this.breaks) {
+	    if (exit.label == null || exit.label.equals(this.label)) {
+		DFNode node = exit.node;
 		if (node instanceof JoinNode) {
 		    DFNode src = cpt.get(node.ref);
 		    ((JoinNode)node).close(src);

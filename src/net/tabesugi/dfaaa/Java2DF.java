@@ -530,12 +530,15 @@ public class Java2DF extends ASTVisitor {
 	this.exporter = exporter;
     }
 
+    // Combine two components into one.
+    // A JoinNode is added to each variable.
     public DFComponent processConditional
-	(DFScope scope, DFComponent cpt, DFFrame frame, ASTNode ast, 
+	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
 	 DFNode condValue,
 	 DFFrame trueFrame, DFComponent trueCpt,
 	 DFFrame falseFrame, DFComponent falseCpt) {
-	
+
+	// refs: all the references from both component.
 	Set<DFRef> refs = new HashSet<DFRef>();
 	if (trueCpt != null) {
 	    for (Map.Entry<DFRef, DFNode> entry : trueCpt.inputs.entrySet()) {
@@ -553,7 +556,8 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    refs.addAll(falseCpt.outputs.keySet());
 	}
-	
+
+	// Attach a JoinNode to each variable.
 	for (DFRef ref : refs) {
 	    JoinNode join = new JoinNode(scope, ref, ast, condValue);
 	    if (trueCpt != null && trueCpt.outputs.containsKey(ref)) {
@@ -568,32 +572,33 @@ public class Java2DF extends ASTVisitor {
 	    cpt.put(join);
 	}
 
+	// Take care of exits.
 	if (trueFrame != null) {
-	    for (DFMeet meet : trueFrame.breaks) {
-		DFNode node = meet.node;
+	    for (DFExit exit : trueFrame.breaks) {
+		DFNode node = exit.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(true, node);
-		frame.addBreak(new DFMeet(join, meet.label));
+		frame.addBreak(new DFExit(join, exit.label));
 	    }
-	    for (DFMeet meet : trueFrame.continues) {
-		DFNode node = meet.node;
+	    for (DFExit exit : trueFrame.continues) {
+		DFNode node = exit.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(true, node);
-		frame.addContinue(new DFMeet(join, meet.label));
+		frame.addContinue(new DFExit(join, exit.label));
 	    }
 	}
 	if (falseFrame != null) {
-	    for (DFMeet meet : falseFrame.breaks) {
-		DFNode node = meet.node;
+	    for (DFExit exit : falseFrame.breaks) {
+		DFNode node = exit.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(false, node);
-		frame.addBreak(new DFMeet(join, meet.label));
+		frame.addBreak(new DFExit(join, exit.label));
 	    }
-	    for (DFMeet meet : falseFrame.continues) {
-		DFNode node = meet.node;
+	    for (DFExit exit : falseFrame.continues) {
+		DFNode node = exit.node;
 		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
 		join.recv(false, node);
-		frame.addContinue(new DFMeet(join, meet.label));
+		frame.addContinue(new DFExit(join, exit.label));
 	    }
 	}
 	
@@ -601,7 +606,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processLoop
-	(DFScope scope, DFComponent cpt, DFFrame frame, ASTNode ast, 
+	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
 	 DFNode condValue, DFFrame loopFrame, DFComponent loopCpt,
 	 Set<DFRef> loopRefs)
 	throws UnsupportedSyntax {
@@ -609,33 +614,33 @@ public class Java2DF extends ASTVisitor {
 	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
 	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> exits = new HashMap<DFRef, DFNode>();
+	Map<DFRef, DFNode> leaves = new HashMap<DFRef, DFNode>();
 	for (DFRef ref : loopRefs) {
 	    DFNode src = cpt.get(ref);
 	    LoopNode loop = new LoopNode(scope, ref, ast, src);
 	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
 	    DFNode repeat = new DistNode(scope, ref);
-	    DFNode exit = new DistNode(scope, ref);
+	    DFNode leave = new DistNode(scope, ref);
 	    loop.connect(branch, 0, DFLinkType.Informational, "end");
 	    branch.send(true, repeat);
-	    branch.send(false, exit);
+	    branch.send(false, leave);
 	    repeat.connect(loop, 0, DFLinkType.BackFlow, "repeat");
 	    loops.put(ref, loop);
 	    branches.put(ref, branch);
 	    repeats.put(ref, repeat);
-	    exits.put(ref, exit);
+	    leaves.put(ref, leave);
 	}
 	
-	for (DFMeet meet : loopFrame.continues) {
-	    if (meet.label == null || meet.label.equals(loopFrame.label)) {
-		DFNode node = meet.node;
+	for (DFExit exit : loopFrame.continues) {
+	    if (exit.label == null || exit.label.equals(loopFrame.label)) {
+		DFNode node = exit.node;
 		DFNode repeat = repeats.get(node.ref);
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(repeat);
 		}
 		repeats.put(node.ref, node);
 	    } else {
-		frame.addContinue(meet);
+		frame.addContinue(exit);
 	    }
 	}
 	
@@ -663,8 +668,8 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	for (DFRef ref : loopRefs) {
-	    DFNode exit = exits.get(ref);
-	    cpt.put(exit);
+	    DFNode leave = leaves.get(ref);
+	    cpt.put(leave);
 	}
 	return cpt;
     }
@@ -1017,14 +1022,14 @@ public class Java2DF extends ASTVisitor {
 	    elseCpt = processStatement(map, elseFrame, elseCpt, elseStmt);
 	}
 
-	return processConditional(scope, cpt, frame, ifStmt,
+	return processConditional(scope, frame, cpt, ifStmt,
 				  condValue,
 				  thenFrame, thenCpt,
 				  elseFrame, elseCpt);
     }
 	
     private DFComponent processCase
-	(DFScope scope, DFComponent cpt, DFFrame frame,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
 
 	for (Map.Entry<DFRef, DFNode> entry : caseCpt.inputs.entrySet()) {
@@ -1062,7 +1067,7 @@ public class Java2DF extends ASTVisitor {
 	    if (stmt instanceof SwitchCase) {
 		if (caseCpt != null) {
 		    // switchCase, caseNode and caseCpt must be non-null.
-		    cpt = processCase(scope, cpt, switchFrame,
+		    cpt = processCase(scope, switchFrame, cpt,
 				      switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
@@ -1084,7 +1089,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 	if (caseCpt != null) {
-	    cpt = processCase(scope, cpt, switchFrame,
+	    cpt = processCase(scope, switchFrame, cpt,
 			      switchCase, caseNode, caseCpt);
 	}
 	switchFrame.finish(cpt);
@@ -1103,7 +1108,7 @@ public class Java2DF extends ASTVisitor {
 	DFNode condValue = loopCpt.value;
 	loopCpt = processStatement(map, loopFrame, loopCpt,
 				   whileStmt.getBody());
-	cpt = processLoop(scope, cpt, frame, whileStmt, 
+	cpt = processLoop(scope, frame, cpt, whileStmt, 
 			  condValue, loopFrame, loopCpt,
 			  scope.getAllRefs());
 	loopFrame.finish(cpt);
@@ -1122,7 +1127,7 @@ public class Java2DF extends ASTVisitor {
 	loopCpt = processExpression(scope, loopCpt,
 				    doStmt.getExpression());
 	DFNode condValue = loopCpt.value;
-	cpt = processLoop(scope, cpt, frame, doStmt, 
+	cpt = processLoop(scope, frame, cpt, doStmt, 
 			  condValue, loopFrame, loopCpt,
 			  scope.getAllRefs());
 	loopFrame.finish(cpt);
@@ -1153,7 +1158,7 @@ public class Java2DF extends ASTVisitor {
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
 	    loopCpt = processExpression(scope, loopCpt, update);
 	}
-	cpt = processLoop(scope, cpt, frame, forStmt, 
+	cpt = processLoop(scope, frame, cpt, forStmt, 
 			  condValue, loopFrame, loopCpt,
 			  scope.getAllRefs());
 	loopFrame.finish(cpt);
@@ -1179,7 +1184,7 @@ public class Java2DF extends ASTVisitor {
 	cpt.put(assign);
 	loopCpt = processStatement(map, loopFrame, loopCpt,
 				   eForStmt.getBody());
-	cpt = processLoop(scope, cpt, frame, eForStmt, 
+	cpt = processLoop(scope, frame, cpt, eForStmt, 
 			  iterValue, loopFrame, loopCpt,
 			  scope.getAllRefs());
 	loopFrame.finish(cpt);
@@ -1262,11 +1267,11 @@ public class Java2DF extends ASTVisitor {
                 DFRef ref = scope.lookupReturn();
                 ReturnNode rtrn = new ReturnNode(scope, ref, rtrnStmt);
                 rtrn.take(cpt.value);
-                frame.addBreak(new DFMeet(rtrn, DFFrame.RETURN));
+                frame.addBreak(new DFExit(rtrn, DFFrame.RETURN));
             }
 	    for (DFRef ref : scope.getAllRefs()) {
 		DFNode node = cpt.get(ref);
-		frame.addBreak(new DFMeet(node, DFFrame.RETURN));
+		frame.addBreak(new DFExit(node, DFFrame.RETURN));
 	    }
 	    
 	} else if (stmt instanceof BreakStatement) {
@@ -1276,7 +1281,7 @@ public class Java2DF extends ASTVisitor {
 	    String name = (labelName == null)? null : labelName.getIdentifier();
 	    for (DFRef ref : scope.getAllRefs()) {
 		DFNode node = cpt.get(ref);
-		frame.addBreak(new DFMeet(node, name));
+		frame.addBreak(new DFExit(node, name));
 	    }
 	    
 	} else if (stmt instanceof ContinueStatement) {
@@ -1286,7 +1291,7 @@ public class Java2DF extends ASTVisitor {
 	    String name = (labelName == null)? null : labelName.getIdentifier();
 	    for (DFRef ref : scope.getAllRefs()) {
 		DFNode node = cpt.get(ref);
-		frame.addContinue(new DFMeet(node, name));
+		frame.addContinue(new DFExit(node, name));
 	    }
 	    
 	} else if (stmt instanceof LabeledStatement) {

@@ -7,19 +7,19 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFMeet
+//  DFExit
 //
-public class DFMeet {
+public class DFExit {
 
     public DFNode node;
     public String label;
 
-    public DFMeet(DFNode node, String label) {
+    public DFExit(DFNode node, String label) {
 	this.node = node;
 	this.label = label;
     }
 
     public String toString() {
-	return ("<DFMeet: "+this.node+" -> "+this.label+">");
+	return ("<DFExit: "+this.node+" -> "+this.label+">");
     }
 }
