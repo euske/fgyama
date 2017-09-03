@@ -34,10 +34,11 @@ public class DFScope {
 	this("S"+genId(), parent);
     }
 
-    public static DFRef THIS = new DFRef(null, "THIS");
-    public static DFRef SUPER = new DFRef(null, "SUPER");
-    public static DFRef RETURN = new DFRef(null, "RETURN");
-    public static DFRef ARRAY = new DFRef(null, "[]");
+    private static DFRef THIS = new DFRef(null, "THIS");
+    private static DFRef SUPER = new DFRef(null, "SUPER");
+    private static DFRef RETURN = new DFRef(null, "RETURN");
+    private static DFRef EXCEPTION = new DFRef(null, "EXCEPTION");
+    private static DFRef ARRAY = new DFRef(null, "[]");
     
     public DFScope(String name, DFScope parent) {
 	this.name = name;
@@ -127,6 +128,10 @@ public class DFScope {
     
     public DFRef lookupReturn() {
 	return RETURN;
+    }
+    
+    public DFRef lookupException() {
+	return EXCEPTION;
     }
     
     public DFRef lookupArray() {

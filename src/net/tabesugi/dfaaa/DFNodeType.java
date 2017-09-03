@@ -19,4 +19,5 @@ public enum DFNodeType {
     Join,
     Loop,
     Terminal,
+    Exception,
 }
