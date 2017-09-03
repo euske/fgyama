@@ -573,18 +573,12 @@ public class Java2DF extends ASTVisitor {
 	// Take care of exits.
 	if (trueFrame != null) {
 	    for (DFExit exit : trueFrame.exits) {
-		DFNode node = exit.node;
-		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
-		join.recv(true, node);
-		frame.add(new DFExit(join, exit.label, exit.cont));
+		frame.add(exit.addJoin(scope, condValue, true));
 	    }
 	}
 	if (falseFrame != null) {
 	    for (DFExit exit : falseFrame.exits) {
-		DFNode node = exit.node;
-		JoinNode join = new JoinNode(scope, node.ref, null, condValue);
-		join.recv(false, node);
-		frame.add(new DFExit(join, exit.label, exit.cont));
+		frame.add(exit.addJoin(scope, condValue, false));
 	    }
 	}
 	
