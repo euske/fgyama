@@ -1012,28 +1012,25 @@ public class Java2DF extends ASTVisitor {
     
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(varStmt);
 	return processVariableDeclaration
 	    (scope, frame, cpt, varStmt.fragments());
     }
 
     public DFComponent processExpressionStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ExpressionStatement exprStmt)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(exprStmt);
 	Expression expr = exprStmt.getExpression();
 	return processExpression(scope, frame, cpt, expr);
     }
 
     public DFComponent processIfStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 IfStatement ifStmt)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(ifStmt);
 	Expression expr = ifStmt.getExpression();
 	cpt = processExpression(scope, frame, cpt, expr);
 	DFNode condValue = cpt.value;
@@ -1041,7 +1038,7 @@ public class Java2DF extends ASTVisitor {
 	Statement thenStmt = ifStmt.getThenStatement();
 	DFFrame thenFrame = new DFFrame(frame, scope.name);
 	DFComponent thenCpt = new DFComponent(scope);
-	thenCpt = processStatement(map, thenFrame, thenCpt, thenStmt);
+	thenCpt = processStatement(scope, thenFrame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFFrame elseFrame = null;
@@ -1049,7 +1046,7 @@ public class Java2DF extends ASTVisitor {
 	if (elseStmt != null) {
 	    elseFrame = new DFFrame(frame, scope.name);
 	    elseCpt = new DFComponent(scope);
-	    elseCpt = processStatement(map, elseFrame, elseCpt, elseStmt);
+	    elseCpt = processStatement(scope, elseFrame, elseCpt, elseStmt);
 	}
 
 	return processConditional(scope, frame, cpt, ifStmt,
@@ -1082,10 +1079,9 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processSwitchStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 SwitchStatement switchStmt)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(switchStmt);
 	DFFrame switchFrame = new DFFrame(frame, scope.name);
 	cpt = processExpression(scope, frame, cpt, switchStmt.getExpression());
 	DFNode switchValue = cpt.value;
@@ -1115,7 +1111,7 @@ public class Java2DF extends ASTVisitor {
 		    // no "case" statement.
 		    throw new UnsupportedSyntax(stmt);
 		}
-		caseCpt = processStatement(map, switchFrame, caseCpt, stmt);
+		caseCpt = processStatement(scope, switchFrame, caseCpt, stmt);
 	    }
 	}
 	if (caseCpt != null) {
@@ -1127,16 +1123,15 @@ public class Java2DF extends ASTVisitor {
     }
     
     public DFComponent processWhileStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 WhileStatement whileStmt, String label)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(whileStmt);
 	DFFrame loopFrame = new DFFrame(frame, scope.name, label);
 	DFComponent loopCpt = new DFComponent(scope);
 	loopCpt = processExpression(scope, frame, loopCpt,
 				    whileStmt.getExpression());
 	DFNode condValue = loopCpt.value;
-	loopCpt = processStatement(map, loopFrame, loopCpt,
+	loopCpt = processStatement(scope, loopFrame, loopCpt,
 				   whileStmt.getBody());
 	cpt = processLoop(scope, frame, cpt, whileStmt, 
 			  condValue, loopFrame, loopCpt,
@@ -1146,13 +1141,12 @@ public class Java2DF extends ASTVisitor {
     }
     
     public DFComponent processDoStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 DoStatement doStmt, String label)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(doStmt);
 	DFFrame loopFrame = new DFFrame(frame, scope.name, label);
 	DFComponent loopCpt = new DFComponent(scope);
-	loopCpt = processStatement(map, loopFrame, loopCpt,
+	loopCpt = processStatement(scope, loopFrame, loopCpt,
 				   doStmt.getBody());
 	loopCpt = processExpression(scope, frame, loopCpt,
 				    doStmt.getExpression());
@@ -1166,10 +1160,9 @@ public class Java2DF extends ASTVisitor {
     
     @SuppressWarnings("unchecked")
     public DFComponent processForStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ForStatement forStmt, String label)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(forStmt);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(scope, frame, cpt, init);
 	}
@@ -1183,7 +1176,7 @@ public class Java2DF extends ASTVisitor {
 	} else {
 	    condValue = new ConstNode(scope, null, "true");
 	}
-	loopCpt = processStatement(map, loopFrame, loopCpt,
+	loopCpt = processStatement(scope, loopFrame, loopCpt,
 				   forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
 	    loopCpt = processExpression(scope, frame, loopCpt, update);
@@ -1197,10 +1190,9 @@ public class Java2DF extends ASTVisitor {
     
     @SuppressWarnings("unchecked")
     public DFComponent processEnhancedForStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 EnhancedForStatement eForStmt, String label)
 	throws UnsupportedSyntax {
-	DFScope scope = map.get(eForStmt);
 	DFFrame loopFrame = new DFFrame(frame, scope.name, label);
 	DFComponent loopCpt = new DFComponent(scope);
 	Expression expr = eForStmt.getExpression();
@@ -1212,7 +1204,7 @@ public class Java2DF extends ASTVisitor {
 	SingleAssignNode assign = new SingleAssignNode(scope, ref, expr);
 	assign.take(iterValue);
 	cpt.put(assign);
-	loopCpt = processStatement(map, loopFrame, loopCpt,
+	loopCpt = processStatement(scope, loopFrame, loopCpt,
 				   eForStmt.getBody());
 	cpt = processLoop(scope, frame, cpt, eForStmt, 
 			  iterValue, loopFrame, loopCpt,
@@ -1222,15 +1214,15 @@ public class Java2DF extends ASTVisitor {
     }
     
     public DFComponent processStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 Statement stmt)
 	throws UnsupportedSyntax {
-	return processStatement(map, frame, cpt, stmt, null);
+	return processStatement(scope, frame, cpt, stmt, null);
     }
     
     @SuppressWarnings("unchecked")
     public DFComponent processStatement
-	(DFScopeMap map, DFFrame frame, DFComponent cpt,
+	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 Statement stmt, String label)
 	throws UnsupportedSyntax {
 	
@@ -1238,60 +1230,63 @@ public class Java2DF extends ASTVisitor {
 	    // XXX Ignore asserts.
 	    
 	} else if (stmt instanceof Block) {
-	    DFScope scope = map.get(stmt);
+	    DFScope child = scope.getChild(stmt);
 	    Block block = (Block)stmt;
 	    for (Statement cstmt : (List<Statement>) block.statements()) {
-		cpt = processStatement(map, frame, cpt, cstmt);
+		cpt = processStatement(child, frame, cpt, cstmt);
 	    }
-	    scope.finish(cpt);
+	    child.finish(cpt);
 
 	} else if (stmt instanceof EmptyStatement) {
 	    
 	} else if (stmt instanceof VariableDeclarationStatement) {
 	    cpt = processVariableDeclarationStatement
-		(map, frame, cpt, (VariableDeclarationStatement)stmt);
+		(scope, frame, cpt, (VariableDeclarationStatement)stmt);
 
 	} else if (stmt instanceof ExpressionStatement) {
 	    cpt = processExpressionStatement
-		(map, frame, cpt, (ExpressionStatement)stmt);
+		(scope, frame, cpt, (ExpressionStatement)stmt);
 		
 	} else if (stmt instanceof IfStatement) {
 	    cpt = processIfStatement
-		(map, frame, cpt, (IfStatement)stmt);
+		(scope, frame, cpt, (IfStatement)stmt);
 	    
 	} else if (stmt instanceof SwitchStatement) {
-	    DFScope scope = map.get(stmt);
+	    DFScope child = scope.getChild(stmt);
 	    cpt = processSwitchStatement
-		(map, frame, cpt, (SwitchStatement)stmt);
-	    scope.finish(cpt);
+		(child, frame, cpt, (SwitchStatement)stmt);
+	    child.finish(cpt);
 	    
 	} else if (stmt instanceof SwitchCase) {
 	    // Invalid "case" placement.
 	    throw new UnsupportedSyntax(stmt);
 	    
 	} else if (stmt instanceof WhileStatement) {
+	    DFScope child = scope.getChild(stmt);
 	    cpt = processWhileStatement
-		(map, frame, cpt, (WhileStatement)stmt, label);
+		(child, frame, cpt, (WhileStatement)stmt, label);
+	    child.finish(cpt);
 	    
 	} else if (stmt instanceof DoStatement) {
+	    DFScope child = scope.getChild(stmt);
 	    cpt = processDoStatement
-		(map, frame, cpt, (DoStatement)stmt, label);
+		(child, frame, cpt, (DoStatement)stmt, label);
+	    child.finish(cpt);
 	    
 	} else if (stmt instanceof ForStatement) {
-	    DFScope scope = map.get(stmt);
+	    DFScope child = scope.getChild(stmt);
 	    cpt = processForStatement
-		(map, frame, cpt, (ForStatement)stmt, label);
-	    scope.finish(cpt);
+		(child, frame, cpt, (ForStatement)stmt, label);
+	    child.finish(cpt);
 	    
 	} else if (stmt instanceof EnhancedForStatement) {
-	    DFScope scope = map.get(stmt);
+	    DFScope child = scope.getChild(stmt);
 	    cpt = processEnhancedForStatement
-		(map, frame, cpt, (EnhancedForStatement)stmt, label);
-	    scope.finish(cpt);
+		(child, frame, cpt, (EnhancedForStatement)stmt, label);
+	    child.finish(cpt);
 	    
 	} else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
-            DFScope scope = map.get(stmt);
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 cpt = processExpression(scope, frame, cpt, expr);
@@ -1307,7 +1302,6 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
-	    DFScope scope = map.get(stmt);
 	    SimpleName labelName = breakStmt.getLabel();
 	    String name = (labelName == null)? null : labelName.getIdentifier();
 	    for (DFRef ref : scope.getAllRefs()) {
@@ -1317,7 +1311,6 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
-	    DFScope scope = map.get(stmt);
 	    SimpleName labelName = contStmt.getLabel();
 	    String name = (labelName == null)? null : labelName.getIdentifier();
 	    for (DFRef ref : scope.getAllRefs()) {
@@ -1328,27 +1321,26 @@ public class Java2DF extends ASTVisitor {
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
 	    SimpleName labelName = labeledStmt.getLabel();
-	    cpt = processStatement(map, frame, cpt,
+	    cpt = processStatement(scope, frame, cpt,
 				   labeledStmt.getBody(),
 				   labelName.getIdentifier());	   
 	    
 	} else if (stmt instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-	    cpt = processStatement(map, frame, cpt,
+	    cpt = processStatement(scope, frame, cpt,
 				   syncStmt.getBody());
 
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore catch statements (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
-	    cpt = processStatement(map, frame, cpt,
+	    cpt = processStatement(scope, frame, cpt,
 				   tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		cpt = processStatement(map, frame, cpt, finBlock);
+		cpt = processStatement(scope, frame, cpt, finBlock);
 	    }
 	    
 	} else if (stmt instanceof ThrowStatement) {
-	    DFScope scope = map.get(stmt);
 	    ThrowStatement throwStmt = (ThrowStatement)stmt;
 	    cpt = processExpression(scope, frame, cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(scope, stmt, cpt.value);
@@ -1360,7 +1352,6 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof ConstructorInvocation) {
 	    // XXX ignore all side effects.
-	    DFScope scope = map.get(stmt);
 	    ConstructorInvocation ci = (ConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) ci.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
@@ -1368,7 +1359,6 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof SuperConstructorInvocation) {
 	    // XXX ignore all side effects.
-	    DFScope scope = map.get(stmt);
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) sci.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
@@ -1389,17 +1379,17 @@ public class Java2DF extends ASTVisitor {
      * Lists all the variables defined inside a block.
      */
     @SuppressWarnings("unchecked")
-    public void buildScope(DFScopeMap map, DFScope scope, Statement ast)
+    public void buildScope(DFScope scope, Statement ast)
 	throws UnsupportedSyntax {
 	
 	if (ast instanceof AssertStatement) {
 
 	} else if (ast instanceof Block) {
 	    Block block = (Block)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
-		buildScope(map, child, stmt);
+		buildScope(child, stmt);
 	    }
 	    
 	} else if (ast instanceof EmptyStatement) {
@@ -1415,87 +1405,87 @@ public class Java2DF extends ASTVisitor {
 		scope.add(varName.getIdentifier(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
-		    buildScope(map, scope, expr);
+		    buildScope(scope, expr);
 		}
 	    }
 
 	} else if (ast instanceof ExpressionStatement) {
 	    ExpressionStatement exprStmt = (ExpressionStatement)ast;
 	    Expression expr = exprStmt.getExpression();
-	    buildScope(map, scope, expr);
+	    buildScope(scope, expr);
 	    
 	} else if (ast instanceof ReturnStatement) {
 	    ReturnStatement returnStmt = (ReturnStatement)ast;
 	    Expression expr = returnStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    
 	} else if (ast instanceof IfStatement) {
 	    IfStatement ifStmt = (IfStatement)ast;
 	    Expression expr = ifStmt.getExpression();
-	    buildScope(map, scope, expr);
+	    buildScope(scope, expr);
 	    Statement thenStmt = ifStmt.getThenStatement();
-	    buildScope(map, scope, thenStmt);
+	    buildScope(scope, thenStmt);
 	    Statement elseStmt = ifStmt.getElseStatement();
 	    if (elseStmt != null) {
-		buildScope(map, scope, elseStmt);
+		buildScope(scope, elseStmt);
 	    }
 	    
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    Expression expr = switchStmt.getExpression();
-	    buildScope(map, child, expr);
+	    buildScope(child, expr);
 	    for (Statement stmt :
 		     (List<Statement>) switchStmt.statements()) {
-		buildScope(map, child, stmt);
+		buildScope(child, stmt);
 	    }
 	    
 	} else if (ast instanceof SwitchCase) {
 	    SwitchCase switchCase = (SwitchCase)ast;
 	    Expression expr = switchCase.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    Expression expr = whileStmt.getExpression();
-	    buildScope(map, child, expr);
+	    buildScope(child, expr);
 	    Statement stmt = whileStmt.getBody();
-	    buildScope(map, child, stmt);
+	    buildScope(child, stmt);
 	    
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    Statement stmt = doStmt.getBody();
-	    buildScope(map, child, stmt);
+	    buildScope(child, stmt);
 	    Expression expr = doStmt.getExpression();
-	    buildScope(map, child, expr);
+	    buildScope(child, expr);
 	    
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
-		buildScope(map, child, init);
+		buildScope(child, init);
 	    }
 	    Expression expr = forStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, child, expr);
+		buildScope(child, expr);
 	    }
 	    Statement stmt = forStmt.getBody();
-	    buildScope(map, child, stmt);
+	    buildScope(child, stmt);
 	    for (Expression update :
 		     (List<Expression>) forStmt.updaters()) {
-		buildScope(map, child, update);
+		buildScope(child, update);
 	    }
 	    
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    DFScope child = new DFScope(scope);
+	    DFScope child = new DFScope(scope, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX ignore modifiers and dimensions.
 	    Type varType = decl.getType();
@@ -1503,10 +1493,10 @@ public class Java2DF extends ASTVisitor {
 	    child.add(varName.getIdentifier(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, child, expr);
+		buildScope(child, expr);
 	    }
 	    Statement stmt = eForStmt.getBody();
-	    buildScope(map, child, stmt);
+	    buildScope(child, stmt);
 	    
 	} else if (ast instanceof BreakStatement) {
 	    
@@ -1515,52 +1505,51 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)ast;
 	    Statement stmt = labeledStmt.getBody();
-	    buildScope(map, scope, stmt);
+	    buildScope(scope, stmt);
 	    
 	} else if (ast instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
 	    Block block = syncStmt.getBody();
-	    buildScope(map, scope, block);
+	    buildScope(scope, block);
 
 	} else if (ast instanceof TryStatement) {
 	    TryStatement tryStmt = (TryStatement)ast;
 	    Block block = tryStmt.getBody();
-	    buildScope(map, scope, block);
+	    buildScope(scope, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
-		DFScope child = new DFScope(scope);
+		DFScope child = new DFScope(scope, cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX ignore modifiers and dimensions.
 		Type varType = decl.getType();
 		SimpleName varName = decl.getName();
 		child.add(varName.getIdentifier(), varType);
-		buildScope(map, child, cc.getBody());
-		map.put(cc, child);
+		buildScope(child, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		buildScope(map, scope, finBlock);
+		buildScope(scope, finBlock);
 	    }
 	    
 	} else if (ast instanceof ThrowStatement) {
 	    ThrowStatement throwStmt = (ThrowStatement)ast;
 	    Expression expr = throwStmt.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    
 	} else if (ast instanceof ConstructorInvocation) {
 	    ConstructorInvocation ci = (ConstructorInvocation)ast;
 	    for (Expression expr :
 		     (List<Expression>) ci.arguments()) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    
 	} else if (ast instanceof SuperConstructorInvocation) {
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
 	    for (Expression expr :
 		     (List<Expression>) sci.arguments()) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	} else if (ast instanceof TypeDeclarationStatement) {
 
@@ -1568,15 +1557,13 @@ public class Java2DF extends ASTVisitor {
 	    throw new UnsupportedSyntax(ast);
 	    
 	}
-	
-	map.put(ast, scope);
     }
 	
     /**
      * Lists all the variables defined within an expression.
      */
     @SuppressWarnings("unchecked")
-    public void buildScope(DFScopeMap map, DFScope scope, Expression ast)
+    public void buildScope(DFScope scope, Expression ast)
 	throws UnsupportedSyntax {
 	
 	if (ast instanceof Annotation) {
@@ -1605,42 +1592,42 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression prefix = (PrefixExpression)ast;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    buildScope(map, scope, operand);
+	    buildScope(scope, operand);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
-		buildScopeLeft(map, scope, operand);
+		buildScopeLeft(scope, operand);
 	    }
 	    
 	} else if (ast instanceof PostfixExpression) {
 	    PostfixExpression postfix = (PostfixExpression)ast;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
-	    buildScope(map, scope, operand);
+	    buildScope(scope, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
-		buildScopeLeft(map, scope, operand);
+		buildScopeLeft(scope, operand);
 	    }
 	    
 	} else if (ast instanceof InfixExpression) {
 	    InfixExpression infix = (InfixExpression)ast;
 	    InfixExpression.Operator op = infix.getOperator();
 	    Expression loperand = infix.getLeftOperand();
-	    buildScope(map, scope, loperand);
+	    buildScope(scope, loperand);
 	    Expression roperand = infix.getRightOperand();
-	    buildScope(map, scope, roperand);
+	    buildScope(scope, roperand);
     
 	} else if (ast instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-	    buildScope(map, scope, paren.getExpression());
+	    buildScope(scope, paren.getExpression());
 	    
 	} else if (ast instanceof Assignment) {
 	    Assignment assn = (Assignment)ast;
 	    Assignment.Operator op = assn.getOperator();
-	    buildScopeLeft(map, scope, assn.getLeftHandSide());
+	    buildScopeLeft(scope, assn.getLeftHandSide());
 	    if (op != Assignment.Operator.ASSIGN) {
-		buildScope(map, scope, assn.getLeftHandSide());
+		buildScope(scope, assn.getLeftHandSide());
 	    }
-	    buildScope(map, scope, assn.getRightHandSide());
+	    buildScope(scope, assn.getRightHandSide());
 
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
@@ -1652,7 +1639,7 @@ public class Java2DF extends ASTVisitor {
 		DFRef ref = scope.add(varName.getIdentifier(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
-		    buildScope(map, scope, expr);
+		    buildScope(scope, expr);
 		    scope.addOutput(ref);
 		}
 	    }
@@ -1661,49 +1648,49 @@ public class Java2DF extends ASTVisitor {
 	    MethodInvocation invoke = (MethodInvocation)ast;
 	    Expression expr = invoke.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    for (Expression arg :
 		     (List<Expression>) invoke.arguments()) {
-		buildScope(map, scope, arg);
+		buildScope(scope, arg);
 	    }
 	    
 	} else if (ast instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation si = (SuperMethodInvocation)ast;
 	    for (Expression arg :
 		     (List<Expression>) si.arguments()) {
-		buildScope(map, scope, arg);
+		buildScope(scope, arg);
 	    }
 	    
 	} else if (ast instanceof ArrayCreation) {
 	    ArrayCreation ac = (ArrayCreation)ast;
 	    for (Expression dim :
 		     (List<Expression>) ac.dimensions()) {
-		buildScope(map, scope, dim);
+		buildScope(scope, dim);
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
-		buildScope(map, scope, init);
+		buildScope(scope, init);
 	    }
 	    
 	} else if (ast instanceof ArrayInitializer) {
 	    ArrayInitializer init = (ArrayInitializer)ast;
 	    for (Expression expr :
 		     (List<Expression>) init.expressions()) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    
 	} else if (ast instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)ast;
-	    buildScope(map, scope, aa.getArray());
-	    buildScope(map, scope, aa.getIndex());
+	    buildScope(scope, aa.getArray());
+	    buildScope(scope, aa.getIndex());
 	    DFRef ref = scope.lookupArray();
 	    scope.addInput(ref);
 	    
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
-	    buildScope(map, scope, fa.getExpression());
+	    buildScope(scope, fa.getExpression());
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    scope.addInput(ref);
 	    
@@ -1717,35 +1704,35 @@ public class Java2DF extends ASTVisitor {
 	    QualifiedName qn = (QualifiedName)ast;
 	    SimpleName fieldName = qn.getName();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    buildScope(map, scope, qn.getQualifier());
+	    buildScope(scope, qn.getQualifier());
 	    scope.addInput(ref);
 	    
 	} else if (ast instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)ast;
-	    buildScope(map, scope, cast.getExpression());
+	    buildScope(scope, cast.getExpression());
 	    
 	} else if (ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
 	    Expression expr = cstr.getExpression();
 	    if (expr != null) {
-		buildScope(map, scope, expr);
+		buildScope(scope, expr);
 	    }
 	    for (Expression arg :
 		     (List<Expression>) cstr.arguments()) {
-		buildScope(map, scope, arg);
+		buildScope(scope, arg);
 	    }
 	    // XXX ignore getAnonymousClassDeclaration()
 	    // It will eventually be picked up as MethodDeclaration.
 	    
 	} else if (ast instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)ast;
-	    buildScope(map, scope, cond.getExpression());
-	    buildScope(map, scope, cond.getThenExpression());
-	    buildScope(map, scope, cond.getElseExpression());
+	    buildScope(scope, cond.getExpression());
+	    buildScope(scope, cond.getThenExpression());
+	    buildScope(scope, cond.getElseExpression());
 	    
 	} else if (ast instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)ast;
-	    buildScope(map, scope, instof.getLeftOperand());
+	    buildScope(scope, instof.getLeftOperand());
 	    
 	} else {
 	    // LambdaExpression
@@ -1757,15 +1744,13 @@ public class Java2DF extends ASTVisitor {
 	    throw new UnsupportedSyntax(ast);
 	    
 	}
-
-	map.put(ast, scope);
     }
 
     /**
      * Lists all the l-values for an expression.
      */
     @SuppressWarnings("unchecked")
-    public void buildScopeLeft(DFScopeMap map, DFScope scope, Expression ast)
+    public void buildScopeLeft(DFScope scope, Expression ast)
 	throws UnsupportedSyntax {
 	
 	if (ast instanceof SimpleName) {
@@ -1775,15 +1760,15 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)ast;
-	    buildScope(map, scope, aa.getArray());
-	    buildScope(map, scope, aa.getIndex());
+	    buildScope(scope, aa.getArray());
+	    buildScope(scope, aa.getIndex());
 	    DFRef ref = scope.lookupArray();
 	    scope.addOutput(ref);
 	    
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
-	    buildScope(map, scope, fa.getExpression());
+	    buildScope(scope, fa.getExpression());
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    scope.addOutput(ref);
 	    
@@ -1791,15 +1776,13 @@ public class Java2DF extends ASTVisitor {
 	    QualifiedName qn = (QualifiedName)ast;
 	    SimpleName fieldName = qn.getName();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    buildScope(map, scope, qn.getQualifier());
+	    buildScope(scope, qn.getQualifier());
 	    scope.addOutput(ref);
 	    
 	} else {
 	    throw new UnsupportedSyntax(ast);
 	    
 	}
-
-	map.put(ast, scope);
     }
     
     /** 
@@ -1846,12 +1829,11 @@ public class Java2DF extends ASTVisitor {
 	// Setup an initial scope.
 	DFFrame frame = new DFFrame(null, scope.name, DFFrame.RETURN);
 	DFComponent cpt = buildMethodDeclaration(scope, method);
-	DFScopeMap map = new DFScopeMap();
-	buildScope(map, scope, funcBlock);
+	buildScope(scope, funcBlock);
 	//scope.dump();
 
 	// Process the function body.
-	cpt = processStatement(map, frame, cpt, funcBlock);
+	cpt = processStatement(scope, frame, cpt, funcBlock);
 	frame.finish(cpt);
 
         // Collapse redundant nodes.

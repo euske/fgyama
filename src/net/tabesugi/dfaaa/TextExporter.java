@@ -73,7 +73,7 @@ class TextExporter {
 		this.writer.newLine();
 	    }
 	}
-	for (DFScope child : scope.children) {
+	for (DFScope child : scope.children.values()) {
 	    this.writeGraph(child);
 	}
 	if (scope.parent == null) {

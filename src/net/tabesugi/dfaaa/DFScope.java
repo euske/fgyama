@@ -15,7 +15,7 @@ public class DFScope {
     public String name;
     public DFScope parent;
     public List<DFNode> nodes;
-    public List<DFScope> children;
+    public Map<ASTNode, DFScope> children;
 
     public Map<String, DFVar> vars;
     public Set<DFRef> inputs;
@@ -27,11 +27,11 @@ public class DFScope {
     }
 
     public DFScope(String name) {
-	this(name, null);
+	this(name, null, null);
     }
 
-    public DFScope(DFScope parent) {
-	this("S"+genId(), parent);
+    public DFScope(DFScope parent, ASTNode ast) {
+	this("S"+genId(), parent, ast);
     }
 
     private static DFRef THIS = new DFRef(null, "THIS");
@@ -40,14 +40,14 @@ public class DFScope {
     private static DFRef EXCEPTION = new DFRef(null, "EXCEPTION");
     private static DFRef ARRAY = new DFRef(null, "[]");
     
-    public DFScope(String name, DFScope parent) {
+    public DFScope(String name, DFScope parent, ASTNode ast) {
 	this.name = name;
 	this.parent = parent;
 	if (parent != null) {
-	    parent.children.add(this);
+	    parent.children.put(ast, this);
 	}
 	this.nodes = new ArrayList<DFNode>();
-	this.children = new ArrayList<DFScope>();
+	this.children = new HashMap<ASTNode, DFScope>();
 	this.vars = new HashMap<String, DFVar>();
 	this.inputs = new HashSet<DFRef>();
 	this.outputs = new HashSet<DFRef>();
@@ -91,7 +91,7 @@ public class DFScope {
 	for (DFVar var : this.vars.values()) {
 	    out.println(i2+"defined: "+var);
 	}
-	for (DFScope scope : this.children) {
+	for (DFScope scope : this.children.values()) {
 	    scope.dump(out, i2);
 	}
 	out.println(indent+"}");
@@ -168,6 +168,10 @@ public class DFScope {
 	return refs;
     }
 
+    public DFScope getChild(ASTNode ast) {
+	return this.children.get(ast);
+    }
+
     public void cleanup() {
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : this.nodes) {
@@ -190,9 +194,8 @@ public class DFScope {
                 link0.src.connect(link1.dst, 1, link0.type, name);
             }
         }
-	for (DFScope child : this.children) {
+	for (DFScope child : this.children.values()) {
 	    child.cleanup();
 	}
     }			   
 }
-
