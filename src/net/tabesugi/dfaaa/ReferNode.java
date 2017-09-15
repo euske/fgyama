@@ -7,23 +7,22 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-// DistNode: a DFNode that distributes a value to multiple nodes.
-public class DistNode extends DFNode {
+// ReferNode: reference node.
+public abstract class ReferNode extends ProgNode {
 
-    public DistNode(DFScope scope, DFRef ref) {
-	super(scope, ref);
+    public ReferNode(DFScope scope, DFRef ref, ASTNode ast) {
+	super(scope, ref, ast);
     }
 
     public DFNodeType type() {
-	return DFNodeType.Dist;
+	return DFNodeType.Refer;
     }
 
     public String label() {
-	return null;
+	return "ref";
     }
 
     public boolean canOmit() {
 	return true;
     }
 }
-

@@ -22,6 +22,10 @@ public abstract class AssignNode extends ProgNode {
 	return "assign";
     }
 
+    public boolean canOmit() {
+	return true;
+    }
+
     abstract public void take(DFNode value);
 }
 

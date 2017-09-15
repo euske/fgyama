@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.*;
 //  DFNodeType
 //
 public enum DFNodeType {
-    None,
+    Dist,
     Refer,
     Const,
     Operator,

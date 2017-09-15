@@ -23,18 +23,6 @@ class UnsupportedSyntax extends Exception {
 }
 
 
-// ReferNode: reference node.
-abstract class ReferNode extends ProgNode {
-
-    public ReferNode(DFScope scope, DFRef ref, ASTNode ast) {
-	super(scope, ref, ast);
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Refer;
-    }
-}
-
 // SingleAssignNode:
 class SingleAssignNode extends AssignNode {
 
@@ -216,10 +204,6 @@ class VarRefNode extends ReferNode {
 	super(scope, ref, ast);
 	this.value = value;
 	value.connect(this, 1);
-    }
-
-    public String label() {
-	return "ref";
     }
 }
 

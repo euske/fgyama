@@ -44,6 +44,10 @@ public abstract class DFNode {
 
     abstract public String label();
 
+    public boolean canOmit() {
+	return false;
+    }
+
     public void accept(DFNode node) {
 	assert this.recv.size() == 0;
 	node.connect(this, 1);

@@ -175,7 +175,7 @@ public class DFScope {
     public void cleanup() {
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : this.nodes) {
-            if (node.type() == DFNodeType.None &&
+            if (node.canOmit() &&
                 node.send.size() == 1 &&
                 node.recv.size() == 1) {
                 removed.add(node);
