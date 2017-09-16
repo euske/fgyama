@@ -26,12 +26,6 @@ public class DFScope {
 	this(name, null, null);
     }
 
-    private static DFRef THIS = new DFRef(null, "THIS");
-    private static DFRef SUPER = new DFRef(null, "SUPER");
-    private static DFRef RETURN = new DFRef(null, "RETURN");
-    private static DFRef EXCEPTION = new DFRef(null, "EXCEPTION");
-    private static DFRef ARRAY = new DFRef(null, "[]");
-    
     public DFScope(String name, DFScope parent, ASTNode ast) {
 	this.name = name;
 	this.parent = parent;
@@ -117,26 +111,6 @@ public class DFScope {
 	}
     }
 
-    public DFRef lookupThis() {
-	return THIS;
-    }
-    
-    public DFRef lookupSuper() {
-	return SUPER;
-    }
-    
-    public DFRef lookupReturn() {
-	return RETURN;
-    }
-    
-    public DFRef lookupException() {
-	return EXCEPTION;
-    }
-    
-    public DFRef lookupArray() {
-	return ARRAY;
-    }
-    
     public DFRef lookupField(String name) {
 	return this.lookupVar("."+name);
     }
