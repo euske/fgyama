@@ -25,6 +25,12 @@ public class DFFrame {
 	this.label = label;
     }
 
+    public DFFrame(DFFrame parent) {
+	this.label = parent.label;
+	this.inputs.addAll(parent.inputs);
+	this.outputs.addAll(parent.outputs);
+    }
+
     public String toString() {
 	return ("<DFFrame("+this.label+")>");
     }
@@ -53,7 +59,7 @@ public class DFFrame {
 	this.exits.add(exit);
     }
 
-    public void captureAll(DFComponent cpt, String label) {
+    public void addExitAll(DFComponent cpt, String label) {
 	for (DFRef ref : this.getInsAndOuts()) {
 	    DFNode node = cpt.get(ref);
 	    this.addExit(new DFExit(node, label));
@@ -65,8 +71,10 @@ public class DFFrame {
 	    if (exit.label == null || exit.label.equals(this.label)) {
 		DFNode node = exit.node;
 		if (node instanceof JoinNode) {
-		    DFNode src = cpt.get(node.ref);
-		    ((JoinNode)node).close(src);
+		    JoinNode join = (JoinNode)node;
+		    if (!join.isClosed()) {
+			join.close(cpt.get(node.ref));
+		    }
 		}
 		cpt.put(node);
 	    }

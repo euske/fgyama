@@ -42,9 +42,11 @@ public class JoinNode extends CondNode {
 
     public void close(DFNode node) {
 	if (!this.recvTrue) {
+	    this.recvTrue = true;
 	    node.connect(this, 1, "true");
 	}
 	if (!this.recvFalse) {
+	    this.recvFalse = true;
 	    node.connect(this, 2, "false");
 	}
     }
