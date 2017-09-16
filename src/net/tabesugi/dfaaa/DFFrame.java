@@ -12,33 +12,31 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     public DFFrame parent;
-    public String name;
+    public DFScope scope;
     public String label;
     public List<DFExit> exits;
 
-    public static String RETURN = "@RETURN";
-    
-    public DFFrame(DFFrame parent, String name) {
-	this(parent, name, null);
-    }
-    
-    public DFFrame(DFFrame parent, String name, String label) {
+    public DFFrame(DFFrame parent, DFScope scope, String label) {
 	this.parent = parent;
-	this.name = name;
+	this.scope = scope;
 	this.label = label;
 	this.exits = new ArrayList<DFExit>();
     }
 
     public String toString() {
-	if (this.label == null) {
-	    return ("<DFFrame("+this.name+")>");
-	} else {
-	    return ("<DFFrame("+this.name+": "+this.label+")>");
-	}
+	return ("<DFFrame("+this.scope.name+": "+this.label+")>");
     }
     
     public void add(DFExit exit) {
 	this.exits.add(exit);
+    }
+
+    public void capture(DFComponent cpt, String label) {
+	// XXX use a different set from scope.
+	for (DFRef ref : this.scope.getInsAndOuts()) {
+	    DFNode node = cpt.get(ref);
+	    this.add(new DFExit(node, label));
+	}
     }
 
     public void finish(DFComponent cpt) {

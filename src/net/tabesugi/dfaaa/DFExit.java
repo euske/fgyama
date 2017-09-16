@@ -15,10 +15,6 @@ public class DFExit {
     public String label;
     public boolean cont;
 
-    public DFExit(DFNode node) {
-	this(node, null);
-    }
-    
     public DFExit(DFNode node, String label) {
 	this(node, label, false);
     }
