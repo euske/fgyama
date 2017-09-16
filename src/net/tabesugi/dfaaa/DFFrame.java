@@ -13,11 +13,13 @@ public class DFFrame {
 
     public String label;
     public Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
-    public int baseId = 0;
     
     public Set<DFRef> inputs = new HashSet<DFRef>();
     public Set<DFRef> outputs = new HashSet<DFRef>();
     public List<DFExit> exits = new ArrayList<DFExit>();
+
+    public static String TRY = "@TRY";
+    public static String METHOD = "@METHOD";
 
     public DFFrame(String label) {
 	this.label = label;
@@ -27,8 +29,7 @@ public class DFFrame {
 	return ("<DFFrame("+this.label+")>");
     }
     
-    public DFFrame addChild(String baselabel, ASTNode ast) {
-	String label = this.label+"_"+baselabel+(this.baseId++);
+    public DFFrame addChild(String label, ASTNode ast) {
 	DFFrame frame = new DFFrame(label);
 	this.children.put(ast, frame);
 	return frame;

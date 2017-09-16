@@ -863,7 +863,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    cpt.value = call;
             if (call.exception != null) {
-                frame.addExit(new DFExit(call.exception, "@call"));
+                frame.addExit(new DFExit(call.exception, DFFrame.TRY));
             }
 	    
 	} else if (expr instanceof SuperMethodInvocation) {
@@ -1035,16 +1035,16 @@ public class Java2DF extends ASTVisitor {
 	DFNode condValue = cpt.value;
 	
 	Statement thenStmt = ifStmt.getThenStatement();
-	DFFrame thenFrame = new DFFrame("@then");
-	DFComponent thenCpt = new DFComponent(scope);
+	DFFrame thenFrame = new DFFrame(null);
+	DFComponent thenCpt = new DFComponent();
 	thenCpt = processStatement(scope, thenFrame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFFrame elseFrame = null;
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
-	    elseFrame = new DFFrame("@else");
-	    elseCpt = new DFComponent(scope);
+	    elseFrame = new DFFrame(null);
+	    elseCpt = new DFComponent();
 	    elseCpt = processStatement(scope, elseFrame, elseCpt, elseStmt);
 	}
 
@@ -1098,7 +1098,7 @@ public class Java2DF extends ASTVisitor {
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(switchScope, stmt, switchValue);
-		caseCpt = new DFComponent(switchScope);
+		caseCpt = new DFComponent();
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(switchScope, frame, cpt, expr);
@@ -1129,7 +1129,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(whileStmt);
 	DFFrame loopFrame = frame.getChild(whileStmt);
-	DFComponent loopCpt = new DFComponent(loopScope);
+	DFComponent loopCpt = new DFComponent();
 	loopCpt = processExpression(loopScope, frame, loopCpt,
 				    whileStmt.getExpression());
 	DFNode condValue = loopCpt.value;
@@ -1148,7 +1148,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(doStmt);
 	DFFrame loopFrame = frame.getChild(doStmt);
-	DFComponent loopCpt = new DFComponent(loopScope);
+	DFComponent loopCpt = new DFComponent();
 	loopCpt = processStatement(loopScope, loopFrame, loopCpt,
 				   doStmt.getBody());
 	loopCpt = processExpression(loopScope, loopFrame, loopCpt,
@@ -1168,7 +1168,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(forStmt);
 	DFFrame loopFrame = frame.getChild(forStmt);
-	DFComponent loopCpt = new DFComponent(loopScope);
+	DFComponent loopCpt = new DFComponent();
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(loopScope, frame, cpt, init);
 	}
@@ -1199,7 +1199,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(eForStmt);
 	DFFrame loopFrame = frame.getChild(eForStmt);
-	DFComponent loopCpt = new DFComponent(loopScope);
+	DFComponent loopCpt = new DFComponent();
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
@@ -1275,9 +1275,9 @@ public class Java2DF extends ASTVisitor {
             if (expr != null) {
                 cpt = processExpression(scope, frame, cpt, expr);
                 ReturnNode rtrn = new ReturnNode(scope, rtrnStmt, cpt.value);
-                frame.addExit(new DFExit(rtrn, "@return"));
+                frame.addExit(new DFExit(rtrn, DFFrame.METHOD));
             }
-	    frame.captureAll(cpt, "@return");
+	    frame.captureAll(cpt, DFFrame.METHOD);
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
@@ -1305,7 +1305,8 @@ public class Java2DF extends ASTVisitor {
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore catch statements (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
-	    cpt = processStatement(scope, frame, cpt,
+	    DFFrame tryFrame = frame.getChild(tryStmt);
+	    cpt = processStatement(scope, tryFrame, cpt,
 				   tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
@@ -1316,8 +1317,8 @@ public class Java2DF extends ASTVisitor {
 	    ThrowStatement throwStmt = (ThrowStatement)stmt;
 	    cpt = processExpression(scope, frame, cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(scope, stmt, cpt.value);
-            frame.addExit(new DFExit(exception, "@throw"));
-	    frame.captureAll(cpt, "@throw");
+            frame.addExit(new DFExit(exception, DFFrame.TRY));
+	    frame.captureAll(cpt, DFFrame.TRY);
 	    
 	} else if (stmt instanceof ConstructorInvocation) {
 	    // XXX ignore all side effects.
@@ -1404,7 +1405,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
 	    DFScope childScope = scope.addChild("switch", ast);
-	    DFFrame childFrame = frame.addChild("@switch", ast);
+	    DFFrame childFrame = frame.addChild(null, ast);
 	    Expression expr = switchStmt.getExpression();
 	    buildScope(childScope, frame, expr);
 	    for (Statement stmt :
@@ -1422,7 +1423,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
 	    DFScope childScope = scope.addChild("while", ast);
-	    DFFrame childFrame = frame.addChild("@while", ast);
+	    DFFrame childFrame = frame.addChild(null, ast);
 	    Expression expr = whileStmt.getExpression();
 	    buildScope(childScope, frame, expr);
 	    Statement stmt = whileStmt.getBody();
@@ -1431,7 +1432,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
 	    DFScope childScope = scope.addChild("do", ast);
-	    DFFrame childFrame = frame.addChild("@do", ast);
+	    DFFrame childFrame = frame.addChild(null, ast);
 	    Statement stmt = doStmt.getBody();
 	    buildScope(childScope, childFrame, stmt);
 	    Expression expr = doStmt.getExpression();
@@ -1440,7 +1441,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
 	    DFScope childScope = scope.addChild("for", ast);
-	    DFFrame childFrame = frame.addChild("@for", ast);
+	    DFFrame childFrame = frame.addChild(null, ast);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
 		buildScope(childScope, frame, init);
@@ -1459,7 +1460,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
 	    DFScope childScope = scope.addChild("efor", ast);
-	    DFFrame childFrame = frame.addChild("@efor", ast);
+	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX ignore modifiers and dimensions.
 	    Type varType = decl.getType();
@@ -1492,7 +1493,8 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof TryStatement) {
 	    TryStatement tryStmt = (TryStatement)ast;
 	    Block block = tryStmt.getBody();
-	    buildScope(scope, frame, block);
+	    DFFrame tryFrame = frame.addChild(DFFrame.TRY, ast);
+	    buildScope(scope, tryFrame, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
 		DFScope childScope = scope.addChild("catch", cc);
@@ -1770,7 +1772,7 @@ public class Java2DF extends ASTVisitor {
 	(DFScope scope, MethodDeclaration method)
 	throws UnsupportedSyntax {
 	
-	DFComponent cpt = new DFComponent(scope);
+	DFComponent cpt = new DFComponent();
 	// XXX ignore isContructor()
 	// XXX ignore getReturnType2()
 	int i = 0;
@@ -1803,7 +1805,7 @@ public class Java2DF extends ASTVisitor {
 				   
 	// Setup an initial scope.
 	DFScope scope = new DFScope(funcName);
-	DFFrame frame = new DFFrame(funcName);
+	DFFrame frame = new DFFrame(DFFrame.METHOD);
 	
 	DFComponent cpt = buildMethodDeclaration(scope, method);
 	buildScope(scope, frame, funcBlock);

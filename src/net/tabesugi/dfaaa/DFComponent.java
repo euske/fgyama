@@ -11,14 +11,12 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFComponent {
 
-    public DFScope scope;
     public Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
     public Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
     public DFNode value = null;
     public AssignNode assign = null;
     
-    public DFComponent(DFScope scope) {
-	this.scope = scope;
+    public DFComponent() {
     }
 
     public void dump() {
@@ -50,7 +48,7 @@ public class DFComponent {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
-		node = new DistNode(this.scope, ref);
+		node = new DistNode(ref.scope, ref);
 		this.inputs.put(ref, node);
 	    }
 	}
