@@ -14,40 +14,35 @@ public class DFScope {
 
     public String name;
     public DFScope parent;
-    public List<DFNode> nodes;
     public Map<ASTNode, DFScope> children;
-
-    public Map<String, DFVar> vars;
-    public Set<DFRef> inputs;
-    public Set<DFRef> outputs;
     public int baseId;
 
+    public List<DFNode> nodes;
+    public Map<String, DFVar> vars;
+
     public DFScope(String name) {
-	this(name, null, null);
+	this(name, null);
     }
 
-    public DFScope(String name, DFScope parent, ASTNode ast) {
+    public DFScope(String name, DFScope parent) {
 	this.name = name;
 	this.parent = parent;
-	if (parent != null) {
-	    parent.children.put(ast, this);
-	}
-	this.nodes = new ArrayList<DFNode>();
 	this.children = new HashMap<ASTNode, DFScope>();
-	this.vars = new HashMap<String, DFVar>();
-	this.inputs = new HashSet<DFRef>();
-	this.outputs = new HashSet<DFRef>();
 	this.baseId = 0;
+	
+	this.nodes = new ArrayList<DFNode>();
+	this.vars = new HashMap<String, DFVar>();
     }
 
     public String toString() {
 	return ("<DFScope("+this.name+")>");
     }
 
-    public String genName(String basename) {
-	String name = this.name+"_"+basename+this.baseId;
-	this.baseId++;
-	return name;
+    public DFScope addChild(String basename, ASTNode ast) {
+	String name = this.name+"_"+basename+(this.baseId++);
+	DFScope scope = new DFScope(name, this);
+	this.children.put(ast, scope);
+	return scope;
     }
 
     public int addNode(DFNode node) {
@@ -66,21 +61,6 @@ public class DFScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+this.name+" {");
 	String i2 = indent + "  ";
-	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : this.inputs) {
-	    inputs.append(" "+ref);
-	}
-	out.println(i2+"inputs:"+inputs);
-	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : this.outputs) {
-	    outputs.append(" "+ref);
-	}
-	out.println(i2+"outputs:"+outputs);
-	StringBuilder inouts = new StringBuilder();
-	for (DFRef ref : this.getInsAndOuts()) {
-	    inouts.append(" "+ref);
-	}
-	out.println(i2+"in/outs:"+inouts);
 	for (DFVar var : this.vars.values()) {
 	    out.println(i2+"defined: "+var);
 	}
@@ -119,26 +99,6 @@ public class DFScope {
 	for (DFRef ref : this.vars.values()) {
 	    cpt.removeRef(ref);
 	}
-    }
-
-    public void addInput(DFRef ref) {
-	if (this.parent != null) {
-	    this.parent.addInput(ref);
-	}
-	this.inputs.add(ref);
-    }
-
-    public void addOutput(DFRef ref) {
-	if (this.parent != null) {
-	    this.parent.addOutput(ref);
-	}
-	this.outputs.add(ref);
-    }
-
-    public Set<DFRef> getInsAndOuts() {
-	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
-	refs.retainAll(this.outputs);
-	return refs;
     }
 
     public DFScope getChild(ASTNode ast) {

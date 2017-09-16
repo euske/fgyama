@@ -11,31 +11,57 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFFrame {
 
-    public DFFrame parent;
-    public DFScope scope;
     public String label;
+    public Map<ASTNode, DFFrame> children;
+    public int baseId;
+    
+    public Set<DFRef> inputs;
+    public Set<DFRef> outputs;
     public List<DFExit> exits;
 
-    public DFFrame(DFFrame parent, DFScope scope, String label) {
-	this.parent = parent;
-	this.scope = scope;
+    public DFFrame(String label) {
 	this.label = label;
+	this.children = new HashMap<ASTNode, DFFrame>();
+	this.baseId = 0;
+	
+	this.inputs = new HashSet<DFRef>();
+	this.outputs = new HashSet<DFRef>();
 	this.exits = new ArrayList<DFExit>();
     }
 
     public String toString() {
-	return ("<DFFrame("+this.scope.name+": "+this.label+")>");
+	return ("<DFFrame("+this.label+")>");
     }
     
-    public void add(DFExit exit) {
+    public DFFrame addChild(String baselabel, ASTNode ast) {
+	String label = this.label+"_"+baselabel+(this.baseId++);
+	DFFrame frame = new DFFrame(label);
+	this.children.put(ast, frame);
+	return frame;
+    }
+
+    public void addInput(DFRef ref) {
+	this.inputs.add(ref);
+    }
+
+    public void addOutput(DFRef ref) {
+	this.outputs.add(ref);
+    }
+
+    public Set<DFRef> getInsAndOuts() {
+	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
+	refs.retainAll(this.outputs);
+	return refs;
+    }
+
+    public void addExit(DFExit exit) {
 	this.exits.add(exit);
     }
 
-    public void capture(DFComponent cpt, String label) {
-	// XXX use a different set from scope.
-	for (DFRef ref : this.scope.getInsAndOuts()) {
+    public void captureAll(DFComponent cpt, String label) {
+	for (DFRef ref : this.getInsAndOuts()) {
 	    DFNode node = cpt.get(ref);
-	    this.add(new DFExit(node, label));
+	    this.addExit(new DFExit(node, label));
 	}
     }
 
@@ -52,4 +78,35 @@ public class DFFrame {
 	}
     }
 
+    public DFFrame getChild(ASTNode ast) {
+	return this.children.get(ast);
+    }
+
+    public void dump() {
+	dump(System.out, "");
+    }
+    
+    public void dump(PrintStream out, String indent) {
+	out.println(indent+this.label+" {");
+	String i2 = indent + "  ";
+	StringBuilder inputs = new StringBuilder();
+	for (DFRef ref : this.inputs) {
+	    inputs.append(" "+ref);
+	}
+	out.println(i2+"inputs:"+inputs);
+	StringBuilder outputs = new StringBuilder();
+	for (DFRef ref : this.outputs) {
+	    outputs.append(" "+ref);
+	}
+	out.println(i2+"outputs:"+outputs);
+	StringBuilder inouts = new StringBuilder();
+	for (DFRef ref : this.getInsAndOuts()) {
+	    inouts.append(" "+ref);
+	}
+	out.println(i2+"in/outs:"+inouts);
+	for (DFFrame frame : this.children.values()) {
+	    frame.dump(out, i2);
+	}
+	out.println(indent+"}");
+    }
 }
