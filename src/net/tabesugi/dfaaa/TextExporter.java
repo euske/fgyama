@@ -23,6 +23,11 @@ class TextExporter {
 	this.writer.flush();
     }
 
+    public void endFile()
+	throws IOException {
+	this.writer.flush();
+    }
+    
     public void writeFailure(String funcName, String astName)
 	throws IOException {
 	this.writer.write("!"+funcName+","+astName+"\n");

@@ -55,6 +55,13 @@ class Utils {
 	reader.close();
 	return text;
     }
+
+    public static Document createXml()
+	throws ParserConfigurationException {
+	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+	return docBuilder.newDocument();
+    }
     
     public static void printXml(OutputStream output, Document doc) {
 	try {

@@ -1904,6 +1904,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	    Java2DF visitor = new Java2DF(exporter);
 	    cu.accept(visitor);
+	    exporter.endFile();
 	}
 	output.close();
     }

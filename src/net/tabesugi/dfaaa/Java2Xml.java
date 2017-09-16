@@ -36,8 +36,6 @@ public class Java2Xml extends ASTVisitor {
 	    }
 	}
 	
-	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
@@ -52,7 +50,7 @@ public class Java2Xml extends ASTVisitor {
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 
-	    Document doc = docBuilder.newDocument();
+	    Document doc = Utils.createXml();
 	    Java2Xml visitor = new Java2Xml(doc);
 	    cu.accept(visitor);
 	    
