@@ -12,17 +12,13 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     public DFScope scope;
-    public Map<DFRef, DFNode> inputs;
-    public Map<DFRef, DFNode> outputs;
-    public DFNode value;
-    public AssignNode assign;
+    public Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
+    public Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
+    public DFNode value = null;
+    public AssignNode assign = null;
     
     public DFComponent(DFScope scope) {
 	this.scope = scope;
-	this.inputs = new HashMap<DFRef, DFNode>();
-	this.outputs = new HashMap<DFRef, DFNode>();
-	this.value = null;
-	this.assign = null;
     }
 
     public void dump() {

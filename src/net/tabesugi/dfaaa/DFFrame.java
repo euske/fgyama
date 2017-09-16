@@ -12,21 +12,15 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     public String label;
-    public Map<ASTNode, DFFrame> children;
-    public int baseId;
+    public Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
+    public int baseId = 0;
     
-    public Set<DFRef> inputs;
-    public Set<DFRef> outputs;
-    public List<DFExit> exits;
+    public Set<DFRef> inputs = new HashSet<DFRef>();
+    public Set<DFRef> outputs = new HashSet<DFRef>();
+    public List<DFExit> exits = new ArrayList<DFExit>();
 
     public DFFrame(String label) {
 	this.label = label;
-	this.children = new HashMap<ASTNode, DFFrame>();
-	this.baseId = 0;
-	
-	this.inputs = new HashSet<DFRef>();
-	this.outputs = new HashSet<DFRef>();
-	this.exits = new ArrayList<DFExit>();
     }
 
     public String toString() {

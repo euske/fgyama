@@ -14,11 +14,11 @@ public class DFScope {
 
     public String name;
     public DFScope parent;
-    public Map<ASTNode, DFScope> children;
-    public int baseId;
+    public Map<ASTNode, DFScope> children = new HashMap<ASTNode, DFScope>();
+    public int baseId = 0;
 
-    public List<DFNode> nodes;
-    public Map<String, DFVar> vars;
+    public List<DFNode> nodes = new ArrayList<DFNode>();
+    public Map<String, DFVar> vars = new HashMap<String, DFVar>();
 
     public DFScope(String name) {
 	this(name, null);
@@ -27,11 +27,6 @@ public class DFScope {
     public DFScope(String name, DFScope parent) {
 	this.name = name;
 	this.parent = parent;
-	this.children = new HashMap<ASTNode, DFScope>();
-	this.baseId = 0;
-	
-	this.nodes = new ArrayList<DFNode>();
-	this.vars = new HashMap<String, DFVar>();
     }
 
     public String toString() {
