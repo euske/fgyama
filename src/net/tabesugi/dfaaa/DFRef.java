@@ -29,11 +29,5 @@ public class DFRef {
 		this.name :
 		this.scope.name+"."+this.name);
     }
-
-    public static DFRef THIS = new DFRef(null, "THIS");
-    public static DFRef SUPER = new DFRef(null, "SUPER");
-    public static DFRef RETURN = new DFRef(null, "RETURN");
-    public static DFRef EXCEPTION = new DFRef(null, "EXCEPTION");
-    public static DFRef ARRAY = new DFRef(null, "[]");
 }
 

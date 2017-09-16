@@ -89,6 +89,22 @@ public class DFScope {
     public DFRef lookupField(String name) {
 	return this.lookupVar("."+name);
     }
+
+    public DFRef lookupThis() {
+	return this.lookupVar(":THIS");
+    }
+
+    public DFRef lookupSuper() {
+	return this.lookupVar(":SUPER");
+    }
+    
+    public DFRef lookupReturn() {
+	return this.lookupVar(":RETURN");
+    }
+    
+    public DFRef lookupArray() {
+	return this.lookupVar(":ARRAY");
+    }
     
     public void finish(DFComponent cpt) {
 	for (DFRef ref : this.vars.values()) {

@@ -495,7 +495,7 @@ class ReturnNode extends ProgNode {
     public DFNode value;
     
     public ReturnNode(DFScope scope, ASTNode ast, DFNode value) {
-	super(scope, DFRef.RETURN, ast);
+	super(scope, scope.lookupReturn(), ast);
         this.value = value;
 	value.connect(this, 1);
     }
@@ -515,7 +515,7 @@ class ExceptionNode extends ProgNode {
     public DFNode value;
 
     public ExceptionNode(DFScope scope, ASTNode ast, DFNode value) {
-	super(scope, DFRef.EXCEPTION, ast);
+	super(scope, null, ast);
         this.value = value;
 	value.connect(this, 1);
     }
@@ -715,7 +715,7 @@ public class Java2DF extends ASTVisitor {
 	    DFNode array = cpt.value;
 	    cpt = processExpression(scope, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.value;
-	    DFRef ref = DFRef.ARRAY;
+	    DFRef ref = scope.lookupArray();
 	    cpt.assign = new ArrayAssignNode(scope, ref, expr, array, index);
 	    
 	} else if (expr instanceof FieldAccess) {
@@ -758,7 +758,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt.value = new VarRefNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof ThisExpression) {
-	    DFRef ref = DFRef.THIS;
+	    DFRef ref = scope.lookupThis();
 	    cpt.value = new VarRefNode(scope, ref, expr, cpt.get(ref));
 	    
 	} else if (expr instanceof BooleanLiteral) {
@@ -867,7 +867,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation si = (SuperMethodInvocation)expr;
 	    SimpleName methodName = si.getName();
-	    DFNode obj = cpt.get(DFRef.SUPER);
+	    DFNode obj = cpt.get(scope.lookupSuper());
 	    MethodCallNode call = new MethodCallNode
 		(scope, si, obj, methodName.getIdentifier());
 	    for (Expression arg : (List<Expression>) si.arguments()) {
@@ -901,7 +901,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
-	    DFRef ref = DFRef.ARRAY;
+	    DFRef ref = scope.lookupArray();
 	    cpt = processExpression(scope, frame, cpt, aa.getArray());
 	    DFNode array = cpt.value;
 	    cpt = processExpression(scope, frame, cpt, aa.getIndex());
@@ -922,7 +922,7 @@ public class Java2DF extends ASTVisitor {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    DFNode obj = cpt.get(DFRef.SUPER);
+	    DFNode obj = cpt.get(scope.lookupSuper());
 	    cpt.value = new FieldAccessNode(scope, ref, sfa,
 					    cpt.get(ref), obj);
 	    
@@ -1551,7 +1551,8 @@ public class Java2DF extends ASTVisitor {
 	    frame.addInput(ref);
 	    
 	} else if (ast instanceof ThisExpression) {
-	    frame.addInput(DFRef.THIS);
+	    DFRef ref = scope.lookupThis();
+	    frame.addInput(ref);
 	    
 	} else if (ast instanceof BooleanLiteral) {
 	    
@@ -1661,7 +1662,7 @@ public class Java2DF extends ASTVisitor {
 	    ArrayAccess aa = (ArrayAccess)ast;
 	    buildScope(scope, frame, aa.getArray());
 	    buildScope(scope, frame, aa.getIndex());
-	    DFRef ref = DFRef.ARRAY;
+	    DFRef ref = scope.lookupArray();
 	    frame.addInput(ref);
 	    
 	} else if (ast instanceof FieldAccess) {
@@ -1739,7 +1740,7 @@ public class Java2DF extends ASTVisitor {
 	    ArrayAccess aa = (ArrayAccess)ast;
 	    buildScope(scope, frame, aa.getArray());
 	    buildScope(scope, frame, aa.getIndex());
-	    DFRef ref = DFRef.ARRAY;
+	    DFRef ref = scope.lookupArray();
 	    frame.addOutput(ref);
 	    
 	} else if (ast instanceof FieldAccess) {
