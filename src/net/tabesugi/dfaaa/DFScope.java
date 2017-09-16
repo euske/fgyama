@@ -20,18 +20,10 @@ public class DFScope {
     public Map<String, DFVar> vars;
     public Set<DFRef> inputs;
     public Set<DFRef> outputs;
-
-    public static int baseId = 0;
-    public static int genId() {
-	return baseId++;
-    }
+    public int baseId;
 
     public DFScope(String name) {
 	this(name, null, null);
-    }
-
-    public DFScope(DFScope parent, ASTNode ast, String basename) {
-	this(basename+genId(), parent, ast);
     }
 
     private static DFRef THIS = new DFRef(null, "THIS");
@@ -51,10 +43,17 @@ public class DFScope {
 	this.vars = new HashMap<String, DFVar>();
 	this.inputs = new HashSet<DFRef>();
 	this.outputs = new HashSet<DFRef>();
+	this.baseId = 0;
     }
 
     public String toString() {
 	return ("<DFScope("+this.name+")>");
+    }
+
+    public String genName(String basename) {
+	String name = this.name+"_"+basename+this.baseId;
+	this.baseId++;
+	return name;
     }
 
     public int addNode(DFNode node) {

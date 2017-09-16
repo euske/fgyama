@@ -1370,7 +1370,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (ast instanceof Block) {
 	    Block block = (Block)ast;
-	    DFScope child = new DFScope(scope, ast, "block");
+	    DFScope child = new DFScope(scope.genName("block"), scope, ast);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
 		buildScope(child, stmt);
@@ -1418,7 +1418,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
-	    DFScope child = new DFScope(scope, ast, "switch");
+	    DFScope child = new DFScope(scope.genName("switch"), scope, ast);
 	    Expression expr = switchStmt.getExpression();
 	    buildScope(child, expr);
 	    for (Statement stmt :
@@ -1435,7 +1435,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
-	    DFScope child = new DFScope(scope, ast, "while");
+	    DFScope child = new DFScope(scope.genName("while"), scope, ast);
 	    Expression expr = whileStmt.getExpression();
 	    buildScope(child, expr);
 	    Statement stmt = whileStmt.getBody();
@@ -1443,7 +1443,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
-	    DFScope child = new DFScope(scope, ast, "do");
+	    DFScope child = new DFScope(scope.genName("do"), scope, ast);
 	    Statement stmt = doStmt.getBody();
 	    buildScope(child, stmt);
 	    Expression expr = doStmt.getExpression();
@@ -1451,7 +1451,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
-	    DFScope child = new DFScope(scope, ast, "for");
+	    DFScope child = new DFScope(scope.genName("for"), scope, ast);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
 		buildScope(child, init);
@@ -1469,7 +1469,7 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    DFScope child = new DFScope(scope, ast, "efor");
+	    DFScope child = new DFScope(scope.genName("efor"), scope, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX ignore modifiers and dimensions.
 	    Type varType = decl.getType();
@@ -1502,7 +1502,7 @@ public class Java2DF extends ASTVisitor {
 	    buildScope(scope, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
-		DFScope child = new DFScope(scope, cc, "catch");
+		DFScope child = new DFScope(scope.genName("catch"), scope, cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX ignore modifiers and dimensions.
 		Type varType = decl.getType();
