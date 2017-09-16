@@ -30,8 +30,8 @@ public class DFScope {
 	this(name, null, null);
     }
 
-    public DFScope(DFScope parent, ASTNode ast) {
-	this("S"+genId(), parent, ast);
+    public DFScope(DFScope parent, ASTNode ast, String basename) {
+	this(basename+genId(), parent, ast);
     }
 
     private static DFRef THIS = new DFRef(null, "THIS");
