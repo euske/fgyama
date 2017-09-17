@@ -69,7 +69,7 @@ public class Java2Xml extends ASTVisitor {
     
     public void preVisit(ASTNode node) {
 	int type = node.getNodeType();
-	String name = Utils.getNodeTypeName(type);
+	String name = Utils.getASTNodeTypeName(type);
 	Element elem = _document.createElement(name);
 	if (_stack.empty()) {
 	    _document.appendChild(elem);

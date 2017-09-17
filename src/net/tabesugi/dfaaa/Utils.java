@@ -96,7 +96,7 @@ class Utils {
 	}
     }
 
-    public static String getNodeTypeName(int type) {
+    public static String getASTNodeTypeName(int type) {
 	switch (type) {
 	case ASTNode.ANNOTATION_TYPE_DECLARATION:
 	    return "AnnotationTypeDeclaration";
