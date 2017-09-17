@@ -36,12 +36,13 @@ class TextExporter {
     
     public void writeGraph(DFGraph graph)
 	throws IOException {
+	this.writer.write("@"+graph.name+"\n");
 	for (DFScope scope : graph.scopes) {
-	    if (scope.parent == null) {
-		this.writer.write("@"+scope.name+"\n");
-	    } else {
-		this.writer.write(":"+scope.name+","+scope.parent.name+"\n");
+	    this.writer.write(":"+scope.name);
+	    if (scope.parent != null) {
+		this.writer.write(","+scope.parent.name);
 	    }
+	    this.writer.newLine();
 	}
 	for (DFNode node : graph.nodes) {
 	    this.writer.write("+"+node.scope.name);

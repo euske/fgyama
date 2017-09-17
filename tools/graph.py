@@ -276,20 +276,22 @@ def load_graphs(fp):
             graph = None
         elif line.startswith('@'):
             assert graph is None
-            sid = line[1:]
-            graph = DFGraph(sid, sid, src)
-            assert sid not in graph.scopes
-            scope = DFScope(sid, sid)
-            graph.root = scope
-            graph.scopes[sid] = scope
+            gid = line[1:]
+            graph = DFGraph(gid, gid, src)
         elif line.startswith(':'):
             f = line[1:].split(',')
-            (sid,pid) = f[0:2]
             assert graph is not None
+            if len(f) < 2:
+                (sid,) = f
+                scope = DFScope(sid, sid)
+                assert graph.root is None
+                graph.root = scope
+            else:
+                (sid,pid) = f[0:2]
+                assert pid in graph.scopes
+                parent = graph.scopes[pid]
+                scope = DFScope(sid, sid, parent)
             assert sid not in graph.scopes
-            assert pid in graph.scopes
-            parent = graph.scopes[pid]
-            scope = DFScope(sid, sid, parent)
             graph.scopes[sid] = scope
         elif line.startswith('+'):
             f = line[1:].split(',')
