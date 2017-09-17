@@ -1888,7 +1888,7 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process files.
-	Exporter exporter = new TextExporter(output);
+	Exporter exporter = new XmlExporter(output);
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
