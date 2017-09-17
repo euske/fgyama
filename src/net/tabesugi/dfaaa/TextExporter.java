@@ -34,15 +34,17 @@ class TextExporter {
 	this.writer.flush();
     }
     
-    public void writeGraph(DFScope scope)
+    public void writeGraph(DFGraph graph)
 	throws IOException {
-	if (scope.parent == null) {
-	    this.writer.write("@"+scope.name+"\n");
-	} else {
-	    this.writer.write(":"+scope.name+","+scope.parent.name+"\n");
+	for (DFScope scope : graph.scopes) {
+	    if (scope.parent == null) {
+		this.writer.write("@"+scope.name+"\n");
+	    } else {
+		this.writer.write(":"+scope.name+","+scope.parent.name+"\n");
+	    }
 	}
-	for (DFNode node : scope.nodes) {
-	    this.writer.write("+"+scope.name);
+	for (DFNode node : graph.nodes) {
+	    this.writer.write("+"+node.scope.name);
 	    this.writer.write(","+node.name());
 	    this.writer.write(","+node.type().ordinal());
 	    String label = node.label();
@@ -68,7 +70,7 @@ class TextExporter {
 	    }
 	    this.writer.newLine();
 	}
-	for (DFNode node : scope.nodes) {
+	for (DFNode node : graph.nodes) {
 	    for (DFLink link : node.send) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
 		this.writer.write(","+link.lid+","+link.type.ordinal());
@@ -78,12 +80,7 @@ class TextExporter {
 		this.writer.newLine();
 	    }
 	}
-	for (DFScope child : scope.children.values()) {
-	    this.writeGraph(child);
-	}
-	if (scope.parent == null) {
-	    this.writer.newLine();
-	}
+	this.writer.newLine();
 	this.writer.flush();
     }
 }

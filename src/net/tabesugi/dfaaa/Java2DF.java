@@ -1795,15 +1795,15 @@ public class Java2DF extends ASTVisitor {
     /** 
      * Performs dataflow analysis for a given method.
      */
-    public DFScope getMethodGraph(MethodDeclaration method)
+    public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
 	String funcName = method.getName().getFullyQualifiedName();
 	Block funcBlock = method.getBody();
-	// Ignore method prototypes.
-	if (funcBlock == null) return null;
+	
+	DFGraph graph = new DFGraph(funcName);
 				   
 	// Setup an initial scope.
-	DFScope scope = new DFScope(funcName);
+	DFScope scope = new DFScope(graph, funcName);
 	DFFrame frame = new DFFrame(DFFrame.METHOD);
 	
 	DFComponent cpt = buildMethodDeclaration(scope, method);
@@ -1816,7 +1816,7 @@ public class Java2DF extends ASTVisitor {
 	
 	scope.finish(cpt);
 	frame.finish(cpt);
-	return scope;
+	return graph;
     }
 
     /// ASTVisitor methods.
@@ -1829,15 +1829,17 @@ public class Java2DF extends ASTVisitor {
 
     public boolean visit(MethodDeclaration method) {
 	String funcName = method.getName().getFullyQualifiedName();
+	// Ignore method prototypes.
+	if (method.getBody() == null) return true;
 	try {
 	    try {
-		DFScope scope = getMethodGraph(method);
-		if (scope != null) {
+		DFGraph graph = getMethodGraph(method);
+		if (graph != null) {
 		    Utils.logit("success: "+funcName);
 		    // Collapse redundant nodes.
-		    scope.cleanup();
+		    graph.cleanup();
 		    if (this.exporter != null) {
-			this.exporter.writeGraph(scope);
+			this.exporter.writeGraph(graph);
 		    }
 		}
 	    } catch (UnsupportedSyntax e) {

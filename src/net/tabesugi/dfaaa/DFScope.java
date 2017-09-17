@@ -12,21 +12,25 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFScope {
 
+    public DFGraph graph;
     public String name;
-    public DFScope parent;
+    public DFScope parent = null;
     public Map<ASTNode, DFScope> children = new HashMap<ASTNode, DFScope>();
     public int baseId = 0;
 
-    public List<DFNode> nodes = new ArrayList<DFNode>();
     public Map<String, DFVar> vars = new HashMap<String, DFVar>();
 
-    public DFScope(String name) {
-	this(name, null);
+    public DFScope(DFGraph graph, String name) {
+	this.graph = graph;
+	this.name = name;
+	graph.addScope(this);
     }
 
     public DFScope(String name, DFScope parent) {
+	this.graph = parent.graph;
 	this.name = name;
 	this.parent = parent;
+	graph.addScope(this);
     }
 
     public String toString() {
@@ -40,13 +44,16 @@ public class DFScope {
 	return scope;
     }
 
-    public int addNode(DFNode node) {
-	this.nodes.add(node);
-	return this.nodes.size();
+    public DFScope getChild(ASTNode ast) {
+	return this.children.get(ast);
+    }
+
+    public void addNode(DFNode node) {
+	this.graph.addNode(node);
     }
 
     public void removeNode(DFNode node) {
-        this.nodes.remove(node);
+	this.graph.removeNode(node);
     }
 
     public void dump() {
@@ -111,35 +118,4 @@ public class DFScope {
 	    cpt.removeRef(ref);
 	}
     }
-
-    public DFScope getChild(ASTNode ast) {
-	return this.children.get(ast);
-    }
-
-    public void cleanup() {
-        List<DFNode> removed = new ArrayList<DFNode>();
-        for (DFNode node : this.nodes) {
-            if (node.canOmit() &&
-                node.send.size() == 1 &&
-                node.recv.size() == 1) {
-                removed.add(node);
-            }
-        }
-        for (DFNode node : removed) {
-            DFLink link0 = node.recv.get(0);
-            DFLink link1 = node.send.get(0);
-            if (link0.type == link1.type &&
-		(link0.name == null || link1.name == null)) {
-                node.remove();
-                String name = link0.name;
-                if (name == null) {
-                    name = link1.name;
-                }
-                link0.src.connect(link1.dst, 1, link0.type, name);
-            }
-        }
-	for (DFScope child : this.children.values()) {
-	    child.cleanup();
-	}
-    }			   
 }

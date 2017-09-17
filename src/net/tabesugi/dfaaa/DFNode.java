@@ -25,11 +25,11 @@ public abstract class DFNode {
 
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
+	this.scope.addNode(this);
 	this.ref = ref;
 	this.id = genId();
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
-	this.scope.addNode(this);
     }
 
     public String toString() {

@@ -41,6 +41,10 @@ public class DFFrame {
 	return frame;
     }
 
+    public DFFrame getChild(ASTNode ast) {
+	return this.children.get(ast);
+    }
+
     public void addInput(DFRef ref) {
 	this.inputs.add(ref);
     }
@@ -79,10 +83,6 @@ public class DFFrame {
 		cpt.put(node);
 	    }
 	}
-    }
-
-    public DFFrame getChild(ASTNode ast) {
-	return this.children.get(ast);
     }
 
     public void dump() {
