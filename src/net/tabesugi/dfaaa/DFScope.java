@@ -101,19 +101,19 @@ public class DFScope {
     }
 
     public DFRef lookupThis() {
-	return this.lookupVar(":THIS");
+	return this.lookupVar("#this");
     }
 
     public DFRef lookupSuper() {
-	return this.lookupVar(":SUPER");
+	return this.lookupVar("#super");
     }
     
     public DFRef lookupReturn() {
-	return this.lookupVar(":RETURN");
+	return this.lookupVar("#return");
     }
     
     public DFRef lookupArray() {
-	return this.lookupVar(":ARRAY");
+	return this.lookupVar("#array");
     }
     
     public void finish(DFComponent cpt) {

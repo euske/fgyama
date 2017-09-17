@@ -86,7 +86,7 @@ class ArrayAccessNode extends ProgNode {
     }
 
     public String label() {
-	return "arrayaccess";
+	return "access";
     }
 }
 
@@ -110,7 +110,7 @@ class FieldAccessNode extends ProgNode {
     }
 
     public String label() {
-	return "fieldaccess";
+	return "access";
     }
 }
 

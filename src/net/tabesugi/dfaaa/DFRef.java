@@ -27,7 +27,7 @@ public class DFRef {
     public String label() {
 	return ((this.scope == null)?
 		this.name :
-		this.scope.name+"."+this.name);
+		this.scope.name+":"+this.name);
     }
 }
 

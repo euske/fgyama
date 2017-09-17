@@ -37,7 +37,7 @@ def write_gv(out, scope, highlight=None, level=0):
             for link in node.send:
                 out.write(h+' N%s -> N%s' % (link.srcid, link.dstid))
                 label = (link.label or '')
-                out.write(h+' [xlabel=%s' % q(label))
+                out.write(h+' [label=%s' % q(label))
                 if link.ltype == DFLink.L_ControlFlow:
                     out.write(', style=dotted')
                 out.write('];\n')
