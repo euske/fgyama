@@ -165,8 +165,9 @@ class ArgNode extends ProgNode {
 
     public int index;
 
-    public ArgNode(DFScope scope, ASTNode ast, int index) {
-	super(scope, null, ast);
+    public ArgNode(DFScope scope, DFRef ref, ASTNode ast,
+		   int index) {
+	super(scope, ref, ast);
 	this.index = index;
     }
 
@@ -175,7 +176,7 @@ class ArgNode extends ProgNode {
     }
 
     public String label() {
-	return "arg";
+	return "arg"+this.index;
     }
 }
 
@@ -955,7 +956,7 @@ public class Java2DF extends ASTVisitor {
 		call.take(cpt.value);
 	    }
 	    cpt.value = call;
-	    // XXX ignore getAnonymousClassDeclaration()
+	    // Ignore getAnonymousClassDeclaration() here.
 	    // It will eventually be picked up as MethodDeclaration.
 	    
 	} else if (expr instanceof ConditionalExpression) {
@@ -1312,14 +1313,14 @@ public class Java2DF extends ASTVisitor {
 	    cpt.addExitAll(frame.outputs, DFFrame.TRY);
 	    
 	} else if (stmt instanceof ConstructorInvocation) {
-	    // XXX ignore all side effects.
+	    // XXX Ignore all side effects.
 	    ConstructorInvocation ci = (ConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) ci.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
 	    }
 	    
 	} else if (stmt instanceof SuperConstructorInvocation) {
-	    // XXX ignore all side effects.
+	    // XXX Ignore all side effects.
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) sci.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
@@ -1358,7 +1359,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof VariableDeclarationStatement) {
 	    VariableDeclarationStatement varStmt =
 		(VariableDeclarationStatement)ast;
-	    // XXX ignore modifiers and dimensions.
+	    // XXX Ignore modifiers and dimensions.
 	    Type varType = varStmt.getType();
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
@@ -1453,7 +1454,7 @@ public class Java2DF extends ASTVisitor {
 	    DFScope childScope = scope.addChild("efor", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
-	    // XXX ignore modifiers and dimensions.
+	    // XXX Ignore modifiers and dimensions.
 	    Type varType = decl.getType();
 	    SimpleName varName = decl.getName();
 	    childScope.add(varName.getIdentifier(), varType);
@@ -1490,7 +1491,7 @@ public class Java2DF extends ASTVisitor {
 		     (List<CatchClause>) tryStmt.catchClauses()) {
 		DFScope childScope = scope.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
-		// XXX ignore modifiers and dimensions.
+		// XXX Ignore modifiers and dimensions.
 		Type varType = decl.getType();
 		SimpleName varName = decl.getName();
 		childScope.add(varName.getIdentifier(), varType);
@@ -1602,7 +1603,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
-	    // XXX ignore modifiers and dimensions.
+	    // XXX Ignore modifiers and dimensions.
 	    Type varType = decl.getType();
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
@@ -1692,7 +1693,7 @@ public class Java2DF extends ASTVisitor {
 		     (List<Expression>) cstr.arguments()) {
 		buildScope(scope, frame, arg);
 	    }
-	    // XXX ignore getAnonymousClassDeclaration()
+	    // Ignore getAnonymousClassDeclaration() here.
 	    // It will eventually be picked up as MethodDeclaration.
 	    
 	} else if (ast instanceof ConditionalExpression) {
@@ -1765,17 +1766,17 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	
 	DFComponent cpt = new DFComponent();
-	// XXX ignore isContructor()
-	// XXX ignore getReturnType2()
+	// XXX Ignore isContructor().
+	// XXX Ignore getReturnType2().
+	// XXX Ignore isVarargs().
 	int i = 0;
-	// XXX ignore isVarargs()
 	for (SingleVariableDeclaration decl :
 		 (List<SingleVariableDeclaration>) method.parameters()) {
-	    DFNode param = new ArgNode(scope, decl, i++);
 	    SimpleName paramName = decl.getName();
-	    // XXX ignore modifiers and dimensions.
+	    // XXX Ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
 	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
+	    DFNode param = new ArgNode(scope, ref, decl, i++);
 	    AssignNode assign = new SingleAssignNode(scope, ref, decl);
 	    assign.take(param);
 	    cpt.put(assign);
