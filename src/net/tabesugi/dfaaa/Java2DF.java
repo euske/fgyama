@@ -548,15 +548,17 @@ public class Java2DF extends ASTVisitor {
 	// refs: all the references from both component.
 	Set<DFRef> refs = new HashSet<DFRef>();
 	if (trueCpt != null) {
-	    for (DFRef ref : trueCpt.inputs.keySet()) {
-		DFNode src = trueCpt.get(ref);
+	    for (Map.Entry<DFRef, DFNode> entry : trueCpt.inputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode src = entry.getValue();
 		src.accept(cpt.get(ref));
 	    }
 	    refs.addAll(trueCpt.outputs.keySet());
 	}
 	if (falseCpt != null) {
-	    for (DFRef ref : falseCpt.inputs.keySet()) {
-		DFNode src = falseCpt.get(ref);
+	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.inputs.entrySet()) {
+		DFRef ref = entry.getKey();
+		DFNode src = entry.getValue();
 		src.accept(cpt.get(ref));
 	    }
 	    refs.addAll(falseCpt.outputs.keySet());
@@ -1032,16 +1034,15 @@ public class Java2DF extends ASTVisitor {
 	DFNode condValue = cpt.value;
 	
 	Statement thenStmt = ifStmt.getThenStatement();
-	DFComponent thenCpt = new DFComponent();
+	DFComponent thenCpt = new DFComponent(scope);
 	thenCpt = processStatement(scope, frame, thenCpt, thenStmt);
 	
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
-	    elseCpt = new DFComponent();
+	    elseCpt = new DFComponent(scope);
 	    elseCpt = processStatement(scope, frame, elseCpt, elseStmt);
 	}
-
 	return processConditional(scope, frame, cpt, ifStmt,
 				  condValue, thenCpt, elseCpt);
     }
@@ -1090,7 +1091,7 @@ public class Java2DF extends ASTVisitor {
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(switchScope, stmt, switchValue);
-		caseCpt = new DFComponent();
+		caseCpt = new DFComponent(switchScope);
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(switchScope, frame, cpt, expr);
@@ -1121,7 +1122,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(whileStmt);
 	DFFrame loopFrame = frame.getChild(whileStmt);
-	DFComponent loopCpt = new DFComponent();
+	DFComponent loopCpt = new DFComponent(loopScope);
 	loopCpt = processExpression(loopScope, frame, loopCpt,
 				    whileStmt.getExpression());
 	DFNode condValue = loopCpt.value;
@@ -1140,7 +1141,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(doStmt);
 	DFFrame loopFrame = frame.getChild(doStmt);
-	DFComponent loopCpt = new DFComponent();
+	DFComponent loopCpt = new DFComponent(loopScope);
 	loopCpt = processStatement(loopScope, loopFrame, loopCpt,
 				   doStmt.getBody());
 	loopCpt = processExpression(loopScope, loopFrame, loopCpt,
@@ -1160,7 +1161,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(forStmt);
 	DFFrame loopFrame = frame.getChild(forStmt);
-	DFComponent loopCpt = new DFComponent();
+	DFComponent loopCpt = new DFComponent(loopScope);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(loopScope, frame, cpt, init);
 	}
@@ -1191,7 +1192,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 	DFScope loopScope = scope.getChild(eForStmt);
 	DFFrame loopFrame = frame.getChild(eForStmt);
-	DFComponent loopCpt = new DFComponent();
+	DFComponent loopCpt = new DFComponent(loopScope);
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
@@ -1765,7 +1766,7 @@ public class Java2DF extends ASTVisitor {
 	(DFScope scope, MethodDeclaration method)
 	throws UnsupportedSyntax {
 	
-	DFComponent cpt = new DFComponent();
+	DFComponent cpt = new DFComponent(scope);
 	// XXX Ignore isContructor().
 	// XXX Ignore getReturnType2().
 	// XXX Ignore isVarargs().
