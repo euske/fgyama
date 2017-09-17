@@ -23,14 +23,13 @@ public class DFScope {
     public DFScope(DFGraph graph, String name) {
 	this.graph = graph;
 	this.name = name;
-	graph.addScope(this);
+	graph.setRoot(this);
     }
 
     public DFScope(String name, DFScope parent) {
 	this.graph = parent.graph;
 	this.name = name;
 	this.parent = parent;
-	graph.addScope(this);
     }
 
     public String toString() {
@@ -46,6 +45,10 @@ public class DFScope {
 
     public DFScope getChild(ASTNode ast) {
 	return this.children.get(ast);
+    }
+
+    public Collection<DFScope> children() {
+	return this.children.values();
     }
 
     public void addNode(DFNode node) {

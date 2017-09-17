@@ -1821,9 +1821,9 @@ public class Java2DF extends ASTVisitor {
 
     /// ASTVisitor methods.
     
-    public TextExporter exporter;
+    public Exporter exporter;
 
-    public Java2DF(TextExporter exporter) {
+    public Java2DF(Exporter exporter) {
 	this.exporter = exporter;
     }
 
@@ -1847,7 +1847,7 @@ public class Java2DF extends ASTVisitor {
 		Utils.logit("fail: "+funcName+" (Unsupported: "+astName+") "+e.ast);
 		//e.printStackTrace();
 		if (this.exporter != null) {
-		    this.exporter.writeFailure(funcName, astName);
+		    this.exporter.writeError(funcName, astName);
 		}
 	    }
 	} catch (IOException e) {
@@ -1888,7 +1888,7 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process files.
-	TextExporter exporter = new TextExporter(output);
+	Exporter exporter = new TextExporter(output);
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
@@ -1908,6 +1908,7 @@ public class Java2DF extends ASTVisitor {
 	    cu.accept(visitor);
 	    exporter.endFile();
 	}
+	exporter.close();
 	output.close();
     }
 }

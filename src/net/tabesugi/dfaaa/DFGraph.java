@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFGraph {
 
     public String name;
-    public List<DFScope> scopes = new ArrayList<DFScope>();
+    public DFScope root;
     public List<DFNode> nodes = new ArrayList<DFNode>();
 
     public DFGraph(String name) {
@@ -23,8 +23,8 @@ public class DFGraph {
 	return ("<DFGraph("+this.name+")>");
     }
 
-    public void addScope(DFScope scope) {
-	this.scopes.add(scope);
+    public void setRoot(DFScope scope) {
+	this.root = scope;
     }
     
     public void addNode(DFNode node) {
