@@ -86,8 +86,8 @@ class TextExporter extends Exporter {
 	    for (DFLink link : node.send) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
 		this.writer.write(","+link.lid+","+link.type.ordinal());
-		if (link.name != null) {
-		    this.writer.write(","+link.name);;
+		if (link.label != null) {
+		    this.writer.write(","+link.label);;
 		}
 		this.writer.newLine();
 	    }

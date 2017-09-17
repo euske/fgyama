@@ -48,13 +48,13 @@ public class DFGraph {
             DFLink link0 = node.recv.get(0);
             DFLink link1 = node.send.get(0);
             if (link0.type == link1.type &&
-		(link0.name == null || link1.name == null)) {
+		(link0.label == null || link1.label == null)) {
                 node.remove();
-                String name = link0.name;
-                if (name == null) {
-                    name = link1.name;
+                String label = link0.label;
+                if (label == null) {
+                    label = link1.label;
                 }
-                link0.src.connect(link1.dst, 1, link0.type, name);
+                link0.src.connect(link1.dst, 1, link0.type, label);
             }
         }
     }			   

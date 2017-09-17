@@ -15,19 +15,19 @@ class DFLink {
     public DFNode dst;
     public int lid;
     public DFLinkType type;
-    public String name;
+    public String label;
     
-    public DFLink(DFNode src, DFNode dst, int lid, DFLinkType type, String name)
+    public DFLink(DFNode src, DFNode dst, int lid, DFLinkType type, String label)
     {
 	this.src = src;
 	this.dst = dst;
 	this.lid = lid;
 	this.type = type;
-	this.name = name;
+	this.label = label;
     }
 
     public String toString() {
-	return ("<DFLink: "+this.src+"-("+this.name+")-"+this.dst+">");
+	return ("<DFLink: "+this.src+"-("+this.label+")-"+this.dst+">");
     }
 
     public void disconnect()

@@ -2,6 +2,8 @@
 import sys
 import os.path
 import sqlite3
+from xml.etree.cElementTree import Element
+from xml.etree.cElementTree import ElementTree
 
 
 ##  SourceDB
@@ -217,7 +219,21 @@ class DFNode:
     N_Join = 6
     N_Loop = 7
     N_Terminal = 8
+    N_Exception = 9
 
+    Type = {
+        'Dist': N_None,
+        'Refer': N_Refer,
+        'Const': N_Const,
+        'Operator': N_Operator,
+        'Assign': N_Assign,
+        'Branch': N_Branch,
+        'Join': N_Join,
+        'Loop': N_Loop,
+        'Terminal': N_Terminal,
+        'Exception': N_Exception,
+    }
+    
     def __init__(self, nid, scope, ntype, label, ref):
         self.nid = nid
         self.scope = scope
@@ -245,6 +261,14 @@ class DFLink:
     L_ControlFlow = 3
     L_Informational = 4
     
+    Type = {
+        'None': L_None,
+        'DataFlow': L_DataFlow,
+        'BackFlow': L_BackFlow,
+        'ControlFlow': L_ControlFlow,
+        'Informational': L_Informational,
+    }
+    
     def __init__(self, lid, srcid, dstid, idx, ltype, label):
         self.lid = lid
         self.srcid = srcid
@@ -261,9 +285,9 @@ class DFLink:
                 (self.lid, self.ltype, self.srcid, self.label, self.dstid, self.idx))
 
 
-##  load_graphs
+##  load_graphs_text
 ##
-def load_graphs(fp):
+def load_graphs_text(fp):
     graph = None
     src = None
     for line in fp:
@@ -318,6 +342,58 @@ def load_graphs(fp):
     if graph is not None:
         yield graph.fixate()
     return
+
+
+##  load_graphs_xml
+##
+def load_graphs_xml(fp):
+    root = ElementTree(file=fp).getroot()
+    for efile in root.getchildren():
+        if efile.tag != 'file': continue
+        path = efile.get('path')
+        yield path
+        for egraph in efile.getchildren():
+            if egraph.tag != 'graph': continue
+            gid = egraph.get('name')
+            graph = DFGraph(gid, gid, path)
+            def get_scope(escope, parent=None):
+                assert escope.tag == 'scope'
+                sid = escope.get('name')
+                scope = DFScope(sid, sid, parent)
+                graph.scopes[sid] = scope
+                for elem in escope.getchildren():
+                    if elem.tag == 'scope':
+                        get_scope(elem, scope)
+                    elif elem.tag == 'node':
+                        nid = elem.get('name')
+                        ntype = DFNode.Type[elem.get('type')]
+                        label = elem.get('label')
+                        ref = elem.get('ref')
+                        node = DFNode(nid, scope, ntype, label, ref)
+                        for e in elem.getchildren():
+                            if e.tag == 'ast':
+                                node.ast = (e.get('type'),
+                                            int(e.get('start')),
+                                            int(e.get('length')))
+                            elif e.tag == 'link':
+                                src = e.get('src')
+                                dst = e.get('dst')
+                                idx = e.get('idx')
+                                ltype = DFLink.Type[e.get('type')]
+                                label = e.get('label')
+                                link = DFLink(len(graph.links), src, dst,
+                                              int(idx), ltype, label)
+                                graph.links.append(link)
+                        graph.nodes[nid] = node
+                        scope.nodes.append(node)
+                return scope
+            for escope in egraph.getchildren():
+                graph.root = get_scope(escope)
+                break
+            yield graph.fixate()
+    return
+
+load_graphs = load_graphs_xml
 
 
 ##  build_graph_tables

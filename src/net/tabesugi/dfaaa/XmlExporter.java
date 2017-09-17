@@ -16,12 +16,14 @@ class XmlExporter extends Exporter {
     public OutputStream stream;
     public Document document;
     
+    private Element _root;
     private Element _file;
     
     public XmlExporter(OutputStream stream) {
 	this.stream = stream;
 	try {
 	    this.document = Utils.createXml();
+	    _root = this.document.createElement("dfaaa");
 	} catch (ParserConfigurationException e) {
 	    throw new RuntimeException();
 	}
@@ -29,6 +31,7 @@ class XmlExporter extends Exporter {
 
     public void close()
 	throws IOException {
+	this.document.appendChild(_root);
 	Utils.printXml(this.stream, this.document);
     }
 
@@ -40,7 +43,7 @@ class XmlExporter extends Exporter {
 
     public void endFile()
 	throws IOException {
-	this.document.appendChild(_file);
+	_root.appendChild(_file);
 	_file = null;
     }
     
@@ -52,23 +55,15 @@ class XmlExporter extends Exporter {
 	_file.appendChild(failure);
     }
 
-    private Element writeScope(DFScope scope) {
+    private Element writeScope(DFGraph graph, DFScope scope) {
 	Element escope = this.document.createElement("scope");
 	escope.setAttribute("name", scope.name);
 	for (DFScope child : scope.children()) {
-	    escope.appendChild(this.writeScope(child));
+	    escope.appendChild(this.writeScope(graph, child));
 	}
-	return escope;
-    }
-    
-    public void writeGraph(DFGraph graph)
-	throws IOException {
-	Element egraph = this.document.createElement("graph");
-	egraph.setAttribute("name", graph.name);
-	egraph.appendChild(this.writeScope(graph.root));
 	for (DFNode node : graph.nodes) {
+	    if (node.scope != scope) continue;
 	    Element enode = this.document.createElement("node");
-	    enode.setAttribute("scope", node.scope.name);
 	    enode.setAttribute("name", node.name());
 	    enode.setAttribute("type", node.type().toString());
 	    String label = node.label();
@@ -82,24 +77,34 @@ class XmlExporter extends Exporter {
 		ProgNode prognode = (ProgNode)node;
 		ASTNode ast = prognode.ast;
 		if (ast != null) {
-		    enode.setAttribute("astType", Utils.getASTNodeTypeName(ast.getNodeType()));
-		    enode.setAttribute("astStart", Integer.toString(ast.getStartPosition()));
-		    enode.setAttribute("astLength", Integer.toString(ast.getLength()));
+		    Element east = this.document.createElement("ast");
+		    east.setAttribute("type", Utils.getASTNodeTypeName(ast.getNodeType()));
+		    east.setAttribute("start", Integer.toString(ast.getStartPosition()));
+		    east.setAttribute("length", Integer.toString(ast.getLength()));
+		    enode.appendChild(east);
 		}
 	    }
 	    for (DFLink link : node.send) {
 		Element elink = this.document.createElement("link");
-		elink.setAttribute("id", Integer.toString(link.lid));
+		elink.setAttribute("idx", Integer.toString(link.lid));
 		elink.setAttribute("type", link.type.toString());
 		elink.setAttribute("src", link.src.name());
 		elink.setAttribute("dst", link.dst.name());
-		if (link.name != null) {
-		    elink.setAttribute("name", link.name);
+		if (link.label != null) {
+		    elink.setAttribute("label", link.label);
 		}
 		enode.appendChild(elink);
 	    }
-	    egraph.appendChild(enode);
+	    escope.appendChild(enode);
 	}
+	return escope;
+    }
+    
+    public void writeGraph(DFGraph graph)
+	throws IOException {
+	Element egraph = this.document.createElement("graph");
+	egraph.setAttribute("name", graph.name);
+	egraph.appendChild(this.writeScope(graph, graph.root));
 	_file.appendChild(egraph);
     }
 }
