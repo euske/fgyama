@@ -16,19 +16,12 @@ public class DFFrame {
     
     public Set<DFRef> inputs = new HashSet<DFRef>();
     public Set<DFRef> outputs = new HashSet<DFRef>();
-    public List<DFExit> exits = new ArrayList<DFExit>();
 
     public static String TRY = "@TRY";
     public static String METHOD = "@METHOD";
 
     public DFFrame(String label) {
 	this.label = label;
-    }
-
-    public DFFrame(DFFrame parent) {
-	this.label = parent.label;
-	this.inputs.addAll(parent.inputs);
-	this.outputs.addAll(parent.outputs);
     }
 
     public String toString() {
@@ -57,32 +50,6 @@ public class DFFrame {
 	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
 	refs.retainAll(this.outputs);
 	return refs;
-    }
-
-    public void addExit(DFExit exit) {
-	this.exits.add(exit);
-    }
-
-    public void addExitAll(DFComponent cpt, String label) {
-	for (DFRef ref : this.getInsAndOuts()) {
-	    DFNode node = cpt.get(ref);
-	    this.addExit(new DFExit(node, label));
-	}
-    }
-
-    public void finish(DFComponent cpt) {
-	for (DFExit exit : this.exits) {
-	    if (exit.label == null || exit.label.equals(this.label)) {
-		DFNode node = exit.node;
-		if (node instanceof JoinNode) {
-		    JoinNode join = (JoinNode)node;
-		    if (!join.isClosed()) {
-			join.close(cpt.get(node.ref));
-		    }
-		}
-		cpt.put(node);
-	    }
-	}
     }
 
     public void dump() {

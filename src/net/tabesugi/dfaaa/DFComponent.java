@@ -13,6 +13,7 @@ public class DFComponent {
 
     public Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
     public Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
+    public List<DFExit> exits = new ArrayList<DFExit>();
     public DFNode value = null;
     public AssignNode assign = null;
     
@@ -59,9 +60,36 @@ public class DFComponent {
 	this.outputs.put(node.ref, node);
     }
 
-    public void removeRef(DFRef ref) {
-	this.inputs.remove(ref);
-	this.outputs.remove(ref);
+    public void endScope(DFScope scope) {
+	for (DFRef ref : scope.vars()) {
+	    this.inputs.remove(ref);
+	    this.outputs.remove(ref);
+	}
+    }
+    
+    public void addExit(DFExit exit) {
+	this.exits.add(exit);
+    }
+
+    public void addExitAll(Collection<DFRef> refs, String label) {
+	for (DFRef ref : refs) {
+	    DFNode node = this.get(ref);
+	    this.addExit(new DFExit(node, label));
+	}
+    }
+
+    public void endFrame(DFFrame frame) {
+	for (DFExit exit : this.exits) {
+	    if (exit.label == null || exit.label.equals(frame.label)) {
+		DFNode node = exit.node;
+		if (node instanceof JoinNode) {
+		    JoinNode join = (JoinNode)node;
+		    if (!join.isClosed()) {
+			join.close(this.get(node.ref));
+		    }
+		}
+		this.put(node);
+	    }
+	}
     }
 }
-

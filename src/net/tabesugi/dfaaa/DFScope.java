@@ -115,10 +115,4 @@ public class DFScope {
     public DFRef lookupArray() {
 	return this.lookupVar("#array");
     }
-    
-    public void finish(DFComponent cpt) {
-	for (DFRef ref : this.vars.values()) {
-	    cpt.removeRef(ref);
-	}
-    }
 }
