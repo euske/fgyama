@@ -15,7 +15,8 @@
   <property name="out_svg" location="${tmpDir}/out.svg" />
   
   <path id="build.classpath">
-    <pathelement location="${libDir}/junit-3.8.1.jar"/>
+    <pathelement location="${libDir}/junit-4.12.jar"/>
+    <pathelement location="${libDir}/xmlunit-1.6.jar"/>
     <pathelement location="${libDir}/sqlite-jdbc-3.20.0.jar"/>
     <pathelement location="${libDir}/org.eclipse.jdt.core-3.12.3.jar"/>
     <pathelement location="${libDir}/org.eclipse.core.resources-3.11.1.jar"/>
@@ -54,6 +55,14 @@
     </javac>
   </target>
 
+  <target name="test" depends="compile">
+    <junit printsummary="yes" showoutput="yes">
+      <test name="net.tabesugi.dfaaa.TestDF" />
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+    </junit>
+  </target>
+  
   <target name="run" depends="compile">
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.dfaaa.Java2DF">
@@ -103,8 +112,10 @@
   
   <target name="get-deps" description="Download all dependencies">
     <mkdir dir="${libDir}"/>
-    <get src="https://repo.maven.apache.org/maven2/junit/junit/3.8.1/junit-3.8.1.jar" 
-         dest="${libDir}/junit-3.8.1.jar" />
+    <get src="https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12.jar" 
+         dest="${libDir}/junit-4.12.jar" />
+    <get src="https://repo.maven.apache.org/maven2/xmlunit/xmlunit/1.6/xmlunit-1.6.jar" 
+         dest="${libDir}/xmlunit-1.6.jar" />
     <get src="https://oss.sonatype.org/content/repositories/releases/org/xerial/sqlite-jdbc/3.20.0/sqlite-jdbc-3.20.0.jar"
 	 dest="${libDir}/sqlite-jdbc-3.20.0.jar" />
     <get src="https://repo.maven.apache.org/maven2/org/eclipse/jdt/org.eclipse.jdt.core/3.12.3/org.eclipse.jdt.core-3.12.3.jar" 

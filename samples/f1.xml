@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dfaaa>
+  <file path="samples/f1.java">
+    <graph name="f1">
+      <scope name="f1">
+        <scope name="f1_b0">
+          <node label="1" name="Nf1_b0_5" type="Const">
+            <ast length="1" start="77" type="NumberLiteral"/>
+            <link dst="Nf1_b0_6" idx="2" label="R" src="Nf1_b0_5" type="DataFlow"/>
+          </node>
+          <node label="+" name="Nf1_b0_6" type="Operator">
+            <ast length="3" start="75" type="InfixExpression"/>
+            <link dst="Nf1_b0_10" idx="1" label="L" src="Nf1_b0_6" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_8" ref="f1_b0:z" type="Assign">
+            <ast length="1" start="88" type="SimpleName"/>
+            <link dst="Nf1_b0_15" idx="1" label="L" src="Nf1_b0_8" type="DataFlow"/>
+            <link dst="Nf1_b0_12" idx="1" label="arg" src="Nf1_b0_8" type="DataFlow"/>
+          </node>
+          <node label="*=" name="Nf1_b0_10" ref="f1_b0:z" type="Operator">
+            <ast length="6" start="88" type="Assignment"/>
+            <link dst="Nf1_b0_8" idx="1" src="Nf1_b0_10" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_11" ref="f1_b0:z" type="Assign">
+            <ast length="1" start="97" type="SimpleName"/>
+            <link dst="Nf1_b0_36" idx="1" label="L" src="Nf1_b0_11" type="DataFlow"/>
+            <link dst="Nf1_b0_27" idx="1" label="index" src="Nf1_b0_11" type="DataFlow"/>
+          </node>
+          <node label="moo()" name="Nf1_b0_12" type="Operator">
+            <ast length="9" start="101" type="MethodInvocation"/>
+            <link dst="Nf1_b0_15" idx="2" label="R" src="Nf1_b0_12" type="DataFlow"/>
+          </node>
+          <node label="2" name="Nf1_b0_14" type="Const">
+            <ast length="1" start="108" type="NumberLiteral"/>
+            <link dst="Nf1_b0_12" idx="3" label="arg" src="Nf1_b0_14" type="DataFlow"/>
+          </node>
+          <node label="=" name="Nf1_b0_15" ref="f1_b0:z" type="Operator">
+            <ast length="13" start="97" type="Assignment"/>
+            <link dst="Nf1_b0_11" idx="1" src="Nf1_b0_15" type="DataFlow"/>
+          </node>
+          <node label="10" name="Nf1_b0_16" type="Const">
+            <ast length="2" start="131" type="NumberLiteral"/>
+          </node>
+          <node label="[3]" name="Nf1_b0_17" type="Refer">
+            <ast length="11" start="135" type="ArrayInitializer"/>
+            <link dst="Nf1_b0_21" idx="1" src="Nf1_b0_17" type="DataFlow"/>
+          </node>
+          <node label="2" name="Nf1_b0_18" type="Const">
+            <ast length="1" start="137" type="NumberLiteral"/>
+            <link dst="Nf1_b0_17" idx="1" label="value" src="Nf1_b0_18" type="DataFlow"/>
+          </node>
+          <node label="3" name="Nf1_b0_19" type="Const">
+            <ast length="1" start="140" type="NumberLiteral"/>
+            <link dst="Nf1_b0_17" idx="2" label="value" src="Nf1_b0_19" type="DataFlow"/>
+          </node>
+          <node label="4" name="Nf1_b0_20" type="Const">
+            <ast length="1" start="143" type="NumberLiteral"/>
+            <link dst="Nf1_b0_17" idx="3" label="value" src="Nf1_b0_20" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_21" ref="f1_b0:a" type="Assign">
+            <ast length="27" start="119" type="VariableDeclarationFragment"/>
+            <link dst="Nf1_b0_24" idx="1" label="array" src="Nf1_b0_21" type="DataFlow"/>
+            <link dst="Nf1_b0_33" idx="1" label="value" src="Nf1_b0_21" type="DataFlow"/>
+          </node>
+          <node label="1" name="Nf1_b0_23" type="Const">
+            <ast length="1" start="151" type="NumberLiteral"/>
+            <link dst="Nf1_b0_24" idx="2" label="index" src="Nf1_b0_23" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_24" ref="f1:#array" type="Assign">
+            <ast length="4" start="149" type="ArrayAccess"/>
+            <link dst="Nf1_b0_33" idx="1" label="array" src="Nf1_b0_24" type="DataFlow"/>
+          </node>
+          <node label="access" name="Nf1_b0_27" ref="f1:.zoo" type="Operator">
+            <ast length="5" start="156" type="QualifiedName"/>
+            <link dst="Nf1_b0_29" idx="2" label="R" src="Nf1_b0_27" type="DataFlow"/>
+          </node>
+          <node label="=" name="Nf1_b0_29" ref="f1:#array" type="Operator">
+            <ast length="12" start="149" type="Assignment"/>
+            <link dst="Nf1_b0_24" idx="1" src="Nf1_b0_29" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_30" ref="f1_b0:z" type="Assign">
+            <ast length="1" start="164" type="SimpleName"/>
+            <link dst="Nf1_b0_38" idx="1" label="index" src="Nf1_b0_30" type="DataFlow"/>
+            <link dst="Nf1_b0_43" idx="1" src="Nf1_b0_30" type="DataFlow"/>
+          </node>
+          <node label="2" name="Nf1_b0_32" type="Const">
+            <ast length="1" start="170" type="NumberLiteral"/>
+            <link dst="Nf1_b0_33" idx="3" label="index" src="Nf1_b0_32" type="DataFlow"/>
+          </node>
+          <node label="access" name="Nf1_b0_33" ref="f1:#array" type="Operator">
+            <ast length="4" start="168" type="ArrayAccess"/>
+            <link dst="Nf1_b0_35" idx="2" label="index" src="Nf1_b0_33" type="DataFlow"/>
+          </node>
+          <node label="access" name="Nf1_b0_35" ref="f1:.moo" type="Operator">
+            <ast length="8" start="168" type="FieldAccess"/>
+            <link dst="Nf1_b0_36" idx="2" label="R" src="Nf1_b0_35" type="DataFlow"/>
+          </node>
+          <node label="=" name="Nf1_b0_36" ref="f1_b0:z" type="Operator">
+            <ast length="12" start="164" type="Assignment"/>
+            <link dst="Nf1_b0_30" idx="1" src="Nf1_b0_36" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf1_b0_38" ref="f1:.foo" type="Assign">
+            <ast length="7" start="179" type="FieldAccess"/>
+          </node>
+          <node label="12" name="Nf1_b0_39" type="Const">
+            <ast length="2" start="189" type="NumberLiteral"/>
+            <link dst="Nf1_b0_41" idx="2" label="R" src="Nf1_b0_39" type="DataFlow"/>
+          </node>
+          <node label="=" name="Nf1_b0_41" ref="f1:.foo" type="Operator">
+            <ast length="12" start="179" type="Assignment"/>
+            <link dst="Nf1_b0_38" idx="1" src="Nf1_b0_41" type="DataFlow"/>
+          </node>
+          <node label="return" name="Nf1_b0_43" ref="f1:#return" type="Terminal">
+            <ast length="9" start="194" type="ReturnStatement"/>
+          </node>
+        </scope>
+        <node label="arg0" name="Nf1_0" ref="f1:x" type="Terminal">
+          <ast length="5" start="50" type="SingleVariableDeclaration"/>
+          <link dst="Nf1_b0_6" idx="1" label="L" src="Nf1_0" type="DataFlow"/>
+        </node>
+        <node label="arg1" name="Nf1_2" ref="f1:y" type="Terminal">
+          <ast length="5" start="57" type="SingleVariableDeclaration"/>
+          <link dst="Nf1_b0_10" idx="1" label="R" src="Nf1_2" type="DataFlow"/>
+        </node>
+        <node name="Nf1_26" ref="f1:.zoo" type="Dist">
+          <link dst="Nf1_b0_27" idx="1" label="value" src="Nf1_26" type="DataFlow"/>
+        </node>
+        <node name="Nf1_28" ref="f1:#array" type="Dist">
+          <link dst="Nf1_b0_29" idx="1" label="L" src="Nf1_28" type="DataFlow"/>
+        </node>
+        <node name="Nf1_34" ref="f1:.moo" type="Dist">
+          <link dst="Nf1_b0_35" idx="1" label="value" src="Nf1_34" type="DataFlow"/>
+        </node>
+        <node name="Nf1_40" ref="f1:.foo" type="Dist">
+          <link dst="Nf1_b0_41" idx="1" label="L" src="Nf1_40" type="DataFlow"/>
+        </node>
+      </scope>
+    </graph>
+  </file>
+</dfaaa>

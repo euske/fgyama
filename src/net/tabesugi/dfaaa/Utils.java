@@ -7,6 +7,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
+import org.xml.sax.*;
 import org.eclipse.jdt.core.dom.*;
 
 
@@ -63,6 +64,14 @@ class Utils {
 	return docBuilder.newDocument();
     }
     
+    public static Document readXml(String path)
+	throws IOException, ParserConfigurationException, SAXException {
+	File file = new File(path);
+	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+	return docBuilder.parse(file);
+    }
+
     public static void printXml(OutputStream output, Document doc) {
 	try {
 	    TransformerFactory transFactory = TransformerFactory.newInstance();
