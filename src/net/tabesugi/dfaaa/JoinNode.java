@@ -28,11 +28,13 @@ public class JoinNode extends CondNode {
     
     public void recv(boolean cond, DFNode node) {
 	if (cond) {
+	    assert(!this.recvTrue);
 	    this.recvTrue = true;
-	    node.connect(this, 1, "true");
+	    node.connect(this, (this.recvFalse)? 2 : 1, "true");
 	} else {
+	    assert(!this.recvFalse);
 	    this.recvFalse = true;
-	    node.connect(this, 2, "false");
+	    node.connect(this, (this.recvTrue)? 2 : 1, "false");
 	}
     }
 
@@ -42,10 +44,12 @@ public class JoinNode extends CondNode {
 
     public void close(DFNode node) {
 	if (!this.recvTrue) {
+	    assert(this.recvFalse);
 	    this.recvTrue = true;
-	    node.connect(this, 1, "true");
+	    node.connect(this, 2, "true");
 	}
 	if (!this.recvFalse) {
+	    assert(this.recvTrue);
 	    this.recvFalse = true;
 	    node.connect(this, 2, "false");
 	}
