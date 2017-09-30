@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.*;
 //  DFScope
 //  Mapping from name -> variable.
 //
-public class DFScope {
+public class DFScope implements Comparable<DFScope> {
 
     public DFGraph graph;
     public String name;
@@ -32,8 +32,14 @@ public class DFScope {
 	this.parent = parent;
     }
 
+    @Override
     public String toString() {
 	return ("<DFScope("+this.name+")>");
+    }
+
+    @Override
+    public int compareTo(DFScope scope) {
+	return this.name.compareTo(scope.name);
     }
 
     public DFScope addChild(String basename, ASTNode ast) {
@@ -47,8 +53,11 @@ public class DFScope {
 	return this.children.get(ast);
     }
 
-    public Collection<DFScope> children() {
-	return this.children.values();
+    public DFScope[] children() {
+	DFScope[] scopes = new DFScope[this.children.size()];
+	this.children.values().toArray(scopes);
+	Arrays.sort(scopes);
+	return scopes;
     }
 
     public void dump() {

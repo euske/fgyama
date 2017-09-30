@@ -59,7 +59,7 @@ class XmlExporter extends Exporter {
 	for (DFScope child : scope.children()) {
 	    escope.appendChild(this.writeScope(graph, child));
 	}
-	for (DFNode node : graph.nodes) {
+	for (DFNode node : graph.nodes()) {
 	    if (node.scope != scope) continue;
 	    Element enode = this.document.createElement("node");
 	    enode.setAttribute("name", node.name());
@@ -82,7 +82,7 @@ class XmlExporter extends Exporter {
 		    enode.appendChild(east);
 		}
 	    }
-	    for (DFLink link : node.send) {
+	    for (DFLink link : node.links()) {
 		Element elink = this.document.createElement("link");
 		elink.setAttribute("idx", Integer.toString(link.lid));
 		elink.setAttribute("type", link.type.toString());

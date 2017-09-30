@@ -36,6 +36,13 @@ public class DFGraph {
         this.nodes.remove(node);
     }
 
+    public DFNode[] nodes() {
+	DFNode[] nodes = new DFNode[this.nodes.size()];
+	this.nodes.toArray(nodes);
+	Arrays.sort(nodes);
+	return nodes;
+    }
+
     public void cleanup() {
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : this.nodes) {

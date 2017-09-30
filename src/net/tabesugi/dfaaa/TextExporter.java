@@ -55,7 +55,7 @@ class TextExporter extends Exporter {
 	throws IOException {
 	this.writer.write("@"+graph.name+"\n");
 	this.writeScope(graph.root);
-	for (DFNode node : graph.nodes) {
+	for (DFNode node : graph.nodes()) {
 	    this.writer.write("+"+node.scope.name);
 	    this.writer.write(","+node.name());
 	    this.writer.write(","+node.type().ordinal());
@@ -82,8 +82,8 @@ class TextExporter extends Exporter {
 	    }
 	    this.writer.newLine();
 	}
-	for (DFNode node : graph.nodes) {
-	    for (DFLink link : node.send) {
+	for (DFNode node : graph.nodes()) {
+	    for (DFLink link : node.links()) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
 		this.writer.write(","+link.lid+","+link.type.ordinal());
 		if (link.label != null) {

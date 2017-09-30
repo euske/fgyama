@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFLink
 //
-class DFLink {
+class DFLink implements Comparable<DFLink> {
     
     public DFNode src;
     public DFNode dst;
@@ -26,10 +26,16 @@ class DFLink {
 	this.label = label;
     }
 
+    @Override
     public String toString() {
 	return ("<DFLink: "+this.src+"-("+this.label+")-"+this.dst+">");
     }
 
+    @Override
+    public int compareTo(DFLink link) {
+	return this.lid - link.lid;
+    }
+    
     public void disconnect()
     {
 	this.src.send.remove(this);

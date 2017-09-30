@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFNode
 //
-public abstract class DFNode {
+public abstract class DFNode implements Comparable<DFNode> {
 
     public DFScope scope;
     public DFRef ref;
@@ -26,10 +26,16 @@ public abstract class DFNode {
 	this.recv = new ArrayList<DFLink>();
     }
 
+    @Override
     public String toString() {
 	return ("<DFNode("+this.name()+") "+this.label()+">");
     }
 
+    @Override
+    public int compareTo(DFNode node) {
+	return this.id - node.id;
+    }
+    
     public String name() {
 	return ("N"+this.scope.name+"_"+id);
     }
@@ -60,6 +66,7 @@ public abstract class DFNode {
     }
     
     public DFLink connect(DFNode dst, int lid, DFLinkType type, String label) {
+	assert (dst.recv.size()+1 == lid);
 	DFLink link = new DFLink(this, dst, lid, type, label);
 	this.send.add(link);
 	dst.recv.add(link);
@@ -83,4 +90,12 @@ public abstract class DFNode {
         }
         this.scope.graph.removeNode(this);
     }
+
+    public DFLink[] links() {
+	DFLink[] links = new DFLink[this.send.size()];
+	this.send.toArray(links);
+	Arrays.sort(links);
+	return links;
+    }
+
 }
