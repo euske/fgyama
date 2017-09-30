@@ -57,6 +57,7 @@
 
   <target name="test" depends="compile">
     <junit>
+      <jvmarg value="-ea" />
       <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
