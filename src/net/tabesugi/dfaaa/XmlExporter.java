@@ -13,14 +13,12 @@ import org.w3c.dom.*;
 //
 class XmlExporter extends Exporter {
 
-    public OutputStream stream;
     public Document document;
     
     private Element _root;
     private Element _file;
     
-    public XmlExporter(OutputStream stream) {
-	this.stream = stream;
+    public XmlExporter() {
 	try {
 	    this.document = Utils.createXml();
 	    _root = this.document.createElement("dfaaa");
@@ -32,7 +30,7 @@ class XmlExporter extends Exporter {
     public void close()
 	throws IOException {
 	this.document.appendChild(_root);
-	Utils.printXml(this.stream, this.document);
+	this.document.normalizeDocument();
     }
 
     public void startFile(String path)

@@ -1830,7 +1830,7 @@ public class Java2DF extends ASTVisitor {
 	    try {
 		DFGraph graph = getMethodGraph(method);
 		if (graph != null) {
-		    Utils.logit("success: "+funcName);
+		    Utils.logit("Success: "+funcName);
 		    // Collapse redundant nodes.
 		    graph.cleanup();
 		    if (this.exporter != null) {
@@ -1839,7 +1839,7 @@ public class Java2DF extends ASTVisitor {
 		}
 	    } catch (UnsupportedSyntax e) {
 		String astName = e.ast.getClass().getName();
-		Utils.logit("fail: "+funcName+" (Unsupported: "+astName+") "+e.ast);
+		Utils.logit("Fail: "+funcName+" (Unsupported: "+astName+") "+e.ast);
 		//e.printStackTrace();
 		if (this.exporter != null) {
 		    this.exporter.writeError(funcName, astName);
@@ -1849,6 +1849,22 @@ public class Java2DF extends ASTVisitor {
 	    e.printStackTrace();
 	}
 	return true;
+    }
+
+    public void processFile(String path)
+	throws IOException {
+	Utils.logit("Parsing: "+path);
+	String src = Utils.readFile(path);
+	Map<String, String> options = JavaCore.getOptions();
+	JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+	ASTParser parser = ASTParser.newParser(AST.JLS8);
+	parser.setSource(src.toCharArray());
+	parser.setKind(ASTParser.K_COMPILATION_UNIT);
+	//parser.setResolveBindings(true);
+	parser.setEnvironment(null, null, null, true);
+	parser.setCompilerOptions(options);
+	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
+	cu.accept(this);
     }
 
     /**
@@ -1883,27 +1899,15 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process files.
-	Exporter exporter = new XmlExporter(output);
+	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
-	    Utils.logit("Parsing: "+path);
-	    String src = Utils.readFile(path);
 	    exporter.startFile(path);
-
-	    Map<String, String> options = JavaCore.getOptions();
-	    JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-	    ASTParser parser = ASTParser.newParser(AST.JLS8);
-	    parser.setSource(src.toCharArray());
-	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	    //parser.setResolveBindings(true);
-	    parser.setEnvironment(null, null, null, true);
-	    parser.setCompilerOptions(options);
-	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
-	    
-	    Java2DF visitor = new Java2DF(exporter);
-	    cu.accept(visitor);
+	    Java2DF converter = new Java2DF(exporter);
+	    converter.processFile(path);
 	    exporter.endFile();
 	}
 	exporter.close();
+	Utils.printXml(output, exporter.document);
 	output.close();
     }
 }
