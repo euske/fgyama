@@ -30,7 +30,35 @@ public class TestDF extends XMLTestCase {
     }
 
     @Test
-    public void test1() throws Exception {
+    public void testf1() throws Exception {
 	compareXml("samples/f1.java", "samples/f1.xml");
+    }
+    @Test
+    public void testf2() throws Exception {
+	compareXml("samples/f2.java", "samples/f2.xml");
+    }
+    @Test
+    public void testf3() throws Exception {
+	compareXml("samples/f3.java", "samples/f3.xml");
+    }
+    @Test
+    public void testf4() throws Exception {
+	compareXml("samples/f4.java", "samples/f4.xml");
+    }
+    @Test
+    public void testf5() throws Exception {
+	compareXml("samples/f5.java", "samples/f5.xml");
+    }
+    @Test
+    public void testf6() throws Exception {
+	compareXml("samples/f6.java", "samples/f6.xml");
+    }
+    @Test
+    public void testf7() throws Exception {
+	compareXml("samples/f7.java", "samples/f7.xml");
+    }
+    @Test
+    public void testc12() throws Exception {
+	compareXml("samples/c12.java", "samples/c12.xml");
     }
 }

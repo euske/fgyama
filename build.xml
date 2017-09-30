@@ -56,10 +56,11 @@
   </target>
 
   <target name="test" depends="compile">
-    <junit printsummary="yes" showoutput="yes">
-      <test name="net.tabesugi.dfaaa.TestDF" />
+    <junit>
+      <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
+      <test name="net.tabesugi.dfaaa.TestDF" />
     </junit>
   </target>
   

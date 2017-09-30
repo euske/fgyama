@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<dfaaa>
+  <file path="samples/f2.java">
+    <graph name="f2">
+      <scope name="f2">
+        <scope name="f2_b0">
+          <scope name="f2_b0_b0">
+            <node label="+=" name="Nf2_b0_b0_18" ref="f2:x" type="Operator">
+              <ast length="6" start="115" type="Assignment"/>
+              <link dst="Nf2_b0_23" idx="1" label="true" src="Nf2_b0_b0_18" type="DataFlow"/>
+            </node>
+          </scope>
+          <scope name="f2_b0_b2">
+            <node label="assign" name="Nf2_b0_b2_28" ref="f2:y" type="Assign">
+              <ast length="1" start="175" type="SimpleName"/>
+              <link dst="Nf2_b0_42" idx="1" label="true" src="Nf2_b0_b2_28" type="DataFlow"/>
+              <link dst="Nf2_b0_44" idx="1" label="true" src="Nf2_b0_b2_28" type="DataFlow"/>
+            </node>
+            <node label="ref" name="Nf2_b0_b2_30" ref="f2:y" type="Refer">
+              <ast length="1" start="175" type="SimpleName"/>
+              <link dst="Nf2_b0_b2_31" idx="1" src="Nf2_b0_b2_30" type="DataFlow"/>
+              <link dst="Nf2_b0_b2_32" idx="1" src="Nf2_b0_b2_30" type="DataFlow"/>
+            </node>
+            <node label="++" name="Nf2_b0_b2_31" ref="f2:y" type="Operator">
+              <ast length="3" start="175" type="PostfixExpression"/>
+              <link dst="Nf2_b0_b2_28" idx="1" src="Nf2_b0_b2_31" type="DataFlow"/>
+            </node>
+            <node label="return" name="Nf2_b0_b2_32" ref="f2:#return" type="Terminal">
+              <ast length="11" start="168" type="ReturnStatement"/>
+              <link dst="Nf2_b0_43" idx="1" label="true" src="Nf2_b0_b2_32" type="DataFlow"/>
+            </node>
+          </scope>
+          <scope name="f2_b0_b1">
+            <node label="2" name="Nf2_b0_b1_20" type="Const">
+              <ast length="1" start="142" type="NumberLiteral"/>
+              <link dst="Nf2_b0_b1_22" idx="2" label="R" src="Nf2_b0_b1_20" type="DataFlow"/>
+            </node>
+            <node label="=" name="Nf2_b0_b1_22" ref="f2_b0:z" type="Operator">
+              <ast length="5" start="138" type="Assignment"/>
+              <link dst="Nf2_b0_24" idx="1" label="false" src="Nf2_b0_b1_22" type="DataFlow"/>
+            </node>
+          </scope>
+          <scope name="f2_b0_b3">
+            <node label="*" name="Nf2_b0_b3_39" type="Operator">
+              <ast length="3" start="202" type="InfixExpression"/>
+              <link dst="Nf2_b0_b3_40" idx="1" src="Nf2_b0_b3_39" type="DataFlow"/>
+            </node>
+            <node label="return" name="Nf2_b0_b3_40" ref="f2:#return" type="Terminal">
+              <ast length="11" start="195" type="ReturnStatement"/>
+              <link dst="Nf2_b0_47" idx="2" label="false" src="Nf2_b0_b3_40" type="DataFlow"/>
+            </node>
+          </scope>
+          <node label="1" name="Nf2_b0_6" type="Const">
+            <ast length="1" start="77" type="NumberLiteral"/>
+            <link dst="Nf2_b0_7" idx="2" label="R" src="Nf2_b0_6" type="DataFlow"/>
+          </node>
+          <node label="+" name="Nf2_b0_7" type="Operator">
+            <ast length="3" start="75" type="InfixExpression"/>
+            <link dst="Nf2_b0_8" idx="1" src="Nf2_b0_7" type="DataFlow"/>
+          </node>
+          <node label="assign" name="Nf2_b0_8" ref="f2_b0:z" type="Assign">
+            <ast length="7" start="71" type="VariableDeclarationFragment"/>
+            <link dst="Nf2_b0_24" idx="1" label="true" src="Nf2_b0_8" type="DataFlow"/>
+            <link dst="Nf2_b0_11" idx="1" label="L" src="Nf2_b0_8" type="DataFlow"/>
+            <link dst="Nf2_b0_b0_18" idx="1" label="R" src="Nf2_b0_8" type="DataFlow"/>
+            <link dst="Nf2_b0_b1_22" idx="1" label="L" src="Nf2_b0_8" type="DataFlow"/>
+          </node>
+          <node label="&lt;" name="Nf2_b0_11" type="Operator">
+            <ast length="5" start="85" type="InfixExpression"/>
+            <link dst="Nf2_b0_23" idx="1" label="cond" src="Nf2_b0_11" type="ControlFlow"/>
+            <link dst="Nf2_b0_24" idx="1" label="cond" src="Nf2_b0_11" type="ControlFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_23" ref="f2:x" type="Join">
+            <ast length="66" start="81" type="IfStatement"/>
+            <link dst="Nf2_b0_35" idx="1" src="Nf2_b0_23" type="DataFlow"/>
+            <link dst="Nf2_b0_45" idx="2" label="false" src="Nf2_b0_23" type="DataFlow"/>
+            <link dst="Nf2_b0_27" idx="1" label="L" src="Nf2_b0_23" type="DataFlow"/>
+            <link dst="Nf2_b0_45" idx="1" label="true" src="Nf2_b0_23" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_24" ref="f2_b0:z" type="Join">
+            <ast length="66" start="81" type="IfStatement"/>
+            <link dst="Nf2_b0_37" idx="1" src="Nf2_b0_24" type="DataFlow"/>
+            <link dst="Nf2_b0_46" idx="1" label="true" src="Nf2_b0_24" type="DataFlow"/>
+          </node>
+          <node label="0" name="Nf2_b0_26" type="Const">
+            <ast length="1" start="158" type="NumberLiteral"/>
+            <link dst="Nf2_b0_27" idx="2" label="R" src="Nf2_b0_26" type="DataFlow"/>
+          </node>
+          <node label="==" name="Nf2_b0_27" type="Operator">
+            <ast length="6" start="153" type="InfixExpression"/>
+            <link dst="Nf2_b0_42" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_43" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_44" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_45" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_46" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_47" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_48" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_49" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+            <link dst="Nf2_b0_50" idx="1" label="cond" src="Nf2_b0_27" type="ControlFlow"/>
+          </node>
+          <node name="Nf2_b0_35" ref="f2:x" type="Dist">
+            <link dst="Nf2_b0_49" idx="2" label="false" src="Nf2_b0_35" type="DataFlow"/>
+            <link dst="Nf2_b0_b3_39" idx="1" label="L" src="Nf2_b0_35" type="DataFlow"/>
+          </node>
+          <node name="Nf2_b0_37" ref="f2_b0:z" type="Dist">
+            <link dst="Nf2_b0_50" idx="2" label="false" src="Nf2_b0_37" type="DataFlow"/>
+            <link dst="Nf2_b0_b3_39" idx="1" label="R" src="Nf2_b0_37" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_42" ref="f2:y" type="Join">
+            <ast length="60" start="149" type="IfStatement"/>
+            <link dst="Nf2_b0_44" idx="2" label="false" src="Nf2_b0_42" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_43" ref="f2:#return" type="Join">
+            <link dst="Nf2_b0_47" idx="1" label="true" src="Nf2_b0_43" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_44" ref="f2:y" type="Join">
+            <link dst="Nf2_b0_48" idx="1" label="true" src="Nf2_b0_44" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_45" ref="f2:x" type="Join">
+            <link dst="Nf2_b0_49" idx="1" label="true" src="Nf2_b0_45" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_46" ref="f2_b0:z" type="Join">
+            <link dst="Nf2_b0_50" idx="1" label="true" src="Nf2_b0_46" type="DataFlow"/>
+          </node>
+          <node label="join" name="Nf2_b0_47" ref="f2:#return" type="Join"/>
+          <node label="join" name="Nf2_b0_48" ref="f2:y" type="Join"/>
+          <node label="join" name="Nf2_b0_49" ref="f2:x" type="Join"/>
+          <node label="join" name="Nf2_b0_50" ref="f2_b0:z" type="Join"/>
+        </scope>
+        <node label="arg0" name="Nf2_1" ref="f2:x" type="Terminal">
+          <ast length="5" start="50" type="SingleVariableDeclaration"/>
+          <link dst="Nf2_2" idx="1" src="Nf2_1" type="DataFlow"/>
+        </node>
+        <node label="assign" name="Nf2_2" ref="f2:x" type="Assign">
+          <ast length="5" start="50" type="SingleVariableDeclaration"/>
+          <link dst="Nf2_b0_23" idx="2" label="false" src="Nf2_2" type="DataFlow"/>
+          <link dst="Nf2_b0_7" idx="1" label="L" src="Nf2_2" type="DataFlow"/>
+          <link dst="Nf2_b0_b0_18" idx="1" label="L" src="Nf2_2" type="DataFlow"/>
+        </node>
+        <node label="arg1" name="Nf2_3" ref="f2:y" type="Terminal">
+          <ast length="5" start="57" type="SingleVariableDeclaration"/>
+          <link dst="Nf2_4" idx="1" src="Nf2_3" type="DataFlow"/>
+        </node>
+        <node label="assign" name="Nf2_4" ref="f2:y" type="Assign">
+          <ast length="5" start="57" type="SingleVariableDeclaration"/>
+          <link dst="Nf2_b0_42" idx="2" label="false" src="Nf2_4" type="DataFlow"/>
+          <link dst="Nf2_b0_11" idx="1" label="R" src="Nf2_4" type="DataFlow"/>
+          <link dst="Nf2_b0_b2_30" idx="1" src="Nf2_4" type="DataFlow"/>
+          <link dst="Nf2_b0_48" idx="1" label="false" src="Nf2_4" type="DataFlow"/>
+        </node>
+        <node name="Nf2_51" ref="f2:#return" type="Dist">
+          <link dst="Nf2_b0_43" idx="2" label="false" src="Nf2_51" type="DataFlow"/>
+        </node>
+        <node name="Nf2_52" ref="f2_b0:z" type="Dist">
+          <link dst="Nf2_b0_46" idx="2" label="false" src="Nf2_52" type="DataFlow"/>
+        </node>
+      </scope>
+    </graph>
+  </file>
+</dfaaa>
