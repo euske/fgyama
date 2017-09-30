@@ -51,14 +51,6 @@ public class DFScope {
 	return this.children.values();
     }
 
-    public void addNode(DFNode node) {
-	this.graph.addNode(node);
-    }
-
-    public void removeNode(DFNode node) {
-	this.graph.removeNode(node);
-    }
-
     public void dump() {
 	dump(System.out, "");
     }

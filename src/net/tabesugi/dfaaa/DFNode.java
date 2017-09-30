@@ -18,16 +18,10 @@ public abstract class DFNode {
     public List<DFLink> send;
     public List<DFLink> recv;
     
-    public static int baseId = 0;
-    public static int genId() {
-	return baseId++;
-    }
-
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
-	this.scope.addNode(this);
+	this.id = this.scope.graph.addNode(this);
 	this.ref = ref;
-	this.id = genId();
 	this.send = new ArrayList<DFLink>();
 	this.recv = new ArrayList<DFLink>();
     }
@@ -87,6 +81,6 @@ public abstract class DFNode {
         for (DFLink link : removed) {
             link.disconnect();
         }
-        this.scope.removeNode(this);
+        this.scope.graph.removeNode(this);
     }
 }
