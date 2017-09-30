@@ -67,7 +67,7 @@ pre { margin: 1em; border: 1px solid gray;}
 ''')        
         return
 
-    def show_html(src, nodes, klass=''):
+    def show_html(gid, src, nodes, klass=''):
         url = geturl(src.name)
         d = {}
         for (i,n) in enumerate(nodes):
@@ -86,7 +86,7 @@ pre { margin: 1em; border: 1px solid gray;}
                 print ('<a href="%s#L%d">%5d</a>:%s' %
                        (q(url), lineno, lineno, s))
             return
-        print('<div class=src><a href="%s">%s</a></div>' % (q(url), src.name))
+        print('<div class=src>%s: <a href="%s">%s</a></div>' % (gid, q(url), src.name))
         print('<pre class=%s>' % klass)
         src.show_nodes(nodes, println=println, astart=astart, aend=aend, abody=abody)
         print('</pre>')
@@ -126,14 +126,14 @@ pre { margin: 1em; border: 1px solid gray;}
             nodes0.append(graph0.nodes[nid0])
             nodes1.append(graph1.nodes[nid1])
         if html:
-            print('<div class=pair>')
-            show_html(src0, nodes0, 's0')
-            show_html(src1, nodes1, 's1')
+            print('<div class=pair>%s nodes<br>' % len(nids))
+            show_html(gid0, src0, nodes0, 's0')
+            show_html(gid1, src1, nodes1, 's1')
             print('</div>')
         else:
-            print('###', src0.name)
+            print('###', src0.name, len(nids))
             src0.show_nodes(nodes0)
-            print('###', src1.name)
+            print('###', src1.name, len(nids))
             src1.show_nodes(nodes1)
             print()
     
