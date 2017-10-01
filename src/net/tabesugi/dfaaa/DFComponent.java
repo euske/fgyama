@@ -12,9 +12,9 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     public DFScope scope;
-    public DFNode value = null;
-    public AssignNode assign = null;
     
+    private AssignNode lval = null;
+    private DFNode rval = null;
     private Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
     private Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
     private List<DFExit> exits = new ArrayList<DFExit>();
@@ -39,15 +39,16 @@ public class DFComponent {
 	    outputs.append(" "+ref);
 	}
 	out.println("  outputs:"+outputs);
-	if (this.value != null) {
-	    out.println("  value: "+this.value);
+	if (this.rval != null) {
+	    out.println("  rval: "+this.rval);
 	}
-	if (this.assign != null) {
-	    out.println("  assign: "+this.assign);
+	if (this.lval != null) {
+	    out.println("  lval: "+this.lval);
 	}
     }
 
-    public DFNode get(DFRef ref) {
+    // getValue(ref): get an output value of the component if defined.
+    public DFNode getValue(DFRef ref) {
 	DFNode node = this.outputs.get(ref);
 	if (node == null) {
 	    node = this.inputs.get(ref);
@@ -59,8 +60,20 @@ public class DFComponent {
 	return node;
     }
 
-    public void put(DFNode node) {
-	this.outputs.put(node.ref, node);
+    public AssignNode getLValue() {
+	return this.lval;
+    }
+
+    public void setLValue(AssignNode assign) {
+	this.lval = assign;
+    }
+
+    public DFNode getRValue() {
+	return this.rval;
+    }
+
+    public void setRValue(DFNode node) {
+	this.rval = node;
     }
 
     public DFNode getInput(DFRef ref) {
@@ -69,6 +82,10 @@ public class DFComponent {
 
     public DFNode getOutput(DFRef ref) {
 	return this.outputs.get(ref);
+    }
+
+    public void setOutput(DFNode node) {
+	this.outputs.put(node.ref, node);
     }
 
     public DFRef[] inputRefs() {
@@ -104,7 +121,7 @@ public class DFComponent {
 
     public void addExitAll(DFRef[] refs, String label) {
 	for (DFRef ref : refs) {
-	    DFNode node = this.get(ref);
+	    DFNode node = this.getValue(ref);
 	    this.addExit(new DFExit(node, label));
 	}
     }
@@ -116,10 +133,10 @@ public class DFComponent {
 		if (node instanceof JoinNode) {
 		    JoinNode join = (JoinNode)node;
 		    if (!join.isClosed()) {
-			join.close(this.get(node.ref));
+			join.close(this.getValue(node.ref));
 		    }
 		}
-		this.put(node);
+		this.setOutput(node);
 	    }
 	}
     }
