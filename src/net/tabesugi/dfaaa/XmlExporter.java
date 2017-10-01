@@ -86,7 +86,7 @@ class XmlExporter extends Exporter {
 		Element elink = this.document.createElement("link");
 		elink.setAttribute("idx", Integer.toString(link.lid));
 		elink.setAttribute("type", link.type.toString());
-		elink.setAttribute("src", link.src.name());
+		//elink.setAttribute("src", link.src.name());
 		elink.setAttribute("dst", link.dst.name());
 		if (link.label != null) {
 		    elink.setAttribute("label", link.label);

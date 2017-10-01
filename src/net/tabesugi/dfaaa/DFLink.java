@@ -33,7 +33,7 @@ class DFLink implements Comparable<DFLink> {
 
     @Override
     public int compareTo(DFLink link) {
-	return this.lid - link.lid;
+	return this.dst.compareTo(link.dst);
     }
     
     public void disconnect()

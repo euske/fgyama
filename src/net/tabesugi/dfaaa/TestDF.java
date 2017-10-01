@@ -26,7 +26,14 @@ public class TestDF extends XMLTestCase {
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
-	assertXMLEqual(refdoc, exporter.document);
+	try {
+	    assertXMLEqual(refdoc, exporter.document);
+	} catch (junit.framework.AssertionFailedError e) {
+	    OutputStream out = new FileOutputStream(new File(javaPath+".out"));
+	    Utils.printXml(out, exporter.document);
+	    out.close();
+	    throw e;
+	}
     }
 
     @Test
