@@ -15,10 +15,10 @@ public class DFScope implements Comparable<DFScope> {
     public DFGraph graph;
     public String name;
     public DFScope parent = null;
-    public Map<ASTNode, DFScope> children = new HashMap<ASTNode, DFScope>();
-    public int baseId = 0;
-
-    public Map<String, DFVar> vars = new HashMap<String, DFVar>();
+    
+    private int baseId = 0;
+    private Map<ASTNode, DFScope> children = new HashMap<ASTNode, DFScope>();
+    private Map<String, DFVar> vars = new HashMap<String, DFVar>();
 
     public DFScope(DFGraph graph, String name) {
 	this.graph = graph;
@@ -82,8 +82,11 @@ public class DFScope implements Comparable<DFScope> {
 	return var;
     }
 
-    public Collection<DFVar> vars() {
-	return this.vars.values();
+    public DFVar[] vars() {
+	DFVar[] vars = new DFVar[this.vars.size()];
+	this.vars.values().toArray(vars);
+	Arrays.sort(vars);
+	return vars;
     }
 
     public DFRef lookupVar(String name) {
