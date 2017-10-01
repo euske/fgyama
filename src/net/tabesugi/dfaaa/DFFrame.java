@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     public String label;
-    public Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
     
-    public Set<DFRef> inputs = new HashSet<DFRef>();
-    public Set<DFRef> outputs = new HashSet<DFRef>();
+    private Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
+    private Set<DFRef> inputs = new HashSet<DFRef>();
+    private Set<DFRef> outputs = new HashSet<DFRef>();
 
-    public static String TRY = "@TRY";
-    public static String METHOD = "@METHOD";
+    public static final String TRY = "@TRY";
+    public static final String METHOD = "@METHOD";
 
     public DFFrame(String label) {
 	this.label = label;
@@ -46,9 +46,19 @@ public class DFFrame {
 	this.outputs.add(ref);
     }
 
-    public Set<DFRef> getInsAndOuts() {
-	Set<DFRef> refs = new HashSet<DFRef>(this.inputs);
-	refs.retainAll(this.outputs);
+    public DFRef[] outputs() {
+	DFRef[] refs = new DFRef[this.outputs.size()];
+	this.outputs.toArray(refs);
+	Arrays.sort(refs);
+	return refs;
+    }
+
+    public DFRef[] getInsAndOuts() {
+	Set<DFRef> inouts = new HashSet<DFRef>(this.inputs);
+	inouts.retainAll(this.outputs);
+	DFRef[] refs = new DFRef[inouts.size()];
+	inouts.toArray(refs);
+	Arrays.sort(refs);
 	return refs;
     }
 

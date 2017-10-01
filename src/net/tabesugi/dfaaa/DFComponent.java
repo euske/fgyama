@@ -73,7 +73,7 @@ public class DFComponent {
 	this.exits.add(exit);
     }
 
-    public void addExitAll(Collection<DFRef> refs, String label) {
+    public void addExitAll(DFRef[] refs, String label) {
 	for (DFRef ref : refs) {
 	    DFNode node = this.get(ref);
 	    this.addExit(new DFExit(node, label));

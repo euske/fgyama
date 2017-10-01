@@ -444,7 +444,8 @@ abstract class CallNode extends ProgNode {
 	this.args = new ArrayList<DFNode>();
         this.exception = null;
 	if (obj != null) {
-	    obj.connect(this, 1, "index");
+	    this.args.add(obj);
+	    obj.connect(this, this.args.size(), "index");
 	}
     }
 
@@ -454,7 +455,7 @@ abstract class CallNode extends ProgNode {
 
     public void take(DFNode arg) {
 	this.args.add(arg);
-	arg.connect(this, this.args.size()+1, "arg");
+	arg.connect(this, this.args.size(), "arg");
     }
 }
 
@@ -607,7 +608,7 @@ public class Java2DF extends ASTVisitor {
 	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
 	Map<DFRef, DFNode> leaves = new HashMap<DFRef, DFNode>();
-	Set<DFRef> loopRefs = loopFrame.getInsAndOuts();
+	DFRef[] loopRefs = loopFrame.getInsAndOuts();
 	for (DFRef ref : loopRefs) {
 	    DFNode src = cpt.get(ref);
 	    LoopNode loop = new LoopNode(scope, ref, ast, src);
@@ -1270,19 +1271,19 @@ public class Java2DF extends ASTVisitor {
                 ReturnNode rtrn = new ReturnNode(scope, rtrnStmt, cpt.value);
                 cpt.addExit(new DFExit(rtrn, DFFrame.METHOD));
             }
-	    cpt.addExitAll(frame.outputs, DFFrame.METHOD);
+	    cpt.addExitAll(frame.outputs(), DFFrame.METHOD);
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    SimpleName labelName = breakStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.outputs, dstLabel);
+	    cpt.addExitAll(frame.outputs(), dstLabel);
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    SimpleName labelName = contStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.outputs, dstLabel);
+	    cpt.addExitAll(frame.outputs(), dstLabel);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
@@ -1311,7 +1312,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpression(scope, frame, cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(scope, stmt, cpt.value);
             cpt.addExit(new DFExit(exception, DFFrame.TRY));
-	    cpt.addExitAll(frame.outputs, DFFrame.TRY);
+	    cpt.addExitAll(frame.outputs(), DFFrame.TRY);
 	    
 	} else if (stmt instanceof ConstructorInvocation) {
 	    // XXX Ignore all side effects.
