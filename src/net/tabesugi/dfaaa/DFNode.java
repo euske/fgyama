@@ -49,8 +49,8 @@ public abstract class DFNode implements Comparable<DFNode> {
     }
 
     public void accept(DFNode node) {
-	assert this.recv.size() == 0;
 	node.connect(this, 1);
+	//assert this.recv.size() == 1;
     }
 
     public DFLink connect(DFNode dst, int lid) {
@@ -66,10 +66,10 @@ public abstract class DFNode implements Comparable<DFNode> {
     }
     
     public DFLink connect(DFNode dst, int lid, DFLinkType type, String label) {
-	assert (dst.recv.size()+1 == lid);
 	DFLink link = new DFLink(this, dst, lid, type, label);
 	this.send.add(link);
 	dst.recv.add(link);
+	//assert (dst.recv.size() == lid);
 	return link;
     }
 
