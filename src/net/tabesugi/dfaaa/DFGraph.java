@@ -13,7 +13,8 @@ public class DFGraph {
 
     public String name;
     public DFScope root;
-    public List<DFNode> nodes = new ArrayList<DFNode>();
+
+    private List<DFNode> nodes = new ArrayList<DFNode>();
 
     public DFGraph(String name) {
 	this.name = name;
@@ -46,24 +47,12 @@ public class DFGraph {
     public void cleanup() {
         List<DFNode> removed = new ArrayList<DFNode>();
         for (DFNode node : this.nodes) {
-            if (node.canOmit() &&
-                node.send.size() == 1 &&
-                node.recv.size() == 1) {
+            if (node.canOmit() && node.tryRemove()) {
                 removed.add(node);
             }
         }
         for (DFNode node : removed) {
-            DFLink link0 = node.recv.get(0);
-            DFLink link1 = node.send.get(0);
-            if (link0.type == link1.type &&
-		(link0.label == null || link1.label == null)) {
-                node.remove();
-                String label = link0.label;
-                if (label == null) {
-                    label = link1.label;
-                }
-                link0.src.connect(link1.dst, 1, link0.type, label);
-            }
+	    this.removeNode(node);
         }
     }			   
 }

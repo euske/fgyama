@@ -15,8 +15,9 @@ public abstract class DFNode implements Comparable<DFNode> {
     public DFRef ref;
     public int id;
     public String name;
-    public List<DFLink> send;
-    public List<DFLink> recv;
+    
+    private List<DFLink> send;
+    private List<DFLink> recv;
     
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
@@ -73,7 +74,26 @@ public abstract class DFNode implements Comparable<DFNode> {
 	return link;
     }
 
-    public void remove() {
+    public boolean tryRemove() {
+	if (this.send.size() == 1 &&
+	    this.recv.size() == 1) {
+            DFLink link0 = this.recv.get(0);
+            DFLink link1 = this.send.get(0);
+            if (link0.type == link1.type &&
+		(link0.label == null || link1.label == null)) {
+                this.remove();
+                String label = link0.label;
+                if (label == null) {
+                    label = link1.label;
+                }
+                link0.src.connect(link1.dst, 1, link0.type, label);
+		return true;
+            }
+	}
+	return false;
+    }
+
+    private void remove() {
         List<DFLink> removed = new ArrayList<DFLink>();
         for (DFLink link : this.send) {
             if (link.src == this) {
@@ -86,9 +106,9 @@ public abstract class DFNode implements Comparable<DFNode> {
             }
         }
         for (DFLink link : removed) {
-            link.disconnect();
+	    link.src.send.remove(link);
+	    link.dst.recv.remove(link);
         }
-        this.scope.graph.removeNode(this);
     }
 
     public DFLink[] links() {

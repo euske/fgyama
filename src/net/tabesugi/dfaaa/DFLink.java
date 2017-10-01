@@ -35,11 +35,5 @@ class DFLink implements Comparable<DFLink> {
     public int compareTo(DFLink link) {
 	return this.dst.compareTo(link.dst);
     }
-    
-    public void disconnect()
-    {
-	this.src.send.remove(this);
-	this.dst.recv.remove(this);
-    }
 }
 
