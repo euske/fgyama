@@ -376,12 +376,11 @@ def load_graphs_xml(fp):
                                             int(e.get('start')),
                                             int(e.get('length')))
                             elif e.tag == 'link':
-                                src = e.get('src')
                                 dst = e.get('dst')
                                 idx = e.get('idx')
                                 ltype = DFLink.Type[e.get('type')]
                                 label = e.get('label')
-                                link = DFLink(len(graph.links), src, dst,
+                                link = DFLink(len(graph.links), nid, dst,
                                               int(idx), ltype, label)
                                 graph.links.append(link)
                         graph.nodes[nid] = node
