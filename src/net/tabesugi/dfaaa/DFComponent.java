@@ -12,11 +12,12 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     public DFScope scope;
-    public Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
-    public Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
-    public List<DFExit> exits = new ArrayList<DFExit>();
     public DFNode value = null;
     public AssignNode assign = null;
+    
+    private Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
+    private Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
+    private List<DFExit> exits = new ArrayList<DFExit>();
     
     public DFComponent(DFScope scope) {
 	this.scope = scope;
@@ -62,11 +63,39 @@ public class DFComponent {
 	this.outputs.put(node.ref, node);
     }
 
+    public DFNode getInput(DFRef ref) {
+	return this.inputs.get(ref);
+    }
+
+    public DFNode getOutput(DFRef ref) {
+	return this.outputs.get(ref);
+    }
+
+    public DFRef[] inputRefs() {
+	DFRef[] refs = new DFRef[this.inputs.size()];
+	this.inputs.keySet().toArray(refs);
+	Arrays.sort(refs);
+	return refs;
+    }
+
+    public DFRef[] outputRefs() {
+	DFRef[] refs = new DFRef[this.outputs.size()];
+	this.outputs.keySet().toArray(refs);
+	Arrays.sort(refs);
+	return refs;
+    }
+    
     public void endScope(DFScope scope) {
 	for (DFRef ref : scope.vars()) {
 	    this.inputs.remove(ref);
 	    this.outputs.remove(ref);
 	}
+    }
+
+    public DFExit[] exits() {
+	DFExit[] exits = new DFExit[this.exits.size()];
+	this.exits.toArray(exits);
+	return exits;
     }
     
     public void addExit(DFExit exit) {

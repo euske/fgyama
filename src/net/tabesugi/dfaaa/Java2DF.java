@@ -546,33 +546,42 @@ public class Java2DF extends ASTVisitor {
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
 	 DFNode condValue, DFComponent trueCpt, DFComponent falseCpt) {
 
-	// refs: all the references from both component.
-	Set<DFRef> refs = new HashSet<DFRef>();
+	// outRefs: all the references from both component.
+	List<DFRef> outRefs = new ArrayList<DFRef>();
 	if (trueCpt != null) {
-	    for (Map.Entry<DFRef, DFNode> entry : trueCpt.inputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode src = entry.getValue();
+	    for (DFRef ref : trueCpt.inputRefs()) {
+		DFNode src = trueCpt.getInput(ref);
+		assert src != null;
 		src.accept(cpt.get(ref));
 	    }
-	    refs.addAll(trueCpt.outputs.keySet());
+	    outRefs.addAll(Arrays.asList(trueCpt.outputRefs()));
 	}
 	if (falseCpt != null) {
-	    for (Map.Entry<DFRef, DFNode> entry : falseCpt.inputs.entrySet()) {
-		DFRef ref = entry.getKey();
-		DFNode src = entry.getValue();
+	    for (DFRef ref : falseCpt.inputRefs()) {
+		DFNode src = falseCpt.getInput(ref);
+		assert src != null;
 		src.accept(cpt.get(ref));
 	    }
-	    refs.addAll(falseCpt.outputs.keySet());
+	    outRefs.addAll(Arrays.asList(falseCpt.outputRefs()));
 	}
 
 	// Attach a JoinNode to each variable.
-	for (DFRef ref : refs) {
+	Set<DFRef> used = new HashSet<DFRef>();
+	for (DFRef ref : outRefs) {
+	    if (used.contains(ref)) continue;
+	    used.add(ref);
 	    JoinNode join = new JoinNode(scope, ref, ast, condValue);
-	    if (trueCpt != null && trueCpt.outputs.containsKey(ref)) {
-		join.recv(true, trueCpt.get(ref));
+	    if (trueCpt != null) {
+		DFNode dst = trueCpt.getOutput(ref);
+		if (dst != null) {
+		    join.recv(true, dst);
+		}
 	    }
-	    if (falseCpt != null && falseCpt.outputs.containsKey(ref)) {
-		join.recv(false, falseCpt.get(ref));
+	    if (falseCpt != null) {
+		DFNode dst = falseCpt.getOutput(ref);
+		if (dst != null) {
+		    join.recv(false, dst);
+		}
 	    }
 	    if (!join.isClosed()) {
 		join.close(cpt.get(ref));
@@ -582,12 +591,12 @@ public class Java2DF extends ASTVisitor {
 
 	// Take care of exits.
 	if (trueCpt != null) {
-	    for (DFExit exit : trueCpt.exits) {
+	    for (DFExit exit : trueCpt.exits()) {
 		cpt.addExit(exit.addJoin(scope, condValue, true));
 	    }
 	}
 	if (falseCpt != null) {
-	    for (DFExit exit : falseCpt.exits) {
+	    for (DFExit exit : falseCpt.exits()) {
 		cpt.addExit(exit.addJoin(scope, condValue, false));
 	    }
 	}
@@ -627,9 +636,8 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Connect the inputs to the loop.
-	for (Map.Entry<DFRef, DFNode> entry : loopCpt.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode input = entry.getValue();
+	for (DFRef ref : loopCpt.inputRefs()) {
+	    DFNode input = loopCpt.getInput(ref);
 	    LoopNode loop = loops.get(ref);
 	    if (loop != null) {
 		input.accept(loop);
@@ -640,9 +648,8 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	// Connect the outputs to the loop.
-	for (Map.Entry<DFRef, DFNode> entry : loopCpt.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode output = entry.getValue();
+	for (DFRef ref : loopCpt.outputRefs()) {
+	    DFNode output = loopCpt.getOutput(ref);
 	    BranchNode branch = branches.get(ref);
 	    if (branch != null) {
 		branch.accept(output);
@@ -652,7 +659,7 @@ public class Java2DF extends ASTVisitor {
 	}
 	
 	// Reconnect the continue statements.
-	for (DFExit exit : loopCpt.exits) {
+	for (DFExit exit : loopCpt.exits()) {
 	    if (exit.cont &&
 		(exit.label == null || exit.label.equals(loopFrame.label))) {
 		DFNode node = exit.node;
@@ -1052,15 +1059,13 @@ public class Java2DF extends ASTVisitor {
 	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
 
-	for (Map.Entry<DFRef, DFNode> entry : caseCpt.inputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode src = entry.getValue();
+	for (DFRef ref : caseCpt.inputRefs()) {
+	    DFNode src = caseCpt.getInput(ref);
 	    src.accept(cpt.get(ref));
 	}
 	
-	for (Map.Entry<DFRef, DFNode> entry : caseCpt.outputs.entrySet()) {
-	    DFRef ref = entry.getKey();
-	    DFNode dst = entry.getValue();
+	for (DFRef ref : caseCpt.outputRefs()) {
+	    DFNode dst = caseCpt.getOutput(ref);
 	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
 	    join.recv(true, dst);
 	    join.close(cpt.get(ref));
