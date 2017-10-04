@@ -47,8 +47,8 @@ class ArrayAssignNode extends SingleAssignNode {
 			   DFNode array, DFNode index) {
 	super(scope, ref, ast);
 	this.index = index;
-	array.connect(this, 1, "array");
-	index.connect(this, 2, "index");
+	array.connect(this, 2, "array");
+	index.connect(this, 3, "index");
     }
 }
 
@@ -61,7 +61,7 @@ class FieldAssignNode extends SingleAssignNode {
 			   DFNode obj) {
 	super(scope, ref, ast);
 	this.obj = obj;
-	obj.connect(this, 1, "index");
+	obj.connect(this, 2, "index");
     }
 }
 

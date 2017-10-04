@@ -51,27 +51,23 @@ public abstract class DFNode implements Comparable<DFNode> {
 
     public void accept(DFNode node) {
 	node.connect(this, 1);
-	//assert this.recv.size() == 1;
+	assert this.recv.size() == 1;
     }
 
-    public DFLink connect(DFNode dst, int lid) {
-	return this.connect(dst, lid, DFLinkType.DataFlow);
+    public void connect(DFNode dst, int lid) {
+	this.addLink(new DFLink(this, dst, lid));
     }
     
-    public DFLink connect(DFNode dst, int lid, DFLinkType type) {
-	return this.connect(dst, lid, type, null);
+    public void connect(DFNode dst, int lid, DFLinkType type) {
+	this.addLink(new DFLink(this, dst, lid, type));
     }
     
-    public DFLink connect(DFNode dst, int lid, String label) {
-	return this.connect(dst, lid, DFLinkType.DataFlow, label);
+    public void connect(DFNode dst, int lid, String label) {
+	this.addLink(new DFLink(this, dst, lid, DFLinkType.DataFlow, label));
     }
     
-    public DFLink connect(DFNode dst, int lid, DFLinkType type, String label) {
-	DFLink link = new DFLink(this, dst, lid, type, label);
-	this.send.add(link);
-	dst.recv.add(link);
-	//assert (dst.recv.size() == lid);
-	return link;
+    public void connect(DFNode dst, int lid, DFLinkType type, String label) {
+	this.addLink(new DFLink(this, dst, lid, type, label));
     }
 
     public boolean tryRemove() {
@@ -81,12 +77,11 @@ public abstract class DFNode implements Comparable<DFNode> {
             DFLink link1 = this.send.get(0);
             if (link0.type == link1.type &&
 		(link0.label == null || link1.label == null)) {
+		DFNode src = link0.src;
+		DFNode dst = link1.dst;
+                String label = (link0.label != null)? link0.label : link1.label;
                 this.remove();
-                String label = link0.label;
-                if (label == null) {
-                    label = link1.label;
-                }
-                link0.src.connect(link1.dst, 1, link0.type, label);
+		src.connect(dst, link1.lid, link1.type, label);
 		return true;
             }
 	}
@@ -96,14 +91,12 @@ public abstract class DFNode implements Comparable<DFNode> {
     private void remove() {
         List<DFLink> removed = new ArrayList<DFLink>();
         for (DFLink link : this.send) {
-            if (link.src == this) {
-                removed.add(link);
-            }
+	    assert link.src == this;
+	    removed.add(link);
         }
         for (DFLink link : this.recv) {
-            if (link.dst == this) {
-                removed.add(link);
-            }
+            assert link.dst == this;
+	    removed.add(link);
         }
         for (DFLink link : removed) {
 	    link.src.send.remove(link);
@@ -116,6 +109,21 @@ public abstract class DFNode implements Comparable<DFNode> {
 	this.send.toArray(links);
 	Arrays.sort(links);
 	return links;
+    }
+
+    private void addLink(DFLink link) {
+	assert !link.dst.containsLid(link.lid);
+	link.src.send.add(link);
+	link.dst.recv.add(link);
+    }
+
+    private boolean containsLid(int lid) {
+	if (lid != 0) {
+	    for (DFLink link : this.recv) {
+		if (link.lid == lid) return true;
+	    }
+	}
+	return false;
     }
 
 }

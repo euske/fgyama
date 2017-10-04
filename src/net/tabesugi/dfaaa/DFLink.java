@@ -17,6 +17,16 @@ class DFLink implements Comparable<DFLink> {
     public DFLinkType type;
     public String label;
     
+    public DFLink(DFNode src, DFNode dst, int lid)
+    {
+	this(src, dst, lid, DFLinkType.DataFlow);
+    }
+    
+    public DFLink(DFNode src, DFNode dst, int lid, DFLinkType type)
+    {
+	this(src, dst, lid, type, null);
+    }
+    
     public DFLink(DFNode src, DFNode dst, int lid, DFLinkType type, String label)
     {
 	this.src = src;
@@ -28,7 +38,7 @@ class DFLink implements Comparable<DFLink> {
 
     @Override
     public String toString() {
-	return ("<DFLink: "+this.src+"-("+this.label+")-"+this.dst+">");
+	return ("<DFLink#"+this.lid+": "+this.src+"-("+this.label+")-"+this.dst+">");
     }
 
     @Override
