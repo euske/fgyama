@@ -13,7 +13,7 @@ def doit(db, graph):
             if link.ltype == DFLink.L_Informational and link.name == 'end':
                 loop_end = link.dst
         cond = None
-        for link in loop_end.recv:
+        for link in loop_end.incoming:
             if link.ltype == DFLink.L_ControlFlow:
                 cond = link.src
                 
@@ -21,7 +21,7 @@ def doit(db, graph):
             if n.ref == ref:
                 return n
             else:
-                for link in n.recv:
+                for link in n.incoming:
                     if link.ltype == DFLink.L_DataFlow:
                         c = findvar(link.src)
                         if c is not None:
@@ -35,7 +35,7 @@ def doit(db, graph):
             if n.ntype == DFNode.N_Branch and n is not loop_end:
                 return True
             else:
-                for link in n.recv:
+                for link in n.incoming:
                     if link.ltype == DFLink.L_DataFlow and not isisolated(link.src):
                         return False
                 return True

@@ -85,7 +85,7 @@ class TextExporter extends Exporter {
 	for (DFNode node : graph.nodes()) {
 	    for (DFLink link : node.links()) {
 		this.writer.write("-"+link.src.name()+","+link.dst.name());
-		this.writer.write(","+link.lid+","+link.type.ordinal());
+		this.writer.write(","+link.deg+","+link.type.ordinal());
 		if (link.label != null) {
 		    this.writer.write(","+link.label);;
 		}

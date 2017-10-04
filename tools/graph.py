@@ -141,14 +141,14 @@ class DFGraph:
             link.src = self.nodes[link.srcid]
             link.dst = self.nodes[link.dstid]
             if link.ltype in (DFLink.L_DataFlow, DFLink.L_ControlFlow):
-                link.src.send.append(link)
-                link.dst.recv.append(link)
+                link.src.outgoing.append(link)
+                link.dst.incoming.append(link)
             else:
                 link.src.other.append(link)
                 link.dst.other.append(link)
         for node in self.nodes.values():
-            node.send.sort(key=lambda link: link.idx)
-            node.recv.sort(key=lambda link: link.idx)
+            node.outgoing.sort(key=lambda link: link.deg)
+            node.incoming.sort(key=lambda link: link.deg)
         return self
     
     def dump(self, out=sys.stdout):
@@ -164,9 +164,9 @@ class DFGraph:
                     out.write(',%s,%s,%s' % node.ast)
                 out.write('\n')
             for node in scope.nodes:
-                for link in (node.send+node.other):
+                for link in (node.outgoing+node.other):
                     out.write('-%s,%s,%s,%s,%s\n' %
-                              (link.srcid, link.dstid, link.idx, link.ltype, link.label))
+                              (link.srcid, link.dstid, link.deg, link.ltype, link.label))
             for child in scope.children:
                 f(child)
         if self.src is not None:
@@ -240,8 +240,8 @@ class DFNode:
         self.ntype = ntype
         self.label = label
         self.ref = ref
-        self.send = []
-        self.recv = []
+        self.outgoing = []
+        self.incoming = []
         self.other = []
         self.ast = None
         return
@@ -269,20 +269,20 @@ class DFLink:
         'Informational': L_Informational,
     }
     
-    def __init__(self, lid, srcid, dstid, idx, ltype, label):
+    def __init__(self, lid, srcid, dstid, deg, ltype, label):
         self.lid = lid
         self.srcid = srcid
         self.src = None
         self.dstid = dstid
         self.dst = None
-        self.idx = idx
+        self.deg = deg
         self.ltype = ltype
         self.label = label
         return
 
     def __repr__(self):
-        return ('<DFLink(%d): ltype=%d, %r-(%r)-%r, idx=%r>' %
-                (self.lid, self.ltype, self.srcid, self.label, self.dstid, self.idx))
+        return ('<DFLink(%d): ltype=%d, %r-(%r)-%r, deg=%r>' %
+                (self.lid, self.ltype, self.srcid, self.label, self.dstid, self.deg))
 
 
 ##  load_graphs_text
@@ -330,10 +330,10 @@ def load_graphs_text(fp):
             scope.nodes.append(node)
         elif line.startswith('-'):
             f = line[1:].split(',')
-            (nid1,nid2,idx,ltype) = f[0:4]
+            (nid1,nid2,deg,ltype) = f[0:4]
             label = f[4] if 5 <= len(f) else None
             assert graph is not None
-            link = DFLink(len(graph.links), nid1, nid2, int(idx), int(ltype), label)
+            link = DFLink(len(graph.links), nid1, nid2, int(deg), int(ltype), label)
             graph.links.append(link)
         elif not line:
             if graph is not None:
@@ -377,11 +377,11 @@ def load_graphs_xml(fp):
                                             int(e.get('length')))
                             elif e.tag == 'link':
                                 dst = e.get('dst')
-                                idx = e.get('idx')
+                                deg = e.get('deg')
                                 ltype = DFLink.Type[e.get('type')]
                                 label = e.get('label')
                                 link = DFLink(len(graph.links), nid, dst,
-                                              int(idx), ltype, label)
+                                              int(deg), ltype, label)
                                 graph.links.append(link)
                         graph.nodes[nid] = node
                         scope.nodes.append(node)
@@ -440,7 +440,7 @@ CREATE TABLE DFLink (
     Lid INTEGER PRIMARY KEY,
     Nid0 INTEGER,
     Nid1 INTEGER,
-    Idx INTEGER,
+    Deg INTEGER,
     Type INTEGER,
     Label TEXT
 );
@@ -487,7 +487,7 @@ def index_graph(cur, cid, graph):
     def index_link(link):
         cur.execute(
             'INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
-            (link.src.nid, link.dst.nid, link.idx, 
+            (link.src.nid, link.dst.nid, link.deg, 
              link.ltype, link.label))
         lid = cur.lastrowid
         link.lid = lid
@@ -495,7 +495,7 @@ def index_graph(cur, cid, graph):
     
     index_scope(graph.root)
     for node in graph.nodes.values():
-        for link in node.send:
+        for link in node.outgoing:
             index_link(link)
     return
 
@@ -541,10 +541,10 @@ def fetch_graph(cur, gid):
         scope.nodes.append(node)
     for (nid0,node) in graph.nodes.items():
         rows = cur.execute(
-            'SELECT Lid,Nid1,Idx,Type,Label FROM DFLink WHERE Nid0=?;',
+            'SELECT Lid,Nid1,Deg,Type,Label FROM DFLink WHERE Nid0=?;',
             (nid0,))
-        for (lid,nid1,idx,ltype,label) in rows:
-            link = DFLink(lid, nid0, nid1, idx, ltype, label)
+        for (lid,nid1,deg,ltype,label) in rows:
+            link = DFLink(lid, nid0, nid1, deg, ltype, label)
             graph.links.append(link)
     graph.fixate()
     return graph

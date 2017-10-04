@@ -16,15 +16,15 @@ public abstract class DFNode implements Comparable<DFNode> {
     public int id;
     public String name;
     
-    private List<DFLink> send;
-    private List<DFLink> recv;
+    private List<DFLink> outgoing;
+    private List<DFLink> incoming;
     
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
 	this.id = this.scope.graph.addNode(this);
 	this.ref = ref;
-	this.send = new ArrayList<DFLink>();
-	this.recv = new ArrayList<DFLink>();
+	this.outgoing = new ArrayList<DFLink>();
+	this.incoming = new ArrayList<DFLink>();
     }
 
     @Override
@@ -51,37 +51,50 @@ public abstract class DFNode implements Comparable<DFNode> {
 
     public void accept(DFNode node) {
 	node.connect(this, 1);
-	assert this.recv.size() == 1;
+	assert this.incoming.size() == 1;
     }
 
-    public void connect(DFNode dst, int lid) {
-	this.addLink(new DFLink(this, dst, lid));
+    public void connect(DFNode dst, int deg) {
+	this.addLink(new DFLink(this, dst, deg));
     }
     
-    public void connect(DFNode dst, int lid, DFLinkType type) {
-	this.addLink(new DFLink(this, dst, lid, type));
+    public void connect(DFNode dst, int deg, DFLinkType type) {
+	this.addLink(new DFLink(this, dst, deg, type));
     }
     
-    public void connect(DFNode dst, int lid, String label) {
-	this.addLink(new DFLink(this, dst, lid, DFLinkType.DataFlow, label));
+    public void connect(DFNode dst, int deg, String label) {
+	this.addLink(new DFLink(this, dst, deg, DFLinkType.DataFlow, label));
     }
     
-    public void connect(DFNode dst, int lid, DFLinkType type, String label) {
-	this.addLink(new DFLink(this, dst, lid, type, label));
+    public void connect(DFNode dst, int deg, DFLinkType type, String label) {
+	this.addLink(new DFLink(this, dst, deg, type, label));
+    }
+
+    protected void addLink(DFLink link) {
+	assert !link.dst.containsDeg(link.deg);
+	link.src.outgoing.add(link);
+	link.dst.incoming.add(link);
+    }
+
+    public DFLink[] links() {
+	DFLink[] links = new DFLink[this.outgoing.size()];
+	this.outgoing.toArray(links);
+	Arrays.sort(links);
+	return links;
     }
 
     public boolean tryRemove() {
-	if (this.send.size() == 1 &&
-	    this.recv.size() == 1) {
-            DFLink link0 = this.recv.get(0);
-            DFLink link1 = this.send.get(0);
+	if (this.outgoing.size() == 1 &&
+	    this.incoming.size() == 1) {
+            DFLink link0 = this.incoming.get(0);
+            DFLink link1 = this.outgoing.get(0);
             if (link0.type == link1.type &&
 		(link0.label == null || link1.label == null)) {
 		DFNode src = link0.src;
 		DFNode dst = link1.dst;
                 String label = (link0.label != null)? link0.label : link1.label;
                 this.remove();
-		src.connect(dst, link1.lid, link1.type, label);
+		src.connect(dst, link1.deg, link1.type, label);
 		return true;
             }
 	}
@@ -90,37 +103,24 @@ public abstract class DFNode implements Comparable<DFNode> {
 
     private void remove() {
         List<DFLink> removed = new ArrayList<DFLink>();
-        for (DFLink link : this.send) {
+        for (DFLink link : this.outgoing) {
 	    assert link.src == this;
 	    removed.add(link);
         }
-        for (DFLink link : this.recv) {
+        for (DFLink link : this.incoming) {
             assert link.dst == this;
 	    removed.add(link);
         }
         for (DFLink link : removed) {
-	    link.src.send.remove(link);
-	    link.dst.recv.remove(link);
+	    link.src.outgoing.remove(link);
+	    link.dst.incoming.remove(link);
         }
     }
 
-    public DFLink[] links() {
-	DFLink[] links = new DFLink[this.send.size()];
-	this.send.toArray(links);
-	Arrays.sort(links);
-	return links;
-    }
-
-    private void addLink(DFLink link) {
-	assert !link.dst.containsLid(link.lid);
-	link.src.send.add(link);
-	link.dst.recv.add(link);
-    }
-
-    private boolean containsLid(int lid) {
-	if (lid != 0) {
-	    for (DFLink link : this.recv) {
-		if (link.lid == lid) return true;
+    private boolean containsDeg(int deg) {
+	if (deg != 0) {
+	    for (DFLink link : this.incoming) {
+		if (link.deg == deg) return true;
 	    }
 	}
 	return false;

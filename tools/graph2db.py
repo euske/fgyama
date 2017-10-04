@@ -88,16 +88,16 @@ def index_graph_tree(cache, cur, graph):
                     (tid, graph.gid, node0.nid))
                 tids.append(tid)
             #print ('index:', pids, key, '->', tids)
-            for link1 in node0.recv:
+            for link1 in node0.incoming:
                 index_tree(link1, link1.src, tids)
         else:
-            for link1 in node0.recv:
+            for link1 in node0.incoming:
                 index_tree(link0, link1.src, pids)
         return
 
     print (graph)
     for node in graph.nodes.values():
-        if not node.send:
+        if not node.outgoing:
             index_tree(None, node, [0])
     return
 

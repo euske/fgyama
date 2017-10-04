@@ -84,7 +84,7 @@ class XmlExporter extends Exporter {
 	    }
 	    for (DFLink link : node.links()) {
 		Element elink = this.document.createElement("link");
-		elink.setAttribute("idx", Integer.toString(link.lid));
+		elink.setAttribute("deg", Integer.toString(link.deg));
 		elink.setAttribute("type", link.type.toString());
 		//elink.setAttribute("src", link.src.name());
 		elink.setAttribute("dst", link.dst.name());

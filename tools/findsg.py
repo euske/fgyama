@@ -30,7 +30,7 @@ def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
             #print ('search:', pid, key, '->', tid, pairs)
             n = 0
             branches = 1
-            for link1 in node0.recv:
+            for link1 in node0.incoming:
                 b = match_tree(tid, link1, link1.src, match)
                 if 0 < b:
                     n += 1
@@ -38,7 +38,7 @@ def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
         else:
             n = 0
             branches = 0
-            for link1 in node0.recv:
+            for link1 in node0.incoming:
                 b = match_tree(pid, link0, link1.src, match)
                 if 0 < b:
                     n += 1
@@ -69,7 +69,7 @@ def find_graph(cache, cur, graph, minnodes=5, minbranches=2):
         return
 
     for node in graph.nodes.values():
-        if not node.send:
+        if not node.outgoing:
             find_tree(node)
 
     return votes

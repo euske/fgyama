@@ -34,7 +34,7 @@ def write_gv(out, scope, highlight=None, level=0):
         write_gv(out, child, highlight, level=level+1)
     if level == 0:
         for node in scope.walk():
-            for link in node.send:
+            for link in node.outgoing:
                 out.write(h+' N%s -> N%s' % (link.srcid, link.dstid))
                 label = (link.label or '')
                 out.write(h+' [label=%s' % q(label))
