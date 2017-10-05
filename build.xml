@@ -34,6 +34,9 @@
     <pathelement location="${libDir}/org.eclipse.core.commands-3.8.1.jar"/>
   </path>
   
+  <target name="build" depends="clean,compile">
+  </target>
+  
   <target name="clean">
     <delete dir="${buildDir}" />
   </target>
