@@ -18,7 +18,6 @@ public class Java2Xml extends ASTVisitor {
     public static void main(String[] args)
 	throws IOException, ParserConfigurationException {
 	
-	String[] classpath = new String[] { "/" };
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
 	for (int i = 0; i < args.length; i++) {
@@ -35,7 +34,8 @@ public class Java2Xml extends ASTVisitor {
 		files.add(arg);
 	    }
 	}
-	
+
+	String[] srcpath = { "." };
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
 	    String src = Utils.readFile(path);
@@ -43,10 +43,11 @@ public class Java2Xml extends ASTVisitor {
 	    Map<String, String> options = JavaCore.getOptions();
 	    JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 	    ASTParser parser = ASTParser.newParser(AST.JLS8);
+	    parser.setUnitName(path);
 	    parser.setSource(src.toCharArray());
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	    //parser.setResolveBindings(true);
-	    parser.setEnvironment(classpath, null, null, true);
+	    parser.setResolveBindings(true);
+	    parser.setEnvironment(null, srcpath, null, true);
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 
@@ -71,6 +72,17 @@ public class Java2Xml extends ASTVisitor {
 	int type = node.getNodeType();
 	String name = Utils.getASTNodeTypeName(type);
 	Element elem = _document.createElement(name);
+	if (node instanceof Type) {
+	    IBinding binding = ((Type)node).resolveBinding();
+	    if (binding != null) {
+		elem.setAttribute("binding", binding.getKey());
+	    }
+	} else if (node instanceof Name) {
+	    IBinding binding = ((Name)node).resolveBinding();
+	    if (binding != null) {
+		elem.setAttribute("binding", binding.getKey());
+	    }
+	}
 	if (_stack.empty()) {
 	    _document.appendChild(elem);
 	} else {
