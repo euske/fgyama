@@ -332,11 +332,16 @@ class BeginNode extends ProgNode {
     }
 
     public void closeLoop(DFNode node) {
-	this.accept(node, "repeat");
     }
     
     public String getType() {
-	return "start";
+	return "begin";
+    }
+
+    protected List<DFLink> getExtraLinks() {
+	List<DFLink> extra = super.getExtraLinks();
+	extra.add(new DFLink(this, this.end, "repeat"));
+	return extra;
     }
 }
 
@@ -353,10 +358,17 @@ class EndNode extends ProgNode {
 	this.begin = begin;
 	begin.end = this;
 	this.repeat = new DistNode(scope, ref);
+	this.repeat.accept(this);
     }
 
     public String getType() {
 	return "end";
+    }
+
+    protected List<DFLink> getExtraLinks() {
+	List<DFLink> extra = super.getExtraLinks();
+	extra.add(new DFLink(this, this.begin, "end"));
+	return extra;
     }
 }
 
@@ -1761,7 +1773,7 @@ public class Java2DF extends ASTVisitor {
 		if (graph != null) {
 		    Utils.logit("Success: "+funcName);
 		    // Remove DistNodes.
-		    //graph.cleanup();
+		    graph.cleanup();
 		    if (this.exporter != null) {
 			this.exporter.writeGraph(graph);
 		    }

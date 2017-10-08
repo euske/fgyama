@@ -152,9 +152,9 @@ class DFGraph:
                     out.write(',%s,%s,%s' % node.ast)
                 out.write('\n')
             for node in scope.nodes:
-                for link in (node.outgoing+node.other):
-                    out.write('-%s,%s,%s,%s,%s\n' %
-                              (link.srcid, link.dstid, link.deg, link.ltype, link.label))
+                for (label,src) in node.inputs.items():
+                    out.write('-%s,%s,%s\n' %
+                              (node.nid, src.nid, link.label))
             for child in scope.children:
                 f(child)
         if self.src is not None:
@@ -206,7 +206,6 @@ class DFNode:
         self.data = data
         self.ast = None
         self.inputs = {}
-        self.other = {}
         return
 
     def __repr__(self):

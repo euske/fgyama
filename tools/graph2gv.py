@@ -9,6 +9,9 @@ def q(s):
     else:
         return '""'
 
+def qp(props):
+    return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
+
 def write_gv(out, scope, highlight=None, level=0):
     h = ' '*level
     if level == 0:
@@ -17,36 +20,33 @@ def write_gv(out, scope, highlight=None, level=0):
         out.write(h+'subgraph cluster_%s {\n' % scope.name)
     out.write(h+' label=%s;\n' % q(scope.name))
     for node in scope.nodes:
-        if node.data is not None:
-            label = node.data
-        elif node.ref is not None:
-            label = '(%s)' % node.ref
-        else:
-            assert 0
-        out.write(h+' N%s [label=%s' % (node.nid, q(label)))
         if node.ntype in ('select','begin','end'):
-            out.write(', shape=diamond')
+            styles = {'shape': 'diamond', 
+                      'label': '%s (%s)' % (node.ntype, node.ref)}
+        elif node.ntype in ('return',):
+            styles = {'shape': 'box', 
+                      'label': '%s (%s)' % (node.ntype, node.ref)}
         elif node.data is not None:
-            out.write(', shape=box, fontname=courier')
-        elif node.ntype is not None:
-            out.write(', shape=box')
+            styles = {'shape': 'box', 'fontname':'courier',
+                      'label': node.data}
+        else:
+            styles = {'label': node.ref}
         if highlight is not None and node.nid in highlight:
-            out.write(', style=filled')
-        out.write('];\n')
+            styles['style'] = 'filled'
+        out.write(h+' N%s [%s];\n' % (node.nid, qp(styles)))
     for child in scope.children:
         write_gv(out, child, highlight, level=level+1)
     if level == 0:
         for node in scope.walk():
             for (label,src) in node.inputs.items():
-                out.write(h+' N%s -> N%s' % (src.nid, node.nid))
-                label = (label or '')
-                out.write(h+' [label=%s' % q(label))
+                if label == 'end': continue
                 if label == 'cond':
-                    out.write(', style=dotted')
-                out.write('];\n')
-            for (label,src) in node.other.items():
-                out.write(h+' N%s -> N%s' % (src.nid, node.nid))
-                out.write(h+' [xlabel=%s, style=dashed, constraint=false];\n' % q(label))
+                    styles = {'style': 'dotted', 'label': label}
+                elif label == 'repeat':
+                    styles = {'style': 'dashed', 'constraint': 'false'}
+                else:
+                    styles = {}
+                out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
     out.write(h+'}\n')
     return
 

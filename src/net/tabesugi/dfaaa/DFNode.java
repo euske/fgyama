@@ -47,10 +47,10 @@ public abstract class DFNode implements Comparable<DFNode> {
     }
 
     public DFLink[] getLinks() {
-	int n = (this.input != null)? 1 : 0;
-	DFLink[] links = new DFLink[this.inputs.size()+n];
-	if (this.input != null) {
-	    links[0] = new DFLink(this, this.input, null);
+	List<DFLink> extra = this.getExtraLinks();
+	DFLink[] links = new DFLink[extra.size()+this.inputs.size()];
+	for (int i = 0; i < extra.size(); i++) {
+	    links[i] = extra.get(i);
 	}
 	String[] labels = new String[this.inputs.size()];
 	this.inputs.keySet().toArray(labels);
@@ -58,18 +58,26 @@ public abstract class DFNode implements Comparable<DFNode> {
 	for (int i = 0; i < labels.length; i++) {
 	    String label = labels[i];
 	    DFNode node = this.inputs.get(label);
-	    links[n+i] = new DFLink(this, node, label);
+	    links[extra.size()+i] = new DFLink(this, node, label);
 	}
 	return links;
     }
 
-    public void accept(DFNode node) {
+    protected List<DFLink> getExtraLinks() {
+	List<DFLink> extra = new ArrayList<DFLink>();
+	if (this.input != null) {
+	    extra.add(new DFLink(this, this.input, null));
+	}	
+	return extra;
+    }
+    
+    protected void accept(DFNode node) {
 	assert this.input == null;
 	this.input = node;
 	node.outputs.add(this);
     }
     
-    public void accept(DFNode node, String label) {
+    protected void accept(DFNode node, String label) {
 	assert !this.inputs.containsKey(label);
 	this.inputs.put(label, node);
 	node.outputs.add(this);
