@@ -31,7 +31,7 @@ public class UnitTestDF extends XMLTestCase {
 	try {
 	    assertXMLEqual(refdoc, exporter.document);
 	} catch (junit.framework.AssertionFailedError e) {
-	    OutputStream out = new FileOutputStream(new File(javaPath+".out"));
+	    OutputStream out = new FileOutputStream(new File(javaPath+".err"));
 	    Utils.printXml(out, exporter.document);
 	    out.close();
 	    throw e;
@@ -39,27 +39,47 @@ public class UnitTestDF extends XMLTestCase {
     }
 
     @Test
-    public void test_basic_f1() throws Exception {
-	compareXml(TESTDATA+"/basic_f1.java", TESTDATA+"/basic_f1.graph");
+    public void test_01_basic_return() throws Exception {
+	compareXml(TESTDATA+"/basic_return.java", TESTDATA+"/basic_return.graph");
     }
     @Test
-    public void test_basic_f2() throws Exception {
-	compareXml(TESTDATA+"/basic_f2.java", TESTDATA+"/basic_f2.graph");
+    public void test_02_basic_assign() throws Exception {
+	compareXml(TESTDATA+"/basic_assign.java", TESTDATA+"/basic_assign.graph");
     }
     @Test
-    public void test_basic_f3() throws Exception {
-	compareXml(TESTDATA+"/basic_f3.java", TESTDATA+"/basic_f3.graph");
+    public void test_03_basic_if() throws Exception {
+	compareXml(TESTDATA+"/basic_if.java", TESTDATA+"/basic_if.graph");
     }
     @Test
-    public void test_basic_f4() throws Exception {
-	compareXml(TESTDATA+"/basic_f4.java", TESTDATA+"/basic_f4.graph");
+    public void test_04_basic_while() throws Exception {
+	compareXml(TESTDATA+"/basic_while.java", TESTDATA+"/basic_while.graph");
     }
     @Test
-    public void test_basic_f5() throws Exception {
-	compareXml(TESTDATA+"/basic_f5.java", TESTDATA+"/basic_f5.graph");
+    public void test_05_basic_do() throws Exception {
+	compareXml(TESTDATA+"/basic_do.java", TESTDATA+"/basic_do.graph");
     }
     @Test
-    public void test_basic_f6() throws Exception {
-	compareXml(TESTDATA+"/basic_f6.java", TESTDATA+"/basic_f6.graph");
+    public void test_06_basic_for() throws Exception {
+	compareXml(TESTDATA+"/basic_for.java", TESTDATA+"/basic_for.graph");
+    }
+    @Test
+    public void test_07_basic_xfor() throws Exception {
+	compareXml(TESTDATA+"/basic_xfor.java", TESTDATA+"/basic_xfor.graph");
+    }
+    @Test
+    public void test_08_basic_break() throws Exception {
+	compareXml(TESTDATA+"/basic_break.java", TESTDATA+"/basic_break.graph");
+    }
+    @Test
+    public void test_09_basic_switch() throws Exception {
+	compareXml(TESTDATA+"/basic_switch.java", TESTDATA+"/basic_switch.graph");
+    }
+    @Test
+    public void test_10_basic_methods() throws Exception {
+	compareXml(TESTDATA+"/basic_methods.java", TESTDATA+"/basic_methods.graph");
+    }
+    @Test
+    public void test_11_basic_ops() throws Exception {
+	compareXml(TESTDATA+"/basic_ops.java", TESTDATA+"/basic_ops.graph");
     }
 }

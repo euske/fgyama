@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><dfaaa>
+  <file path="test/data/basic_methods.java">
+    <graph name="fa">
+      <scope name="fa">
+        <scope name="fa_b0">
+          <node data="0" name="Nfa_b0_1" type="const">
+            <ast length="1" start="58" type="34"/>
+          </node>
+          <node name="Nfa_b0_2" ref="fa_b0:a" type="assign">
+            <ast length="5" start="54" type="59"/>
+            <link src="Nfa_b0_1"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph name="fb">
+      <scope name="fb">
+        <scope name="fb_b0">
+          <node data="0" name="Nfb_b0_1" type="const">
+            <ast length="1" start="106" type="34"/>
+          </node>
+          <node name="Nfb_b0_2" ref="fb_b0:b" type="assign">
+            <ast length="5" start="102" type="59"/>
+            <link src="Nfb_b0_1"/>
+          </node>
+          <node data="new Object" name="Nfb_b0_3" type="call">
+            <ast length="71" start="121" type="14"/>
+          </node>
+          <node name="Nfb_b0_4" ref="fb_b0:a" type="assign">
+            <ast length="75" start="117" type="59"/>
+            <link src="Nfb_b0_3"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph name="toString">
+      <scope name="toString">
+        <scope name="toString_b0">
+          <node data="foo" name="NtoString_b0_1" type="const">
+            <ast length="5" start="177" type="45"/>
+          </node>
+          <node name="NtoString_b0_2" ref="toString:#return" type="return">
+            <ast length="13" start="170" type="41"/>
+            <link src="NtoString_b0_1"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph name="fc">
+      <scope name="fc">
+        <scope name="fc_b0">
+          <node data="123" name="Nfc_b0_1" type="const">
+            <ast length="3" start="237" type="34"/>
+          </node>
+          <node name="Nfc_b0_2" ref="fc:#return" type="return">
+            <ast length="11" start="230" type="41"/>
+            <link src="Nfc_b0_1"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+  </file>
+</dfaaa>

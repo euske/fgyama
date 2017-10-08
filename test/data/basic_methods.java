@@ -1,15 +1,15 @@
 public class Foo {
-    public static void f6a() {
+    public static void fa() {
 	int a = 0;
     }
-    public static void f6b() {
+    public static void fb() {
 	int b = 0;
 	Object a = new Object()
 	    {
 		public String toString() { return "foo"; }
 	    };
 	class moo {
-	    public int f6c() { return 123; }
+	    public int fc() { return 123; }
 	}
     }
 }
