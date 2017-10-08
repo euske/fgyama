@@ -5,6 +5,12 @@ import sqlite3
 from xml.etree.cElementTree import Element
 from xml.etree.cElementTree import ElementTree
 
+def ns(x):
+    if isinstance(x, str):
+        return x
+    else:
+        return 'N'+str(x)
+
 
 ##  SourceDB
 ##
@@ -141,29 +147,11 @@ class DFGraph:
                 src.outputs.append(node)
         return self
     
-    def dump(self, out=sys.stdout):
-        def f(scope):
-            if scope.parent is None:
-                out.write('@%s\n' % (scope.name,))
-            else:
-                out.write(':%s,%s\n' % (scope.name, scope.parent.name))
-            for node in scope.nodes:
-                out.write('+%s,%s,%s,%s,%s' %
-                          (scope.name, node.nid, node.ntype, node.ref, node.data))
-                if node.ast is not None:
-                    out.write(',%s,%s,%s' % node.ast)
-                out.write('\n')
-            for node in scope.nodes:
-                for (label,src) in node.inputs.items():
-                    out.write('-%s,%s,%s\n' %
-                              (node.nid, src.nid, label))
-            for child in scope.children:
-                f(child)
-        if self.src is not None:
-            out.write('#%s\n' % (self.src,))
-        f(self.root)
-        out.write('\n')
-        return
+    def toxml(self):
+        egraph = Element('graph')
+        egraph.set('name', self.name)
+        egraph.append(self.root.toxml())
+        return egraph
 
     
 ##  DFScope
@@ -195,6 +183,15 @@ class DFScope:
                 yield n
         return
 
+    def toxml(self):
+        escope = Element('scope')
+        escope.set('name', self.name)
+        for child in self.children:
+            escope.append(child.toxml())
+        for node in self.nodes:
+            escope.append(node.toxml())
+        return escope
+
     
 ##  DFNode
 ##
@@ -215,10 +212,77 @@ class DFNode:
         return ('<DFNode(%s): ntype=%s, ref=%r, data=%r, inputs=%r>' %
                 (self.nid, self.ntype, self.ref, self.data, len(self.inputs)))
 
+    def toxml(self):
+        enode = Element('node')
+        enode.set('name', ns(self.nid))
+        if self.ntype is not None:
+            enode.set('type', self.ntype)
+        if self.data is not None:
+            enode.set('data', self.data)
+        if self.ref is not None:
+            enode.set('ref', self.ref)
+        if self.ast is not None:
+            east = Element('ast')
+            (astype,astart,alength) = self.ast
+            east.set('type', str(astype))
+            east.set('start', str(astart))
+            east.set('length', str(alength))
+            enode.append(east)
+        for (label,src) in self.inputs.items():
+            elink = Element('link')
+            if label is not None:
+                elink.set('label', label)
+            elink.set('src', ns(src.nid))
+            enode.append(elink)
+        return enode
 
-##  load_graphs_xml
+
+##  parse_graph
 ##
-def load_graphs_xml(fp):
+def parse_graph(egraph, path):
+    assert egraph.tag == 'graph'
+    gid = egraph.get('name')
+    graph = DFGraph(gid, gid, path)
+    def parse_node(scope, enode):
+        assert enode.tag == 'node'
+        nname = enode.get('name')
+        ntype = enode.get('type')
+        ref = enode.get('ref')
+        data = enode.get('data')
+        node = DFNode(nname, scope, ntype, ref, data)
+        for e in enode.getchildren():
+            if e.tag == 'ast':
+                node.ast = (int(e.get('type')),
+                            int(e.get('start')),
+                            int(e.get('length')))
+            elif e.tag == 'link':
+                label = e.get('label')
+                src = e.get('src')
+                assert label not in node.inputs
+                node.inputs[label] = src
+        return node
+    def parse_scope(escope, parent=None):
+        assert escope.tag == 'scope'
+        sname = escope.get('name')
+        scope = DFScope(sname, sname, parent)
+        graph.scopes[sname] = scope
+        for elem in escope.getchildren():
+            if elem.tag == 'scope':
+                parse_scope(elem, scope)
+            elif elem.tag == 'node':
+                node = parse_node(scope, elem)
+                graph.nodes[node.nid] = node
+                scope.nodes.append(node)
+        return scope
+    for escope in egraph.getchildren():
+        graph.root = parse_scope(escope)
+        break
+    return graph.fixate()
+
+
+##  load_graphs_file
+##
+def load_graphs_file(fp):
     root = ElementTree(file=fp).getroot()
     for efile in root.getchildren():
         if efile.tag != 'file': continue
@@ -226,42 +290,13 @@ def load_graphs_xml(fp):
         yield path
         for egraph in efile.getchildren():
             if egraph.tag != 'graph': continue
-            gid = egraph.get('name')
-            graph = DFGraph(gid, gid, path)
-            def get_scope(escope, parent=None):
-                assert escope.tag == 'scope'
-                sname = escope.get('name')
-                scope = DFScope(sname, sname, parent)
-                graph.scopes[sname] = scope
-                for elem in escope.getchildren():
-                    if elem.tag == 'scope':
-                        get_scope(elem, scope)
-                    elif elem.tag == 'node':
-                        nname = elem.get('name')
-                        ntype = elem.get('type')
-                        ref = elem.get('ref')
-                        data = elem.get('data')
-                        node = DFNode(nname, scope, ntype, ref, data)
-                        for e in elem.getchildren():
-                            if e.tag == 'ast':
-                                node.ast = (int(e.get('type')),
-                                            int(e.get('start')),
-                                            int(e.get('length')))
-                            elif e.tag == 'link':
-                                label = e.get('label')
-                                src = e.get('src')
-                                assert label not in node.inputs
-                                node.inputs[label] = src
-                        graph.nodes[nname] = node
-                        scope.nodes.append(node)
-                return scope
-            for escope in egraph.getchildren():
-                graph.root = get_scope(escope)
-                break
-            yield graph.fixate()
+            yield parse_graph(egraph, path)
     return
 
-load_graphs = load_graphs_xml
+def load_graphs_stream(fp):
+    root = ElementTree(file=fp).getroot()
+    yield parse_graph(root, None)
+    return
 
 
 ##  build_graph_tables
@@ -408,7 +443,7 @@ def fetch_graph(cur, gid):
             'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
             (nid0,))
         for (lid,nid1,label) in rows:
-            node.inputs[label] = nid
+            node.inputs[label] = nid1
     graph.fixate()
     return graph
 
@@ -420,9 +455,13 @@ def get_graphs(arg):
         gids = map(int, ext.split(','))
     else:
         gids = None
-    if path.endswith('.graph'):
+    if path == '-':
+        for (gid,graph) in enumerate(load_graphs_stream(sys.stdin)):
+            if gids is None or gid in gids:
+                yield graph
+    elif path.endswith('.graph'):
         with open(path) as fp:
-            for (gid,graph) in enumerate(load_graphs(fp)):
+            for (gid,graph) in enumerate(load_graphs_file(fp)):
                 if gids is None or gid in gids:
                     yield graph
     elif path.endswith('.db'):
@@ -443,6 +482,7 @@ def get_graphs(arg):
 def main(argv):
     import fileinput
     import getopt
+    from xml.etree.cElementTree import dump
     def usage():
         print('usage: %s [file ...]' % argv[0])
         return 100
@@ -455,7 +495,7 @@ def main(argv):
     for path in args:
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
-                graph.dump()
+                dump(graph.toxml())
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
