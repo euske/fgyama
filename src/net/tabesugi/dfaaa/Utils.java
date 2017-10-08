@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  Utility functions.
 // 
-class Utils {
+public class Utils {
 
     public static void logit(String s) {
 	System.err.println(s);

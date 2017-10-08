@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 
 //  XmlExporter
 //
-class XmlExporter extends Exporter {
+public class XmlExporter extends Exporter {
 
     public Document document;
     

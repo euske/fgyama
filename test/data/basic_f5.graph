@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><dfaaa>
+  <file path="test/data/basic_f5.java">
+    <graph name="f5">
+      <scope name="f5">
+        <scope name="f5_b0">
+          <scope name="f5_b0_while0">
+            <scope name="f5_b0_while0_b0">
+              <scope name="f5_b0_while0_b0_b0"/>
+              <node name="Nf5_b0_while0_b0_5" ref="f5:x" type="ref">
+                <ast length="1" start="79" type="42"/>
+                <link src="Nf5_b0_while0_13"/>
+              </node>
+              <node data="0" name="Nf5_b0_while0_b0_6" type="const">
+                <ast length="1" start="84" type="34"/>
+              </node>
+              <node data="==" name="Nf5_b0_while0_b0_7" type="infix">
+                <ast length="6" start="79" type="27"/>
+                <link label="L" src="Nf5_b0_while0_b0_5"/>
+                <link label="R" src="Nf5_b0_while0_b0_6"/>
+              </node>
+              <node name="Nf5_b0_while0_b0_9" ref="f5:x" type="select">
+                <link label="cond" src="Nf5_b0_while0_b0_7"/>
+                <link label="false" src="Nf5_b0_while0_14"/>
+                <link label="true" src="Nf5_b0_while0_13"/>
+              </node>
+              <node name="Nf5_b0_while0_b0_10" ref="f5:x" type="assign">
+                <ast length="1" start="103" type="42"/>
+                <link src="Nf5_b0_while0_b0_12"/>
+              </node>
+              <node data="1" name="Nf5_b0_while0_b0_11" type="const">
+                <ast length="1" start="108" type="34"/>
+              </node>
+              <node data="-=" name="Nf5_b0_while0_b0_12" ref="f5:x" type="assignop">
+                <ast length="6" start="103" type="7"/>
+                <link label="L" src="Nf5_b0_while0_13"/>
+                <link label="R" src="Nf5_b0_while0_b0_11"/>
+              </node>
+            </scope>
+            <node data="true" name="Nf5_b0_while0_3" type="const">
+              <ast length="4" start="62" type="9"/>
+            </node>
+            <node name="Nf5_b0_while0_13" ref="f5:x" type="begin">
+              <ast length="58" start="55" type="61"/>
+              <link label="repeat" src="Nf5_b0_while0_14"/>
+              <link label="enter" src="Nf5_2"/>
+            </node>
+            <node name="Nf5_b0_while0_14" ref="f5:x" type="end">
+              <ast length="58" start="55" type="61"/>
+              <link src="Nf5_b0_while0_b0_10"/>
+              <link label="end" src="Nf5_b0_while0_13"/>
+              <link label="cond" src="Nf5_b0_while0_3"/>
+            </node>
+          </scope>
+        </scope>
+        <node data="arg0" name="Nf5_1" ref="f5:x" type="arg">
+          <ast length="5" start="45" type="44"/>
+        </node>
+        <node name="Nf5_2" ref="f5:x" type="assign">
+          <ast length="5" start="45" type="44"/>
+          <link src="Nf5_1"/>
+        </node>
+      </scope>
+    </graph>
+  </file>
+</dfaaa>

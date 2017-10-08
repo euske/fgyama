@@ -1,15 +1,17 @@
-//  TestDF
+//  UnitTestDF
 //
-package net.tabesugi.dfaaa;
 import java.io.*;
 import java.util.*;
 import org.w3c.dom.*;
 import org.custommonkey.xmlunit.*;
 import org.junit.Test;
+import net.tabesugi.dfaaa.*;
 
-public class TestDF extends XMLTestCase {
+public class UnitTestDF extends XMLTestCase {
 
-    public TestDF(String name) {
+    public static final String TESTDATA = "test/data";
+
+    public UnitTestDF(String name) {
 	super(name);
 	XMLUnit.setIgnoreComments(true);
 	XMLUnit.setIgnoreWhitespace(true);
@@ -38,22 +40,26 @@ public class TestDF extends XMLTestCase {
 
     @Test
     public void test_basic_f1() throws Exception {
-	compareXml("testdata/basic_f1.java", "testdata/basic_f1.graph");
+	compareXml(TESTDATA+"/basic_f1.java", TESTDATA+"/basic_f1.graph");
     }
     @Test
     public void test_basic_f2() throws Exception {
-	compareXml("testdata/basic_f2.java", "testdata/basic_f2.graph");
+	compareXml(TESTDATA+"/basic_f2.java", TESTDATA+"/basic_f2.graph");
     }
     @Test
     public void test_basic_f3() throws Exception {
-	compareXml("testdata/basic_f3.java", "testdata/basic_f3.graph");
+	compareXml(TESTDATA+"/basic_f3.java", TESTDATA+"/basic_f3.graph");
     }
     @Test
     public void test_basic_f4() throws Exception {
-	compareXml("testdata/basic_f4.java", "testdata/basic_f4.graph");
+	compareXml(TESTDATA+"/basic_f4.java", TESTDATA+"/basic_f4.graph");
     }
     @Test
     public void test_basic_f5() throws Exception {
-	compareXml("testdata/basic_f5.java", "testdata/basic_f5.graph");
+	compareXml(TESTDATA+"/basic_f5.java", TESTDATA+"/basic_f5.graph");
+    }
+    @Test
+    public void test_basic_f6() throws Exception {
+	compareXml(TESTDATA+"/basic_f6.java", TESTDATA+"/basic_f6.graph");
     }
 }
