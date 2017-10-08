@@ -130,10 +130,10 @@ public class DFComponent {
 	for (DFExit exit : this.exits) {
 	    if (exit.label == null || exit.label.equals(frame.label)) {
 		DFNode node = exit.node;
-		if (node instanceof JoinNode) {
-		    JoinNode join = (JoinNode)node;
-		    if (!join.isClosed()) {
-			join.close(this.getValue(node.ref));
+		if (node instanceof SelectNode) {
+		    SelectNode select = (SelectNode)node;
+		    if (!select.isClosed()) {
+			select.close(this.getValue(node.ref));
 		    }
 		}
 		this.setOutput(node);

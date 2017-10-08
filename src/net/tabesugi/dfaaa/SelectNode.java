@@ -7,14 +7,14 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-// JoinNode
-public class JoinNode extends CondNode {
+// SelectNode
+public class SelectNode extends CondNode {
 
     public boolean recvTrue = false;
     public boolean recvFalse = false;
     
-    public JoinNode(DFScope scope, DFRef ref, ASTNode ast,
-		    DFNode value) {
+    public SelectNode(DFScope scope, DFRef ref, ASTNode ast,
+		      DFNode value) {
 	super(scope, ref, ast, value);
     }
     

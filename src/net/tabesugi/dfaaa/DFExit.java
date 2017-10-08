@@ -29,9 +29,9 @@ public class DFExit {
 	return ("<DFExit: "+this.node+" -> "+this.label+">");
     }
 
-    public DFExit addJoin(DFScope scope, DFNode condValue, boolean cond) {
-	JoinNode join = new JoinNode(scope, this.node.ref, null, condValue);
-	join.recv(cond, this.node);
-	return new DFExit(join, this.label, this.cont);
+    public DFExit addSelect(DFScope scope, DFNode condValue, boolean cond) {
+	SelectNode select = new SelectNode(scope, this.node.ref, null, condValue);
+	select.recv(cond, this.node);
+	return new DFExit(select, this.label, this.cont);
     }
 }
