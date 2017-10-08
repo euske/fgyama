@@ -14,16 +14,8 @@ public class DistNode extends DFNode {
 	super(scope, ref);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Dist;
-    }
-
-    public String label() {
+    public String getType() {
 	return null;
-    }
-
-    public boolean canOmit() {
-	return true;
     }
 }
 

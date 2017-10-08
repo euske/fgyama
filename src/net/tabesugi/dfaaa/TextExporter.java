@@ -55,18 +55,17 @@ class TextExporter extends Exporter {
 	throws IOException {
 	this.writer.write("@"+graph.name+"\n");
 	this.writeScope(graph.root);
-	for (DFNode node : graph.nodes()) {
+	for (DFNode node : graph.getNodes()) {
 	    this.writer.write("+"+node.scope.name);
-	    this.writer.write(","+node.name());
-	    this.writer.write(","+node.type().ordinal());
-	    String label = node.label();
-	    if (label != null) {
-		this.writer.write(","+Utils.sanitize(label));
+	    this.writer.write(","+node.getName());
+	    String data = node.getData();
+	    if (data != null) {
+		this.writer.write(","+Utils.sanitize(data));
 	    } else {
 		this.writer.write(",");
 	    }
 	    if (node.ref != null) {
-		this.writer.write(","+node.ref.label());
+		this.writer.write(","+node.ref.getName());
 	    } else {
 		this.writer.write(",");
 	    }
@@ -82,13 +81,10 @@ class TextExporter extends Exporter {
 	    }
 	    this.writer.newLine();
 	}
-	for (DFNode node : graph.nodes()) {
-	    for (DFLink link : node.links()) {
-		this.writer.write("-"+link.src.name()+","+link.dst.name());
-		this.writer.write(","+link.deg+","+link.type.ordinal());
-		if (link.label != null) {
-		    this.writer.write(","+link.label);;
-		}
+	for (DFNode node : graph.getNodes()) {
+	    for (DFLink link : node.getLinks()) {
+		this.writer.write("-"+link.src.getName()+","+link.dst.getName());
+		this.writer.write(","+link.label);
 		this.writer.newLine();
 	    }
 	}

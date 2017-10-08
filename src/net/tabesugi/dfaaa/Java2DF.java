@@ -26,91 +26,74 @@ class UnsupportedSyntax extends Exception {
 // SingleAssignNode:
 class SingleAssignNode extends AssignNode {
 
-    public DFNode value;
-    
     public SingleAssignNode(DFScope scope, DFRef ref, ASTNode ast) {
 	super(scope, ref, ast);
-    }
-
-    public void take(DFNode value) {
-	this.value = value;
-	value.connect(this, 1);
     }
 }
 
 // ArrayAssignNode:
 class ArrayAssignNode extends SingleAssignNode {
 
-    public DFNode index;
-
     public ArrayAssignNode(DFScope scope, DFRef ref, ASTNode ast,
 			   DFNode array, DFNode index) {
 	super(scope, ref, ast);
-	this.index = index;
-	array.connect(this, 2, "array");
-	index.connect(this, 3, "index");
+	this.accept(array, "array");
+	this.accept(index, "index");
     }
 }
 
 // FieldAssignNode:
 class FieldAssignNode extends SingleAssignNode {
 
-    public DFNode obj;
-
     public FieldAssignNode(DFScope scope, DFRef ref, ASTNode ast,
 			   DFNode obj) {
 	super(scope, ref, ast);
-	this.obj = obj;
-	obj.connect(this, 2, "index");
+	this.accept(obj, "obj");
+    }
+}
+
+// VarRefNode: represnets a variable reference.
+class VarRefNode extends ReferNode {
+
+    public VarRefNode(DFScope scope, DFRef ref, ASTNode ast,
+		      DFNode value) {
+	super(scope, ref, ast);
+	this.accept(value);
+    }
+    
+    public String getType() {
+	return "ref";
     }
 }
 
 // ArrayAccessNode
 class ArrayAccessNode extends ProgNode {
 
-    public DFNode value;
-    public DFNode index;
-
     public ArrayAccessNode(DFScope scope, DFRef ref, ASTNode ast,
-			   DFNode array, DFNode value, DFNode index) {
+			   DFNode array, DFNode index, DFNode value) {
 	super(scope, ref, ast);
-	this.value = value;
-	this.index = index;
-	array.connect(this, 1, "array");
-	value.connect(this, 2, "value");
-	index.connect(this, 3, "index");
+	this.accept(array, "array");
+	this.accept(index, "index");
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
-    }
-
-    public String label() {
-	return "access";
+    public String getType() {
+	return "arrayaccess";
     }
 }
 
 // FieldAccessNode
 class FieldAccessNode extends ProgNode {
 
-    public DFNode value;
-    public DFNode obj;
-
     public FieldAccessNode(DFScope scope, DFRef ref, ASTNode ast,
-			   DFNode value, DFNode obj) {
+			   DFNode obj, DFNode value) {
 	super(scope, ref, ast);
-	this.value = value;
-	this.obj = obj;
-	value.connect(this, 1, "value");
-	obj.connect(this, 2, "index");
+	this.accept(obj, "obj");
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
-    }
-
-    public String label() {
-	return "access";
+    public String getType() {
+	return "fieldaccess";
     }
 }
 
@@ -118,21 +101,19 @@ class FieldAccessNode extends ProgNode {
 class PrefixNode extends ProgNode {
 
     public PrefixExpression.Operator op;
-    public DFNode value;
 
     public PrefixNode(DFScope scope, DFRef ref, ASTNode ast,
 		      PrefixExpression.Operator op, DFNode value) {
 	super(scope, ref, ast);
 	this.op = op;
-	this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "prefix";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return this.op.toString();
     }
 }
@@ -141,21 +122,19 @@ class PrefixNode extends ProgNode {
 class PostfixNode extends ProgNode {
 
     public PostfixExpression.Operator op;
-    public DFNode value;
 
     public PostfixNode(DFScope scope, DFRef ref, ASTNode ast,
 		       PostfixExpression.Operator op, DFNode value) {
 	super(scope, ref, ast);
 	this.op = op;
-	this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "prefix";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return this.op.toString();
     }
 }
@@ -171,24 +150,12 @@ class ArgNode extends ProgNode {
 	this.index = index;
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Terminal;
+    public String getType() {
+	return "arg";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return "arg"+this.index;
-    }
-}
-
-// VarRefNode: represnets a variable reference.
-class VarRefNode extends ReferNode {
-
-    public DFNode value;
-
-    public VarRefNode(DFScope scope, DFRef ref, ASTNode ast, DFNode value) {
-	super(scope, ref, ast);
-	this.value = value;
-	value.connect(this, 1);
     }
 }
 
@@ -202,32 +169,36 @@ class ConstNode extends ProgNode {
 	this.value = value;
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Const;
+    public String getType() {
+	return "const";
     }
     
-    public String label() {
+    public String getData() {
 	return this.value;
     }
 }
 
 // ArrayValueNode: represents an array.
-class ArrayValueNode extends ReferNode {
+class ArrayValueNode extends ProgNode {
 
-    public List<DFNode> values;
+    public List<DFNode> values = new ArrayList<DFNode>();
 
     public ArrayValueNode(DFScope scope, ASTNode ast) {
 	super(scope, null, ast);
-	this.values = new ArrayList<DFNode>();
     }
 
-    public String label() {
+    public String getType() {
+	return "arrayvalue";
+    }
+    
+    public String getData() {
 	return "["+this.values.size()+"]";
     }
     
-    public void take(DFNode value) {
+    public void addValue(DFNode value) {
+	String label = "value"+this.values.size();
+	this.accept(value, label);
 	this.values.add(value);
-	value.connect(this, this.values.size(), "value");
     }
 }
 
@@ -235,25 +206,21 @@ class ArrayValueNode extends ReferNode {
 class InfixNode extends ProgNode {
 
     public InfixExpression.Operator op;
-    public DFNode lvalue;
-    public DFNode rvalue;
 
     public InfixNode(DFScope scope, ASTNode ast,
 		     InfixExpression.Operator op,
 		     DFNode lvalue, DFNode rvalue) {
 	super(scope, null, ast);
 	this.op = op;
-	this.lvalue = lvalue;
-	this.rvalue = rvalue;
-	lvalue.connect(this, 1, "L");
-	rvalue.connect(this, 2, "R");
+	this.accept(lvalue, "L");
+	this.accept(rvalue, "R");
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "infix";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return this.op.toString();
     }
 }
@@ -262,21 +229,19 @@ class InfixNode extends ProgNode {
 class TypeCastNode extends ProgNode {
 
     public Type type;
-    public DFNode value;
     
     public TypeCastNode(DFScope scope, ASTNode ast,
 			Type type, DFNode value) {
 	super(scope, null, ast);
 	this.type = type;
-	this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "typecast";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return "("+Utils.getTypeName(this.type)+")";
     }
 }
@@ -285,21 +250,19 @@ class TypeCastNode extends ProgNode {
 class InstanceofNode extends ProgNode {
 
     public Type type;
-    public DFNode value;
     
     public InstanceofNode(DFScope scope, ASTNode ast,
 			  Type type, DFNode value) {
 	super(scope, null, ast);
 	this.type = type;
-	this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "instanceof";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return Utils.getTypeName(this.type)+"?";
     }
 }
@@ -307,32 +270,30 @@ class InstanceofNode extends ProgNode {
 // CaseNode
 class CaseNode extends ProgNode {
 
-    public DFNode value;
-    public List<DFNode> matches;
+    public List<DFNode> matches = new ArrayList<DFNode>();
     
     public CaseNode(DFScope scope, ASTNode ast,
 		    DFNode value) {
 	super(scope, null, ast);
-	this.value = value;
-	value.connect(this, 1);
-	this.matches = new ArrayList<DFNode>();
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "case";
     }
-
-    public String label() {
-	if (!this.matches.isEmpty()) {
-	    return "case";
-	} else {
+    
+    public String getData() {
+	if (this.matches.isEmpty()) {
 	    return "default";
+	} else {
+	    return "case("+this.matches.size()+")";
 	}
     }
 
-    public void add(DFNode node) {
+    public void addMatch(DFNode node) {
+	String label = "match"+this.matches.size();
+	this.accept(node, label);
 	this.matches.add(node);
-	node.connect(this, this.matches.size());
     }
 }
 
@@ -340,92 +301,75 @@ class CaseNode extends ProgNode {
 class AssignOpNode extends ProgNode {
 
     public Assignment.Operator op;
-    public DFNode lvalue;
-    public DFNode rvalue;
 
     public AssignOpNode(DFScope scope, DFRef ref, ASTNode ast,
 			Assignment.Operator op,
 			DFNode lvalue, DFNode rvalue) {
 	super(scope, ref, ast);
 	this.op = op;
-	this.lvalue = lvalue;
-	this.rvalue = rvalue;
-	lvalue.connect(this, 1, "L");
-	rvalue.connect(this, 2, "R");
+	this.accept(lvalue, "L");
+	this.accept(rvalue, "R");
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "assignop";
     }
-
-    public String label() {
+    
+    public String getData() {
 	return this.op.toString();
-    }
-}
-
-// BranchNode
-class BranchNode extends CondNode {
-
-    public BranchNode(DFScope scope, DFRef ref, ASTNode ast,
-		      DFNode value) {
-	super(scope, ref, ast, value);
-    }
-
-    public DFNodeType type() {
-	return DFNodeType.Branch;
-    }
-
-    public String label() {
-	return "branch";
-    }
-
-    public void send(boolean cond, DFNode node) {
-	if (cond) {
-	    this.connect(node, 1, "true");
-	} else {
-	    this.connect(node, 2, "false");
-	}
     }
 }
 
 // LoopNode
 class LoopNode extends ProgNode {
 
-    public DFNode enter;
+    public BranchNode branch;
     
     public LoopNode(DFScope scope, DFRef ref, ASTNode ast,
 		    DFNode enter) {
 	super(scope, ref, ast);
-	this.enter = enter;
-	enter.connect(this, 1, "enter");
+	this.accept(enter, "enter");
+    }
+
+    public void closeLoop(DFNode node) {
+	this.accept(node, "repeat");
     }
     
-    public DFNodeType type() {
-	return DFNodeType.Loop;
+    public String getType() {
+	return "start";
     }
+}
+
+// BranchNode
+class BranchNode extends ProgNode {
+
+    public LoopNode loop;
+    public DFNode repeat;
     
-    public String label() {
-	return "loop";
+    public BranchNode(DFScope scope, DFRef ref, ASTNode ast,
+		      DFNode value, LoopNode loop) {
+	super(scope, ref, ast);
+	this.accept(value, "cond");
+	this.loop = loop;
+	loop.branch = this;
+	this.repeat = new DistNode(scope, ref);
+    }
+
+    public String getType() {
+	return "end";
     }
 }
 
 // IterNode
 class IterNode extends ProgNode {
 
-    public DFNode list;
-    
     public IterNode(DFScope scope, DFRef ref, ASTNode ast,
-		    DFNode list) {
+		    DFNode value) {
 	super(scope, ref, ast);
-	this.list = list;
-	list.connect(this, 1);
-    }
-    
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+	this.accept(value);
     }
 
-    public String label() {
+    public String getType() {
 	return "iter";
     }
 }
@@ -433,29 +377,27 @@ class IterNode extends ProgNode {
 // CallNode
 abstract class CallNode extends ProgNode {
 
-    public DFNode obj;
     public List<DFNode> args;
     public DFNode exception;
 
     public CallNode(DFScope scope, DFRef ref, ASTNode ast,
 		    DFNode obj) {
 	super(scope, ref, ast);
-	this.obj = obj;
 	this.args = new ArrayList<DFNode>();
         this.exception = null;
 	if (obj != null) {
-	    this.args.add(obj);
-	    obj.connect(this, this.args.size(), "index");
+	    this.accept(obj, "obj");
 	}
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Operator;
+    public String getType() {
+	return "call";
     }
-
-    public void take(DFNode arg) {
+    
+    public void addArg(DFNode arg) {
+	String label = "arg"+this.args.size();
+	this.accept(arg, label);
 	this.args.add(arg);
-	arg.connect(this, this.args.size(), "arg");
     }
 }
 
@@ -470,7 +412,7 @@ class MethodCallNode extends CallNode {
 	this.name = name;
     }
     
-    public String label() {
+    public String getData() {
 	return this.name+"()";
     }
 }
@@ -486,7 +428,7 @@ class CreateObjectNode extends CallNode {
 	this.type = type;
     }
     
-    public String label() {
+    public String getData() {
 	return "new "+Utils.getTypeName(this.type);
     }
 }
@@ -494,19 +436,12 @@ class CreateObjectNode extends CallNode {
 // ReturnNode: represents a return value.
 class ReturnNode extends ProgNode {
 
-    public DFNode value;
-    
     public ReturnNode(DFScope scope, ASTNode ast, DFNode value) {
 	super(scope, scope.lookupReturn(), ast);
-        this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Terminal;
-    }
-
-    public String label() {
+    public String getType() {
 	return "return";
     }
 }
@@ -514,19 +449,12 @@ class ReturnNode extends ProgNode {
 // ExceptionNode
 class ExceptionNode extends ProgNode {
 
-    public DFNode value;
-
     public ExceptionNode(DFScope scope, ASTNode ast, DFNode value) {
 	super(scope, null, ast);
-        this.value = value;
-	value.connect(this, 1);
+	this.accept(value);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Exception;
-    }
-
-    public String label() {
+    public String getType() {
 	return "exception";
     }
 }
@@ -613,32 +541,24 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 
 	// Add four nodes for each loop variable.
-	Map<DFRef, LoopNode> loops = new HashMap<DFRef, LoopNode>();
-	Map<DFRef, BranchNode> branches = new HashMap<DFRef, BranchNode>();
+	Map<DFRef, LoopNode> begins = new HashMap<DFRef, LoopNode>();
+	Map<DFRef, BranchNode> ends = new HashMap<DFRef, BranchNode>();
 	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
-	Map<DFRef, DFNode> leaves = new HashMap<DFRef, DFNode>();
 	DFRef[] loopRefs = loopFrame.getInsAndOuts();
 	for (DFRef ref : loopRefs) {
 	    DFNode src = cpt.getValue(ref);
 	    LoopNode loop = new LoopNode(scope, ref, ast, src);
-	    BranchNode branch = new BranchNode(scope, ref, ast, condValue);
-	    DFNode repeat = new DistNode(scope, ref);
-	    DFNode leave = new DistNode(scope, ref);
+	    BranchNode branch = new BranchNode(scope, ref, ast, condValue, loop);
 	    // LoopNode -> P -> Branch -> [Repeat | Leave]
-	    loop.connect(branch, 0, DFLinkType.Informational, "end");
-	    branch.send(true, repeat);
-	    branch.send(false, leave);
-	    repeat.connect(loop, 0, DFLinkType.BackFlow, "repeat");
-	    loops.put(ref, loop);
-	    branches.put(ref, branch);
-	    repeats.put(ref, repeat);
-	    leaves.put(ref, leave);
+	    begins.put(ref, loop);
+	    ends.put(ref, branch);
+	    repeats.put(ref, branch.repeat);
 	}
 
 	// Connect the inputs to the loop.
 	for (DFRef ref : loopCpt.inputRefs()) {
 	    DFNode input = loopCpt.getInput(ref);
-	    LoopNode loop = loops.get(ref);
+	    LoopNode loop = begins.get(ref);
 	    if (loop != null) {
 		input.accept(loop);
 	    } else {
@@ -650,7 +570,7 @@ public class Java2DF extends ASTVisitor {
 	// Connect the outputs to the loop.
 	for (DFRef ref : loopCpt.outputRefs()) {
 	    DFNode output = loopCpt.getOutput(ref);
-	    BranchNode branch = branches.get(ref);
+	    BranchNode branch = ends.get(ref);
 	    if (branch != null) {
 		branch.accept(output);
 	    } else {
@@ -675,8 +595,11 @@ public class Java2DF extends ASTVisitor {
 
 	// Handle the leave nodes.
 	for (DFRef ref : loopRefs) {
-	    DFNode leave = leaves.get(ref);
-	    cpt.setOutput(leave);
+	    LoopNode loop = begins.get(ref);
+	    DFNode repeat = repeats.get(ref);
+	    loop.closeLoop(repeat);
+	    DFNode branch = ends.get(ref);
+	    cpt.setOutput(branch);
 	}
 	
 	return cpt;
@@ -697,7 +620,7 @@ public class Java2DF extends ASTVisitor {
 	    if (init != null) {
 		cpt = processExpression(scope, frame, cpt, init);
 		AssignNode assign = new SingleAssignNode(scope, ref, frag);
-		assign.take(cpt.getRValue());
+		assign.accept(cpt.getRValue());
 		cpt.setOutput(assign);
 	    }
 	}
@@ -803,7 +726,7 @@ public class Java2DF extends ASTVisitor {
 		cpt = processAssignment(scope, frame, cpt, operand);
 		AssignNode assign = cpt.getLValue();
 		DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.getRValue());
-		assign.take(value);
+		assign.accept(value);
 		cpt.setOutput(assign);
 		cpt.setRValue(value);
 	    } else {
@@ -819,7 +742,7 @@ public class Java2DF extends ASTVisitor {
 		op == PostfixExpression.Operator.DECREMENT) {
 		AssignNode assign = cpt.getLValue();
 		cpt = processExpression(scope, frame, cpt, operand);
-		assign.take(new PostfixNode(scope, assign.ref, expr, op, cpt.getRValue()));
+		assign.accept(new PostfixNode(scope, assign.ref, expr, op, cpt.getRValue()));
 		cpt.setOutput(assign);
 	    }
 	    
@@ -844,7 +767,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpression(scope, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
 	    DFNode lvalue = cpt.getValue(assign.ref);
-	    assign.take(new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue));
+	    assign.accept(new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue));
 	    cpt.setOutput(assign);
 	    cpt.setRValue(assign);
 
@@ -866,7 +789,7 @@ public class Java2DF extends ASTVisitor {
 		(scope, invoke, obj, methodName.getIdentifier());
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
-		call.take(cpt.getRValue());
+		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
             if (call.exception != null) {
@@ -881,7 +804,7 @@ public class Java2DF extends ASTVisitor {
 		(scope, si, obj, methodName.getIdentifier());
 	    for (Expression arg : (List<Expression>) si.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
-		call.take(cpt.getRValue());
+		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
 	    
@@ -903,7 +826,7 @@ public class Java2DF extends ASTVisitor {
 	    ArrayValueNode arr = new ArrayValueNode(scope, init);
 	    for (Expression expr1 : (List<Expression>) init.expressions()) {
 		cpt = processExpression(scope, frame, cpt, expr1);
-		arr.take(cpt.getRValue());
+		arr.addValue(cpt.getRValue());
 	    }
 	    cpt.setRValue(arr);
 	    // XXX array ref is not used.
@@ -916,7 +839,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpression(scope, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
 	    cpt.setRValue(new ArrayAccessNode(scope, ref, aa,
-					      cpt.getValue(ref), array, index));
+					      array, index, cpt.getValue(ref)));
 	    
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
@@ -963,7 +886,7 @@ public class Java2DF extends ASTVisitor {
 		new CreateObjectNode(scope, cstr, obj, instType);
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
-		call.take(cpt.getRValue());
+		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
 	    // Ignore getAnonymousClassDeclaration() here.
@@ -1101,7 +1024,7 @@ public class Java2DF extends ASTVisitor {
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(switchScope, frame, cpt, expr);
-		    caseNode.add(cpt.getRValue());
+		    caseNode.addMatch(cpt.getRValue());
 		} else {
 		    // "default" case.
 		}
@@ -1206,7 +1129,7 @@ public class Java2DF extends ASTVisitor {
 	DFRef ref = loopScope.lookupVar(varName.getIdentifier());
 	DFNode iterValue = new IterNode(loopScope, ref, expr, loopCpt.getRValue());
 	SingleAssignNode assign = new SingleAssignNode(loopScope, ref, expr);
-	assign.take(iterValue);
+	assign.accept(iterValue);
 	cpt.setOutput(assign);
 	loopCpt = processStatement(loopScope, loopFrame, loopCpt,
 				   eForStmt.getBody());
@@ -1785,7 +1708,7 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
 	    DFNode param = new ArgNode(scope, ref, decl, i++);
 	    AssignNode assign = new SingleAssignNode(scope, ref, decl);
-	    assign.take(param);
+	    assign.accept(param);
 	    cpt.setOutput(assign);
 	}
 	return cpt;
@@ -1837,7 +1760,7 @@ public class Java2DF extends ASTVisitor {
 		DFGraph graph = getMethodGraph(method);
 		if (graph != null) {
 		    Utils.logit("Success: "+funcName);
-		    // Collapse redundant nodes.
+		    // Remove DistNodes.
 		    graph.cleanup();
 		    if (this.exporter != null) {
 			this.exporter.writeGraph(graph);

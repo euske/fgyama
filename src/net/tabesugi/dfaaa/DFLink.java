@@ -9,41 +9,21 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFLink
 //
-class DFLink implements Comparable<DFLink> {
+class DFLink {
     
-    public DFNode src;
     public DFNode dst;
-    public int deg;
-    public DFLinkType type;
+    public DFNode src;
     public String label;
     
-    public DFLink(DFNode src, DFNode dst, int deg)
+    public DFLink(DFNode dst, DFNode src, String label)
     {
-	this(src, dst, deg, DFLinkType.DataFlow);
-    }
-    
-    public DFLink(DFNode src, DFNode dst, int deg, DFLinkType type)
-    {
-	this(src, dst, deg, type, null);
-    }
-    
-    public DFLink(DFNode src, DFNode dst, int deg, DFLinkType type, String label)
-    {
-	this.src = src;
 	this.dst = dst;
-	this.deg = deg;
-	this.type = type;
+	this.src = src;
 	this.label = label;
     }
 
     @Override
     public String toString() {
-	return ("<DFLink#"+this.deg+": "+this.src+"-("+this.label+")-"+this.dst+">");
-    }
-
-    @Override
-    public int compareTo(DFLink link) {
-	return this.dst.compareTo(link.dst);
+	return ("<DFLink "+this.dst+"<-"+this.src+">");
     }
 }
-

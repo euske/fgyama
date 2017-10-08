@@ -22,7 +22,7 @@ public class DFRef implements Comparable<DFRef> {
 
     @Override
     public String toString() {
-	return ("<DFRef("+this.label()+")>");
+	return ("<DFRef("+this.getName()+")>");
     }
 
     @Override
@@ -30,7 +30,7 @@ public class DFRef implements Comparable<DFRef> {
 	return this.name.compareTo(ref.name);
     }
     
-    public String label() {
+    public String getName() {
 	return ((this.scope == null)?
 		this.name :
 		this.scope.name+":"+this.name);

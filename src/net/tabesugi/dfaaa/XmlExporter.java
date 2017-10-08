@@ -59,17 +59,16 @@ class XmlExporter extends Exporter {
 	for (DFScope child : scope.children()) {
 	    escope.appendChild(this.writeScope(graph, child));
 	}
-	for (DFNode node : graph.nodes()) {
+	for (DFNode node : graph.getNodes()) {
 	    if (node.scope != scope) continue;
 	    Element enode = this.document.createElement("node");
-	    enode.setAttribute("name", node.name());
-	    enode.setAttribute("type", node.type().toString());
-	    String label = node.label();
-	    if (label != null) {
-		enode.setAttribute("label", label);
+	    enode.setAttribute("name", node.getName());
+	    enode.setAttribute("type", node.getType());
+	    if (node.getData() != null) {
+		enode.setAttribute("data", node.getData());
 	    }
 	    if (node.ref != null) {
-		enode.setAttribute("ref", node.ref.label());
+		enode.setAttribute("ref", node.ref.getName());
 	    }
 	    if (node instanceof ProgNode) {
 		ProgNode prognode = (ProgNode)node;
@@ -82,12 +81,9 @@ class XmlExporter extends Exporter {
 		    enode.appendChild(east);
 		}
 	    }
-	    for (DFLink link : node.links()) {
+	    for (DFLink link : node.getLinks()) {
 		Element elink = this.document.createElement("link");
-		elink.setAttribute("deg", Integer.toString(link.deg));
-		elink.setAttribute("type", link.type.toString());
-		//elink.setAttribute("src", link.src.name());
-		elink.setAttribute("dst", link.dst.name());
+		elink.setAttribute("src", link.src.getName());
 		if (link.label != null) {
 		    elink.setAttribute("label", link.label);
 		}

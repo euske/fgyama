@@ -18,23 +18,19 @@ public class JoinNode extends CondNode {
 	super(scope, ref, ast, value);
     }
     
-    public DFNodeType type() {
-	return DFNodeType.Join;
-    }
-
-    public String label() {
-	return "join";
+    public String getType() {
+	return "select";
     }
     
     public void recv(boolean cond, DFNode node) {
 	if (cond) {
 	    assert(!this.recvTrue);
 	    this.recvTrue = true;
-	    node.connect(this, (this.recvFalse)? 2 : 1, "true");
+	    this.accept(node, "true");
 	} else {
 	    assert(!this.recvFalse);
 	    this.recvFalse = true;
-	    node.connect(this, (this.recvTrue)? 2 : 1, "false");
+	    this.accept(node, "false");
 	}
     }
 
@@ -46,12 +42,12 @@ public class JoinNode extends CondNode {
 	if (!this.recvTrue) {
 	    assert(this.recvFalse);
 	    this.recvTrue = true;
-	    node.connect(this, 2, "true");
+	    this.accept(node, "true");
 	}
 	if (!this.recvFalse) {
 	    assert(this.recvTrue);
 	    this.recvFalse = true;
-	    node.connect(this, 2, "false");
+	    this.accept(node, "false");
 	}
     }
 }

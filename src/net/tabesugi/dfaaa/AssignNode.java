@@ -14,18 +14,7 @@ public abstract class AssignNode extends ProgNode {
 	super(scope, ref, ast);
     }
 
-    public DFNodeType type() {
-	return DFNodeType.Assign;
-    }
-
-    public String label() {
+    public String getType() {
 	return "assign";
     }
-
-    public boolean canOmit() {
-	return true;
-    }
-
-    abstract public void take(DFNode value);
 }
-

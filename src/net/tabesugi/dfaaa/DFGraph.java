@@ -37,7 +37,7 @@ public class DFGraph {
         this.nodes.remove(node);
     }
 
-    public DFNode[] nodes() {
+    public DFNode[] getNodes() {
 	DFNode[] nodes = new DFNode[this.nodes.size()];
 	this.nodes.toArray(nodes);
 	Arrays.sort(nodes);
@@ -45,14 +45,15 @@ public class DFGraph {
     }
 
     public void cleanup() {
-        List<DFNode> removed = new ArrayList<DFNode>();
-        for (DFNode node : this.nodes) {
-            if (node.canOmit() && node.tryRemove()) {
-                removed.add(node);
-            }
-        }
-        for (DFNode node : removed) {
-	    this.removeNode(node);
-        }
-    }			   
+	ArrayList<DFNode> removed = new ArrayList<DFNode>();
+	for (DFNode node : this.nodes) {
+	    if (node.getType() == null) {
+		node.rewire();
+		removed.add(node);
+	    }
+	}
+	for (DFNode node : removed) {
+	    this.nodes.remove(node);
+	}
+    }
 }
