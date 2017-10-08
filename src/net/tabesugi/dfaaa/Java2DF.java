@@ -1842,10 +1842,14 @@ public class Java2DF extends ASTVisitor {
 	// Process files.
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
-	    exporter.startFile(path);
-	    Java2DF converter = new Java2DF(exporter);
-	    converter.processFile(path);
-	    exporter.endFile();
+	    try {
+		exporter.startFile(path);
+		Java2DF converter = new Java2DF(exporter);
+		converter.processFile(path);
+		exporter.endFile();
+	    } catch (IOException e) {
+		System.err.println("Cannot open input file: "+path);
+	    }
 	}
 	exporter.close();
 	Utils.printXml(output, exporter.document);
