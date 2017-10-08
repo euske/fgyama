@@ -47,8 +47,7 @@ public class DFGraph {
     public void cleanup() {
 	ArrayList<DFNode> removed = new ArrayList<DFNode>();
 	for (DFNode node : this.nodes) {
-	    if (node.getType() == null) {
-		node.rewire();
+	    if (node.getType() == null && node.purge()) {
 		removed.add(node);
 	    }
 	}

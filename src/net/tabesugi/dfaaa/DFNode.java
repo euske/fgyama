@@ -75,11 +75,20 @@ public abstract class DFNode implements Comparable<DFNode> {
 	node.outputs.add(this);
     }
 
-    public void rewire() {
-	if (this.input != null) {
-	    for (DFNode dst : this.outputs) {
-		dst.input = this.input;
+    public boolean purge() {
+	if (this.input == null) return false;
+	for (DFNode node : this.outputs) {
+	    if (node.input == this) {
+		node.input = this.input;
+		this.input.outputs.add(node);
+	    }
+	    for (Map.Entry<String, DFNode> entry : node.inputs.entrySet()) {
+		if (entry.getValue() == this) {
+		    entry.setValue(this.input);
+		    this.input.outputs.add(node);
+		}
 	    }
 	}
+	return true;
     }
 }

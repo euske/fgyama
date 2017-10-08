@@ -127,28 +127,16 @@ class DFGraph:
         self.root = None
         self.scopes = {}
         self.nodes = {}
-        self.links = []
         return
 
     def __repr__(self):
-        return ('<DFGraph(%s), name=%r (%d nodes, %d links)>' %
-                (self.gid, self.name, len(self.nodes), len(self.links)))
+        return ('<DFGraph(%s), name=%r (%d nodes)>' %
+                (self.gid, self.name, len(self.nodes)))
 
     def fixate(self):
-        for link in self.links:
-            assert link.srcid in self.nodes
-            assert link.dstid in self.nodes
-            link.src = self.nodes[link.srcid]
-            link.dst = self.nodes[link.dstid]
-            if link.ltype in (DFLink.L_DataFlow, DFLink.L_ControlFlow):
-                link.src.outgoing.append(link)
-                link.dst.incoming.append(link)
-            else:
-                link.src.other.append(link)
-                link.dst.other.append(link)
         for node in self.nodes.values():
-            node.outgoing.sort(key=lambda link: link.deg)
-            node.incoming.sort(key=lambda link: link.deg)
+            for (label,name) in node.inputs.items():
+                node.inputs[label] = self.nodes[name]
         return self
     
     def dump(self, out=sys.stdout):
@@ -210,138 +198,20 @@ class DFScope:
 ##
 class DFNode:
 
-    N_None = 0
-    N_Refer = 1
-    N_Const = 2
-    N_Operator = 3
-    N_Assign = 4
-    N_Branch = 5
-    N_Join = 6
-    N_Loop = 7
-    N_Terminal = 8
-    N_Exception = 9
-
-    Type = {
-        'Dist': N_None,
-        'Refer': N_Refer,
-        'Const': N_Const,
-        'Operator': N_Operator,
-        'Assign': N_Assign,
-        'Branch': N_Branch,
-        'Join': N_Join,
-        'Loop': N_Loop,
-        'Terminal': N_Terminal,
-        'Exception': N_Exception,
-    }
-    
-    def __init__(self, nid, scope, ntype, label, ref):
+    def __init__(self, nid, scope, ntype, ref, data):
         self.nid = nid
         self.scope = scope
         self.ntype = ntype
-        self.label = label
         self.ref = ref
-        self.outgoing = []
-        self.incoming = []
-        self.other = []
+        self.data = data
         self.ast = None
+        self.inputs = {}
+        self.other = {}
         return
 
     def __repr__(self):
-        return ('<DFNode(%s): ntype=%d, ref=%r, label=%r>' %
-                (self.nid, self.ntype, self.ref, self.label))
-
-
-##  DFLink
-##
-class DFLink:
-
-    L_None = 0
-    L_DataFlow = 1
-    L_BackFlow = 2
-    L_ControlFlow = 3
-    L_Informational = 4
-    
-    Type = {
-        'None': L_None,
-        'DataFlow': L_DataFlow,
-        'BackFlow': L_BackFlow,
-        'ControlFlow': L_ControlFlow,
-        'Informational': L_Informational,
-    }
-    
-    def __init__(self, lid, srcid, dstid, deg, ltype, label):
-        self.lid = lid
-        self.srcid = srcid
-        self.src = None
-        self.dstid = dstid
-        self.dst = None
-        self.deg = deg
-        self.ltype = ltype
-        self.label = label
-        return
-
-    def __repr__(self):
-        return ('<DFLink(%d): ltype=%d, %r-(%r)-%r, deg=%r>' %
-                (self.lid, self.ltype, self.srcid, self.label, self.dstid, self.deg))
-
-
-##  load_graphs_text
-##
-def load_graphs_text(fp):
-    graph = None
-    src = None
-    for line in fp:
-        line = line.strip()
-        if line.startswith('#'):
-            assert graph is None
-            src = line[1:]
-            yield src
-        elif line.startswith('!'):
-            graph = None
-        elif line.startswith('@'):
-            assert graph is None
-            gid = line[1:]
-            graph = DFGraph(gid, gid, src)
-        elif line.startswith(':'):
-            f = line[1:].split(',')
-            assert graph is not None
-            if len(f) < 2:
-                (sid,) = f
-                scope = DFScope(sid, sid)
-                assert graph.root is None
-                graph.root = scope
-            else:
-                (sid,pid) = f[0:2]
-                assert pid in graph.scopes
-                parent = graph.scopes[pid]
-                scope = DFScope(sid, sid, parent)
-            assert sid not in graph.scopes
-            graph.scopes[sid] = scope
-        elif line.startswith('+'):
-            f = line[1:].split(',')
-            (sid,nid,ntype,label,ref) = f[0:5]
-            assert graph is not None
-            assert sid in graph.scopes
-            scope = graph.scopes[sid]
-            node = DFNode(nid, scope, int(ntype), label, ref)
-            if len(f) == 8:
-                node.ast = (int(f[5]),int(f[6]),int(f[7]))
-            graph.nodes[nid] = node
-            scope.nodes.append(node)
-        elif line.startswith('-'):
-            f = line[1:].split(',')
-            (nid1,nid2,deg,ltype) = f[0:4]
-            label = f[4] if 5 <= len(f) else None
-            assert graph is not None
-            link = DFLink(len(graph.links), nid1, nid2, int(deg), int(ltype), label)
-            graph.links.append(link)
-        elif not line:
-            if graph is not None:
-                yield graph.fixate()
-            graph = None
-    if graph is not None:
-        yield graph.fixate()
-    return
+        return ('<DFNode(%s): ntype=%d, ref=%r, data=%r, inputs=%r>' %
+                (self.nid, self.ntype, self.ref, self.data, len(self.inputs)))
 
 
 ##  load_graphs_xml
@@ -358,32 +228,29 @@ def load_graphs_xml(fp):
             graph = DFGraph(gid, gid, path)
             def get_scope(escope, parent=None):
                 assert escope.tag == 'scope'
-                sid = escope.get('name')
-                scope = DFScope(sid, sid, parent)
-                graph.scopes[sid] = scope
+                sname = escope.get('name')
+                scope = DFScope(sname, sname, parent)
+                graph.scopes[sname] = scope
                 for elem in escope.getchildren():
                     if elem.tag == 'scope':
                         get_scope(elem, scope)
                     elif elem.tag == 'node':
-                        nid = elem.get('name')
-                        ntype = DFNode.Type[elem.get('type')]
-                        label = elem.get('label')
+                        nname = elem.get('name')
+                        ntype = elem.get('type')
                         ref = elem.get('ref')
-                        node = DFNode(nid, scope, ntype, label, ref)
+                        data = elem.get('data')
+                        node = DFNode(nname, scope, ntype, ref, data)
                         for e in elem.getchildren():
                             if e.tag == 'ast':
                                 node.ast = (e.get('type'),
                                             int(e.get('start')),
                                             int(e.get('length')))
                             elif e.tag == 'link':
-                                dst = e.get('dst')
-                                deg = e.get('deg')
-                                ltype = DFLink.Type[e.get('type')]
                                 label = e.get('label')
-                                link = DFLink(len(graph.links), nid, dst,
-                                              int(deg), ltype, label)
-                                graph.links.append(link)
-                        graph.nodes[nid] = node
+                                src = e.get('src')
+                                assert label not in node.inputs
+                                node.inputs[label] = src
+                        graph.nodes[nname] = node
                         scope.nodes.append(node)
                 return scope
             for escope in egraph.getchildren():
@@ -430,9 +297,9 @@ CREATE TABLE DFNode (
     Gid INTEGER,
     Sid INTEGER,
     Aid INTEGER,
-    Type INTEGER,
-    Label TEXT,
-    Ref TEXT
+    Type TEXT,
+    Ref TEXT,
+    Data TEXT
 );
 CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
 
@@ -440,8 +307,6 @@ CREATE TABLE DFLink (
     Lid INTEGER PRIMARY KEY,
     Nid0 INTEGER,
     Nid1 INTEGER,
-    Deg INTEGER,
-    Type INTEGER,
     Label TEXT
 );
 CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
@@ -467,7 +332,7 @@ def index_graph(cur, cid, graph):
             aid = cur.lastrowid
         cur.execute(
             'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-            (gid, sid, aid, node.ntype, node.label, node.ref))
+            (gid, sid, aid, node.ntype, node.ref, node.data))
         nid = cur.lastrowid
         node.nid = nid
         return nid
@@ -484,11 +349,10 @@ def index_graph(cur, cid, graph):
             index_scope(child, sid)
         return
 
-    def index_link(link):
+    def index_link(node, src, label):
         cur.execute(
-            'INSERT INTO DFLink VALUES (NULL,?,?,?,?,?);',
-            (link.src.nid, link.dst.nid, link.deg, 
-             link.ltype, link.label))
+            'INSERT INTO DFLink VALUES (NULL,?,?,?);',
+            (node.nid, src.nid, label))
         lid = cur.lastrowid
         link.lid = lid
         return
@@ -527,11 +391,11 @@ def fetch_graph(cur, gid):
         if parent != 0:
             scopes[sid].set_parent(scopes[parent])
     rows = cur.execute(
-        'SELECT Nid,Sid,Aid,Type,Label,Ref FROM DFNode WHERE Gid=?;',
+        'SELECT Nid,Sid,Aid,Type,Ref,Data FROM DFNode WHERE Gid=?;',
         (gid,))
-    for (nid,sid,aid,ntype,label,ref) in list(rows):
+    for (nid,sid,aid,ntype,ref,data) in list(rows):
         scope = scopes[sid]
-        node = DFNode(nid, scope, ntype, label, ref)
+        node = DFNode(nid, scope, ntype, ref, data)
         rows = cur.execute(
             'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
             (aid,))
@@ -541,11 +405,10 @@ def fetch_graph(cur, gid):
         scope.nodes.append(node)
     for (nid0,node) in graph.nodes.items():
         rows = cur.execute(
-            'SELECT Lid,Nid1,Deg,Type,Label FROM DFLink WHERE Nid0=?;',
+            'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
             (nid0,))
-        for (lid,nid1,deg,ltype,label) in rows:
-            link = DFLink(lid, nid0, nid1, deg, ltype, label)
-            graph.links.append(link)
+        for (lid,nid1,label) in rows:
+            node.inputs[label] = graph.nodes[nid]
     graph.fixate()
     return graph
 

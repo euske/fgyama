@@ -58,7 +58,7 @@
     </javac>
   </target>
 
-  <target name="test" depends="compile">
+  <target name="test" depends="build">
     <junit>
       <jvmarg value="-ea" />
       <formatter type="plain" usefile="false" />
@@ -68,7 +68,7 @@
     </junit>
   </target>
   
-  <target name="run" depends="compile">
+  <target name="run" depends="build">
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.dfaaa.Java2DF">
       <arg value="-o" />

@@ -2,7 +2,7 @@
 import sys
 import os.path
 import sqlite3
-from graph import DFGraph, DFLink, DFNode
+from graph import DFGraph, DFNode
 from graph import get_graphs, build_graph_tables, index_graph
 
 

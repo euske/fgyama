@@ -1761,7 +1761,7 @@ public class Java2DF extends ASTVisitor {
 		if (graph != null) {
 		    Utils.logit("Success: "+funcName);
 		    // Remove DistNodes.
-		    graph.cleanup();
+		    //graph.cleanup();
 		    if (this.exporter != null) {
 			this.exporter.writeGraph(graph);
 		    }

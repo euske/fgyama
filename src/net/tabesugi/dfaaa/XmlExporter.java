@@ -63,7 +63,9 @@ class XmlExporter extends Exporter {
 	    if (node.scope != scope) continue;
 	    Element enode = this.document.createElement("node");
 	    enode.setAttribute("name", node.getName());
-	    enode.setAttribute("type", node.getType());
+	    if (node.getType() != null) {
+		enode.setAttribute("type", node.getType());
+	    }
 	    if (node.getData() != null) {
 		enode.setAttribute("data", node.getData());
 	    }
