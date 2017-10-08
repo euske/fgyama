@@ -59,27 +59,23 @@ class TreeCache:
         return tid
 
 # is_key
-def is_key(node):
-    return node.ntype in (
-        DFNode.N_Terminal,
-        DFNode.N_Operator,
-        DFNode.N_Const,
-        DFNode.N_Branch,
-        DFNode.N_Join,
-        DFNode.N_Loop)
+def get_data(node):
+    if node.ntype in ('select','begin','end','return'):
+        return node.ntype
+    elif node.data is not None:
+        return node.data
+    else:
+        return None
 
 def index_graph_tree(cache, cur, graph):
     visited = set()
     
-    def index_tree(link0, node0, pids):
+    def index_tree(label, node0, pids):
         if node0 in visited: return
         visited.add(node0)
-        if link0 is None:
-            key0 = ''
-        else:
-            key0 = link0.label or ''
-        if is_key(node0):
-            key = key0+':'+node0.label
+        data = get_data(node0)
+        if data is not None:
+            key = (label or '')+':'+data
             tids = [0]
             for pid in pids:
                 tid = cache.get(pid, key)
@@ -88,16 +84,16 @@ def index_graph_tree(cache, cur, graph):
                     (tid, graph.gid, node0.nid))
                 tids.append(tid)
             #print ('index:', pids, key, '->', tids)
-            for link1 in node0.incoming:
-                index_tree(link1, link1.src, tids)
+            for (label,src) in node0.inputs.items():
+                index_tree(label, src, tids)
         else:
-            for link1 in node0.incoming:
-                index_tree(link0, link1.src, pids)
+            for (_,src) in node0.inputs.items():
+                index_tree(label, src, pids)
         return
 
     print (graph)
     for node in graph.nodes.values():
-        if not node.outgoing:
+        if not node.outputs:
             index_tree(None, node, [0])
     return
 

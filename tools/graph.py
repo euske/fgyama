@@ -136,7 +136,9 @@ class DFGraph:
     def fixate(self):
         for node in self.nodes.values():
             for (label,name) in node.inputs.items():
-                node.inputs[label] = self.nodes[name]
+                src = self.nodes[name]
+                node.inputs[label] = src
+                src.outputs.append(node)
         return self
     
     def dump(self, out=sys.stdout):
@@ -147,14 +149,14 @@ class DFGraph:
                 out.write(':%s,%s\n' % (scope.name, scope.parent.name))
             for node in scope.nodes:
                 out.write('+%s,%s,%s,%s,%s' %
-                          (scope.name, node.nid, node.ntype, node.label, node.ref))
+                          (scope.name, node.nid, node.ntype, node.ref, node.data))
                 if node.ast is not None:
                     out.write(',%s,%s,%s' % node.ast)
                 out.write('\n')
             for node in scope.nodes:
                 for (label,src) in node.inputs.items():
                     out.write('-%s,%s,%s\n' %
-                              (node.nid, src.nid, link.label))
+                              (node.nid, src.nid, label))
             for child in scope.children:
                 f(child)
         if self.src is not None:
@@ -206,10 +208,11 @@ class DFNode:
         self.data = data
         self.ast = None
         self.inputs = {}
+        self.outputs = []
         return
 
     def __repr__(self):
-        return ('<DFNode(%s): ntype=%d, ref=%r, data=%r, inputs=%r>' %
+        return ('<DFNode(%s): ntype=%s, ref=%r, data=%r, inputs=%r>' %
                 (self.nid, self.ntype, self.ref, self.data, len(self.inputs)))
 
 
@@ -241,7 +244,7 @@ def load_graphs_xml(fp):
                         node = DFNode(nname, scope, ntype, ref, data)
                         for e in elem.getchildren():
                             if e.tag == 'ast':
-                                node.ast = (e.get('type'),
+                                node.ast = (int(e.get('type')),
                                             int(e.get('start')),
                                             int(e.get('length')))
                             elif e.tag == 'link':
@@ -352,14 +355,12 @@ def index_graph(cur, cid, graph):
         cur.execute(
             'INSERT INTO DFLink VALUES (NULL,?,?,?);',
             (node.nid, src.nid, label))
-        lid = cur.lastrowid
-        link.lid = lid
         return
     
     index_scope(graph.root)
     for node in graph.nodes.values():
-        for link in node.outgoing:
-            index_link(link)
+        for (label,src) in node.inputs.items():
+            index_link(node, src, label)
     return
 
 
@@ -407,7 +408,7 @@ def fetch_graph(cur, gid):
             'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
             (nid0,))
         for (lid,nid1,label) in rows:
-            node.inputs[label] = graph.nodes[nid]
+            node.inputs[label] = nid
     graph.fixate()
     return graph
 

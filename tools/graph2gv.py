@@ -45,7 +45,7 @@ def write_gv(out, scope, highlight=None, level=0):
                 elif label == 'repeat':
                     styles = {'style': 'dashed', 'constraint': 'false'}
                 else:
-                    styles = {}
+                    styles = {'label': label}
                 out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
     out.write(h+'}\n')
     return

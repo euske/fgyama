@@ -77,7 +77,7 @@ class XmlExporter extends Exporter {
 		ASTNode ast = prognode.ast;
 		if (ast != null) {
 		    Element east = this.document.createElement("ast");
-		    east.setAttribute("type", Utils.getASTNodeTypeName(ast.getNodeType()));
+		    east.setAttribute("type", Integer.toString(ast.getNodeType()));
 		    east.setAttribute("start", Integer.toString(ast.getStartPosition()));
 		    east.setAttribute("length", Integer.toString(ast.getLength()));
 		    enode.appendChild(east);

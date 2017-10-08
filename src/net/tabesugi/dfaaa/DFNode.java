@@ -16,9 +16,9 @@ public abstract class DFNode implements Comparable<DFNode> {
     public int id;
     public String name;
     
-    private List<DFNode> outputs = new ArrayList<DFNode>();
     private DFNode input = null;
     private Map<String, DFNode> inputs = new HashMap<String, DFNode>();
+    private List<DFNode> outputs = new ArrayList<DFNode>();
     
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
