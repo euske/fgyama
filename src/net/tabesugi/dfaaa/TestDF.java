@@ -37,35 +37,23 @@ public class TestDF extends XMLTestCase {
     }
 
     @Test
-    public void testf1() throws Exception {
-	compareXml("samples/f1.java", "samples/f1.xml");
+    public void test_basic_f1() throws Exception {
+	compareXml("testdata/basic_f1.java", "testdata/basic_f1.graph");
     }
     @Test
-    public void testf2() throws Exception {
-	compareXml("samples/f2.java", "samples/f2.xml");
+    public void test_basic_f2() throws Exception {
+	compareXml("testdata/basic_f2.java", "testdata/basic_f2.graph");
     }
     @Test
-    public void testf3() throws Exception {
-	compareXml("samples/f3.java", "samples/f3.xml");
+    public void test_basic_f3() throws Exception {
+	compareXml("testdata/basic_f3.java", "testdata/basic_f3.graph");
     }
     @Test
-    public void testf4() throws Exception {
-	compareXml("samples/f4.java", "samples/f4.xml");
+    public void test_basic_f4() throws Exception {
+	compareXml("testdata/basic_f4.java", "testdata/basic_f4.graph");
     }
     @Test
-    public void testf5() throws Exception {
-	compareXml("samples/f5.java", "samples/f5.xml");
-    }
-    @Test
-    public void testf6() throws Exception {
-	compareXml("samples/f6.java", "samples/f6.xml");
-    }
-    @Test
-    public void testf7() throws Exception {
-	compareXml("samples/f7.java", "samples/f7.xml");
-    }
-    @Test
-    public void testc12() throws Exception {
-	compareXml("samples/c12.java", "samples/c12.xml");
+    public void test_basic_f5() throws Exception {
+	compareXml("testdata/basic_f5.java", "testdata/basic_f5.graph");
     }
 }

@@ -61,7 +61,9 @@ class Utils {
 	throws ParserConfigurationException {
 	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-	return docBuilder.newDocument();
+	Document doc = docBuilder.newDocument();
+	doc.setXmlStandalone(true);
+	return doc;
     }
     
     public static Document readXml(String path)

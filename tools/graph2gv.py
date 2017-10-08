@@ -43,7 +43,8 @@ def write_gv(out, scope, highlight=None, level=0):
                 if label == 'cond':
                     styles = {'style': 'dotted', 'label': label}
                 elif label == 'repeat':
-                    styles = {'style': 'dashed', 'constraint': 'false'}
+                    styles = {'xlabel': 'repeat',
+                              'style': 'dashed', 'constraint': 'false'}
                 else:
                     styles = {'label': label}
                 out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
