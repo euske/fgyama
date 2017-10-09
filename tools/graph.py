@@ -151,6 +151,8 @@ class DFGraph:
     def toxml(self):
         egraph = Element('graph')
         egraph.set('name', self.name)
+        if self.src is not None:
+            egraph.set('src', self.src)
         egraph.append(self.root.toxml())
         return egraph
 
@@ -239,6 +241,12 @@ class DFNode:
             enode.append(elink)
         return enode
 
+    def get_inputs(self):
+        for (label,src) in self.inputs.items():
+            if label is None or not label.startswith('_'):
+                yield (label, src)
+        return
+
 
 ##  parse_graph
 ##
@@ -296,7 +304,6 @@ def load_graphs_file(fp):
     for efile in root.getchildren():
         if efile.tag != 'file': continue
         path = efile.get('path')
-        yield path
         for egraph in efile.getchildren():
             if egraph.tag != 'graph': continue
             gid += 1
@@ -305,7 +312,7 @@ def load_graphs_file(fp):
 
 def load_graphs_stream(fp):
     root = ElementTree(file=fp).getroot()
-    yield parse_graph(1, root)
+    yield parse_graph(0, root)
     return
 
 
@@ -507,8 +514,7 @@ def main(argv):
 
     for path in args:
         for graph in get_graphs(path):
-            if isinstance(graph, DFGraph):
-                dump(graph.toxml())
+            dump(graph.toxml())
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

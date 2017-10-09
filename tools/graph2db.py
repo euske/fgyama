@@ -101,7 +101,8 @@ class TreeCache:
         return
 
     # searches subgraphs
-    def search_graph(self, graph, minnodes=5, minbranches=2):
+    def search_graph(self, graph, minnodes=5, minbranches=2,
+                     checkgid=(lambda gid: True)):
         cur = self.cur
 
         def match_tree(pid, label, node0, match):
@@ -113,7 +114,7 @@ class TreeCache:
                 rows = cur.execute(
                     'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                     (tid,))
-                found = [ (gid,nid) for (gid,nid) in rows if graph.gid < gid ]
+                found = [ (gid,nid) for (gid,nid) in rows if checkgid(gid) ]
                 if not found: return 0
                 for (gid,nid) in found:
                     if gid in match:
@@ -209,17 +210,19 @@ def main(argv):
     
     cache = TreeCache(indexconn.cursor(), insert=True)
     cid = None
+    src = None
     for path in args:
         for graph in get_graphs(path):
-            if isinstance(graph, DFGraph):
-                assert cid is not None
-                store_graph(graphcur, cid, graph)
-                cache.index_graph(graph)
-            elif isinstance(graph, str):
+            assert isinstance(graph, DFGraph)
+            if graph.src is not None and graph.src != src:
+                src = graph.src
                 graphcur.execute(
                     'INSERT INTO SourceFile VALUES (NULL,?)',
-                    (graph,))
+                    (src,))
                 cid = graphcur.lastrowid
+            assert cid is not None
+            store_graph(graphcur, cid, graph)
+            cache.index_graph(graph)
     graphconn.commit()
     indexconn.commit()
     return 0

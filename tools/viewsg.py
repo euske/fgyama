@@ -2,7 +2,7 @@
 import sys
 import sqlite3
 from graph import SourceDB, DFGraph
-from graph import get_graphs, fetch_graph
+from graph import fetch_graph
 
 def q(s):
     return s.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')

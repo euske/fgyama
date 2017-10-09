@@ -61,8 +61,8 @@ def main(argv):
         return
     
     for graph0 in get_graphs(args.pop(0)):
-        if not isinstance(graph0, DFGraph): continue
-        if verbose or (isinstance(graph0.gid, int) and (graph0.gid % 100) == 0):
+        gid0 = graph0.gid
+        if verbose or (isinstance(gid0, int) and (gid0 % 100) == 0):
             sys.stderr.write('*** %d ***\n' % gid0)
             sys.stderr.flush()
         src0 = None
@@ -73,7 +73,8 @@ def main(argv):
                 pass
         maxvotes = cache.search_graph(
             graph0,
-            minnodes=minnodes, minbranches=minbranches)
+            minnodes=minnodes, minbranches=minbranches,
+            checkgid=(lambda gid: graph0.gid < gid))
         if not maxvotes: continue
         show_result(graph0, src0, maxvotes)
         sys.stdout.flush()

@@ -39,16 +39,15 @@ def write_gv(out, scope, highlight=None, level=0):
     if level == 0:
         for node in scope.walk():
             for (label,src) in node.inputs.items():
-                if label == 'end': continue
                 if label == 'cond':
                     styles = {'style': 'dotted', 'label': label}
+                elif label == '_repeat':
+                    styles = {'xlabel': 'repeat',
+                              'style': 'dashed', 'constraint': 'false'}
+                elif label.startswith('_'):
+                    continue
                 else:
                     styles = {'label': label}
-                out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
-            if node.repeat is not None:
-                styles = {'xlabel': 'repeat',
-                          'style': 'dashed', 'constraint': 'false'}
-                src = node.repeat
                 out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
     out.write(h+'}\n')
     return
