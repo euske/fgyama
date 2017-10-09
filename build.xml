@@ -84,6 +84,7 @@
   <target name="run" depends="build">
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.dfaaa.Java2DF">
+      <jvmarg value="-ea" />
       <arg value="-o" />
       <arg file="${out_graph}" />
       <arg file="${input}" />
