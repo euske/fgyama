@@ -31,7 +31,7 @@ public class UnitTestDF extends XMLTestCase {
 	try {
 	    assertXMLEqual(refdoc, exporter.document);
 	} catch (junit.framework.AssertionFailedError e) {
-	    OutputStream out = new FileOutputStream(new File(javaPath+".err"));
+	    OutputStream out = new FileOutputStream(new File(xmlPath+".err"));
 	    Utils.printXml(out, exporter.document);
 	    out.close();
 	    throw e;

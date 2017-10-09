@@ -27,30 +27,43 @@ public class XmlExporter extends Exporter {
 	}
     }
 
+    @Override
     public void close()
 	throws IOException {
 	this.document.appendChild(_root);
 	this.document.normalizeDocument();
     }
 
+    @Override
     public void startFile(String path)
 	throws IOException {
 	_file = this.document.createElement("file");
 	_file.setAttribute("path", path);
     }
 
+    @Override
     public void endFile()
 	throws IOException {
 	_root.appendChild(_file);
 	_file = null;
     }
     
+    @Override
     public void writeError(String funcName, String astName)
 	throws IOException {
 	Element failure = this.document.createElement("error");
 	failure.setAttribute("func", funcName);
 	failure.setAttribute("ast", astName);
 	_file.appendChild(failure);
+    }
+    
+    @Override
+    public void writeGraph(DFGraph graph)
+	throws IOException {
+	Element egraph = this.document.createElement("graph");
+	egraph.setAttribute("name", graph.name);
+	egraph.appendChild(this.writeScope(graph, graph.root));
+	_file.appendChild(egraph);
     }
 
     private Element writeScope(DFGraph graph, DFScope scope) {
@@ -94,13 +107,5 @@ public class XmlExporter extends Exporter {
 	    escope.appendChild(enode);
 	}
 	return escope;
-    }
-    
-    public void writeGraph(DFGraph graph)
-	throws IOException {
-	Element egraph = this.document.createElement("graph");
-	egraph.setAttribute("name", graph.name);
-	egraph.appendChild(this.writeScope(graph, graph.root));
-	_file.appendChild(egraph);
     }
 }

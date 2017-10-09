@@ -33,13 +33,13 @@
             </node>
             <node name="Nbasic_xfor_b0_efor0_14" ref="basic_xfor_b0:s" type="begin">
               <ast length="33" start="76" type="70"/>
-              <link label="repeat" src="Nbasic_xfor_b0_efor0_15"/>
+              <link label="_repeat" src="Nbasic_xfor_b0_efor0_15"/>
               <link label="enter" src="Nbasic_xfor_b0_4"/>
             </node>
             <node name="Nbasic_xfor_b0_efor0_15" ref="basic_xfor_b0:s" type="end">
               <ast length="33" start="76" type="70"/>
               <link src="Nbasic_xfor_b0_efor0_b0_9"/>
-              <link label="end" src="Nbasic_xfor_b0_efor0_14"/>
+              <link label="_end" src="Nbasic_xfor_b0_efor0_14"/>
               <link label="cond" src="Nbasic_xfor_b0_efor0_7"/>
             </node>
           </scope>

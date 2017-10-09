@@ -32,13 +32,13 @@
             </node>
             <node name="Nbasic_while_b0_while0_10" ref="basic_while:x" type="begin">
               <ast length="32" start="64" type="61"/>
-              <link label="repeat" src="Nbasic_while_b0_while0_11"/>
+              <link label="_repeat" src="Nbasic_while_b0_while0_11"/>
               <link label="enter" src="Nbasic_while_2"/>
             </node>
             <node name="Nbasic_while_b0_while0_11" ref="basic_while:x" type="end">
               <ast length="32" start="64" type="61"/>
               <link src="Nbasic_while_b0_while0_b0_7"/>
-              <link label="end" src="Nbasic_while_b0_while0_10"/>
+              <link label="_end" src="Nbasic_while_b0_while0_10"/>
               <link label="cond" src="Nbasic_while_b0_while0_6"/>
             </node>
           </scope>

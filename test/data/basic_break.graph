@@ -41,13 +41,13 @@
             </node>
             <node name="Nbasic_break_b0_while0_13" ref="basic_break:x" type="begin">
               <ast length="58" start="64" type="61"/>
-              <link label="repeat" src="Nbasic_break_b0_while0_14"/>
+              <link label="_repeat" src="Nbasic_break_b0_while0_14"/>
               <link label="enter" src="Nbasic_break_2"/>
             </node>
             <node name="Nbasic_break_b0_while0_14" ref="basic_break:x" type="end">
               <ast length="58" start="64" type="61"/>
               <link src="Nbasic_break_b0_while0_b0_10"/>
-              <link label="end" src="Nbasic_break_b0_while0_13"/>
+              <link label="_end" src="Nbasic_break_b0_while0_13"/>
               <link label="cond" src="Nbasic_break_b0_while0_3"/>
             </node>
           </scope>

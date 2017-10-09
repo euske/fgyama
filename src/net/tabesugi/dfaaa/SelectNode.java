@@ -18,6 +18,7 @@ public class SelectNode extends CondNode {
 	super(scope, ref, ast, value);
     }
     
+    @Override
     public String getType() {
 	return "select";
     }

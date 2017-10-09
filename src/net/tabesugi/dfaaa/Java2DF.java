@@ -60,7 +60,8 @@ class VarRefNode extends ReferNode {
 	super(scope, ref, ast);
 	this.accept(value);
     }
-    
+
+    @Override
     public String getType() {
 	return "ref";
     }
@@ -77,6 +78,7 @@ class ArrayAccessNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "arrayaccess";
     }
@@ -92,6 +94,7 @@ class FieldAccessNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "fieldaccess";
     }
@@ -109,10 +112,12 @@ class PrefixNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "prefix";
     }
     
+    @Override
     public String getData() {
 	return this.op.toString();
     }
@@ -130,10 +135,12 @@ class PostfixNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "prefix";
     }
     
+    @Override
     public String getData() {
 	return this.op.toString();
     }
@@ -150,10 +157,12 @@ class ArgNode extends ProgNode {
 	this.index = index;
     }
 
+    @Override
     public String getType() {
 	return "arg";
     }
     
+    @Override
     public String getData() {
 	return "arg"+this.index;
     }
@@ -169,10 +178,12 @@ class ConstNode extends ProgNode {
 	this.value = value;
     }
 
+    @Override
     public String getType() {
 	return "const";
     }
     
+    @Override
     public String getData() {
 	return this.value;
     }
@@ -187,10 +198,12 @@ class ArrayValueNode extends ProgNode {
 	super(scope, null, ast);
     }
 
+    @Override
     public String getType() {
 	return "arrayvalue";
     }
     
+    @Override
     public String getData() {
 	return "["+this.values.size()+"]";
     }
@@ -216,10 +229,12 @@ class InfixNode extends ProgNode {
 	this.accept(rvalue, "R");
     }
 
+    @Override
     public String getType() {
 	return "infix";
     }
     
+    @Override
     public String getData() {
 	return this.op.toString();
     }
@@ -237,10 +252,12 @@ class TypeCastNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "typecast";
     }
     
+    @Override
     public String getData() {
 	return "("+Utils.getTypeName(this.type)+")";
     }
@@ -258,10 +275,12 @@ class InstanceofNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "instanceof";
     }
     
+    @Override
     public String getData() {
 	return Utils.getTypeName(this.type)+"?";
     }
@@ -278,10 +297,12 @@ class CaseNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "case";
     }
     
+    @Override
     public String getData() {
 	if (this.matches.isEmpty()) {
 	    return "default";
@@ -311,10 +332,12 @@ class AssignOpNode extends ProgNode {
 	this.accept(rvalue, "R");
     }
 
+    @Override
     public String getType() {
 	return "assignop";
     }
     
+    @Override
     public String getData() {
 	return this.op.toString();
     }
@@ -331,17 +354,19 @@ class BeginNode extends ProgNode {
 	this.accept(enter, "enter");
     }
 
-    public void closeLoop(DFNode node) {
-    }
-    
+    @Override
     public String getType() {
 	return "begin";
     }
 
+    @Override
     protected List<DFLink> getExtraLinks() {
 	List<DFLink> extra = super.getExtraLinks();
-	extra.add(new DFLink(this, this.end, "repeat"));
+	extra.add(new DFLink(this, this.end, "_repeat"));
 	return extra;
+    }
+    
+    public void closeLoop(DFNode node) {
     }
 }
 
@@ -361,13 +386,15 @@ class EndNode extends ProgNode {
 	this.repeat.accept(this);
     }
 
+    @Override
     public String getType() {
 	return "end";
     }
 
+    @Override
     protected List<DFLink> getExtraLinks() {
 	List<DFLink> extra = super.getExtraLinks();
-	extra.add(new DFLink(this, this.begin, "end"));
+	extra.add(new DFLink(this, this.begin, "_end"));
 	return extra;
     }
 }
@@ -381,6 +408,7 @@ class IterNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "iter";
     }
@@ -402,6 +430,7 @@ abstract class CallNode extends ProgNode {
 	}
     }
 
+    @Override
     public String getType() {
 	return "call";
     }
@@ -424,6 +453,7 @@ class MethodCallNode extends CallNode {
 	this.name = name;
     }
     
+    @Override
     public String getData() {
 	return this.name+"()";
     }
@@ -440,6 +470,7 @@ class CreateObjectNode extends CallNode {
 	this.type = type;
     }
     
+    @Override
     public String getData() {
 	return "new "+Utils.getTypeName(this.type);
     }
@@ -453,6 +484,7 @@ class ReturnNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "return";
     }
@@ -466,6 +498,7 @@ class ExceptionNode extends ProgNode {
 	this.accept(value);
     }
 
+    @Override
     public String getType() {
 	return "exception";
     }

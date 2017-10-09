@@ -53,24 +53,24 @@
             </node>
             <node name="Nbasic_for_b0_for0_19" ref="basic_for_b0_for0:i" type="begin">
               <ast length="48" start="73" type="24"/>
-              <link label="repeat" src="Nbasic_for_b0_for0_20"/>
+              <link label="_repeat" src="Nbasic_for_b0_for0_20"/>
               <link label="enter" src="Nbasic_for_b0_for0_6"/>
             </node>
             <node name="Nbasic_for_b0_for0_20" ref="basic_for_b0_for0:i" type="end">
               <ast length="48" start="73" type="24"/>
               <link src="Nbasic_for_b0_for0_16"/>
-              <link label="end" src="Nbasic_for_b0_for0_19"/>
+              <link label="_end" src="Nbasic_for_b0_for0_19"/>
               <link label="cond" src="Nbasic_for_b0_for0_11"/>
             </node>
             <node name="Nbasic_for_b0_for0_22" ref="basic_for_b0:x" type="begin">
               <ast length="48" start="73" type="24"/>
-              <link label="repeat" src="Nbasic_for_b0_for0_23"/>
+              <link label="_repeat" src="Nbasic_for_b0_for0_23"/>
               <link label="enter" src="Nbasic_for_b0_4"/>
             </node>
             <node name="Nbasic_for_b0_for0_23" ref="basic_for_b0:x" type="end">
               <ast length="48" start="73" type="24"/>
               <link src="Nbasic_for_b0_for0_b0_12"/>
-              <link label="end" src="Nbasic_for_b0_for0_22"/>
+              <link label="_end" src="Nbasic_for_b0_for0_22"/>
               <link label="cond" src="Nbasic_for_b0_for0_11"/>
             </node>
           </scope>

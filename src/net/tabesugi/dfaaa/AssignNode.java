@@ -14,6 +14,7 @@ public abstract class AssignNode extends ProgNode {
 	super(scope, ref, ast);
     }
 
+    @Override
     public String getType() {
 	return "assign";
     }
