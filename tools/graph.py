@@ -144,7 +144,8 @@ class DFGraph:
             for (label,name) in node.inputs.items():
                 src = self.nodes[name]
                 node.inputs[label] = src
-                src.outputs.append(node)
+                if label is None or not label.startswith('_'):
+                    src.outputs.append(node)
         return self
     
     def toxml(self):
@@ -197,8 +198,9 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, nid, scope, ntype, ref, data):
+    def __init__(self, nid, name, scope, ntype, ref, data):
         self.nid = nid
+        self.name = name
         self.scope = scope
         self.ntype = ntype
         self.ref = ref
@@ -209,9 +211,10 @@ class DFNode:
         return
 
     def __repr__(self):
+        name = self.nid if self.name is None else self.name
         return ('<DFNode(%s): ntype=%s, ref=%r, data=%r, inputs=%r>' %
-                (self.nid, self.ntype, self.ref, self.data, len(self.inputs)))
-
+                (name, self.ntype, self.ref, self.data, len(self.inputs)))
+        
     def toxml(self):
         enode = Element('node')
         enode.set('name', ns(self.nid))
@@ -239,17 +242,18 @@ class DFNode:
 
 ##  parse_graph
 ##
-def parse_graph(egraph, path):
+def parse_graph(gid, egraph, src=None):
     assert egraph.tag == 'graph'
-    gid = egraph.get('name')
-    graph = DFGraph(gid, gid, path)
-    def parse_node(scope, enode):
+    gname = egraph.get('name')
+    graph = DFGraph(gid, gname, src)
+    
+    def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
         nname = enode.get('name')
         ntype = enode.get('type')
         ref = enode.get('ref')
         data = enode.get('data')
-        node = DFNode(nname, scope, ntype, ref, data)
+        node = DFNode(nid, nname, scope, ntype, ref, data)
         for e in enode.getchildren():
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -261,41 +265,47 @@ def parse_graph(egraph, path):
                 assert label not in node.inputs
                 node.inputs[label] = src
         return node
-    def parse_scope(escope, parent=None):
+    
+    def parse_scope(sid, escope, parent=None):
         assert escope.tag == 'scope'
         sname = escope.get('name')
-        scope = DFScope(sname, sname, parent)
+        scope = DFScope(sid, sname, parent)
+        sid += 1
         graph.scopes[sname] = scope
         for elem in escope.getchildren():
             if elem.tag == 'scope':
-                parse_scope(elem, scope)
+                (sid,child) = parse_scope(sid, elem, scope)
             elif elem.tag == 'node':
-                node = parse_node(scope, elem)
-                graph.nodes[node.nid] = node
+                nid = len(graph.nodes)+1
+                node = parse_node(nid, scope, elem)
+                graph.nodes[node.name] = node
                 scope.nodes.append(node)
-        return scope
+        return (sid,scope)
+    
     for escope in egraph.getchildren():
-        graph.root = parse_scope(escope)
+        (_,graph.root) = parse_scope(1, escope)
         break
     return graph.fixate()
 
 
-##  load_graphs_file
+##  load_graphs
 ##
 def load_graphs_file(fp):
     root = ElementTree(file=fp).getroot()
+    gid = 0
     for efile in root.getchildren():
         if efile.tag != 'file': continue
         path = efile.get('path')
         yield path
         for egraph in efile.getchildren():
             if egraph.tag != 'graph': continue
-            yield parse_graph(egraph, path)
+            gid += 1
+            yield parse_graph(gid, egraph, src=path)
     return
 
 def load_graphs_stream(fp):
     root = ElementTree(file=fp).getroot()
-    yield parse_graph(root, None)
+    yield parse_graph(1, root)
     return
 
 
@@ -351,16 +361,16 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
     return
 
 
-##  index_graph
+##  store_graph
 ##
-def index_graph(cur, cid, graph):
+def store_graph(cur, cid, graph):
     cur.execute(
         'INSERT INTO DFGraph VALUES (NULL,?,?);',
         (cid, graph.name))
     gid = cur.lastrowid
     graph.gid = gid
     
-    def index_node(sid, node):
+    def store_node(sid, node):
         aid = 0
         if node.ast is not None:
             cur.execute(
@@ -374,28 +384,28 @@ def index_graph(cur, cid, graph):
         node.nid = nid
         return nid
 
-    def index_scope(scope, parent=0):
+    def store_scope(scope, parent=0):
         cur.execute(
             'INSERT INTO DFScope VALUES (NULL,?,?,?);',
             (gid, parent, scope.name))
         sid = cur.lastrowid
         scope.sid = sid
         for node in scope.nodes:
-            index_node(sid, node)
+            store_node(sid, node)
         for child in scope.children:
-            index_scope(child, sid)
+            store_scope(child, sid)
         return
 
-    def index_link(node, src, label):
+    def store_link(node, src, label):
         cur.execute(
             'INSERT INTO DFLink VALUES (NULL,?,?,?);',
             (node.nid, src.nid, label))
         return
     
-    index_scope(graph.root)
+    store_scope(graph.root)
     for node in graph.nodes.values():
         for (label,src) in node.inputs.items():
-            index_link(node, src, label)
+            store_link(node, src, label)
     return
 
 
@@ -430,7 +440,7 @@ def fetch_graph(cur, gid):
         (gid,))
     for (nid,sid,aid,ntype,ref,data) in list(rows):
         scope = scopes[sid]
-        node = DFNode(nid, scope, ntype, ref, data)
+        node = DFNode(nid, None, scope, ntype, ref, data)
         rows = cur.execute(
             'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
             (aid,))
@@ -455,15 +465,18 @@ def get_graphs(arg):
         gids = map(int, ext.split(','))
     else:
         gids = None
+        
     if path == '-':
         for (gid,graph) in enumerate(load_graphs_stream(sys.stdin)):
             if gids is None or gid in gids:
                 yield graph
+        
     elif path.endswith('.graph'):
         with open(path) as fp:
             for (gid,graph) in enumerate(load_graphs_file(fp)):
                 if gids is None or gid in gids:
                     yield graph
+        
     elif path.endswith('.db'):
         conn = sqlite3.connect(path)
         cur1 = conn.cursor()

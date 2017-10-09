@@ -3,7 +3,17 @@ import sys
 import os.path
 import sqlite3
 from graph import DFGraph, DFNode
-from graph import get_graphs, build_graph_tables, index_graph
+from graph import get_graphs, build_graph_tables, store_graph
+
+
+# get_nodekey
+def get_nodekey(node):
+    if node.ntype in ('select','begin','end','return'):
+        return node.ntype
+    elif node.data is not None:
+        return node.data
+    else:
+        return None
 
 
 ##  build_index_tables
@@ -58,45 +68,107 @@ class TreeCache:
             self._cache[k] = tid
         return tid
 
-# is_key
-def get_data(node):
-    if node.ntype in ('select','begin','end','return'):
-        return node.ntype
-    elif node.data is not None:
-        return node.data
-    else:
-        return None
+    # stores the index of the graph.
+    def index_graph(self, graph):
+        visited = set()
+        cur = self.cur
 
-def index_graph_tree(cache, cur, graph):
-    visited = set()
-    
-    def index_tree(label, node0, pids):
-        if node0 in visited: return
-        visited.add(node0)
-        data = get_data(node0)
-        if data is not None:
-            key = (label or '')+':'+data
-            tids = [0]
-            for pid in pids:
-                tid = cache.get(pid, key)
-                cur.execute(
-                    'INSERT INTO TreeLeaf VALUES (?,?,?);',
-                    (tid, graph.gid, node0.nid))
-                tids.append(tid)
-            #print ('index:', pids, key, '->', tids)
-            for (label,src) in node0.inputs.items():
-                index_tree(label, src, tids)
-        else:
-            for (_,src) in node0.inputs.items():
-                index_tree(label, src, pids)
+        def index_tree(label, node0, pids):
+            if node0 in visited: return
+            visited.add(node0)
+            data = get_nodekey(node0)
+            if data is not None:
+                key = (label or '')+':'+data
+                tids = [0]
+                for pid in pids:
+                    tid = self.get(pid, key)
+                    cur.execute(
+                        'INSERT INTO TreeLeaf VALUES (?,?,?);',
+                        (tid, graph.gid, node0.nid))
+                    tids.append(tid)
+                #print ('index:', pids, key, '->', tids)
+                for (label,src) in node0.inputs.items():
+                    index_tree(label, src, tids)
+            else:
+                for (_,src) in node0.inputs.items():
+                    index_tree(label, src, pids)
+            return
+
+        print (graph)
+        for node in graph.nodes.values():
+            if not node.outputs:
+                index_tree(None, node, [0])
         return
 
-    print (graph)
-    for node in graph.nodes.values():
-        if not node.outputs:
-            index_tree(None, node, [0])
-    return
+    # searches subgraphs
+    def search_graph(self, graph, minnodes=5, minbranches=2):
+        cur = self.cur
 
+        def match_tree(pid, label, node0, match):
+            data = get_nodekey(node0)
+            if data is not None:
+                key = (label or '')+':'+data
+                tid = self.get(pid, key)
+                if tid is None: return 0
+                rows = cur.execute(
+                    'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
+                    (tid,))
+                found = [ (gid,nid) for (gid,nid) in rows if graph.gid < gid ]
+                if not found: return 0
+                for (gid,nid) in found:
+                    if gid in match:
+                        pairs = match[gid]
+                    else:
+                        pairs = match[gid] = []
+                    pairs.append((key, node0, nid))
+                #print ('search:', pid, key, '->', tid, pairs)
+                n = 0
+                branches = 1
+                for (label,src) in node0.inputs.items():
+                    b = match_tree(tid, label, src, match)
+                    if 0 < b:
+                        n += 1
+                        branches = max(branches, b)
+            else:
+                n = 0
+                branches = 0
+                for (_,src) in node0.inputs.items():
+                    b = match_tree(pid, label, src, match)
+                    if 0 < b:
+                        n += 1
+                        branches = max(branches, b)
+            return max(branches, n)
+
+        def filter_pairs(pairs):
+            a = []
+            nodes = set()
+            nids = set()
+            for (key,node,nid) in pairs:
+                if node not in nodes and nid not in nids:
+                    nodes.add(node)
+                    nids.add(nid)
+                    a.append((key,node,nid))
+            return a
+
+        votes = {}
+        def find_tree(root):
+            match = {}
+            branches = match_tree(0, None, root, match)
+            if branches < minbranches: return
+            for (gid,pairs) in match.items():
+                pairs = filter_pairs(pairs)
+                if len(pairs) < minnodes: continue
+                if (gid not in votes) or len(votes[gid]) < len(pairs):
+                    votes[gid] = pairs
+            return
+
+        for node in graph.nodes.values():
+            if not node.outputs:
+                find_tree(node)
+
+        return votes
+
+# main
 def main(argv):
     import fileinput
     import getopt
@@ -141,8 +213,8 @@ def main(argv):
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
                 assert cid is not None
-                index_graph(graphcur, cid, graph)
-                index_graph_tree(cache, indexcur, graph)
+                store_graph(graphcur, cid, graph)
+                cache.index_graph(graph)
             elif isinstance(graph, str):
                 graphcur.execute(
                     'INSERT INTO SourceFile VALUES (NULL,?)',
