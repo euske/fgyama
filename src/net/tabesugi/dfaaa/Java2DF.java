@@ -394,7 +394,7 @@ class EndNode extends ProgNode {
     @Override
     protected List<DFLink> getExtraLinks() {
 	List<DFLink> extra = super.getExtraLinks();
-	extra.add(new DFLink(this, this.begin, "_end"));
+	extra.add(new DFLink(this, this.begin, "_begin"));
 	return extra;
     }
 }
