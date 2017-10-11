@@ -216,7 +216,7 @@ class DFNode:
         name = self.nid if self.name is None else self.name
         return ('<DFNode(%s): ntype=%s, ref=%r, data=%r, inputs=%r>' %
                 (name, self.ntype, self.ref, self.data, len(self.inputs)))
-        
+
     def toxml(self):
         enode = Element('node')
         enode.set('name', ns(self.nid))
@@ -313,6 +313,19 @@ def load_graphs_file(fp):
 def load_graphs_stream(fp):
     root = ElementTree(file=fp).getroot()
     yield parse_graph(0, root)
+    return
+
+def load_graphs_db(conn, gids=None):
+    cur = conn.cursor()
+    if gids is not None:
+        for gid in gids:
+            graph = fetch_graph(cur, gid)
+            yield graph
+    else:
+        cur1 = conn.cursor()
+        for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
+            graph = fetch_graph(cur, gid)
+            yield graph
     return
 
 
@@ -474,28 +487,17 @@ def get_graphs(arg):
         gids = None
         
     if path == '-':
-        for (gid,graph) in enumerate(load_graphs_stream(sys.stdin)):
-            if gids is None or gid in gids:
-                yield graph
-        
+        graphs = load_graphs_stream(sys.stdin)
     elif path.endswith('.graph'):
         with open(path) as fp:
-            for (gid,graph) in enumerate(load_graphs_file(fp)):
-                if gids is None or gid in gids:
-                    yield graph
-        
+            graphs = load_graphs_file(fp)
     elif path.endswith('.db'):
         conn = sqlite3.connect(path)
-        cur1 = conn.cursor()
-        cur2 = conn.cursor()
-        if gids is not None:
-            for gid in gids:
-                graph = fetch_graph(cur2, gid)
-                yield graph
-        else:
-            for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
-                graph = fetch_graph(cur2, gid)
-                yield graph
+        graphs = load_graphs_db(conn, gids)
+
+    for graph in graphs:
+        if gids is None or graph.gid in gids:
+            yield graph
     return
 
 # main
