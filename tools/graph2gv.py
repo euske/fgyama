@@ -39,7 +39,9 @@ def write_gv(out, scope, highlight=None, level=0):
     if level == 0:
         for node in scope.walk():
             for (label,src) in node.inputs.items():
-                if label == 'cond':
+                if label is None:
+                    styles = {}
+                elif label == 'cond':
                     styles = {'style': 'dotted', 'label': label}
                 elif label == '_repeat':
                     styles = {'xlabel': 'repeat',

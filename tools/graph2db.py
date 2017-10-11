@@ -73,12 +73,12 @@ class TreeCache:
         visited = set()
         cur = self.cur
 
-        def index_tree(label, node0, pids):
+        def index_tree(label0, node0, pids):
             if node0 in visited: return
             visited.add(node0)
             data = get_nodekey(node0)
             if data is not None:
-                key = (label or '')+':'+data
+                key = (label0 or '')+':'+data
                 tids = [0]
                 for pid in pids:
                     tid = self.get(pid, key)
@@ -87,11 +87,12 @@ class TreeCache:
                         (tid, graph.gid, node0.nid))
                     tids.append(tid)
                 #print ('index:', pids, key, '->', tids)
-                for (label,src) in node0.inputs.items():
-                    index_tree(label, src, tids)
+                for (label1,src) in node0.inputs.items():
+                    index_tree(label1, src, tids)
             else:
-                for (_,src) in node0.inputs.items():
-                    index_tree(label, src, pids)
+                for (label1,src) in node0.inputs.items():
+                    assert label1 is None
+                    index_tree(label0, src, pids)
             return
 
         print (graph)
@@ -101,49 +102,64 @@ class TreeCache:
         return
 
     # searches subgraphs
-    def search_graph(self, graph, checkgid=(lambda graph, gid: True)):
+    def search_graph(self, graph, minnodes=2, mindepth=2,
+                     checkgid=(lambda graph, gid: True)):
         cur = self.cur
 
         # match_tree:
+        #   result: {gid: [(label,node0,nid1)]}
         #   pid: parent tid.
-        #   label: previous edge label.
+        #   label0: previous edge label0.
         #   node0: node to match.
-        #   match: {gid: [(label,node0,nid1)]}
-        def match_tree(pid, label, node0, match):
+        # returns (#nodes, #depth)
+        def match_tree(result, pid, label0, node0):
             data = get_nodekey(node0)
             if data is not None:
-                key = (label or '')+':'+data
+                key = (label0 or '')+':'+data
                 # descend a trie.
                 tid = self.get(pid, key)
-                if tid is None: return
+                if tid is None: return (0,0)
                 rows = cur.execute(
                     'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                     (tid,))
                 found = [ (gid1,nid1) for (gid1,nid1) in rows
                           if checkgid(graph, gid1) ]
-                if not found: return
+                if not found: return (0,0)
                 for (gid1,nid1) in found:
-                    if gid1 in match:
-                        pairs = match[gid1]
+                    if gid1 in result:
+                        pairs = result[gid1]
                     else:
-                        pairs = match[gid1] = []
-                    pairs.append((label, node0, nid1))
+                        pairs = result[gid1] = []
+                    pairs.append((label0, node0, nid1))
                 #print ('search:', pid, key, '->', tid, pairs)
-                for (label,src) in node0.inputs.items():
-                    match_tree(tid, label, src, match)
+                nodes = depth = 0
+                for (label1,src) in node0.inputs.items():
+                    (n,d) = match_tree(result, tid, label1, src)
+                    nodes += n
+                    depth = max(d, depth)
+                nodes += 1
+                depth += 1
             else:
                 # skip this node, using the same label.
-                for (_,src) in node0.inputs.items():
-                    match_tree(pid, label, src, match)
-            return
+                nodes = depth = 0
+                for (label1,src) in node0.inputs.items():
+                    assert label1 is None
+                    (n,d) = match_tree(result, pid, label0, src)
+                    nodes += n
+                    depth = max(d, depth)
+            return (nodes,depth)
 
         votes = {}
         for node in graph.nodes.values():
             if node.outputs: continue
             # start from each terminal node.
-            match = {}
-            match_tree(0, None, node, match)
-            for (gid1,pairs) in match.items():
+            result = {}
+            (maxnodes,maxdepth) = match_tree(result, 0, None, node)
+            if maxnodes < minnodes: continue
+            if maxdepth < mindepth: continue
+            for (gid1,pairs) in result.items():
+                maxnodes = len(set( nid for (_,_,nid) in pairs ))
+                if maxnodes < minnodes: continue
                 if gid1 not in votes:
                     votes[gid1] = []
                 votes[gid1].extend(pairs)
