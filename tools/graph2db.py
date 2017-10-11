@@ -101,77 +101,52 @@ class TreeCache:
         return
 
     # searches subgraphs
-    def search_graph(self, graph, minnodes=5, minbranches=2,
-                     checkgid=(lambda gid: True)):
+    def search_graph(self, graph, checkgid=(lambda graph, gid: True)):
         cur = self.cur
 
         # match_tree:
         #   pid: parent tid.
         #   label: previous edge label.
         #   node0: node to match.
-        #   match: {gid: [(label,node,nid)]}
-        # returns (max number of branches)
+        #   match: {gid: [(label,node0,nid1)]}
         def match_tree(pid, label, node0, match):
             data = get_nodekey(node0)
             if data is not None:
                 key = (label or '')+':'+data
+                # descend a trie.
                 tid = self.get(pid, key)
-                if tid is None: return 0
+                if tid is None: return
                 rows = cur.execute(
                     'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                     (tid,))
-                found = [ (gid,nid) for (gid,nid) in rows if checkgid(gid) ]
-                if not found: return 0
-                for (gid,nid) in found:
-                    if gid in match:
-                        pairs = match[gid]
+                found = [ (gid1,nid1) for (gid1,nid1) in rows
+                          if checkgid(graph, gid1) ]
+                if not found: return
+                for (gid1,nid1) in found:
+                    if gid1 in match:
+                        pairs = match[gid1]
                     else:
-                        pairs = match[gid] = []
-                    pairs.append((label, node0, nid))
+                        pairs = match[gid1] = []
+                    pairs.append((label, node0, nid1))
                 #print ('search:', pid, key, '->', tid, pairs)
-                n = 0
-                branches = 1
                 for (label,src) in node0.inputs.items():
-                    b = match_tree(tid, label, src, match)
-                    if 0 < b:
-                        n += 1
-                        branches = max(branches, b)
+                    match_tree(tid, label, src, match)
             else:
                 # skip this node, using the same label.
-                n = 0
-                branches = 0
                 for (_,src) in node0.inputs.items():
-                    b = match_tree(pid, label, src, match)
-                    if 0 < b:
-                        n += 1
-                        branches = max(branches, b)
-            branches = max(branches, n)
-            return branches
-
-        # filter duplicated nodes.
-        def filter_dupes(pairs):
-            a = []
-            nodes = set()
-            nids = set()
-            for (label,node,nid) in pairs:
-                if node not in nodes and nid not in nids:
-                    nodes.add(node)
-                    nids.add(nid)
-                    a.append((label,node,nid))
-            return a
+                    match_tree(pid, label, src, match)
+            return
 
         votes = {}
         for node in graph.nodes.values():
             if node.outputs: continue
             # start from each terminal node.
             match = {}
-            branches = match_tree(0, None, node, match)
-            if branches < minbranches: continue
-            for (gid,pairs) in match.items():
-                pairs = filter_dupes(pairs)
-                if len(pairs) < minnodes: continue
-                if (gid not in votes) or len(votes[gid]) < len(pairs):
-                    votes[gid] = pairs
+            match_tree(0, None, node, match)
+            for (gid1,pairs) in match.items():
+                if gid1 not in votes:
+                    votes[gid1] = []
+                votes[gid1].extend(pairs)
         return votes
 
 # main

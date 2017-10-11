@@ -298,21 +298,21 @@ def parse_graph(gid, egraph, src=None):
 
 ##  load_graphs
 ##
-def load_graphs_file(fp):
+def load_graphs_file(fp, gid=0):
     root = ElementTree(file=fp).getroot()
-    gid = 0
     for efile in root.getchildren():
         if efile.tag != 'file': continue
         path = efile.get('path')
         for egraph in efile.getchildren():
             if egraph.tag != 'graph': continue
-            gid += 1
+            if gid is not None:
+                gid += 1
             yield parse_graph(gid, egraph, src=path)
     return
 
-def load_graphs_stream(fp):
+def load_graphs_stream(fp, gid=None):
     root = ElementTree(file=fp).getroot()
-    yield parse_graph(0, root)
+    yield parse_graph(gid, root)
     return
 
 def load_graphs_db(conn, gids=None):
@@ -490,7 +490,7 @@ def get_graphs(arg):
         graphs = load_graphs_stream(sys.stdin)
     elif path.endswith('.graph'):
         with open(path) as fp:
-            graphs = load_graphs_file(fp)
+            graphs = list(load_graphs_file(fp))
     elif path.endswith('.db'):
         conn = sqlite3.connect(path)
         graphs = load_graphs_db(conn, gids)
