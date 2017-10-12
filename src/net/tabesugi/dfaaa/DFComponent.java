@@ -13,7 +13,7 @@ public class DFComponent {
 
     public DFScope scope;
     
-    private AssignNode lval = null;
+    private DFNode lval = null;
     private DFNode rval = null;
     private Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
     private Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
@@ -53,19 +53,19 @@ public class DFComponent {
 	if (node == null) {
 	    node = this.inputs.get(ref);
 	    if (node == null) {
-		node = new DistNode(this.scope, ref);
+		node = new DFNode(this.scope, ref);
 		this.inputs.put(ref, node);
 	    }
 	}
 	return node;
     }
 
-    public AssignNode getLValue() {
+    public DFNode getLValue() {
 	return this.lval;
     }
 
-    public void setLValue(AssignNode assign) {
-	this.lval = assign;
+    public void setLValue(DFNode node) {
+	this.lval = node;
     }
 
     public DFNode getRValue() {
@@ -130,12 +130,7 @@ public class DFComponent {
 	for (DFExit exit : this.exits) {
 	    if (exit.label == null || exit.label.equals(frame.label)) {
 		DFNode node = exit.node;
-		if (node instanceof SelectNode) {
-		    SelectNode select = (SelectNode)node;
-		    if (!select.isClosed()) {
-			select.close(this.getValue(node.ref));
-		    }
-		}
+		node.finish(this);
 		this.setOutput(node);
 	    }
 	}

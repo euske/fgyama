@@ -10,7 +10,7 @@ import org.w3c.dom.*;
 
 //  DFNode
 //
-public abstract class DFNode implements Comparable<DFNode> {
+public class DFNode implements Comparable<DFNode> {
 
     public DFScope scope;
     public DFRef ref;
@@ -59,7 +59,9 @@ public abstract class DFNode implements Comparable<DFNode> {
 	return ("N"+this.scope.name+"_"+id);
     }
 
-    abstract public String getType();
+    public String getType() {
+	return null;
+    }
     
     public String getData() {
 	return null;
@@ -100,6 +102,9 @@ public abstract class DFNode implements Comparable<DFNode> {
 	assert !this.inputs.containsKey(label);
 	this.inputs.put(label, node);
 	node.outputs.add(this);
+    }
+
+    public void finish(DFComponent cpt) {
     }
 
     public boolean purge() {

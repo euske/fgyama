@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 
 //  UnsupportedSyntax
@@ -23,16 +24,45 @@ class UnsupportedSyntax extends Exception {
 }
 
 
+// ProgNode: a DFNode that corresponds to an actual program point.
+abstract class ProgNode extends DFNode {
+
+    public ASTNode ast;
+    
+    public ProgNode(DFScope scope, DFRef ref, ASTNode ast) {
+	super(scope, ref);
+	this.ast = ast;
+    }
+    
+    @Override
+    public Element toXML(Document document) {
+	Element elem = super.toXML(document);
+	if (this.ast != null) {
+	    Element east = document.createElement("ast");
+	    east.setAttribute("type", Integer.toString(this.ast.getNodeType()));
+	    east.setAttribute("start", Integer.toString(this.ast.getStartPosition()));
+	    east.setAttribute("length", Integer.toString(this.ast.getLength()));
+	    elem.appendChild(east);
+	}
+	return elem;
+    }
+}
+
 // SingleAssignNode:
-class SingleAssignNode extends AssignNode {
+class SingleAssignNode extends ProgNode {
 
     public SingleAssignNode(DFScope scope, DFRef ref, ASTNode ast) {
 	super(scope, ref, ast);
     }
+
+    @Override
+    public String getType() {
+	return "assign";
+    }
 }
 
 // ArrayAssignNode:
-class ArrayAssignNode extends SingleAssignNode {
+class ArrayAssignNode extends ProgNode {
 
     public ArrayAssignNode(DFScope scope, DFRef ref, ASTNode ast,
 			   DFNode array, DFNode index) {
@@ -48,7 +78,7 @@ class ArrayAssignNode extends SingleAssignNode {
 }
 
 // FieldAssignNode:
-class FieldAssignNode extends SingleAssignNode {
+class FieldAssignNode extends ProgNode {
 
     public FieldAssignNode(DFScope scope, DFRef ref, ASTNode ast,
 			   DFNode obj) {
@@ -63,7 +93,7 @@ class FieldAssignNode extends SingleAssignNode {
 }
 
 // VarRefNode: represnets a variable reference.
-class VarRefNode extends ReferNode {
+class VarRefNode extends ProgNode {
 
     public VarRefNode(DFScope scope, DFRef ref, ASTNode ast,
 		      DFNode value) {
@@ -73,7 +103,7 @@ class VarRefNode extends ReferNode {
 
     @Override
     public String getType() {
-	return "varref";
+	return "ref";
     }
 }
 
@@ -353,6 +383,60 @@ class ArrayValueNode extends ProgNode {
     }
 }
 
+// SelectNode
+class SelectNode extends ProgNode {
+
+    public boolean recvTrue = false;
+    public boolean recvFalse = false;
+    
+    public SelectNode(DFScope scope, DFRef ref, ASTNode ast,
+		      DFNode value) {
+	super(scope, ref, ast);
+	this.accept(value, "cond");
+    }
+    
+    @Override
+    public String getType() {
+	return "select";
+    }
+    
+    @Override
+    public void finish(DFComponent cpt) {
+	if (!this.isClosed()) {
+	    this.close(cpt.getValue(this.ref));
+	}
+    }
+
+    public void recv(boolean cond, DFNode node) {
+	if (cond) {
+	    assert(!this.recvTrue);
+	    this.recvTrue = true;
+	    this.accept(node, "true");
+	} else {
+	    assert(!this.recvFalse);
+	    this.recvFalse = true;
+	    this.accept(node, "false");
+	}
+    }
+
+    public boolean isClosed() {
+	return (this.recvTrue && this.recvFalse);
+    };
+
+    public void close(DFNode node) {
+	if (!this.recvTrue) {
+	    assert(this.recvFalse);
+	    this.recvTrue = true;
+	    this.accept(node, "true");
+	}
+	if (!this.recvFalse) {
+	    assert(this.recvTrue);
+	    this.recvFalse = true;
+	    this.accept(node, "false");
+	}
+    }
+}
+
 // BeginNode
 class BeginNode extends ProgNode {
 
@@ -392,7 +476,7 @@ class EndNode extends ProgNode {
 	this.accept(value, "cond");
 	this.begin = begin;
 	begin.end = this;
-	this.repeat = new DistNode(scope, ref);
+	this.repeat = new DFNode(scope, ref);
 	this.repeat.accept(this);
     }
 
@@ -575,12 +659,16 @@ public class Java2DF extends ASTVisitor {
 	// Take care of exits.
 	if (trueCpt != null) {
 	    for (DFExit exit : trueCpt.exits()) {
-		cpt.addExit(exit.addSelect(scope, condValue, true));
+		SelectNode select = new SelectNode(scope, exit.node.ref, null, condValue);
+		select.recv(true, exit.node);
+		cpt.addExit(exit.wrap(select));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFExit exit : falseCpt.exits()) {
-		cpt.addExit(exit.addSelect(scope, condValue, false));
+		SelectNode select = new SelectNode(scope, exit.node.ref, null, condValue);
+		select.recv(false, exit.node);
+		cpt.addExit(exit.wrap(select));
 	    }
 	}
 	
@@ -674,7 +762,7 @@ public class Java2DF extends ASTVisitor {
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(scope, frame, cpt, init);
-		AssignNode assign = new SingleAssignNode(scope, ref, frag);
+		DFNode assign = new SingleAssignNode(scope, ref, frag);
 		assign.accept(cpt.getRValue());
 		cpt.setOutput(assign);
 	    }
@@ -779,7 +867,7 @@ public class Java2DF extends ASTVisitor {
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
 		cpt = processAssignment(scope, frame, cpt, operand);
-		AssignNode assign = cpt.getLValue();
+		DFNode assign = cpt.getLValue();
 		DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.getRValue());
 		assign.accept(value);
 		cpt.setOutput(assign);
@@ -795,7 +883,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processAssignment(scope, frame, cpt, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
-		AssignNode assign = cpt.getLValue();
+		DFNode assign = cpt.getLValue();
 		cpt = processExpression(scope, frame, cpt, operand);
 		assign.accept(new PostfixNode(scope, assign.ref, expr, op, cpt.getRValue()));
 		cpt.setOutput(assign);
@@ -818,7 +906,7 @@ public class Java2DF extends ASTVisitor {
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
 	    cpt = processAssignment(scope, frame, cpt, assn.getLeftHandSide());
-	    AssignNode assign = cpt.getLValue();
+	    DFNode assign = cpt.getLValue();
 	    cpt = processExpression(scope, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
 	    DFNode lvalue = cpt.getValue(assign.ref);
@@ -1762,7 +1850,7 @@ public class Java2DF extends ASTVisitor {
 	    Type paramType = decl.getType();
 	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
 	    DFNode param = new ArgNode(scope, ref, decl, i++);
-	    AssignNode assign = new SingleAssignNode(scope, ref, decl);
+	    DFNode assign = new SingleAssignNode(scope, ref, decl);
 	    assign.accept(param);
 	    cpt.setOutput(assign);
 	}
@@ -1815,7 +1903,7 @@ public class Java2DF extends ASTVisitor {
 		DFGraph graph = getMethodGraph(method);
 		if (graph != null) {
 		    Utils.logit("Success: "+funcName);
-		    // Remove DistNodes.
+		    // Remove redundant nodes.
 		    graph.cleanup();
 		    if (this.exporter != null) {
 			this.exporter.writeGraph(graph);
