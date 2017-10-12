@@ -5,6 +5,9 @@ from graph import SourceDB, DFGraph
 from graph import load_graphs_file, load_graphs_db, fetch_graph
 from graph2db import TreeCache, get_nodekey
 
+def isok(n):
+    return (n.data is not None)
+
 def flatten(t):
     (n0,n1,st) = t
     yield (n0,n1)
@@ -26,6 +29,14 @@ def count_depth(t):
     for (_,c) in st:
         n = max(n, count_depth(c))
     return n+1
+
+def count_branch(t):
+    (_,_,st) = t
+    n = b = 0
+    for (_,c) in st:
+        b = max(b, count_branch(c))
+        n += 1
+    return max(1, n, b)
 
 def str_tree(t, label=None):
     (node,_,st) = t
@@ -99,11 +110,7 @@ def main(argv):
 
     cache = TreeCache(indexconn.cursor())
     
-    def show_result(graph0, graph1, pairs, s):
-        print ('-', graph0.gid, graph1.gid,
-               ','.join('%d:%d' % (n0.nid, n1.nid) for (n0,n1) in pairs),
-               s)
-        if srcdb is None: return
+    def show_result(graph0, graph1, pairs):
         try:
             src1 = srcdb.get(graph1.src)
         except KeyError:
@@ -148,9 +155,16 @@ def main(argv):
                 for (n0,n1) in pairs:
                     visited0.add(n0)
                     visited1.add(n1)
-                if len(pairs) < minnodes: continue
-                if count_depth(tree) < mindepth: continue
-                show_result(graph0, graph1, pairs, str_tree(tree))
+                nodes = sum( 1 for (n,_) in pairs if isok(n) )
+                if nodes < minnodes: continue
+                depth = count_depth(tree)
+                if depth < mindepth: continue
+                branch = count_branch(tree)
+                print ('-', graph0.gid, graph1.gid, nodes, depth, branch,
+                       ','.join('%d:%d' % (n0.nid, n1.nid) for (n0,n1) in pairs),
+                       str_tree(tree))
+                if srcdb is not None: 
+                    show_result(graph0, graph1, pairs)
         sys.stdout.flush()
     return 0
 
