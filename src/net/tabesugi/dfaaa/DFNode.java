@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 
 //  DFNode
@@ -34,6 +35,24 @@ public abstract class DFNode implements Comparable<DFNode> {
     @Override
     public int compareTo(DFNode node) {
 	return this.id - node.id;
+    }
+
+    public Element toXML(Document document) {
+	Element elem = document.createElement("node");
+	elem.setAttribute("name", this.getName());
+	if (this.getType() != null) {
+	    elem.setAttribute("type", this.getType());
+	}
+	if (this.getData() != null) {
+	    elem.setAttribute("data", this.getData());
+	}
+	if (this.ref != null) {
+	    elem.setAttribute("ref", this.ref.getName());
+	}
+	for (DFLink link : this.getLinks()) {
+	    elem.appendChild(link.toXML(document));
+	}
+	return elem;
     }
     
     public String getName() {

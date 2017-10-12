@@ -73,38 +73,9 @@ public class XmlExporter extends Exporter {
 	    escope.appendChild(this.writeScope(graph, child));
 	}
 	for (DFNode node : graph.getNodes()) {
-	    if (node.scope != scope) continue;
-	    Element enode = this.document.createElement("node");
-	    enode.setAttribute("name", node.getName());
-	    if (node.getType() != null) {
-		enode.setAttribute("type", node.getType());
+	    if (node.scope == scope) {
+		escope.appendChild(node.toXML(this.document));
 	    }
-	    if (node.getData() != null) {
-		enode.setAttribute("data", node.getData());
-	    }
-	    if (node.ref != null) {
-		enode.setAttribute("ref", node.ref.getName());
-	    }
-	    if (node instanceof ProgNode) {
-		ProgNode prognode = (ProgNode)node;
-		ASTNode ast = prognode.ast;
-		if (ast != null) {
-		    Element east = this.document.createElement("ast");
-		    east.setAttribute("type", Integer.toString(ast.getNodeType()));
-		    east.setAttribute("start", Integer.toString(ast.getStartPosition()));
-		    east.setAttribute("length", Integer.toString(ast.getLength()));
-		    enode.appendChild(east);
-		}
-	    }
-	    for (DFLink link : node.getLinks()) {
-		Element elink = this.document.createElement("link");
-		elink.setAttribute("src", link.src.getName());
-		if (link.label != null) {
-		    elink.setAttribute("label", link.label);
-		}
-		enode.appendChild(elink);
-	    }
-	    escope.appendChild(enode);
 	}
 	return escope;
     }
