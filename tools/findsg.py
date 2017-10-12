@@ -76,22 +76,22 @@ def get_match(node0, node1):
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-v] [-B basedir] [-n minnodes] [-b minbranches] '
+        print('usage: %s [-v] [-B basedir] [-n minnodes] [-d mindepth] '
               'graph.db index.db [graphs]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'vB:n:b:')
+        (opts, args) = getopt.getopt(argv[1:], 'vB:n:d:')
     except getopt.GetoptError:
         return usage()
     verbose = False
     srcdb = None
     minnodes = 5
-    minbranches = 2
+    mindepth = 2
     for (k, v) in opts:
         if k == '-v': verbose = True
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-n': minnodes = int(v)
-        elif k == '-b': minbranches = int(v)
+        elif k == '-d': mindepth = int(v)
     if not args: return usage()
 
     graphname = args.pop(0)
@@ -139,7 +139,7 @@ def main(argv):
         print ('+', graph0.gid)
         for (gid1,result) in result.items():
             graph1 = fetch_graph(graphcur, gid1)
-            result = [ (label, node0, graph1.nodes[nid1]) for (label,node0,nid1) in result ]
+            result = [ (label, node0, graph1.nodes[nid1]) for (_,label,node0,nid1) in result ]
             visited0 = set()
             visited1 = set()
             for (_,node0,node1) in result:
@@ -151,6 +151,7 @@ def main(argv):
                     visited0.add(n0)
                     visited1.add(n1)
                 if len(pairs) < minnodes: continue
+                if count_depth(tree) < mindepth: continue
                 show_result(graph0, graph1, pairs, str_tree(tree))
         sys.stdout.flush()
     return 0

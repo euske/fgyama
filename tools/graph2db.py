@@ -112,7 +112,7 @@ class TreeCache:
         #   label0: previous edge label0.
         #   node0: node to match.
         # returns (#nodes, #depth)
-        def match_tree(result, pid, label0, node0):
+        def match_tree(result, pid, label0, node0, depth=0):
             data = get_nodekey(node0)
             if data is not None:
                 key = (label0 or '')+':'+data
@@ -130,24 +130,24 @@ class TreeCache:
                         pairs = result[gid1]
                     else:
                         pairs = result[gid1] = []
-                    pairs.append((label0, node0, nid1))
+                    pairs.append((depth, label0, node0, nid1))
                 #print ('search:', pid, key, '->', tid, pairs)
-                nodes = depth = 0
+                maxnodes = maxdepth = 0
                 for (label1,src) in node0.inputs.items():
-                    (n,d) = match_tree(result, tid, label1, src)
-                    nodes += n
-                    depth = max(d, depth)
-                nodes += 1
-                depth += 1
+                    (n,d) = match_tree(result, tid, label1, src, depth+1)
+                    maxnodes += n
+                    maxdepth = max(d, maxdepth)
+                maxnodes += 1
+                maxdepth += 1
             else:
                 # skip this node, using the same label.
-                nodes = depth = 0
+                maxnodes = maxdepth = 0
                 for (label1,src) in node0.inputs.items():
                     assert label1 is None
-                    (n,d) = match_tree(result, pid, label0, src)
-                    nodes += n
-                    depth = max(d, depth)
-            return (nodes,depth)
+                    (n,d) = match_tree(result, pid, label0, src, depth)
+                    maxnodes += n
+                    maxdepth = max(d, maxdepth)
+            return (maxnodes,maxdepth)
 
         votes = {}
         for node in graph.nodes.values():
@@ -158,8 +158,12 @@ class TreeCache:
             if maxnodes < minnodes: continue
             if maxdepth < mindepth: continue
             for (gid1,pairs) in result.items():
-                maxnodes = len(set( nid for (_,_,nid) in pairs ))
+                maxnodes = len(set( nid1 for (_,_,_,nid1) in pairs ))
                 if maxnodes < minnodes: continue
+                maxnodes = len(set( node0.nid for (_,_,node0,_) in pairs ))
+                if maxnodes < minnodes: continue
+                maxdepth = max( d for (d,_,_,_) in pairs )
+                if maxdepth < mindepth: continue
                 if gid1 not in votes:
                     votes[gid1] = []
                 votes[gid1].extend(pairs)
