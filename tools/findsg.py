@@ -3,13 +3,7 @@ import sys
 import sqlite3
 from graph import SourceDB, DFGraph
 from graph import load_graphs_file, load_graphs_db, fetch_graph
-from graph2db import TreeCache
-
-def is_key(node):
-    if node.ntype in ('select','begin','end','return'):
-        return True
-    else:
-        return (node.data is not None)
+from graph2db import TreeCache, get_nodekey
 
 def flatten(t):
     (n0,n1,st) = t
@@ -46,29 +40,30 @@ def get_match(node0, node1):
     def visit(n0, n1):
         if n0 in visited0: return None
         if n1 in visited1: return None
-        if not is_key(n0):
+        key0 = get_nodekey(n0)
+        if key0 is None:
             visited0.add(n0)
-            if None in n0.inputs:
-                return visit(n0.inputs[None], n1)
+            if '' in n0.inputs:
+                return visit(n0.inputs[''], n1)
             else:
                 return None
-        if not is_key(n1):
+        key1 = get_nodekey(n1)
+        if key1 is None:
             visited1.add(n1)
-            if None in n1.inputs:
-                return visit(n0, n1.inputs[None])
+            if '' in n1.inputs:
+                return visit(n0, n1.inputs[''])
             else:
                 return None
+        if key0 != key1: return None
         visited0.add(n0)
         visited1.add(n1)
         st = []
-        for (label,src0) in n0.inputs.items():
-            if label is not None and label.startswith('_'):
-                pass
-            elif label in n1.inputs:
-                src1 = n1.inputs[label]
-                t = visit(src0, src1)
-                if t is not None:
-                    st.append((label, t))
+        for (label,src0) in n0.get_inputs():
+            if label not in n1.inputs: continue
+            src1 = n1.inputs[label]
+            t = visit(src0, src1)
+            if t is not None:
+                st.append((label, t))
         return (n0,n1,st)
     
     return visit(node0, node1)
@@ -76,11 +71,11 @@ def get_match(node0, node1):
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-v] [-B basedir] [-n minnodes] [-d mindepth] '
+        print('usage: %s [-v] [-B basedir] [-n minnodes] [-m mindepth] '
               'graph.db index.db [graphs]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'vB:n:d:')
+        (opts, args) = getopt.getopt(argv[1:], 'vB:n:m:')
     except getopt.GetoptError:
         return usage()
     verbose = False
@@ -91,7 +86,7 @@ def main(argv):
         if k == '-v': verbose = True
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-n': minnodes = int(v)
-        elif k == '-d': mindepth = int(v)
+        elif k == '-m': mindepth = int(v)
     if not args: return usage()
 
     graphname = args.pop(0)
@@ -134,7 +129,9 @@ def main(argv):
         if verbose or (isinstance(gid0, int) and (gid0 % 100) == 0):
             sys.stderr.write('*** %d ***\n' % gid0)
             sys.stderr.flush()
-        result = cache.search_graph(graph0, checkgid=checkgid)
+        result = cache.search_graph(
+            graph0, checkgid=checkgid,
+            minnodes=minnodes, mindepth=mindepth)                        
         if not result: continue
         print ('+', graph0.gid)
         for (gid1,result) in result.items():
@@ -146,6 +143,7 @@ def main(argv):
                 if node0 in visited0: continue
                 if node1 in visited1: continue
                 tree = get_match(node0, node1)
+                if tree is None: continue
                 pairs = list(flatten(tree))
                 for (n0,n1) in pairs:
                     visited0.add(n0)

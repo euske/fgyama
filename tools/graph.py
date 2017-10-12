@@ -144,7 +144,7 @@ class DFGraph:
             for (label,name) in node.inputs.items():
                 src = self.nodes[name]
                 node.inputs[label] = src
-                if label is None or not label.startswith('_'):
+                if not label.startswith('_'):
                     src.outputs.append(node)
         return self
     
@@ -235,7 +235,7 @@ class DFNode:
             enode.append(east)
         for (label,src) in self.inputs.items():
             elink = Element('link')
-            if label is not None:
+            if label:
                 elink.set('label', label)
             elink.set('src', ns(src.nid))
             enode.append(elink)
@@ -243,7 +243,7 @@ class DFNode:
 
     def get_inputs(self):
         for (label,src) in self.inputs.items():
-            if label is None or not label.startswith('_'):
+            if not label.startswith('_'):
                 yield (label, src)
         return
 
@@ -268,9 +268,10 @@ def parse_graph(gid, egraph, src=None):
                             int(e.get('start')),
                             int(e.get('length')))
             elif e.tag == 'link':
-                label = e.get('label')
+                label = e.get('label', '')
                 src = e.get('src')
                 assert label not in node.inputs
+                assert src is not None
                 node.inputs[label] = src
         return node
     

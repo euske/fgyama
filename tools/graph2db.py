@@ -8,12 +8,10 @@ from graph import get_graphs, build_graph_tables, store_graph
 
 # get_nodekey
 def get_nodekey(node):
-    if node.ntype in ('select','begin','end','return'):
-        return node.ntype
-    elif node.data is not None:
-        return node.data
-    else:
+    if node.ntype in (None, 'assign', 'ref'):
         return None
+    else:
+        return node.ntype+':'+(node.data or '')
 
 
 ##  build_index_tables
@@ -76,9 +74,9 @@ class TreeCache:
         def index_tree(label0, node0, pids):
             if node0 in visited: return
             visited.add(node0)
-            data = get_nodekey(node0)
-            if data is not None:
-                key = (label0 or '')+':'+data
+            key = get_nodekey(node0)
+            if key is not None:
+                key = label0+':'+key
                 tids = [0]
                 for pid in pids:
                     tid = self.get(pid, key)
@@ -87,18 +85,18 @@ class TreeCache:
                         (tid, graph.gid, node0.nid))
                     tids.append(tid)
                 #print ('index:', pids, key, '->', tids)
-                for (label1,src) in node0.inputs.items():
+                for (label1,src) in node0.get_inputs():
                     index_tree(label1, src, tids)
             else:
-                for (label1,src) in node0.inputs.items():
-                    assert label1 is None
+                for (label1,src) in node0.get_inputs():
+                    assert label1 is ''
                     index_tree(label0, src, pids)
             return
 
         print (graph)
         for node in graph.nodes.values():
             if not node.outputs:
-                index_tree(None, node, [0])
+                index_tree('', node, [0])
         return
 
     # searches subgraphs
@@ -112,10 +110,10 @@ class TreeCache:
         #   label0: previous edge label0.
         #   node0: node to match.
         # returns (#nodes, #depth)
-        def match_tree(result, pid, label0, node0, depth=0):
-            data = get_nodekey(node0)
-            if data is not None:
-                key = (label0 or '')+':'+data
+        def match_tree(result, pid, label0, node0, depth=1):
+            key = get_nodekey(node0)
+            if key is not None:
+                key = label0+':'+key
                 # descend a trie.
                 tid = self.get(pid, key)
                 if tid is None: return (0,0)
@@ -133,7 +131,7 @@ class TreeCache:
                     pairs.append((depth, label0, node0, nid1))
                 #print ('search:', pid, key, '->', tid, pairs)
                 maxnodes = maxdepth = 0
-                for (label1,src) in node0.inputs.items():
+                for (label1,src) in node0.get_inputs():
                     (n,d) = match_tree(result, tid, label1, src, depth+1)
                     maxnodes += n
                     maxdepth = max(d, maxdepth)
@@ -142,8 +140,8 @@ class TreeCache:
             else:
                 # skip this node, using the same label.
                 maxnodes = maxdepth = 0
-                for (label1,src) in node0.inputs.items():
-                    assert label1 is None
+                for (label1,src) in node0.get_inputs():
+                    assert label1 is ''
                     (n,d) = match_tree(result, pid, label0, src, depth)
                     maxnodes += n
                     maxdepth = max(d, maxdepth)
@@ -154,13 +152,13 @@ class TreeCache:
             if node.outputs: continue
             # start from each terminal node.
             result = {}
-            (maxnodes,maxdepth) = match_tree(result, 0, None, node)
+            (maxnodes,maxdepth) = match_tree(result, 0, '', node)
             if maxnodes < minnodes: continue
             if maxdepth < mindepth: continue
             for (gid1,pairs) in result.items():
-                maxnodes = len(set( nid1 for (_,_,_,nid1) in pairs ))
-                if maxnodes < minnodes: continue
                 maxnodes = len(set( node0.nid for (_,_,node0,_) in pairs ))
+                if maxnodes < minnodes: continue
+                maxnodes = len(set( nid1 for (_,_,_,nid1) in pairs ))
                 if maxnodes < minnodes: continue
                 maxdepth = max( d for (d,_,_,_) in pairs )
                 if maxdepth < mindepth: continue
