@@ -40,6 +40,11 @@ class ArrayAssignNode extends SingleAssignNode {
 	this.accept(array, "array");
 	this.accept(index, "index");
     }
+
+    @Override
+    public String getType() {
+	return "arrayassign";
+    }
 }
 
 // FieldAssignNode:
@@ -49,6 +54,11 @@ class FieldAssignNode extends SingleAssignNode {
 			   DFNode obj) {
 	super(scope, ref, ast);
 	this.accept(obj, "obj");
+    }
+
+    @Override
+    public String getType() {
+	return "fieldassign";
     }
 }
 
@@ -63,7 +73,7 @@ class VarRefNode extends ReferNode {
 
     @Override
     public String getType() {
-	return "ref";
+	return "varref";
     }
 }
 
@@ -137,81 +147,12 @@ class PostfixNode extends ProgNode {
 
     @Override
     public String getType() {
-	return "prefix";
+	return "postfix";
     }
     
     @Override
     public String getData() {
 	return this.op.toString();
-    }
-}
-
-// ArgNode: represnets a function argument.
-class ArgNode extends ProgNode {
-
-    public int index;
-
-    public ArgNode(DFScope scope, DFRef ref, ASTNode ast,
-		   int index) {
-	super(scope, ref, ast);
-	this.index = index;
-    }
-
-    @Override
-    public String getType() {
-	return "arg";
-    }
-    
-    @Override
-    public String getData() {
-	return "arg"+this.index;
-    }
-}
-
-// ConstNode: represents a constant value.
-class ConstNode extends ProgNode {
-
-    public String value;
-
-    public ConstNode(DFScope scope, ASTNode ast, String value) {
-	super(scope, null, ast);
-	this.value = value;
-    }
-
-    @Override
-    public String getType() {
-	return "const";
-    }
-    
-    @Override
-    public String getData() {
-	return this.value;
-    }
-}
-
-// ArrayValueNode: represents an array.
-class ArrayValueNode extends ProgNode {
-
-    public List<DFNode> values = new ArrayList<DFNode>();
-
-    public ArrayValueNode(DFScope scope, ASTNode ast) {
-	super(scope, null, ast);
-    }
-
-    @Override
-    public String getType() {
-	return "arrayvalue";
-    }
-    
-    @Override
-    public String getData() {
-	return "["+this.values.size()+"]";
-    }
-    
-    public void addValue(DFNode value) {
-	String label = "value"+this.values.size();
-	this.accept(value, label);
-	this.values.add(value);
     }
 }
 
@@ -340,6 +281,75 @@ class AssignOpNode extends ProgNode {
     @Override
     public String getData() {
 	return this.op.toString();
+    }
+}
+
+// ArgNode: represnets a function argument.
+class ArgNode extends ProgNode {
+
+    public int index;
+
+    public ArgNode(DFScope scope, DFRef ref, ASTNode ast,
+		   int index) {
+	super(scope, ref, ast);
+	this.index = index;
+    }
+
+    @Override
+    public String getType() {
+	return "arg";
+    }
+    
+    @Override
+    public String getData() {
+	return "arg"+this.index;
+    }
+}
+
+// ConstNode: represents a constant value.
+class ConstNode extends ProgNode {
+
+    public String value;
+
+    public ConstNode(DFScope scope, ASTNode ast, String value) {
+	super(scope, null, ast);
+	this.value = value;
+    }
+
+    @Override
+    public String getType() {
+	return "const";
+    }
+    
+    @Override
+    public String getData() {
+	return this.value;
+    }
+}
+
+// ArrayValueNode: represents an array.
+class ArrayValueNode extends ProgNode {
+
+    public List<DFNode> values = new ArrayList<DFNode>();
+
+    public ArrayValueNode(DFScope scope, ASTNode ast) {
+	super(scope, null, ast);
+    }
+
+    @Override
+    public String getType() {
+	return "arrayvalue";
+    }
+    
+    @Override
+    public String getData() {
+	return "["+this.values.size()+"]";
+    }
+    
+    public void addValue(DFNode value) {
+	String label = "value"+this.values.size();
+	this.accept(value, label);
+	this.values.add(value);
     }
 }
 
