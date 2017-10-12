@@ -4,65 +4,65 @@
       <scope name="basic_single">
         <scope name="basic_single_b0">
           <node name="Nbasic_single_b0_7" ref="basic_single:a" type="ref">
-            <ast length="1" start="87" type="42"/>
             <link src="Nbasic_single_2"/>
+            <ast length="1" start="87" type="42"/>
           </node>
           <node data="-" name="Nbasic_single_b0_8" type="prefix">
-            <ast length="2" start="86" type="38"/>
             <link src="Nbasic_single_b0_7"/>
+            <ast length="2" start="86" type="38"/>
           </node>
           <node name="Nbasic_single_b0_9" ref="basic_single:a" type="ref">
-            <ast length="1" start="93" type="42"/>
             <link src="Nbasic_single_2"/>
+            <ast length="1" start="93" type="42"/>
           </node>
           <node name="Nbasic_single_b0_10" ref="basic_single:b" type="ref">
-            <ast length="1" start="97" type="42"/>
             <link src="Nbasic_single_4"/>
+            <ast length="1" start="97" type="42"/>
           </node>
           <node data="+" name="Nbasic_single_b0_11" type="infix">
-            <ast length="5" start="93" type="27"/>
             <link label="L" src="Nbasic_single_b0_9"/>
             <link label="R" src="Nbasic_single_b0_10"/>
+            <ast length="5" start="93" type="27"/>
           </node>
           <node name="Nbasic_single_b0_12" ref="basic_single:c" type="ref">
-            <ast length="1" start="102" type="42"/>
             <link src="Nbasic_single_6"/>
+            <ast length="1" start="102" type="42"/>
           </node>
           <node data="*" name="Nbasic_single_b0_13" type="infix">
-            <ast length="11" start="92" type="27"/>
             <link label="L" src="Nbasic_single_b0_11"/>
             <link label="R" src="Nbasic_single_b0_12"/>
+            <ast length="11" start="92" type="27"/>
           </node>
           <node data="+" name="Nbasic_single_b0_14" type="infix">
-            <ast length="18" start="85" type="27"/>
             <link label="L" src="Nbasic_single_b0_8"/>
             <link label="R" src="Nbasic_single_b0_13"/>
+            <ast length="18" start="85" type="27"/>
           </node>
           <node name="Nbasic_single_b0_15" ref="basic_single:#return" type="return">
-            <ast length="26" start="78" type="41"/>
             <link src="Nbasic_single_b0_14"/>
+            <ast length="26" start="78" type="41"/>
           </node>
         </scope>
         <node data="arg0" name="Nbasic_single_1" ref="basic_single:a" type="arg">
           <ast length="5" start="54" type="44"/>
         </node>
         <node name="Nbasic_single_2" ref="basic_single:a" type="assign">
-          <ast length="5" start="54" type="44"/>
           <link src="Nbasic_single_1"/>
+          <ast length="5" start="54" type="44"/>
         </node>
         <node data="arg1" name="Nbasic_single_3" ref="basic_single:b" type="arg">
           <ast length="5" start="61" type="44"/>
         </node>
         <node name="Nbasic_single_4" ref="basic_single:b" type="assign">
-          <ast length="5" start="61" type="44"/>
           <link src="Nbasic_single_3"/>
+          <ast length="5" start="61" type="44"/>
         </node>
         <node data="arg2" name="Nbasic_single_5" ref="basic_single:c" type="arg">
           <ast length="5" start="68" type="44"/>
         </node>
         <node name="Nbasic_single_6" ref="basic_single:c" type="assign">
-          <ast length="5" start="68" type="44"/>
           <link src="Nbasic_single_5"/>
+          <ast length="5" start="68" type="44"/>
         </node>
       </scope>
     </graph>
