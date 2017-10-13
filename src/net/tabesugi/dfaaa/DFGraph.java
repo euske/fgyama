@@ -14,7 +14,7 @@ public class DFGraph {
     public String name;
     public DFScope root;
 
-    private List<DFNode> nodes = new ArrayList<DFNode>();
+    private Map<Integer, DFNode> nodes = new HashMap<Integer, DFNode>();
 
     public DFGraph(String name) {
 	this.name = name;
@@ -29,30 +29,27 @@ public class DFGraph {
     }
     
     public int addNode(DFNode node) {
-	this.nodes.add(node);
-	return this.nodes.size();
-    }
-
-    public void removeNode(DFNode node) {
-        this.nodes.remove(node);
+	int id = this.nodes.size()+1;
+	this.nodes.put(id, node);
+	return id;
     }
 
     public DFNode[] getNodes() {
 	DFNode[] nodes = new DFNode[this.nodes.size()];
-	this.nodes.toArray(nodes);
+	this.nodes.values().toArray(nodes);
 	Arrays.sort(nodes);
 	return nodes;
     }
 
     public void cleanup() {
-	ArrayList<DFNode> removed = new ArrayList<DFNode>();
-	for (DFNode node : this.nodes) {
+	ArrayList<Integer> removed = new ArrayList<Integer>();
+	for (DFNode node : this.nodes.values()) {
 	    if (node.getType() == null && node.purge()) {
-		removed.add(node);
+		removed.add(node.id);
 	    }
 	}
-	for (DFNode node : removed) {
-	    this.nodes.remove(node);
+	for (int id : removed) {
+	    this.nodes.remove(id);
 	}
     }
 }
