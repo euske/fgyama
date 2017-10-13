@@ -60,7 +60,7 @@ public class DFGraph {
     private Element writeScope(Document document, DFNode[] nodes, DFScope scope) {
 	Element elem = document.createElement("scope");
 	elem.setAttribute("name", scope.name);
-	for (DFScope child : scope.children()) {
+	for (DFScope child : scope.getChildren()) {
 	    elem.appendChild(this.writeScope(document, nodes, child));
 	}
 	for (DFNode node : nodes) {

@@ -10,14 +10,14 @@ import org.eclipse.jdt.core.dom.*;
 //  DFScope
 //  Mapping from name -> variable.
 //
-public class DFScope implements Comparable<DFScope> {
+public class DFScope {
 
     public DFGraph graph;
     public String name;
     public DFScope parent = null;
-    
-    private int baseId = 0;
-    private Map<ASTNode, DFScope> children = new HashMap<ASTNode, DFScope>();
+
+    private List<DFScope> children = new ArrayList<DFScope>();
+    private Map<ASTNode, DFScope> ast2child = new HashMap<ASTNode, DFScope>();
     private Map<String, DFVar> vars = new HashMap<String, DFVar>();
 
     public DFScope(DFGraph graph, String name) {
@@ -37,26 +37,22 @@ public class DFScope implements Comparable<DFScope> {
 	return ("<DFScope("+this.name+")>");
     }
 
-    @Override
-    public int compareTo(DFScope scope) {
-	return this.name.compareTo(scope.name);
-    }
-
     public DFScope addChild(String basename, ASTNode ast) {
-	String name = this.name+"_"+basename+(this.baseId++);
+	int id = this.children.size();
+	String name = this.name+"_"+basename+id;
 	DFScope scope = new DFScope(name, this);
-	this.children.put(ast, scope);
+	this.children.add(scope);
+	this.ast2child.put(ast, scope);
 	return scope;
     }
 
     public DFScope getChild(ASTNode ast) {
-	return this.children.get(ast);
+	return this.ast2child.get(ast);
     }
 
-    public DFScope[] children() {
+    public DFScope[] getChildren() {
 	DFScope[] scopes = new DFScope[this.children.size()];
-	this.children.values().toArray(scopes);
-	Arrays.sort(scopes);
+	this.children.toArray(scopes);
 	return scopes;
     }
 
@@ -70,7 +66,7 @@ public class DFScope implements Comparable<DFScope> {
 	for (DFVar var : this.vars.values()) {
 	    out.println(i2+"defined: "+var);
 	}
-	for (DFScope scope : this.children.values()) {
+	for (DFScope scope : this.children) {
 	    scope.dump(out, i2);
 	}
 	out.println(indent+"}");
