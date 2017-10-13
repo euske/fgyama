@@ -60,23 +60,6 @@ public class XmlExporter extends Exporter {
     @Override
     public void writeGraph(DFGraph graph)
 	throws IOException {
-	Element egraph = this.document.createElement("graph");
-	egraph.setAttribute("name", graph.name);
-	egraph.appendChild(this.writeScope(graph, graph.root));
-	_file.appendChild(egraph);
-    }
-
-    private Element writeScope(DFGraph graph, DFScope scope) {
-	Element escope = this.document.createElement("scope");
-	escope.setAttribute("name", scope.name);
-	for (DFScope child : scope.children()) {
-	    escope.appendChild(this.writeScope(graph, child));
-	}
-	for (DFNode node : graph.getNodes()) {
-	    if (node.scope == scope) {
-		escope.appendChild(node.toXML(this.document));
-	    }
-	}
-	return escope;
+	_file.appendChild(graph.toXML(this.document));
     }
 }

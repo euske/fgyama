@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 
 //  DFGraph
@@ -34,13 +35,6 @@ public class DFGraph {
 	return id;
     }
 
-    public DFNode[] getNodes() {
-	DFNode[] nodes = new DFNode[this.nodes.size()];
-	this.nodes.values().toArray(nodes);
-	Arrays.sort(nodes);
-	return nodes;
-    }
-
     public void cleanup() {
 	ArrayList<Integer> removed = new ArrayList<Integer>();
 	for (DFNode node : this.nodes.values()) {
@@ -51,5 +45,29 @@ public class DFGraph {
 	for (int id : removed) {
 	    this.nodes.remove(id);
 	}
+    }
+
+    public Element toXML(Document document) {
+	Element elem = document.createElement("graph");
+	elem.setAttribute("name", this.name);
+	DFNode[] nodes = new DFNode[this.nodes.size()];
+	this.nodes.values().toArray(nodes);
+	Arrays.sort(nodes);
+	elem.appendChild(this.writeScope(document, nodes, this.root));
+	return elem;
+    }
+
+    private Element writeScope(Document document, DFNode[] nodes, DFScope scope) {
+	Element elem = document.createElement("scope");
+	elem.setAttribute("name", scope.name);
+	for (DFScope child : scope.children()) {
+	    elem.appendChild(this.writeScope(document, nodes, child));
+	}
+	for (DFNode node : nodes) {
+	    if (node.scope == scope) {
+		elem.appendChild(node.toXML(document));
+	    }
+	}
+	return elem;
     }
 }
