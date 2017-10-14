@@ -2,10 +2,10 @@
 <project name="Java2DF" default="build" basedir=".">
   
   <property file="build.properties" />
-  <property name="srcDir" location="src" />
+  <property name="srcDir" location="src/main" />
+  <property name="testDir" location="src/test" />
   <property name="libDir" location="lib" />
   <property name="tmpDir" location="tmp" />
-  <property name="testDir" location="test/src" />
   <property name="buildDir" location="target" />
   <property name="toolsDir" location="tools" />
   

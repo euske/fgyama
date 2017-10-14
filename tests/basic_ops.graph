@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <file path="test/data/basic_ops.java">
+  <file path="tests/basic_ops.java">
     <graph name="basic_ops">
       <scope name="basic_ops">
         <scope name="basic_ops_b0">

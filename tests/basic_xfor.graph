@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <file path="test/data/basic_xfor.java">
+  <file path="tests/basic_xfor.java">
     <graph name="basic_xfor">
       <scope name="basic_xfor">
         <scope name="basic_xfor_b0">

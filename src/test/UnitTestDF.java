@@ -9,7 +9,7 @@ import net.tabesugi.fgyama.*;
 
 public class UnitTestDF extends XMLTestCase {
 
-    public static final String TESTDATA = "test/data";
+    public static final String TESTDATA = "tests";
 
     public UnitTestDF(String name) {
 	super(name);
