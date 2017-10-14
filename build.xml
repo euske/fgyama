@@ -72,7 +72,7 @@
       </src>
       <classpath refid="build.classpath"/>
     </javac>
-    <junit>
+    <junit fork="true">
       <jvmarg value="-ea" />
       <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><dfaaa>
+<?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="test/data/basic_methods.java">
     <graph name="fa">
       <scope name="fa">
@@ -7,8 +7,8 @@
             <ast length="1" start="58" type="34"/>
           </node>
           <node name="Nfa_b0_2" ref="fa_b0:a" type="assign">
-            <ast length="5" start="54" type="59"/>
             <link src="Nfa_b0_1"/>
+            <ast length="5" start="54" type="59"/>
           </node>
         </scope>
       </scope>
@@ -20,15 +20,15 @@
             <ast length="1" start="106" type="34"/>
           </node>
           <node name="Nfb_b0_2" ref="fb_b0:b" type="assign">
-            <ast length="5" start="102" type="59"/>
             <link src="Nfb_b0_1"/>
+            <ast length="5" start="102" type="59"/>
           </node>
           <node data="new Object" name="Nfb_b0_3" type="call">
             <ast length="71" start="121" type="14"/>
           </node>
           <node name="Nfb_b0_4" ref="fb_b0:a" type="assign">
-            <ast length="75" start="117" type="59"/>
             <link src="Nfb_b0_3"/>
+            <ast length="75" start="117" type="59"/>
           </node>
         </scope>
       </scope>
@@ -40,8 +40,8 @@
             <ast length="5" start="177" type="45"/>
           </node>
           <node name="NtoString_b0_2" ref="toString:#return" type="return">
-            <ast length="13" start="170" type="41"/>
             <link src="NtoString_b0_1"/>
+            <ast length="13" start="170" type="41"/>
           </node>
         </scope>
       </scope>
@@ -53,11 +53,11 @@
             <ast length="3" start="237" type="34"/>
           </node>
           <node name="Nfc_b0_2" ref="fc:#return" type="return">
-            <ast length="11" start="230" type="41"/>
             <link src="Nfc_b0_1"/>
+            <ast length="11" start="230" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
   </file>
-</dfaaa>
+</fgyama>

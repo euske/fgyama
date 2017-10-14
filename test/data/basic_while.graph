@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><dfaaa>
+<?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="test/data/basic_while.java">
     <graph name="basic_while">
       <scope name="basic_while">
@@ -53,4 +53,4 @@
       </scope>
     </graph>
   </file>
-</dfaaa>
+</fgyama>
