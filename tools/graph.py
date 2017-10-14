@@ -495,6 +495,8 @@ def get_graphs(arg):
     elif path.endswith('.db'):
         conn = sqlite3.connect(path)
         graphs = load_graphs_db(conn, gids)
+    else:
+        raise ValueError('unknown file format: %r' % path)
 
     for graph in graphs:
         if gids is None or graph.gid in gids:
