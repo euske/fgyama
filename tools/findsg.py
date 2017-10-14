@@ -126,11 +126,12 @@ def main(argv):
         print ()
         return
 
-    checkgid = (lambda graph, gid: graph.gid is None or graph.gid < gid)
+    checkgid = (lambda graph, gid: graph.gid is None or graph.gid+100 < gid)
     if args:
         graphs = load_graphs_file(args.pop(0), None)
     else:
         graphs = load_graphs_db(graphconn)
+    
     for graph0 in graphs:
         gid0 = graph0.gid
         if verbose or (isinstance(gid0, int) and (gid0 % 100) == 0):
@@ -140,7 +141,8 @@ def main(argv):
             graph0, checkgid=checkgid,
             minnodes=minnodes, mindepth=mindepth)                        
         if not result: continue
-        print ('+', graph0.gid)
+        maxmatch = None
+        maxnodes = -1
         for (gid1,result) in result.items():
             graph1 = fetch_graph(graphcur, gid1)
             result = [ (label, node0, graph1.nodes[nid1]) for (_,label,node0,nid1) in result ]
@@ -160,11 +162,16 @@ def main(argv):
                 depth = count_depth(tree)
                 if depth < mindepth: continue
                 branch = count_branch(tree)
-                print ('-', graph0.gid, graph1.gid, nodes, depth, branch,
-                       ','.join('%d:%d' % (n0.nid, n1.nid) for (n0,n1) in pairs),
-                       str_tree(tree))
-                if srcdb is not None: 
-                    show_result(graph0, graph1, pairs)
+                if maxnodes < nodes:
+                    maxnodes = nodes
+                    maxmatch = (nodes, depth, branch, graph1, pairs, tree)
+        if maxmatch is not None:
+            (nodes, depth, branch, graph1, pairs, tree) = maxmatch
+            print ('-', graph0.gid, graph1.gid, nodes, depth, branch,
+                   ','.join('%d:%d' % (n0.nid, n1.nid) for (n0,n1) in pairs),
+                   str_tree(tree))
+            if srcdb is not None: 
+                show_result(graph0, graph1, pairs)
         sys.stdout.flush()
     return 0
 
