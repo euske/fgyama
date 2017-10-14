@@ -1,6 +1,6 @@
-# dfaaa
+# FGyama
 
-Dataflow Analyzaa
+FGyama, or Flow Graph yama is a dataflow extractor for program analysis.
 
 Prerequisites:
 

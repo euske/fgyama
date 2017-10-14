@@ -1,6 +1,6 @@
 //  Java2DF
 //
-package net.tabesugi.dfaaa;
+package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.*;
@@ -21,7 +21,7 @@ public class XmlExporter extends Exporter {
     public XmlExporter() {
 	try {
 	    this.document = Utils.createXml();
-	    _root = this.document.createElement("dfaaa");
+	    _root = this.document.createElement("fgyama");
 	} catch (ParserConfigurationException e) {
 	    throw new RuntimeException();
 	}

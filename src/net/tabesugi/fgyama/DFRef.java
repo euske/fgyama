@@ -1,6 +1,6 @@
 //  Java2DF
 //
-package net.tabesugi.dfaaa;
+package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;

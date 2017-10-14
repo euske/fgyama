@@ -2,7 +2,7 @@
  * Java2DF
  * Dataflow analyzer for Java
  */
-package net.tabesugi.dfaaa;
+package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;

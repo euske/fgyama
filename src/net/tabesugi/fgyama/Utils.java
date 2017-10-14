@@ -1,6 +1,6 @@
 //  Utils.java
 //
-package net.tabesugi.dfaaa;
+package net.tabesugi.fgyama;
 import java.io.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;

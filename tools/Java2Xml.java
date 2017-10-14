@@ -5,7 +5,7 @@
 // javac -cp org.eclipse.jdt.core.jar:org.eclipse.core.runtime.jar:org.eclipse.equinox.common.jar Test.java
 // java -cp .:org.eclipse.jdt.core.jar:org.eclipse.core.runtime.jar:org.eclipse.equinox.common.jar:org.eclipse.core.resources.jar:org.eclipse.core.jobs.jar:org.eclipse.osgi.jar:org.eclipse.core.contenttype.jar:org.eclipse.equinox.preferences.jar Test
 
-package net.tabesugi.dfaaa;
+package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.*;

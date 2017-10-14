@@ -17,4 +17,4 @@ CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.equinox.app-1.3.400.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.core.filesystem-1.6.1.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.text-3.6.0.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.core.commands-3.8.1.jar
-exec java -ea -cp $CLASSPATH net.tabesugi.dfaaa.Java2DF "$@"
+exec java -ea -cp $CLASSPATH net.tabesugi.fgyama.Java2DF "$@"

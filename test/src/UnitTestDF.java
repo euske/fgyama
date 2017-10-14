@@ -5,7 +5,7 @@ import java.util.*;
 import org.w3c.dom.*;
 import org.custommonkey.xmlunit.*;
 import org.junit.Test;
-import net.tabesugi.dfaaa.*;
+import net.tabesugi.fgyama.*;
 
 public class UnitTestDF extends XMLTestCase {
 
