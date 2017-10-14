@@ -4,6 +4,9 @@ import sqlite3
 from graph import SourceDB, DFGraph
 from graph import fetch_graph
 
+def isok(n):
+    return (n.data is not None)
+
 def q(s):
     return s.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
 
@@ -112,6 +115,8 @@ def main(argv):
             (nid0,_,nid1) = v.partition(':')
             nodes0.append(graph0.nodes[int(nid0)])
             nodes1.append(graph1.nodes[int(nid1)])
+        nodes0 = [ node for node in nodes0 if isok(node) ]
+        nodes1 = [ node for node in nodes1 if isok(node) ]
         if html:
             print('<div class=pair><span class=head>%s Pair %d:</span> (nodes=%d, depth=%d, branch=%d)<br>' % \
                   (f[0], npairs, nodes, depth, branch))
@@ -119,9 +124,9 @@ def main(argv):
             show_html(gid1, src1, geturl(src1.name), nodes1, 's1')
             print('</div>')
         else:
-            print('###', src0.name, len(nids))
+            print('###', npairs, nodes, depth, branch, src0.name)
             src0.show_nodes(nodes0)
-            print('###', src1.name, len(nids))
+            print('###', npairs, nodes, depth, branch, src1.name)
             src1.show_nodes(nodes1)
             print()
         npairs += 1
