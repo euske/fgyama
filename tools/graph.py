@@ -311,11 +311,6 @@ def load_graphs_file(fp, gid=0):
             yield parse_graph(gid, egraph, src=path)
     return
 
-def load_graphs_stream(fp, gid=None):
-    root = ElementTree(file=fp).getroot()
-    yield parse_graph(gid, root)
-    return
-
 def load_graphs_db(conn, gids=None):
     cur = conn.cursor()
     if gids is not None:
@@ -488,15 +483,13 @@ def get_graphs(arg):
         gids = None
         
     if path == '-':
-        graphs = load_graphs_stream(sys.stdin)
-    elif path.endswith('.graph'):
-        with open(path) as fp:
-            graphs = list(load_graphs_file(fp))
+        graphs = load_graphs_file(sys.stdin)
     elif path.endswith('.db'):
         conn = sqlite3.connect(path)
         graphs = load_graphs_db(conn, gids)
     else:
-        raise ValueError('unknown file format: %r' % path)
+        with open(path) as fp:
+            graphs = list(load_graphs_file(fp))
 
     for graph in graphs:
         if gids is None or graph.gid in gids:
