@@ -7,7 +7,7 @@
             <scope name="basic_break_b0_while0_b0">
               <scope name="basic_break_b0_while0_b0_b0"/>
               <node name="Nbasic_break_b0_while0_b0_5" ref="basic_break:x" type="ref">
-                <link src="Nbasic_break_b0_while0_13"/>
+                <link src="Nbasic_break_b0_while0_14"/>
                 <ast length="1" start="88" type="42"/>
               </node>
               <node data="0" name="Nbasic_break_b0_while0_b0_6" type="const">
@@ -21,7 +21,7 @@
               <node name="Nbasic_break_b0_while0_b0_9" ref="basic_break:x" type="select">
                 <link label="cond" src="Nbasic_break_b0_while0_b0_7"/>
                 <link label="false" src="Nbasic_break_b0_while0_14"/>
-                <link label="true" src="Nbasic_break_b0_while0_13"/>
+                <link label="true" src="Nbasic_break_b0_while0_14"/>
               </node>
               <node name="Nbasic_break_b0_while0_b0_10" ref="basic_break:x" type="assign">
                 <link src="Nbasic_break_b0_while0_b0_12"/>
@@ -31,7 +31,7 @@
                 <ast length="1" start="117" type="34"/>
               </node>
               <node data="-=" name="Nbasic_break_b0_while0_b0_12" ref="basic_break:x" type="assignop">
-                <link label="L" src="Nbasic_break_b0_while0_13"/>
+                <link label="L" src="Nbasic_break_b0_while0_14"/>
                 <link label="R" src="Nbasic_break_b0_while0_b0_11"/>
                 <ast length="6" start="112" type="7"/>
               </node>
@@ -40,12 +40,12 @@
               <ast length="4" start="71" type="9"/>
             </node>
             <node name="Nbasic_break_b0_while0_13" ref="basic_break:x" type="begin">
-              <link label="_repeat" src="Nbasic_break_b0_while0_14"/>
+              <link label="_repeat" src="Nbasic_break_b0_while0_b0_10"/>
               <link label="enter" src="Nbasic_break_2"/>
               <ast length="58" start="64" type="61"/>
             </node>
             <node name="Nbasic_break_b0_while0_14" ref="basic_break:x" type="end">
-              <link src="Nbasic_break_b0_while0_b0_10"/>
+              <link src="Nbasic_break_b0_while0_13"/>
               <link label="_begin" src="Nbasic_break_b0_while0_13"/>
               <link label="cond" src="Nbasic_break_b0_while0_3"/>
               <ast length="58" start="64" type="61"/>

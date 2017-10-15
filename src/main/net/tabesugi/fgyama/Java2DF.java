@@ -662,7 +662,8 @@ public class Java2DF extends ASTVisitor {
      */
     public DFComponent processLoop
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
-	 DFNode condValue, DFFrame loopFrame, DFComponent loopCpt)
+	 DFNode condValue, DFFrame loopFrame, DFComponent loopCpt,
+	 boolean preTest)
 	throws UnsupportedSyntax {
 
 	// Add four nodes for each loop variable.
@@ -675,33 +676,62 @@ public class Java2DF extends ASTVisitor {
 	    BeginNode begin = new BeginNode(scope, ref, ast, src);
 	    EndNode end = new EndNode(scope, ref, ast, condValue);
 	    DFNode repeat = new DFNode(scope, ref);
-	    // Begin -> [S] -> End -> Repeat
 	    begins.put(ref, begin);
 	    ends.put(ref, end);
-	    repeat.accept(end);
 	    repeats.put(ref, repeat);
 	}
 
-	// Connect the inputs to the loop.
-	for (DFRef ref : loopCpt.inputRefs()) {
-	    DFNode input = loopCpt.getInput(ref);
-	    DFNode begin = begins.get(ref);
-	    if (begin != null) {
-		input.accept(begin);
-	    } else {
-		DFNode src = cpt.getValue(ref);
+	if (preTest) {
+	    // Begin -> End -> [S] -> Repeat
+	    for (DFRef ref : loopRefs) {
+		BeginNode begin = begins.get(ref);
+		EndNode end = ends.get(ref);
+		end.accept(begin);
+	    }
+	    // Connect the inputs to the loop.
+	    for (DFRef ref : loopCpt.inputRefs()) {
+		DFNode input = loopCpt.getInput(ref);
+		DFNode src = ends.get(ref);
+		if (src == null) {
+		    src = cpt.getValue(ref);
+		}
 		input.accept(src);
 	    }
-	}
-	
-	// Connect the outputs to the loop.
-	for (DFRef ref : loopCpt.outputRefs()) {
-	    DFNode output = loopCpt.getOutput(ref);
-	    DFNode end = ends.get(ref);
-	    if (end != null) {
-		end.accept(output);
-	    } else {
-		cpt.setOutput(output);
+	    // Connect the outputs to the loop.
+	    for (DFRef ref : loopCpt.outputRefs()) {
+		DFNode output = loopCpt.getOutput(ref);
+		DFNode dst = repeats.get(ref);
+		if (dst != null) {
+		    dst.accept(output);
+		} else {
+		    cpt.setOutput(output);
+		}
+	    }
+	} else {
+	    // Begin -> [S] -> End -> Repeat
+	    for (DFRef ref : loopRefs) {
+		EndNode end = ends.get(ref);
+		DFNode repeat = repeats.get(ref);
+		repeat.accept(end);
+	    }
+	    // Connect the inputs to the loop.
+	    for (DFRef ref : loopCpt.inputRefs()) {
+		DFNode input = loopCpt.getInput(ref);
+		DFNode src = begins.get(ref);
+		if (src == null) {
+		    src = cpt.getValue(ref);
+		}
+		input.accept(src);
+	    }
+	    // Connect the outputs to the loop.
+	    for (DFRef ref : loopCpt.outputRefs()) {
+		DFNode output = loopCpt.getOutput(ref);
+		DFNode dst = ends.get(ref);
+		if (dst != null) {
+		    dst.accept(output);
+		} else {
+		    cpt.setOutput(output);
+		}
 	    }
 	}
 	
@@ -1186,7 +1216,7 @@ public class Java2DF extends ASTVisitor {
 	loopCpt = processStatement(loopScope, loopFrame, loopCpt,
 				   whileStmt.getBody());
 	cpt = processLoop(loopScope, frame, cpt, whileStmt, 
-			  condValue, loopFrame, loopCpt);
+			  condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	cpt.endScope(loopScope);
 	return cpt;
@@ -1205,7 +1235,7 @@ public class Java2DF extends ASTVisitor {
 				    doStmt.getExpression());
 	DFNode condValue = loopCpt.getRValue();
 	cpt = processLoop(loopScope, frame, cpt, doStmt, 
-			  condValue, loopFrame, loopCpt);
+			  condValue, loopFrame, loopCpt, false);
 	cpt.endFrame(loopFrame);
 	cpt.endScope(loopScope);
 	return cpt;
@@ -1236,7 +1266,7 @@ public class Java2DF extends ASTVisitor {
 	    loopCpt = processExpression(loopScope, loopFrame, loopCpt, update);
 	}
 	cpt = processLoop(loopScope, frame, cpt, forStmt, 
-			  condValue, loopFrame, loopCpt);
+			  condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	cpt.endScope(loopScope);
 	return cpt;
@@ -1262,7 +1292,7 @@ public class Java2DF extends ASTVisitor {
 	loopCpt = processStatement(loopScope, loopFrame, loopCpt,
 				   eForStmt.getBody());
 	cpt = processLoop(loopScope, frame, cpt, eForStmt, 
-			  iterValue, loopFrame, loopCpt);
+			  iterValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	cpt.endScope(loopScope);
 	return cpt;
