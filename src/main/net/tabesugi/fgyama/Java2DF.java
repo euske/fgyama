@@ -1369,7 +1369,7 @@ public class Java2DF extends ASTVisitor {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    SimpleName labelName = contStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.outputs(), dstLabel);
+	    cpt.addExitAll(frame.outputs(), dstLabel, true);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;

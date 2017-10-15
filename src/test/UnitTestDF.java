@@ -71,15 +71,19 @@ public class UnitTestDF extends XMLTestCase {
 	compareXml(TESTDATA+"/basic_break.java", TESTDATA+"/basic_break.graph");
     }
     @Test
-    public void test_09_basic_switch() throws Exception {
+    public void test_09_basic_continue() throws Exception {
+	compareXml(TESTDATA+"/basic_continue.java", TESTDATA+"/basic_continue.graph");
+    }
+    @Test
+    public void test_10_basic_switch() throws Exception {
 	compareXml(TESTDATA+"/basic_switch.java", TESTDATA+"/basic_switch.graph");
     }
     @Test
-    public void test_10_basic_methods() throws Exception {
+    public void test_11_basic_methods() throws Exception {
 	compareXml(TESTDATA+"/basic_methods.java", TESTDATA+"/basic_methods.graph");
     }
     @Test
-    public void test_11_basic_ops() throws Exception {
+    public void test_12_basic_ops() throws Exception {
 	compareXml(TESTDATA+"/basic_ops.java", TESTDATA+"/basic_ops.graph");
     }
 }

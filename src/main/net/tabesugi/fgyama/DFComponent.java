@@ -120,9 +120,13 @@ public class DFComponent {
     }
 
     public void addExitAll(DFRef[] refs, String label) {
+	this.addExitAll(refs, label, false);
+    }
+    
+    public void addExitAll(DFRef[] refs, String label, boolean cont) {
 	for (DFRef ref : refs) {
 	    DFNode node = this.getValue(ref);
-	    this.addExit(new DFExit(node, label));
+	    this.addExit(new DFExit(node, label, cont));
 	}
     }
 
