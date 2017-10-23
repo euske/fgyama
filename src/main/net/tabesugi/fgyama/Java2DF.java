@@ -437,11 +437,11 @@ class JoinNode extends ProgNode {
     }
 }
 
-// BeginNode
-class BeginNode extends ProgNode {
+// LoopBeginNode
+class LoopBeginNode extends ProgNode {
 
-    public BeginNode(DFScope scope, DFRef ref, ASTNode ast,
-		     DFNode enter) {
+    public LoopBeginNode(DFScope scope, DFRef ref, ASTNode ast,
+			 DFNode enter) {
 	super(scope, ref, ast);
 	this.accept(enter, "enter");
     }
@@ -456,11 +456,11 @@ class BeginNode extends ProgNode {
     }
 }
 
-// EndNode
-class EndNode extends ProgNode {
+// LoopEndNode
+class LoopEndNode extends ProgNode {
 
-    public EndNode(DFScope scope, DFRef ref, ASTNode ast,
-		   DFNode value) {
+    public LoopEndNode(DFScope scope, DFRef ref, ASTNode ast,
+		       DFNode value) {
 	super(scope, ref, ast);
 	this.accept(value, "cond");
     }
@@ -667,14 +667,14 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 
 	// Add four nodes for each loop variable.
-	Map<DFRef, BeginNode> begins = new HashMap<DFRef, BeginNode>();
-	Map<DFRef, EndNode> ends = new HashMap<DFRef, EndNode>();
+	Map<DFRef, LoopBeginNode> begins = new HashMap<DFRef, LoopBeginNode>();
+	Map<DFRef, LoopEndNode> ends = new HashMap<DFRef, LoopEndNode>();
 	Map<DFRef, DFNode> repeats = new HashMap<DFRef, DFNode>();
 	DFRef[] loopRefs = loopFrame.getInsAndOuts();
 	for (DFRef ref : loopRefs) {
 	    DFNode src = cpt.getValue(ref);
-	    BeginNode begin = new BeginNode(scope, ref, ast, src);
-	    EndNode end = new EndNode(scope, ref, ast, condValue);
+	    LoopBeginNode begin = new LoopBeginNode(scope, ref, ast, src);
+	    LoopEndNode end = new LoopEndNode(scope, ref, ast, condValue);
 	    DFNode repeat = new DFNode(scope, ref);
 	    begins.put(ref, begin);
 	    ends.put(ref, end);
@@ -684,8 +684,8 @@ public class Java2DF extends ASTVisitor {
 	if (preTest) {
 	    // Begin -> End -> [S] -> Repeat
 	    for (DFRef ref : loopRefs) {
-		BeginNode begin = begins.get(ref);
-		EndNode end = ends.get(ref);
+		LoopBeginNode begin = begins.get(ref);
+		LoopEndNode end = ends.get(ref);
 		end.accept(begin);
 	    }
 	    // Connect the inputs to the loop.
@@ -710,7 +710,7 @@ public class Java2DF extends ASTVisitor {
 	} else {
 	    // Begin -> [S] -> End -> Repeat
 	    for (DFRef ref : loopRefs) {
-		EndNode end = ends.get(ref);
+		LoopEndNode end = ends.get(ref);
 		DFNode repeat = repeats.get(ref);
 		repeat.accept(end);
 	    }
@@ -752,8 +752,8 @@ public class Java2DF extends ASTVisitor {
 
 	// Handle the leave nodes.
 	for (DFRef ref : loopRefs) {
-	    BeginNode begin = begins.get(ref);
-	    EndNode end = ends.get(ref);
+	    LoopBeginNode begin = begins.get(ref);
+	    LoopEndNode end = ends.get(ref);
 	    DFNode repeat = repeats.get(ref);
 	    begin.close(repeat);
 	    end.close(begin);
