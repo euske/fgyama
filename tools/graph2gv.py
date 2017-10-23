@@ -20,7 +20,7 @@ def write_gv(out, scope, highlight=None, level=0):
         out.write(h+'subgraph cluster_%s {\n' % scope.name)
     out.write(h+' label=%s;\n' % q(scope.name))
     for node in scope.nodes:
-        if node.ntype in ('select','begin','end'):
+        if node.ntype in ('join','begin','end'):
             styles = {'shape': 'diamond', 
                       'label': '%s (%s)' % (node.ntype, node.ref)}
         elif node.ntype in ('return',):
