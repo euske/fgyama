@@ -383,13 +383,13 @@ class ArrayValueNode extends ProgNode {
     }
 }
 
-// SelectNode
-class SelectNode extends ProgNode {
+// JoinNode
+class JoinNode extends ProgNode {
 
     public boolean recvTrue = false;
     public boolean recvFalse = false;
     
-    public SelectNode(DFScope scope, DFRef ref, ASTNode ast,
+    public JoinNode(DFScope scope, DFRef ref, ASTNode ast,
 		      DFNode value) {
 	super(scope, ref, ast);
 	this.accept(value, "cond");
@@ -397,7 +397,7 @@ class SelectNode extends ProgNode {
     
     @Override
     public String getType() {
-	return "select";
+	return "join";
     }
     
     @Override
@@ -589,7 +589,7 @@ public class Java2DF extends ASTVisitor {
     
     /** 
      * Combines two components into one.
-     * A SelectNode is added to each variable.
+     * A JoinNode is added to each variable.
      */
     public DFComponent processConditional
 	(DFScope scope, DFFrame frame, DFComponent cpt, ASTNode ast, 
@@ -614,43 +614,43 @@ public class Java2DF extends ASTVisitor {
 	    outRefs.addAll(Arrays.asList(falseCpt.outputRefs()));
 	}
 
-	// Attach a SelectNode to each variable.
+	// Attach a JoinNode to each variable.
 	Set<DFRef> used = new HashSet<DFRef>();
 	for (DFRef ref : outRefs) {
 	    if (used.contains(ref)) continue;
 	    used.add(ref);
-	    SelectNode select = new SelectNode(scope, ref, ast, condValue);
+	    JoinNode join = new JoinNode(scope, ref, ast, condValue);
 	    if (trueCpt != null) {
 		DFNode dst = trueCpt.getOutput(ref);
 		if (dst != null) {
-		    select.recv(true, dst);
+		    join.recv(true, dst);
 		}
 	    }
 	    if (falseCpt != null) {
 		DFNode dst = falseCpt.getOutput(ref);
 		if (dst != null) {
-		    select.recv(false, dst);
+		    join.recv(false, dst);
 		}
 	    }
-	    if (!select.isClosed()) {
-		select.close(cpt.getValue(ref));
+	    if (!join.isClosed()) {
+		join.close(cpt.getValue(ref));
 	    }
-	    cpt.setOutput(select);
+	    cpt.setOutput(join);
 	}
 
 	// Take care of exits.
 	if (trueCpt != null) {
 	    for (DFExit exit : trueCpt.exits()) {
-		SelectNode select = new SelectNode(scope, exit.node.ref, null, condValue);
-		select.recv(true, exit.node);
-		cpt.addExit(exit.wrap(select));
+		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
+		join.recv(true, exit.node);
+		cpt.addExit(exit.wrap(join));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFExit exit : falseCpt.exits()) {
-		SelectNode select = new SelectNode(scope, exit.node.ref, null, condValue);
-		select.recv(false, exit.node);
-		cpt.addExit(exit.wrap(select));
+		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
+		join.recv(false, exit.node);
+		cpt.addExit(exit.wrap(join));
 	    }
 	}
 	
@@ -741,8 +741,8 @@ public class Java2DF extends ASTVisitor {
 		(exit.label == null || exit.label.equals(loopFrame.label))) {
 		DFNode node = exit.node;
 		DFNode repeat = repeats.get(node.ref);
-		if (node instanceof SelectNode) {
-		    ((SelectNode)node).close(repeat);
+		if (node instanceof JoinNode) {
+		    ((JoinNode)node).close(repeat);
 		}
 		repeats.put(node.ref, node);
 	    } else {
@@ -1058,10 +1058,10 @@ public class Java2DF extends ASTVisitor {
 	    DFNode trueValue = cpt.getRValue();
 	    cpt = processExpression(scope, frame, cpt, cond.getElseExpression());
 	    DFNode falseValue = cpt.getRValue();
-	    SelectNode select = new SelectNode(scope, null, expr, condValue);
-	    select.recv(true, trueValue);
-	    select.recv(false, falseValue);
-	    cpt.setRValue(select);
+	    JoinNode join = new JoinNode(scope, null, expr, condValue);
+	    join.recv(true, trueValue);
+	    join.recv(false, falseValue);
+	    cpt.setRValue(join);
 	    
 	} else if (expr instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
@@ -1147,10 +1147,10 @@ public class Java2DF extends ASTVisitor {
 	
 	for (DFRef ref : caseCpt.outputRefs()) {
 	    DFNode dst = caseCpt.getOutput(ref);
-	    SelectNode select = new SelectNode(scope, ref, apt, caseNode);
-	    select.recv(true, dst);
-	    select.close(cpt.getValue(ref));
-	    cpt.setOutput(select);
+	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
+	    join.recv(true, dst);
+	    join.close(cpt.getValue(ref));
+	    cpt.setOutput(join);
 	}
 	
 	return cpt;

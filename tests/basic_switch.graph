@@ -32,7 +32,7 @@
               <link label="R" src="Nbasic_switch_b0_switch0_9"/>
               <ast length="7" start="108" type="7"/>
             </node>
-            <node name="Nbasic_switch_b0_switch0_13" ref="basic_switch_b0:x" type="select">
+            <node name="Nbasic_switch_b0_switch0_13" ref="basic_switch_b0:x" type="join">
               <link label="cond" src="Nbasic_switch_b0_switch0_6"/>
               <link label="false" src="Nbasic_switch_12"/>
               <link label="true" src="Nbasic_switch_b0_switch0_8"/>
@@ -54,7 +54,7 @@
               <link label="R" src="Nbasic_switch_b0_switch0_16"/>
               <ast length="7" start="144" type="7"/>
             </node>
-            <node name="Nbasic_switch_b0_switch0_19" ref="basic_switch_b0:x" type="select">
+            <node name="Nbasic_switch_b0_switch0_19" ref="basic_switch_b0:x" type="join">
               <link label="cond" src="Nbasic_switch_b0_switch0_14"/>
               <link label="false" src="Nbasic_switch_b0_switch0_13"/>
               <link label="true" src="Nbasic_switch_b0_switch0_15"/>

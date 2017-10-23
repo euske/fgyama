@@ -43,7 +43,7 @@
             <link label="R" src="Nbasic_if_b0_4"/>
             <ast length="6" start="73" type="27"/>
           </node>
-          <node name="Nbasic_if_b0_15" ref="basic_if_b0:y" type="select">
+          <node name="Nbasic_if_b0_15" ref="basic_if_b0:y" type="join">
             <link label="cond" src="Nbasic_if_b0_5"/>
             <link label="false" src="Nbasic_if_b0_b1_10"/>
             <link label="true" src="Nbasic_if_b0_b0_6"/>

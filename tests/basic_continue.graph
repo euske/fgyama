@@ -18,7 +18,7 @@
                 <link label="R" src="Nbasic_continue_b0_while0_b0_6"/>
                 <ast length="6" start="91" type="27"/>
               </node>
-              <node name="Nbasic_continue_b0_while0_b0_9" ref="basic_continue:x" type="select">
+              <node name="Nbasic_continue_b0_while0_b0_9" ref="basic_continue:x" type="join">
                 <link label="cond" src="Nbasic_continue_b0_while0_b0_7"/>
                 <link label="false" src="Nbasic_continue_b0_while0_b0_10"/>
                 <link label="true" src="Nbasic_continue_b0_while0_14"/>
