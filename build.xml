@@ -54,6 +54,7 @@
       <compilerarg value="-Xlint" />
       <src>
         <pathelement location="${srcDir}"/>
+        <pathelement location="${testDir}"/>
       </src>
       <classpath refid="build.classpath"/>
     </javac>
@@ -98,18 +99,6 @@
   </target>
   
   <target name="test" depends="build">
-    <javac destdir="${buildDir}"
-           debug="true" 
-           optimize="false" 
-           deprecation="true"
-	   verbose="false"
-	   includeAntRuntime="false">
-      <compilerarg value="-Xlint" />
-      <src>
-        <pathelement location="${testDir}"/>
-      </src>
-      <classpath refid="build.classpath"/>
-    </javac>
     <junit fork="true">
       <jvmarg value="-ea" />
       <formatter type="plain" usefile="false" />
@@ -120,18 +109,6 @@
   </target>
   
   <target name="java2xml" depends="build">
-    <javac destdir="${buildDir}"
-           debug="true" 
-           optimize="false" 
-           deprecation="true"
-	   verbose="false"
-	   includeAntRuntime="false">
-      <compilerarg value="-Xlint" />
-      <src>
-        <pathelement location="${testDir}"/>
-      </src>
-      <classpath refid="build.classpath"/>
-    </javac>
     <java classname="Java2Xml">
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
