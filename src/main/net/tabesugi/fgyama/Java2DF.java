@@ -451,8 +451,12 @@ class LoopBeginNode extends ProgNode {
 	return "begin";
     }
 
-    public void close(DFNode repeat) {
-	this.accept(repeat, "_repeat");
+    public void setRepeat(DFNode repeat) {
+	this.accept(repeat, "repeat");
+    }
+
+    public void setEnd(LoopEndNode end) {
+	this.accept(end, "_end");
     }
 }
 
@@ -470,8 +474,25 @@ class LoopEndNode extends ProgNode {
 	return "end";
     }
 
-    public void close(DFNode begin) {
+    public void setBegin(LoopBeginNode begin) {
 	this.accept(begin, "_begin");
+    }
+}
+
+// LoopRepeatNode
+class LoopRepeatNode extends ProgNode {
+
+    public LoopRepeatNode(DFScope scope, DFRef ref, ASTNode ast) {
+	super(scope, ref, ast);
+    }
+
+    @Override
+    public String getType() {
+	return "repeat";
+    }
+
+    public void setEnd(LoopEndNode end) {
+	this.accept(end, "_loop");
     }
 }
 
@@ -674,47 +695,46 @@ public class Java2DF extends ASTVisitor {
 	for (DFRef ref : loopRefs) {
 	    DFNode src = cpt.getValue(ref);
 	    LoopBeginNode begin = new LoopBeginNode(scope, ref, ast, src);
+	    LoopRepeatNode repeat = new LoopRepeatNode(scope, ref, ast);
 	    LoopEndNode end = new LoopEndNode(scope, ref, ast, condValue);
-	    DFNode repeat = new DFNode(scope, ref);
+	    begin.setEnd(end);
+	    end.setBegin(begin);
+	    repeat.setEnd(end);
 	    begins.put(ref, begin);
 	    ends.put(ref, end);
 	    repeats.put(ref, repeat);
 	}
 
-	if (preTest) {
-	    // Begin -> End -> [S] -> Repeat
-	    for (DFRef ref : loopRefs) {
-		LoopBeginNode begin = begins.get(ref);
-		LoopEndNode end = ends.get(ref);
-		end.accept(begin);
-	    }
-	    // Connect the inputs to the loop.
+	if (preTest) {  // Repeat -> [S] -> Begin -> End
+	    // Connect the repeats to the loop inputs.
 	    for (DFRef ref : loopCpt.inputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
-		DFNode src = ends.get(ref);
+		DFNode src = repeats.get(ref);
 		if (src == null) {
 		    src = cpt.getValue(ref);
 		}
 		input.accept(src);
 	    }
-	    // Connect the outputs to the loop.
+	    // Connect the loop outputs to the begins.
 	    for (DFRef ref : loopCpt.outputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
-		DFNode dst = repeats.get(ref);
-		if (dst != null) {
-		    dst.accept(output);
+		LoopBeginNode begin = begins.get(ref);
+		if (begin != null) {
+		    begin.setRepeat(output);
 		} else {
+		    //assert !loopRefs.contains(ref);
 		    cpt.setOutput(output);
 		}
 	    }
-	} else {
-	    // Begin -> [S] -> End -> Repeat
+	    // Connect the beings and ends.
 	    for (DFRef ref : loopRefs) {
+		LoopBeginNode begin = begins.get(ref);
 		LoopEndNode end = ends.get(ref);
-		DFNode repeat = repeats.get(ref);
-		repeat.accept(end);
+		end.accept(begin);
 	    }
-	    // Connect the inputs to the loop.
+	    
+	} else {  // Begin -> [S] -> End -> Repeat
+	    // Connect the begins to the loop inputs.
 	    for (DFRef ref : loopCpt.inputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
 		DFNode src = begins.get(ref);
@@ -723,19 +743,26 @@ public class Java2DF extends ASTVisitor {
 		}
 		input.accept(src);
 	    }
-	    // Connect the outputs to the loop.
+	    // Connect the loop outputs to the ends.
 	    for (DFRef ref : loopCpt.outputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
-		DFNode dst = ends.get(ref);
+		LoopEndNode dst = ends.get(ref);
 		if (dst != null) {
 		    dst.accept(output);
 		} else {
+		    //assert !loopRefs.contains(ref);
 		    cpt.setOutput(output);
 		}
 	    }
+	    // Connect the repeats and begins.
+	    for (DFRef ref : loopRefs) {
+		DFNode repeat = repeats.get(ref);
+		LoopBeginNode begin = begins.get(ref);
+		begin.setRepeat(repeat);
+	    }
 	}
 	
-	// Reconnect the continue statements.
+	// Redirect the continue statements.
 	for (DFExit exit : loopCpt.exits()) {
 	    if (exit.cont &&
 		(exit.label == null || exit.label.equals(loopFrame.label))) {
@@ -750,13 +777,9 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 
-	// Handle the leave nodes.
+	// Closing the loop.
 	for (DFRef ref : loopRefs) {
-	    LoopBeginNode begin = begins.get(ref);
 	    LoopEndNode end = ends.get(ref);
-	    DFNode repeat = repeats.get(ref);
-	    begin.close(repeat);
-	    end.close(begin);
 	    cpt.setOutput(end);
 	}
 	

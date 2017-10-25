@@ -43,9 +43,8 @@ def write_gv(out, scope, highlight=None, level=0):
                     styles = {}
                 elif label == 'cond':
                     styles = {'style': 'dotted', 'label': label}
-                elif label == '_repeat':
-                    styles = {'xlabel': 'repeat',
-                              'style': 'dashed', 'constraint': 'false'}
+                elif label == '_loop':
+                    styles = {'style': 'dashed', 'constraint': 'false'}
                 elif label.startswith('_'):
                     continue
                 else:
