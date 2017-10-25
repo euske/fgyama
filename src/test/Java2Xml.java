@@ -5,13 +5,13 @@
 // javac -cp org.eclipse.jdt.core.jar:org.eclipse.core.runtime.jar:org.eclipse.equinox.common.jar Test.java
 // java -cp .:org.eclipse.jdt.core.jar:org.eclipse.core.runtime.jar:org.eclipse.equinox.common.jar:org.eclipse.core.resources.jar:org.eclipse.core.jobs.jar:org.eclipse.osgi.jar:org.eclipse.core.contenttype.jar:org.eclipse.equinox.preferences.jar Test
 
-package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
+import net.tabesugi.fgyama.*;
 
 public class Java2Xml extends ASTVisitor {
 

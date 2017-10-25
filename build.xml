@@ -9,7 +9,7 @@
   <property name="buildDir" location="target" />
   <property name="toolsDir" location="tools" />
   
-  <property name="input" location="samples/f1.java" />
+  <property name="input" location="tests/basic_return.java" />
   <property name="out_xml" location="${tmpDir}/out.xml" />
   <property name="out_graph" location="${tmpDir}/out.graph" />
   <property name="out_gv" location="${tmpDir}/out.gv" />
@@ -59,31 +59,9 @@
     </javac>
   </target>
 
-  <target name="test" depends="build">
-    <javac destdir="${buildDir}"
-           debug="true" 
-           optimize="false" 
-           deprecation="true"
-	   verbose="false"
-	   includeAntRuntime="false">
-      <compilerarg value="-Xlint" />
-      <src>
-        <pathelement location="${testDir}"/>
-      </src>
-      <classpath refid="build.classpath"/>
-    </javac>
-    <junit fork="true">
-      <jvmarg value="-ea" />
-      <formatter type="plain" usefile="false" />
-      <classpath location="${buildDir}" />
-      <classpath refid="build.classpath"/>
-      <test name="UnitTestDF" />
-    </junit>
-  </target>
-  
   <target name="run" depends="build">
     <mkdir dir="${tmpDir}" />
-    <java classname="net.tabesugi.dfaaa.Java2DF">
+    <java classname="net.tabesugi.fgyama.Java2DF">
       <jvmarg value="-ea" />
       <arg value="-o" />
       <arg file="${out_graph}" />
@@ -107,16 +85,6 @@
     </exec>
   </target>
   
-  <target name="Java2Xml" depends="compile">
-    <java classname="net.tabesugi.dfaaa.Java2Xml">
-      <classpath location="${buildDir}" />
-      <classpath refid="build.classpath"/>
-      <arg value="-o" />
-      <arg file="${out_xml}" />
-      <arg file="${input}" />
-    </java>
-  </target>
-  
   <target name="package" depends="compile">
     <mkdir dir="${tmpDir}" />
     <jar jarfile="${tmpDir}/Java2DF.jar" 
@@ -124,9 +92,53 @@
          index="false" 
          basedir="${buildDir}">
       <manifest>
-        <attribute name="Main-Class" value="net.tabesugi.dfaaa.Java2DF"/>
+        <attribute name="Main-Class" value="net.tabesugi.fgyama.Java2DF"/>
       </manifest>
     </jar>
+  </target>
+  
+  <target name="test" depends="build">
+    <javac destdir="${buildDir}"
+           debug="true" 
+           optimize="false" 
+           deprecation="true"
+	   verbose="false"
+	   includeAntRuntime="false">
+      <compilerarg value="-Xlint" />
+      <src>
+        <pathelement location="${testDir}"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+    <junit fork="true">
+      <jvmarg value="-ea" />
+      <formatter type="plain" usefile="false" />
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+      <test name="UnitTestDF" />
+    </junit>
+  </target>
+  
+  <target name="java2xml" depends="build">
+    <javac destdir="${buildDir}"
+           debug="true" 
+           optimize="false" 
+           deprecation="true"
+	   verbose="false"
+	   includeAntRuntime="false">
+      <compilerarg value="-Xlint" />
+      <src>
+        <pathelement location="${testDir}"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+    <java classname="Java2Xml">
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+      <arg value="-o" />
+      <arg file="${out_xml}" />
+      <arg file="${input}" />
+    </java>
   </target>
   
   <target name="get-deps" description="Download all dependencies">
