@@ -151,6 +151,10 @@ public class Utils {
 	    return "ConstructorInvocation";
 	case ASTNode.CONTINUE_STATEMENT:
 	    return "ContinueStatement";
+	case ASTNode.CREATION_REFERENCE:
+	    return "CreationReference";
+	case ASTNode.DIMENSION:
+	    return "Dimension";
 	case ASTNode.DO_STATEMENT:
 	    return "DoStatement";
 	case ASTNode.EMPTY_STATEMENT:
@@ -161,6 +165,8 @@ public class Utils {
 	    return "EnumConstantDeclaration";
 	case ASTNode.ENUM_DECLARATION:
 	    return "EnumDeclaration";
+	case ASTNode.EXPRESSION_METHOD_REFERENCE:
+	    return "ExpressionMethodReference";
 	case ASTNode.EXPRESSION_STATEMENT:
 	    return "ExpressionStatement";
 	case ASTNode.FIELD_ACCESS:
@@ -179,10 +185,14 @@ public class Utils {
 	    return "Initializer";
 	case ASTNode.INSTANCEOF_EXPRESSION:
 	    return "InstanceofExpression";
+	case ASTNode.INTERSECTION_TYPE:
+	    return "IntersectionType";
 	case ASTNode.JAVADOC:
 	    return "Javadoc";
 	case ASTNode.LABELED_STATEMENT:
 	    return "LabeledStatement";
+	case ASTNode.LAMBDA_EXPRESSION:
+	    return "LambdaExpression";
 	case ASTNode.LINE_COMMENT:
 	    return "LineComment";
 	case ASTNode.MARKER_ANNOTATION:
@@ -201,6 +211,8 @@ public class Utils {
 	    return "MethodRefParameter";
 	case ASTNode.MODIFIER:
 	    return "Modifier";
+	case ASTNode.NAME_QUALIFIED_TYPE:
+	    return "NameQualifiedType";
 	case ASTNode.NORMAL_ANNOTATION:
 	    return "NormalAnnotation";
 	case ASTNode.NULL_LITERAL:
@@ -241,6 +253,8 @@ public class Utils {
 	    return "SuperFieldAccess";
 	case ASTNode.SUPER_METHOD_INVOCATION:
 	    return "SuperMethodInvocation";
+	case ASTNode.SUPER_METHOD_REFERENCE:
+	    return "SuperMethhodReference";
 	case ASTNode.SWITCH_CASE:
 	    return "SwitchCase";
 	case ASTNode.SWITCH_STATEMENT:
@@ -263,6 +277,8 @@ public class Utils {
 	    return "TypeDeclarationStatement";
 	case ASTNode.TYPE_LITERAL:
 	    return "TypeLiteral";
+	case ASTNode.TYPE_METHOD_REFERENCE:
+	    return "TypeMethodReference";
 	case ASTNode.TYPE_PARAMETER:
 	    return "TypeParameter";
 	case ASTNode.UNION_TYPE:
@@ -277,8 +293,6 @@ public class Utils {
 	    return "WhileStatement";
 	case ASTNode.WILDCARD_TYPE:
 	    return "WildcardType";
-	case 85:		// ???
-	    return "UNKNOWN";
 	default:
 	    return null;
 	}
