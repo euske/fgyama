@@ -15,6 +15,7 @@ import net.tabesugi.fgyama.*;
 
 public class Java2Xml extends ASTVisitor {
 
+    @SuppressWarnings("unchecked")
     public static void main(String[] args)
 	throws IOException, ParserConfigurationException {
 	
@@ -54,6 +55,20 @@ public class Java2Xml extends ASTVisitor {
 	    Document doc = Utils.createXml();
 	    Java2Xml visitor = new Java2Xml(doc);
 	    cu.accept(visitor);
+
+            // Add comments.
+            Element root = doc.getDocumentElement();
+            for (org.eclipse.jdt.core.dom.Comment node :
+                     (List<org.eclipse.jdt.core.dom.Comment>) cu.getCommentList()) {
+                int type = node.getNodeType();
+                String name = Utils.getASTNodeTypeName(type);
+                Element elem = doc.createElement(name);
+                int start = node.getStartPosition();
+                int length = node.getLength();
+                String text = src.substring(start, start+length);
+                elem.appendChild(doc.createTextNode(text));
+                root.appendChild(elem);
+            }
 	    
 	    Utils.printXml(output, doc);
 	}
