@@ -31,17 +31,34 @@
               <ast length="6" start="71" type="27"/>
             </node>
             <node name="Nbasic_while_b0_while0_10" ref="basic_while:x" type="begin">
-              <link label="_repeat" src="Nbasic_while_b0_while0_b0_7"/>
+              <link label="_end" src="Nbasic_while_b0_while0_12"/>
               <link label="enter" src="Nbasic_while_2"/>
+              <link label="repeat" src="Nbasic_while_b0_while0_b0_7"/>
               <ast length="32" start="64" type="61"/>
             </node>
-            <node name="Nbasic_while_b0_while0_11" ref="basic_while:x" type="end">
+            <node name="Nbasic_while_b0_while0_11" ref="basic_while:x" type="repeat">
+              <link label="_loop" src="Nbasic_while_b0_while0_12"/>
+              <ast length="32" start="64" type="61"/>
+            </node>
+            <node name="Nbasic_while_b0_while0_12" ref="basic_while:x" type="end">
               <link src="Nbasic_while_b0_while0_10"/>
               <link label="_begin" src="Nbasic_while_b0_while0_10"/>
               <link label="cond" src="Nbasic_while_b0_while0_6"/>
               <ast length="32" start="64" type="61"/>
             </node>
           </scope>
+          <node name="Nbasic_while_b0_13" ref="basic_while:x" type="assign">
+            <link src="Nbasic_while_b0_15"/>
+            <ast length="1" start="98" type="42"/>
+          </node>
+          <node name="Nbasic_while_b0_14" ref="basic_while:x" type="ref">
+            <link src="Nbasic_while_b0_while0_12"/>
+            <ast length="1" start="98" type="42"/>
+          </node>
+          <node data="++" name="Nbasic_while_b0_15" ref="basic_while:x" type="postfix">
+            <link src="Nbasic_while_b0_14"/>
+            <ast length="3" start="98" type="37"/>
+          </node>
         </scope>
         <node data="arg0" name="Nbasic_while_1" ref="basic_while:x" type="arg">
           <ast length="5" start="54" type="44"/>

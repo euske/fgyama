@@ -43,22 +43,32 @@
               <ast length="5" start="110" type="27"/>
             </node>
             <node name="Nbasic_do_b0_do0_16" ref="basic_do_b0:n" type="begin">
-              <link label="_repeat" src="Nbasic_do_b0_do0_17"/>
+              <link label="_end" src="Nbasic_do_b0_do0_18"/>
               <link label="enter" src="Nbasic_do_b0_4"/>
+              <link label="repeat" src="Nbasic_do_b0_do0_17"/>
               <ast length="45" start="72" type="19"/>
             </node>
-            <node name="Nbasic_do_b0_do0_17" ref="basic_do_b0:n" type="end">
+            <node name="Nbasic_do_b0_do0_17" ref="basic_do_b0:n" type="repeat">
+              <link label="_loop" src="Nbasic_do_b0_do0_18"/>
+              <ast length="45" start="72" type="19"/>
+            </node>
+            <node name="Nbasic_do_b0_do0_18" ref="basic_do_b0:n" type="end">
               <link src="Nbasic_do_b0_do0_b0_9"/>
               <link label="_begin" src="Nbasic_do_b0_do0_16"/>
               <link label="cond" src="Nbasic_do_b0_do0_15"/>
               <ast length="45" start="72" type="19"/>
             </node>
             <node name="Nbasic_do_b0_do0_19" ref="basic_do:x" type="begin">
-              <link label="_repeat" src="Nbasic_do_b0_do0_20"/>
+              <link label="_end" src="Nbasic_do_b0_do0_21"/>
               <link label="enter" src="Nbasic_do_2"/>
+              <link label="repeat" src="Nbasic_do_b0_do0_20"/>
               <ast length="45" start="72" type="19"/>
             </node>
-            <node name="Nbasic_do_b0_do0_20" ref="basic_do:x" type="end">
+            <node name="Nbasic_do_b0_do0_20" ref="basic_do:x" type="repeat">
+              <link label="_loop" src="Nbasic_do_b0_do0_21"/>
+              <ast length="45" start="72" type="19"/>
+            </node>
+            <node name="Nbasic_do_b0_do0_21" ref="basic_do:x" type="end">
               <link src="Nbasic_do_b0_do0_b0_5"/>
               <link label="_begin" src="Nbasic_do_b0_do0_19"/>
               <link label="cond" src="Nbasic_do_b0_do0_15"/>
@@ -73,7 +83,7 @@
             <ast length="5" start="64" type="59"/>
           </node>
           <node name="Nbasic_do_b0_22" ref="basic_do_b0:n" type="ref">
-            <link src="Nbasic_do_b0_do0_17"/>
+            <link src="Nbasic_do_b0_do0_18"/>
             <ast length="1" start="126" type="42"/>
           </node>
           <node name="Nbasic_do_b0_23" ref="basic_do:#return" type="return">

@@ -20,7 +20,7 @@
               </node>
               <node name="Nbasic_break_b0_while0_b0_9" ref="basic_break:x" type="join">
                 <link label="cond" src="Nbasic_break_b0_while0_b0_7"/>
-                <link label="false" src="Nbasic_break_b0_while0_14"/>
+                <link label="false" src="Nbasic_break_b0_while0_15"/>
                 <link label="true" src="Nbasic_break_b0_while0_14"/>
               </node>
               <node name="Nbasic_break_b0_while0_b0_10" ref="basic_break:x" type="assign">
@@ -40,17 +40,34 @@
               <ast length="4" start="71" type="9"/>
             </node>
             <node name="Nbasic_break_b0_while0_13" ref="basic_break:x" type="begin">
-              <link label="_repeat" src="Nbasic_break_b0_while0_b0_10"/>
+              <link label="_end" src="Nbasic_break_b0_while0_15"/>
               <link label="enter" src="Nbasic_break_2"/>
+              <link label="repeat" src="Nbasic_break_b0_while0_b0_10"/>
               <ast length="58" start="64" type="61"/>
             </node>
-            <node name="Nbasic_break_b0_while0_14" ref="basic_break:x" type="end">
+            <node name="Nbasic_break_b0_while0_14" ref="basic_break:x" type="repeat">
+              <link label="_loop" src="Nbasic_break_b0_while0_15"/>
+              <ast length="58" start="64" type="61"/>
+            </node>
+            <node name="Nbasic_break_b0_while0_15" ref="basic_break:x" type="end">
               <link src="Nbasic_break_b0_while0_13"/>
               <link label="_begin" src="Nbasic_break_b0_while0_13"/>
               <link label="cond" src="Nbasic_break_b0_while0_3"/>
               <ast length="58" start="64" type="61"/>
             </node>
           </scope>
+          <node name="Nbasic_break_b0_16" ref="basic_break:x" type="assign">
+            <link src="Nbasic_break_b0_18"/>
+            <ast length="1" start="124" type="42"/>
+          </node>
+          <node name="Nbasic_break_b0_17" ref="basic_break:x" type="ref">
+            <link src="Nbasic_break_b0_while0_b0_9"/>
+            <ast length="1" start="124" type="42"/>
+          </node>
+          <node data="++" name="Nbasic_break_b0_18" ref="basic_break:x" type="postfix">
+            <link src="Nbasic_break_b0_17"/>
+            <ast length="3" start="124" type="37"/>
+          </node>
         </scope>
         <node data="arg0" name="Nbasic_break_1" ref="basic_break:x" type="arg">
           <ast length="5" start="54" type="44"/>

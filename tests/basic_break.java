@@ -4,5 +4,6 @@ public class Foo {
 	    if (x == 0) { break; }
 	    x -= 1;
 	}
+	x++;
     }
 }

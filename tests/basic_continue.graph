@@ -13,14 +13,14 @@
               <node data="0" name="Nbasic_continue_b0_while0_b0_6" type="const">
                 <ast length="1" start="96" type="34"/>
               </node>
-              <node data="==" name="Nbasic_continue_b0_while0_b0_7" type="infix">
+              <node data="!=" name="Nbasic_continue_b0_while0_b0_7" type="infix">
                 <link label="L" src="Nbasic_continue_b0_while0_b0_5"/>
                 <link label="R" src="Nbasic_continue_b0_while0_b0_6"/>
                 <ast length="6" start="91" type="27"/>
               </node>
               <node name="Nbasic_continue_b0_while0_b0_9" ref="basic_continue:x" type="join">
                 <link label="cond" src="Nbasic_continue_b0_while0_b0_7"/>
-                <link label="false" src="Nbasic_continue_b0_while0_b0_10"/>
+                <link label="false" src="Nbasic_continue_b0_while0_15"/>
                 <link label="true" src="Nbasic_continue_b0_while0_14"/>
               </node>
               <node name="Nbasic_continue_b0_while0_b0_10" ref="basic_continue:x" type="assign">
@@ -40,17 +40,34 @@
               <ast length="4" start="74" type="9"/>
             </node>
             <node name="Nbasic_continue_b0_while0_13" ref="basic_continue:x" type="begin">
-              <link label="_repeat" src="Nbasic_continue_b0_while0_b0_9"/>
+              <link label="_end" src="Nbasic_continue_b0_while0_15"/>
               <link label="enter" src="Nbasic_continue_2"/>
-              <ast length="61" start="67" type="61"/>
+              <link label="repeat" src="Nbasic_continue_b0_while0_b0_10"/>
+              <ast length="73" start="67" type="61"/>
             </node>
-            <node name="Nbasic_continue_b0_while0_14" ref="basic_continue:x" type="end">
+            <node name="Nbasic_continue_b0_while0_14" ref="basic_continue:x" type="repeat">
+              <link label="_loop" src="Nbasic_continue_b0_while0_b0_9"/>
+              <ast length="73" start="67" type="61"/>
+            </node>
+            <node name="Nbasic_continue_b0_while0_15" ref="basic_continue:x" type="end">
               <link src="Nbasic_continue_b0_while0_13"/>
               <link label="_begin" src="Nbasic_continue_b0_while0_13"/>
               <link label="cond" src="Nbasic_continue_b0_while0_3"/>
-              <ast length="61" start="67" type="61"/>
+              <ast length="73" start="67" type="61"/>
             </node>
           </scope>
+          <node name="Nbasic_continue_b0_16" ref="basic_continue:x" type="assign">
+            <link src="Nbasic_continue_b0_18"/>
+            <ast length="1" start="149" type="42"/>
+          </node>
+          <node name="Nbasic_continue_b0_17" ref="basic_continue:x" type="ref">
+            <link src="Nbasic_continue_b0_while0_b0_10"/>
+            <ast length="1" start="149" type="42"/>
+          </node>
+          <node data="++" name="Nbasic_continue_b0_18" ref="basic_continue:x" type="postfix">
+            <link src="Nbasic_continue_b0_17"/>
+            <ast length="3" start="149" type="37"/>
+          </node>
         </scope>
         <node data="arg0" name="Nbasic_continue_1" ref="basic_continue:x" type="arg">
           <ast length="5" start="57" type="44"/>
