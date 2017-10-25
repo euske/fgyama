@@ -767,6 +767,7 @@ public class Java2DF extends ASTVisitor {
 		(exit.label == null || exit.label.equals(loopFrame.label))) {
 		DFNode node = exit.node;
 		DFNode end = ends.get(node.ref);
+                assert end != null;
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(end);
 		}
@@ -1393,7 +1394,7 @@ public class Java2DF extends ASTVisitor {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    SimpleName labelName = contStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.outputs(), dstLabel, true);
+	    cpt.addExitAll(frame.getInsAndOuts(), dstLabel, true);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
