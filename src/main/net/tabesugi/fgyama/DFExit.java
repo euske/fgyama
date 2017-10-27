@@ -12,24 +12,24 @@ import org.eclipse.jdt.core.dom.*;
 public class DFExit {
 
     public DFNode node;
-    public String label;
+    public DFFrame frame;
     public boolean cont;
 
-    public DFExit(DFNode node, String label) {
-	this(node, label, false);
+    public DFExit(DFNode node, DFFrame frame) {
+	this(node, frame, false);
     }
     
-    public DFExit(DFNode node, String label, boolean cont) {
+    public DFExit(DFNode node, DFFrame frame, boolean cont) {
 	this.node = node;
-	this.label = label;
+	this.frame = frame;
 	this.cont = cont;
     }
 
     public String toString() {
-	return ("<DFExit: "+this.node+" -> "+this.label+">");
+	return ("<DFExit: "+this.node+" -> "+this.frame+">");
     }
 
     public DFExit wrap(DFNode node) {
-	return new DFExit(node, this.label, this.cont);
+	return new DFExit(node, this.frame, this.cont);
     }
 }

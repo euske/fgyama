@@ -763,8 +763,7 @@ public class Java2DF extends ASTVisitor {
 	
 	// Redirect the continue statements.
 	for (DFExit exit : loopCpt.exits()) {
-	    if (exit.cont &&
-		(exit.label == null || exit.label.equals(loopFrame.label))) {
+	    if (exit.cont && exit.frame == loopFrame) {
 		DFNode node = exit.node;
 		DFNode end = ends.get(node.ref);
                 assert end != null;
@@ -976,7 +975,8 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    cpt.setRValue(call);
             if (call.exception != null) {
-                cpt.addExit(new DFExit(call.exception, DFFrame.TRY));
+		DFFrame dstFrame = frame.find(DFFrame.TRY);
+		cpt.addExit(new DFExit(call.exception, dstFrame));
             }
 	    
 	} else if (expr instanceof SuperMethodInvocation) {
@@ -1376,25 +1376,28 @@ public class Java2DF extends ASTVisitor {
 	    
 	} else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+	    DFFrame dstFrame = frame.find(DFFrame.METHOD);
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 cpt = processExpression(scope, frame, cpt, expr);
                 ReturnNode rtrn = new ReturnNode(scope, rtrnStmt, cpt.getRValue());
-                cpt.addExit(new DFExit(rtrn, DFFrame.METHOD));
+                cpt.addExit(new DFExit(rtrn, dstFrame));
             }
-	    cpt.addExitAll(frame.outputs(), DFFrame.METHOD);
+	    cpt.addExitAll(frame.outputs(), dstFrame);
 	    
 	} else if (stmt instanceof BreakStatement) {
 	    BreakStatement breakStmt = (BreakStatement)stmt;
 	    SimpleName labelName = breakStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.outputs(), dstLabel);
+	    DFFrame dstFrame = frame.find(dstLabel);
+	    cpt.addExitAll(frame.outputs(), dstFrame);
 	    
 	} else if (stmt instanceof ContinueStatement) {
 	    ContinueStatement contStmt = (ContinueStatement)stmt;
 	    SimpleName labelName = contStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
-	    cpt.addExitAll(frame.getInsAndOuts(), dstLabel, true);
+	    DFFrame dstFrame = frame.find(dstLabel);
+	    cpt.addExitAll(frame.outputs(), dstFrame, true);
 	    
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
@@ -1422,8 +1425,9 @@ public class Java2DF extends ASTVisitor {
 	    ThrowStatement throwStmt = (ThrowStatement)stmt;
 	    cpt = processExpression(scope, frame, cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(scope, stmt, cpt.getRValue());
-            cpt.addExit(new DFExit(exception, DFFrame.TRY));
-	    cpt.addExitAll(frame.outputs(), DFFrame.TRY);
+	    DFFrame dstFrame = frame.find(DFFrame.TRY);
+	    cpt.addExit(new DFExit(exception, dstFrame));
+	    cpt.addExitAll(frame.outputs(), dstFrame);
 	    
 	} else if (stmt instanceof ConstructorInvocation) {
 	    // XXX Ignore all side effects.

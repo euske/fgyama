@@ -119,20 +119,20 @@ public class DFComponent {
 	this.exits.add(exit);
     }
 
-    public void addExitAll(DFRef[] refs, String label) {
-	this.addExitAll(refs, label, false);
+    public void addExitAll(DFRef[] refs, DFFrame frame) {
+	this.addExitAll(refs, frame, false);
     }
     
-    public void addExitAll(DFRef[] refs, String label, boolean cont) {
+    public void addExitAll(DFRef[] refs, DFFrame frame, boolean cont) {
 	for (DFRef ref : refs) {
 	    DFNode node = this.getValue(ref);
-	    this.addExit(new DFExit(node, label, cont));
+	    this.addExit(new DFExit(node, frame, cont));
 	}
     }
 
     public void endFrame(DFFrame frame) {
 	for (DFExit exit : this.exits) {
-	    if (exit.label == null || exit.label.equals(frame.label)) {
+	    if (exit.frame == frame) {
 		DFNode node = exit.node;
 		node.finish(this);
 		this.setOutput(node);

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     public String label;
+    public DFFrame parent;
     
     private Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
     private Set<DFRef> inputs = new HashSet<DFRef>();
@@ -21,7 +22,12 @@ public class DFFrame {
     public static final String METHOD = "@METHOD";
 
     public DFFrame(String label) {
+	this(label, null);
+    }
+    
+    public DFFrame(String label, DFFrame parent) {
 	this.label = label;
+	this.parent = parent;
     }
 
     public String toString() {
@@ -29,7 +35,7 @@ public class DFFrame {
     }
     
     public DFFrame addChild(String label, ASTNode ast) {
-	DFFrame frame = new DFFrame(label);
+	DFFrame frame = new DFFrame(label, this);
 	this.children.put(ast, frame);
 	return frame;
     }
@@ -44,6 +50,16 @@ public class DFFrame {
 
     public void addOutput(DFRef ref) {
 	this.outputs.add(ref);
+    }
+
+    public DFFrame find(String label) {
+	if (label == null) return this;
+	DFFrame frame = this;
+	while (frame != null) {
+	    if (frame.label.equals(label)) break;
+	    frame = frame.parent;
+	}
+	return frame;
     }
 
     public DFRef[] outputs() {
