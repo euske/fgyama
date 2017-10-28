@@ -55,7 +55,7 @@ public class DFFrame {
     public DFFrame find(String label) {
 	if (label == null) return this;
 	DFFrame frame = this;
-	while (frame != null) {
+	while (frame.parent != null) {
 	    if (frame.label.equals(label)) break;
 	    frame = frame.parent;
 	}
