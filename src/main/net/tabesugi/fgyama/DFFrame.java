@@ -56,7 +56,8 @@ public class DFFrame {
 	if (label == null) return this;
 	DFFrame frame = this;
 	while (frame.parent != null) {
-	    if (frame.label.equals(label)) break;
+	    if (frame.label != null &&
+		frame.label.equals(label)) break;
 	    frame = frame.parent;
 	}
 	return frame;
