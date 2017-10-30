@@ -117,6 +117,14 @@
       <arg file="${input}" />
     </java>
   </target>
+
+  <target name="comm" depends="build">
+    <java classname="CommExtractor">
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+      <arg file="${input}" />
+    </java>
+  </target>
   
   <target name="get-deps" description="Download all dependencies">
     <mkdir dir="${libDir}"/>
