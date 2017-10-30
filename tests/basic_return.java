@@ -1,4 +1,5 @@
-// This is a module.
+/* This is a module.
+ */
 
 // This is a class.
 public class Foo {
@@ -8,3 +9,5 @@ public class Foo {
 	return (-a) + (a + b) * c; // Variable.
     }
 }
+
+/** Javadoc! */
