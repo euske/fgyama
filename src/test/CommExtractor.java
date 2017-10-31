@@ -14,6 +14,10 @@ public class CommExtractor extends ASTVisitor {
 	new TreeMap<Integer, List<ASTNode> >();
     private SortedMap<Integer, List<ASTNode> > _end =
 	new TreeMap<Integer, List<ASTNode> >();
+
+    private Stack<ASTNode> _stack = new Stack<ASTNode>();
+    private Map<ASTNode, List<ASTNode> > _children =
+	new HashMap<ASTNode, List<ASTNode> >();
     
     public CommExtractor(String src, OutputStream output) {
 	this.src = src;
@@ -28,6 +32,16 @@ public class CommExtractor extends ASTVisitor {
 	    _start.put(start, nodes);
 	}
 	nodes.add(node);
+	if (!_stack.empty()) {
+	    ASTNode parent = _stack.peek();
+	    List<ASTNode> children = _children.get(parent);
+	    if (children == null) {
+		children = new ArrayList<ASTNode>();
+		_children.put(parent, children);
+	    }
+	    children.add(node);
+	}
+	_stack.push(node);
     }
     
     public void postVisit(ASTNode node) {
@@ -38,6 +52,7 @@ public class CommExtractor extends ASTVisitor {
 	    _end.put(end, nodes);
 	}
 	nodes.add(node);
+	_stack.pop();
     }
 
     public void addComment(Comment node) {
@@ -75,7 +90,7 @@ public class CommExtractor extends ASTVisitor {
 		parent = n;
 	    }
 	}
-	out.println(toStr(parent)+" "+toStr(prev)+" "+prevnl+" "+toStr(node)+" "+nextnl+" "+toStr(next)+" "+getText(node));
+	out.println(toStr(parent,false)+" "+toStr(prev)+" "+prevnl+" "+toStr(node)+" "+nextnl+" "+toStr(next)+" "+getText(node));
     }
 
     private ASTNode pickOne(Collection<ASTNode> nodes) {
@@ -94,11 +109,25 @@ public class CommExtractor extends ASTVisitor {
     }
 
     private String toStr(ASTNode node) {
+	return toStr(node, true);
+    }
+    private String toStr(ASTNode node, boolean tree) {
 	if (node == null) {
-	    return "null";
+	    return "()";
 	} else {
 	    int type = node.getNodeType();
-	    return Utils.getASTNodeTypeName(type);
+	    String s = "(";
+	    s += Utils.getASTNodeTypeName(type);
+	    if (tree) {
+		List<ASTNode> children = _children.get(node);
+		if (children != null) {
+		    for (ASTNode child : children) {
+			s += toStr(child);
+		    }
+		}
+	    }
+	    s += ")";
+	    return s;
 	}
     }
 
