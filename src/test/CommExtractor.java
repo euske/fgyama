@@ -10,28 +10,34 @@ public class CommExtractor extends ASTVisitor {
     private String src;
     private PrintStream out;
     
-    private SortedMap<Integer, ASTNode> _start = new TreeMap<Integer, ASTNode>();
-    private SortedMap<Integer, ASTNode> _end = new TreeMap<Integer, ASTNode>();
+    private SortedMap<Integer, List<ASTNode> > _start =
+	new TreeMap<Integer, List<ASTNode> >();
+    private SortedMap<Integer, List<ASTNode> > _end =
+	new TreeMap<Integer, List<ASTNode> >();
     
     public CommExtractor(String src, OutputStream output) {
 	this.src = src;
 	this.out = new PrintStream(output);
     }
 
-    public void preVisit(ASTNode node1) {
-	int start = node1.getStartPosition();
-	ASTNode node0 = _start.get(start);
-	if (node0 == null || node0.getLength() < node1.getLength()) {
-	    _start.put(start, node1);
+    public void preVisit(ASTNode node) {
+	int start = node.getStartPosition();
+	List<ASTNode> nodes = _start.get(start);
+	if (nodes == null) {
+	    nodes = new ArrayList<ASTNode>();
+	    _start.put(start, nodes);
 	}
+	nodes.add(node);
     }
     
-    public void postVisit(ASTNode node1) {
-	int end = node1.getStartPosition() + node1.getLength();
-	ASTNode node0 = _end.get(end);
-	if (node0 == null || node0.getLength() < node1.getLength()) {
-	    _end.put(end, node1);
+    public void postVisit(ASTNode node) {
+	int end = node.getStartPosition() + node.getLength();
+	List<ASTNode> nodes = _end.get(end);
+	if (nodes == null) {
+	    nodes = new ArrayList<ASTNode>();
+	    _end.put(end, nodes);
 	}
+	nodes.add(node);
     }
 
     public void addComment(Comment node) {
@@ -40,29 +46,46 @@ public class CommExtractor extends ASTVisitor {
 	int end = start + length;
 	ASTNode prev = null;
 	boolean prevnl = false;
-	SortedMap<Integer, ASTNode> before = _end.headMap(start);
+	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start);
 	if (!before.isEmpty()) {
-	    prev = before.get(before.lastKey());
-	    prevnl = hasNL(prev.getStartPosition() + prev.getLength(), start);
+	    int i = before.lastKey();
+	    prev = pickOne(before.get(i));
+	    prevnl = hasNL(i, start);
 	}
-	SortedMap<Integer, ASTNode> after = _start.tailMap(end);
+	SortedMap<Integer, List<ASTNode> > after = _start.tailMap(end);
 	ASTNode next = null;
 	boolean nextnl = false;
 	if (!after.isEmpty()) {
-	    next = after.get(after.firstKey());
-	    nextnl = hasNL(end, next.getStartPosition());
+	    int i = after.firstKey();
+	    next = pickOne(after.get(i));
+	    nextnl = hasNL(end, i);
 	}
-	Collection<ASTNode> nodes0 = _start.headMap(start).values();
-	Collection<ASTNode> nodes1 = _end.tailMap(end).values();
+	Set<ASTNode> nodes0 = new HashSet<ASTNode>();
+	for (List<ASTNode> nodes : _start.headMap(start).values()) {
+	    nodes0.addAll(nodes);
+	}
+	Set<ASTNode> nodes1 = new HashSet<ASTNode>();
+	for (List<ASTNode> nodes : _end.tailMap(end).values()) {
+	    nodes1.addAll(nodes);
+	}
+	nodes0.retainAll(nodes1);
 	ASTNode parent = null;
 	for (ASTNode n : nodes0) {
-	    if (nodes1.contains(n)) {
-		if (parent == null || n.getLength() < parent.getLength()) {
-		    parent = n;
-		}
+	    if (parent == null || n.getLength() < parent.getLength()) {
+		parent = n;
 	    }
 	}
 	out.println(toStr(parent)+" "+toStr(prev)+" "+prevnl+" "+toStr(node)+" "+nextnl+" "+toStr(next)+" "+getText(node));
+    }
+
+    private ASTNode pickOne(Collection<ASTNode> nodes) {
+	ASTNode node0 = null;
+	for (ASTNode node1 : nodes) {
+	    if (node0 == null || node0.getLength() < node1.getLength()) {
+		node0 = node1;
+	    }
+	}
+	return node0;
     }
 
     private boolean hasNL(int start, int end) {
