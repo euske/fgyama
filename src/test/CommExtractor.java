@@ -46,7 +46,7 @@ public class CommExtractor extends ASTVisitor {
 	int end = start + length;
 	ASTNode prev = null;
 	boolean prevnl = false;
-	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start);
+	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start+1);
 	if (!before.isEmpty()) {
 	    int i = before.lastKey();
 	    prev = pickOne(before.get(i));
@@ -61,7 +61,7 @@ public class CommExtractor extends ASTVisitor {
 	    nextnl = hasNL(end, i);
 	}
 	Set<ASTNode> nodes0 = new HashSet<ASTNode>();
-	for (List<ASTNode> nodes : _start.headMap(start).values()) {
+	for (List<ASTNode> nodes : _start.headMap(start+1).values()) {
 	    nodes0.addAll(nodes);
 	}
 	Set<ASTNode> nodes1 = new HashSet<ASTNode>();
