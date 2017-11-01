@@ -1,3 +1,7 @@
+//  CommExtractor.java
+//  Feature extractor for comments.
+//
+
 import java.io.*;
 import java.util.*;
 import javax.xml.parsers.*;
@@ -57,22 +61,21 @@ public class CommExtractor extends ASTVisitor {
 
     public void addComment(Comment node) {
 	int start = node.getStartPosition();
-	int length = node.getLength();
-	int end = start + length;
-	ASTNode prev = null;
+	int end = start + node.getLength();
+	String prevkey = null;
 	boolean prevnl = false;
 	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start+1);
 	if (!before.isEmpty()) {
 	    int i = before.lastKey();
-	    prev = pickOne(before.get(i));
+	    prevkey = toKey(before.get(i));
 	    prevnl = hasNL(i, start);
 	}
 	SortedMap<Integer, List<ASTNode> > after = _start.tailMap(end);
-	ASTNode next = null;
+	String nextkey = null;
 	boolean nextnl = false;
 	if (!after.isEmpty()) {
 	    int i = after.firstKey();
-	    next = pickOne(after.get(i));
+	    nextkey = toKey(after.get(i));
 	    nextnl = hasNL(end, i);
 	}
 	Set<ASTNode> nodes0 = new HashSet<ASTNode>();
@@ -90,17 +93,34 @@ public class CommExtractor extends ASTVisitor {
 		parent = n;
 	    }
 	}
-	out.println(toStr(parent,false)+" "+toStr(prev)+" "+prevnl+" "+toStr(node)+" "+nextnl+" "+toStr(next)+" "+getText(node));
+	assert parent != null;
+	int pstart = parent.getStartPosition();
+	int pend = pstart + parent.getLength();
+	out.println("parent="+getType(parent)+" "+
+		    "pstart="+(pstart == start)+" "+
+		    "pend="+(pend == end)+" "+
+		    "prevkey="+prevkey+" "+
+		    "prevnl="+prevnl+" "+
+		    "type="+getType(node)+" "+
+		    "nextnl="+nextnl+" "+
+		    "nextkey="+nextkey+" "+
+		    "words="+getWords(getText(node)));
     }
 
-    private ASTNode pickOne(Collection<ASTNode> nodes) {
-	ASTNode node0 = null;
-	for (ASTNode node1 : nodes) {
-	    if (node0 == null || node0.getLength() < node1.getLength()) {
-		node0 = node1;
+    private String toKey(Collection<ASTNode> nodes) {
+	ASTNode[] sorted = new ASTNode[nodes.size()];
+	nodes.toArray(sorted);
+	Arrays.sort(sorted, (a, b) -> (b.getLength() - a.getLength()));
+	String s = null;
+	for (ASTNode node : sorted) {
+	    if (s == null) {
+		s = "";
+	    } else {
+		s += ",";
 	    }
+	    s += getType(node);
 	}
-	return node0;
+	return s;
     }
 
     private boolean hasNL(int start, int end) {
@@ -108,27 +128,9 @@ public class CommExtractor extends ASTVisitor {
 	return 0 <= s.indexOf("\n");
     }
 
-    private String toStr(ASTNode node) {
-	return toStr(node, true);
-    }
-    private String toStr(ASTNode node, boolean tree) {
-	if (node == null) {
-	    return "()";
-	} else {
-	    int type = node.getNodeType();
-	    String s = "(";
-	    s += Utils.getASTNodeTypeName(type);
-	    if (tree) {
-		List<ASTNode> children = _children.get(node);
-		if (children != null) {
-		    for (ASTNode child : children) {
-			s += toStr(child);
-		    }
-		}
-	    }
-	    s += ")";
-	    return s;
-	}
+    private String getType(ASTNode node) {
+	int type = node.getNodeType();
+	return Utils.getASTNodeTypeName(type);
     }
 
     private String getText(ASTNode node) {
@@ -136,6 +138,21 @@ public class CommExtractor extends ASTVisitor {
 	int length = node.getLength();
 	int end = start + length;
 	return this.src.substring(start, end);
+    }
+
+    private String getWords(String text) {
+	String[] words = text.split("\\W+");
+	String s = null;
+	for (String w : words) {
+	    if (w.length() == 0) {
+		;
+	    } else if (s == null) {
+		s = w;
+	    } else {
+		s += ","+w;
+	    }
+	}
+	return s;
     }
     
     @SuppressWarnings("unchecked")
