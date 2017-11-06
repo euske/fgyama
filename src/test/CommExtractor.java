@@ -110,6 +110,7 @@ public class CommExtractor extends ASTVisitor {
 	Collection<ASTNode> outside = getNodesOutside(start, end);
 	ASTNode parent = null;
 	for (ASTNode n : outside) {
+	    if (n == node) continue;
 	    if (parent == null || n.getLength() < parent.getLength()) {
 		parent = n;
 	    }
@@ -221,6 +222,9 @@ public class CommExtractor extends ASTVisitor {
 	    CommExtractor visitor = new CommExtractor(src);
 	    cu.accept(visitor);
 	    
+            for (Comment node : (List<Comment>) cu.getCommentList()) {
+		visitor.addNode(node);
+	    }
             for (Comment node : (List<Comment>) cu.getCommentList()) {
 		String feats = visitor.getFeatures(node);
 		out.println(feats);
