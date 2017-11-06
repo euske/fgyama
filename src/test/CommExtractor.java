@@ -118,12 +118,12 @@ public class CommExtractor extends ASTVisitor {
 	assert parent != null;
 	int pstart = parent.getStartPosition();
 	int pend = pstart + parent.getLength();
-	return ("parent="+getType(parent)+" "+
+	return ("type="+getType(node)+" "+
+		"parent="+getType(parent)+" "+
 		"pstart="+(pstart == start)+" "+
 		"pend="+(pend == end)+" "+
 		"prevkey="+prevkey+" "+
 		"prevnl="+prevnl+" "+
-		"type="+getType(node)+" "+
 		"nextnl="+nextnl+" "+
 		"nextkey="+nextkey+" "+
 		"words="+getWords(getText(node)));
@@ -185,7 +185,8 @@ public class CommExtractor extends ASTVisitor {
     @SuppressWarnings("unchecked")
     public static void main(String[] args)
 	throws IOException {
-	
+
+	int context = 100;
 	List<String> files = new ArrayList<String>();
 	PrintStream out = System.out;
 	for (int i = 0; i < args.length; i++) {
@@ -206,6 +207,7 @@ public class CommExtractor extends ASTVisitor {
 	String[] srcpath = { "." };
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
+	    out.println("# "+path);
 	    String src = Utils.readFile(path);
 
 	    Map<String, String> options = JavaCore.getOptions();
@@ -226,9 +228,12 @@ public class CommExtractor extends ASTVisitor {
 		visitor.addNode(node);
 	    }
             for (Comment node : (List<Comment>) cu.getCommentList()) {
+		int start = node.getStartPosition();
+		int end = node.getStartPosition() + node.getLength();
 		String feats = visitor.getFeatures(node);
-		out.println(feats);
-	    }		
+		out.println("+ "+start+" "+end+" "+feats);
+	    }
+	    out.println();
 	}
 	
 	out.close();
