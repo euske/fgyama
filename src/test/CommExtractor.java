@@ -12,7 +12,6 @@ import net.tabesugi.fgyama.*;
 public class CommExtractor extends ASTVisitor {
 
     private String src;
-    private PrintStream out;
     
     private SortedMap<Integer, List<ASTNode> > _start =
 	new TreeMap<Integer, List<ASTNode> >();
@@ -23,9 +22,8 @@ public class CommExtractor extends ASTVisitor {
     private Map<ASTNode, List<ASTNode> > _children =
 	new HashMap<ASTNode, List<ASTNode> >();
     
-    public CommExtractor(String src, OutputStream output) {
+    public CommExtractor(String src) {
 	this.src = src;
-	this.out = new PrintStream(output);
     }
 
     public void preVisit(ASTNode node) {
@@ -90,7 +88,7 @@ public class CommExtractor extends ASTVisitor {
 	return nodes0;
     }
     
-    public void addComment(Comment node) {
+    public String getFeatures(Comment node) {
 	int start = node.getStartPosition();
 	int end = start + node.getLength();
 	String prevkey = null;
@@ -119,15 +117,15 @@ public class CommExtractor extends ASTVisitor {
 	assert parent != null;
 	int pstart = parent.getStartPosition();
 	int pend = pstart + parent.getLength();
-	out.println("parent="+getType(parent)+" "+
-		    "pstart="+(pstart == start)+" "+
-		    "pend="+(pend == end)+" "+
-		    "prevkey="+prevkey+" "+
-		    "prevnl="+prevnl+" "+
-		    "type="+getType(node)+" "+
-		    "nextnl="+nextnl+" "+
-		    "nextkey="+nextkey+" "+
-		    "words="+getWords(getText(node)));
+	return ("parent="+getType(parent)+" "+
+		"pstart="+(pstart == start)+" "+
+		"pend="+(pend == end)+" "+
+		"prevkey="+prevkey+" "+
+		"prevnl="+prevnl+" "+
+		"type="+getType(node)+" "+
+		"nextnl="+nextnl+" "+
+		"nextkey="+nextkey+" "+
+		"words="+getWords(getText(node)));
     }
 
     private String toKey(Collection<ASTNode> nodes) {
@@ -188,7 +186,7 @@ public class CommExtractor extends ASTVisitor {
 	throws IOException {
 	
 	List<String> files = new ArrayList<String>();
-	OutputStream output = System.out;
+	PrintStream out = System.out;
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
 	    if (arg.equals("--")) {
@@ -196,7 +194,7 @@ public class CommExtractor extends ASTVisitor {
 		    files.add(args[i]);
 		}
 	    } else if (arg.equals("-o")) {
-		output = new FileOutputStream(args[i+1]);
+		out = new PrintStream(new FileOutputStream(args[i+1]));
 		i++;
 	    } else if (arg.startsWith("-")) {
 	    } else {
@@ -220,14 +218,15 @@ public class CommExtractor extends ASTVisitor {
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 
-	    CommExtractor visitor = new CommExtractor(src, output);
+	    CommExtractor visitor = new CommExtractor(src);
 	    cu.accept(visitor);
 	    
             for (Comment node : (List<Comment>) cu.getCommentList()) {
-		visitor.addComment(node);
+		String feats = visitor.getFeatures(node);
+		out.println(feats);
 	    }		
 	}
 	
-	output.close();
+	out.close();
     }
 }
