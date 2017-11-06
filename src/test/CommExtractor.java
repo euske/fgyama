@@ -29,13 +29,7 @@ public class CommExtractor extends ASTVisitor {
     }
 
     public void preVisit(ASTNode node) {
-	int start = node.getStartPosition();
-	List<ASTNode> nodes = _start.get(start);
-	if (nodes == null) {
-	    nodes = new ArrayList<ASTNode>();
-	    _start.put(start, nodes);
-	}
-	nodes.add(node);
+	addStart(node);
 	if (!_stack.empty()) {
 	    ASTNode parent = _stack.peek();
 	    List<ASTNode> children = _children.get(parent);
@@ -49,6 +43,21 @@ public class CommExtractor extends ASTVisitor {
     }
     
     public void postVisit(ASTNode node) {
+	addEnd(node);
+	_stack.pop();
+    }
+    
+    private void addStart(ASTNode node) {
+	int start = node.getStartPosition();
+	List<ASTNode> nodes = _start.get(start);
+	if (nodes == null) {
+	    nodes = new ArrayList<ASTNode>();
+	    _start.put(start, nodes);
+	}
+	nodes.add(node);
+    }
+
+    private void addEnd(ASTNode node) {
 	int end = node.getStartPosition() + node.getLength();
 	List<ASTNode> nodes = _end.get(end);
 	if (nodes == null) {
@@ -56,27 +65,26 @@ public class CommExtractor extends ASTVisitor {
 	    _end.put(end, nodes);
 	}
 	nodes.add(node);
-	_stack.pop();
     }
 
     public void addComment(Comment node) {
 	int start = node.getStartPosition();
 	int end = start + node.getLength();
 	String prevkey = null;
-	boolean prevnl = false;
+	int prevnl = 0;
 	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start+1);
 	if (!before.isEmpty()) {
 	    int i = before.lastKey();
 	    prevkey = toKey(before.get(i));
-	    prevnl = hasNL(i, start);
+	    prevnl = countNL(i, start);
 	}
 	SortedMap<Integer, List<ASTNode> > after = _start.tailMap(end);
 	String nextkey = null;
-	boolean nextnl = false;
+	int nextnl = 0;
 	if (!after.isEmpty()) {
 	    int i = after.firstKey();
 	    nextkey = toKey(after.get(i));
-	    nextnl = hasNL(end, i);
+	    nextnl = countNL(end, i);
 	}
 	Set<ASTNode> nodes0 = new HashSet<ASTNode>();
 	for (List<ASTNode> nodes : _start.headMap(start+1).values()) {
@@ -123,9 +131,14 @@ public class CommExtractor extends ASTVisitor {
 	return s;
     }
 
-    private boolean hasNL(int start, int end) {
-	String s = this.src.substring(start, end);
-	return 0 <= s.indexOf("\n");
+    private int countNL(int start, int end) {
+	int n = 0;
+	while (true) {
+	    start = this.src.indexOf("\n", start);
+	    if (start < 0 || end <= start) break;
+	    start++; n++;
+	}
+	return n;
     }
 
     private String getType(ASTNode node) {
@@ -187,7 +200,7 @@ public class CommExtractor extends ASTVisitor {
 	    parser.setUnitName(path);
 	    parser.setSource(src.toCharArray());
 	    parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	    parser.setResolveBindings(true);
+	    parser.setResolveBindings(false);
 	    parser.setEnvironment(null, srcpath, null, true);
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
