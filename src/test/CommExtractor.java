@@ -29,7 +29,7 @@ public class CommExtractor extends ASTVisitor {
     }
 
     public void preVisit(ASTNode node) {
-	addStart(node);
+	addNode(node);
 	if (!_stack.empty()) {
 	    ASTNode parent = _stack.peek();
 	    List<ASTNode> children = _children.get(parent);
@@ -43,23 +43,19 @@ public class CommExtractor extends ASTVisitor {
     }
     
     public void postVisit(ASTNode node) {
-	addEnd(node);
 	_stack.pop();
     }
     
-    private void addStart(ASTNode node) {
+    public void addNode(ASTNode node) {
 	int start = node.getStartPosition();
+	int end = node.getStartPosition() + node.getLength();
 	List<ASTNode> nodes = _start.get(start);
 	if (nodes == null) {
 	    nodes = new ArrayList<ASTNode>();
 	    _start.put(start, nodes);
 	}
 	nodes.add(node);
-    }
-
-    private void addEnd(ASTNode node) {
-	int end = node.getStartPosition() + node.getLength();
-	List<ASTNode> nodes = _end.get(end);
+	nodes = _end.get(end);
 	if (nodes == null) {
 	    nodes = new ArrayList<ASTNode>();
 	    _end.put(end, nodes);
@@ -67,25 +63,21 @@ public class CommExtractor extends ASTVisitor {
 	nodes.add(node);
     }
 
-    public void addComment(Comment node) {
-	int start = node.getStartPosition();
-	int end = start + node.getLength();
-	String prevkey = null;
-	int prevnl = 0;
-	SortedMap<Integer, List<ASTNode> > before = _end.headMap(start+1);
-	if (!before.isEmpty()) {
-	    int i = before.lastKey();
-	    prevkey = toKey(before.get(i));
-	    prevnl = countNL(i, start);
-	}
-	SortedMap<Integer, List<ASTNode> > after = _start.tailMap(end);
-	String nextkey = null;
-	int nextnl = 0;
-	if (!after.isEmpty()) {
-	    int i = after.firstKey();
-	    nextkey = toKey(after.get(i));
-	    nextnl = countNL(end, i);
-	}
+    public List<ASTNode> getNodesEndBefore(int i) {
+	SortedMap<Integer, List<ASTNode> > before = _end.headMap(i+1);
+	if (before.isEmpty()) return null;
+	i = before.lastKey();
+	return before.get(i);
+    }
+
+    public List<ASTNode> getNodesStartAfter(int i) {
+	SortedMap<Integer, List<ASTNode> > after = _start.tailMap(i);
+	if (after.isEmpty()) return null;
+	i = after.firstKey();
+	return after.get(i);
+    }
+
+    public Set<ASTNode> getNodesOutside(int start, int end) {
 	Set<ASTNode> nodes0 = new HashSet<ASTNode>();
 	for (List<ASTNode> nodes : _start.headMap(start+1).values()) {
 	    nodes0.addAll(nodes);
@@ -95,8 +87,31 @@ public class CommExtractor extends ASTVisitor {
 	    nodes1.addAll(nodes);
 	}
 	nodes0.retainAll(nodes1);
+	return nodes0;
+    }
+    
+    public void addComment(Comment node) {
+	int start = node.getStartPosition();
+	int end = start + node.getLength();
+	String prevkey = null;
+	int prevnl = 0;
+	List<ASTNode> before = getNodesEndBefore(start);
+	if (before != null) {
+	    ASTNode n = before.get(0);
+	    prevkey = toKey(before);
+	    prevnl = countNL(n.getStartPosition()+n.getLength(), start);
+	}
+	String nextkey = null;
+	int nextnl = 0;
+	List<ASTNode> after = getNodesStartAfter(end);
+	if (after != null) {
+	    ASTNode n = after.get(0);
+	    nextkey = toKey(after);
+	    nextnl = countNL(end, n.getStartPosition());
+	}
+	Collection<ASTNode> outside = getNodesOutside(start, end);
 	ASTNode parent = null;
-	for (ASTNode n : nodes0) {
+	for (ASTNode n : outside) {
 	    if (parent == null || n.getLength() < parent.getLength()) {
 		parent = n;
 	    }
