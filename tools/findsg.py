@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 import sqlite3
-from graph import SourceDB, DFGraph
+from srcdb import SourceDB
+from graph import DFGraph
 from graph import load_graphs_file, load_graphs_db, fetch_graph
 from graph2db import TreeCache, get_nodekey
 
@@ -120,9 +121,11 @@ def main(argv):
         except KeyError:
             return
         print ('###', src0.name)
-        src0.show_nodes([ n0 for (n0,n1) in pairs ])
+        for (_,line) in src0.show_nodes([ n0 for (n0,n1) in pairs ]):
+            print(line)
         print ('###', src1.name)
-        src1.show_nodes([ n1 for (n0,n1) in pairs ])
+        for (_,line) in src1.show_nodes([ n1 for (n0,n1) in pairs ]):
+            print(line)
         print ()
         return
 

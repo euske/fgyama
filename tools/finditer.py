@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
-from graph import SourceDB, DFGraph
+from srcdb import SourceDB
+from graph import DFGraph
 from graph import get_graphs
 
 def q(s):
@@ -39,16 +40,14 @@ def show_html(src, nodes):
         return '</span>'
     def abody(annos, s):
         return q(s.replace('\n',''))
-    def println(lineno, s):
+    print('<div class=src>%s: </div>' % (src.name))
+    print('<pre>')
+    for (lineno,s) in src.show_nodes(nodes, astart=astart, aend=aend, abody=abody):
         if lineno is None:
             print ('     '+s)
         else:
             lineno += 1
             print ('%5d:%s' % (lineno, s))
-        return
-    print('<div class=src>%s: </div>' % (src.name))
-    print('<pre>')
-    src.show_nodes(nodes, println=println, astart=astart, aend=aend, abody=abody)
     print('</pre>')
     return
 

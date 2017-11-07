@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 import sqlite3
-from graph import SourceDB, DFGraph
+from srcdb import SourceDB
+from graph import DFGraph
 from graph import fetch_graph
 
 def isok(n):
@@ -44,7 +45,9 @@ def show_html(gid, src, url, nodes, klass=''):
         return '</span>'
     def abody(annos, s):
         return q(s.replace('\n',''))
-    def println(lineno, s):
+    print('<div class=src>%s: <a href="%s">%s</a></div>' % (gid, q(url), src.name))
+    print('<pre class=%s>' % klass)
+    for (lineno,s) in src.show_nodes(nodes, astart=astart, aend=aend, abody=abody):
         if lineno is None:
             print ('     '+s)
         else:
@@ -52,9 +55,6 @@ def show_html(gid, src, url, nodes, klass=''):
             print ('<a href="%s#L%d">%5d</a>:%s' %
                    (q(url), lineno, lineno, s))
         return
-    print('<div class=src>%s: <a href="%s">%s</a></div>' % (gid, q(url), src.name))
-    print('<pre class=%s>' % klass)
-    src.show_nodes(nodes, println=println, astart=astart, aend=aend, abody=abody)
     print('</pre>')
     return
 
@@ -125,9 +125,11 @@ def main(argv):
             print('</div>')
         else:
             print('###', npairs, nodes, depth, branch, src0.name)
-            src0.show_nodes(nodes0)
+            for (_,line) in src0.show_nodes(nodes0):
+                print(line)
             print('###', npairs, nodes, depth, branch, src1.name)
-            src1.show_nodes(nodes1)
+            for (_,line) in src1.show_nodes(nodes1):
+                print(line)
             print()
         npairs += 1
     
