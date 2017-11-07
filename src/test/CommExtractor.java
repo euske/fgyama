@@ -121,6 +121,7 @@ public class CommExtractor extends ASTVisitor {
 	return ("type="+getType(node)+" "+
 		"parent="+getType(parent)+" "+
 		"pstart="+(pstart == start)+" "+
+                "pos="+getPos(start)+" "+
 		"pend="+(pend == end)+" "+
 		"prevkey="+prevkey+" "+
 		"prevnl="+prevnl+" "+
@@ -145,10 +146,24 @@ public class CommExtractor extends ASTVisitor {
 	return s;
     }
 
+    private int getPos(int end) {
+        final int TAB = 8;
+        int i = this.src.lastIndexOf('\n', end)+1;
+        int n = 0;
+        for (char c : this.src.substring(i, end).toCharArray()) {
+            if (c == '\t') {
+                n = ((n/TAB)+1) * TAB;
+            } else {
+                n++;
+            }
+        }
+        return n;
+    }
+        
     private int countNL(int start, int end) {
 	int n = 0;
 	while (true) {
-	    start = this.src.indexOf("\n", start);
+	    start = this.src.indexOf('\n', start);
 	    if (start < 0 || end <= start) break;
 	    start++; n++;
 	}
