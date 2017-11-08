@@ -119,7 +119,7 @@
   </target>
 
   <target name="comm" depends="build">
-    <java classname="CommExtractor">
+    <java classname="CommentExtractor">
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg file="${input}" />

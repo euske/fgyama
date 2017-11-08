@@ -1,7 +1,7 @@
 #!/bin/sh
 # usage:
 #   run.sh net.tabesugi.fgyama.Java2DF *.java
-#   run.sh CommExtractor *.java
+#   run.sh CommentExtractor *.java
 BASEDIR=${0%/*}
 LIBDIR=${BASEDIR}/lib
 CLASSPATH=${BASEDIR}/target

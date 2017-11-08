@@ -1,4 +1,4 @@
-//  CommExtractor.java
+//  CommentExtractor.java
 //  Feature extractor for comments.
 //
 
@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import net.tabesugi.fgyama.*;
 
-public class CommExtractor extends ASTVisitor {
+public class CommentExtractor extends ASTVisitor {
 
     private String src;
     
@@ -22,7 +22,7 @@ public class CommExtractor extends ASTVisitor {
     private Map<ASTNode, List<ASTNode> > _children =
 	new HashMap<ASTNode, List<ASTNode> >();
     
-    public CommExtractor(String src) {
+    public CommentExtractor(String src) {
 	this.src = src;
     }
 
@@ -236,7 +236,7 @@ public class CommExtractor extends ASTVisitor {
 	    parser.setCompilerOptions(options);
 	    CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 
-	    CommExtractor visitor = new CommExtractor(src);
+	    CommentExtractor visitor = new CommentExtractor(src);
 	    cu.accept(visitor);
 	    
             for (Comment node : (List<Comment>) cu.getCommentList()) {
