@@ -70,7 +70,7 @@ class SourceFile:
         n = len(self.lines)
         for (lineno,line) in list(lines.items()):
             for i in range(max(0, lineno-ncontext),
-                           min(n, lineno+ncontext+1))q:
+                           min(n, lineno+ncontext+1)):
                 if i not in lines:
                     lines[i] = abody(None, self.lines[i])
         lineno0 = 0
