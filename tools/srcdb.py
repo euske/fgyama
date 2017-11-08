@@ -67,8 +67,10 @@ class SourceFile:
                 buf += abody(annos, line[pos0:])
                 lines[lineno] = buf
             loc0 = loc1
+        n = len(self.lines)
         for (lineno,line) in list(lines.items()):
-            for i in range(lineno-ncontext, lineno+ncontext+1):
+            for i in range(max(0, lineno-ncontext),
+                           min(n, lineno+ncontext+1))q:
                 if i not in lines:
                     lines[i] = abody(None, self.lines[i])
         lineno0 = 0
