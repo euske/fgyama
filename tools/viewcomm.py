@@ -19,24 +19,27 @@ def main(argv):
         if k == '-B': srcdb = SourceDB(v)
     if not args: return usage()
 
-    # "+ 2886 2919 type=LineComment parent=Block ..."
+    # "+ path.java"
+    # "- 2886 2919 type=LineComment parent=Block ..."
     src = None
     for line in fileinput.input(args):
         line = line.strip()
-        if line.startswith('#'):
-            print (line)
+        if line.startswith('+'):
             (_,_,name) = line.strip().partition(' ')
             src = srcdb.get(name)
-        elif line.startswith('+'):
+            print('+ %s' % name)
+        elif line.startswith('-'):
             assert src is not None
             f = line.split(' ')
             (start, end) = map(int, f[1:3])
-            print (line+' key=XXX')
+            print('- %s %s key=XXX' % (start, end))
             ranges = [(start,end,1)]
-            for (_,line) in src.show(ranges):
+            for (_,line) in src.show(ranges, ncontext=2):
                 print('   '+line, end='')
             print()
-        elif line:
+        elif not line:
+            print()
+        else:
             raise ValueError(line)
     
     return 0

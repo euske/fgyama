@@ -222,7 +222,7 @@ public class CommExtractor extends ASTVisitor {
 	String[] srcpath = { "." };
 	for (String path : files) {
 	    Utils.logit("Parsing: "+path);
-	    out.println("# "+path);
+	    out.println("+ "+path);
 	    String src = Utils.readFile(path);
 
 	    Map<String, String> options = JavaCore.getOptions();
@@ -246,7 +246,7 @@ public class CommExtractor extends ASTVisitor {
 		int start = node.getStartPosition();
 		int end = node.getStartPosition() + node.getLength();
 		String feats = visitor.getFeatures(node);
-		out.println("+ "+start+" "+end+" "+feats);
+		out.println("- "+start+" "+end+" "+feats);
 	    }
 	    out.println();
 	}
