@@ -63,7 +63,7 @@ class SourceFile:
                 else:
                     buf += aend(anno)
                     annos.remove(anno)
-            if 0 < pos0:
+            if buf:
                 buf += abody(annos, line[pos0:])
                 lines[lineno] = buf
             loc0 = loc1
