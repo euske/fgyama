@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import random
 from srcdb import SourceDB
 
 def main(argv):
@@ -15,6 +16,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     srcdb = None
+    ncomments = 2
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
     if not args: return usage()
@@ -22,23 +24,29 @@ def main(argv):
     # "+ path.java"
     # "- 2886 2919 type=LineComment parent=Block ..."
     src = None
+    ranges = []
+    random.seed(0)
     for line in fileinput.input(args):
         line = line.strip()
         if line.startswith('+'):
             (_,_,name) = line.strip().partition(' ')
             src = srcdb.get(name)
             print('+ %s' % name)
+            ranges = []
         elif line.startswith('-'):
             assert src is not None
             f = line.split(' ')
             (start, end) = map(int, f[1:3])
-            print('- %s %s key=XXX' % (start, end))
-            ranges = [(start,end,1)]
-            for (_,line) in src.show(ranges, ncontext=2):
-                print('   '+line, end='')
-            print()
+            ranges.append((start,end,1))
         elif not line:
-            print()
+            if ranges:
+                random.shuffle(ranges)
+                for (start,end,tag) in ranges[:ncomments]:
+                    print('- %s %s key=XXX' % (start, end))
+                    for (_,line) in src.show([(start,end,tag)], ncontext=3):
+                        print('   '+line, end='')
+                print()
+                ranges = None
         else:
             raise ValueError(line)
     
