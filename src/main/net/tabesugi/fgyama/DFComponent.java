@@ -103,7 +103,7 @@ public class DFComponent {
     }
     
     public void endScope(DFScope scope) {
-	for (DFRef ref : scope.vars()) {
+	for (DFRef ref : scope.refs()) {
 	    this.inputs.remove(ref);
 	    this.outputs.remove(ref);
 	}

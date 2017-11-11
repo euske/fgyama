@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.*;
 
 
 //  DFScope
-//  Mapping from name -> variable.
+//  Mapping from name -> reference.
 //
 public class DFScope {
 
@@ -18,7 +18,7 @@ public class DFScope {
 
     private List<DFScope> children = new ArrayList<DFScope>();
     private Map<ASTNode, DFScope> ast2child = new HashMap<ASTNode, DFScope>();
-    private Map<String, DFVar> vars = new HashMap<String, DFVar>();
+    private Map<String, DFRef> refs = new HashMap<String, DFRef>();
 
     public DFScope(DFGraph graph, String name) {
 	this.graph = graph;
@@ -63,8 +63,8 @@ public class DFScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+this.name+" {");
 	String i2 = indent + "  ";
-	for (DFVar var : this.vars.values()) {
-	    out.println(i2+"defined: "+var);
+	for (DFRef ref : this.refs.values()) {
+	    out.println(i2+"defined: "+ref);
 	}
 	for (DFScope scope : this.children) {
 	    scope.dump(out, i2);
@@ -72,47 +72,47 @@ public class DFScope {
 	out.println(indent+"}");
     }
 
-    public DFVar add(String name, Type type) {
-	DFVar var = new DFVar(this, name, type);
-	this.vars.put(name, var);
-	return var;
+    public DFRef addVar(String name, Type type) {
+	DFRef ref = new DFVar(this, name, type);
+	this.refs.put(name, ref);
+	return ref;
     }
 
-    public DFVar[] vars() {
-	DFVar[] vars = new DFVar[this.vars.size()];
-	this.vars.values().toArray(vars);
-	Arrays.sort(vars);
-	return vars;
+    public DFRef[] refs() {
+	DFRef[] refs = new DFRef[this.refs.size()];
+	this.refs.values().toArray(refs);
+	Arrays.sort(refs);
+	return refs;
     }
 
-    public DFRef lookupVar(String name) {
-	DFVar var = this.vars.get(name);
-	if (var != null) {
-	    return var;
+    public DFRef lookupRef(String name) {
+	DFRef ref = this.refs.get(name);
+	if (ref != null) {
+	    return ref;
 	} else if (this.parent != null) {
-	    return this.parent.lookupVar(name);
+	    return this.parent.lookupRef(name);
 	} else {
-	    return this.add(name, null);
+	    return this.addVar(name, null);
 	}
     }
 
     public DFRef lookupField(String name) {
-	return this.lookupVar("."+name);
+	return this.lookupRef("."+name);
     }
 
     public DFRef lookupThis() {
-	return this.lookupVar("#this");
+	return this.lookupRef("#this");
     }
 
     public DFRef lookupSuper() {
-	return this.lookupVar("#super");
+	return this.lookupRef("#super");
     }
     
     public DFRef lookupReturn() {
-	return this.lookupVar("#return");
+	return this.lookupRef("#return");
     }
     
     public DFRef lookupArray() {
-	return this.lookupVar("#array");
+	return this.lookupRef("#array");
     }
 }

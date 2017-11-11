@@ -799,7 +799,7 @@ public class Java2DF extends ASTVisitor {
 
 	for (VariableDeclarationFragment frag : frags) {
 	    SimpleName varName = frag.getName();
-	    DFRef ref = scope.lookupVar(varName.getIdentifier());
+	    DFRef ref = scope.lookupRef(varName.getIdentifier());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(scope, frame, cpt, init);
@@ -822,7 +822,7 @@ public class Java2DF extends ASTVisitor {
 
 	if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookupVar(varName.getIdentifier());
+	    DFRef ref = scope.lookupRef(varName.getIdentifier());
 	    cpt.setLValue(new SingleAssignNode(scope, ref, expr));
 	    
 	} else if (expr instanceof ArrayAccess) {
@@ -870,7 +870,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookupVar(varName.getIdentifier());
+	    DFRef ref = scope.lookupRef(varName.getIdentifier());
 	    cpt.setRValue(new VarRefNode(scope, ref, expr, cpt.getValue(ref)));
 	    
 	} else if (expr instanceof ThisExpression) {
@@ -1311,7 +1311,7 @@ public class Java2DF extends ASTVisitor {
 	loopCpt = processExpression(loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
 	SimpleName varName = decl.getName();
-	DFRef ref = loopScope.lookupVar(varName.getIdentifier());
+	DFRef ref = loopScope.lookupRef(varName.getIdentifier());
 	DFNode iterValue = new IterNode(loopScope, ref, expr, loopCpt.getRValue());
 	SingleAssignNode assign = new SingleAssignNode(loopScope, ref, expr);
 	assign.accept(iterValue);
@@ -1503,7 +1503,7 @@ public class Java2DF extends ASTVisitor {
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
 		SimpleName varName = frag.getName();
-		scope.add(varName.getIdentifier(), varType);
+		scope.addVar(varName.getIdentifier(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
 		    buildScope(scope, frame, expr);
@@ -1596,7 +1596,7 @@ public class Java2DF extends ASTVisitor {
 	    // XXX Ignore modifiers and dimensions.
 	    Type varType = decl.getType();
 	    SimpleName varName = decl.getName();
-	    childScope.add(varName.getIdentifier(), varType);
+	    childScope.addVar(varName.getIdentifier(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
 		buildScope(childScope, frame, expr);
@@ -1633,7 +1633,7 @@ public class Java2DF extends ASTVisitor {
 		// XXX Ignore modifiers and dimensions.
 		Type varType = decl.getType();
 		SimpleName varName = decl.getName();
-		childScope.add(varName.getIdentifier(), varType);
+		childScope.addVar(varName.getIdentifier(), varType);
 		buildScope(childScope, frame, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
@@ -1680,7 +1680,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (ast instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookupVar(varName.getIdentifier());
+	    DFRef ref = scope.lookupRef(varName.getIdentifier());
 	    frame.addInput(ref);
 	    
 	} else if (ast instanceof ThisExpression) {
@@ -1747,7 +1747,7 @@ public class Java2DF extends ASTVisitor {
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
 		SimpleName varName = frag.getName();
-		DFRef ref = scope.add(varName.getIdentifier(), varType);
+		DFRef ref = scope.addVar(varName.getIdentifier(), varType);
 		frame.addOutput(ref);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
@@ -1866,7 +1866,7 @@ public class Java2DF extends ASTVisitor {
 	
 	if (ast instanceof SimpleName) {
 	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookupVar(varName.getIdentifier());
+	    DFRef ref = scope.lookupRef(varName.getIdentifier());
 	    frame.addOutput(ref);
 	    
 	} else if (ast instanceof ArrayAccess) {
@@ -1914,7 +1914,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName paramName = decl.getName();
 	    // XXX Ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
-	    DFRef ref = scope.add(paramName.getIdentifier(), paramType);
+	    DFRef ref = scope.addVar(paramName.getIdentifier(), paramType);
 	    DFNode param = new ArgNode(scope, ref, decl, i++);
 	    DFNode assign = new SingleAssignNode(scope, ref, decl);
 	    assign.accept(param);
