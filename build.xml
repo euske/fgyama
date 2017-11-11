@@ -109,7 +109,8 @@
   </target>
   
   <target name="java2xml" depends="build">
-    <java classname="Java2Xml">
+    <java fork="true" classname="Java2Xml">
+      <jvmarg value="-ea" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg value="-o" />
@@ -119,7 +120,8 @@
   </target>
 
   <target name="comm" depends="build">
-    <java classname="CommentExtractor">
+    <java fork="true" classname="CommentExtractor">
+      <jvmarg value="-ea" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg file="${input}" />
