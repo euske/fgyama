@@ -7,18 +7,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] '
+        print('usage: %s [-B basedir] [-n comments] [-c context] '
               'comm.out' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:')
+        (opts, args) = getopt.getopt(argv[1:], 'B:n:c:')
     except getopt.GetoptError:
         return usage()
     srcdb = None
     ncomments = 2
+    ncontext = 3
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
+        elif k == '-n': ncomments = int(v)
+        elif k == '-c': ncontext = int(v)
     if not args: return usage()
 
     # "+ path.java"
@@ -43,10 +46,11 @@ def main(argv):
                 random.shuffle(ranges)
                 for (start,end,tag) in ranges[:ncomments]:
                     print('- %s %s key=XXX' % (start, end))
-                    for (_,line) in src.show([(start,end,tag)], ncontext=3):
+                    r = [(start,end,tag)]
+                    for (_,line) in src.show(r, ncontext=ncontext):
                         print('   '+line, end='')
-                print()
-                ranges = None
+                    print()
+                ranges = []
         else:
             raise ValueError(line)
     
