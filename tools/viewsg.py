@@ -54,7 +54,6 @@ def show_html(gid, src, url, nodes, klass=''):
             lineno += 1
             print ('<a href="%s#L%d">%5d</a>:%s' %
                    (q(url), lineno, lineno, s))
-        return
     print('</pre>')
     return
 
