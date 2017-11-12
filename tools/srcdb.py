@@ -31,10 +31,10 @@ CREATE INDEX SourceMapIndex ON SourceMap(FileName);
         self._conn.commit()
         return
 
-    def add(self, key, reponame, branch, commit, src):
+    def add(self, path, reponame, branch, commit, src):
         self._cur.execute(
             'INSERT INTO SourceMap VALUES (NULL,?,?,?,?,?);',
-            (dst, reponame, branch, commit, src))
+            (path, reponame, branch, commit, src))
         return
 
     def get(self, key):

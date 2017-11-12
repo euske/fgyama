@@ -11,23 +11,9 @@ import re
 import os.path
 import zipfile
 import hashlib
-import sqlite3
+from srcdb import SourceMap
 
 BUFSIZ = 2**16
-
-def build_srcmap_tables(cur):
-    cur.executescript('''
-CREATE TABLE SourceMap (
-    Uid INTEGER PRIMARY KEY,
-    FileName TEXT,
-    RepoName TEXT,
-    BranchName TEXT,
-    CommitId TEXT,
-    SrcPath TEXT
-);
-CREATE INDEX SourceMapIndex ON SourceMap(FileName);
-''')
-    return
 
 NONASCII = re.compile(r'[^.a-zA-Z0-9]')
 def getkey(path):
@@ -57,18 +43,9 @@ def main(argv):
         elif k == '-p': pat = re.compile(v)
         elif k == '-b': dstbase = v
         elif k == '-R': repomap = v
-        elif k == '-M': srcmap = v
+        elif k == '-M': srcmap = SourceMap(v)
     if not args: return usage()
     assert (srcmap is None) == (repomap is None)
-    
-    srcmapconn = srcmapcur = None
-    if srcmap is not None:
-        srcmapconn = sqlite3.connect(srcmap)
-        srcmapcur = srcmapconn.cursor()
-        try:
-            build_srcmap_tables(srcmapcur)
-        except sqlite3.OperationalError:
-            pass
 
     repo = None
     if repomap is not None:
@@ -99,10 +76,8 @@ def main(argv):
                         pass
             dst = os.path.join(dstdir, getkey(src1))
             print('extract: %r -> %r' % (src1, dst), file=sys.stderr)
-            if srcmapcur is not None:
-                srcmapcur.execute(
-                    'INSERT INTO SourceMap VALUES (NULL,?,?,?,?,?);',
-                    (dst, reponame, branch, commit, src1))
+            if srcmap is not None:
+                srcmap.add(dst, reponame, branch, commit, src1)
             if extract:
                 fp = zfp.open(src, 'r')
                 out = open(os.path.join(dstbase, dst), 'wb')
@@ -112,9 +87,9 @@ def main(argv):
                     out.write(data)
                 out.close()
                 fp.close()
-    
-    if srcmapconn is not None:
-        srcmapconn.commit()
+
+    if srcmap is not None:
+        srcmap.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

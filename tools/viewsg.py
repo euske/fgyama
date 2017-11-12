@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import sys
-import sqlite3
 from srcdb import SourceDB, SourceMap
 from graph import DFGraph
 from graph import GraphDB
