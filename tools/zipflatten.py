@@ -2,6 +2,9 @@
 ##
 ##  flatten .zip files
 ##
+##  usage:
+##    $ zipflatten.py -b src -p '\.java$' -R repos.out -M srcmap.db zip/*.zip
+##
 
 import sys
 import re
