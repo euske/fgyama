@@ -1,6 +1,53 @@
 #!/usr/bin/env python
 import sys
 import os.path
+import sqlite3
+
+
+##  SourceMap
+##
+class SourceMap:
+
+    def __init__(self, path):
+        self._conn = sqlite3.connect(path)
+        self._cur = self._conn.cursor()
+        try:
+            self._cur.executescript('''
+CREATE TABLE SourceMap (
+    Uid INTEGER PRIMARY KEY,
+    FileName TEXT,
+    RepoName TEXT,
+    BranchName TEXT,
+    CommitId TEXT,
+    SrcPath TEXT
+);
+CREATE INDEX SourceMapIndex ON SourceMap(FileName);
+''')
+        except sqlite3.OperationalError:
+            pass
+        return
+
+    def close(self):
+        self._conn.commit()
+        return
+
+    def add(self, key, reponame, branch, commit, src):
+        self._cur.execute(
+            'INSERT INTO SourceMap VALUES (NULL,?,?,?,?,?);',
+            (dst, reponame, branch, commit, src))
+        return
+
+    def get(self, key):
+        rows = self._cur.execute(
+            'SELECT RepoName,CommitId,SrcPath FROM SourceMap WHERE FileName=?;',
+            (name,))
+        if not rows: raise KeyError(key)
+        return rows.fetchone()
+
+    def geturl(self, key):
+        (reponame,commit,srcpath) = self.get(key)
+        url = 'https://github.com/%s/tree/%s/%s' % (reponame, commit, srcpath)
+        return url
 
 
 ##  SourceFile
