@@ -61,27 +61,27 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] [-U urls.db] [-H] '
+        print('usage: %s [-B basedir] [-M srcmap.db] [-H] '
               'graph.db sg.out' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:U:H')
+        (opts, args) = getopt.getopt(argv[1:], 'B:M:H')
     except getopt.GetoptError:
         return usage()
     srcdb = None
-    urlsname = None
+    srcmap = None
     html = False
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
-        elif k == '-U': urlsname = v
+        elif k == '-U': srcmap = v
         elif k == '-H': html = True
     if not args: return usage()
 
-    urlsconn = urlscur = None
-    if urlsname is not None:
-        urlsconn = sqlite3.connect(urlsname)
-        urlscur = urlsconn.cursor()
+    srcmapconn = srcmapcur = None
+    if srcmap is not None:
+        srcmapconn = sqlite3.connect(srcmap)
+        srcmapcur = srcmapconn.cursor()
     
     graphname = args.pop(0)
     graphconn = sqlite3.connect(graphname)
@@ -90,10 +90,13 @@ def main(argv):
         show_html_headers()
 
     def geturl(name):
-        if urlscur is None:
+        if srcmapcur is None:
             return name
-        rows = urlscur.execute('SELECT URL FROM SourceURL WHERE FileName=?;', (name,))
-        (url,) = rows.fetchone()
+        rows = srcmapcur.execute(
+            'SELECT RepoName,CommitId,SrcPath FROM SourceMap WHERE FileName=?;',
+            (name,))
+        (reponame,commit,srcpath) = rows.fetchone()
+        url = 'https://github.com/%s/tree/%s%s' % (reponame, commit, srcpath)
         return url
 
     npairs = 0
