@@ -19,8 +19,8 @@ public class CommentExtractor extends ASTVisitor {
 	new TreeMap<Integer, List<ASTNode> >();
 
     private Stack<ASTNode> _stack = new Stack<ASTNode>();
-    private Map<ASTNode, List<ASTNode> > _children =
-	new HashMap<ASTNode, List<ASTNode> >();
+    private Map<ASTNode, ASTNode> _parent =
+	new HashMap<ASTNode, ASTNode>();
     
     public CommentExtractor(String src) {
 	this.src = src;
@@ -30,12 +30,7 @@ public class CommentExtractor extends ASTVisitor {
 	addNode(node);
 	if (!_stack.empty()) {
 	    ASTNode parent = _stack.peek();
-	    List<ASTNode> children = _children.get(parent);
-	    if (children == null) {
-		children = new ArrayList<ASTNode>();
-		_children.put(parent, children);
-	    }
-	    children.add(node);
+	    _parent.put(node, parent);
 	}
 	_stack.push(node);
     }
@@ -61,6 +56,15 @@ public class CommentExtractor extends ASTVisitor {
 	nodes.add(node);
     }
 
+    public List<ASTNode> getParentNodes(ASTNode node) {
+	ArrayList<ASTNode> parents = new ArrayList<ASTNode>();
+	while (node != null) {
+	    parents.add(node);
+	    node = _parent.get(node);
+	}
+	return parents;
+    }
+    
     public List<ASTNode> getNodesEndBefore(int i) {
 	SortedMap<Integer, List<ASTNode> > before = _end.headMap(i+1);
 	if (before.isEmpty()) return null;
@@ -91,21 +95,21 @@ public class CommentExtractor extends ASTVisitor {
     public String getFeatures(Comment node) {
 	int start = node.getStartPosition();
 	int end = start + node.getLength();
-	String prevkey = null;
-	int prevnl = 0;
+	String leftkey = null;
+	int leftnl = 0;
 	List<ASTNode> before = getNodesEndBefore(start);
 	if (before != null) {
 	    ASTNode n = before.get(0);
-	    prevkey = toKey(before);
-	    prevnl = countNL(n.getStartPosition()+n.getLength(), start);
+	    leftkey = toKeySorted(before);
+	    leftnl = countNL(n.getStartPosition()+n.getLength(), start);
 	}
-	String nextkey = null;
-	int nextnl = 0;
+	String rightkey = null;
+	int rightnl = 0;
 	List<ASTNode> after = getNodesStartAfter(end);
 	if (after != null) {
 	    ASTNode n = after.get(0);
-	    nextkey = toKey(after);
-	    nextnl = countNL(end, n.getStartPosition());
+	    rightkey = toKeySorted(after);
+	    rightnl = countNL(end, n.getStartPosition());
 	}
 	Collection<ASTNode> outside = getNodesOutside(start, end);
 	ASTNode parent = null;
@@ -118,32 +122,36 @@ public class CommentExtractor extends ASTVisitor {
 	assert parent != null;
 	int pstart = parent.getStartPosition();
 	int pend = pstart + parent.getLength();
+	List<ASTNode> parents = getParentNodes(parent);
 	return ("type="+getType(node)+" "+
-		"parent="+getType(parent)+" "+
+		"parent="+toKey(parents)+" "+
 		"pstart="+(pstart == start)+" "+
                 "pos="+getPos(start)+" "+
 		"pend="+(pend == end)+" "+
-		"prevkey="+prevkey+" "+
-		"prevnl="+prevnl+" "+
-		"nextnl="+nextnl+" "+
-		"nextkey="+nextkey+" "+
+		"leftkey="+leftkey+" "+
+		"leftnl="+leftnl+" "+
+		"rightnl="+rightnl+" "+
+		"rightkey="+rightkey+" "+
 		"words="+getWords(getText(node)));
     }
 
-    private String toKey(Collection<ASTNode> nodes) {
+    private String toKey(List<ASTNode> nodes) {
+	String[] names = new String[nodes.size()];
+	for (int i = 0; i < nodes.size(); i++) {
+	    names[i] = getType(nodes.get(i));
+	}
+	return join(names);
+    }
+    
+    private String toKeySorted(Collection<ASTNode> nodes) {
 	ASTNode[] sorted = new ASTNode[nodes.size()];
 	nodes.toArray(sorted);
-	Arrays.sort(sorted, (a, b) -> (b.getLength() - a.getLength()));
-	String s = null;
-	for (ASTNode node : sorted) {
-	    if (s == null) {
-		s = "";
-	    } else {
-		s += ",";
-	    }
-	    s += getType(node);
+	Arrays.sort(sorted, (a, b) -> (a.getLength() - b.getLength()));
+	String[] names = new String[sorted.length];
+	for (int i = 0; i < sorted.length; i++) {
+	    names[i] = getType(sorted[i]);
 	}
-	return s;
+	return join(names);
     }
 
     private int getPos(int end) {
@@ -183,7 +191,10 @@ public class CommentExtractor extends ASTVisitor {
     }
 
     private String getWords(String text) {
-	String[] words = text.split("\\W+");
+	return join(text.split("\\W+"));
+    }
+    
+    private static String join(String[] words) {
 	String s = null;
 	for (String w : words) {
 	    if (w.length() == 0) {
