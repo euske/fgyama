@@ -189,7 +189,7 @@ def parse_graph(gid, egraph, src=None):
 
 ##  load_graphs
 ##
-def load_graphs_file(fp, gid=0):
+def load_graphs(fp, gid=0):
     root = ElementTree(file=fp).getroot()
     for efile in root.getchildren():
         if efile.tag != 'file': continue
@@ -201,24 +201,16 @@ def load_graphs_file(fp, gid=0):
             yield parse_graph(gid, egraph, src=path)
     return
 
-def load_graphs_db(conn, gids=None):
-    cur = conn.cursor()
-    if gids is not None:
-        for gid in gids:
-            graph = fetch_graph(cur, gid)
-            yield graph
-    else:
-        cur1 = conn.cursor()
-        for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
-            graph = fetch_graph(cur, gid)
-            yield graph
-    return
 
-
-##  build_graph_tables
+##  GraphDB
 ##
-def build_graph_tables(cur):
-    cur.executescript('''
+class GraphDB:
+    
+    def __init__(self, path):
+        self._conn = sqlite3.connect(path)
+        self._cur = self._conn.cursor()
+        try:
+            self._cur.executescript('''
 CREATE TABLE SourceFile (
     Cid INTEGER PRIMARY KEY,
     FileName TEXT
@@ -264,104 +256,121 @@ CREATE TABLE DFLink (
 );
 CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
 ''')
-    return
+        except sqlite3.OperationalError:
+            pass
+        return
 
+    def close(self):
+        self._conn.commit()
+        return
 
-##  store_graph
-##
-def store_graph(cur, cid, graph):
-    cur.execute(
-        'INSERT INTO DFGraph VALUES (NULL,?,?);',
-        (cid, graph.name))
-    gid = cur.lastrowid
-    graph.gid = gid
-    
-    def store_node(sid, node):
-        aid = 0
-        if node.ast is not None:
+    def get_gids(self):
+        cur1 = self._conn.cursor()
+        for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
+            yield gid
+        return
+
+    def add_src(self, src):
+        self._cur.execute(
+            'INSERT INTO SourceFile VALUES (NULL,?)',
+            (src,))
+        cid = self._cur.lastrowid
+        return cid
+
+    # store_graph
+    def add(self, cid, graph):
+        cur = self._cur
+        cur.execute(
+            'INSERT INTO DFGraph VALUES (NULL,?,?);',
+            (cid, graph.name))
+        gid = cur.lastrowid
+        graph.gid = gid
+
+        def store_node(sid, node):
+            aid = 0
+            if node.ast is not None:
+                cur.execute(
+                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
+                    node.ast)
+                aid = cur.lastrowid
             cur.execute(
-                'INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
-                node.ast)
-            aid = cur.lastrowid
+                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
+                (gid, sid, aid, node.ntype, node.ref, node.data))
+            nid = cur.lastrowid
+            node.nid = nid
+            return nid
+
+        def store_scope(scope, parent=0):
+            cur.execute(
+                'INSERT INTO DFScope VALUES (NULL,?,?,?);',
+                (gid, parent, scope.name))
+            sid = cur.lastrowid
+            scope.sid = sid
+            for node in scope.nodes:
+                store_node(sid, node)
+            for child in scope.children:
+                store_scope(child, sid)
+            return
+
+        def store_link(node, src, label):
+            cur.execute(
+                'INSERT INTO DFLink VALUES (NULL,?,?,?);',
+                (node.nid, src.nid, label))
+            return
+
+        store_scope(graph.root)
+        for node in graph.nodes.values():
+            for (label,src) in node.inputs.items():
+                store_link(node, src, label)
+        return gid
+
+    # fetch_graph
+    def get(self, gid):
+        cur = self._cur
         cur.execute(
-            'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-            (gid, sid, aid, node.ntype, node.ref, node.data))
-        nid = cur.lastrowid
-        node.nid = nid
-        return nid
-
-    def store_scope(scope, parent=0):
+            'SELECT Cid,Name FROM DFGraph WHERE Gid=?;',
+            (gid,))
+        (cid,name) = cur.fetchone()
         cur.execute(
-            'INSERT INTO DFScope VALUES (NULL,?,?,?);',
-            (gid, parent, scope.name))
-        sid = cur.lastrowid
-        scope.sid = sid
-        for node in scope.nodes:
-            store_node(sid, node)
-        for child in scope.children:
-            store_scope(child, sid)
-        return
-
-    def store_link(node, src, label):
-        cur.execute(
-            'INSERT INTO DFLink VALUES (NULL,?,?,?);',
-            (node.nid, src.nid, label))
-        return
-    
-    store_scope(graph.root)
-    for node in graph.nodes.values():
-        for (label,src) in node.inputs.items():
-            store_link(node, src, label)
-    return
-
-
-##  fetch_graph
-##
-def fetch_graph(cur, gid):
-    cur.execute(
-        'SELECT Cid,Name FROM DFGraph WHERE Gid=?;',
-        (gid,))
-    (cid,name) = cur.fetchone()
-    cur.execute(
-        'SELECT FileName FROM SourceFile WHERE Cid=?;',
-        (cid,))
-    (src,) = cur.fetchone()
-    graph = DFGraph(gid, name, src)
-    rows = cur.execute(
-        'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
-        (gid,))
-    pids = {}
-    scopes = graph.scopes
-    for (sid,parent,name) in rows:
-        scope = DFScope(sid, name)
-        scopes[sid] = scope
-        pids[sid] = parent
-        if parent == 0:
-            graph.root = scope
-    for (sid,parent) in pids.items():
-        if parent != 0:
-            scopes[sid].set_parent(scopes[parent])
-    rows = cur.execute(
-        'SELECT Nid,Sid,Aid,Type,Ref,Data FROM DFNode WHERE Gid=?;',
-        (gid,))
-    for (nid,sid,aid,ntype,ref,data) in list(rows):
-        scope = scopes[sid]
-        node = DFNode(nid, None, scope, ntype, ref, data)
+            'SELECT FileName FROM SourceFile WHERE Cid=?;',
+            (cid,))
+        (src,) = cur.fetchone()
+        graph = DFGraph(gid, name, src)
         rows = cur.execute(
-            'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
-            (aid,))
-        for (t,s,e) in rows:
-            node.ast = (t,s,e)
-        graph.nodes[nid] = node
-        scope.nodes.append(node)
-    for (nid0,node) in graph.nodes.items():
+            'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
+            (gid,))
+        pids = {}
+        scopes = graph.scopes
+        for (sid,parent,name) in rows:
+            scope = DFScope(sid, name)
+            scopes[sid] = scope
+            pids[sid] = parent
+            if parent == 0:
+                graph.root = scope
+        for (sid,parent) in pids.items():
+            if parent != 0:
+                scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
-            (nid0,))
-        for (lid,nid1,label) in rows:
-            node.inputs[label] = nid1
-    graph.fixate()
-    return graph
+            'SELECT Nid,Sid,Aid,Type,Ref,Data FROM DFNode WHERE Gid=?;',
+            (gid,))
+        for (nid,sid,aid,ntype,ref,data) in list(rows):
+            scope = scopes[sid]
+            node = DFNode(nid, None, scope, ntype, ref, data)
+            rows = cur.execute(
+                'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
+                (aid,))
+            for (t,s,e) in rows:
+                node.ast = (t,s,e)
+            graph.nodes[nid] = node
+            scope.nodes.append(node)
+        for (nid0,node) in graph.nodes.items():
+            rows = cur.execute(
+                'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
+                (nid0,))
+            for (lid,nid1,label) in rows:
+                node.inputs[label] = nid1
+        graph.fixate()
+        return graph
 
 
 # get_graphs
@@ -373,13 +382,16 @@ def get_graphs(arg):
         gids = None
         
     if path == '-':
-        graphs = load_graphs_file(sys.stdin)
+        graphs = load_graphs(sys.stdin)
     elif path.endswith('.db'):
-        conn = sqlite3.connect(path)
-        graphs = load_graphs_db(conn, gids)
+        db = GraphDB(path)
+        if gids is None:
+            graphs = ( db.get(gid) for gid in db.get_gids() )
+        else:
+            graphs = [ db.get(gid) for gid in gids ]
     else:
         with open(path) as fp:
-            graphs = list(load_graphs_file(fp))
+            graphs = list(load_graphs(fp))
 
     for graph in graphs:
         if gids is None or graph.gid in gids:

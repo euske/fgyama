@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import sys
 import sqlite3
-from srcdb import SourceDB
+from srcdb import SourceDB, SourceMap
 from graph import DFGraph
-from graph import fetch_graph
+from graph import GraphDB
 
 def isok(n):
     return (n.data is not None)
@@ -74,30 +74,17 @@ def main(argv):
     html = False
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
-        elif k == '-U': srcmap = v
+        elif k == '-M': srcmap = SourceMap(v)
         elif k == '-H': html = True
     if not args: return usage()
-
-    srcmapconn = srcmapcur = None
-    if srcmap is not None:
-        srcmapconn = sqlite3.connect(srcmap)
-        srcmapcur = srcmapconn.cursor()
     
-    graphname = args.pop(0)
-    graphconn = sqlite3.connect(graphname)
-    graphcur = graphconn.cursor()
+    graphdb = GraphDB(args.pop(0))
     if html:
         show_html_headers()
 
     def geturl(name):
-        if srcmapcur is None:
-            return name
-        rows = srcmapcur.execute(
-            'SELECT RepoName,CommitId,SrcPath FROM SourceMap WHERE FileName=?;',
-            (name,))
-        (reponame,commit,srcpath) = rows.fetchone()
-        url = 'https://github.com/%s/tree/%s%s' % (reponame, commit, srcpath)
-        return url
+        if srcmap is None: return name
+        return srcmap.geturl(name)
 
     npairs = 0
     # "- gid0 gid1 nodes depth branch pairs key ..."
@@ -106,8 +93,8 @@ def main(argv):
         if not line.startswith('-'): continue
         f = line.split(' ')
         (gid0, gid1, nodes, depth, branch) = map(int, f[1:6])
-        graph0 = fetch_graph(graphcur, gid0)
-        graph1 = fetch_graph(graphcur, gid1)
+        graph0 = graphdb.get(gid0)
+        graph1 = graphdb.get(gid1)
         src0 = srcdb.get(graph0.src)
         src1 = srcdb.get(graph1.src)
         nodes0 = []

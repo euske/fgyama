@@ -3,7 +3,7 @@ import sys
 import os.path
 import sqlite3
 from graph import DFGraph, DFNode
-from graph import get_graphs, build_graph_tables, store_graph
+from graph import GraphDB, get_graphs
 
 
 # get_nodekey
@@ -14,10 +14,16 @@ def get_nodekey(node):
         return node.ntype+':'+(node.data or '')
 
 
-##  build_index_tables
+##  IndexDB
 ##
-def build_index_tables(cur):
-    cur.executescript('''
+class IndexDB:
+
+    def __init__(self, path, insert=False):
+        self.insert = insert
+        self._conn = sqlite3.connect(path)
+        self._cur = self._conn.cursor()
+        try:
+            self._cur.executescript('''
 CREATE TABLE TreeNode (
     Tid INTEGER PRIMARY KEY,
     Pid INTEGER,
@@ -32,21 +38,17 @@ CREATE TABLE TreeLeaf (
 );
 CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
 ''')
-    return
-
-
-##  TreeCache
-##
-class TreeCache:
-
-    def __init__(self, cur, insert=False):
-        self.cur = cur
-        self.insert = insert
+        except sqlite3.OperationalError:
+            pass
         self._cache = {}
         return
 
+    def close(self):
+        self._conn.commit()
+        return
+
     def get(self, pid, key):
-        cur = self.cur
+        cur = self._cur
         k = (pid,key)
         if k in self._cache:
             tid = self._cache[k]
@@ -69,7 +71,7 @@ class TreeCache:
     # stores the index of the graph.
     def index_graph(self, graph):
         visited = set()
-        cur = self.cur
+        cur = self._cur
 
         def index_tree(label0, node0, pids):
             if node0 in visited: return
@@ -102,7 +104,7 @@ class TreeCache:
     # searches subgraphs
     def search_graph(self, graph, minnodes=2, mindepth=2,
                      checkgid=(lambda graph, gid: True)):
-        cur = self.cur
+        cur = self._cur
 
         # match_tree:
         #   result: {gid: [(label,node0,nid1)]}
@@ -172,7 +174,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-c] graph.db index.db [graph ...]' % argv[0])
+        print('usage: %s [-c)ontinue] graph.db index.db [graph ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'c')
@@ -186,43 +188,29 @@ def main(argv):
     def exists(path):
         print('already exists: %r' % path)
         return 111
-    if not args: return usage()
-    path = args.pop(0)
-    if isnew and os.path.exists(path): return exists(path)
-    graphconn = sqlite3.connect(path)
-    graphcur = graphconn.cursor()
-    try:
-        build_graph_tables(graphconn)
-    except sqlite3.OperationalError:
-        pass
     
     if not args: return usage()
     path = args.pop(0)
     if isnew and os.path.exists(path): return exists(path)
-    indexconn = sqlite3.connect(path)
-    indexcur = indexconn.cursor()
-    try:
-        build_index_tables(indexconn)
-    except sqlite3.OperationalError:
-        pass
+    graphdb = GraphDB(path)
     
-    cache = TreeCache(indexconn.cursor(), insert=True)
+    if not args: return usage()
+    path = args.pop(0)
+    if isnew and os.path.exists(path): return exists(path)
+    indexdb = IndexDB(path, insert=True)
+    
     cid = None
     src = None
     for path in args:
         for graph in get_graphs(path):
             assert isinstance(graph, DFGraph)
             if graph.src is not None and graph.src != src:
-                src = graph.src
-                graphcur.execute(
-                    'INSERT INTO SourceFile VALUES (NULL,?)',
-                    (src,))
-                cid = graphcur.lastrowid
+                cid = graphdb.add_src(graph.src)
             assert cid is not None
-            store_graph(graphcur, cid, graph)
-            cache.index_graph(graph)
-    graphconn.commit()
-    indexconn.commit()
+            graphdb.add(cid, graph)
+            indexdb.index_graph(graph)
+    graphdb.close()
+    indexdb.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

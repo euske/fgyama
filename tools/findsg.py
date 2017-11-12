@@ -3,8 +3,8 @@ import sys
 import sqlite3
 from srcdb import SourceDB
 from graph import DFGraph
-from graph import load_graphs_file, load_graphs_db, fetch_graph
-from graph2db import TreeCache, get_nodekey
+from graph import GraphDB
+from graph2db import IndexDB, get_nodekey
 
 def isok(n):
     return (n.data is not None)
@@ -100,16 +100,9 @@ def main(argv):
         elif k == '-n': minnodes = int(v)
         elif k == '-m': mindepth = int(v)
     if not args: return usage()
-
-    graphname = args.pop(0)
-    graphconn = sqlite3.connect(graphname)
-    graphcur = graphconn.cursor()
-
-    indexname = args.pop(0)
-    indexconn = sqlite3.connect(indexname)
-    indexcur = indexconn.cursor()
-
-    cache = TreeCache(indexconn.cursor())
+    graphdb = GraphDB(args.pop(0))
+    if not args: return usage()
+    indexdb = IndexDB(args.pop(0))
     
     def show_result(graph0, graph1, pairs):
         try:
@@ -131,23 +124,23 @@ def main(argv):
 
     checkgid = (lambda graph, gid: graph.gid is None or graph.gid+100 < gid)
     if args:
-        graphs = load_graphs_file(args.pop(0), None)
+        graphs = load_graphs(args.pop(0))
     else:
-        graphs = load_graphs_db(graphconn)
+        graphs = ( graphdb.get(gid) for gid in graphdb.get_gids() )
     
     for graph0 in graphs:
         gid0 = graph0.gid
         if verbose or (isinstance(gid0, int) and (gid0 % 100) == 0):
             sys.stderr.write('*** %d ***\n' % gid0)
             sys.stderr.flush()
-        result = cache.search_graph(
+        result = indexdb.search_graph(
             graph0, checkgid=checkgid,
             minnodes=minnodes, mindepth=mindepth)                        
         if not result: continue
         maxmatch = None
         maxnodes = -1
         for (gid1,result) in result.items():
-            graph1 = fetch_graph(graphcur, gid1)
+            graph1 = graphdb.get(gid1)
             result = [ (label, node0, graph1.nodes[nid1]) for (_,label,node0,nid1) in result ]
             visited0 = set()
             visited1 = set()
