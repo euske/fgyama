@@ -40,7 +40,7 @@ CREATE INDEX SourceMapIndex ON SourceMap(FileName);
     def get(self, key):
         rows = self._cur.execute(
             'SELECT RepoName,CommitId,SrcPath FROM SourceMap WHERE FileName=?;',
-            (name,))
+            (key,))
         if not rows: raise KeyError(key)
         return rows.fetchone()
 

@@ -1,57 +1,118 @@
 #!/usr/bin/env python
 import sys
-import random
-from srcdb import SourceDB
+import os.path
+from srcdb import SourceDB, SourceMap
+
+def q(s):
+    return s.replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('"','&quot;')
+
+def show_html_headers():
+    print('''<html>
+<style>
+pre { margin: 1em; background: #eeeeee; }
+.head { font-size: 75%; font-weight: bold; }
+.src { margin: 8px; padding: 4px; border: 2px solid gray; }
+.key { font-weight: bold; }
+</style>
+<body>
+''')        
+    return
+
+def show(src, start, end, key, url=None, ncontext=3):
+    ranges = [(start, end, None)]
+    if url is None:
+        print('@ %s %d %d key=%s' % (src.name, start, end, key))
+        for (_,line) in src.show(ranges, ncontext=ncontext):
+            print('  '+line, end='')
+        print()
+    else:
+        def astart(anno):
+            return '<mark>'
+        def aend(anno):
+            return '</mark>'
+        def abody(annos, s):
+            return q(s.replace('\n',''))
+        name = os.path.basename(src.name)
+        print('<div class=src><div class=head><a href="%s">%s</a></div>' % (q(url), name))
+        print('<div class=key>key=%s</div>' % (q(key)))
+        print('<pre>')
+        for (lineno,s) in src.show(ranges, astart=astart, aend=aend, abody=abody,
+                                   ncontext=ncontext):
+            if lineno is None:
+                print ('     '+s)
+            else:
+                lineno += 1
+                print ('<a href="%s#L%d">%5d</a>:%s' %
+                       (q(url), lineno, lineno, s))
+        print('</pre></div>')
+    return
+
+def get_props(a):
+    d = {}
+    for x in a:
+        (k,_,v) = x.partition('=')
+        d[k] = v
+    return d
 
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] [-n comments] [-c context] '
-              'comm.out' %
+        print('usage: %s [-B basedir] [-M srcmap.db] [-H] '
+              '[-n comments] [-c context] comm.out' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:n:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'B:M:Hn:c:')
     except getopt.GetoptError:
         return usage()
     srcdb = None
+    srcmap = None
+    html = False
     ncomments = 2
     ncontext = 3
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
+        elif k == '-M': srcmap = SourceMap(v)
+        elif k == '-H': html = True
         elif k == '-n': ncomments = int(v)
         elif k == '-c': ncontext = int(v)
     if not args: return usage()
 
+    if html:
+        show_html_headers()
+    
     # "+ path.java"
     # "- 2886 2919 type=LineComment parent=Block ..."
     src = None
-    ranges = []
-    random.seed(0)
     for line in fileinput.input(args):
         line = line.strip()
         if line.startswith('+'):
             (_,_,name) = line.strip().partition(' ')
             src = srcdb.get(name)
-            print('+ %s' % name)
-            ranges = []
         elif line.startswith('-'):
             assert src is not None
             f = line.split(' ')
-            (start, end) = map(int, f[1:3])
-            ranges.append((start,end,1))
-        elif not line:
-            if ranges:
-                random.shuffle(ranges)
-                for (start,end,tag) in ranges[:ncomments]:
-                    print('- %s %s key=XXX' % (start, end))
-                    r = [(start,end,tag)]
-                    for (_,line) in src.show(r, ncontext=ncontext):
-                        print('   '+line, end='')
-                    print()
-                ranges = []
-        else:
+            start = int(f[1])
+            end = int(f[2])
+            props = get_props(f[3:])
+            key = props.get('key', 'XXX')
+            show(src, start, end, key, ncontext=ncontext)
+            
+        elif line.startswith('@'):
+            f = line.split(' ')
+            name = f[1]
+            start = int(f[2])
+            end = int(f[3])
+            props = get_props(f[3:])
+            key = props.get('key', 'XXX')
+            src = srcdb.get(name)
+            url = None
+            if html and srcmap is not None:
+                url = srcmap.geturl(name)
+            show(src, start, end, key, url=url, ncontext=ncontext)
+            
+        elif line:
             raise ValueError(line)
     
     return 0
