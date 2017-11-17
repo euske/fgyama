@@ -25,7 +25,7 @@ def getkey(path):
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-n] [-p pat] [-b dstbase] [-R repos.out] [-M srcmap.db] [zip ...]' %
+        print('usage: %s [-n] [-p pat] [-m maxsize] [-b dstbase] [-R repos.out] [-M srcmap.db] [zip ...]' %
               argv[0])
         return 100
     try:
@@ -35,12 +35,14 @@ def main(argv):
     debug = 0
     extract = True
     pat = None
+    maxsize = 1024*1024
     dstbase = '.'
     repomap = None
     srcmap = None
     for (k, v) in opts:
         if k == '-n': extract = False
         elif k == '-p': pat = re.compile(v)
+        elif k == '-m': maxsize = int(v)
         elif k == '-b': dstbase = v
         elif k == '-R': repomap = v
         elif k == '-M': srcmap = SourceMap(v)
@@ -66,6 +68,7 @@ def main(argv):
             src = info.filename
             if '/.' in src: continue
             if pat is not None and not pat.search(src): continue
+            if maxsize < info.file_size: continue
             (dir1,_,src1) = src.partition('/')
             if dstdir != dir1:
                 dstdir = dir1
