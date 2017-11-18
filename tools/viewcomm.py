@@ -18,9 +18,10 @@ pre { margin: 1em; background: #eeeeee; }
 ''')        
     return
 
-def show(src, start, end, key, url=None, ncontext=3):
+def show(index, src, start, end, key, url=None, ncontext=3):
     ranges = [(start, end, None)]
     if url is None:
+        print('# %s:' % index)
         print('@ %s %d %d key=%s' % (src.name, start, end, key))
         for (_,line) in src.show(ranges, ncontext=ncontext):
             print('  '+line, end='')
@@ -33,7 +34,8 @@ def show(src, start, end, key, url=None, ncontext=3):
         def abody(annos, s):
             return q(s.replace('\n',''))
         name = os.path.basename(src.name)
-        print('<div class=src><div class=head><a href="%s">%s</a></div>' % (q(url), name))
+        print('<div class=src><div class=head>%s: <a href="%s">%s</a></div>' %
+              (index, q(url), name))
         print('<div class=key>key=%s</div>' % (q(key)))
         print('<pre>')
         for (lineno,s) in src.show(ranges, astart=astart, aend=aend, abody=abody,
@@ -59,23 +61,21 @@ def main(argv):
     import getopt
     def usage():
         print('usage: %s [-B basedir] [-M srcmap.db] [-H] '
-              '[-n comments] [-c context] comm.out' %
+              '[-c context] comm.out' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:M:Hn:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'B:M:Hc:')
     except getopt.GetoptError:
         return usage()
     srcdb = None
     srcmap = None
     html = False
-    ncomments = 2
     ncontext = 3
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
         elif k == '-M': srcmap = SourceMap(v)
         elif k == '-H': html = True
-        elif k == '-n': ncomments = int(v)
         elif k == '-c': ncontext = int(v)
     if not args: return usage()
 
@@ -85,6 +85,7 @@ def main(argv):
     # "+ path.java"
     # "- 2886 2919 type=LineComment parent=Block ..."
     src = None
+    index = 0
     for line in fileinput.input(args):
         line = line.strip()
         if line.startswith('+'):
@@ -97,7 +98,8 @@ def main(argv):
             end = int(f[2])
             props = get_props(f[3:])
             key = props.get('key', 'XXX')
-            show(src, start, end, key, ncontext=ncontext)
+            show(index, src, start, end, key, ncontext=ncontext)
+            index += 1
             
         elif line.startswith('@'):
             f = line.split(' ')
@@ -110,7 +112,8 @@ def main(argv):
             url = None
             if html and srcmap is not None:
                 url = srcmap.geturl(name)
-            show(src, start, end, key, url=url, ncontext=ncontext)
+            show(index, src, start, end, key, url=url, ncontext=ncontext)
+            index += 1
             
         elif line:
             raise ValueError(line)
