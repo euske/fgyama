@@ -83,6 +83,23 @@ class SourceFile:
              aend=(lambda _: ']'),
              abody=(lambda _,s: s),
              ncontext=1, skip='...\n'):
+        for (lineno,line) in self.chunk(ranges, ncontext=ncontext):
+            if lineno is None:
+                yield (lineno,skip)
+            else:
+                buf = ''
+                for (v, anno, s) in line:
+                    if v == 0:
+                        buf += abody(anno, s)
+                    elif 0 < v:
+                        buf += astart(anno)
+                    else:
+                        buf += aend(anno)
+                yield (lineno,buf)
+        return
+
+    # ranges=[(start,end,anno), ...]
+    def chunk(self, ranges, ncontext=1):
         if not ranges: return
         triggers = []
         for (s,e,anno) in ranges:
@@ -96,36 +113,40 @@ class SourceFile:
         for (lineno,line) in enumerate(self.lines):
             loc1 = loc0+len(line)
             pos0 = 0
-            buf = ''
+            out = []
             while i < len(triggers):
                 (loc,v,anno) = triggers[i]
                 if loc1 < loc: break
                 i += 1
                 pos1 = loc - loc0
-                buf += abody(annos, line[pos0:pos1])
+                out.append((0, annos[:], line[pos0:pos1]))
                 pos0 = pos1
                 if 0 < v:
-                    buf += astart(anno)
+                    out.append((v, anno, None))
                     annos.append(anno)
                 else:
-                    buf += aend(anno)
+                    out.append((v, anno, None))
                     annos.remove(anno)
-            if buf:
-                buf += abody(annos, line[pos0:])
-                lines[lineno] = buf
+            if out:
+                out.append((0, annos[:], line[pos0:]))
+                lines[lineno] = out
+            elif annos:
+                lines[lineno] = [(0, annos[:], line)]
             loc0 = loc1
         n = len(self.lines)
         for (lineno,line) in list(lines.items()):
             for i in range(max(0, lineno-ncontext),
                            min(n, lineno+ncontext+1)):
                 if i not in lines:
-                    lines[i] = abody(None, self.lines[i])
+                    lines[i] = [(0, [], self.lines[i])]
         lineno0 = 0
         for lineno1 in sorted(lines):
             if lineno0 < lineno1:
-                yield (None, skip)
+                yield (None, None)
             yield (lineno1, lines[lineno1])
             lineno0 = lineno1+1
+        if lineno0 < len(self.lines):
+            yield (None, None)
         return
 
 

@@ -18,8 +18,8 @@ pre { margin: 1em; background: #eeeeee; }
 ''')        
     return
 
-def show(index, src, start, end, key, url=None, ncontext=3):
-    ranges = [(start, end, None)]
+def show(index, src, start, end, key, url=None, ncontext=4):
+    ranges = [(start, end, True)]
     if url is None:
         print('# %s:' % index)
         print('@ %s %d %d key=%s' % (src.name, start, end, key))
@@ -27,25 +27,34 @@ def show(index, src, start, end, key, url=None, ncontext=3):
             print('  '+line, end='')
         print()
     else:
-        def astart(anno):
-            return '<mark>'
-        def aend(anno):
-            return '</mark>'
-        def abody(annos, s):
-            return q(s.replace('\n',''))
+        lines = []
+        linenos = set()
+        for (lineno,line) in src.chunk(ranges, ncontext=ncontext):
+            if lineno is None:
+                lines.append('       ...')
+            else:
+                buf = ''
+                for (v, anno, s) in line:
+                    if v == 0:
+                        s = s.replace('\n','')
+                        buf += q(s)
+                        if s and anno:
+                            linenos.add(lineno)
+                    elif 0 < v:
+                        buf += '<mark>'
+                    else:
+                        buf += '</mark>'
+                lines.append('%5d: %s' % (lineno+1, buf))
+        assert linenos
         name = os.path.basename(src.name)
-        print('<div class=src><div class=head>%s: <a href="%s">%s</a></div>' %
-              (index, q(url), name))
+        lineno0 = min(linenos)+1
+        lineno1 = max(linenos)+1
+        print('<div id="%s" class=src><div class=head>%s:' % (index, index))
+        print('<a href="%s#L%d-L%d">%s</a></div>' % (q(url), lineno0, lineno1, name))
         print('<div class=key>key=%s</div>' % (q(key)))
         print('<pre>')
-        for (lineno,s) in src.show(ranges, astart=astart, aend=aend, abody=abody,
-                                   ncontext=ncontext):
-            if lineno is None:
-                print ('     '+s)
-            else:
-                lineno += 1
-                print ('<a href="%s#L%d">%5d</a>:%s' %
-                       (q(url), lineno, lineno, s))
+        for line in lines:
+            print(line)
         print('</pre></div>')
     return
 
@@ -71,7 +80,7 @@ def main(argv):
     srcdb = None
     srcmap = None
     html = False
-    ncontext = 3
+    ncontext = 4
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
         elif k == '-M': srcmap = SourceMap(v)
@@ -88,9 +97,13 @@ def main(argv):
     index = 0
     for line in fileinput.input(args):
         line = line.strip()
-        if line.startswith('+'):
+        if line.startswith('#'):
+            continue
+        
+        elif line.startswith('+'):
             (_,_,name) = line.strip().partition(' ')
             src = srcdb.get(name)
+            
         elif line.startswith('-'):
             assert src is not None
             f = line.split(' ')
