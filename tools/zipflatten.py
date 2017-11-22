@@ -58,7 +58,12 @@ def main(argv):
                 repo[commit] = (reponame, branch)
     
     for zippath in args:
-        zfp = zipfile.ZipFile(zippath)
+        print('extracting: %r...' % zippath, file=sys.stderr)
+        try:
+            zfp = zipfile.ZipFile(zippath)
+        except zipfile.BadZipFile as e:
+            print('error: %r: %r' % (zippath, e), file=sys.stderr)
+            raise
         dstdir = None
         (commit,_) = os.path.splitext(os.path.basename(zippath))
         if repo is not None:
@@ -68,7 +73,9 @@ def main(argv):
             src = info.filename
             if '/.' in src: continue
             if pat is not None and not pat.search(src): continue
-            if maxsize < info.file_size: continue
+            if maxsize < info.file_size:
+                print('skipped: %r (%r)' % (src, info.file_size), file=sys.stderr)
+                continue
             (dir1,_,src1) = src.partition('/')
             if dstdir != dir1:
                 dstdir = dir1
@@ -78,18 +85,25 @@ def main(argv):
                     except OSError:
                         pass
             dst = os.path.join(dstdir, getkey(src1))
-            print('extract: %r -> %r' % (src1, dst), file=sys.stderr)
+            print('extract: %r -> %r' % (src1, dst))
             if srcmap is not None:
                 srcmap.add(dst, reponame, branch, commit, src1)
             if extract:
-                fp = zfp.open(src, 'r')
-                out = open(os.path.join(dstbase, dst), 'wb')
-                while 1:
-                    data = fp.read(BUFSIZ)
-                    if not data: break
-                    out.write(data)
-                out.close()
-                fp.close()
+                try:
+                    fp = zfp.open(src, 'r')
+                    try:
+                        out = open(os.path.join(dstbase, dst), 'wb')
+                        try:
+                            while 1:
+                                data = fp.read(BUFSIZ)
+                                if not data: break
+                                out.write(data)
+                        finally:
+                            out.close()
+                    finally:
+                        fp.close()
+                except (zipfile.BadZipFile, zipfile.zlib.error) as e:
+                    print('error: %r/%r: %r' % (zippath, src, e), file=sys.stderr)
 
     if srcmap is not None:
         srcmap.close()
