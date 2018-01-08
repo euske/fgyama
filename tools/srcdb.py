@@ -59,7 +59,7 @@ class SourceFile:
         self.data = data
         self.lines = data.splitlines(True)
         return
-    
+
     def __repr__(self):
         return ('<SourceFile(%s)>' %
                 (self.name,))
@@ -91,7 +91,7 @@ class SourceFile:
                 for (v, anno, s) in line:
                     if v == 0:
                         buf += abody(anno, s)
-                    elif 0 < v:
+                    elif v < 0:
                         buf += astart(anno)
                     else:
                         buf += aend(anno)
@@ -103,8 +103,8 @@ class SourceFile:
         if not ranges: return
         triggers = []
         for (s,e,anno) in ranges:
-            triggers.append((s,+1,anno))
-            triggers.append((e,-1,anno))
+            triggers.append((s,-1,anno))
+            triggers.append((e,+1,anno))
         triggers.sort(key=lambda x: (x[0],x[1]))
         lines = {}
         loc0 = 0
@@ -121,7 +121,7 @@ class SourceFile:
                 pos1 = loc - loc0
                 out.append((0, annos[:], line[pos0:pos1]))
                 pos0 = pos1
-                if 0 < v:
+                if v < 0:
                     out.append((v, anno, None))
                     annos.append(anno)
                 else:
@@ -153,7 +153,7 @@ class SourceFile:
 ##  SourceDB
 ##
 class SourceDB:
-    
+
     def __init__(self, basedir):
         self.basedir = basedir
         self._cache = {}
