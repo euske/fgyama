@@ -820,10 +820,20 @@ public class Java2DF extends ASTVisitor {
 	 Expression expr)
 	throws UnsupportedSyntax {
 
-	if (expr instanceof SimpleName) {
-	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookupRef(varName.getIdentifier());
-	    cpt.setLValue(new SingleAssignNode(scope, ref, expr));
+	if (expr instanceof Name) {
+	    Name name = (Name)expr;
+	    if (name.isSimpleName()) {
+		SimpleName varName = (SimpleName)name;
+		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		cpt.setLValue(new SingleAssignNode(scope, ref, expr));
+	    } else {
+		QualifiedName qn = (QualifiedName)name;
+		SimpleName fieldName = qn.getName();
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
+		DFNode obj = cpt.getRValue();
+		cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
+	    }
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
@@ -840,14 +850,6 @@ public class Java2DF extends ASTVisitor {
 	    cpt = processExpression(scope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
-
-	} else if (expr instanceof QualifiedName) {
-	    QualifiedName qn = (QualifiedName)expr;
-	    SimpleName fieldName = qn.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    cpt = processExpression(scope, frame, cpt, qn.getQualifier());
-	    DFNode obj = cpt.getRValue();
 	    cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
 
 	} else {
@@ -868,10 +870,21 @@ public class Java2DF extends ASTVisitor {
 
 	if (expr instanceof Annotation) {
 
-	} else if (expr instanceof SimpleName) {
-	    SimpleName varName = (SimpleName)expr;
-	    DFRef ref = scope.lookupRef(varName.getIdentifier());
-	    cpt.setRValue(new VarRefNode(scope, ref, expr, cpt.getValue(ref)));
+	} else if (expr instanceof Name) {
+	    Name name = (Name)expr;
+	    if (name.isSimpleName()) {
+		SimpleName varName = (SimpleName)name;
+		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		cpt.setRValue(new VarRefNode(scope, ref, expr, cpt.getValue(ref)));
+	    } else {
+		QualifiedName qn = (QualifiedName)name;
+		SimpleName fieldName = qn.getName();
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
+		DFNode obj = cpt.getRValue();
+		cpt.setRValue(new FieldAccessNode(scope, ref, qn,
+						  cpt.getValue(ref), obj));
+	    }
 
 	} else if (expr instanceof ThisExpression) {
 	    DFRef ref = scope.lookupThis();
@@ -1041,15 +1054,6 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    DFNode obj = cpt.getValue(scope.lookupSuper());
 	    cpt.setRValue(new FieldAccessNode(scope, ref, sfa,
-					      cpt.getValue(ref), obj));
-
-	} else if (expr instanceof QualifiedName) {
-	    QualifiedName qn = (QualifiedName)expr;
-	    SimpleName fieldName = qn.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    cpt = processExpression(scope, frame, cpt, qn.getQualifier());
-	    DFNode obj = cpt.getRValue();
-	    cpt.setRValue(new FieldAccessNode(scope, ref, qn,
 					      cpt.getValue(ref), obj));
 
 	} else if (expr instanceof CastExpression) {
@@ -1678,10 +1682,18 @@ public class Java2DF extends ASTVisitor {
 
 	if (ast instanceof Annotation) {
 
-	} else if (ast instanceof SimpleName) {
-	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookupRef(varName.getIdentifier());
-	    frame.addInput(ref);
+	} else if (ast instanceof Name) {
+	    Name name = (Name)ast;
+	    if (name.isSimpleName()) {
+		SimpleName varName = (SimpleName)name;
+		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		frame.addInput(ref);
+	    } else {
+		QualifiedName qn = (QualifiedName)name;
+		SimpleName fieldName = qn.getName();
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		frame.addInput(ref);
+	    }
 
 	} else if (ast instanceof ThisExpression) {
 	    DFRef ref = scope.lookupThis();
@@ -1811,13 +1823,6 @@ public class Java2DF extends ASTVisitor {
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    frame.addInput(ref);
 
-	} else if (ast instanceof QualifiedName) {
-	    QualifiedName qn = (QualifiedName)ast;
-	    SimpleName fieldName = qn.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    frame.addInput(ref);
-	    buildScope(scope, frame, qn.getQualifier());
-
 	} else if (ast instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)ast;
 	    buildScope(scope, frame, cast.getExpression());
@@ -1864,10 +1869,19 @@ public class Java2DF extends ASTVisitor {
     public void buildScopeLeft(DFScope scope, DFFrame frame, Expression ast)
 	throws UnsupportedSyntax {
 
-	if (ast instanceof SimpleName) {
-	    SimpleName varName = (SimpleName)ast;
-	    DFRef ref = scope.lookupRef(varName.getIdentifier());
-	    frame.addOutput(ref);
+	if (ast instanceof Name) {
+	    Name name = (Name)ast;
+	    if (name.isSimpleName()) {
+		SimpleName varName = (SimpleName)name;
+		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		frame.addOutput(ref);
+	    } else {
+		QualifiedName qn = (QualifiedName)name;
+		SimpleName fieldName = qn.getName();
+		buildScope(scope, frame, qn.getQualifier());
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		frame.addOutput(ref);
+	    }
 
 	} else if (ast instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)ast;
@@ -1880,13 +1894,6 @@ public class Java2DF extends ASTVisitor {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    buildScope(scope, frame, fa.getExpression());
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
-	    frame.addOutput(ref);
-
-	} else if (ast instanceof QualifiedName) {
-	    QualifiedName qn = (QualifiedName)ast;
-	    SimpleName fieldName = qn.getName();
-	    buildScope(scope, frame, qn.getQualifier());
 	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    frame.addOutput(ref);
 
