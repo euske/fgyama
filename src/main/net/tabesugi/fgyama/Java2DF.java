@@ -827,11 +827,12 @@ public class Java2DF extends ASTVisitor {
 		DFRef ref = scope.lookupRef(varName.getIdentifier());
 		cpt.setLValue(new SingleAssignNode(scope, ref, expr));
 	    } else {
+		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
 		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
 		cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
 	    }
 
@@ -877,11 +878,12 @@ public class Java2DF extends ASTVisitor {
 		DFRef ref = scope.lookupRef(varName.getIdentifier());
 		cpt.setRValue(new VarRefNode(scope, ref, expr, cpt.getValue(ref)));
 	    } else {
+		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
 		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
+		DFRef ref = scope.lookupField(fieldName.getIdentifier());
 		cpt.setRValue(new FieldAccessNode(scope, ref, qn,
 						  cpt.getValue(ref), obj));
 	    }
@@ -1042,17 +1044,17 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    cpt = processExpression(scope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    cpt.setRValue(new FieldAccessNode(scope, ref, fa,
 					      cpt.getValue(ref), obj));
 
 	} else if (expr instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    DFNode obj = cpt.getValue(scope.lookupSuper());
+	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
 	    cpt.setRValue(new FieldAccessNode(scope, ref, sfa,
 					      cpt.getValue(ref), obj));
 
@@ -1689,6 +1691,7 @@ public class Java2DF extends ASTVisitor {
 		DFRef ref = scope.lookupRef(varName.getIdentifier());
 		frame.addInput(ref);
 	    } else {
+		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		DFRef ref = scope.lookupField(fieldName.getIdentifier());
@@ -1876,6 +1879,7 @@ public class Java2DF extends ASTVisitor {
 		DFRef ref = scope.lookupRef(varName.getIdentifier());
 		frame.addOutput(ref);
 	    } else {
+		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		buildScope(scope, frame, qn.getQualifier());
