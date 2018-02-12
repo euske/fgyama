@@ -11,11 +11,11 @@ import org.w3c.dom.*;
 //  DFLink
 //
 class DFLink {
-    
+
     public DFNode dst;
     public DFNode src;
     public String label;
-    
+
     public DFLink(DFNode dst, DFNode src, String label)
     {
 	this.dst = dst;

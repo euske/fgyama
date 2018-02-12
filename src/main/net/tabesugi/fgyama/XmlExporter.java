@@ -14,10 +14,10 @@ import org.w3c.dom.*;
 public class XmlExporter extends Exporter {
 
     public Document document;
-    
+
     private Element _root;
     private Element _file;
-    
+
     public XmlExporter() {
 	try {
 	    this.document = Utils.createXml();
@@ -47,7 +47,7 @@ public class XmlExporter extends Exporter {
 	_root.appendChild(_file);
 	_file = null;
     }
-    
+
     @Override
     public void writeError(String funcName, String astName)
 	throws IOException {
@@ -56,7 +56,7 @@ public class XmlExporter extends Exporter {
 	failure.setAttribute("ast", astName);
 	_file.appendChild(failure);
     }
-    
+
     @Override
     public void writeGraph(DFGraph graph)
 	throws IOException {

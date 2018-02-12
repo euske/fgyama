@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 
 
 //  Utility functions.
-// 
+//
 public class Utils {
 
     public static void logit(String s) {
@@ -33,7 +33,7 @@ public class Utils {
         } else {
             return s.replaceAll("[\\s,]+", "_");
         }
-	
+
     }
 
     public static String indent(int n) {
@@ -65,7 +65,7 @@ public class Utils {
 	doc.setXmlStandalone(true);
 	return doc;
     }
-    
+
     public static Document readXml(String path)
 	throws IOException, ParserConfigurationException, SAXException {
 	File file = new File(path);

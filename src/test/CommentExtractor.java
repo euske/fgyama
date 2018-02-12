@@ -12,7 +12,7 @@ import net.tabesugi.fgyama.*;
 public class CommentExtractor extends ASTVisitor {
 
     private String src;
-    
+
     private SortedMap<Integer, List<ASTNode> > _start =
 	new TreeMap<Integer, List<ASTNode> >();
     private SortedMap<Integer, List<ASTNode> > _end =
@@ -21,7 +21,7 @@ public class CommentExtractor extends ASTVisitor {
     private Stack<ASTNode> _stack = new Stack<ASTNode>();
     private Map<ASTNode, ASTNode> _parent =
 	new HashMap<ASTNode, ASTNode>();
-    
+
     public CommentExtractor(String src) {
 	this.src = src;
     }
@@ -34,11 +34,11 @@ public class CommentExtractor extends ASTVisitor {
 	}
 	_stack.push(node);
     }
-    
+
     public void postVisit(ASTNode node) {
 	_stack.pop();
     }
-    
+
     public void addNode(ASTNode node) {
 	int start = node.getStartPosition();
 	int end = node.getStartPosition() + node.getLength();
@@ -64,7 +64,7 @@ public class CommentExtractor extends ASTVisitor {
 	}
 	return parents;
     }
-    
+
     public List<ASTNode> getNodesEndBefore(int i) {
 	SortedMap<Integer, List<ASTNode> > before = _end.headMap(i+1);
 	if (before.isEmpty()) return null;
@@ -91,7 +91,7 @@ public class CommentExtractor extends ASTVisitor {
 	nodes0.retainAll(nodes1);
 	return nodes0;
     }
-    
+
     public String getFeatures(Comment node) {
 	int start = node.getStartPosition();
 	int end = start + node.getLength();
@@ -142,7 +142,7 @@ public class CommentExtractor extends ASTVisitor {
 	}
 	return join(names);
     }
-    
+
     private String toKeySorted(Collection<ASTNode> nodes) {
 	ASTNode[] sorted = new ASTNode[nodes.size()];
 	nodes.toArray(sorted);
@@ -167,7 +167,7 @@ public class CommentExtractor extends ASTVisitor {
         }
         return n;
     }
-        
+
     private int countNL(int start, int end) {
 	int n = 0;
 	while (true) {
@@ -193,7 +193,7 @@ public class CommentExtractor extends ASTVisitor {
     private String getWords(String text) {
 	return join(text.split("\\W+"));
     }
-    
+
     private static String join(String[] words) {
 	String s = null;
 	for (String w : words) {
@@ -207,7 +207,7 @@ public class CommentExtractor extends ASTVisitor {
 	}
 	return s;
     }
-    
+
     @SuppressWarnings("unchecked")
     public static void main(String[] args)
 	throws IOException {
@@ -249,7 +249,7 @@ public class CommentExtractor extends ASTVisitor {
 
 	    CommentExtractor visitor = new CommentExtractor(src);
 	    cu.accept(visitor);
-	    
+
             for (Comment node : (List<Comment>) cu.getCommentList()) {
 		visitor.addNode(node);
 	    }
@@ -261,7 +261,7 @@ public class CommentExtractor extends ASTVisitor {
 	    }
 	    out.println();
 	}
-	
+
 	out.close();
     }
 }

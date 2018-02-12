@@ -23,4 +23,3 @@ public class DFVar extends DFRef {
 	return ("<DFVar("+this.scope.name+"."+this.name+"): "+this.type+">");
     }
 }
-

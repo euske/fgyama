@@ -16,11 +16,11 @@ public class DFNode implements Comparable<DFNode> {
     public DFRef ref;
     public int id;
     public String name;
-    
+
     private DFNode input = null;
     private Map<String, DFNode> inputs = new HashMap<String, DFNode>();
     private List<DFNode> outputs = new ArrayList<DFNode>();
-    
+
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
 	this.id = this.scope.graph.addNode(this);
@@ -54,7 +54,7 @@ public class DFNode implements Comparable<DFNode> {
 	}
 	return elem;
     }
-    
+
     public String getName() {
 	return ("N"+this.scope.name+"_"+id);
     }
@@ -62,7 +62,7 @@ public class DFNode implements Comparable<DFNode> {
     public String getType() {
 	return null;
     }
-    
+
     public String getData() {
 	return null;
     }
@@ -89,7 +89,7 @@ public class DFNode implements Comparable<DFNode> {
 	this.input = node;
 	node.outputs.add(this);
     }
-    
+
     protected void accept(DFNode node, String label) {
 	assert !this.inputs.containsKey(label);
 	this.inputs.put(label, node);

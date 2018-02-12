@@ -59,7 +59,7 @@ public class DFScope {
     public void dump() {
 	dump(System.out, "");
     }
-    
+
     public void dump(PrintStream out, String indent) {
 	out.println(indent+this.name+" {");
 	String i2 = indent + "  ";
@@ -107,11 +107,11 @@ public class DFScope {
     public DFRef lookupSuper() {
 	return this.lookupRef("#super");
     }
-    
+
     public DFRef lookupReturn() {
 	return this.lookupRef("#return");
     }
-    
+
     public DFRef lookupArray() {
 	return this.lookupRef("#array");
     }

@@ -13,7 +13,7 @@ public class DFFrame {
 
     public String label;
     public DFFrame parent;
-    
+
     private Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
     private Set<DFRef> inputs = new HashSet<DFRef>();
     private Set<DFRef> outputs = new HashSet<DFRef>();
@@ -24,7 +24,7 @@ public class DFFrame {
     public DFFrame(String label) {
 	this(label, null);
     }
-    
+
     public DFFrame(String label, DFFrame parent) {
 	this.label = label;
 	this.parent = parent;
@@ -33,7 +33,7 @@ public class DFFrame {
     public String toString() {
 	return ("<DFFrame("+this.label+")>");
     }
-    
+
     public DFFrame addChild(String label, ASTNode ast) {
 	DFFrame frame = new DFFrame(label, this);
 	this.children.put(ast, frame);
@@ -82,7 +82,7 @@ public class DFFrame {
     public void dump() {
 	dump(System.out, "");
     }
-    
+
     public void dump(PrintStream out, String indent) {
 	out.println(indent+this.label+" {");
 	String i2 = indent + "  ";

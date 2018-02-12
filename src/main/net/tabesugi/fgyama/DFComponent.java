@@ -12,13 +12,13 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     public DFScope scope;
-    
+
     private DFNode lval = null;
     private DFNode rval = null;
     private Map<DFRef, DFNode> inputs = new HashMap<DFRef, DFNode>();
     private Map<DFRef, DFNode> outputs = new HashMap<DFRef, DFNode>();
     private List<DFExit> exits = new ArrayList<DFExit>();
-    
+
     public DFComponent(DFScope scope) {
 	this.scope = scope;
     }
@@ -26,7 +26,7 @@ public class DFComponent {
     public void dump() {
 	dump(System.out);
     }
-    
+
     public void dump(PrintStream out) {
 	out.println("DFComponent");
 	StringBuilder inputs = new StringBuilder();
@@ -101,7 +101,7 @@ public class DFComponent {
 	Arrays.sort(refs);
 	return refs;
     }
-    
+
     public void endScope(DFScope scope) {
 	for (DFRef ref : scope.refs()) {
 	    this.inputs.remove(ref);
@@ -114,7 +114,7 @@ public class DFComponent {
 	this.exits.toArray(exits);
 	return exits;
     }
-    
+
     public void addExit(DFExit exit) {
 	this.exits.add(exit);
     }

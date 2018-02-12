@@ -18,7 +18,7 @@ public class DFExit {
     public DFExit(DFNode node, DFFrame frame) {
 	this(node, frame, false);
     }
-    
+
     public DFExit(DFNode node, DFFrame frame, boolean cont) {
 	this.node = node;
 	this.frame = frame;

@@ -28,7 +28,7 @@ public class DFGraph {
     public void setRoot(DFScope scope) {
 	this.root = scope;
     }
-    
+
     public int addNode(DFNode node) {
 	int id = this.nodes.size()+1;
 	this.nodes.put(id, node);
