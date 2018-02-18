@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     private DFScope _scope;
+
     private DFNode _lval = null;
     private DFNode _rval = null;
     private Map<DFRef, DFNode> _inputs = new HashMap<DFRef, DFNode>();
@@ -84,7 +85,7 @@ public class DFComponent {
     }
 
     public void setOutput(DFNode node) {
-	_outputs.put(node.ref, node);
+	_outputs.put(node.getRef(), node);
     }
 
     public DFRef[] getInputRefs() {
@@ -120,8 +121,8 @@ public class DFComponent {
 
     public void endFrame(DFFrame frame) {
 	for (DFExit exit : _exits) {
-	    if (exit.frame == frame) {
-		DFNode node = exit.node;
+	    if (frame == exit.getFrame()) {
+		DFNode node = exit.getNode();
 		node.finish(this);
 		this.setOutput(node);
 	    }

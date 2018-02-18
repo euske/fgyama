@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFFrame {
 
-    public String label;
-    public DFFrame parent;
+    private String _label;
+    private DFFrame _parent;
 
     private Map<ASTNode, DFFrame> _children = new HashMap<ASTNode, DFFrame>();
     private Set<DFRef> _inputs = new HashSet<DFRef>();
@@ -26,18 +26,26 @@ public class DFFrame {
     }
 
     public DFFrame(String label, DFFrame parent) {
-	this.label = label;
-	this.parent = parent;
+	_label = label;
+	_parent = parent;
     }
 
     public String toString() {
-	return ("<DFFrame("+this.label+")>");
+	return ("<DFFrame("+_label+")>");
     }
 
     public DFFrame addChild(String label, ASTNode ast) {
 	DFFrame frame = new DFFrame(label, this);
 	_children.put(ast, frame);
 	return frame;
+    }
+
+    public String getLabel() {
+        return _label;
+    }
+
+    public DFFrame getParent() {
+        return _parent;
     }
 
     public DFFrame getChild(ASTNode ast) {
@@ -55,10 +63,10 @@ public class DFFrame {
     public DFFrame find(String label) {
 	if (label == null) return this;
 	DFFrame frame = this;
-	while (frame.parent != null) {
-	    if (frame.label != null &&
-		frame.label.equals(label)) break;
-	    frame = frame.parent;
+	while (frame.getParent() != null) {
+	    if (frame.getLabel() != null &&
+		frame.getLabel().equals(label)) break;
+	    frame = frame.getParent();
 	}
 	return frame;
     }
@@ -84,7 +92,7 @@ public class DFFrame {
     }
 
     public void dump(PrintStream out, String indent) {
-	out.println(indent+this.label+" {");
+	out.println(indent+_label+" {");
 	String i2 = indent + "  ";
 	StringBuilder inputs = new StringBuilder();
 	for (DFRef ref : _inputs) {

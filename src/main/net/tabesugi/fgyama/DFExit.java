@@ -11,25 +11,37 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFExit {
 
-    public DFNode node;
-    public DFFrame frame;
-    public boolean cont;
+    private DFNode _node;
+    private DFFrame _frame;
+    private boolean _cont;
 
     public DFExit(DFNode node, DFFrame frame) {
 	this(node, frame, false);
     }
 
     public DFExit(DFNode node, DFFrame frame, boolean cont) {
-	this.node = node;
-	this.frame = frame;
-	this.cont = cont;
+	_node = node;
+	_frame = frame;
+	_cont = cont;
     }
 
     public String toString() {
-	return ("<DFExit: "+this.node+" -> "+this.frame+">");
+	return ("<DFExit: "+_node+" -> "+_frame+">");
+    }
+
+    public DFNode getNode() {
+        return _node;
+    }
+
+    public DFFrame getFrame() {
+        return _frame;
+    }
+
+    public boolean isCont() {
+        return _cont;
     }
 
     public DFExit wrap(DFNode node) {
-	return new DFExit(node, this.frame, this.cont);
+	return new DFExit(node, _frame, _cont);
     }
 }

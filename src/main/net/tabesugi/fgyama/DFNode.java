@@ -12,19 +12,19 @@ import org.w3c.dom.*;
 //
 public class DFNode implements Comparable<DFNode> {
 
-    public DFScope scope;
-    public DFRef ref;
-    public int id;
-    public String name;
+    private DFScope _scope;
+    private DFRef _ref;
+    private int _id;
+    private String _name;
 
     private DFNode _input = null;
     private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
     private List<DFNode> _outputs = new ArrayList<DFNode>();
 
     public DFNode(DFScope scope, DFRef ref) {
-	this.scope = scope;
-	this.id = this.scope.graph.addNode(this);
-	this.ref = ref;
+	_scope = scope;
+	_id = scope.getGraph().addNode(this);
+	_ref = ref;
     }
 
     @Override
@@ -34,7 +34,19 @@ public class DFNode implements Comparable<DFNode> {
 
     @Override
     public int compareTo(DFNode node) {
-	return this.id - node.id;
+	return _id - node._id;
+    }
+
+    public DFScope getScope() {
+        return _scope;
+    }
+
+    public DFRef getRef() {
+        return _ref;
+    }
+
+    public int getId() {
+        return _id;
     }
 
     public Element toXML(Document document) {
@@ -46,8 +58,8 @@ public class DFNode implements Comparable<DFNode> {
 	if (this.getData() != null) {
 	    elem.setAttribute("data", this.getData());
 	}
-	if (this.ref != null) {
-	    elem.setAttribute("ref", this.ref.getName());
+	if (_ref != null) {
+	    elem.setAttribute("ref", _ref.getName());
 	}
 	for (DFLink link : this.getLinks()) {
 	    elem.appendChild(link.toXML(document));
@@ -56,7 +68,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public String getName() {
-	return ("N"+this.scope.name+"_"+id);
+	return ("N"+_scope.getName()+"_"+_id);
     }
 
     public String getType() {

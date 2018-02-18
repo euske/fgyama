@@ -403,7 +403,7 @@ class JoinNode extends ProgNode {
     @Override
     public void finish(DFComponent cpt) {
 	if (!this.isClosed()) {
-	    this.close(cpt.getValue(this.ref));
+	    this.close(cpt.getValue(this.getRef()));
 	}
     }
 
@@ -662,15 +662,17 @@ public class Java2DF extends ASTVisitor {
 	// Take care of exits.
 	if (trueCpt != null) {
 	    for (DFExit exit : trueCpt.getExits()) {
-		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
-		join.recv(true, exit.node);
+                DFNode node = exit.getNode();
+		JoinNode join = new JoinNode(scope, node.getRef(), null, condValue);
+		join.recv(true, node);
 		cpt.addExit(exit.wrap(join));
 	    }
 	}
 	if (falseCpt != null) {
 	    for (DFExit exit : falseCpt.getExits()) {
-		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
-		join.recv(false, exit.node);
+                DFNode node = exit.getNode();
+		JoinNode join = new JoinNode(scope, node.getRef(), null, condValue);
+		join.recv(false, node);
 		cpt.addExit(exit.wrap(join));
 	    }
 	}
@@ -763,16 +765,16 @@ public class Java2DF extends ASTVisitor {
 
 	// Redirect the continue statements.
 	for (DFExit exit : loopCpt.getExits()) {
-	    if (exit.cont && exit.frame == loopFrame) {
-		DFNode node = exit.node;
-		DFNode end = ends.get(node.ref);
+	    if (exit.isCont() && exit.getFrame() == loopFrame) {
+		DFNode node = exit.getNode();
+		DFNode end = ends.get(node.getRef());
 		if (end == null) {
-		    end = cpt.getValue(node.ref);
+		    end = cpt.getValue(node.getRef());
 		}
 		if (node instanceof JoinNode) {
 		    ((JoinNode)node).close(end);
 		}
-		ends.put(node.ref, node);
+		ends.put(node.getRef(), node);
 	    } else {
 		cpt.addExit(exit);
 	    }
@@ -924,7 +926,7 @@ public class Java2DF extends ASTVisitor {
 		op == PrefixExpression.Operator.DECREMENT) {
 		cpt = processAssignment(scope, frame, cpt, operand);
 		DFNode assign = cpt.getLValue();
-		DFNode value = new PrefixNode(scope, assign.ref, expr, op, cpt.getRValue());
+		DFNode value = new PrefixNode(scope, assign.getRef(), expr, op, cpt.getRValue());
 		assign.accept(value);
 		cpt.setOutput(assign);
 		cpt.setRValue(value);
@@ -941,7 +943,7 @@ public class Java2DF extends ASTVisitor {
 		op == PostfixExpression.Operator.DECREMENT) {
 		DFNode assign = cpt.getLValue();
 		cpt = processExpression(scope, frame, cpt, operand);
-		assign.accept(new PostfixNode(scope, assign.ref, expr, op, cpt.getRValue()));
+		assign.accept(new PostfixNode(scope, assign.getRef(), expr, op, cpt.getRValue()));
 		cpt.setOutput(assign);
 	    }
 
@@ -965,8 +967,8 @@ public class Java2DF extends ASTVisitor {
 	    DFNode assign = cpt.getLValue();
 	    cpt = processExpression(scope, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
-	    DFNode lvalue = cpt.getValue(assign.ref);
-	    assign.accept(new AssignOpNode(scope, assign.ref, assn, op, lvalue, rvalue));
+	    DFNode lvalue = cpt.getValue(assign.getRef());
+	    assign.accept(new AssignOpNode(scope, assign.getRef(), assn, op, lvalue, rvalue));
 	    cpt.setOutput(assign);
 	    cpt.setRValue(assign);
 
@@ -1391,7 +1393,7 @@ public class Java2DF extends ASTVisitor {
                 ReturnNode rtrn = new ReturnNode(scope, rtrnStmt, cpt.getRValue());
                 cpt.addExit(new DFExit(rtrn, dstFrame));
             }
-	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
+	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
 		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
@@ -1403,7 +1405,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName labelName = breakStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
-	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
+	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
 		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
@@ -1415,7 +1417,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName labelName = contStmt.getLabel();
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
-	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
+	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
 		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}
@@ -1450,7 +1452,7 @@ public class Java2DF extends ASTVisitor {
             ExceptionNode exception = new ExceptionNode(scope, stmt, cpt.getRValue());
 	    DFFrame dstFrame = frame.find(DFFrame.TRY);
 	    cpt.addExit(new DFExit(exception, dstFrame));
-	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
+	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
 		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}

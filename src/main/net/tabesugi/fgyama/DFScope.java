@@ -12,34 +12,42 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFScope {
 
-    public DFGraph graph;
-    public String name;
-    public DFScope parent = null;
+    private DFGraph _graph;
+    private String _name;
+    private DFScope _parent = null;
 
     private List<DFScope> _children = new ArrayList<DFScope>();
     private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
     private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
     public DFScope(DFGraph graph, String name) {
-	this.graph = graph;
-	this.name = name;
+	_graph = graph;
+	_name = name;
 	graph.setRoot(this);
     }
 
     public DFScope(String name, DFScope parent) {
-	this.graph = parent.graph;
-	this.name = name;
-	this.parent = parent;
+	_graph = parent._graph;
+	_name = name;
+	_parent = parent;
     }
 
     @Override
     public String toString() {
-	return ("<DFScope("+this.name+")>");
+	return ("<DFScope("+_name+")>");
+    }
+
+    public DFGraph getGraph() {
+        return _graph;
+    }
+
+    public String getName() {
+        return _name;
     }
 
     public DFScope addChild(String basename, ASTNode ast) {
 	int id = _children.size();
-	String name = this.name+"_"+basename+id;
+	String name = _name+"_"+basename+id;
 	DFScope scope = new DFScope(name, this);
 	_children.add(scope);
 	_ast2child.put(ast, scope);
@@ -61,7 +69,7 @@ public class DFScope {
     }
 
     public void dump(PrintStream out, String indent) {
-	out.println(indent+this.name+" {");
+	out.println(indent+_name+" {");
 	String i2 = indent + "  ";
 	for (DFRef ref : _refs.values()) {
 	    out.println(i2+"defined: "+ref);
@@ -89,8 +97,8 @@ public class DFScope {
 	DFRef ref = _refs.get(name);
 	if (ref != null) {
 	    return ref;
-	} else if (this.parent != null) {
-	    return this.parent.lookupRef(name);
+	} else if (_parent != null) {
+	    return _parent.lookupRef(name);
 	} else {
 	    return this.addVar(name, null);
 	}

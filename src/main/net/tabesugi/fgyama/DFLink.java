@@ -12,28 +12,28 @@ import org.w3c.dom.*;
 //
 class DFLink {
 
-    public DFNode dst;
-    public DFNode src;
-    public String label;
+    private DFNode _dst;
+    private DFNode _src;
+    private String _label;
 
     public DFLink(DFNode dst, DFNode src, String label)
     {
-	this.dst = dst;
-	this.src = src;
-	this.label = label;
+	_dst = dst;
+	_src = src;
+	_label = label;
     }
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("link");
-	elem.setAttribute("src", this.src.getName());
-	if (this.label != null) {
-	    elem.setAttribute("label", this.label);
+	elem.setAttribute("src", _src.getName());
+	if (_label != null) {
+	    elem.setAttribute("label", _label);
 	}
 	return elem;
     }
 
     @Override
     public String toString() {
-	return ("<DFLink "+this.dst+"<-"+this.src+">");
+	return ("<DFLink "+_dst+"<-"+_src+">");
     }
 }

@@ -12,21 +12,21 @@ import org.w3c.dom.*;
 //
 public class DFGraph {
 
-    public String name;
-    public DFScope root;
+    private String _name;
+    private DFScope _root;
 
     private Map<Integer, DFNode> _nodes = new HashMap<Integer, DFNode>();
 
     public DFGraph(String name) {
-	this.name = name;
+	_name = name;
     }
 
     public String toString() {
-	return ("<DFGraph("+this.name+")>");
+	return ("<DFGraph("+_name+")>");
     }
 
     public void setRoot(DFScope scope) {
-	this.root = scope;
+	_root = scope;
     }
 
     public int addNode(DFNode node) {
@@ -39,7 +39,7 @@ public class DFGraph {
 	ArrayList<Integer> removed = new ArrayList<Integer>();
 	for (DFNode node : _nodes.values()) {
 	    if (node.getType() == null && node.purge()) {
-		removed.add(node.id);
+		removed.add(node.getId());
 	    }
 	}
 	for (int id : removed) {
@@ -49,22 +49,22 @@ public class DFGraph {
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
-	elem.setAttribute("name", this.name);
+	elem.setAttribute("name", _name);
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);
-	elem.appendChild(this.writeScope(document, nodes, this.root));
+	elem.appendChild(this.writeScope(document, nodes, _root));
 	return elem;
     }
 
     private Element writeScope(Document document, DFNode[] nodes, DFScope scope) {
 	Element elem = document.createElement("scope");
-	elem.setAttribute("name", scope.name);
+	elem.setAttribute("name", scope.getName());
 	for (DFScope child : scope.getChildren()) {
 	    elem.appendChild(this.writeScope(document, nodes, child));
 	}
 	for (DFNode node : nodes) {
-	    if (node.scope == scope) {
+	    if (node.getScope() == scope) {
 		elem.appendChild(node.toXML(document));
 	    }
 	}

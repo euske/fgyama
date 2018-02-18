@@ -12,12 +12,12 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFRef implements Comparable<DFRef> {
 
-    public DFScope scope;
-    public String name;
+    private DFScope _scope;
+    private String _name;
 
     public DFRef(DFScope scope, String name) {
-	this.scope = scope;
-	this.name = name;
+	_scope = scope;
+	_name = name;
     }
 
     @Override
@@ -27,12 +27,12 @@ public class DFRef implements Comparable<DFRef> {
 
     @Override
     public int compareTo(DFRef ref) {
-	return this.name.compareTo(ref.name);
+	return _name.compareTo(ref._name);
     }
 
     public String getName() {
-	return ((this.scope == null)?
-		this.name :
-		this.scope.name+":"+this.name);
+	return ((_scope == null)?
+		_name :
+		_scope.getName()+":"+_name);
     }
 }
