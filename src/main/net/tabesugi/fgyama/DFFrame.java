@@ -30,6 +30,7 @@ public class DFFrame {
 	_parent = parent;
     }
 
+    @Override
     public String toString() {
 	return ("<DFFrame("+_label+")>");
     }
@@ -87,10 +88,10 @@ public class DFFrame {
 	return refs;
     }
 
+    // dump: for debugging.
     public void dump() {
 	dump(System.out, "");
     }
-
     public void dump(PrintStream out, String indent) {
 	out.println(indent+_label+" {");
 	String i2 = indent + "  ";

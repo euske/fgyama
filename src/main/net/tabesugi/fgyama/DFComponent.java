@@ -23,30 +23,6 @@ public class DFComponent {
 	_scope = scope;
     }
 
-    public void dump() {
-	dump(System.out);
-    }
-
-    public void dump(PrintStream out) {
-	out.println("DFComponent");
-	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : _inputs.keySet()) {
-	    inputs.append(" "+ref);
-	}
-	out.println("  inputs:"+inputs);
-	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : _outputs.keySet()) {
-	    outputs.append(" "+ref);
-	}
-	out.println("  outputs:"+outputs);
-	if (_rval != null) {
-	    out.println("  rval: "+_rval);
-	}
-	if (_lval != null) {
-	    out.println("  lval: "+_lval);
-	}
-    }
-
     // getValue(ref): get an output value of the component if defined.
     public DFNode getValue(DFRef ref) {
 	DFNode node = _outputs.get(ref);
@@ -126,6 +102,30 @@ public class DFComponent {
 		node.finish(this);
 		this.setOutput(node);
 	    }
+	}
+    }
+
+    // dump: for debugging.
+    public void dump() {
+	dump(System.out);
+    }
+    public void dump(PrintStream out) {
+	out.println("DFComponent");
+	StringBuilder inputs = new StringBuilder();
+	for (DFRef ref : _inputs.keySet()) {
+	    inputs.append(" "+ref);
+	}
+	out.println("  inputs:"+inputs);
+	StringBuilder outputs = new StringBuilder();
+	for (DFRef ref : _outputs.keySet()) {
+	    outputs.append(" "+ref);
+	}
+	out.println("  outputs:"+outputs);
+	if (_rval != null) {
+	    out.println("  rval: "+_rval);
+	}
+	if (_lval != null) {
+	    out.println("  lval: "+_lval);
 	}
     }
 }

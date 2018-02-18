@@ -38,6 +38,20 @@ public class DFScope {
 	return ("<DFScope("+_name+")>");
     }
 
+    public Element toXML(Document document, DFNode[] nodes) {
+	Element elem = document.createElement("scope");
+	elem.setAttribute("name", _name);
+	for (DFScope child : this.getChildren()) {
+	    elem.appendChild(child.toXML(document, nodes));
+	}
+	for (DFNode node : nodes) {
+	    if (node.getScope() == this) {
+		elem.appendChild(node.toXML(document));
+	    }
+	}
+	return elem;
+    }
+
     public DFGraph getGraph() {
         return _graph;
     }
@@ -63,36 +77,6 @@ public class DFScope {
 	DFScope[] scopes = new DFScope[_children.size()];
 	_children.toArray(scopes);
 	return scopes;
-    }
-
-    public void dump() {
-	dump(System.out, "");
-    }
-
-    public void dump(PrintStream out, String indent) {
-	out.println(indent+_name+" {");
-	String i2 = indent + "  ";
-	for (DFRef ref : _refs.values()) {
-	    out.println(i2+"defined: "+ref);
-	}
-	for (DFScope scope : _children) {
-	    scope.dump(out, i2);
-	}
-	out.println(indent+"}");
-    }
-
-    public Element toXML(Document document, DFNode[] nodes) {
-	Element elem = document.createElement("scope");
-	elem.setAttribute("name", _name);
-	for (DFScope child : this.getChildren()) {
-	    elem.appendChild(child.toXML(document, nodes));
-	}
-	for (DFNode node : nodes) {
-	    if (node.getScope() == this) {
-		elem.appendChild(node.toXML(document));
-	    }
-	}
-	return elem;
     }
 
     public DFRef addVar(String name, Type type) {
@@ -137,5 +121,21 @@ public class DFScope {
 
     public DFRef lookupArray() {
 	return this.lookupRef("#array");
+    }
+
+    // dump: for debugging.
+    public void dump() {
+	dump(System.out, "");
+    }
+    public void dump(PrintStream out, String indent) {
+	out.println(indent+_name+" {");
+	String i2 = indent + "  ";
+	for (DFRef ref : _refs.values()) {
+	    out.println(i2+"defined: "+ref);
+	}
+	for (DFScope scope : _children) {
+	    scope.dump(out, i2);
+	}
+	out.println(indent+"}");
     }
 }

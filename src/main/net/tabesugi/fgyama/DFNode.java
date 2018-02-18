@@ -15,7 +15,6 @@ public class DFNode implements Comparable<DFNode> {
     private DFScope _scope;
     private DFRef _ref;
     private int _id;
-    private String _name;
 
     private DFNode _input = null;
     private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
@@ -37,18 +36,6 @@ public class DFNode implements Comparable<DFNode> {
 	return _id - node._id;
     }
 
-    public DFScope getScope() {
-        return _scope;
-    }
-
-    public DFRef getRef() {
-        return _ref;
-    }
-
-    public int getId() {
-        return _id;
-    }
-
     public Element toXML(Document document) {
 	Element elem = document.createElement("node");
 	elem.setAttribute("name", this.getName());
@@ -65,6 +52,18 @@ public class DFNode implements Comparable<DFNode> {
 	    elem.appendChild(link.toXML(document));
 	}
 	return elem;
+    }
+
+    public DFScope getScope() {
+        return _scope;
+    }
+
+    public DFRef getRef() {
+        return _ref;
+    }
+
+    public int getId() {
+        return _id;
     }
 
     public String getName() {

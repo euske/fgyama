@@ -19,6 +19,7 @@ public class DFVar extends DFRef {
 	_type = type;
     }
 
+    @Override
     public String toString() {
 	return ("<DFVar("+this.getName()+"): "+_type+">");
     }

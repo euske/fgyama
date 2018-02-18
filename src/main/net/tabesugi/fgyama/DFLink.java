@@ -23,6 +23,11 @@ class DFLink {
 	_label = label;
     }
 
+    @Override
+    public String toString() {
+	return ("<DFLink "+_dst+"<-"+_src+">");
+    }
+
     public Element toXML(Document document) {
 	Element elem = document.createElement("link");
 	elem.setAttribute("src", _src.getName());
@@ -30,10 +35,5 @@ class DFLink {
 	    elem.setAttribute("label", _label);
 	}
 	return elem;
-    }
-
-    @Override
-    public String toString() {
-	return ("<DFLink "+_dst+"<-"+_src+">");
     }
 }

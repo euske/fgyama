@@ -21,8 +21,19 @@ public class DFGraph {
 	_name = name;
     }
 
+    @Override
     public String toString() {
 	return ("<DFGraph("+_name+")>");
+    }
+
+    public Element toXML(Document document) {
+	Element elem = document.createElement("graph");
+	elem.setAttribute("name", _name);
+	DFNode[] nodes = new DFNode[_nodes.size()];
+	_nodes.values().toArray(nodes);
+	Arrays.sort(nodes);
+	elem.appendChild(_root.toXML(document, nodes));
+	return elem;
     }
 
     public void setRoot(DFScope scope) {
@@ -45,15 +56,5 @@ public class DFGraph {
 	for (int id : removed) {
 	    _nodes.remove(id);
 	}
-    }
-
-    public Element toXML(Document document) {
-	Element elem = document.createElement("graph");
-	elem.setAttribute("name", _name);
-	DFNode[] nodes = new DFNode[_nodes.size()];
-	_nodes.values().toArray(nodes);
-	Arrays.sort(nodes);
-	elem.appendChild(_root.toXML(document, nodes));
-	return elem;
     }
 }
