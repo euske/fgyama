@@ -16,9 +16,9 @@ public class DFScope {
     public String name;
     public DFScope parent = null;
 
-    private List<DFScope> children = new ArrayList<DFScope>();
-    private Map<ASTNode, DFScope> ast2child = new HashMap<ASTNode, DFScope>();
-    private Map<String, DFRef> refs = new HashMap<String, DFRef>();
+    private List<DFScope> _children = new ArrayList<DFScope>();
+    private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
+    private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
     public DFScope(DFGraph graph, String name) {
 	this.graph = graph;
@@ -38,21 +38,21 @@ public class DFScope {
     }
 
     public DFScope addChild(String basename, ASTNode ast) {
-	int id = this.children.size();
+	int id = _children.size();
 	String name = this.name+"_"+basename+id;
 	DFScope scope = new DFScope(name, this);
-	this.children.add(scope);
-	this.ast2child.put(ast, scope);
+	_children.add(scope);
+	_ast2child.put(ast, scope);
 	return scope;
     }
 
     public DFScope getChild(ASTNode ast) {
-	return this.ast2child.get(ast);
+	return _ast2child.get(ast);
     }
 
     public DFScope[] getChildren() {
-	DFScope[] scopes = new DFScope[this.children.size()];
-	this.children.toArray(scopes);
+	DFScope[] scopes = new DFScope[_children.size()];
+	_children.toArray(scopes);
 	return scopes;
     }
 
@@ -63,10 +63,10 @@ public class DFScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+this.name+" {");
 	String i2 = indent + "  ";
-	for (DFRef ref : this.refs.values()) {
+	for (DFRef ref : _refs.values()) {
 	    out.println(i2+"defined: "+ref);
 	}
-	for (DFScope scope : this.children) {
+	for (DFScope scope : _children) {
 	    scope.dump(out, i2);
 	}
 	out.println(indent+"}");
@@ -74,19 +74,19 @@ public class DFScope {
 
     public DFRef addVar(String name, Type type) {
 	DFRef ref = new DFVar(this, name, type);
-	this.refs.put(name, ref);
+	_refs.put(name, ref);
 	return ref;
     }
 
     public DFRef[] getRefs() {
-	DFRef[] refs = new DFRef[this.refs.size()];
-	this.refs.values().toArray(refs);
+	DFRef[] refs = new DFRef[_refs.size()];
+	_refs.values().toArray(refs);
 	Arrays.sort(refs);
 	return refs;
     }
 
     public DFRef lookupRef(String name) {
-	DFRef ref = this.refs.get(name);
+	DFRef ref = _refs.get(name);
 	if (ref != null) {
 	    return ref;
 	} else if (this.parent != null) {

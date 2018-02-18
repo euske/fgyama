@@ -14,9 +14,9 @@ public class DFFrame {
     public String label;
     public DFFrame parent;
 
-    private Map<ASTNode, DFFrame> children = new HashMap<ASTNode, DFFrame>();
-    private Set<DFRef> inputs = new HashSet<DFRef>();
-    private Set<DFRef> outputs = new HashSet<DFRef>();
+    private Map<ASTNode, DFFrame> _children = new HashMap<ASTNode, DFFrame>();
+    private Set<DFRef> _inputs = new HashSet<DFRef>();
+    private Set<DFRef> _outputs = new HashSet<DFRef>();
 
     public static final String TRY = "@TRY";
     public static final String METHOD = "@METHOD";
@@ -36,20 +36,20 @@ public class DFFrame {
 
     public DFFrame addChild(String label, ASTNode ast) {
 	DFFrame frame = new DFFrame(label, this);
-	this.children.put(ast, frame);
+	_children.put(ast, frame);
 	return frame;
     }
 
     public DFFrame getChild(ASTNode ast) {
-	return this.children.get(ast);
+	return _children.get(ast);
     }
 
     public void addInput(DFRef ref) {
-	this.inputs.add(ref);
+	_inputs.add(ref);
     }
 
     public void addOutput(DFRef ref) {
-	this.outputs.add(ref);
+	_outputs.add(ref);
     }
 
     public DFFrame find(String label) {
@@ -64,15 +64,15 @@ public class DFFrame {
     }
 
     public DFRef[] getOutputs() {
-	DFRef[] refs = new DFRef[this.outputs.size()];
-	this.outputs.toArray(refs);
+	DFRef[] refs = new DFRef[_outputs.size()];
+	_outputs.toArray(refs);
 	Arrays.sort(refs);
 	return refs;
     }
 
     public DFRef[] getInsAndOuts() {
-	Set<DFRef> inouts = new HashSet<DFRef>(this.inputs);
-	inouts.retainAll(this.outputs);
+	Set<DFRef> inouts = new HashSet<DFRef>(_inputs);
+	inouts.retainAll(_outputs);
 	DFRef[] refs = new DFRef[inouts.size()];
 	inouts.toArray(refs);
 	Arrays.sort(refs);
@@ -87,12 +87,12 @@ public class DFFrame {
 	out.println(indent+this.label+" {");
 	String i2 = indent + "  ";
 	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : this.inputs) {
+	for (DFRef ref : _inputs) {
 	    inputs.append(" "+ref);
 	}
 	out.println(i2+"inputs:"+inputs);
 	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : this.outputs) {
+	for (DFRef ref : _outputs) {
 	    outputs.append(" "+ref);
 	}
 	out.println(i2+"outputs:"+outputs);
@@ -101,7 +101,7 @@ public class DFFrame {
 	    inouts.append(" "+ref);
 	}
 	out.println(i2+"in/outs:"+inouts);
-	for (DFFrame frame : this.children.values()) {
+	for (DFFrame frame : _children.values()) {
 	    frame.dump(out, i2);
 	}
 	out.println(indent+"}");

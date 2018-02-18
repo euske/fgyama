@@ -15,7 +15,7 @@ public class DFGraph {
     public String name;
     public DFScope root;
 
-    private Map<Integer, DFNode> nodes = new HashMap<Integer, DFNode>();
+    private Map<Integer, DFNode> _nodes = new HashMap<Integer, DFNode>();
 
     public DFGraph(String name) {
 	this.name = name;
@@ -30,28 +30,28 @@ public class DFGraph {
     }
 
     public int addNode(DFNode node) {
-	int id = this.nodes.size()+1;
-	this.nodes.put(id, node);
+	int id = _nodes.size()+1;
+	_nodes.put(id, node);
 	return id;
     }
 
     public void cleanup() {
 	ArrayList<Integer> removed = new ArrayList<Integer>();
-	for (DFNode node : this.nodes.values()) {
+	for (DFNode node : _nodes.values()) {
 	    if (node.getType() == null && node.purge()) {
 		removed.add(node.id);
 	    }
 	}
 	for (int id : removed) {
-	    this.nodes.remove(id);
+	    _nodes.remove(id);
 	}
     }
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
 	elem.setAttribute("name", this.name);
-	DFNode[] nodes = new DFNode[this.nodes.size()];
-	this.nodes.values().toArray(nodes);
+	DFNode[] nodes = new DFNode[_nodes.size()];
+	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);
 	elem.appendChild(this.writeScope(document, nodes, this.root));
 	return elem;

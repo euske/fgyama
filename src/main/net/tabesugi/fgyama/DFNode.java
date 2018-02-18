@@ -17,9 +17,9 @@ public class DFNode implements Comparable<DFNode> {
     public int id;
     public String name;
 
-    private DFNode input = null;
-    private Map<String, DFNode> inputs = new HashMap<String, DFNode>();
-    private List<DFNode> outputs = new ArrayList<DFNode>();
+    private DFNode _input = null;
+    private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
+    private List<DFNode> _outputs = new ArrayList<DFNode>();
 
     public DFNode(DFScope scope, DFRef ref) {
 	this.scope = scope;
@@ -68,48 +68,48 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public DFLink[] getLinks() {
-	int n = (this.input != null)? 1 : 0;
-	DFLink[] links = new DFLink[n+this.inputs.size()];
-	if (this.input != null) {
-	    links[0] = new DFLink(this, this.input, null);
+	int n = (_input != null)? 1 : 0;
+	DFLink[] links = new DFLink[n+_inputs.size()];
+	if (_input != null) {
+	    links[0] = new DFLink(this, _input, null);
 	}
-	String[] labels = new String[this.inputs.size()];
-	this.inputs.keySet().toArray(labels);
+	String[] labels = new String[_inputs.size()];
+	_inputs.keySet().toArray(labels);
 	Arrays.sort(labels);
 	for (int i = 0; i < labels.length; i++) {
 	    String label = labels[i];
-	    DFNode node = this.inputs.get(label);
+	    DFNode node = _inputs.get(label);
 	    links[n+i] = new DFLink(this, node, label);
 	}
 	return links;
     }
 
     protected void accept(DFNode node) {
-	assert this.input == null;
-	this.input = node;
-	node.outputs.add(this);
+	assert _input == null;
+	_input = node;
+	node._outputs.add(this);
     }
 
     protected void accept(DFNode node, String label) {
-	assert !this.inputs.containsKey(label);
-	this.inputs.put(label, node);
-	node.outputs.add(this);
+	assert !_inputs.containsKey(label);
+	_inputs.put(label, node);
+	node._outputs.add(this);
     }
 
     public void finish(DFComponent cpt) {
     }
 
     public boolean purge() {
-	if (this.input == null) return false;
-	for (DFNode node : this.outputs) {
-	    if (node.input == this) {
-		node.input = this.input;
-		this.input.outputs.add(node);
+	if (_input == null) return false;
+	for (DFNode node : _outputs) {
+	    if (node._input == this) {
+		node._input = _input;
+		_input._outputs.add(node);
 	    }
-	    for (Map.Entry<String, DFNode> entry : node.inputs.entrySet()) {
+	    for (Map.Entry<String, DFNode> entry : node._inputs.entrySet()) {
 		if (entry.getValue() == this) {
-		    entry.setValue(this.input);
-		    this.input.outputs.add(node);
+		    entry.setValue(_input);
+		    _input._outputs.add(node);
 		}
 	    }
 	}
