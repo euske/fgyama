@@ -53,21 +53,7 @@ public class DFGraph {
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);
-	elem.appendChild(this.writeScope(document, nodes, _root));
-	return elem;
-    }
-
-    private Element writeScope(Document document, DFNode[] nodes, DFScope scope) {
-	Element elem = document.createElement("scope");
-	elem.setAttribute("name", scope.getName());
-	for (DFScope child : scope.getChildren()) {
-	    elem.appendChild(this.writeScope(document, nodes, child));
-	}
-	for (DFNode node : nodes) {
-	    if (node.getScope() == scope) {
-		elem.appendChild(node.toXML(document));
-	    }
-	}
+	elem.appendChild(_root.toXML(document, nodes));
 	return elem;
     }
 }

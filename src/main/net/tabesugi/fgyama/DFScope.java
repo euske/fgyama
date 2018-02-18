@@ -5,6 +5,7 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 
 //  DFScope
@@ -78,6 +79,20 @@ public class DFScope {
 	    scope.dump(out, i2);
 	}
 	out.println(indent+"}");
+    }
+
+    public Element toXML(Document document, DFNode[] nodes) {
+	Element elem = document.createElement("scope");
+	elem.setAttribute("name", _name);
+	for (DFScope child : this.getChildren()) {
+	    elem.appendChild(child.toXML(document, nodes));
+	}
+	for (DFNode node : nodes) {
+	    if (node.getScope() == this) {
+		elem.appendChild(node.toXML(document));
+	    }
+	}
+	return elem;
     }
 
     public DFRef addVar(String name, Type type) {
