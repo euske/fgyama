@@ -88,14 +88,14 @@ public class DFComponent {
 	this.outputs.put(node.ref, node);
     }
 
-    public DFRef[] inputRefs() {
+    public DFRef[] getInputRefs() {
 	DFRef[] refs = new DFRef[this.inputs.size()];
 	this.inputs.keySet().toArray(refs);
 	Arrays.sort(refs);
 	return refs;
     }
 
-    public DFRef[] outputRefs() {
+    public DFRef[] getOutputRefs() {
 	DFRef[] refs = new DFRef[this.outputs.size()];
 	this.outputs.keySet().toArray(refs);
 	Arrays.sort(refs);
@@ -103,13 +103,13 @@ public class DFComponent {
     }
 
     public void endScope(DFScope scope) {
-	for (DFRef ref : scope.refs()) {
+	for (DFRef ref : scope.getRefs()) {
 	    this.inputs.remove(ref);
 	    this.outputs.remove(ref);
 	}
     }
 
-    public DFExit[] exits() {
+    public DFExit[] getExits() {
 	DFExit[] exits = new DFExit[this.exits.size()];
 	this.exits.toArray(exits);
 	return exits;

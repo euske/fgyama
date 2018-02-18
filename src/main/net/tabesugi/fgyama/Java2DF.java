@@ -619,20 +619,20 @@ public class Java2DF extends ASTVisitor {
 	// outRefs: all the references from both component.
 	List<DFRef> outRefs = new ArrayList<DFRef>();
 	if (trueCpt != null) {
-	    for (DFRef ref : trueCpt.inputRefs()) {
+	    for (DFRef ref : trueCpt.getInputRefs()) {
 		DFNode src = trueCpt.getInput(ref);
 		assert src != null;
 		src.accept(cpt.getValue(ref));
 	    }
-	    outRefs.addAll(Arrays.asList(trueCpt.outputRefs()));
+	    outRefs.addAll(Arrays.asList(trueCpt.getOutputRefs()));
 	}
 	if (falseCpt != null) {
-	    for (DFRef ref : falseCpt.inputRefs()) {
+	    for (DFRef ref : falseCpt.getInputRefs()) {
 		DFNode src = falseCpt.getInput(ref);
 		assert src != null;
 		src.accept(cpt.getValue(ref));
 	    }
-	    outRefs.addAll(Arrays.asList(falseCpt.outputRefs()));
+	    outRefs.addAll(Arrays.asList(falseCpt.getOutputRefs()));
 	}
 
 	// Attach a JoinNode to each variable.
@@ -661,14 +661,14 @@ public class Java2DF extends ASTVisitor {
 
 	// Take care of exits.
 	if (trueCpt != null) {
-	    for (DFExit exit : trueCpt.exits()) {
+	    for (DFExit exit : trueCpt.getExits()) {
 		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
 		join.recv(true, exit.node);
 		cpt.addExit(exit.wrap(join));
 	    }
 	}
 	if (falseCpt != null) {
-	    for (DFExit exit : falseCpt.exits()) {
+	    for (DFExit exit : falseCpt.getExits()) {
 		JoinNode join = new JoinNode(scope, exit.node.ref, null, condValue);
 		join.recv(false, exit.node);
 		cpt.addExit(exit.wrap(join));
@@ -706,7 +706,7 @@ public class Java2DF extends ASTVisitor {
 
 	if (preTest) {  // Repeat -> [S] -> Begin -> End
 	    // Connect the repeats to the loop inputs.
-	    for (DFRef ref : loopCpt.inputRefs()) {
+	    for (DFRef ref : loopCpt.getInputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
 		DFNode src = repeats.get(ref);
 		if (src == null) {
@@ -715,7 +715,7 @@ public class Java2DF extends ASTVisitor {
 		input.accept(src);
 	    }
 	    // Connect the loop outputs to the begins.
-	    for (DFRef ref : loopCpt.outputRefs()) {
+	    for (DFRef ref : loopCpt.getOutputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
 		LoopBeginNode begin = begins.get(ref);
 		if (begin != null) {
@@ -734,7 +734,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else {  // Begin -> [S] -> End -> Repeat
 	    // Connect the begins to the loop inputs.
-	    for (DFRef ref : loopCpt.inputRefs()) {
+	    for (DFRef ref : loopCpt.getInputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
 		DFNode src = begins.get(ref);
 		if (src == null) {
@@ -743,7 +743,7 @@ public class Java2DF extends ASTVisitor {
 		input.accept(src);
 	    }
 	    // Connect the loop outputs to the ends.
-	    for (DFRef ref : loopCpt.outputRefs()) {
+	    for (DFRef ref : loopCpt.getOutputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
 		DFNode dst = ends.get(ref);
 		if (dst != null) {
@@ -762,7 +762,7 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Redirect the continue statements.
-	for (DFExit exit : loopCpt.exits()) {
+	for (DFExit exit : loopCpt.getExits()) {
 	    if (exit.cont && exit.frame == loopFrame) {
 		DFNode node = exit.node;
 		DFNode end = ends.get(node.ref);
@@ -1173,12 +1173,12 @@ public class Java2DF extends ASTVisitor {
 	(DFScope scope, DFFrame frame, DFComponent cpt,
 	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
 
-	for (DFRef ref : caseCpt.inputRefs()) {
+	for (DFRef ref : caseCpt.getInputRefs()) {
 	    DFNode src = caseCpt.getInput(ref);
 	    src.accept(cpt.getValue(ref));
 	}
 
-	for (DFRef ref : caseCpt.outputRefs()) {
+	for (DFRef ref : caseCpt.getOutputRefs()) {
 	    DFNode dst = caseCpt.getOutput(ref);
 	    JoinNode join = new JoinNode(scope, ref, apt, caseNode);
 	    join.recv(true, dst);
@@ -1392,7 +1392,7 @@ public class Java2DF extends ASTVisitor {
                 cpt.addExit(new DFExit(rtrn, dstFrame));
             }
 	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
-		for (DFRef ref : frm.outputs()) {
+		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
 		if (frm == dstFrame) break;
@@ -1404,7 +1404,7 @@ public class Java2DF extends ASTVisitor {
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
 	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
-		for (DFRef ref : frm.outputs()) {
+		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
 		if (frm == dstFrame) break;
@@ -1416,7 +1416,7 @@ public class Java2DF extends ASTVisitor {
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
 	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
-		for (DFRef ref : frm.outputs()) {
+		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}
 		if (frm == dstFrame) break;
@@ -1451,7 +1451,7 @@ public class Java2DF extends ASTVisitor {
 	    DFFrame dstFrame = frame.find(DFFrame.TRY);
 	    cpt.addExit(new DFExit(exception, dstFrame));
 	    for (DFFrame frm = frame; frm != null; frm = frm.parent) {
-		for (DFRef ref : frm.outputs()) {
+		for (DFRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}
 		if (frm == dstFrame) break;

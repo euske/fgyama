@@ -78,7 +78,7 @@ public class DFScope {
 	return ref;
     }
 
-    public DFRef[] refs() {
+    public DFRef[] getRefs() {
 	DFRef[] refs = new DFRef[this.refs.size()];
 	this.refs.values().toArray(refs);
 	Arrays.sort(refs);

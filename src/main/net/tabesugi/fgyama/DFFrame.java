@@ -63,7 +63,7 @@ public class DFFrame {
 	return frame;
     }
 
-    public DFRef[] outputs() {
+    public DFRef[] getOutputs() {
 	DFRef[] refs = new DFRef[this.outputs.size()];
 	this.outputs.toArray(refs);
 	Arrays.sort(refs);
