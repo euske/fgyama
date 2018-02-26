@@ -78,13 +78,6 @@ public class DFComponent {
 	return refs;
     }
 
-    public void endScope(DFScope scope) {
-	for (DFRef ref : scope.getRefs()) {
-	    _inputs.remove(ref);
-	    _outputs.remove(ref);
-	}
-    }
-
     public DFExit[] getExits() {
 	DFExit[] exits = new DFExit[_exits.size()];
 	_exits.toArray(exits);

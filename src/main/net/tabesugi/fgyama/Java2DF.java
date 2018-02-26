@@ -1128,7 +1128,6 @@ public class Java2DF extends ASTVisitor {
 	for (Statement cstmt : (List<Statement>) block.statements()) {
 	    cpt = processStatement(childScope, frame, cpt, cstmt);
 	}
-	cpt.endScope(childScope);
 	return cpt;
     }
 
@@ -1234,7 +1233,6 @@ public class Java2DF extends ASTVisitor {
 				       switchCase, caseNode, caseCpt);
 	}
 	cpt.endFrame(switchFrame);
-	cpt.endScope(switchScope);
 	return cpt;
     }
 
@@ -1253,7 +1251,6 @@ public class Java2DF extends ASTVisitor {
 	cpt = processLoop(loopScope, frame, cpt, whileStmt,
 			  condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
-	cpt.endScope(loopScope);
 	return cpt;
     }
 
@@ -1272,7 +1269,6 @@ public class Java2DF extends ASTVisitor {
 	cpt = processLoop(loopScope, frame, cpt, doStmt,
 			  condValue, loopFrame, loopCpt, false);
 	cpt.endFrame(loopFrame);
-	cpt.endScope(loopScope);
 	return cpt;
     }
 
@@ -1303,7 +1299,6 @@ public class Java2DF extends ASTVisitor {
 	cpt = processLoop(loopScope, frame, cpt, forStmt,
 			  condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
-	cpt.endScope(loopScope);
 	return cpt;
     }
 
@@ -1329,7 +1324,6 @@ public class Java2DF extends ASTVisitor {
 	cpt = processLoop(loopScope, frame, cpt, eForStmt,
 			  iterValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
-	cpt.endScope(loopScope);
 	return cpt;
     }
 
@@ -1961,7 +1955,6 @@ public class Java2DF extends ASTVisitor {
 	cpt = processStatement(scope, frame, cpt, funcBlock);
 
 	cpt.endFrame(frame);
-	cpt.endScope(scope);
 	return graph;
     }
 

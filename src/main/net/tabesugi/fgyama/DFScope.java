@@ -85,13 +85,6 @@ public class DFScope {
 	return ref;
     }
 
-    public DFRef[] getRefs() {
-	DFRef[] refs = new DFRef[_refs.size()];
-	_refs.values().toArray(refs);
-	Arrays.sort(refs);
-	return refs;
-    }
-
     public DFRef lookupRef(String name) {
 	DFRef ref = _refs.get(name);
 	if (ref != null) {
