@@ -100,7 +100,7 @@
             <ast length="9" start="123" type="41"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_for_1" ref="basic_for:n" type="arg">
+        <node data="0" name="Nbasic_for_1" ref="basic_for:n" type="arg">
           <ast length="5" start="51" type="44"/>
         </node>
         <node name="Nbasic_for_2" ref="basic_for:n" type="assign">

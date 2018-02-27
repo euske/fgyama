@@ -60,7 +60,7 @@
             <ast length="3" start="98" type="37"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_while_1" ref="basic_while:x" type="arg">
+        <node data="0" name="Nbasic_while_1" ref="basic_while:x" type="arg">
           <ast length="5" start="54" type="44"/>
         </node>
         <node name="Nbasic_while_2" ref="basic_while:x" type="assign">

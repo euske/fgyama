@@ -69,7 +69,7 @@
             <ast length="3" start="124" type="37"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_break_1" ref="basic_break:x" type="arg">
+        <node data="0" name="Nbasic_break_1" ref="basic_break:x" type="arg">
           <ast length="5" start="54" type="44"/>
         </node>
         <node name="Nbasic_break_2" ref="basic_break:x" type="assign">

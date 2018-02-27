@@ -64,7 +64,7 @@
             <ast length="9" start="111" type="41"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_xfor_1" ref="basic_xfor:a" type="arg">
+        <node data="0" name="Nbasic_xfor_1" ref="basic_xfor:a" type="arg">
           <ast length="7" start="52" type="44"/>
         </node>
         <node name="Nbasic_xfor_2" ref="basic_xfor:a" type="assign">

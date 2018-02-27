@@ -230,7 +230,12 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getData() {
-	return "("+Utils.getTypeName(this.type)+")";
+        IBinding binding = this.type.resolveBinding();
+        if (binding != null) {
+            return binding.getKey();
+        } else {
+            return Utils.getTypeName(this.type);
+        }
     }
 }
 
@@ -253,7 +258,12 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getData() {
-	return Utils.getTypeName(this.type)+"?";
+        IBinding binding = this.type.resolveBinding();
+        if (binding != null) {
+            return binding.getKey();
+        } else {
+            return Utils.getTypeName(this.type);
+        }
     }
 }
 
@@ -332,7 +342,7 @@ class ArgNode extends ProgNode {
 
     @Override
     public String getData() {
-	return "arg"+this.index;
+	return Integer.toString(this.index);
     }
 }
 
@@ -373,7 +383,7 @@ class ArrayValueNode extends ProgNode {
 
     @Override
     public String getData() {
-	return "["+this.values.size()+"]";
+	return Integer.toString(this.values.size());
     }
 
     public void addValue(DFNode value) {
@@ -573,8 +583,18 @@ class CreateObjectNode extends CallNode {
     }
 
     @Override
+    public String getType() {
+	return "new";
+    }
+
+    @Override
     public String getData() {
-	return "new "+Utils.getTypeName(this.type);
+        IBinding binding = this.type.resolveBinding();
+        if (binding != null) {
+            return binding.getKey();
+        } else {
+            return Utils.getTypeName(this.type);
+        }
     }
 }
 

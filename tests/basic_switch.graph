@@ -74,7 +74,7 @@
             <ast length="9" start="169" type="41"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_switch_1" ref="basic_switch:n" type="arg">
+        <node data="0" name="Nbasic_switch_1" ref="basic_switch:n" type="arg">
           <ast length="5" start="54" type="44"/>
         </node>
         <node name="Nbasic_switch_2" ref="basic_switch:n" type="assign">

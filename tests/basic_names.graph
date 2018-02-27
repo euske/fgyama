@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph name="doit">
+    <graph name="Lmeepdom/basic_names~Foo;.doit()V">
       <scope name="doit">
         <scope name="doit_b0">
           <node name="Ndoit_b0_2" ref="doit:Ljava/lang/System;" type="ref">
@@ -12,7 +12,7 @@
             <link label="obj" src="Ndoit_3"/>
             <ast length="10" start="99" type="40"/>
           </node>
-          <node data="println()" name="Ndoit_b0_5" type="call">
+          <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" name="Ndoit_b0_5" type="call">
             <link label="arg0" src="Ndoit_b0_6"/>
             <link label="obj" src="Ndoit_b0_4"/>
             <ast length="26" start="99" type="32"/>
@@ -20,7 +20,7 @@
           <node data="Foo!" name="Ndoit_b0_6" type="const">
             <ast length="6" start="118" type="45"/>
           </node>
-          <node data="new Baz" name="Ndoit_b0_7" type="call">
+          <node data="Lmeepdom/basic_names~Foo$141$Baz;" name="Ndoit_b0_7" type="new">
             <ast length="9" start="194" type="14"/>
           </node>
           <node name="Ndoit_b0_8" ref="doit:Lmeepdom/basic_names~Foo;.doit()V#baz" type="assign">
@@ -50,7 +50,7 @@
             <link label="R" src="Ndoit_b0_14"/>
             <ast length="14" start="213" type="7"/>
           </node>
-          <node data="m33p()" name="Ndoit_b0_17" type="call">
+          <node data="m33p" name="Ndoit_b0_17" type="call">
             <ast length="6" start="237" type="32"/>
           </node>
         </scope>
@@ -61,10 +61,10 @@
         <node name="Ndoit_15" ref="doit:Lmeepdom/basic_names~Foo$141$Baz;.x)I"/>
       </scope>
     </graph>
-    <graph name="main">
+    <graph name="Lmeepdom/basic_names~Foo;.main([Ljava/lang/String;)V">
       <scope name="main">
         <scope name="main_b0">
-          <node data="new Foo" name="Nmain_b0_3" type="call">
+          <node data="Lmeepdom/basic_names~Foo;" name="Nmain_b0_3" type="new">
             <ast length="9" start="330" type="14"/>
           </node>
           <node name="Nmain_b0_4" ref="main:Lmeepdom/basic_names~Foo;.main([Ljava/lang/String;)V#foo" type="assign">
@@ -75,12 +75,12 @@
             <link src="Nmain_b0_4"/>
             <ast length="3" start="349" type="42"/>
           </node>
-          <node data="doit()" name="Nmain_b0_6" type="call">
+          <node data="Lmeepdom/basic_names~Foo;.doit()V" name="Nmain_b0_6" type="call">
             <link label="obj" src="Nmain_b0_5"/>
             <ast length="10" start="349" type="32"/>
           </node>
         </scope>
-        <node data="arg0" name="Nmain_1" ref="main:Lmeepdom/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="arg">
+        <node data="0" name="Nmain_1" ref="main:Lmeepdom/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="arg">
           <ast length="13" start="295" type="44"/>
         </node>
         <node name="Nmain_2" ref="main:Lmeepdom/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="assign">

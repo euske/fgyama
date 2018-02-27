@@ -43,21 +43,21 @@
             <ast length="26" start="183" type="41"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_single_1" ref="basic_single:a" type="arg">
+        <node data="0" name="Nbasic_single_1" ref="basic_single:a" type="arg">
           <ast length="5" start="125" type="44"/>
         </node>
         <node name="Nbasic_single_2" ref="basic_single:a" type="assign">
           <link src="Nbasic_single_1"/>
           <ast length="5" start="125" type="44"/>
         </node>
-        <node data="arg1" name="Nbasic_single_3" ref="basic_single:b" type="arg">
+        <node data="1" name="Nbasic_single_3" ref="basic_single:b" type="arg">
           <ast length="5" start="132" type="44"/>
         </node>
         <node name="Nbasic_single_4" ref="basic_single:b" type="assign">
           <link src="Nbasic_single_3"/>
           <ast length="5" start="132" type="44"/>
         </node>
-        <node data="arg2" name="Nbasic_single_5" ref="basic_single:c" type="arg">
+        <node data="2" name="Nbasic_single_5" ref="basic_single:c" type="arg">
           <ast length="5" start="139" type="44"/>
         </node>
         <node name="Nbasic_single_6" ref="basic_single:c" type="assign">

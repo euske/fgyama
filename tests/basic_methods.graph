@@ -23,7 +23,7 @@
             <link src="Nfb_b0_1"/>
             <ast length="5" start="102" type="59"/>
           </node>
-          <node data="new Object" name="Nfb_b0_3" type="call">
+          <node data="Object" name="Nfb_b0_3" type="new">
             <ast length="71" start="121" type="14"/>
           </node>
           <node name="Nfb_b0_4" ref="fb_b0:a" type="assign">

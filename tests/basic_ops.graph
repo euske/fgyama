@@ -35,7 +35,7 @@
             <link src="Nbasic_ops_b0_14"/>
             <ast length="1" start="93" type="42"/>
           </node>
-          <node data="moo()" name="Nbasic_ops_b0_11" type="call">
+          <node data="moo" name="Nbasic_ops_b0_11" type="call">
             <link label="arg0" src="Nbasic_ops_b0_12"/>
             <link label="arg1" src="Nbasic_ops_b0_13"/>
             <ast length="9" start="97" type="32"/>
@@ -55,7 +55,7 @@
           <node data="10" name="Nbasic_ops_b0_15" type="const">
             <ast length="2" start="127" type="34"/>
           </node>
-          <node data="[3]" name="Nbasic_ops_b0_16" type="arrayvalue">
+          <node data="3" name="Nbasic_ops_b0_16" type="arrayvalue">
             <link label="value0" src="Nbasic_ops_b0_17"/>
             <link label="value1" src="Nbasic_ops_b0_18"/>
             <link label="value2" src="Nbasic_ops_b0_19"/>
@@ -154,7 +154,7 @@
             <ast length="9" start="193" type="41"/>
           </node>
         </scope>
-        <node data="arg0" name="Nbasic_ops_1" ref="basic_ops:x" type="arg">
+        <node data="0" name="Nbasic_ops_1" ref="basic_ops:x" type="arg">
           <ast length="5" start="51" type="44"/>
         </node>
         <node name="Nbasic_ops_2" ref="basic_ops:x" type="assign">
