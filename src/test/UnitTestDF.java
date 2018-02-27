@@ -20,11 +20,15 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String javaPath, String xmlPath)
 	throws Exception {
+        compareXml(javaPath, xmlPath, false);
+    }
+    public void compareXml(String javaPath, String xmlPath, boolean resolve)
+	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
 	XmlExporter exporter = new XmlExporter();
 	exporter.startFile(javaPath);
 	Java2DF converter = new Java2DF(exporter);
-	converter.processFile(javaPath);
+	converter.processFile(javaPath, resolve);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
@@ -85,5 +89,9 @@ public class UnitTestDF extends XMLTestCase {
     @Test
     public void test_12_basic_ops() throws Exception {
 	compareXml(TESTDATA+"/basic_ops.java", TESTDATA+"/basic_ops.graph");
+    }
+    @Test
+    public void test_13_basic_names() throws Exception {
+	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph", true);
     }
 }
