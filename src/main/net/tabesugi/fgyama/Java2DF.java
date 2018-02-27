@@ -542,17 +542,22 @@ abstract class CallNode extends ProgNode {
 // MethodCallNode
 class MethodCallNode extends CallNode {
 
-    public String name;
+    public SimpleName name;
 
     public MethodCallNode(DFScope scope, ASTNode ast,
-			  DFNode obj, String name) {
+			  DFNode obj, SimpleName name) {
 	super(scope, null, ast, obj);
 	this.name = name;
     }
 
     @Override
     public String getData() {
-	return this.name+"()";
+        IBinding binding = this.name.resolveBinding();
+        if (binding != null) {
+            return binding.getKey();
+        } else {
+            return this.name.getIdentifier();
+        }
     }
 }
 
@@ -984,7 +989,7 @@ public class Java2DF extends ASTVisitor {
 	    }
 	    SimpleName methodName = invoke.getName();
 	    MethodCallNode call = new MethodCallNode
-		(scope, invoke, obj, methodName.getIdentifier());
+		(scope, invoke, obj, methodName);
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1000,7 +1005,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName methodName = si.getName();
 	    DFNode obj = cpt.getValue(scope.lookupSuper());
 	    MethodCallNode call = new MethodCallNode
-		(scope, si, obj, methodName.getIdentifier());
+		(scope, si, obj, methodName);
 	    for (Expression arg : (List<Expression>) si.arguments()) {
 		cpt = processExpression(scope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1926,13 +1931,13 @@ public class Java2DF extends ASTVisitor {
      */
     public DFGraph getMethodGraph(MethodDeclaration method)
 	throws UnsupportedSyntax {
-	String funcName = method.getName().getFullyQualifiedName();
+	SimpleName funcName = method.getName();
 	Block funcBlock = method.getBody();
 
 	DFGraph graph = new DFGraph(funcName);
 
 	// Setup an initial scope.
-	DFScope scope = new DFScope(graph, funcName);
+	DFScope scope = new DFScope(graph, funcName.getIdentifier());
 	DFFrame frame = new DFFrame(DFFrame.METHOD);
 
 	DFComponent cpt = buildMethodDeclaration(scope, method);
