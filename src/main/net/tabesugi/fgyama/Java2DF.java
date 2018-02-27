@@ -800,8 +800,7 @@ public class Java2DF extends ASTVisitor {
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
-	    SimpleName varName = frag.getName();
-	    DFRef ref = scope.lookupRef(varName.getIdentifier());
+	    DFRef ref = scope.lookupVar(frag.getName());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(scope, frame, cpt, init);
@@ -825,8 +824,7 @@ public class Java2DF extends ASTVisitor {
 	if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		SimpleName varName = (SimpleName)name;
-		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		DFRef ref = scope.lookupVar((SimpleName)name);
 		cpt.setLValue(new SingleAssignNode(scope, ref, expr));
 	    } else {
 		// QualifiedName == FieldAccess
@@ -834,7 +832,7 @@ public class Java2DF extends ASTVisitor {
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		DFRef ref = scope.lookupField(fieldName);
 		cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
 	    }
 
@@ -852,7 +850,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(scope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    cpt.setLValue(new FieldAssignNode(scope, ref, expr, obj));
 
 	} else {
@@ -876,8 +874,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		SimpleName varName = (SimpleName)name;
-		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		DFRef ref = scope.lookupVar((SimpleName)name);
 		cpt.setRValue(new VarRefNode(scope, ref, expr, cpt.getValue(ref)));
 	    } else {
 		// QualifiedName == FieldAccess
@@ -885,7 +882,7 @@ public class Java2DF extends ASTVisitor {
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(scope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		DFRef ref = scope.lookupField(fieldName);
 		cpt.setRValue(new FieldAccessNode(scope, ref, qn,
 						  cpt.getValue(ref), obj));
 	    }
@@ -1048,7 +1045,7 @@ public class Java2DF extends ASTVisitor {
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(scope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    cpt.setRValue(new FieldAccessNode(scope, ref, fa,
 					      cpt.getValue(ref), obj));
 
@@ -1056,7 +1053,7 @@ public class Java2DF extends ASTVisitor {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
 	    DFNode obj = cpt.getValue(scope.lookupSuper());
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    cpt.setRValue(new FieldAccessNode(scope, ref, sfa,
 					      cpt.getValue(ref), obj));
 
@@ -1313,8 +1310,7 @@ public class Java2DF extends ASTVisitor {
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
-	SimpleName varName = decl.getName();
-	DFRef ref = loopScope.lookupRef(varName.getIdentifier());
+	DFRef ref = loopScope.lookupVar(decl.getName());
 	DFNode iterValue = new IterNode(loopScope, ref, expr, loopCpt.getRValue());
 	SingleAssignNode assign = new SingleAssignNode(loopScope, ref, expr);
 	assign.accept(iterValue);
@@ -1504,8 +1500,7 @@ public class Java2DF extends ASTVisitor {
 	    Type varType = varStmt.getType();
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		SimpleName varName = frag.getName();
-		scope.addVar(varName.getIdentifier(), varType);
+		scope.addVar(frag.getName(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
 		    buildScope(scope, frame, expr);
@@ -1597,8 +1592,7 @@ public class Java2DF extends ASTVisitor {
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers and dimensions.
 	    Type varType = decl.getType();
-	    SimpleName varName = decl.getName();
-	    childScope.addVar(varName.getIdentifier(), varType);
+	    childScope.addVar(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
 		buildScope(childScope, frame, expr);
@@ -1634,8 +1628,7 @@ public class Java2DF extends ASTVisitor {
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers and dimensions.
 		Type varType = decl.getType();
-		SimpleName varName = decl.getName();
-		childScope.addVar(varName.getIdentifier(), varType);
+		childScope.addVar(decl.getName(), varType);
 		buildScope(childScope, frame, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
@@ -1683,14 +1676,13 @@ public class Java2DF extends ASTVisitor {
 	} else if (ast instanceof Name) {
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		SimpleName varName = (SimpleName)name;
-		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		DFRef ref = scope.lookupVar((SimpleName)name);
 		frame.addInput(ref);
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		DFRef ref = scope.lookupField(fieldName);
 		frame.addInput(ref);
 	    }
 
@@ -1757,8 +1749,7 @@ public class Java2DF extends ASTVisitor {
 	    Type varType = decl.getType();
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
-		SimpleName varName = frag.getName();
-		DFRef ref = scope.addVar(varName.getIdentifier(), varType);
+		DFRef ref = scope.addVar(frag.getName(), varType);
 		frame.addOutput(ref);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
@@ -1813,13 +1804,13 @@ public class Java2DF extends ASTVisitor {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    buildScope(scope, frame, fa.getExpression());
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    frame.addInput(ref);
 
 	} else if (ast instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
 	    SimpleName fieldName = sfa.getName();
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    frame.addInput(ref);
 
 	} else if (ast instanceof CastExpression) {
@@ -1871,15 +1862,14 @@ public class Java2DF extends ASTVisitor {
 	if (ast instanceof Name) {
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		SimpleName varName = (SimpleName)name;
-		DFRef ref = scope.lookupRef(varName.getIdentifier());
+		DFRef ref = scope.lookupVar((SimpleName)name);
 		frame.addOutput(ref);
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		buildScope(scope, frame, qn.getQualifier());
-		DFRef ref = scope.lookupField(fieldName.getIdentifier());
+		DFRef ref = scope.lookupField(fieldName);
 		frame.addOutput(ref);
 	    }
 
@@ -1894,7 +1884,7 @@ public class Java2DF extends ASTVisitor {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    buildScope(scope, frame, fa.getExpression());
-	    DFRef ref = scope.lookupField(fieldName.getIdentifier());
+	    DFRef ref = scope.lookupField(fieldName);
 	    frame.addOutput(ref);
 
 	} else {
@@ -1918,10 +1908,9 @@ public class Java2DF extends ASTVisitor {
 	int i = 0;
 	for (SingleVariableDeclaration decl :
 		 (List<SingleVariableDeclaration>) method.parameters()) {
-	    SimpleName paramName = decl.getName();
 	    // XXX Ignore modifiers and dimensions.
 	    Type paramType = decl.getType();
-	    DFRef ref = scope.addVar(paramName.getIdentifier(), paramType);
+	    DFRef ref = scope.addVar(decl.getName(), paramType);
 	    DFNode param = new ArgNode(scope, ref, decl, i++);
 	    DFNode assign = new SingleAssignNode(scope, ref, decl);
 	    assign.accept(param);

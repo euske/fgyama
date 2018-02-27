@@ -79,25 +79,34 @@ public class DFScope {
 	return scopes;
     }
 
-    public DFRef addVar(String name, Type type) {
-	DFRef ref = new DFVar(this, name, type);
-	_refs.put(name, ref);
+    public DFRef addVar(SimpleName name, Type type) {
+        return this.addVar(name.getIdentifier(), type);
+    }
+
+    public DFRef addVar(String id, Type type) {
+	DFRef ref = new DFVar(this, id, type);
+	_refs.put(id, ref);
 	return ref;
     }
 
-    public DFRef lookupRef(String name) {
-	DFRef ref = _refs.get(name);
+    private DFRef lookupRef(String id)
+    {
+	DFRef ref = _refs.get(id);
 	if (ref != null) {
 	    return ref;
 	} else if (_parent != null) {
-	    return _parent.lookupRef(name);
+	    return _parent.lookupRef(id);
 	} else {
-	    return this.addVar(name, null);
+	    return this.addVar(id, null);
 	}
     }
 
-    public DFRef lookupField(String name) {
-	return this.lookupRef("."+name);
+    public DFRef lookupVar(SimpleName name) {
+        return this.lookupRef(name.getIdentifier());
+    }
+
+    public DFRef lookupField(SimpleName name) {
+        return this.lookupRef("."+name.getIdentifier());
     }
 
     public DFRef lookupThis() {
