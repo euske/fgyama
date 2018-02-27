@@ -14,6 +14,7 @@ import org.w3c.dom.*;
 public class DFScope {
 
     private DFGraph _graph;
+    private DFScope _root;
     private String _name;
     private DFScope _parent = null;
 
@@ -23,12 +24,14 @@ public class DFScope {
 
     public DFScope(DFGraph graph, String name) {
 	_graph = graph;
+        _root = this;
 	_name = name;
 	graph.setRoot(this);
     }
 
     public DFScope(String name, DFScope parent) {
 	_graph = parent._graph;
+        _root = parent._root;
 	_name = name;
 	_parent = parent;
     }
@@ -79,18 +82,26 @@ public class DFScope {
 	return scopes;
     }
 
-    public DFRef addVar(SimpleName name, Type type) {
-        return this.addVar(name.getIdentifier(), type);
-    }
-
     public DFRef addVar(String id, Type type) {
 	DFRef ref = new DFVar(this, id, type);
 	_refs.put(id, ref);
 	return ref;
     }
 
-    private DFRef lookupRef(String id)
-    {
+    public DFRef addVar(IBinding binding, Type type) {
+        return this.addVar(binding.getKey(), type);
+    }
+
+    public DFRef addVar(SimpleName name, Type type) {
+        IBinding binding = name.resolveBinding();
+        if (binding != null) {
+            return _root.addVar(binding, type);
+        } else {
+            return this.addVar(name.getIdentifier(), type);
+        }
+    }
+
+    private DFRef lookupRef(String id) {
 	DFRef ref = _refs.get(id);
 	if (ref != null) {
 	    return ref;
@@ -101,12 +112,26 @@ public class DFScope {
 	}
     }
 
+    private DFRef lookupRef(IBinding binding) {
+        return this.lookupRef(binding.getKey());
+    }
+
     public DFRef lookupVar(SimpleName name) {
-        return this.lookupRef(name.getIdentifier());
+        IBinding binding = name.resolveBinding();
+        if (binding != null) {
+            return _root.lookupRef(binding);
+        } else {
+            return this.lookupRef(name.getIdentifier());
+        }
     }
 
     public DFRef lookupField(SimpleName name) {
-        return this.lookupRef("."+name.getIdentifier());
+        IBinding binding = name.resolveBinding();
+        if (binding != null) {
+            return _root.lookupRef(binding);
+        } else {
+            return this.lookupRef("."+name.getIdentifier());
+        }
     }
 
     public DFRef lookupThis() {

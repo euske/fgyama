@@ -1984,16 +1984,17 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    public void processFile(String path)
+    public void processFile(String path, boolean resolve)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
 	String src = Utils.readFile(path);
 	Map<String, String> options = JavaCore.getOptions();
 	JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 	ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setUnitName(path);
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	//parser.setResolveBindings(true);
+	parser.setResolveBindings(resolve);
 	parser.setEnvironment(null, null, null, true);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
@@ -2037,7 +2038,7 @@ public class Java2DF extends ASTVisitor {
 	    try {
 		exporter.startFile(path);
 		Java2DF converter = new Java2DF(exporter);
-		converter.processFile(path);
+		converter.processFile(path, true);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
