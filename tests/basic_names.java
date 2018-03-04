@@ -1,4 +1,4 @@
-package meepdom;
+package moo.meepdom;
 
 class Foo {
 
