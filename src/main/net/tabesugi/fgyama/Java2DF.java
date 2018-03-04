@@ -2085,8 +2085,11 @@ public class Java2DF extends ASTVisitor {
 	// Parse the options.
 	String[] classpath = null;
 	String[] srcpath = null;
+	String tmppath = null;
+	boolean resolve = false;
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
+
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
 	    if (arg.equals("--")) {
@@ -2101,19 +2104,43 @@ public class Java2DF extends ASTVisitor {
 		} catch (IOException e) {
 		    System.err.println("Cannot open output file: "+path);
 		}
+	    } else if (arg.equals("-C")) {
+		classpath = args[++i].split(";");
+	    } else if (arg.equals("-R")) {
+		tmppath = args[++i];
 	    } else if (arg.startsWith("-")) {
+		;
 	    } else {
 		files.add(arg);
 	    }
 	}
 
+	// Preprocess files.
+	if (tmppath != null) {
+	    for (int i = 0; i < files.size(); i++) {
+		String src = files.get(i);
+		try {
+		    String name = PackageNameExtractor.getCanonicalName(src);
+		    File dstfile = new File(tmppath+"/"+name.replace(".", "/")+".java");
+		    dstfile.getParentFile().mkdirs();
+		    String dst = dstfile.getAbsolutePath();
+		    System.out.println("Copying: "+src+" -> "+dst);
+		    Utils.copyFile(src, dst);
+		    files.set(i, dst);
+		} catch (IOException e) {
+		    System.err.println("Cannot open input file: "+src);
+		}
+	    }
+	    srcpath = new String[] { tmppath };
+	    resolve = true;
+	}
 	// Process files.
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
 	    try {
 		exporter.startFile(path);
 		Java2DF converter = new Java2DF(exporter);
-		converter.processFile(classpath, srcpath, path, true);
+		converter.processFile(classpath, srcpath, path, resolve);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);

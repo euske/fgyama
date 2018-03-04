@@ -62,6 +62,20 @@ public class Utils {
 	return text;
     }
 
+    public static void copyFile(String src, String dst)
+	throws IOException {
+	BufferedReader reader = new BufferedReader(new FileReader(src));
+	BufferedWriter writer = new BufferedWriter(new FileWriter(dst));
+	while (true) {
+	    String line = reader.readLine();
+	    if (line == null) break;
+	    writer.write(line);
+	    writer.newLine();
+	}
+	writer.close();
+	reader.close();
+    }
+
     public static Document createXml()
 	throws ParserConfigurationException {
 	DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
