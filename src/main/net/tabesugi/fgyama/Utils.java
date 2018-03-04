@@ -62,18 +62,18 @@ public class Utils {
 	return text;
     }
 
-    public static void copyFile(String src, String dst)
+    public static void copyFile(File src, File dst)
 	throws IOException {
-	BufferedReader reader = new BufferedReader(new FileReader(src));
-	BufferedWriter writer = new BufferedWriter(new FileWriter(dst));
+        FileInputStream input = new FileInputStream(src);
+        FileOutputStream output = new FileOutputStream(dst);
+        byte[] buf = new byte[4096];
 	while (true) {
-	    String line = reader.readLine();
-	    if (line == null) break;
-	    writer.write(line);
-	    writer.newLine();
+            int n = input.read(buf);
+            if (n < 0) break;
+	    output.write(buf, 0, n);
 	}
-	writer.close();
-	reader.close();
+	output.close();
+	input.close();
     }
 
     public static Document createXml()

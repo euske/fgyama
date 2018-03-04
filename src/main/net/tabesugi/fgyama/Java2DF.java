@@ -671,7 +671,13 @@ class PackageNameExtractor extends ASTVisitor {
 	cu.accept(extractor);
 	String pkg = extractor.getPackageName();
 	String name = extractor.getTopLevelName();
-	return (pkg != null)? pkg+"."+name : name;
+        if (name == null) {
+            return null;
+        } else if (pkg == null) {
+            return name;
+        } else {
+            return pkg+"."+name;
+        }
     }
 }
 
@@ -2116,20 +2122,31 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Preprocess files.
+        Map<String, String> srcmap = null;
 	if (tmppath != null) {
+            srcmap = new HashMap<String, String>();
 	    for (int i = 0; i < files.size(); i++) {
 		String src = files.get(i);
+                String dst;
 		try {
 		    String name = PackageNameExtractor.getCanonicalName(src);
-		    File dstfile = new File(tmppath+"/"+name.replace(".", "/")+".java");
-		    dstfile.getParentFile().mkdirs();
-		    String dst = dstfile.getAbsolutePath();
-		    System.out.println("Copying: "+src+" -> "+dst);
-		    Utils.copyFile(src, dst);
-		    files.set(i, dst);
+                    if (name == null) continue;
+                    dst = tmppath + "/" + name.replace(".", "/") + ".java";
 		} catch (IOException e) {
 		    System.err.println("Cannot open input file: "+src);
+                    continue;
 		}
+                Utils.logit("Copying: "+src+" -> "+dst);
+                try {
+                    File srcfile = new File(src);
+                    File dstfile = new File(dst);
+                    dstfile.getParentFile().mkdirs();
+                    Utils.copyFile(srcfile, dstfile);
+                    srcmap.put(src, dst);
+		} catch (IOException e) {
+		    System.err.println("Cannot copy: "+e);
+                    continue;
+                }
 	    }
 	    srcpath = new String[] { tmppath };
 	    resolve = true;
@@ -2137,13 +2154,14 @@ public class Java2DF extends ASTVisitor {
 	// Process files.
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
+            String src = (srcmap != null)? srcmap.get(path) : path;
 	    try {
 		exporter.startFile(path);
 		Java2DF converter = new Java2DF(exporter);
-		converter.processFile(classpath, srcpath, path, resolve);
+		converter.processFile(classpath, srcpath, src, resolve);
 		exporter.endFile();
 	    } catch (IOException e) {
-		System.err.println("Cannot open input file: "+path);
+		System.err.println("Cannot open input file: "+src);
 	    }
 	}
 	exporter.close();
