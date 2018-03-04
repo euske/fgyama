@@ -28,7 +28,7 @@ public class UnitTestDF extends XMLTestCase {
 	XmlExporter exporter = new XmlExporter();
 	exporter.startFile(javaPath);
 	Java2DF converter = new Java2DF(exporter);
-	converter.processFile(javaPath, resolve);
+	converter.processFile(null, null, javaPath, resolve);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);

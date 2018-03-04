@@ -627,6 +627,54 @@ class ExceptionNode extends ProgNode {
 }
 
 
+//  PackageNameExtractor
+//
+class PackageNameExtractor extends ASTVisitor {
+
+    private String _package = null;
+    private String _toplevel = null;
+
+    public String getPackageName() {
+	return _package;
+    }
+
+    public String getTopLevelName() {
+	return _toplevel;
+    }
+
+    public boolean visit(PackageDeclaration node) {
+	_package = node.getName().getFullyQualifiedName();
+	return true;
+    }
+
+    public boolean visit(TypeDeclaration node) {
+	if (node.isPackageMemberTypeDeclaration()) {
+	    _toplevel = node.getName().getIdentifier();
+	}
+	return true;
+    }
+
+    public static String getCanonicalName(String path)
+	throws IOException {
+	String src = Utils.readFile(path);
+	Map<String, String> options = JavaCore.getOptions();
+	JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+	ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setUnitName(path);
+	parser.setSource(src.toCharArray());
+	parser.setKind(ASTParser.K_COMPILATION_UNIT);
+	parser.setResolveBindings(false);
+	parser.setEnvironment(null, null, null, false);
+	parser.setCompilerOptions(options);
+	PackageNameExtractor extractor = new PackageNameExtractor();
+	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
+	cu.accept(extractor);
+	String pkg = extractor.getPackageName();
+	String name = extractor.getTopLevelName();
+	return (pkg != null)? pkg+"."+name : name;
+    }
+}
+
 //  Java2DF
 //
 public class Java2DF extends ASTVisitor {
@@ -2009,7 +2057,7 @@ public class Java2DF extends ASTVisitor {
 	return true;
     }
 
-    public void processFile(String path, boolean resolve)
+    public void processFile(String[] classpath, String[] srcpath, String path, boolean resolve)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
 	String src = Utils.readFile(path);
@@ -2020,7 +2068,7 @@ public class Java2DF extends ASTVisitor {
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	parser.setResolveBindings(resolve);
-	parser.setEnvironment(null, null, null, true);
+	parser.setEnvironment(classpath, srcpath, null, resolve);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 	cu.accept(this);
@@ -2035,6 +2083,8 @@ public class Java2DF extends ASTVisitor {
 	throws IOException {
 
 	// Parse the options.
+	String[] classpath = null;
+	String[] srcpath = null;
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
 	for (int i = 0; i < args.length; i++) {
@@ -2063,7 +2113,7 @@ public class Java2DF extends ASTVisitor {
 	    try {
 		exporter.startFile(path);
 		Java2DF converter = new Java2DF(exporter);
-		converter.processFile(path, true);
+		converter.processFile(classpath, srcpath, path, true);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
