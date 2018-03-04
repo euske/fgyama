@@ -46,7 +46,12 @@ public class Utils {
 
     public static String readFile(String path)
 	throws IOException {
-	BufferedReader reader = new BufferedReader(new FileReader(path));
+	return readFile(new File(path));
+    }
+
+    public static String readFile(File file)
+	throws IOException {
+	BufferedReader reader = new BufferedReader(new FileReader(file));
 	String text = "";
 	while (true) {
 	    String line = reader.readLine();

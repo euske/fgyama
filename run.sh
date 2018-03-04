@@ -2,6 +2,10 @@
 # usage:
 #   run.sh net.tabesugi.fgyama.Java2DF *.java
 #   run.sh CommentExtractor *.java
+if [ $# -eq 0 ]; then
+    echo "usage: $0 package.class [args]"
+    exit 1
+fi
 BASEDIR=${0%/*}
 LIBDIR=${BASEDIR}/lib
 CLASSPATH=${BASEDIR}/target
