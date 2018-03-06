@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><fgyama>
+  <file path="tests/multi/dom/meep/multi_xref1.java">
+    <graph name="Ldom/meep/multi_xref1;.moo()V">
+      <scope name="moo">
+        <scope name="moo_b0">
+          <node data="Ldom/meep/multi_xref2;" name="Nmoo_b0_1" type="new">
+            <ast length="17" start="92" type="14"/>
+          </node>
+          <node name="Nmoo_b0_2" ref="moo:Ldom/meep/multi_xref1;.moo()V#xref2" type="assign">
+            <link src="Nmoo_b0_1"/>
+            <ast length="25" start="84" type="59"/>
+          </node>
+          <node name="Nmoo_b0_3" ref="moo:Ldom/meep/multi_xref1;.moo()V#xref2" type="ref">
+            <link src="Nmoo_b0_2"/>
+            <ast length="5" start="112" type="42"/>
+          </node>
+          <node data="Ldom/meep/multi_xref2;.foo()V" name="Nmoo_b0_4" type="call">
+            <link label="obj" src="Nmoo_b0_3"/>
+            <ast length="11" start="112" type="32"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+  </file>
+</fgyama>

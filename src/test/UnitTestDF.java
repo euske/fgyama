@@ -20,15 +20,16 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String javaPath, String xmlPath)
 	throws Exception {
-        compareXml(javaPath, xmlPath, false);
+        compareXml(javaPath, xmlPath, false, null);
     }
-    public void compareXml(String javaPath, String xmlPath, boolean resolve)
+    public void compareXml(String javaPath, String xmlPath,
+			   boolean resolve, String[] srcPath)
 	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
 	XmlExporter exporter = new XmlExporter();
 	exporter.startFile(javaPath);
 	Java2DF converter = new Java2DF(exporter, resolve);
-	converter.processFile(null, null, javaPath);
+	converter.processFile(null, srcPath, javaPath);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
@@ -92,12 +93,24 @@ public class UnitTestDF extends XMLTestCase {
     }
     @Test
     public void test_13_basic_names() throws Exception {
-	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph", true);
+	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph",
+		   true, null);
     }
 
     @Test
     public void test_14_canonical_name() throws Exception {
 	String name = PackageNameExtractor.getCanonicalName(TESTDATA+"/basic_names.java");
 	assertEquals(name, "dom.meep.Foo");
+    }
+
+    @Test
+    public void test_15_multi_xref() throws Exception {
+	String[] srcpath = new String[] { TESTDATA+"/multi" };
+	compareXml(TESTDATA+"/multi/dom/meep/multi_xref1.java",
+		   TESTDATA+"/multi/dom/meep/multi_xref1.graph",
+		   true, srcpath);
+	compareXml(TESTDATA+"/multi/dom/meep/multi_xref2.java",
+		   TESTDATA+"/multi/dom/meep/multi_xref2.graph",
+		   true, srcpath);
     }
 }
