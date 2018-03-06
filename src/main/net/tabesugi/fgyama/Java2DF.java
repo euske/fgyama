@@ -654,6 +654,13 @@ class PackageNameExtractor extends ASTVisitor {
 	return true;
     }
 
+    public boolean visit(EnumDeclaration node) {
+	if (node.isPackageMemberTypeDeclaration()) {
+	    _toplevel = node.getName().getIdentifier();
+	}
+	return true;
+    }
+
     public static String getCanonicalName(String path)
 	throws IOException {
 	String src = Utils.readFile(path);
@@ -2130,7 +2137,10 @@ public class Java2DF extends ASTVisitor {
                 String dst;
 		try {
 		    String name = PackageNameExtractor.getCanonicalName(src);
-                    if (name == null) continue;
+                    if (name == null) {
+			Utils.logit("Error: no toplevel name: "+src);
+			continue;
+		    }
                     dst = tmppath + "/" + name.replace(".", "/") + ".java";
 		} catch (IOException e) {
 		    System.err.println("Cannot open input file: "+src);
@@ -2155,6 +2165,7 @@ public class Java2DF extends ASTVisitor {
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
             String src = (srcmap != null)? srcmap.get(path) : path;
+	    if (src == null) continue;
 	    try {
 		exporter.startFile(path);
 		Java2DF converter = new Java2DF(exporter);
