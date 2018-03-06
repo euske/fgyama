@@ -627,6 +627,25 @@ class ExceptionNode extends ProgNode {
 }
 
 
+//  NameResolutionChecker
+//
+class NameResolutionChecker extends ASTVisitor {
+
+    private boolean _resolved = true;
+
+    public boolean isResolved() {
+	return _resolved;
+    }
+
+    public boolean visit(SimpleName node) {
+	if (node.resolveBinding() == null) {
+	    _resolved = false;
+	}
+	return false;
+    }
+}
+
+
 //  PackageNameExtractor
 //
 class PackageNameExtractor extends ASTVisitor {
@@ -644,21 +663,21 @@ class PackageNameExtractor extends ASTVisitor {
 
     public boolean visit(PackageDeclaration node) {
 	_package = node.getName().getFullyQualifiedName();
-	return true;
+	return false;
     }
 
     public boolean visit(TypeDeclaration node) {
 	if (node.isPackageMemberTypeDeclaration()) {
 	    _toplevel = node.getName().getIdentifier();
 	}
-	return true;
+	return false;
     }
 
     public boolean visit(EnumDeclaration node) {
 	if (node.isPackageMemberTypeDeclaration()) {
 	    _toplevel = node.getName().getIdentifier();
 	}
-	return true;
+	return false;
     }
 
     public static String getCanonicalName(String path)
@@ -2036,15 +2055,25 @@ public class Java2DF extends ASTVisitor {
     /// ASTVisitor methods.
 
     public Exporter exporter;
+    public boolean resolve;
 
-    public Java2DF(Exporter exporter) {
+    public Java2DF(Exporter exporter, boolean resolve) {
 	this.exporter = exporter;
+	this.resolve = resolve;
     }
 
     public boolean visit(MethodDeclaration method) {
-	String funcName = method.getName().getFullyQualifiedName();
 	// Ignore method prototypes.
-	if (method.getBody() == null) return true;
+	if (method.getBody() == null) return false;
+	String funcName = method.getName().getFullyQualifiedName();
+	if (this.resolve) {
+	    NameResolutionChecker checker = new NameResolutionChecker();
+	    method.accept(checker);
+	    if (!checker.isResolved()) {
+		Utils.logit("Unresolved: "+funcName);
+		return false;
+	    }
+	}
 	try {
 	    try {
 		DFGraph graph = getMethodGraph(method);
@@ -2067,10 +2096,10 @@ public class Java2DF extends ASTVisitor {
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
-	return true;
+	return false;
     }
 
-    public void processFile(String[] classpath, String[] srcpath, String path, boolean resolve)
+    public void processFile(String[] classpath, String[] srcpath, String path)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
 	String src = Utils.readFile(path);
@@ -2080,8 +2109,8 @@ public class Java2DF extends ASTVisitor {
         parser.setUnitName(path);
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	parser.setResolveBindings(resolve);
-	parser.setEnvironment(classpath, srcpath, null, resolve);
+	parser.setResolveBindings(this.resolve);
+	parser.setEnvironment(classpath, srcpath, null, this.resolve);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 	cu.accept(this);
@@ -2168,8 +2197,8 @@ public class Java2DF extends ASTVisitor {
 	    if (src == null) continue;
 	    try {
 		exporter.startFile(path);
-		Java2DF converter = new Java2DF(exporter);
-		converter.processFile(classpath, srcpath, src, resolve);
+		Java2DF converter = new Java2DF(exporter, resolve);
+		converter.processFile(classpath, srcpath, src);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+src);
