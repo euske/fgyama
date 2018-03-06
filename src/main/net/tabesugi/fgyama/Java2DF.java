@@ -2133,6 +2133,7 @@ public class Java2DF extends ASTVisitor {
 	    srcpath = new String[] { tmppath };
 	    resolve = true;
 	}
+
 	// Process files.
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
@@ -2150,5 +2151,14 @@ public class Java2DF extends ASTVisitor {
 	exporter.close();
 	Utils.printXml(output, exporter.document);
 	output.close();
+
+	// Cleanup files.
+	if (srcmap != null) {
+	    for (String dst : srcmap.values()) {
+                Utils.logit("Deleting: "+dst);
+		File file = new File(dst);
+		file.delete();
+	    }
+	}
     }
 }
