@@ -1,4 +1,4 @@
-package moo.meepdom;
+package dom.meep;
 
 class Foo {
 
@@ -12,6 +12,9 @@ class Foo {
         }
         Baz baz = new Baz();
         baz.x = this.y;
+    }
+
+    public void meh() {
         m33p(); // unresolved.
     }
 

@@ -27,8 +27,8 @@ public class UnitTestDF extends XMLTestCase {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
 	XmlExporter exporter = new XmlExporter();
 	exporter.startFile(javaPath);
-	Java2DF converter = new Java2DF(exporter);
-	converter.processFile(null, null, javaPath, resolve);
+	Java2DF converter = new Java2DF(exporter, resolve);
+	converter.processFile(null, null, javaPath);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
@@ -93,5 +93,11 @@ public class UnitTestDF extends XMLTestCase {
     @Test
     public void test_13_basic_names() throws Exception {
 	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph", true);
+    }
+
+    @Test
+    public void test_14_canonical_name() throws Exception {
+	String name = PackageNameExtractor.getCanonicalName(TESTDATA+"/basic_names.java");
+	assertEquals(name, "dom.meep.Foo");
     }
 }

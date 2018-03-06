@@ -1,91 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph name="Lmoo/meepdom/basic_names~Foo;.doit()V">
+    <graph name="Ldom/meep/basic_names~Foo;.doit()V">
       <scope name="doit">
         <scope name="doit_b0">
           <node name="Ndoit_b0_2" ref="doit:Ljava/lang/System;" type="ref">
             <link src="Ndoit_1"/>
-            <ast length="6" start="103" type="42"/>
+            <ast length="6" start="100" type="42"/>
           </node>
           <node name="Ndoit_b0_4" ref="doit:Ljava/lang/System;.out)Ljava/io/PrintStream;" type="fieldaccess">
             <link src="Ndoit_b0_2"/>
             <link label="obj" src="Ndoit_3"/>
-            <ast length="10" start="103" type="40"/>
+            <ast length="10" start="100" type="40"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" name="Ndoit_b0_5" type="call">
             <link label="arg0" src="Ndoit_b0_6"/>
             <link label="obj" src="Ndoit_b0_4"/>
-            <ast length="26" start="103" type="32"/>
+            <ast length="26" start="100" type="32"/>
           </node>
           <node data="Foo!" name="Ndoit_b0_6" type="const">
-            <ast length="6" start="122" type="45"/>
+            <ast length="6" start="119" type="45"/>
           </node>
-          <node data="Lmoo/meepdom/basic_names~Foo$145$Baz;" name="Ndoit_b0_7" type="new">
-            <ast length="9" start="198" type="14"/>
+          <node data="Ldom/meep/basic_names~Foo$142$Baz;" name="Ndoit_b0_7" type="new">
+            <ast length="9" start="195" type="14"/>
           </node>
-          <node name="Ndoit_b0_8" ref="doit:Lmoo/meepdom/basic_names~Foo;.doit()V#baz" type="assign">
+          <node name="Ndoit_b0_8" ref="doit:Ldom/meep/basic_names~Foo;.doit()V#baz" type="assign">
             <link src="Ndoit_b0_7"/>
-            <ast length="15" start="192" type="59"/>
+            <ast length="15" start="189" type="59"/>
           </node>
-          <node name="Ndoit_b0_9" ref="doit:Lmoo/meepdom/basic_names~Foo;.doit()V#baz" type="ref">
+          <node name="Ndoit_b0_9" ref="doit:Ldom/meep/basic_names~Foo;.doit()V#baz" type="ref">
             <link src="Ndoit_b0_8"/>
-            <ast length="3" start="217" type="42"/>
+            <ast length="3" start="214" type="42"/>
           </node>
-          <node name="Ndoit_b0_10" ref="doit:Lmoo/meepdom/basic_names~Foo$145$Baz;.x)I" type="fieldassign">
+          <node name="Ndoit_b0_10" ref="doit:Ldom/meep/basic_names~Foo$142$Baz;.x)I" type="fieldassign">
             <link src="Ndoit_b0_16"/>
             <link label="obj" src="Ndoit_b0_9"/>
-            <ast length="5" start="217" type="40"/>
+            <ast length="5" start="214" type="40"/>
           </node>
           <node name="Ndoit_b0_12" ref="doit:#this" type="ref">
             <link src="Ndoit_11"/>
-            <ast length="4" start="225" type="52"/>
+            <ast length="4" start="222" type="52"/>
           </node>
-          <node name="Ndoit_b0_14" ref="doit:Lmoo/meepdom/basic_names~Foo;.y)I" type="fieldaccess">
+          <node name="Ndoit_b0_14" ref="doit:Ldom/meep/basic_names~Foo;.y)I" type="fieldaccess">
             <link src="Ndoit_b0_12"/>
             <link label="obj" src="Ndoit_13"/>
-            <ast length="6" start="225" type="22"/>
+            <ast length="6" start="222" type="22"/>
           </node>
-          <node data="=" name="Ndoit_b0_16" ref="doit:Lmoo/meepdom/basic_names~Foo$145$Baz;.x)I" type="assignop">
+          <node data="=" name="Ndoit_b0_16" ref="doit:Ldom/meep/basic_names~Foo$142$Baz;.x)I" type="assignop">
             <link label="L" src="Ndoit_15"/>
             <link label="R" src="Ndoit_b0_14"/>
-            <ast length="14" start="217" type="7"/>
-          </node>
-          <node data="m33p" name="Ndoit_b0_17" type="call">
-            <ast length="6" start="241" type="32"/>
+            <ast length="14" start="214" type="7"/>
           </node>
         </scope>
         <node name="Ndoit_1" ref="doit:Ljava/lang/System;"/>
         <node name="Ndoit_3" ref="doit:Ljava/lang/System;.out)Ljava/io/PrintStream;"/>
         <node name="Ndoit_11" ref="doit:#this"/>
-        <node name="Ndoit_13" ref="doit:Lmoo/meepdom/basic_names~Foo;.y)I"/>
-        <node name="Ndoit_15" ref="doit:Lmoo/meepdom/basic_names~Foo$145$Baz;.x)I"/>
+        <node name="Ndoit_13" ref="doit:Ldom/meep/basic_names~Foo;.y)I"/>
+        <node name="Ndoit_15" ref="doit:Ldom/meep/basic_names~Foo$142$Baz;.x)I"/>
       </scope>
     </graph>
-    <graph name="Lmoo/meepdom/basic_names~Foo;.main([Ljava/lang/String;)V">
+    <graph name="Ldom/meep/basic_names~Foo;.main([Ljava/lang/String;)V">
       <scope name="main">
         <scope name="main_b0">
-          <node data="Lmoo/meepdom/basic_names~Foo;" name="Nmain_b0_3" type="new">
-            <ast length="9" start="334" type="14"/>
+          <node data="Ldom/meep/basic_names~Foo;" name="Nmain_b0_3" type="new">
+            <ast length="9" start="362" type="14"/>
           </node>
-          <node name="Nmain_b0_4" ref="main:Lmoo/meepdom/basic_names~Foo;.main([Ljava/lang/String;)V#foo" type="assign">
+          <node name="Nmain_b0_4" ref="main:Ldom/meep/basic_names~Foo;.main([Ljava/lang/String;)V#foo" type="assign">
             <link src="Nmain_b0_3"/>
-            <ast length="15" start="328" type="59"/>
+            <ast length="15" start="356" type="59"/>
           </node>
-          <node name="Nmain_b0_5" ref="main:Lmoo/meepdom/basic_names~Foo;.main([Ljava/lang/String;)V#foo" type="ref">
+          <node name="Nmain_b0_5" ref="main:Ldom/meep/basic_names~Foo;.main([Ljava/lang/String;)V#foo" type="ref">
             <link src="Nmain_b0_4"/>
-            <ast length="3" start="353" type="42"/>
+            <ast length="3" start="381" type="42"/>
           </node>
-          <node data="Lmoo/meepdom/basic_names~Foo;.doit()V" name="Nmain_b0_6" type="call">
+          <node data="Ldom/meep/basic_names~Foo;.doit()V" name="Nmain_b0_6" type="call">
             <link label="obj" src="Nmain_b0_5"/>
-            <ast length="10" start="353" type="32"/>
+            <ast length="10" start="381" type="32"/>
           </node>
         </scope>
-        <node data="0" name="Nmain_1" ref="main:Lmoo/meepdom/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="arg">
-          <ast length="13" start="299" type="44"/>
+        <node data="0" name="Nmain_1" ref="main:Ldom/meep/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="arg">
+          <ast length="13" start="327" type="44"/>
         </node>
-        <node name="Nmain_2" ref="main:Lmoo/meepdom/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="assign">
+        <node name="Nmain_2" ref="main:Ldom/meep/basic_names~Foo;.main([Ljava/lang/String;)V#args#0#0" type="assign">
           <link src="Nmain_1"/>
-          <ast length="13" start="299" type="44"/>
+          <ast length="13" start="327" type="44"/>
         </node>
       </scope>
     </graph>
