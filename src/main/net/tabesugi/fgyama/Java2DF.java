@@ -2039,7 +2039,7 @@ public class Java2DF extends ASTVisitor {
 	} catch (IOException e) {
 	    e.printStackTrace();
 	}
-	return false;
+	return true;
     }
 
     public void processFile(String[] classpath, String[] srcpath, String path)
