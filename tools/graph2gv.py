@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+from subprocess import Popen, PIPE
 from graph import DFGraph, DFNode
 from graph import get_graphs
 
@@ -52,6 +53,19 @@ def write_gv(out, scope, highlight=None, level=0):
                 out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
     out.write(h+'}\n')
     return
+
+def run_dot(graph, type='svg'):
+    args = ['dot', '-T'+type]
+    print('run_dot: %r' % args)
+    p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
+    write_gv(p.stdin, graph.root)
+    p.stdin.close()
+    output = ''
+    for (i,line) in enumerate(p.stdout):
+        if i < 5: continue      # skip the first 5 lines.
+        output += line
+    p.wait()
+    return output
 
 def main(argv):
     import fileinput

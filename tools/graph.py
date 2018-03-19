@@ -2,6 +2,7 @@
 import sys
 import os.path
 import sqlite3
+from subprocess import Popen, PIPE
 from xml.etree.cElementTree import Element
 from xml.etree.cElementTree import ElementTree
 
@@ -397,6 +398,37 @@ def get_graphs(arg):
         if gids is None or graph.gid in gids:
             yield graph
     return
+
+# run_fgyama
+BASEDIR = os.path.dirname(os.path.dirname(__file__))
+LIBDIR = os.path.join(BASEDIR, 'lib')
+LIBS = (
+    'junit-3.8.1.jar',
+    'org.eclipse.jdt.core-3.12.3.jar',
+    'org.eclipse.core.resources-3.11.1.jar',
+    'org.eclipse.core.expressions-3.5.100.jar',
+    'org.eclipse.core.runtime-3.12.0.jar',
+    'org.eclipse.osgi-3.11.3.jar',
+    'org.eclipse.equinox.common-3.8.0.jar',
+    'org.eclipse.core.jobs-3.8.0.jar',
+    'org.eclipse.equinox.registry-3.6.100.jar',
+    'org.eclipse.equinox.preferences-3.6.1.jar',
+    'org.eclipse.core.contenttype-3.5.100.jar',
+    'org.eclipse.equinox.app-1.3.400.jar',
+    'org.eclipse.core.filesystem-1.6.1.jar',
+    'org.eclipse.text-3.6.0.jar',
+    'org.eclipse.core.commands-3.8.1.jar',
+)
+CLASSPATH = [ os.path.join(LIBDIR, name) for name in LIBS ]
+CLASSPATH.append(os.path.join(BASEDIR, 'target'))
+def run_fgyama(path):
+    args = ['java', '-cp', ':'.join(CLASSPATH),
+            'net.tabesugi.fgyama.Java2DF', path]
+    print('run_fgyama: %r' % args)
+    p = Popen(args, stdout=PIPE)
+    graphs = list(load_graphs(p.stdout))
+    p.wait()
+    return graphs
 
 # main
 def main(argv):
