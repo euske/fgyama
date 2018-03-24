@@ -49,13 +49,13 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def send_text(self, text):
         self.send('''<!DOCTYPE html>
-<html><head>FGyama Grapher</head><body>
+<html><head><title>FGyama Grapher</title></head><body>
 <h1>FGyama Grapher</h1>
 <form method=POST action="/graph">
-<textarea name=t>%s</textarea><br>
-<input type=submit>        
-<input type=reset>        
-</form>        
+<textarea name=t cols=80 rows=10>%s</textarea><br>
+<input type=submit>
+<input type=reset>
+</form>
 ''' % q(text))
         return
 
@@ -83,7 +83,7 @@ class MyHTTPRequestHandler(BaseHTTPRequestHandler):
 </body></html>
 ''')
         return
-    
+
 def main(argv):
     server_address = ('', 8000)
     handler = MyHTTPRequestHandler
