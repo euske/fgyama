@@ -12,6 +12,7 @@ import org.w3c.dom.*;
 //
 public class DFNode implements Comparable<DFNode> {
 
+    private DFGraph _graph;
     private DFScope _scope;
     private DFRef _ref;
     private int _id;
@@ -20,9 +21,10 @@ public class DFNode implements Comparable<DFNode> {
     private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
     private List<DFNode> _outputs = new ArrayList<DFNode>();
 
-    public DFNode(DFScope scope, DFRef ref) {
+    public DFNode(DFGraph graph, DFScope scope, DFRef ref) {
+        _graph = graph;
+	_id = graph.addNode(this);
 	_scope = scope;
-	_id = scope.getGraph().addNode(this);
 	_ref = ref;
     }
 

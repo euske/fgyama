@@ -13,7 +13,6 @@ import org.w3c.dom.*;
 //
 public class DFScope {
 
-    private DFGraph _graph;
     private DFScope _root;
     private String _name;
     private DFScope _parent = null;
@@ -22,15 +21,12 @@ public class DFScope {
     private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
     private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
-    public DFScope(DFGraph graph, String name) {
-	_graph = graph;
+    public DFScope(String name) {
         _root = this;
 	_name = name;
-	graph.setRoot(this);
     }
 
     public DFScope(String name, DFScope parent) {
-	_graph = parent._graph;
         _root = parent._root;
 	_name = name;
 	_parent = parent;
@@ -53,10 +49,6 @@ public class DFScope {
 	    }
 	}
 	return elem;
-    }
-
-    public DFGraph getGraph() {
-        return _graph;
     }
 
     public String getName() {

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFComponent {
 
+    private DFGraph _graph;
     private DFScope _scope;
 
     private DFNode _lval = null;
@@ -19,7 +20,8 @@ public class DFComponent {
     private Map<DFRef, DFNode> _outputs = new HashMap<DFRef, DFNode>();
     private List<DFExit> _exits = new ArrayList<DFExit>();
 
-    public DFComponent(DFScope scope) {
+    public DFComponent(DFGraph graph, DFScope scope) {
+        _graph = graph;
 	_scope = scope;
     }
 
@@ -29,7 +31,7 @@ public class DFComponent {
 	if (node == null) {
 	    node = _inputs.get(ref);
 	    if (node == null) {
-		node = new DFNode(_scope, ref);
+		node = new DFNode(_graph, _scope, ref);
 		_inputs.put(ref, node);
 	    }
 	}
