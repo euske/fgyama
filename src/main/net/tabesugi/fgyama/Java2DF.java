@@ -1545,7 +1545,7 @@ public class Java2DF extends ASTVisitor {
     /**
      * Performs dataflow analysis for a given method.
      */
-    public DFGraph getMethodGraph(MethodDeclaration method)
+    public DFGraph getMethodGraph(DFScope scope, MethodDeclaration method)
 	throws UnsupportedSyntax {
 	SimpleName funcName = method.getName();
 	Block funcBlock = method.getBody();
@@ -1553,7 +1553,6 @@ public class Java2DF extends ASTVisitor {
 	DFGraph graph = new DFGraph(funcName);
 
 	// Setup an initial scope.
-	DFScope scope = new DFScope(funcName.getIdentifier());
 	DFFrame frame = new DFFrame(DFFrame.METHOD);
         graph.setRoot(scope);
 
@@ -1584,41 +1583,56 @@ public class Java2DF extends ASTVisitor {
 	this.resolve = resolve;
     }
 
-    public boolean visit(MethodDeclaration method) {
+    public DFGraph processMethodDeclaration(DFScope scope, MethodDeclaration method)
+        throws UnsupportedSyntax {
 	// Ignore method prototypes.
-	if (method.getBody() == null) return false;
-	String funcName = method.getName().getFullyQualifiedName();
-	if (this.resolve) {
-	    if (!NameResolutionChecker.canResolveNames(method)) {
-		Utils.logit("Unresolved: "+funcName);
-		return false;
-	    }
-	}
-	try {
-	    try {
-		DFGraph graph = getMethodGraph(method);
-		if (graph != null) {
-		    Utils.logit("Success: "+funcName);
-		    // Remove redundant nodes.
-		    graph.cleanup();
-		    if (this.exporter != null) {
-			this.exporter.writeGraph(graph);
-		    }
-		}
-	    } catch (UnsupportedSyntax e) {
-		String astName = e.ast.getClass().getName();
-		Utils.logit("Fail: "+funcName+" (Unsupported: "+astName+") "+e.ast);
-		//e.printStackTrace();
-		if (this.exporter != null) {
-		    this.exporter.writeError(funcName, astName);
-		}
-	    }
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
-	return true;
+	if (method.getBody() == null) return null;
+        scope = scope.getScope(method.getName());
+	String funcName = method.getName().getIdentifier();
+        try {
+            DFGraph graph = getMethodGraph(scope, method);
+            if (graph != null) {
+                Utils.logit("Success: "+funcName);
+                // Remove redundant nodes.
+                graph.cleanup();
+            }
+            return graph;
+        } catch (UnsupportedSyntax e) {
+            //e.printStackTrace();
+            e.name = funcName;
+            throw e;
+        }
     }
 
+    @SuppressWarnings("unchecked")
+    public void processTypeDeclaration(DFScope scope, TypeDeclaration typedecl)
+        throws IOException {
+        scope = scope.getScope(typedecl.getName());
+        // XXX superclass
+        for (BodyDeclaration body : (List<BodyDeclaration>) typedecl.bodyDeclarations()) {
+            if (body instanceof TypeDeclaration) {
+                processTypeDeclaration(scope, (TypeDeclaration)body);
+            } else if (body instanceof FieldDeclaration) {
+                // XXX
+                // XXX static
+            } else if (body instanceof MethodDeclaration) {
+                try {
+                    DFGraph graph = processMethodDeclaration(scope, (MethodDeclaration)body);
+                    if (this.exporter != null && graph != null) {
+                        this.exporter.writeGraph(graph);
+                    }
+                } catch (UnsupportedSyntax e) {
+                    String astName = e.ast.getClass().getName();
+                    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                    if (this.exporter != null) {
+                        this.exporter.writeError(e.name, astName);
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public void processFile(String path)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
@@ -1633,7 +1647,15 @@ public class Java2DF extends ASTVisitor {
 	parser.setEnvironment(this.classPath, this.srcPath, null, this.resolve);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
-	cu.accept(this);
+        PackageDeclaration pkg = cu.getPackage();
+        DFScope scope = new DFScope();
+        if (pkg != null) {
+            scope = scope.getScope(pkg.getName());
+        }
+        for (TypeDeclaration typedecl : (List<TypeDeclaration>) cu.types()) {
+            processTypeDeclaration(scope, typedecl);
+        }
+	scope.dump();
     }
 
     /**

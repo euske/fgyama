@@ -14,6 +14,7 @@ public class UnsupportedSyntax extends Exception {
     static final long serialVersionUID = 1L;
 
     public ASTNode ast;
+    public String name = null;
 
     public UnsupportedSyntax(ASTNode ast) {
 	this.ast = ast;

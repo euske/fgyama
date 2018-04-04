@@ -18,18 +18,40 @@ public class DFScope {
     private DFScope _parent = null;
 
     private List<DFScope> _children = new ArrayList<DFScope>();
+    private Map<String, DFScope> _name2child = new HashMap<String, DFScope>();
     private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
     private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
-    public DFScope(String name) {
+    public DFScope() {
         _root = this;
-	_name = name;
+	_name = "root";
     }
 
     public DFScope(String name, DFScope parent) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
+    }
+
+    public DFScope getScope(Name name) {
+        if (name.isQualifiedName()) {
+            QualifiedName qname = (QualifiedName)name;
+            DFScope scope = _parent.getScope(qname.getQualifier());
+            return scope.getScope(qname.getName().getIdentifier());
+        } else {
+            SimpleName sname = (SimpleName)name;
+            return this.getScope(sname.getIdentifier());
+        }
+    }
+
+    public DFScope getScope(String name) {
+        DFScope scope = _name2child.get(name);
+        if (scope == null) {
+            scope = new DFScope(name, this);
+            _children.add(scope);
+            _name2child.put(name, scope);
+        }
+        return scope;
     }
 
     @Override
@@ -52,7 +74,11 @@ public class DFScope {
     }
 
     public String getName() {
-        return _name;
+        if (_parent == null) {
+            return _name;
+        } else {
+            return _parent.getName()+"."+_name;
+        }
     }
 
     public DFScope addChild(String basename, ASTNode ast) {
@@ -60,6 +86,7 @@ public class DFScope {
 	String name = _name+"_"+basename+id;
 	DFScope scope = new DFScope(name, this);
 	_children.add(scope);
+        _name2child.put(name, scope);
 	_ast2child.put(ast, scope);
 	return scope;
     }
@@ -75,8 +102,11 @@ public class DFScope {
     }
 
     public DFRef addVar(String id, Type type) {
-	DFRef ref = new DFVar(this, id, type);
-	_refs.put(id, ref);
+	DFRef ref = _refs.get(id);
+	if (ref == null) {
+            ref = new DFVar(this, id, type);
+            _refs.put(id, ref);
+        }
 	return ref;
     }
 
@@ -127,19 +157,19 @@ public class DFScope {
     }
 
     public DFRef lookupThis() {
-	return this.lookupRef("#this");
+	return this.addVar("#this", null);
     }
 
     public DFRef lookupSuper() {
-	return this.lookupRef("#super");
+	return this.addVar("#super", null);
     }
 
     public DFRef lookupReturn() {
-	return this.lookupRef("#return");
+	return this.addVar("#return", null);
     }
 
     public DFRef lookupArray() {
-	return this.lookupRef("#array");
+	return this.addVar("#array", null);
     }
 
     // dump: for debugging.
@@ -147,7 +177,7 @@ public class DFScope {
 	dump(System.out, "");
     }
     public void dump(PrintStream out, String indent) {
-	out.println(indent+_name+" {");
+	out.println(indent+getName()+" {");
 	String i2 = indent + "  ";
 	for (DFRef ref : _refs.values()) {
 	    out.println(i2+"defined: "+ref);

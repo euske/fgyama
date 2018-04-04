@@ -33,6 +33,6 @@ public class DFRef implements Comparable<DFRef> {
     public String getName() {
 	return ((_scope == null)?
 		_name :
-		_scope.getName()+":"+_name);
+		_scope.getName()+"/"+_name);
     }
 }
