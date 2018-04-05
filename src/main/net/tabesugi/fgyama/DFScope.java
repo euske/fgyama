@@ -62,7 +62,7 @@ public class DFScope {
 
     public DFScope addChild(String basename, ASTNode ast) {
 	int id = _children.size();
-	String name = _name+"_"+basename+id;
+	String name = basename+id;
 	DFScope scope = new DFScope(name, this);
 	_children.add(scope);
         _name2child.put(name, scope);
@@ -76,8 +76,9 @@ public class DFScope {
 
     public DFScope getChildByName(Name name) {
         if (name.isQualifiedName()) {
-            QualifiedName qname = (QualifiedName)name;
-            DFScope scope = _parent.getChildByName(qname.getQualifier());
+	    QualifiedName qname = (QualifiedName)name;
+	    DFScope scope = (_parent != null)? _parent : this;
+	    scope = scope.getChildByName(qname.getQualifier());
             return scope.getChildByName(qname.getName().getIdentifier());
         } else {
             SimpleName sname = (SimpleName)name;
@@ -157,19 +158,19 @@ public class DFScope {
     }
 
     public DFRef lookupThis() {
-	return this.addVar("#this", null);
+	return this.lookupRef("#this");
     }
 
     public DFRef lookupSuper() {
-	return this.addVar("#super", null);
+	return this.lookupRef("#super");
     }
 
     public DFRef lookupReturn() {
-	return this.addVar("#return", null);
+	return this.lookupRef("#return");
     }
 
     public DFRef lookupArray() {
-	return this.addVar("#array", null);
+	return _root.addVar("#array", null);
     }
 
     // dump: for debugging.

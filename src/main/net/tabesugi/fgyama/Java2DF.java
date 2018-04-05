@@ -1588,6 +1588,7 @@ public class Java2DF extends ASTVisitor {
 	// Ignore method prototypes.
 	if (method.getBody() == null) return null;
         scope = scope.getChildByName(method.getName());
+	scope.addVar("#return", null);
 	String funcName = method.getName().getIdentifier();
         try {
             DFGraph graph = getMethodGraph(scope, method);
@@ -1604,17 +1605,23 @@ public class Java2DF extends ASTVisitor {
         }
     }
 
+    public void processFieldDeclaration(DFScope scope, FieldDeclaration method) {
+	// XXX
+	// XXX static
+    }
+
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(DFScope scope, TypeDeclaration typedecl)
         throws IOException {
         scope = scope.getChildByName(typedecl.getName());
+	scope.addVar("#this", null);
+	scope.addVar("#super", null);
         // XXX superclass
         for (BodyDeclaration body : (List<BodyDeclaration>) typedecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
                 processTypeDeclaration(scope, (TypeDeclaration)body);
             } else if (body instanceof FieldDeclaration) {
-                // XXX
-                // XXX static
+                processFieldDeclaration(scope, (FieldDeclaration)body);
             } else if (body instanceof MethodDeclaration) {
                 try {
                     DFGraph graph = processMethodDeclaration(scope, (MethodDeclaration)body);
@@ -1644,7 +1651,7 @@ public class Java2DF extends ASTVisitor {
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	parser.setResolveBindings(this.resolve);
-	parser.setEnvironment(this.classPath, this.srcPath, null, this.resolve);
+	parser.setEnvironment(this.classPath, this.srcPath, null, true);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
         PackageDeclaration pkg = cu.getPackage();
