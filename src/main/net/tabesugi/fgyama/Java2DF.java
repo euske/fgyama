@@ -831,15 +831,15 @@ public class Java2DF extends ASTVisitor {
      * Creates a new variable node.
      */
     public DFComponent processVariableDeclaration
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 List<VariableDeclarationFragment> frags)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, List<VariableDeclarationFragment> frags)
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
 	    DFRef ref = varScope.lookupVar(frag.getName());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
-		cpt = processExpression(graph, varScope, frame, cpt, init);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, init);
 		DFNode assign = new SingleAssignNode(graph, varScope, ref, frag);
 		assign.accept(cpt.getRValue());
 		cpt.setOutput(assign);
@@ -853,8 +853,8 @@ public class Java2DF extends ASTVisitor {
      */
     @SuppressWarnings("unchecked")
     public DFComponent processAssignment
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 Expression expr)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, Expression expr)
 	throws UnsupportedSyntax {
 
 	if (expr instanceof Name) {
@@ -866,7 +866,7 @@ public class Java2DF extends ASTVisitor {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		cpt = processExpression(graph, varScope, frame, cpt, qn.getQualifier());
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
 		DFRef ref = varScope.lookupField(fieldName);
 		cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
@@ -874,9 +874,9 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
-	    cpt = processExpression(graph, varScope, frame, cpt, aa.getArray());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, aa.getIndex());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
 	    DFRef ref = varScope.lookupArray();
 	    cpt.setLValue(new ArrayAssignNode(graph, varScope, ref, expr, array, index));
@@ -884,7 +884,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
-	    cpt = processExpression(graph, varScope, frame, cpt, fa.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
 	    DFRef ref = varScope.lookupField(fieldName);
 	    cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
@@ -901,8 +901,8 @@ public class Java2DF extends ASTVisitor {
      */
     @SuppressWarnings("unchecked")
     public DFComponent processExpression
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 Expression expr)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+         DFFrame frame, DFComponent cpt, Expression expr)
 	throws UnsupportedSyntax {
 
 	if (expr instanceof Annotation) {
@@ -916,7 +916,7 @@ public class Java2DF extends ASTVisitor {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		cpt = processExpression(graph, varScope, frame, cpt, qn.getQualifier());
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
 		DFRef ref = varScope.lookupField(fieldName);
 		cpt.setRValue(new FieldAccessNode(graph, varScope, ref, qn,
@@ -954,10 +954,10 @@ public class Java2DF extends ASTVisitor {
 	    PrefixExpression prefix = (PrefixExpression)expr;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    cpt = processExpression(graph, varScope, frame, cpt, operand);
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, operand);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
-		cpt = processAssignment(graph, varScope, frame, cpt, operand);
+		cpt = processAssignment(graph, typeScope, varScope, frame, cpt, operand);
 		DFNode assign = cpt.getLValue();
 		DFNode value = new PrefixNode(graph, varScope, assign.getRef(), expr,
                                               op, cpt.getRValue());
@@ -973,11 +973,11 @@ public class Java2DF extends ASTVisitor {
 	    PostfixExpression postfix = (PostfixExpression)expr;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
-	    cpt = processAssignment(graph, varScope, frame, cpt, operand);
+	    cpt = processAssignment(graph, typeScope, varScope, frame, cpt, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
 		DFNode assign = cpt.getLValue();
-		cpt = processExpression(graph, varScope, frame, cpt, operand);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, operand);
 		assign.accept(new PostfixNode(graph, varScope, assign.getRef(), expr,
                                               op, cpt.getRValue()));
 		cpt.setOutput(assign);
@@ -986,22 +986,22 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof InfixExpression) {
 	    InfixExpression infix = (InfixExpression)expr;
 	    InfixExpression.Operator op = infix.getOperator();
-	    cpt = processExpression(graph, varScope, frame, cpt, infix.getLeftOperand());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getLeftOperand());
 	    DFNode lvalue = cpt.getRValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, infix.getRightOperand());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
 	    cpt.setRValue(new InfixNode(graph, varScope, expr, op, lvalue, rvalue));
 
 	} else if (expr instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    cpt = processExpression(graph, varScope, frame, cpt, paren.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, paren.getExpression());
 
 	} else if (expr instanceof Assignment) {
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
-	    cpt = processAssignment(graph, varScope, frame, cpt, assn.getLeftHandSide());
+	    cpt = processAssignment(graph, typeScope, varScope, frame, cpt, assn.getLeftHandSide());
 	    DFNode assign = cpt.getLValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, assn.getRightHandSide());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
 	    DFNode lvalue = cpt.getValue(assign.getRef());
 	    assign.accept(new AssignOpNode(graph, varScope, assign.getRef(), assn,
@@ -1012,21 +1012,21 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
 	    cpt = processVariableDeclaration
-		(graph, varScope, frame, cpt, decl.fragments());
+		(graph, typeScope, varScope, frame, cpt, decl.fragments());
 
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
 	    DFNode obj = null;
 	    if (expr1 != null) {
-		cpt = processExpression(graph, varScope, frame, cpt, expr1);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
 	    SimpleName methodName = invoke.getName();
 	    MethodCallNode call = new MethodCallNode
 		(graph, varScope, invoke, obj, methodName);
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
-		cpt = processExpression(graph, varScope, frame, cpt, arg);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1042,7 +1042,7 @@ public class Java2DF extends ASTVisitor {
 	    MethodCallNode call = new MethodCallNode
 		(graph, varScope, si, obj, methodName);
 	    for (Expression arg : (List<Expression>) si.arguments()) {
-		cpt = processExpression(graph, varScope, frame, cpt, arg);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1051,11 +1051,11 @@ public class Java2DF extends ASTVisitor {
 	    ArrayCreation ac = (ArrayCreation)expr;
 	    for (Expression dim : (List<Expression>) ac.dimensions()) {
 		// XXX cpt.getRValue() is not used (for now).
-		cpt = processExpression(graph, varScope, frame, cpt, dim);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, dim);
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
-		cpt = processExpression(graph, varScope, frame, cpt, init);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, init);
 	    } else {
 		cpt.setRValue(new ArrayValueNode(graph, varScope, ac));
 	    }
@@ -1064,7 +1064,7 @@ public class Java2DF extends ASTVisitor {
 	    ArrayInitializer init = (ArrayInitializer)expr;
 	    ArrayValueNode arr = new ArrayValueNode(graph, varScope, init);
 	    for (Expression expr1 : (List<Expression>) init.expressions()) {
-		cpt = processExpression(graph, varScope, frame, cpt, expr1);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		arr.addValue(cpt.getRValue());
 	    }
 	    cpt.setRValue(arr);
@@ -1073,9 +1073,9 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
 	    DFRef ref = varScope.lookupArray();
-	    cpt = processExpression(graph, varScope, frame, cpt, aa.getArray());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, aa.getIndex());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
 	    cpt.setRValue(new ArrayAccessNode(graph, varScope, ref, aa,
 					      array, index, cpt.getValue(ref)));
@@ -1083,7 +1083,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
-	    cpt = processExpression(graph, varScope, frame, cpt, fa.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
 	    DFRef ref = varScope.lookupField(fieldName);
 	    cpt.setRValue(new FieldAccessNode(graph, varScope, ref, fa,
@@ -1100,7 +1100,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)expr;
 	    Type type = cast.getType();
-	    cpt = processExpression(graph, varScope, frame, cpt, cast.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, cast.getExpression());
 	    cpt.setRValue(new TypeCastNode(graph, varScope, cast, type, cpt.getRValue()));
 
 	} else if (expr instanceof ClassInstanceCreation) {
@@ -1109,13 +1109,13 @@ public class Java2DF extends ASTVisitor {
 	    Expression expr1 = cstr.getExpression();
 	    DFNode obj = null;
 	    if (expr1 != null) {
-		cpt = processExpression(graph, varScope, frame, cpt, expr1);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
 	    CreateObjectNode call = new CreateObjectNode(graph, varScope, cstr,
                                                          obj, instType);
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
-		cpt = processExpression(graph, varScope, frame, cpt, arg);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1124,11 +1124,11 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (expr instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)expr;
-	    cpt = processExpression(graph, varScope, frame, cpt, cond.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, cond.getExpression());
 	    DFNode condValue = cpt.getRValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, cond.getThenExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, cond.getThenExpression());
 	    DFNode trueValue = cpt.getRValue();
-	    cpt = processExpression(graph, varScope, frame, cpt, cond.getElseExpression());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, cond.getElseExpression());
 	    DFNode falseValue = cpt.getRValue();
 	    JoinNode join = new JoinNode(graph, varScope, null, expr, condValue);
 	    join.recv(true, trueValue);
@@ -1138,7 +1138,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (expr instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
 	    Type type = instof.getRightOperand();
-	    cpt = processExpression(graph, varScope, frame, cpt, instof.getLeftOperand());
+	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, instof.getLeftOperand());
 	    cpt.setRValue(new InstanceofNode(graph, varScope, instof, type, cpt.getRValue()));
 
 	} else {
@@ -1158,58 +1158,59 @@ public class Java2DF extends ASTVisitor {
     /// Statement processors.
     @SuppressWarnings("unchecked")
     public DFComponent processBlock
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 Block block)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, Block block)
 	throws UnsupportedSyntax {
 	DFScope childScope = varScope.getChildByAST(block);
 	for (Statement cstmt : (List<Statement>) block.statements()) {
-	    cpt = processStatement(graph, childScope, frame, cpt, cstmt);
+	    cpt = processStatement(graph, typeScope, childScope, frame, cpt, cstmt);
 	}
 	return cpt;
     }
 
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 VariableDeclarationStatement varStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
 	return processVariableDeclaration
-	    (graph, varScope, frame, cpt, varStmt.fragments());
+	    (graph, typeScope, varScope, frame, cpt, varStmt.fragments());
     }
 
     public DFComponent processExpressionStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 ExpressionStatement exprStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, ExpressionStatement exprStmt)
 	throws UnsupportedSyntax {
 	Expression expr = exprStmt.getExpression();
-	return processExpression(graph, varScope, frame, cpt, expr);
+	return processExpression(graph, typeScope, varScope, frame, cpt, expr);
     }
 
     public DFComponent processIfStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 IfStatement ifStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, IfStatement ifStmt)
 	throws UnsupportedSyntax {
 	Expression expr = ifStmt.getExpression();
-	cpt = processExpression(graph, varScope, frame, cpt, expr);
+	cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr);
 	DFNode condValue = cpt.getRValue();
 
 	Statement thenStmt = ifStmt.getThenStatement();
 	DFComponent thenCpt = new DFComponent(graph, varScope);
-	thenCpt = processStatement(graph, varScope, frame, thenCpt, thenStmt);
+	thenCpt = processStatement(graph, typeScope, varScope, frame, thenCpt, thenStmt);
 
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
 	    elseCpt = new DFComponent(graph, varScope);
-	    elseCpt = processStatement(graph, varScope, frame, elseCpt, elseStmt);
+	    elseCpt = processStatement(graph, typeScope, varScope, frame, elseCpt, elseStmt);
 	}
 	return processConditional(graph, varScope, frame, cpt, ifStmt,
 				  condValue, thenCpt, elseCpt);
     }
 
     private DFComponent processCaseStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 ASTNode apt, DFNode caseNode, DFComponent caseCpt) {
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+         DFFrame frame, DFComponent cpt, ASTNode apt,
+         DFNode caseNode, DFComponent caseCpt) {
 
 	for (DFRef ref : caseCpt.getInputRefs()) {
 	    DFNode src = caseCpt.getInput(ref);
@@ -1229,12 +1230,13 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processSwitchStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 SwitchStatement switchStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, SwitchStatement switchStmt)
 	throws UnsupportedSyntax {
 	DFScope switchScope = varScope.getChildByAST(switchStmt);
 	DFFrame switchFrame = frame.getChildByAST(switchStmt);
-	cpt = processExpression(graph, varScope, frame, cpt, switchStmt.getExpression());
+	cpt = processExpression(graph, typeScope, varScope,
+                                frame, cpt, switchStmt.getExpression());
 	DFNode switchValue = cpt.getRValue();
 
 	SwitchCase switchCase = null;
@@ -1244,15 +1246,15 @@ public class Java2DF extends ASTVisitor {
 	    if (stmt instanceof SwitchCase) {
 		if (caseCpt != null) {
 		    // switchCase, caseNode and caseCpt must be non-null.
-		    cpt = processCaseStatement(graph, switchScope, switchFrame, cpt,
-					       switchCase, caseNode, caseCpt);
+		    cpt = processCaseStatement(graph, typeScope, switchScope, switchFrame,
+                                               cpt, switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
 		caseNode = new CaseNode(graph, switchScope, stmt, switchValue);
 		caseCpt = new DFComponent(graph, switchScope);
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
-		    cpt = processExpression(graph, switchScope, frame, cpt, expr);
+		    cpt = processExpression(graph, typeScope, switchScope, frame, cpt, expr);
 		    caseNode.addMatch(cpt.getRValue());
 		} else {
 		    // "default" case.
@@ -1262,28 +1264,29 @@ public class Java2DF extends ASTVisitor {
 		    // no "case" statement.
 		    throw new UnsupportedSyntax(stmt);
 		}
-		caseCpt = processStatement(graph, switchScope, switchFrame, caseCpt, stmt);
+		caseCpt = processStatement(graph, typeScope, switchScope,
+                                           switchFrame, caseCpt, stmt);
 	    }
 	}
 	if (caseCpt != null) {
-	    cpt = processCaseStatement(graph, switchScope, switchFrame, cpt,
-				       switchCase, caseNode, caseCpt);
+	    cpt = processCaseStatement(graph, typeScope, switchScope, switchFrame,
+				       cpt, switchCase, caseNode, caseCpt);
 	}
 	cpt.endFrame(switchFrame);
 	return cpt;
     }
 
     public DFComponent processWhileStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 WhileStatement whileStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, WhileStatement whileStmt)
 	throws UnsupportedSyntax {
 	DFScope loopScope = varScope.getChildByAST(whileStmt);
 	DFFrame loopFrame = frame.getChildByAST(whileStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
-	loopCpt = processExpression(graph, loopScope, frame, loopCpt,
+	loopCpt = processExpression(graph, typeScope, loopScope, frame, loopCpt,
 				    whileStmt.getExpression());
 	DFNode condValue = loopCpt.getRValue();
-	loopCpt = processStatement(graph, loopScope, loopFrame, loopCpt,
+	loopCpt = processStatement(graph, typeScope, loopScope, loopFrame, loopCpt,
 				   whileStmt.getBody());
 	cpt = processLoop(graph, loopScope, frame, cpt, whileStmt,
 			  condValue, loopFrame, loopCpt, true);
@@ -1292,15 +1295,15 @@ public class Java2DF extends ASTVisitor {
     }
 
     public DFComponent processDoStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 DoStatement doStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, DoStatement doStmt)
 	throws UnsupportedSyntax {
 	DFScope loopScope = varScope.getChildByAST(doStmt);
 	DFFrame loopFrame = frame.getChildByAST(doStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
-	loopCpt = processStatement(graph, loopScope, loopFrame, loopCpt,
+	loopCpt = processStatement(graph, typeScope, loopScope, loopFrame, loopCpt,
 				   doStmt.getBody());
-	loopCpt = processExpression(graph, loopScope, loopFrame, loopCpt,
+	loopCpt = processExpression(graph, typeScope, loopScope, loopFrame, loopCpt,
 				    doStmt.getExpression());
 	DFNode condValue = loopCpt.getRValue();
 	cpt = processLoop(graph, loopScope, frame, cpt, doStmt,
@@ -1311,27 +1314,27 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processForStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 ForStatement forStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, ForStatement forStmt)
 	throws UnsupportedSyntax {
 	DFScope loopScope = varScope.getChildByAST(forStmt);
 	DFFrame loopFrame = frame.getChildByAST(forStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
-	    cpt = processExpression(graph, loopScope, frame, cpt, init);
+	    cpt = processExpression(graph, typeScope, loopScope, frame, cpt, init);
 	}
 	Expression expr = forStmt.getExpression();
 	DFNode condValue;
 	if (expr != null) {
-	    loopCpt = processExpression(graph, loopScope, loopFrame, loopCpt, expr);
+	    loopCpt = processExpression(graph, typeScope, loopScope, loopFrame, loopCpt, expr);
 	    condValue = loopCpt.getRValue();
 	} else {
 	    condValue = new ConstNode(graph, loopScope, null, "true");
 	}
-	loopCpt = processStatement(graph, loopScope, loopFrame, loopCpt,
+	loopCpt = processStatement(graph, typeScope, loopScope, loopFrame, loopCpt,
 				   forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
-	    loopCpt = processExpression(graph, loopScope, loopFrame, loopCpt, update);
+	    loopCpt = processExpression(graph, typeScope, loopScope, loopFrame, loopCpt, update);
 	}
 	cpt = processLoop(graph, loopScope, frame, cpt, forStmt,
 			  condValue, loopFrame, loopCpt, true);
@@ -1341,21 +1344,21 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processEnhancedForStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 EnhancedForStatement eForStmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, EnhancedForStatement eForStmt)
 	throws UnsupportedSyntax {
 	DFScope loopScope = varScope.getChildByAST(eForStmt);
 	DFFrame loopFrame = frame.getChildByAST(eForStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	Expression expr = eForStmt.getExpression();
-	loopCpt = processExpression(graph, loopScope, frame, loopCpt, expr);
+	loopCpt = processExpression(graph, typeScope, loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
 	DFRef ref = loopScope.lookupVar(decl.getName());
 	DFNode iterValue = new IterNode(graph, loopScope, ref, expr, loopCpt.getRValue());
 	SingleAssignNode assign = new SingleAssignNode(graph, loopScope, ref, expr);
 	assign.accept(iterValue);
 	cpt.setOutput(assign);
-	loopCpt = processStatement(graph, loopScope, loopFrame, loopCpt,
+	loopCpt = processStatement(graph, typeScope, loopScope, loopFrame, loopCpt,
 				   eForStmt.getBody());
 	cpt = processLoop(graph, loopScope, frame, cpt, eForStmt,
 			  iterValue, loopFrame, loopCpt, true);
@@ -1365,8 +1368,8 @@ public class Java2DF extends ASTVisitor {
 
     @SuppressWarnings("unchecked")
     public DFComponent processStatement
-	(DFGraph graph, DFScope varScope, DFFrame frame, DFComponent cpt,
-	 Statement stmt)
+	(DFGraph graph, DFScope typeScope, DFScope varScope,
+	 DFFrame frame, DFComponent cpt, Statement stmt)
 	throws UnsupportedSyntax {
 
 	if (stmt instanceof AssertStatement) {
@@ -1374,25 +1377,25 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (stmt instanceof Block) {
 	    cpt = processBlock
-		(graph, varScope, frame, cpt, (Block)stmt);
+		(graph, typeScope, varScope, frame, cpt, (Block)stmt);
 
 	} else if (stmt instanceof EmptyStatement) {
 
 	} else if (stmt instanceof VariableDeclarationStatement) {
 	    cpt = processVariableDeclarationStatement
-		(graph, varScope, frame, cpt, (VariableDeclarationStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (VariableDeclarationStatement)stmt);
 
 	} else if (stmt instanceof ExpressionStatement) {
 	    cpt = processExpressionStatement
-		(graph, varScope, frame, cpt, (ExpressionStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (ExpressionStatement)stmt);
 
 	} else if (stmt instanceof IfStatement) {
 	    cpt = processIfStatement
-		(graph, varScope, frame, cpt, (IfStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (IfStatement)stmt);
 
 	} else if (stmt instanceof SwitchStatement) {
 	    cpt = processSwitchStatement
-		(graph, varScope, frame, cpt, (SwitchStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (SwitchStatement)stmt);
 
 	} else if (stmt instanceof SwitchCase) {
 	    // Invalid "case" placement.
@@ -1400,26 +1403,26 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (stmt instanceof WhileStatement) {
 	    cpt = processWhileStatement
-		(graph, varScope, frame, cpt, (WhileStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (WhileStatement)stmt);
 
 	} else if (stmt instanceof DoStatement) {
 	    cpt = processDoStatement
-		(graph, varScope, frame, cpt, (DoStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (DoStatement)stmt);
 
 	} else if (stmt instanceof ForStatement) {
 	    cpt = processForStatement
-		(graph, varScope, frame, cpt, (ForStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (ForStatement)stmt);
 
 	} else if (stmt instanceof EnhancedForStatement) {
 	    cpt = processEnhancedForStatement
-		(graph, varScope, frame, cpt, (EnhancedForStatement)stmt);
+		(graph, typeScope, varScope, frame, cpt, (EnhancedForStatement)stmt);
 
 	} else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
 	    DFFrame dstFrame = frame.find(DFFrame.METHOD);
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
-                cpt = processExpression(graph, varScope, frame, cpt, expr);
+                cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr);
                 ReturnNode rtrn = new ReturnNode(graph, varScope, rtrnStmt, cpt.getRValue());
                 cpt.addExit(new DFExit(rtrn, dstFrame));
             }
@@ -1457,28 +1460,29 @@ public class Java2DF extends ASTVisitor {
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
 	    DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
-	    cpt = processStatement(graph, varScope, labeledFrame, cpt,
-				   labeledStmt.getBody());
+	    cpt = processStatement(graph, typeScope, varScope, labeledFrame,
+                                   cpt, labeledStmt.getBody());
 
 	} else if (stmt instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-	    cpt = processStatement(graph, varScope, frame, cpt,
-				   syncStmt.getBody());
+	    cpt = processStatement(graph, typeScope, varScope, frame,
+				   cpt, syncStmt.getBody());
 
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore catch statements (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
 	    DFFrame tryFrame = frame.getChildByAST(tryStmt);
-	    cpt = processStatement(graph, varScope, tryFrame, cpt,
-				   tryStmt.getBody());
+	    cpt = processStatement(graph, typeScope, varScope, tryFrame,
+				   cpt, tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		cpt = processStatement(graph, varScope, frame, cpt, finBlock);
+		cpt = processStatement(graph, typeScope, varScope, frame, cpt, finBlock);
 	    }
 
 	} else if (stmt instanceof ThrowStatement) {
 	    ThrowStatement throwStmt = (ThrowStatement)stmt;
-	    cpt = processExpression(graph, varScope, frame, cpt, throwStmt.getExpression());
+	    cpt = processExpression(graph, typeScope, varScope,
+                                    frame, cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(graph, varScope, stmt, cpt.getRValue());
 	    DFFrame dstFrame = frame.find(DFFrame.TRY);
 	    cpt.addExit(new DFExit(exception, dstFrame));
@@ -1493,14 +1497,14 @@ public class Java2DF extends ASTVisitor {
 	    // XXX Ignore all side effects.
 	    ConstructorInvocation ci = (ConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) ci.arguments()) {
-		cpt = processExpression(graph, varScope, frame, cpt, arg);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 	    }
 
 	} else if (stmt instanceof SuperConstructorInvocation) {
 	    // XXX Ignore all side effects.
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) sci.arguments()) {
-		cpt = processExpression(graph, varScope, frame, cpt, arg);
+		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 	    }
 
 	} else if (stmt instanceof TypeDeclarationStatement) {
@@ -1550,7 +1554,7 @@ public class Java2DF extends ASTVisitor {
 	    cpt.setOutput(assign);
 	}
 	// Process the function body.
-	cpt = processStatement(graph, varScope, frame, cpt, funcBlock);
+	cpt = processStatement(graph, typeScope, varScope, frame, cpt, funcBlock);
 
 	cpt.endFrame(frame);
 	return graph;
@@ -1635,7 +1639,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public void processFile(String path)
+    public void processFile(DFScope typeScope, String path)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
 	String src = Utils.readFile(path);
@@ -1650,14 +1654,12 @@ public class Java2DF extends ASTVisitor {
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
         PackageDeclaration pkg = cu.getPackage();
-        DFScope typeScope = new DFScope("");
         if (pkg != null) {
             typeScope = typeScope.getChildByName(pkg.getName());
         }
         for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cu.types()) {
             processTypeDeclaration(typeScope, typeDecl);
         }
-	typeScope.dump();
     }
 
     /**
@@ -1736,6 +1738,7 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process files.
+        DFScope typeScope = new DFScope("");
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
             String src = (srcmap != null)? srcmap.get(path) : path;
@@ -1744,12 +1747,13 @@ public class Java2DF extends ASTVisitor {
 		Java2DF converter =
 		    new Java2DF(exporter, classpath, srcpath, resolve);
 		exporter.startFile(path);
-		converter.processFile(src);
+		converter.processFile(typeScope, src);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+src);
 	    }
 	}
+	typeScope.dump();
 	exporter.close();
 	Utils.printXml(output, exporter.document);
 	output.close();
