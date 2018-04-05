@@ -1161,7 +1161,7 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 Block block)
 	throws UnsupportedSyntax {
-	DFScope childScope = scope.getChild(block);
+	DFScope childScope = scope.getChildByAST(block);
 	for (Statement cstmt : (List<Statement>) block.statements()) {
 	    cpt = processStatement(graph, childScope, frame, cpt, cstmt);
 	}
@@ -1232,8 +1232,8 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 SwitchStatement switchStmt)
 	throws UnsupportedSyntax {
-	DFScope switchScope = scope.getChild(switchStmt);
-	DFFrame switchFrame = frame.getChild(switchStmt);
+	DFScope switchScope = scope.getChildByAST(switchStmt);
+	DFFrame switchFrame = frame.getChildByAST(switchStmt);
 	cpt = processExpression(graph, scope, frame, cpt, switchStmt.getExpression());
 	DFNode switchValue = cpt.getRValue();
 
@@ -1277,8 +1277,8 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 WhileStatement whileStmt)
 	throws UnsupportedSyntax {
-	DFScope loopScope = scope.getChild(whileStmt);
-	DFFrame loopFrame = frame.getChild(whileStmt);
+	DFScope loopScope = scope.getChildByAST(whileStmt);
+	DFFrame loopFrame = frame.getChildByAST(whileStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	loopCpt = processExpression(graph, loopScope, frame, loopCpt,
 				    whileStmt.getExpression());
@@ -1295,8 +1295,8 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 DoStatement doStmt)
 	throws UnsupportedSyntax {
-	DFScope loopScope = scope.getChild(doStmt);
-	DFFrame loopFrame = frame.getChild(doStmt);
+	DFScope loopScope = scope.getChildByAST(doStmt);
+	DFFrame loopFrame = frame.getChildByAST(doStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	loopCpt = processStatement(graph, loopScope, loopFrame, loopCpt,
 				   doStmt.getBody());
@@ -1314,8 +1314,8 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 ForStatement forStmt)
 	throws UnsupportedSyntax {
-	DFScope loopScope = scope.getChild(forStmt);
-	DFFrame loopFrame = frame.getChild(forStmt);
+	DFScope loopScope = scope.getChildByAST(forStmt);
+	DFFrame loopFrame = frame.getChildByAST(forStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(graph, loopScope, frame, cpt, init);
@@ -1344,8 +1344,8 @@ public class Java2DF extends ASTVisitor {
 	(DFGraph graph, DFScope scope, DFFrame frame, DFComponent cpt,
 	 EnhancedForStatement eForStmt)
 	throws UnsupportedSyntax {
-	DFScope loopScope = scope.getChild(eForStmt);
-	DFFrame loopFrame = frame.getChild(eForStmt);
+	DFScope loopScope = scope.getChildByAST(eForStmt);
+	DFFrame loopFrame = frame.getChildByAST(eForStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopScope);
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(graph, loopScope, frame, loopCpt, expr);
@@ -1456,7 +1456,7 @@ public class Java2DF extends ASTVisitor {
 
 	} else if (stmt instanceof LabeledStatement) {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
-	    DFFrame labeledFrame = frame.getChild(labeledStmt);
+	    DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
 	    cpt = processStatement(graph, scope, labeledFrame, cpt,
 				   labeledStmt.getBody());
 
@@ -1468,7 +1468,7 @@ public class Java2DF extends ASTVisitor {
 	} else if (stmt instanceof TryStatement) {
 	    // XXX Ignore catch statements (for now).
 	    TryStatement tryStmt = (TryStatement)stmt;
-	    DFFrame tryFrame = frame.getChild(tryStmt);
+	    DFFrame tryFrame = frame.getChildByAST(tryStmt);
 	    cpt = processStatement(graph, scope, tryFrame, cpt,
 				   tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
@@ -1587,7 +1587,7 @@ public class Java2DF extends ASTVisitor {
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
 	if (method.getBody() == null) return null;
-        scope = scope.getScope(method.getName());
+        scope = scope.getChildByName(method.getName());
 	String funcName = method.getName().getIdentifier();
         try {
             DFGraph graph = getMethodGraph(scope, method);
@@ -1607,7 +1607,7 @@ public class Java2DF extends ASTVisitor {
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(DFScope scope, TypeDeclaration typedecl)
         throws IOException {
-        scope = scope.getScope(typedecl.getName());
+        scope = scope.getChildByName(typedecl.getName());
         // XXX superclass
         for (BodyDeclaration body : (List<BodyDeclaration>) typedecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
@@ -1650,7 +1650,7 @@ public class Java2DF extends ASTVisitor {
         PackageDeclaration pkg = cu.getPackage();
         DFScope scope = new DFScope();
         if (pkg != null) {
-            scope = scope.getScope(pkg.getName());
+            scope = scope.getChildByName(pkg.getName());
         }
         for (TypeDeclaration typedecl : (List<TypeDeclaration>) cu.types()) {
             processTypeDeclaration(scope, typedecl);

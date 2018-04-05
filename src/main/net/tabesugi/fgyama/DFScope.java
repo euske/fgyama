@@ -33,27 +33,6 @@ public class DFScope {
 	_parent = parent;
     }
 
-    public DFScope getScope(Name name) {
-        if (name.isQualifiedName()) {
-            QualifiedName qname = (QualifiedName)name;
-            DFScope scope = _parent.getScope(qname.getQualifier());
-            return scope.getScope(qname.getName().getIdentifier());
-        } else {
-            SimpleName sname = (SimpleName)name;
-            return this.getScope(sname.getIdentifier());
-        }
-    }
-
-    public DFScope getScope(String name) {
-        DFScope scope = _name2child.get(name);
-        if (scope == null) {
-            scope = new DFScope(name, this);
-            _children.add(scope);
-            _name2child.put(name, scope);
-        }
-        return scope;
-    }
-
     @Override
     public String toString() {
 	return ("<DFScope("+_name+")>");
@@ -91,8 +70,29 @@ public class DFScope {
 	return scope;
     }
 
-    public DFScope getChild(ASTNode ast) {
+    public DFScope getChildByAST(ASTNode ast) {
 	return _ast2child.get(ast);
+    }
+
+    public DFScope getChildByName(Name name) {
+        if (name.isQualifiedName()) {
+            QualifiedName qname = (QualifiedName)name;
+            DFScope scope = _parent.getChildByName(qname.getQualifier());
+            return scope.getChildByName(qname.getName().getIdentifier());
+        } else {
+            SimpleName sname = (SimpleName)name;
+            return this.getChildByName(sname.getIdentifier());
+        }
+    }
+
+    public DFScope getChildByName(String name) {
+        DFScope scope = _name2child.get(name);
+        if (scope == null) {
+            scope = new DFScope(name, this);
+            _children.add(scope);
+            _name2child.put(name, scope);
+        }
+        return scope;
     }
 
     public DFScope[] getChildren() {

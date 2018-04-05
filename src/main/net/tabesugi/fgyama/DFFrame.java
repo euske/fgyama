@@ -49,7 +49,7 @@ public class DFFrame {
         return _parent;
     }
 
-    public DFFrame getChild(ASTNode ast) {
+    public DFFrame getChildByAST(ASTNode ast) {
 	return _children.get(ast);
     }
 
