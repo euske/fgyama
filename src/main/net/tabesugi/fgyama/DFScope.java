@@ -15,16 +15,17 @@ public class DFScope {
 
     private DFScope _root;
     private String _name;
-    private DFScope _parent = null;
+    private DFScope _parent;
 
     private List<DFScope> _children = new ArrayList<DFScope>();
     private Map<String, DFScope> _name2child = new HashMap<String, DFScope>();
     private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
     private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
-    public DFScope() {
+    public DFScope(String name) {
         _root = this;
-	_name = "root";
+	_name = name;
+        _parent = null;
     }
 
     public DFScope(String name, DFScope parent) {
