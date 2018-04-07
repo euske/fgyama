@@ -42,7 +42,7 @@ class SingleAssignNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "assign";
     }
 }
@@ -58,7 +58,7 @@ class ArrayAssignNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "arrayassign";
     }
 }
@@ -73,7 +73,7 @@ class FieldAssignNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "fieldassign";
     }
 }
@@ -88,7 +88,7 @@ class VarRefNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "ref";
     }
 }
@@ -105,7 +105,7 @@ class ArrayAccessNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "arrayaccess";
     }
 }
@@ -121,7 +121,7 @@ class FieldAccessNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "fieldaccess";
     }
 }
@@ -139,7 +139,7 @@ class PrefixNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "prefix";
     }
 
@@ -162,7 +162,7 @@ class PostfixNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "postfix";
     }
 
@@ -187,7 +187,7 @@ class InfixNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "infix";
     }
 
@@ -210,7 +210,7 @@ class TypeCastNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "typecast";
     }
 
@@ -238,7 +238,7 @@ class InstanceofNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "instanceof";
     }
 
@@ -265,7 +265,7 @@ class CaseNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "case";
     }
 
@@ -300,7 +300,7 @@ class AssignOpNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "assignop";
     }
 
@@ -322,7 +322,7 @@ class ArgNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "arg";
     }
 
@@ -343,7 +343,7 @@ class ConstNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "const";
     }
 
@@ -363,7 +363,7 @@ class ArrayValueNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "arrayvalue";
     }
 
@@ -392,7 +392,7 @@ class JoinNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "join";
     }
 
@@ -443,7 +443,7 @@ class LoopBeginNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "begin";
     }
 
@@ -466,7 +466,7 @@ class LoopEndNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "end";
     }
 
@@ -483,7 +483,7 @@ class LoopRepeatNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "repeat";
     }
 
@@ -502,7 +502,7 @@ class IterNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "iter";
     }
 }
@@ -524,7 +524,7 @@ abstract class CallNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "call";
     }
 
@@ -569,7 +569,7 @@ class CreateObjectNode extends CallNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "new";
     }
 
@@ -593,7 +593,7 @@ class ReturnNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "return";
     }
 }
@@ -607,7 +607,7 @@ class ExceptionNode extends ProgNode {
     }
 
     @Override
-    public String getType() {
+    public String getKind() {
 	return "exception";
     }
 }

@@ -54,7 +54,7 @@ public class DFGraph {
     public void cleanup() {
 	ArrayList<Integer> removed = new ArrayList<Integer>();
 	for (DFNode node : _nodes.values()) {
-	    if (node.getType() == null && node.purge()) {
+	    if (node.getKind() == null && node.purge()) {
 		removed.add(node.getId());
 	    }
 	}

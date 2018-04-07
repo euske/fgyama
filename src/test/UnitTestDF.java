@@ -26,10 +26,11 @@ public class UnitTestDF extends XMLTestCase {
 			   boolean resolve, String[] srcPath)
 	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
+        DFScope typeScope = new DFScope("");
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(exporter, null, srcPath, resolve);
 	exporter.startFile(javaPath);
-	converter.processFile(javaPath);
+	converter.processFile(typeScope, javaPath);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
