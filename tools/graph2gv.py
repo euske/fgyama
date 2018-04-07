@@ -21,12 +21,12 @@ def write_gv(out, scope, highlight=None, level=0):
         out.write(h+'subgraph cluster_%s {\n' % scope.name)
     out.write(h+' label=%s;\n' % q(scope.name))
     for node in scope.nodes:
-        if node.ntype in ('join','begin','end'):
-            styles = {'shape': 'diamond', 
-                      'label': '%s (%s)' % (node.ntype, node.ref)}
-        elif node.ntype in ('return',):
-            styles = {'shape': 'box', 
-                      'label': '%s (%s)' % (node.ntype, node.ref)}
+        if node.kind in ('join','begin','end'):
+            styles = {'shape': 'diamond',
+                      'label': '%s (%s)' % (node.kind, node.ref)}
+        elif node.kind in ('return',):
+            styles = {'shape': 'box',
+                      'label': '%s (%s)' % (node.kind, node.ref)}
         elif node.data is not None:
             styles = {'shape': 'box', 'fontname':'courier',
                       'label': node.data}
@@ -83,7 +83,7 @@ def main(argv):
         if k == '-o': output = open(v, 'w')
         elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
     if not args: return usage()
-    
+
     for path in args:
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):

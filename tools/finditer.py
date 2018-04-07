@@ -27,7 +27,7 @@ pre { margin: 1em; border: 1px solid gray;}
 .p9 { background:#884400; color:white; }
 </style>
 <body>
-''')        
+''')
     return
 
 def show_html(src, nodes):
@@ -64,9 +64,9 @@ def isiter(ref, n_begin, n_end):
     def isisolated(n):
         if n is n_begin:
             return True
-        elif n.ntype == 'begin':
+        elif n.kind == 'begin':
             return False
-        elif n.ntype == 'end' and n is not n_end:
+        elif n.kind == 'end' and n is not n_end:
             return True
         else:
             for (label,src) in n.get_inputs():
@@ -79,7 +79,7 @@ def isiter(ref, n_begin, n_end):
 def finditer(graph):
     refs = set()
     for node in graph.nodes.values():
-        if node.ntype == 'begin':
+        if node.kind == 'begin':
             n_end = node.inputs['_repeat']
             ref = node.ref
             if isiter(ref, node, n_end):

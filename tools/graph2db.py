@@ -8,10 +8,10 @@ from graph import GraphDB, get_graphs
 
 # get_nodekey
 def get_nodekey(node):
-    if node.ntype in (None, 'assign', 'ref'):
+    if node.kind in (None, 'assign', 'ref'):
         return None
     else:
-        return node.ntype+':'+(node.data or '')
+        return node.kind+':'+(node.data or '')
 
 
 ##  IndexDB
@@ -180,25 +180,25 @@ def main(argv):
         (opts, args) = getopt.getopt(argv[1:], 'c')
     except getopt.GetoptError:
         return usage()
-    
+
     isnew = True
     for (k, v) in opts:
         if k == '-c': isnew = False
-    
+
     def exists(path):
         print('already exists: %r' % path)
         return 111
-    
+
     if not args: return usage()
     path = args.pop(0)
     if isnew and os.path.exists(path): return exists(path)
     graphdb = GraphDB(path)
-    
+
     if not args: return usage()
     path = args.pop(0)
     if isnew and os.path.exists(path): return exists(path)
     indexdb = IndexDB(path, insert=True)
-    
+
     cid = None
     src = None
     for path in args:

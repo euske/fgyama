@@ -38,7 +38,7 @@ class DFGraph:
                 if not label.startswith('_'):
                     src.outputs.append(node)
         return self
-    
+
     def toxml(self):
         egraph = Element('graph')
         egraph.set('name', self.name)
@@ -47,7 +47,7 @@ class DFGraph:
         egraph.append(self.root.toxml())
         return egraph
 
-    
+
 ##  DFScope
 ##
 class DFScope:
@@ -86,16 +86,16 @@ class DFScope:
             escope.append(node.toxml())
         return escope
 
-    
+
 ##  DFNode
 ##
 class DFNode:
 
-    def __init__(self, nid, name, scope, ntype, ref, data):
+    def __init__(self, nid, name, scope, kind, ref, data):
         self.nid = nid
         self.name = name
         self.scope = scope
-        self.ntype = ntype
+        self.kind = kind
         self.ref = ref
         self.data = data
         self.ast = None
@@ -105,14 +105,14 @@ class DFNode:
 
     def __repr__(self):
         name = self.nid if self.name is None else self.name
-        return ('<DFNode(%s): ntype=%s, ref=%r, data=%r, inputs=%r>' %
-                (name, self.ntype, self.ref, self.data, len(self.inputs)))
+        return ('<DFNode(%s): kind=%s, ref=%r, data=%r, inputs=%r>' %
+                (name, self.kind, self.ref, self.data, len(self.inputs)))
 
     def toxml(self):
         enode = Element('node')
         enode.set('name', ns(self.nid))
-        if self.ntype is not None:
-            enode.set('type', self.ntype)
+        if self.kind is not None:
+            enode.set('kind', self.kind)
         if self.data is not None:
             enode.set('data', self.data)
         if self.ref is not None:
@@ -145,14 +145,14 @@ def parse_graph(gid, egraph, src=None):
     assert egraph.tag == 'graph'
     gname = egraph.get('name')
     graph = DFGraph(gid, gname, src)
-    
+
     def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
         nname = enode.get('name')
-        ntype = enode.get('type')
+        kind = enode.get('kind')
         ref = enode.get('ref')
         data = enode.get('data')
-        node = DFNode(nid, nname, scope, ntype, ref, data)
+        node = DFNode(nid, nname, scope, kind, ref, data)
         for e in enode.getchildren():
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -165,7 +165,7 @@ def parse_graph(gid, egraph, src=None):
                 assert src is not None
                 node.inputs[label] = src
         return node
-    
+
     def parse_scope(sid, escope, parent=None):
         assert escope.tag == 'scope'
         sname = escope.get('name')
@@ -181,7 +181,7 @@ def parse_graph(gid, egraph, src=None):
                 graph.nodes[node.name] = node
                 scope.nodes.append(node)
         return (sid,scope)
-    
+
     for escope in egraph.getchildren():
         (_,graph.root) = parse_scope(1, escope)
         break
@@ -206,7 +206,7 @@ def load_graphs(fp, gid=0):
 ##  GraphDB
 ##
 class GraphDB:
-    
+
     def __init__(self, path):
         self._conn = sqlite3.connect(path)
         self._cur = self._conn.cursor()
@@ -243,7 +243,7 @@ CREATE TABLE DFNode (
     Gid INTEGER,
     Sid INTEGER,
     Aid INTEGER,
-    Type TEXT,
+    Kind TEXT,
     Ref TEXT,
     Data TEXT
 );
@@ -291,12 +291,12 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             aid = 0
             if node.ast is not None:
                 cur.execute(
-                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);', 
+                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);',
                     node.ast)
                 aid = cur.lastrowid
             cur.execute(
                 'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-                (gid, sid, aid, node.ntype, node.ref, node.data))
+                (gid, sid, aid, node.kind, node.ref, node.data))
             nid = cur.lastrowid
             node.nid = nid
             return nid
@@ -352,11 +352,11 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Type,Ref,Data FROM DFNode WHERE Gid=?;',
+            'SELECT Nid,Sid,Aid,Kind,Ref,Data FROM DFNode WHERE Gid=?;',
             (gid,))
-        for (nid,sid,aid,ntype,ref,data) in list(rows):
+        for (nid,sid,aid,kind,ref,data) in list(rows):
             scope = scopes[sid]
-            node = DFNode(nid, None, scope, ntype, ref, data)
+            node = DFNode(nid, None, scope, kind, ref, data)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))
@@ -381,7 +381,7 @@ def get_graphs(arg):
         gids = map(int, ext.split(','))
     else:
         gids = None
-        
+
     if path == '-':
         graphs = load_graphs(sys.stdin)
     elif path.endswith('.db'):

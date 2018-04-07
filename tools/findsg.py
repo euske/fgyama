@@ -41,7 +41,7 @@ def count_branch(t):
 
 def str_tree(t, label=None):
     (node,_,st) = t
-    r = [('%s:%s:%s' % ((label or ''), node.ntype, (node.data or '')))]
+    r = [('%s:%s:%s' % ((label or ''), node.kind, (node.data or '')))]
     for (label,c) in st:
         r.append(str_tree(c,label))
     return '(%s)' % ' '.join(r)
@@ -77,7 +77,7 @@ def get_match(node0, node1):
             if t is not None:
                 st.append((label, t))
         return (n0,n1,st)
-    
+
     return visit(node0, node1)
 
 def main(argv):
@@ -103,7 +103,7 @@ def main(argv):
     graphdb = GraphDB(args.pop(0))
     if not args: return usage()
     indexdb = IndexDB(args.pop(0))
-    
+
     def show_result(graph0, graph1, pairs):
         try:
             src1 = srcdb.get(graph1.src)
@@ -127,7 +127,7 @@ def main(argv):
         graphs = load_graphs(args.pop(0))
     else:
         graphs = ( graphdb.get(gid) for gid in graphdb.get_gids() )
-    
+
     for graph0 in graphs:
         gid0 = graph0.gid
         if verbose or (isinstance(gid0, int) and (gid0 % 100) == 0):
@@ -135,7 +135,7 @@ def main(argv):
             sys.stderr.flush()
         result = indexdb.search_graph(
             graph0, checkgid=checkgid,
-            minnodes=minnodes, mindepth=mindepth)                        
+            minnodes=minnodes, mindepth=mindepth)
         if not result: continue
         maxmatch = None
         maxnodes = -1
@@ -166,7 +166,7 @@ def main(argv):
             print ('-', graph0.gid, graph1.gid, nodes, depth, branch,
                    ','.join('%d:%d' % (n0.nid, n1.nid) for (n0,n1) in pairs),
                    str_tree(tree))
-            if srcdb is not None: 
+            if srcdb is not None:
                 show_result(graph0, graph1, pairs)
         sys.stdout.flush()
     return 0
