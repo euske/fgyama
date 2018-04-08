@@ -13,18 +13,20 @@ import org.w3c.dom.*;
 public class DFNode implements Comparable<DFNode> {
 
     private DFGraph _graph;
-    private DFScope _scope;
-    private DFRef _ref;
     private int _id;
+    private DFScope _scope;
+    private DFType _type;
+    private DFRef _ref;
 
     private DFNode _input = null;
     private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
     private List<DFNode> _outputs = new ArrayList<DFNode>();
 
-    public DFNode(DFGraph graph, DFScope scope, DFRef ref) {
+    public DFNode(DFGraph graph, DFScope scope, DFType type, DFRef ref) {
         _graph = graph;
 	_id = graph.addNode(this);
 	_scope = scope;
+        _type = type;
 	_ref = ref;
     }
 
@@ -47,6 +49,9 @@ public class DFNode implements Comparable<DFNode> {
 	if (this.getData() != null) {
 	    elem.setAttribute("data", this.getData());
 	}
+        if (_type != null) {
+            elem.setAttribute("type", _type.getName());
+        }
 	if (_ref != null) {
 	    elem.setAttribute("ref", _ref.getName());
 	}
@@ -56,16 +61,20 @@ public class DFNode implements Comparable<DFNode> {
 	return elem;
     }
 
+    public int getId() {
+        return _id;
+    }
+
     public DFScope getScope() {
         return _scope;
     }
 
-    public DFRef getRef() {
-        return _ref;
+    public DFType getType() {
+        return _type;
     }
 
-    public int getId() {
-        return _id;
+    public DFRef getRef() {
+        return _ref;
     }
 
     public String getName() {
@@ -100,6 +109,9 @@ public class DFNode implements Comparable<DFNode> {
     protected void accept(DFNode node) {
 	assert _input == null;
 	_input = node;
+	if (_type == null) {
+	    _type = node.getType();
+	}
 	node._outputs.add(this);
     }
 

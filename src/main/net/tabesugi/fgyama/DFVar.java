@@ -12,15 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFVar extends DFRef {
 
-    private Type _type;
-
-    public DFVar(DFScope scope, String name, Type type) {
-	super(scope, name);
-	_type = type;
-    }
-
-    @Override
-    public String toString() {
-	return ("<DFVar("+this.getName()+"): "+_type+">");
+    public DFVar(DFScope scope, String name, DFType type) {
+	super(scope, name, type);
     }
 }

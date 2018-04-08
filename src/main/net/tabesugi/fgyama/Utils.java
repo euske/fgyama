@@ -109,7 +109,7 @@ public class Utils {
 
     public static String getTypeName(Type type) {
 	if (type instanceof PrimitiveType) {
-	    return ((PrimitiveType)type).getPrimitiveTypeCode().toString();
+	    return "@"+((PrimitiveType)type).getPrimitiveTypeCode().toString();
 	} else if (type instanceof SimpleType) {
 	    return ((SimpleType)type).getName().getFullyQualifiedName();
 	} else if (type instanceof ArrayType) {

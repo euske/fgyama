@@ -31,7 +31,7 @@ public class DFComponent {
 	if (node == null) {
 	    node = _inputs.get(ref);
 	    if (node == null) {
-		node = new DFNode(_graph, _scope, ref);
+		node = new DFNode(_graph, _scope, null, ref);
 		_inputs.put(ref, node);
 	    }
 	}

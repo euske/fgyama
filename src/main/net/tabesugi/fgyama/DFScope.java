@@ -103,7 +103,7 @@ public class DFScope {
 	return scopes;
     }
 
-    public DFRef addVar(String id, Type type) {
+    public DFRef addVar(String id, DFType type) {
 	DFRef ref = _refs.get(id);
 	if (ref == null) {
             ref = new DFVar(this, id, type);
@@ -112,11 +112,11 @@ public class DFScope {
 	return ref;
     }
 
-    public DFRef addVar(IBinding binding, Type type) {
+    public DFRef addVar(IBinding binding, DFType type) {
         return this.addVar(binding.getKey(), type);
     }
 
-    public DFRef addVar(SimpleName name, Type type) {
+    public DFRef addVar(SimpleName name, DFType type) {
         IBinding binding = name.resolveBinding();
         if (binding != null) {
             return _root.addVar(binding, type);
@@ -213,7 +213,7 @@ public class DFScope {
 	    VariableDeclarationStatement varStmt =
 		(VariableDeclarationStatement)ast;
 	    // XXX Ignore modifiers and dimensions.
-	    Type varType = varStmt.getType();
+	    DFType varType = new DFType(varStmt.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
 		this.addVar(frag.getName(), varType);
@@ -307,7 +307,7 @@ public class DFScope {
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers and dimensions.
-	    Type varType = decl.getType();
+	    DFType varType = new DFType(decl.getType());
 	    childScope.addVar(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
@@ -343,7 +343,7 @@ public class DFScope {
 		DFScope childScope = this.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers and dimensions.
-		Type varType = decl.getType();
+		DFType varType = new DFType(decl.getType());
 		childScope.addVar(decl.getName(), varType);
 		childScope.build(frame, cc.getBody());
 	    }
@@ -462,7 +462,7 @@ public class DFScope {
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
 	    // XXX Ignore modifiers and dimensions.
-	    Type varType = decl.getType();
+	    DFType varType = new DFType(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
 		DFRef ref = this.addVar(frag.getName(), varType);
