@@ -20,17 +20,15 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String javaPath, String xmlPath)
 	throws Exception {
-        compareXml(javaPath, xmlPath, false, null);
+        compareXml(javaPath, xmlPath, null);
     }
-    public void compareXml(String javaPath, String xmlPath,
-			   boolean resolve, String[] srcPath)
+    public void compareXml(String javaPath, String xmlPath, String[] srcPath)
 	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
-        DFScope typeScope = new DFScope("");
 	XmlExporter exporter = new XmlExporter();
-	Java2DF converter = new Java2DF(exporter, null, srcPath, resolve);
+	Java2DF converter = new Java2DF(exporter, null, srcPath);
 	exporter.startFile(javaPath);
-	converter.processFile(typeScope, javaPath);
+	converter.processFile(javaPath);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
@@ -95,7 +93,7 @@ public class UnitTestDF extends XMLTestCase {
     @Test
     public void test_13_basic_names() throws Exception {
 	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph",
-		   true, null);
+		   null);
     }
 
     @Test
@@ -109,9 +107,9 @@ public class UnitTestDF extends XMLTestCase {
 	String[] srcpath = new String[] { TESTDATA+"/multi" };
 	compareXml(TESTDATA+"/multi/dom/meep/multi_xref1.java",
 		   TESTDATA+"/multi/dom/meep/multi_xref1.graph",
-		   true, srcpath);
+		   srcpath);
 	compareXml(TESTDATA+"/multi/dom/meep/multi_xref2.java",
 		   TESTDATA+"/multi/dom/meep/multi_xref2.graph",
-		   true, srcpath);
+		   srcpath);
     }
 }

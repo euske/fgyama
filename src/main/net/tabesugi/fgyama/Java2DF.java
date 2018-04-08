@@ -594,7 +594,7 @@ class ExceptionNode extends ProgNode {
 
 //  Java2DF
 //
-public class Java2DF extends ASTVisitor {
+public class Java2DF {
 
     /// General graph operations.
 
@@ -1544,16 +1544,16 @@ public class Java2DF extends ASTVisitor {
 	return graph;
     }
 
-    /// ASTVisitor methods.
-
     public Exporter exporter;
     public String[] classPath;
     public String[] srcPath;
+    public DFScope rootScope;
 
     public Java2DF(Exporter exporter, String[] classPath, String[] srcPath) {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
+        this.rootScope = new DFScope("");
     }
 
     @SuppressWarnings("unchecked")
@@ -1620,7 +1620,7 @@ public class Java2DF extends ASTVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    public void processFile(DFScope typeScope, String path)
+    public void processFile(String path)
 	throws IOException {
 	Utils.logit("Parsing: "+path);
 	String src = Utils.readFile(path);
@@ -1635,6 +1635,7 @@ public class Java2DF extends ASTVisitor {
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
         PackageDeclaration pkg = cu.getPackage();
+        DFScope typeScope = this.rootScope;
         if (pkg != null) {
             typeScope = typeScope.getChildByName(pkg.getName());
         }
@@ -1681,19 +1682,18 @@ public class Java2DF extends ASTVisitor {
 	}
 
 	// Process files.
-        DFScope typeScope = new DFScope("");
 	XmlExporter exporter = new XmlExporter();
+        Java2DF converter = new Java2DF(exporter, classpath, srcpath);
 	for (String path : files) {
 	    try {
-		Java2DF converter = new Java2DF(exporter, classpath, srcpath);
 		exporter.startFile(path);
-		converter.processFile(typeScope, path);
+		converter.processFile(path);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
 	    }
 	}
-	typeScope.dump();
+	converter.rootScope.dump();
 	exporter.close();
 	Utils.printXml(output, exporter.document);
 	output.close();
