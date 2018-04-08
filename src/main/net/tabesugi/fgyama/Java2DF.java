@@ -592,31 +592,6 @@ class ExceptionNode extends ProgNode {
 }
 
 
-//  NameResolutionChecker
-//
-class NameResolutionChecker extends ASTVisitor {
-
-    private boolean _resolved = true;
-
-    public boolean isResolved() {
-	return _resolved;
-    }
-
-    public boolean visit(SimpleName node) {
-	if (node.resolveBinding() == null) {
-	    _resolved = false;
-	}
-	return false;
-    }
-
-    public static boolean canResolveNames(ASTNode node) {
-	NameResolutionChecker checker = new NameResolutionChecker();
-	node.accept(checker);
-	return checker.isResolved();
-    }
-}
-
-
 //  Java2DF
 //
 public class Java2DF extends ASTVisitor {
@@ -1574,14 +1549,11 @@ public class Java2DF extends ASTVisitor {
     public Exporter exporter;
     public String[] classPath;
     public String[] srcPath;
-    public boolean resolve;
 
-    public Java2DF(Exporter exporter, String[] classPath, String[] srcPath,
-		   boolean resolve) {
+    public Java2DF(Exporter exporter, String[] classPath, String[] srcPath) {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
-	this.resolve = resolve;
     }
 
     @SuppressWarnings("unchecked")
@@ -1658,7 +1630,7 @@ public class Java2DF extends ASTVisitor {
         parser.setUnitName(path);
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	parser.setResolveBindings(this.resolve);
+	parser.setResolveBindings(true);
 	parser.setEnvironment(this.classPath, this.srcPath, null, true);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
@@ -1682,8 +1654,6 @@ public class Java2DF extends ASTVisitor {
 	// Parse the options.
 	String[] classpath = null;
 	String[] srcpath = null;
-	String tmppath = null;
-	boolean resolve = false;
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
 
@@ -1703,8 +1673,6 @@ public class Java2DF extends ASTVisitor {
 		}
 	    } else if (arg.equals("-C")) {
 		classpath = args[++i].split(";");
-	    } else if (arg.equals("-R")) {
-		tmppath = args[++i];
 	    } else if (arg.startsWith("-")) {
 		;
 	    } else {
@@ -1712,68 +1680,22 @@ public class Java2DF extends ASTVisitor {
 	    }
 	}
 
-	// Preprocess files.
-        Map<String, String> srcmap = null;
-	if (tmppath != null) {
-            srcmap = new HashMap<String, String>();
-	    for (int i = 0; i < files.size(); i++) {
-		String src = files.get(i);
-                String dst;
-		try {
-		    String name = PackageNameExtractor.getCanonicalName(src);
-                    if (name == null) {
-			Utils.logit("Error: no toplevel name: "+src);
-			continue;
-		    }
-                    dst = tmppath + "/" + name.replace(".", "/") + ".java";
-		} catch (IOException e) {
-		    System.err.println("Cannot open input file: "+src);
-                    continue;
-		}
-                Utils.logit("Copying: "+src+" -> "+dst);
-                try {
-                    File srcfile = new File(src);
-                    File dstfile = new File(dst);
-                    dstfile.getParentFile().mkdirs();
-                    Utils.copyFile(srcfile, dstfile);
-                    srcmap.put(src, dst);
-		} catch (IOException e) {
-		    System.err.println("Cannot copy: "+e);
-                    continue;
-                }
-	    }
-	    srcpath = new String[] { tmppath };
-	    resolve = true;
-	}
-
 	// Process files.
         DFScope typeScope = new DFScope("");
 	XmlExporter exporter = new XmlExporter();
 	for (String path : files) {
-            String src = (srcmap != null)? srcmap.get(path) : path;
-	    if (src == null) continue;
 	    try {
-		Java2DF converter =
-		    new Java2DF(exporter, classpath, srcpath, resolve);
+		Java2DF converter = new Java2DF(exporter, classpath, srcpath);
 		exporter.startFile(path);
-		converter.processFile(typeScope, src);
+		converter.processFile(typeScope, path);
 		exporter.endFile();
 	    } catch (IOException e) {
-		System.err.println("Cannot open input file: "+src);
+		System.err.println("Cannot open input file: "+path);
 	    }
 	}
 	typeScope.dump();
 	exporter.close();
 	Utils.printXml(output, exporter.document);
 	output.close();
-
-	// Cleanup files.
-	if (srcmap != null) {
-	    for (String dst : srcmap.values()) {
-                Utils.logit("Deleting: "+dst);
-		File file = new File(dst);
-		file.delete();
-	    }
-	}
     }
 }
