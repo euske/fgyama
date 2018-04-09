@@ -106,7 +106,7 @@ public class DFScope {
     public DFRef addVar(String id, DFType type) {
 	DFRef ref = _refs.get(id);
 	if (ref == null) {
-            ref = new DFVar(this, id, type);
+            ref = new DFRef(this, id, type);
             _refs.put(id, ref);
         }
 	return ref;
