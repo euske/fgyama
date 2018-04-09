@@ -531,12 +531,7 @@ class MethodCallNode extends CallNode {
 
     @Override
     public String getData() {
-        IBinding binding = this.name.resolveBinding();
-        if (binding != null) {
-            return binding.getKey();
-        } else {
-            return this.name.getIdentifier();
-        }
+        return this.name.getIdentifier();
     }
 }
 
@@ -983,20 +978,22 @@ public class Java2DF {
 
 	} else if (expr instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
-	    cpt = processVariableDeclaration
-		(graph, typeScope, varScope, frame, cpt, decl.fragments());
+	    cpt = processVariableDeclaration(
+                graph, typeScope, varScope, frame, cpt, decl.fragments());
 
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
-	    DFNode obj = null;
+	    DFRef ref = varScope.lookupThis();
+	    DFNode obj = cpt.getValue(ref);
 	    if (expr1 != null) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
 	    SimpleName methodName = invoke.getName();
-	    MethodCallNode call = new MethodCallNode
-		(graph, varScope, null /*XXX*/, invoke, obj, methodName);
+	    MethodCallNode call = new MethodCallNode(
+                graph, varScope, null /*XXX*/,
+                invoke, obj, methodName);
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1011,8 +1008,9 @@ public class Java2DF {
 	    SuperMethodInvocation si = (SuperMethodInvocation)expr;
 	    SimpleName methodName = si.getName();
 	    DFNode obj = cpt.getValue(varScope.lookupSuper());
-	    MethodCallNode call = new MethodCallNode
-		(graph, varScope, null /*XXX*/, si, obj, methodName);
+	    MethodCallNode call = new MethodCallNode(
+		graph, varScope, null /*XXX*/,
+                si, obj, methodName);
 	    for (Expression arg : (List<Expression>) si.arguments()) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1557,14 +1555,17 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFGraph processMethodDeclaration(DFScope typeScope, DFScope varScope,
-                                            MethodDeclaration method)
+    public DFGraph processMethodDeclaration(
+        DFScope typeScope, DFScope varScope,
+        MethodDeclaration method)
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
 	if (method.getBody() == null) return null;
-        varScope = varScope.getChildByName(method.getName());
-	varScope.addVar("#return", null);
+        Type type0 = method.getReturnType2();
+        DFType type = (type0 == null)? null : new DFType(type0);
 	String funcName = method.getName().getIdentifier();
+        varScope = varScope.getChildByName(method.getName());
+	varScope.addVar("#return", type);
         try {
             DFGraph graph = buildMethodGraph(typeScope, varScope, method);
             if (graph != null) {
@@ -1581,30 +1582,33 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public void processFieldDeclaration(DFScope typeScope, DFScope varScope,
-                                        FieldDeclaration method) {
+    public void processFieldDeclaration(
+        DFScope typeScope, DFScope varScope,
+        FieldDeclaration method) {
 	// XXX
 	// XXX static
     }
 
     @SuppressWarnings("unchecked")
-    public void processTypeDeclaration(DFScope typeScope, TypeDeclaration typeDecl)
+    public void processTypeDeclaration(
+        DFScope typeScope, TypeDeclaration typeDecl)
         throws IOException {
+        DFType type = new DFType(typeDecl.getName());
         typeScope = typeScope.getChildByName(typeDecl.getName());
         DFScope varScope = new DFScope(typeScope.getName());
-	varScope.addVar("#this", null);
-	varScope.addVar("#super", null);
-        // XXX superclass
-        for (BodyDeclaration body : (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
+	varScope.addVar("#this", type);
+	varScope.addVar("#super", type); // XXX ignore superclass now...
+        for (BodyDeclaration body :
+                 (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
                 processTypeDeclaration(typeScope, (TypeDeclaration)body);
             } else if (body instanceof FieldDeclaration) {
-                processFieldDeclaration(typeScope, varScope,
-                                        (FieldDeclaration)body);
+                processFieldDeclaration(
+                    typeScope, varScope, (FieldDeclaration)body);
             } else if (body instanceof MethodDeclaration) {
                 try {
-                    DFGraph graph = processMethodDeclaration(typeScope, varScope,
-                                                             (MethodDeclaration)body);
+                    DFGraph graph = processMethodDeclaration(
+                        typeScope, varScope, (MethodDeclaration)body);
                     if (this.exporter != null && graph != null) {
                         this.exporter.writeGraph(graph);
                     }

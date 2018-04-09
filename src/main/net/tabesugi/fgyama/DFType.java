@@ -21,6 +21,10 @@ public class DFType {
 	_name = Utils.getTypeName(type);
     }
 
+    public DFType(Name name) {
+	_name = "."+name.getFullyQualifiedName();
+    }
+
     public DFType(PrimitiveType.Code code) {
 	_name = "@"+code.toString();
     }

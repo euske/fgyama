@@ -109,18 +109,23 @@ public class Utils {
 
     public static String getTypeName(Type type) {
 	if (type instanceof PrimitiveType) {
-	    return "@"+((PrimitiveType)type).getPrimitiveTypeCode().toString();
+            PrimitiveType ptype = (PrimitiveType)type;
+	    return "@"+ptype.getPrimitiveTypeCode().toString();
 	} else if (type instanceof SimpleType) {
-	    return ((SimpleType)type).getName().getFullyQualifiedName();
+            SimpleType stype = (SimpleType)type;
+	    return "."+stype.getName().getFullyQualifiedName();
 	} else if (type instanceof ArrayType) {
-	    String name = getTypeName(((ArrayType)type).getElementType());
-	    int ndims = ((ArrayType)type).getDimensions();
+            ArrayType atype = (ArrayType)type;
+	    String name = getTypeName(atype.getElementType());
+	    int ndims = atype.getDimensions();
 	    for (int i = 0; i < ndims; i++) {
 		name += "[]";
 	    }
 	    return name;
 	} else if (type instanceof ParameterizedType) {
-	    return getTypeName(((ParameterizedType)type).getType());
+            ParameterizedType ptype = (ParameterizedType)type;
+            // ignore ptype.typeArguments()
+	    return getTypeName(ptype.getType());
 	} else {
 	    return null;
 	}

@@ -28,12 +28,7 @@ public class DFGraph {
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
-        IBinding binding = _name.resolveBinding();
-        if (binding != null) {
-            elem.setAttribute("name", binding.getKey());
-        } else {
-            elem.setAttribute("name", _name.getIdentifier());
-        }
+        elem.setAttribute("name", _name.getIdentifier());
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);

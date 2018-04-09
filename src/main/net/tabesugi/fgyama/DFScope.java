@@ -112,17 +112,8 @@ public class DFScope {
 	return ref;
     }
 
-    public DFRef addVar(IBinding binding, DFType type) {
-        return this.addVar(binding.getKey(), type);
-    }
-
     public DFRef addVar(SimpleName name, DFType type) {
-        IBinding binding = name.resolveBinding();
-        if (binding != null) {
-            return _root.addVar(binding, type);
-        } else {
-            return this.addVar(name.getIdentifier(), type);
-        }
+        return this.addVar(name.getIdentifier(), type);
     }
 
     private DFRef lookupRef(String id) {
@@ -141,21 +132,11 @@ public class DFScope {
     }
 
     public DFRef lookupVar(SimpleName name) {
-        IBinding binding = name.resolveBinding();
-        if (binding != null) {
-            return _root.lookupRef(binding);
-        } else {
-            return this.lookupRef(name.getIdentifier());
-        }
+        return this.lookupRef(name.getIdentifier());
     }
 
     public DFRef lookupField(SimpleName name) {
-        IBinding binding = name.resolveBinding();
-        if (binding != null) {
-            return _root.lookupRef(binding);
-        } else {
-            return this.lookupRef("."+name.getIdentifier());
-        }
+        return this.lookupRef("."+name.getIdentifier());
     }
 
     public DFRef lookupThis() {
