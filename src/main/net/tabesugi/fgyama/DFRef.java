@@ -12,11 +12,11 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFRef implements Comparable<DFRef> {
 
-    private DFScope _scope;
+    private DFVarScope _scope;
     private String _name;
     private DFTypeRef _type;
 
-    public DFRef(DFScope scope, String name, DFTypeRef type) {
+    public DFRef(DFVarScope scope, String name, DFTypeRef type) {
 	_scope = scope;
 	_name = name;
 	_type = type;

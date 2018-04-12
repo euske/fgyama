@@ -109,20 +109,6 @@ public class DFTypeScope {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(CompilationUnit cunit)
-	throws UnsupportedSyntax {
-
-        PackageDeclaration pkg = cunit.getPackage();
-        DFTypeScope scope = _root;
-        if (pkg != null) {
-            scope = scope.addChildScope(pkg.getName());
-        }
-        for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cunit.types()) {
-            scope.build(typeDecl);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
 

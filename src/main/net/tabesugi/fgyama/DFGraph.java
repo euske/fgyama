@@ -13,11 +13,12 @@ import org.w3c.dom.*;
 public class DFGraph {
 
     private SimpleName _name;
-    private DFScope _root;
+    private DFVarScope _root;
 
     private Map<Integer, DFNode> _nodes = new HashMap<Integer, DFNode>();
 
-    public DFGraph(SimpleName name) {
+    public DFGraph(DFVarScope root, SimpleName name) {
+	_root = root;
 	_name = name;
     }
 
@@ -34,10 +35,6 @@ public class DFGraph {
 	Arrays.sort(nodes);
 	elem.appendChild(_root.toXML(document, nodes));
 	return elem;
-    }
-
-    public void setRoot(DFScope scope) {
-	_root = scope;
     }
 
     public int addNode(DFNode node) {

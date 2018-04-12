@@ -8,27 +8,27 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFScope
+//  DFVarScope
 //  Mapping from name -> reference.
 //
-public class DFScope {
+public class DFVarScope {
 
-    private DFScope _root;
+    private DFVarScope _root;
     private String _name;
-    private DFScope _parent;
+    private DFVarScope _parent;
 
-    private List<DFScope> _children = new ArrayList<DFScope>();
-    private Map<String, DFScope> _name2child = new HashMap<String, DFScope>();
-    private Map<ASTNode, DFScope> _ast2child = new HashMap<ASTNode, DFScope>();
+    private List<DFVarScope> _children = new ArrayList<DFVarScope>();
+    private Map<String, DFVarScope> _name2child = new HashMap<String, DFVarScope>();
+    private Map<ASTNode, DFVarScope> _ast2child = new HashMap<ASTNode, DFVarScope>();
     private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
 
-    public DFScope(String name) {
+    public DFVarScope(String name) {
         _root = this;
 	_name = name;
         _parent = null;
     }
 
-    public DFScope(String name, DFScope parent) {
+    public DFVarScope(String name, DFVarScope parent) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
@@ -36,13 +36,13 @@ public class DFScope {
 
     @Override
     public String toString() {
-	return ("<DFScope("+_name+")>");
+	return ("<DFVarScope("+_name+")>");
     }
 
     public Element toXML(Document document, DFNode[] nodes) {
 	Element elem = document.createElement("scope");
 	elem.setAttribute("name", _name);
-	for (DFScope child : this.getChildren()) {
+	for (DFVarScope child : this.getChildren()) {
 	    elem.appendChild(child.toXML(document, nodes));
 	}
 	for (DFNode node : nodes) {
@@ -61,24 +61,24 @@ public class DFScope {
         }
     }
 
-    public DFScope addChild(String basename, ASTNode ast) {
+    public DFVarScope addChild(String basename, ASTNode ast) {
 	int id = _children.size();
 	String name = basename+id;
-	DFScope scope = new DFScope(name, this);
+	DFVarScope scope = new DFVarScope(name, this);
 	_children.add(scope);
         _name2child.put(name, scope);
 	_ast2child.put(ast, scope);
 	return scope;
     }
 
-    public DFScope getChildByAST(ASTNode ast) {
+    public DFVarScope getChildByAST(ASTNode ast) {
 	return _ast2child.get(ast);
     }
 
-    public DFScope getChildByName(Name name) {
+    public DFVarScope getChildByName(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
-	    DFScope scope = (_parent != null)? _parent : this;
+	    DFVarScope scope = (_parent != null)? _parent : this;
 	    scope = scope.getChildByName(qname.getQualifier());
             return scope.getChildByName(qname.getName().getIdentifier());
         } else {
@@ -87,18 +87,18 @@ public class DFScope {
         }
     }
 
-    public DFScope getChildByName(String name) {
-        DFScope scope = _name2child.get(name);
+    public DFVarScope getChildByName(String name) {
+        DFVarScope scope = _name2child.get(name);
         if (scope == null) {
-            scope = new DFScope(name, this);
+            scope = new DFVarScope(name, this);
             _children.add(scope);
             _name2child.put(name, scope);
         }
         return scope;
     }
 
-    public DFScope[] getChildren() {
-	DFScope[] scopes = new DFScope[_children.size()];
+    public DFVarScope[] getChildren() {
+	DFVarScope[] scopes = new DFVarScope[_children.size()];
 	_children.toArray(scopes);
 	return scopes;
     }
@@ -165,7 +165,7 @@ public class DFScope {
 	for (DFRef ref : _refs.values()) {
 	    out.println(i2+"defined: "+ref);
 	}
-	for (DFScope scope : _children) {
+	for (DFVarScope scope : _children) {
 	    scope.dump(out, i2);
 	}
 	out.println(indent+"}");
@@ -182,7 +182,7 @@ public class DFScope {
 
 	} else if (ast instanceof Block) {
 	    Block block = (Block)ast;
-	    DFScope childScope = this.addChild("b", ast);
+	    DFVarScope childScope = this.addChild("b", ast);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
 		childScope.build(frame, stmt);
@@ -229,7 +229,7 @@ public class DFScope {
 
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
-	    DFScope childScope = this.addChild("switch", ast);
+	    DFVarScope childScope = this.addChild("switch", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    Expression expr = switchStmt.getExpression();
 	    childScope.build(frame, expr);
@@ -247,7 +247,7 @@ public class DFScope {
 
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
-	    DFScope childScope = this.addChild("while", ast);
+	    DFVarScope childScope = this.addChild("while", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    Expression expr = whileStmt.getExpression();
 	    childScope.build(frame, expr);
@@ -256,7 +256,7 @@ public class DFScope {
 
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
-	    DFScope childScope = this.addChild("do", ast);
+	    DFVarScope childScope = this.addChild("do", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    Statement stmt = doStmt.getBody();
 	    childScope.build(childFrame, stmt);
@@ -265,7 +265,7 @@ public class DFScope {
 
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
-	    DFScope childScope = this.addChild("for", ast);
+	    DFVarScope childScope = this.addChild("for", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
@@ -284,7 +284,7 @@ public class DFScope {
 
 	} else if (ast instanceof EnhancedForStatement) {
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    DFScope childScope = this.addChild("efor", ast);
+	    DFVarScope childScope = this.addChild("efor", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers and dimensions.
@@ -321,7 +321,7 @@ public class DFScope {
 	    this.build(tryFrame, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
-		DFScope childScope = this.addChild("catch", cc);
+		DFVarScope childScope = this.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers and dimensions.
 		DFTypeRef varType = new DFTypeRef(decl.getType());

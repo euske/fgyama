@@ -27,8 +27,9 @@ public class UnitTestDF extends XMLTestCase {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(exporter, null, srcPath);
+	converter.pass1(javaPath);
 	exporter.startFile(javaPath);
-	converter.processFile(javaPath);
+	converter.pass2(javaPath);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
