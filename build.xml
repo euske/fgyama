@@ -2,8 +2,7 @@
 <project name="Java2DF" default="build" basedir=".">
 
   <property file="build.properties" />
-  <property name="mainSrcDir" location="src/main" />
-  <property name="testSrcDir" location="src/test" />
+  <property name="srcDir" location="src" />
   <property name="libDir" location="lib" />
   <property name="tmpDir" location="tmp" />
   <property name="buildDir" location="target" />
@@ -52,10 +51,10 @@
 	   verbose="false"
 	   includeAntRuntime="false">
       <compilerarg value="-Xlint" />
-      <src>
-        <pathelement location="${mainSrcDir}"/>
-        <pathelement location="${testSrcDir}"/>
-      </src>
+      <src path="${srcDir}" />
+      <include name="main/**" />
+      <include name="test/**" />
+      <exclude name="**/.*/**"/>
       <classpath refid="build.classpath"/>
     </javac>
   </target>
