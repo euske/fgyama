@@ -15,7 +15,7 @@ abstract class ProgNode extends DFNode {
 
     public ASTNode ast;
 
-    public ProgNode(DFGraph graph, DFScope scope, DFType type, DFRef ref,
+    public ProgNode(DFGraph graph, DFScope scope, DFTypeRef type, DFRef ref,
                     ASTNode ast) {
 	super(graph, scope, type, ref);
 	this.ast = ast;
@@ -174,7 +174,7 @@ class InfixNode extends ProgNode {
 
     public InfixExpression.Operator op;
 
-    public InfixNode(DFGraph graph, DFScope scope, DFType type,
+    public InfixNode(DFGraph graph, DFScope scope, DFTypeRef type,
                      ASTNode ast, InfixExpression.Operator op,
 		     DFNode lvalue, DFNode rvalue) {
 	super(graph, scope, type, null, ast);
@@ -197,7 +197,7 @@ class InfixNode extends ProgNode {
 // TypeCastNode
 class TypeCastNode extends ProgNode {
 
-    public TypeCastNode(DFGraph graph, DFScope scope, DFType type,
+    public TypeCastNode(DFGraph graph, DFScope scope, DFTypeRef type,
                         ASTNode ast) {
 	super(graph, scope, type, null, ast);
     }
@@ -216,11 +216,11 @@ class TypeCastNode extends ProgNode {
 // InstanceofNode
 class InstanceofNode extends ProgNode {
 
-    public DFType type;
+    public DFTypeRef type;
 
     public InstanceofNode(DFGraph graph, DFScope scope,
-			  ASTNode ast, DFType type) {
-	super(graph, scope, DFType.BOOLEAN, null, ast);
+			  ASTNode ast, DFTypeRef type) {
+	super(graph, scope, DFTypeRef.BOOLEAN, null, ast);
 	this.type = type;
     }
 
@@ -318,7 +318,7 @@ class ConstNode extends ProgNode {
 
     public String data;
 
-    public ConstNode(DFGraph graph, DFScope scope, DFType type,
+    public ConstNode(DFGraph graph, DFScope scope, DFTypeRef type,
                      ASTNode ast, String data) {
 	super(graph, scope, type, null, ast);
 	this.data = data;
@@ -496,7 +496,7 @@ abstract class CallNode extends ProgNode {
     public List<DFNode> args;
     public DFNode exception;
 
-    public CallNode(DFGraph graph, DFScope scope, DFType type, DFRef ref,
+    public CallNode(DFGraph graph, DFScope scope, DFTypeRef type, DFRef ref,
                     ASTNode ast) {
 	super(graph, scope, type, ref, ast);
 	this.args = new ArrayList<DFNode>();
@@ -520,7 +520,7 @@ class MethodCallNode extends CallNode {
 
     public SimpleName name;
 
-    public MethodCallNode(DFGraph graph, DFScope scope, DFType type,
+    public MethodCallNode(DFGraph graph, DFScope scope, DFTypeRef type,
 			  ASTNode ast, DFNode obj, SimpleName name) {
 	super(graph, scope, type, null, ast);
 	if (obj != null) {
@@ -538,7 +538,7 @@ class MethodCallNode extends CallNode {
 // CreateObjectNode
 class CreateObjectNode extends CallNode {
 
-    public CreateObjectNode(DFGraph graph, DFScope scope, DFType type,
+    public CreateObjectNode(DFGraph graph, DFScope scope, DFTypeRef type,
                             ASTNode ast, DFNode obj) {
 	super(graph, scope, type, null, ast);
 	if (obj != null) {
@@ -883,31 +883,31 @@ public class Java2DF {
 
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.BOOLEAN,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.BOOLEAN,
 					expr, Boolean.toString(value)));
 
 	} else if (expr instanceof CharacterLiteral) {
 	    char value = ((CharacterLiteral)expr).charValue();
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.CHAR,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.CHAR,
 					expr, Character.toString(value)));
 
 	} else if (expr instanceof NullLiteral) {
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.NULL,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.NULL,
 					expr, "null"));
 
 	} else if (expr instanceof NumberLiteral) {
 	    String value = ((NumberLiteral)expr).getToken();
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.NUMBER,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.NUMBER,
 					expr, value));
 
 	} else if (expr instanceof StringLiteral) {
 	    String value = ((StringLiteral)expr).getLiteralValue();
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.STRING,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.STRING,
 					expr, value));
 
 	} else if (expr instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)expr).getType();
-	    cpt.setRValue(new ConstNode(graph, varScope, DFType.TYPE,
+	    cpt.setRValue(new ConstNode(graph, varScope, DFTypeRef.TYPE,
 					expr, Utils.getTypeName(value)));
 
 	} else if (expr instanceof PrefixExpression) {
@@ -955,7 +955,7 @@ public class Java2DF {
 	    DFNode lvalue = cpt.getRValue();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
-            DFType type = lvalue.getType(); // XXX
+            DFTypeRef type = lvalue.getType(); // XXX
 	    cpt.setRValue(new InfixNode(graph, varScope, type,
                                         expr, op, lvalue, rvalue));
 
@@ -1073,7 +1073,7 @@ public class Java2DF {
 
 	} else if (expr instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)expr;
-	    DFType type = new DFType(cast.getType());
+	    DFTypeRef type = new DFTypeRef(cast.getType());
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, cast.getExpression());
             DFNode node = new TypeCastNode(graph, varScope, type, cast);
             node.accept(cpt.getRValue());
@@ -1081,15 +1081,15 @@ public class Java2DF {
 
 	} else if (expr instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-	    DFType instType = new DFType(cstr.getType());
+	    DFTypeRef instType = new DFTypeRef(cstr.getType());
 	    Expression expr1 = cstr.getExpression();
 	    DFNode obj = null;
 	    if (expr1 != null) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-	    CreateObjectNode call = new CreateObjectNode(graph, varScope, instType,
-                                                         cstr, obj);
+	    CreateObjectNode call = new CreateObjectNode(
+		graph, varScope, instType, cstr, obj);
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1113,7 +1113,7 @@ public class Java2DF {
 
 	} else if (expr instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
-	    DFType type = new DFType(instof.getRightOperand());
+	    DFTypeRef type = new DFTypeRef(instof.getRightOperand());
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt,
 				    instof.getLeftOperand());
             DFNode node = new InstanceofNode(graph, varScope, instof, type);
@@ -1309,7 +1309,7 @@ public class Java2DF {
 	    loopCpt = processExpression(graph, typeScope, loopScope, loopFrame, loopCpt, expr);
 	    condValue = loopCpt.getRValue();
 	} else {
-	    condValue = new ConstNode(graph, loopScope, DFType.BOOLEAN, null, "true");
+	    condValue = new ConstNode(graph, loopScope, DFTypeRef.BOOLEAN, null, "true");
 	}
 	loopCpt = processStatement(graph, typeScope, loopScope, loopFrame, loopCpt,
 				   forStmt.getBody());
@@ -1528,8 +1528,8 @@ public class Java2DF {
 	for (SingleVariableDeclaration decl :
 		 (List<SingleVariableDeclaration>) method.parameters()) {
 	    // XXX Ignore modifiers and dimensions.
-	    DFType paramType = new DFType(decl.getType());
-	    DFRef ref = varScope.addVar(decl.getName(), paramType);
+	    DFTypeRef paramType = new DFTypeRef(decl.getType());
+	    DFRef ref = varScope.addRef(decl.getName(), paramType);
 	    DFNode param = new ArgNode(graph, varScope, ref, decl, i++);
 	    DFNode assign = new SingleAssignNode(graph, varScope, ref, decl);
 	    assign.accept(param);
@@ -1545,13 +1545,13 @@ public class Java2DF {
     public Exporter exporter;
     public String[] classPath;
     public String[] srcPath;
-    public DFScope rootScope;
+    public DFTypeScope rootScope;
 
     public Java2DF(Exporter exporter, String[] classPath, String[] srcPath) {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
-        this.rootScope = new DFScope("");
+        this.rootScope = new DFTypeScope("");
     }
 
     @SuppressWarnings("unchecked")
@@ -1562,10 +1562,10 @@ public class Java2DF {
 	// Ignore method prototypes.
 	if (method.getBody() == null) return null;
         Type type0 = method.getReturnType2();
-        DFType type = (type0 == null)? null : new DFType(type0);
+        DFTypeRef type = (type0 == null)? null : new DFTypeRef(type0);
 	String funcName = method.getName().getIdentifier();
         varScope = varScope.getChildByName(method.getName());
-	varScope.addVar("#return", type);
+	varScope.addRef("#return", type);
         try {
             DFGraph graph = buildMethodGraph(typeScope, varScope, method);
             if (graph != null) {
@@ -1593,11 +1593,11 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFScope typeScope, TypeDeclaration typeDecl)
         throws IOException {
-        DFType type = new DFType(typeDecl.getName());
+        DFTypeRef type = new DFTypeRef(typeDecl.getName());
         typeScope = typeScope.getChildByName(typeDecl.getName());
         DFScope varScope = new DFScope(typeScope.getName());
-	varScope.addVar("#this", type);
-	varScope.addVar("#super", type); // XXX ignore superclass now...
+	varScope.addRef("#this", type);
+	varScope.addRef("#super", type); // XXX ignore superclass now...
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
@@ -1638,14 +1638,12 @@ public class Java2DF {
 	parser.setEnvironment(this.classPath, this.srcPath, null, true);
 	parser.setCompilerOptions(options);
 	CompilationUnit cu = (CompilationUnit)parser.createAST(null);
-        PackageDeclaration pkg = cu.getPackage();
-        DFScope typeScope = this.rootScope;
-        if (pkg != null) {
-            typeScope = typeScope.getChildByName(pkg.getName());
-        }
-        for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cu.types()) {
-            processTypeDeclaration(typeScope, typeDecl);
-        }
+	try {
+	    this.rootScope.build(cu);
+	} catch (UnsupportedSyntax e) {
+	    String astName = e.ast.getClass().getName();
+	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+	}
     }
 
     /**

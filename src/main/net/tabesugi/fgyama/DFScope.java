@@ -103,7 +103,7 @@ public class DFScope {
 	return scopes;
     }
 
-    public DFRef addVar(String id, DFType type) {
+    public DFRef addRef(String id, DFTypeRef type) {
 	DFRef ref = _refs.get(id);
 	if (ref == null) {
             ref = new DFRef(this, id, type);
@@ -112,8 +112,8 @@ public class DFScope {
 	return ref;
     }
 
-    public DFRef addVar(SimpleName name, DFType type) {
-        return this.addVar(name.getIdentifier(), type);
+    public DFRef addRef(SimpleName name, DFTypeRef type) {
+        return this.addRef(name.getIdentifier(), type);
     }
 
     private DFRef lookupRef(String id) {
@@ -123,7 +123,7 @@ public class DFScope {
 	} else if (_parent != null) {
 	    return _parent.lookupRef(id);
 	} else {
-	    return this.addVar(id, null);
+	    return this.addRef(id, null);
 	}
     }
 
@@ -152,7 +152,7 @@ public class DFScope {
     }
 
     public DFRef lookupArray() {
-	return _root.addVar("#array", null);
+	return _root.addRef("#array", null);
     }
 
     // dump: for debugging.
@@ -194,10 +194,10 @@ public class DFScope {
 	    VariableDeclarationStatement varStmt =
 		(VariableDeclarationStatement)ast;
 	    // XXX Ignore modifiers and dimensions.
-	    DFType varType = new DFType(varStmt.getType());
+	    DFTypeRef varType = new DFTypeRef(varStmt.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		this.addVar(frag.getName(), varType);
+		this.addRef(frag.getName(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
 		    this.build(frame, expr);
@@ -288,8 +288,8 @@ public class DFScope {
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers and dimensions.
-	    DFType varType = new DFType(decl.getType());
-	    childScope.addVar(decl.getName(), varType);
+	    DFTypeRef varType = new DFTypeRef(decl.getType());
+	    childScope.addRef(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
 		childScope.build(frame, expr);
@@ -324,8 +324,8 @@ public class DFScope {
 		DFScope childScope = this.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers and dimensions.
-		DFType varType = new DFType(decl.getType());
-		childScope.addVar(decl.getName(), varType);
+		DFTypeRef varType = new DFTypeRef(decl.getType());
+		childScope.addRef(decl.getName(), varType);
 		childScope.build(frame, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
@@ -443,10 +443,10 @@ public class DFScope {
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
 	    // XXX Ignore modifiers and dimensions.
-	    DFType varType = new DFType(decl.getType());
+	    DFTypeRef varType = new DFTypeRef(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
-		DFRef ref = this.addVar(frag.getName(), varType);
+		DFRef ref = this.addRef(frag.getName(), varType);
 		frame.addOutput(ref);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {

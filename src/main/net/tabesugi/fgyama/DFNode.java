@@ -15,14 +15,14 @@ public class DFNode implements Comparable<DFNode> {
     private DFGraph _graph;
     private int _id;
     private DFScope _scope;
-    private DFType _type;
+    private DFTypeRef _type;
     private DFRef _ref;
 
     private DFNode _input = null;
     private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
     private List<DFNode> _outputs = new ArrayList<DFNode>();
 
-    public DFNode(DFGraph graph, DFScope scope, DFType type, DFRef ref) {
+    public DFNode(DFGraph graph, DFScope scope, DFTypeRef type, DFRef ref) {
         _graph = graph;
 	_id = graph.addNode(this);
 	_scope = scope;
@@ -69,7 +69,7 @@ public class DFNode implements Comparable<DFNode> {
         return _scope;
     }
 
-    public DFType getType() {
+    public DFTypeRef getType() {
         return _type;
     }
 

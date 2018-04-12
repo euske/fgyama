@@ -14,9 +14,9 @@ public class DFRef implements Comparable<DFRef> {
 
     private DFScope _scope;
     private String _name;
-    private DFType _type;
+    private DFTypeRef _type;
 
-    public DFRef(DFScope scope, String name, DFType type) {
+    public DFRef(DFScope scope, String name, DFTypeRef type) {
 	_scope = scope;
 	_name = name;
 	_type = type;
@@ -27,7 +27,7 @@ public class DFRef implements Comparable<DFRef> {
 	if (_type == null) {
 	    return ("<DFRef("+this.getName()+")>");
 	} else {
-	    return ("<DFRef("+this.getName()+"): "+_type.getName()+">");
+	    return ("<DFRef("+this.getName()+"): "+_type.toString()+">");
 	}
     }
 
@@ -42,7 +42,7 @@ public class DFRef implements Comparable<DFRef> {
 		_scope.getName()+"/"+_name);
     }
 
-    public DFType getType() {
+    public DFTypeRef getType() {
 	return _type;
     }
 }
