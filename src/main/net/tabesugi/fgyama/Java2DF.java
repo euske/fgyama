@@ -1511,50 +1511,6 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    /**
-     * Performs dataflow analysis for a given method.
-     */
-    @SuppressWarnings("unchecked")
-    public DFGraph buildMethodGraph(
-	DFTypeScope typeScope, DFVarScope varScope, MethodDeclaration method)
-	throws UnsupportedSyntax {
-	SimpleName funcName = method.getName();
-	Block funcBlock = method.getBody();
-        Type rt = method.getReturnType2();
-        DFTypeRef returnType = (rt == null)? null : new DFTypeRef(rt);
-
-	// Setup an initial scope.
-	DFFrame frame = new DFFrame(DFFrame.METHOD);
-        varScope = varScope.getChildByName(funcName);
-	varScope.build(frame, funcBlock);
-	varScope.addRef("#return", returnType);
-	varScope.dump();
-	//frame.dump();
-
-	DFGraph graph = new DFGraph(varScope, funcName);
-	DFComponent cpt = new DFComponent(graph, varScope);
-	// XXX Ignore isContructor().
-	// XXX Ignore getReturnType2().
-	// XXX Ignore isVarargs().
-	int i = 0;
-	for (SingleVariableDeclaration decl :
-		 (List<SingleVariableDeclaration>) method.parameters()) {
-	    // XXX Ignore modifiers and dimensions.
-	    DFTypeRef paramType = new DFTypeRef(decl.getType());
-	    DFRef ref = varScope.addRef(decl.getName(), paramType);
-	    DFNode param = new ArgNode(graph, varScope, ref, decl, i++);
-	    DFNode assign = new SingleAssignNode(graph, varScope, ref, decl);
-	    assign.accept(param);
-	    cpt.setOutput(assign);
-	}
-	// Process the function body.
-	cpt = processStatement(
-	    graph, typeScope, varScope, frame, cpt, funcBlock);
-
-	cpt.endFrame(frame);
-	return graph;
-    }
-
     public Exporter exporter;
     public String[] classPath;
     public String[] srcPath;
@@ -1568,6 +1524,9 @@ public class Java2DF {
         this.rootScope = new DFTypeScope("");
     }
 
+    /**
+     * Performs dataflow analysis for a given method.
+     */
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
         DFTypeScope typeScope, DFVarScope varScope,
@@ -1576,13 +1535,42 @@ public class Java2DF {
 	// Ignore method prototypes.
 	if (method.getBody() == null) return null;
 	String funcName = method.getName().getIdentifier();
+	Block funcBlock = method.getBody();
+        Type rt = method.getReturnType2();
+        DFTypeRef returnType = (rt == null)? null : new DFTypeRef(rt);
         try {
-            DFGraph graph = buildMethodGraph(typeScope, varScope, method);
-            if (graph != null) {
-                Utils.logit("Success: "+funcName);
-                // Remove redundant nodes.
-                graph.cleanup();
+            // Setup an initial scope.
+            DFFrame frame = new DFFrame(DFFrame.METHOD);
+            varScope = varScope.getChildByName(funcName);
+            varScope.build(frame, funcBlock);
+            varScope.addRef("#return", returnType);
+            varScope.dump();
+            //frame.dump();
+
+            DFGraph graph = new DFGraph(varScope, funcName);
+            DFComponent cpt = new DFComponent(graph, varScope);
+            // XXX Ignore isContructor().
+            // XXX Ignore getReturnType2().
+            // XXX Ignore isVarargs().
+            int i = 0;
+            for (SingleVariableDeclaration decl :
+                     (List<SingleVariableDeclaration>) method.parameters()) {
+                // XXX Ignore modifiers and dimensions.
+                DFTypeRef paramType = new DFTypeRef(decl.getType());
+                DFRef ref = varScope.addRef(decl.getName(), paramType);
+                DFNode param = new ArgNode(graph, varScope, ref, decl, i++);
+                DFNode assign = new SingleAssignNode(graph, varScope, ref, decl);
+                assign.accept(param);
+                cpt.setOutput(assign);
             }
+            // Process the function body.
+            cpt = processStatement(
+                graph, typeScope, varScope, frame, cpt, funcBlock);
+            cpt.endFrame(frame);
+            // Remove redundant nodes.
+            graph.cleanup();
+
+            Utils.logit("Success: "+funcName);
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
