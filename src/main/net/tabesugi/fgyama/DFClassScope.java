@@ -26,7 +26,7 @@ public class DFClassScope extends DFVarScope {
     }
 
     public String getName() {
-	return _typeScope.getFullName()+"/"+super.getName();
+	return _typeScope.getName()+"/"+super.getName();
     }
 
     public DFVarScope addChild(String name) {

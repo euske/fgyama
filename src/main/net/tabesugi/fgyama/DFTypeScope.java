@@ -38,18 +38,14 @@ public class DFTypeScope {
     }
 
     public String getName() {
-        return _name;
-    }
-
-    public String getFullName() {
         if (_parent == null) {
             return _name;
         } else {
-            return _parent.getFullName()+"."+_name;
+            return _parent.getName()+"."+_name;
         }
     }
 
-    public DFClassScope lookupClass(String name) {
+    protected DFClassScope lookupClass(String name) {
         DFClassScope klass = _name2class.get(name);
         if (klass != null) {
             return klass;
@@ -101,7 +97,7 @@ public class DFTypeScope {
 	dump(System.out, "");
     }
     public void dump(PrintStream out, String indent) {
-	out.println(indent+getName()+" {");
+	out.println(indent+_name+" {");
 	String i2 = indent + "  ";
 	for (DFClassScope klass : _name2class.values()) {
 	    out.println(i2+"defined: "+klass);

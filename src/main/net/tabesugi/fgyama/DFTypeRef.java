@@ -43,11 +43,11 @@ public class DFTypeRef {
     public static DFTypeRef CHAR =
 	new DFTypeRef(PrimitiveType.CHAR);
     public static DFTypeRef NULL =
-	new DFTypeRef("NULL");
+	new DFTypeRef("@null");
     public static DFTypeRef NUMBER =
-	new DFTypeRef("number");
-    public static DFTypeRef STRING =
-	new DFTypeRef("String");
+	new DFTypeRef("@number");
     public static DFTypeRef TYPE =
-	new DFTypeRef("Type");
+	new DFTypeRef("@type");
+    public static DFTypeRef STRING =
+	new DFTypeRef(".String");
 }
