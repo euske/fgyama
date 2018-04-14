@@ -13,8 +13,12 @@ public class DFTypeRef {
 
     private String _name;
 
-    public DFTypeRef(String name) {
+    private DFTypeRef(String name) {
 	_name = name;
+    }
+
+    public DFTypeRef(PrimitiveType.Code code) {
+	_name = Utils.getTypeName(code);
     }
 
     public DFTypeRef(Type type) {
@@ -22,11 +26,7 @@ public class DFTypeRef {
     }
 
     public DFTypeRef(Name name) {
-	_name = "."+name.getFullyQualifiedName();
-    }
-
-    public DFTypeRef(PrimitiveType.Code code) {
-	_name = "@"+code.toString();
+	_name = Utils.getTypeName(name);
     }
 
     @Override

@@ -27,7 +27,7 @@ public class DFRef implements Comparable<DFRef> {
 	if (_type == null) {
 	    return ("<DFRef("+this.getName()+")>");
 	} else {
-	    return ("<DFRef("+this.getName()+"): "+_type.toString()+">");
+	    return ("<DFRef("+this.getName()+": "+_type.toString()+">");
 	}
     }
 

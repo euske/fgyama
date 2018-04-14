@@ -18,7 +18,7 @@ public class DFTypeScope {
 
     private List<DFTypeScope> _children = new ArrayList<DFTypeScope>();
     private Map<String, DFTypeScope> _name2child = new HashMap<String, DFTypeScope>();
-    private Map<String, DFClassType> _name2type = new HashMap<String, DFClassType>();
+    private Map<String, DFClassScope> _name2class = new HashMap<String, DFClassScope>();
 
     public DFTypeScope(String name) {
         _root = this;
@@ -26,7 +26,7 @@ public class DFTypeScope {
         _parent = null;
     }
 
-    public DFTypeScope(String name, DFTypeScope parent) {
+    public DFTypeScope(DFTypeScope parent, String name) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
@@ -49,31 +49,35 @@ public class DFTypeScope {
         }
     }
 
-    public DFClassType lookupClassType(String name) {
-        DFClassType klass = _name2type.get(name);
+    public DFClassScope lookupClass(String name) {
+        DFClassScope klass = _name2class.get(name);
         if (klass != null) {
             return klass;
         } else if (_parent != null) {
-            return _parent.lookupClassType(name);
+            return _parent.lookupClass(name);
         } else {
             return null;
         }
     }
 
-    public DFClassType addClassType(String name) {
-	DFClassType klass = new DFClassType(this, name);
-	_name2type.put(name, klass);
-	return klass;
+    public DFClassScope lookupClass(SimpleName name) {
+	return this.lookupClass(name.getIdentifier());
     }
 
-    public DFClassType addClassType(SimpleName name) {
-	return this.addClassType(name.getIdentifier());
+    public DFClassScope lookupClass(DFTypeRef type) {
+	return this.lookupClass(type.getName());
+    }
+
+    public DFClassScope addClass(SimpleName name) {
+	DFClassScope klass = new DFClassScope(this, name);
+	_name2class.put(name.getIdentifier(), klass);
+	return klass;
     }
 
     public DFTypeScope addChildScope(String name) {
         DFTypeScope scope = _name2child.get(name);
         if (scope == null) {
-            scope = new DFTypeScope(name, this);
+            scope = new DFTypeScope(this, name);
             _children.add(scope);
             _name2child.put(name, scope);
         }
@@ -99,7 +103,7 @@ public class DFTypeScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+getName()+" {");
 	String i2 = indent + "  ";
-	for (DFClassType klass : _name2type.values()) {
+	for (DFClassScope klass : _name2class.values()) {
 	    out.println(i2+"defined: "+klass);
 	}
 	for (DFTypeScope scope : _children) {
@@ -112,7 +116,7 @@ public class DFTypeScope {
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
 
-        DFClassType klass = this.addClassType(typeDecl.getName());
+        DFClassScope klass = this.addClass(typeDecl.getName());
         DFTypeScope child = this.addChildScope(typeDecl.getName());
 
         for (BodyDeclaration body :

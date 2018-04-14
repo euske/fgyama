@@ -18,9 +18,8 @@ public class DFVarScope {
     private DFVarScope _parent;
 
     private List<DFVarScope> _children = new ArrayList<DFVarScope>();
-    private Map<String, DFVarScope> _name2child = new HashMap<String, DFVarScope>();
     private Map<ASTNode, DFVarScope> _ast2child = new HashMap<ASTNode, DFVarScope>();
-    private Map<String, DFRef> _refs = new HashMap<String, DFRef>();
+    private Map<String, DFRef> _name2ref = new HashMap<String, DFRef>();
 
     public DFVarScope(String name) {
         _root = this;
@@ -28,7 +27,7 @@ public class DFVarScope {
         _parent = null;
     }
 
-    public DFVarScope(String name, DFVarScope parent) {
+    public DFVarScope(DFVarScope parent, String name) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
@@ -64,9 +63,8 @@ public class DFVarScope {
     public DFVarScope addChild(String basename, ASTNode ast) {
 	int id = _children.size();
 	String name = basename+id;
-	DFVarScope scope = new DFVarScope(name, this);
+	DFVarScope scope = new DFVarScope(this, name);
 	_children.add(scope);
-        _name2child.put(name, scope);
 	_ast2child.put(ast, scope);
 	return scope;
     }
@@ -75,39 +73,17 @@ public class DFVarScope {
 	return _ast2child.get(ast);
     }
 
-    public DFVarScope getChildByName(Name name) {
-        if (name.isQualifiedName()) {
-	    QualifiedName qname = (QualifiedName)name;
-	    DFVarScope scope = (_parent != null)? _parent : this;
-	    scope = scope.getChildByName(qname.getQualifier());
-            return scope.getChildByName(qname.getName().getIdentifier());
-        } else {
-            SimpleName sname = (SimpleName)name;
-            return this.getChildByName(sname.getIdentifier());
-        }
-    }
-
-    public DFVarScope getChildByName(String name) {
-        DFVarScope scope = _name2child.get(name);
-        if (scope == null) {
-            scope = new DFVarScope(name, this);
-            _children.add(scope);
-            _name2child.put(name, scope);
-        }
-        return scope;
-    }
-
     public DFVarScope[] getChildren() {
 	DFVarScope[] scopes = new DFVarScope[_children.size()];
 	_children.toArray(scopes);
 	return scopes;
     }
 
-    public DFRef addRef(String id, DFTypeRef type) {
-	DFRef ref = _refs.get(id);
+    protected DFRef addRef(String id, DFTypeRef type) {
+	DFRef ref = _name2ref.get(id);
 	if (ref == null) {
             ref = new DFRef(this, id, type);
-            _refs.put(id, ref);
+            _name2ref.put(id, ref);
         }
 	return ref;
     }
@@ -116,8 +92,8 @@ public class DFVarScope {
         return this.addRef(name.getIdentifier(), type);
     }
 
-    private DFRef lookupRef(String id) {
-	DFRef ref = _refs.get(id);
+    protected DFRef lookupRef(String id) {
+	DFRef ref = _name2ref.get(id);
 	if (ref != null) {
 	    return ref;
 	} else if (_parent != null) {
@@ -127,24 +103,12 @@ public class DFVarScope {
 	}
     }
 
-    private DFRef lookupRef(IBinding binding) {
-        return this.lookupRef(binding.getKey());
-    }
-
     public DFRef lookupVar(SimpleName name) {
         return this.lookupRef(name.getIdentifier());
     }
 
-    public DFRef lookupField(SimpleName name) {
-        return this.lookupRef("."+name.getIdentifier());
-    }
-
-    public DFRef lookupThis() {
-	return this.lookupRef("#this");
-    }
-
-    public DFRef lookupSuper() {
-	return this.lookupRef("#super");
+    public DFRef addReturn(DFTypeRef returnType) {
+	return this.addRef("#return", returnType);
     }
 
     public DFRef lookupReturn() {
@@ -155,6 +119,22 @@ public class DFVarScope {
 	return _root.addRef("#array", null);
     }
 
+    public DFRef lookupThis() {
+	return _parent.lookupThis();
+    }
+
+    public DFRef lookupField(SimpleName name) {
+        return _parent.lookupField(name);
+    }
+
+    public DFMethod lookupMethod(String id) {
+        return _parent.lookupMethod(id);
+    }
+
+    public DFMethod lookupMethod(SimpleName name) {
+        return this.lookupMethod(name.getIdentifier());
+    }
+
     // dump: for debugging.
     public void dump() {
 	dump(System.out, "");
@@ -162,7 +142,7 @@ public class DFVarScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+getName()+" {");
 	String i2 = indent + "  ";
-	for (DFRef ref : _refs.values()) {
+	for (DFRef ref : _name2ref.values()) {
 	    out.println(i2+"defined: "+ref);
 	}
 	for (DFVarScope scope : _children) {

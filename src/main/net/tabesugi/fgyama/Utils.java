@@ -107,13 +107,19 @@ public class Utils {
 	}
     }
 
+    public static String getTypeName(PrimitiveType.Code code) {
+        return "@"+code.toString();
+    }
+    public static String getTypeName(Name name) {
+        return "."+name.getFullyQualifiedName();
+    }
     public static String getTypeName(Type type) {
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
-	    return "@"+ptype.getPrimitiveTypeCode().toString();
+            return getTypeName(ptype.getPrimitiveTypeCode());
 	} else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-	    return "."+stype.getName().getFullyQualifiedName();
+            return getTypeName(stype.getName());
 	} else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
 	    String name = getTypeName(atype.getElementType());

@@ -518,20 +518,20 @@ abstract class CallNode extends ProgNode {
 // MethodCallNode
 class MethodCallNode extends CallNode {
 
-    public SimpleName name;
+    public DFMethod method;
 
-    public MethodCallNode(DFGraph graph, DFVarScope scope, DFTypeRef type,
-			  ASTNode ast, DFNode obj, SimpleName name) {
-	super(graph, scope, type, null, ast);
+    public MethodCallNode(DFGraph graph, DFVarScope scope, DFMethod method,
+			  ASTNode ast, DFNode obj) {
+	super(graph, scope, method.getReturnType(), null, ast);
 	if (obj != null) {
 	    this.accept(obj, "obj");
 	}
-	this.name = name;
+	this.method = method;
     }
 
     @Override
     public String getData() {
-        return this.name.getIdentifier();
+        return this.method.getName();
     }
 }
 
@@ -984,16 +984,17 @@ public class Java2DF {
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
-	    DFRef ref = varScope.lookupThis();
-	    DFNode obj = cpt.getValue(ref);
-	    if (expr1 != null) {
+	    DFNode obj;
+	    if (expr1 == null) {
+                obj = cpt.getValue(varScope.lookupThis());
+            } else {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-	    SimpleName methodName = invoke.getName();
+            DFClassScope klass = typeScope.lookupClass(obj.getType());
+            DFMethod method = klass.lookupMethod(invoke.getName());
 	    MethodCallNode call = new MethodCallNode(
-                graph, varScope, null /*XXX*/,
-                invoke, obj, methodName);
+                graph, varScope, method, invoke, obj);
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
@@ -1005,17 +1006,22 @@ public class Java2DF {
             }
 
 	} else if (expr instanceof SuperMethodInvocation) {
-	    SuperMethodInvocation si = (SuperMethodInvocation)expr;
-	    SimpleName methodName = si.getName();
-	    DFNode obj = cpt.getValue(varScope.lookupSuper());
+	    SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
+            DFNode obj = cpt.getValue(varScope.lookupThis());
+            DFClassScope klass = typeScope.lookupClass(obj.getType());
+            DFClassScope baseKlass = klass.getBase();
+            DFMethod method = baseKlass.lookupMethod(sinvoke.getName());
 	    MethodCallNode call = new MethodCallNode(
-		graph, varScope, null /*XXX*/,
-                si, obj, methodName);
-	    for (Expression arg : (List<Expression>) si.arguments()) {
+		graph, varScope, method, sinvoke, obj);
+	    for (Expression arg : (List<Expression>) sinvoke.arguments()) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
+            if (call.exception != null) {
+		DFFrame dstFrame = frame.find(DFFrame.TRY);
+		cpt.addExit(new DFExit(call.exception, dstFrame));
+            }
 
 	} else if (expr instanceof ArrayCreation) {
 	    ArrayCreation ac = (ArrayCreation)expr;
@@ -1065,8 +1071,9 @@ public class Java2DF {
 	} else if (expr instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
-	    DFNode obj = cpt.getValue(varScope.lookupSuper());
-	    DFRef ref = varScope.lookupField(fieldName);
+	    DFNode obj = cpt.getValue(varScope.lookupThis());
+            DFClassScope klass = typeScope.lookupClass(obj.getType());
+	    DFRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varScope, ref, sfa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1529,7 +1536,7 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
-        DFTypeScope typeScope, DFVarScope varScope,
+        DFTypeScope typeScope, DFClassScope klass,
         MethodDeclaration method)
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
@@ -1541,9 +1548,9 @@ public class Java2DF {
         try {
             // Setup an initial scope.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
-            varScope = varScope.getChildByName(funcName);
+            DFVarScope varScope = klass.addChild(funcName);
             varScope.build(frame, funcBlock);
-            varScope.addRef("#return", returnType);
+            varScope.addReturn(returnType);
             varScope.dump();
             //frame.dump();
 
@@ -1581,7 +1588,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
-        DFTypeScope typeScope, DFVarScope varScope,
+        DFTypeScope typeScope, DFClassScope klass,
         FieldDeclaration method) {
 	// XXX
 	// XXX static
@@ -1592,10 +1599,7 @@ public class Java2DF {
         DFTypeScope typeScope, TypeDeclaration typeDecl)
         throws IOException {
         DFTypeRef type = new DFTypeRef(typeDecl.getName());
-        typeScope = typeScope.addChildScope(typeDecl.getName());
-        DFVarScope varScope = new DFVarScope(typeScope.getName());
-	varScope.addRef("#this", type);
-	varScope.addRef("#super", type); // XXX ignore superclass now...
+        DFClassScope klass = typeScope.lookupClass(typeDecl.getName());
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
 	    try {
@@ -1604,10 +1608,10 @@ public class Java2DF {
 			typeScope, (TypeDeclaration)body);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
-			typeScope, varScope, (FieldDeclaration)body);
+			typeScope, klass, (FieldDeclaration)body);
 		} else if (body instanceof MethodDeclaration) {
                     DFGraph graph = processMethodDeclaration(
-                        typeScope, varScope, (MethodDeclaration)body);
+                        typeScope, klass, (MethodDeclaration)body);
                     if (this.exporter != null && graph != null) {
                         this.exporter.writeGraph(graph);
                     }

@@ -11,11 +11,11 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFMethod implements Comparable<DFMethod> {
 
-    private DFClassType _klass;
+    private DFClassScope _klass;
     private String _name;
     private DFTypeRef _returnType;
 
-    public DFMethod(DFClassType klass, String name, DFTypeRef returnType) {
+    public DFMethod(DFClassScope klass, String name, DFTypeRef returnType) {
 	_klass = klass;
 	_name = name;
 	_returnType = returnType;
@@ -23,7 +23,11 @@ public class DFMethod implements Comparable<DFMethod> {
 
     @Override
     public String toString() {
-        return ("<DFMethod: "+_name+">");
+	if (_returnType == null) {
+	    return ("<DFMethod("+this.getName()+" -> ?)>");
+	} else {
+	    return ("<DFMethod("+this.getName()+" -> "+_returnType.toString()+">");
+	}
     }
 
     @Override
