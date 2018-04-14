@@ -19,7 +19,7 @@ public class DFVarScope {
 
     private List<DFVarScope> _children = new ArrayList<DFVarScope>();
     private Map<ASTNode, DFVarScope> _ast2child = new HashMap<ASTNode, DFVarScope>();
-    private Map<String, DFRef> _name2ref = new HashMap<String, DFRef>();
+    private Map<String, DFVarRef> _name2ref = new HashMap<String, DFVarRef>();
 
     public DFVarScope(String name) {
         _root = this;
@@ -79,21 +79,21 @@ public class DFVarScope {
 	return scopes;
     }
 
-    protected DFRef addRef(String id, DFTypeRef type) {
-	DFRef ref = _name2ref.get(id);
+    protected DFVarRef addRef(String id, DFTypeRef type) {
+	DFVarRef ref = _name2ref.get(id);
 	if (ref == null) {
-            ref = new DFRef(this, id, type);
+            ref = new DFVarRef(this, id, type);
             _name2ref.put(id, ref);
         }
 	return ref;
     }
 
-    public DFRef addRef(SimpleName name, DFTypeRef type) {
+    public DFVarRef addRef(SimpleName name, DFTypeRef type) {
         return this.addRef(name.getIdentifier(), type);
     }
 
-    protected DFRef lookupRef(String id) {
-	DFRef ref = _name2ref.get(id);
+    protected DFVarRef lookupRef(String id) {
+	DFVarRef ref = _name2ref.get(id);
 	if (ref != null) {
 	    return ref;
 	} else if (_parent != null) {
@@ -103,27 +103,27 @@ public class DFVarScope {
 	}
     }
 
-    public DFRef lookupVar(SimpleName name) {
+    public DFVarRef lookupVar(SimpleName name) {
         return this.lookupRef(name.getIdentifier());
     }
 
-    public DFRef addReturn(DFTypeRef returnType) {
+    public DFVarRef addReturn(DFTypeRef returnType) {
 	return this.addRef("#return", returnType);
     }
 
-    public DFRef lookupReturn() {
+    public DFVarRef lookupReturn() {
 	return this.lookupRef("#return");
     }
 
-    public DFRef lookupArray() {
+    public DFVarRef lookupArray() {
 	return _root.addRef("#array", null);
     }
 
-    public DFRef lookupThis() {
+    public DFVarRef lookupThis() {
 	return _parent.lookupThis();
     }
 
-    public DFRef lookupField(SimpleName name) {
+    public DFVarRef lookupField(SimpleName name) {
         return _parent.lookupField(name);
     }
 
@@ -142,7 +142,7 @@ public class DFVarScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+getName()+" {");
 	String i2 = indent + "  ";
-	for (DFRef ref : _name2ref.values()) {
+	for (DFVarRef ref : _name2ref.values()) {
 	    out.println(i2+"defined: "+ref);
 	}
 	for (DFVarScope scope : _children) {
@@ -353,18 +353,18 @@ public class DFVarScope {
 	} else if (ast instanceof Name) {
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		DFRef ref = this.lookupVar((SimpleName)name);
+		DFVarRef ref = this.lookupVar((SimpleName)name);
 		frame.addInput(ref);
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		DFRef ref = this.lookupField(fieldName);
+		DFVarRef ref = this.lookupField(fieldName);
 		frame.addInput(ref);
 	    }
 
 	} else if (ast instanceof ThisExpression) {
-	    DFRef ref = this.lookupThis();
+	    DFVarRef ref = this.lookupThis();
 	    frame.addInput(ref);
 
 	} else if (ast instanceof BooleanLiteral) {
@@ -426,7 +426,7 @@ public class DFVarScope {
 	    DFTypeRef varType = new DFTypeRef(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
-		DFRef ref = this.addRef(frag.getName(), varType);
+		DFVarRef ref = this.addRef(frag.getName(), varType);
 		frame.addOutput(ref);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
@@ -474,20 +474,20 @@ public class DFVarScope {
 	    ArrayAccess aa = (ArrayAccess)ast;
 	    this.build(frame, aa.getArray());
 	    this.build(frame, aa.getIndex());
-	    DFRef ref = this.lookupArray();
+	    DFVarRef ref = this.lookupArray();
 	    frame.addInput(ref);
 
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    this.build(frame, fa.getExpression());
-	    DFRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName);
 	    frame.addInput(ref);
 
 	} else if (ast instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
 	    SimpleName fieldName = sfa.getName();
-	    DFRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName);
 	    frame.addInput(ref);
 
 	} else if (ast instanceof CastExpression) {
@@ -539,14 +539,14 @@ public class DFVarScope {
 	if (ast instanceof Name) {
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		DFRef ref = this.lookupVar((SimpleName)name);
+		DFVarRef ref = this.lookupVar((SimpleName)name);
 		frame.addOutput(ref);
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		this.build(frame, qn.getQualifier());
-		DFRef ref = this.lookupField(fieldName);
+		DFVarRef ref = this.lookupField(fieldName);
 		frame.addOutput(ref);
 	    }
 
@@ -554,14 +554,14 @@ public class DFVarScope {
 	    ArrayAccess aa = (ArrayAccess)ast;
 	    this.build(frame, aa.getArray());
 	    this.build(frame, aa.getIndex());
-	    DFRef ref = this.lookupArray();
+	    DFVarRef ref = this.lookupArray();
 	    frame.addOutput(ref);
 
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    this.build(frame, fa.getExpression());
-	    DFRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName);
 	    frame.addOutput(ref);
 
 	} else {

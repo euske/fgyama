@@ -7,16 +7,16 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFRef
+//  DFVarRef
 //  Place to store a value.
 //
-public class DFRef implements Comparable<DFRef> {
+public class DFVarRef implements Comparable<DFVarRef> {
 
     private DFVarScope _scope;
     private String _name;
     private DFTypeRef _type;
 
-    public DFRef(DFVarScope scope, String name, DFTypeRef type) {
+    public DFVarRef(DFVarScope scope, String name, DFTypeRef type) {
 	_scope = scope;
 	_name = name;
 	_type = type;
@@ -25,14 +25,14 @@ public class DFRef implements Comparable<DFRef> {
     @Override
     public String toString() {
 	if (_type == null) {
-	    return ("<DFRef("+this.getName()+")>");
+	    return ("<DFVarRef("+this.getName()+")>");
 	} else {
-	    return ("<DFRef("+this.getName()+": "+_type.toString()+">");
+	    return ("<DFVarRef("+this.getName()+": "+_type.toString()+">");
 	}
     }
 
     @Override
-    public int compareTo(DFRef ref) {
+    public int compareTo(DFVarRef ref) {
 	return _name.compareTo(ref._name);
     }
 

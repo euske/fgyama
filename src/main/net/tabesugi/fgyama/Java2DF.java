@@ -15,7 +15,7 @@ abstract class ProgNode extends DFNode {
 
     public ASTNode ast;
 
-    public ProgNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFRef ref,
+    public ProgNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref,
                     ASTNode ast) {
 	super(graph, scope, type, ref);
 	this.ast = ast;
@@ -38,7 +38,7 @@ abstract class ProgNode extends DFNode {
 // SingleAssignNode:
 class SingleAssignNode extends ProgNode {
 
-    public SingleAssignNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public SingleAssignNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                             ASTNode ast) {
 	super(graph, scope, null, ref, ast);
     }
@@ -52,7 +52,7 @@ class SingleAssignNode extends ProgNode {
 // ArrayAssignNode:
 class ArrayAssignNode extends ProgNode {
 
-    public ArrayAssignNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public ArrayAssignNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                            ASTNode ast, DFNode array, DFNode index) {
 	super(graph, scope, null, ref, ast);
 	this.accept(array, "array");
@@ -68,7 +68,7 @@ class ArrayAssignNode extends ProgNode {
 // FieldAssignNode:
 class FieldAssignNode extends ProgNode {
 
-    public FieldAssignNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public FieldAssignNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
 			   ASTNode ast, DFNode obj) {
 	super(graph, scope, null, ref, ast);
 	this.accept(obj, "obj");
@@ -83,7 +83,7 @@ class FieldAssignNode extends ProgNode {
 // VarRefNode: represnets a variable reference.
 class VarRefNode extends ProgNode {
 
-    public VarRefNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public VarRefNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                       ASTNode ast) {
 	super(graph, scope, ref.getType(), ref, ast);
     }
@@ -97,7 +97,7 @@ class VarRefNode extends ProgNode {
 // ArrayAccessNode
 class ArrayAccessNode extends ProgNode {
 
-    public ArrayAccessNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public ArrayAccessNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
 			   ASTNode ast, DFNode array, DFNode index) {
 	super(graph, scope, null, ref, ast);
 	this.accept(array, "array");
@@ -113,7 +113,7 @@ class ArrayAccessNode extends ProgNode {
 // FieldAccessNode
 class FieldAccessNode extends ProgNode {
 
-    public FieldAccessNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public FieldAccessNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                            ASTNode ast, DFNode obj) {
 	super(graph, scope, null, ref, ast);
 	this.accept(obj, "obj");
@@ -130,7 +130,7 @@ class PrefixNode extends ProgNode {
 
     public PrefixExpression.Operator op;
 
-    public PrefixNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public PrefixNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                       ASTNode ast, PrefixExpression.Operator op) {
 	super(graph, scope, null, ref, ast);
 	this.op = op;
@@ -152,7 +152,7 @@ class PostfixNode extends ProgNode {
 
     public PostfixExpression.Operator op;
 
-    public PostfixNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public PostfixNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                        ASTNode ast, PostfixExpression.Operator op) {
 	super(graph, scope, null, ref, ast);
 	this.op = op;
@@ -271,7 +271,7 @@ class AssignOpNode extends ProgNode {
 
     public Assignment.Operator op;
 
-    public AssignOpNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public AssignOpNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
 			ASTNode ast, Assignment.Operator op,
 			DFNode lvalue, DFNode rvalue) {
 	super(graph, scope, rvalue.getType(), ref, ast);
@@ -296,7 +296,7 @@ class ArgNode extends ProgNode {
 
     public int index;
 
-    public ArgNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public ArgNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                    ASTNode ast, int index) {
 	super(graph, scope, ref.getType(), ref, ast);
 	this.index = index;
@@ -368,7 +368,7 @@ class JoinNode extends ProgNode {
     public boolean recvTrue = false;
     public boolean recvFalse = false;
 
-    public JoinNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public JoinNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                     ASTNode ast, DFNode cond) {
 	super(graph, scope, null, ref, ast);
 	this.accept(cond, "cond");
@@ -419,7 +419,7 @@ class JoinNode extends ProgNode {
 // LoopBeginNode
 class LoopBeginNode extends ProgNode {
 
-    public LoopBeginNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public LoopBeginNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                          ASTNode ast, DFNode enter) {
 	super(graph, scope, null, ref, ast);
 	this.accept(enter, "enter");
@@ -442,7 +442,7 @@ class LoopBeginNode extends ProgNode {
 // LoopEndNode
 class LoopEndNode extends ProgNode {
 
-    public LoopEndNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public LoopEndNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                        ASTNode ast, DFNode cond) {
 	super(graph, scope, null, ref, ast);
 	this.accept(cond, "cond");
@@ -461,7 +461,7 @@ class LoopEndNode extends ProgNode {
 // LoopRepeatNode
 class LoopRepeatNode extends ProgNode {
 
-    public LoopRepeatNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public LoopRepeatNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                           ASTNode ast) {
 	super(graph, scope, null, ref, ast);
     }
@@ -479,7 +479,7 @@ class LoopRepeatNode extends ProgNode {
 // IterNode
 class IterNode extends ProgNode {
 
-    public IterNode(DFGraph graph, DFVarScope scope, DFRef ref,
+    public IterNode(DFGraph graph, DFVarScope scope, DFVarRef ref,
                     ASTNode ast) {
 	super(graph, scope, null, ref, ast);
     }
@@ -496,7 +496,7 @@ abstract class CallNode extends ProgNode {
     public List<DFNode> args;
     public DFNode exception;
 
-    public CallNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFRef ref,
+    public CallNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref,
                     ASTNode ast) {
 	super(graph, scope, type, ref, ast);
 	this.args = new ArrayList<DFNode>();
@@ -602,9 +602,9 @@ public class Java2DF {
 	 DFNode condValue, DFComponent trueCpt, DFComponent falseCpt) {
 
 	// outRefs: all the references from both component.
-	List<DFRef> outRefs = new ArrayList<DFRef>();
+	List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
 	if (trueCpt != null) {
-	    for (DFRef ref : trueCpt.getInputRefs()) {
+	    for (DFVarRef ref : trueCpt.getInputRefs()) {
 		DFNode src = trueCpt.getInput(ref);
 		assert src != null;
 		src.accept(cpt.getValue(ref));
@@ -612,7 +612,7 @@ public class Java2DF {
 	    outRefs.addAll(Arrays.asList(trueCpt.getOutputRefs()));
 	}
 	if (falseCpt != null) {
-	    for (DFRef ref : falseCpt.getInputRefs()) {
+	    for (DFVarRef ref : falseCpt.getInputRefs()) {
 		DFNode src = falseCpt.getInput(ref);
 		assert src != null;
 		src.accept(cpt.getValue(ref));
@@ -621,8 +621,8 @@ public class Java2DF {
 	}
 
 	// Attach a JoinNode to each variable.
-	Set<DFRef> used = new HashSet<DFRef>();
-	for (DFRef ref : outRefs) {
+	Set<DFVarRef> used = new HashSet<DFVarRef>();
+	for (DFVarRef ref : outRefs) {
 	    if (used.contains(ref)) continue;
 	    used.add(ref);
 	    JoinNode join = new JoinNode(graph, varScope, ref, ast, condValue);
@@ -675,11 +675,11 @@ public class Java2DF {
 	throws UnsupportedSyntax {
 
 	// Add four nodes for each loop variable.
-	Map<DFRef, LoopBeginNode> begins = new HashMap<DFRef, LoopBeginNode>();
-	Map<DFRef, LoopRepeatNode> repeats = new HashMap<DFRef, LoopRepeatNode>();
-	Map<DFRef, DFNode> ends = new HashMap<DFRef, DFNode>();
-	DFRef[] loopRefs = loopFrame.getInsAndOuts();
-	for (DFRef ref : loopRefs) {
+	Map<DFVarRef, LoopBeginNode> begins = new HashMap<DFVarRef, LoopBeginNode>();
+	Map<DFVarRef, LoopRepeatNode> repeats = new HashMap<DFVarRef, LoopRepeatNode>();
+	Map<DFVarRef, DFNode> ends = new HashMap<DFVarRef, DFNode>();
+	DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
+	for (DFVarRef ref : loopRefs) {
 	    DFNode src = cpt.getValue(ref);
 	    LoopBeginNode begin = new LoopBeginNode(graph, varScope, ref, ast, src);
 	    LoopRepeatNode repeat = new LoopRepeatNode(graph, varScope, ref, ast);
@@ -693,7 +693,7 @@ public class Java2DF {
 
 	if (preTest) {  // Repeat -> [S] -> Begin -> End
 	    // Connect the repeats to the loop inputs.
-	    for (DFRef ref : loopCpt.getInputRefs()) {
+	    for (DFVarRef ref : loopCpt.getInputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
 		DFNode src = repeats.get(ref);
 		if (src == null) {
@@ -702,7 +702,7 @@ public class Java2DF {
 		input.accept(src);
 	    }
 	    // Connect the loop outputs to the begins.
-	    for (DFRef ref : loopCpt.getOutputRefs()) {
+	    for (DFVarRef ref : loopCpt.getOutputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
 		LoopBeginNode begin = begins.get(ref);
 		if (begin != null) {
@@ -713,7 +713,7 @@ public class Java2DF {
 		}
 	    }
 	    // Connect the beings and ends.
-	    for (DFRef ref : loopRefs) {
+	    for (DFVarRef ref : loopRefs) {
 		LoopBeginNode begin = begins.get(ref);
 		DFNode end = ends.get(ref);
 		end.accept(begin);
@@ -721,7 +721,7 @@ public class Java2DF {
 
 	} else {  // Begin -> [S] -> End -> Repeat
 	    // Connect the begins to the loop inputs.
-	    for (DFRef ref : loopCpt.getInputRefs()) {
+	    for (DFVarRef ref : loopCpt.getInputRefs()) {
 		DFNode input = loopCpt.getInput(ref);
 		DFNode src = begins.get(ref);
 		if (src == null) {
@@ -730,7 +730,7 @@ public class Java2DF {
 		input.accept(src);
 	    }
 	    // Connect the loop outputs to the ends.
-	    for (DFRef ref : loopCpt.getOutputRefs()) {
+	    for (DFVarRef ref : loopCpt.getOutputRefs()) {
 		DFNode output = loopCpt.getOutput(ref);
 		DFNode dst = ends.get(ref);
 		if (dst != null) {
@@ -741,7 +741,7 @@ public class Java2DF {
 		}
 	    }
 	    // Connect the repeats and begins.
-	    for (DFRef ref : loopRefs) {
+	    for (DFVarRef ref : loopRefs) {
 		LoopRepeatNode repeat = repeats.get(ref);
 		LoopBeginNode begin = begins.get(ref);
 		begin.setRepeat(repeat);
@@ -766,7 +766,7 @@ public class Java2DF {
 	}
 
 	// Closing the loop.
-	for (DFRef ref : loopRefs) {
+	for (DFVarRef ref : loopRefs) {
 	    DFNode end = ends.get(ref);
 	    LoopRepeatNode repeat = repeats.get(ref);
 	    cpt.setOutput(end);
@@ -785,7 +785,7 @@ public class Java2DF {
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
-	    DFRef ref = varScope.lookupVar(frag.getName());
+	    DFVarRef ref = varScope.lookupVar(frag.getName());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, init);
@@ -809,7 +809,7 @@ public class Java2DF {
 	if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFRef ref = varScope.lookupVar((SimpleName)name);
+		DFVarRef ref = varScope.lookupVar((SimpleName)name);
 		cpt.setLValue(new SingleAssignNode(graph, varScope, ref, expr));
 	    } else {
 		// QualifiedName == FieldAccess
@@ -817,7 +817,7 @@ public class Java2DF {
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFRef ref = varScope.lookupField(fieldName);
+		DFVarRef ref = varScope.lookupField(fieldName);
 		cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
 	    }
 
@@ -827,7 +827,7 @@ public class Java2DF {
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
-	    DFRef ref = varScope.lookupArray();
+	    DFVarRef ref = varScope.lookupArray();
 	    cpt.setLValue(new ArrayAssignNode(graph, varScope, ref, expr, array, index));
 
 	} else if (expr instanceof FieldAccess) {
@@ -835,7 +835,7 @@ public class Java2DF {
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFRef ref = varScope.lookupField(fieldName);
+	    DFVarRef ref = varScope.lookupField(fieldName);
 	    cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
 
 	} else {
@@ -859,7 +859,7 @@ public class Java2DF {
 	} else if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFRef ref = varScope.lookupVar((SimpleName)name);
+		DFVarRef ref = varScope.lookupVar((SimpleName)name);
                 DFNode node = new VarRefNode(graph, varScope, ref, expr);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
@@ -869,14 +869,14 @@ public class Java2DF {
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(graph, typeScope, varScope, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFRef ref = varScope.lookupField(fieldName);
+		DFVarRef ref = varScope.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varScope, ref, qn, obj);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
 	    }
 
 	} else if (expr instanceof ThisExpression) {
-	    DFRef ref = varScope.lookupThis();
+	    DFVarRef ref = varScope.lookupThis();
             DFNode node = new VarRefNode(graph, varScope, ref, expr);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1048,7 +1048,7 @@ public class Java2DF {
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
-	    DFRef ref = varScope.lookupArray();
+	    DFVarRef ref = varScope.lookupArray();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, aa.getIndex());
@@ -1063,7 +1063,7 @@ public class Java2DF {
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFRef ref = varScope.lookupField(fieldName);
+	    DFVarRef ref = varScope.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varScope, ref, fa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1073,7 +1073,7 @@ public class Java2DF {
 	    SimpleName fieldName = sfa.getName();
 	    DFNode obj = cpt.getValue(varScope.lookupThis());
             DFClassScope klass = typeScope.lookupClass(obj.getType());
-	    DFRef ref = klass.lookupField(fieldName);
+	    DFVarRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varScope, ref, sfa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1198,12 +1198,12 @@ public class Java2DF {
          DFFrame frame, DFComponent cpt, ASTNode apt,
          DFNode caseNode, DFComponent caseCpt) {
 
-	for (DFRef ref : caseCpt.getInputRefs()) {
+	for (DFVarRef ref : caseCpt.getInputRefs()) {
 	    DFNode src = caseCpt.getInput(ref);
 	    src.accept(cpt.getValue(ref));
 	}
 
-	for (DFRef ref : caseCpt.getOutputRefs()) {
+	for (DFVarRef ref : caseCpt.getOutputRefs()) {
 	    DFNode dst = caseCpt.getOutput(ref);
 	    JoinNode join = new JoinNode(graph, varScope, ref, apt, caseNode);
 	    join.recv(true, dst);
@@ -1340,7 +1340,7 @@ public class Java2DF {
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(graph, typeScope, loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
-	DFRef ref = loopScope.lookupVar(decl.getName());
+	DFVarRef ref = loopScope.lookupVar(decl.getName());
 	DFNode iterValue = new IterNode(graph, loopScope, ref, expr);
         iterValue.accept(loopCpt.getRValue());
 	SingleAssignNode assign = new SingleAssignNode(graph, loopScope, ref, expr);
@@ -1417,7 +1417,7 @@ public class Java2DF {
                 cpt.addExit(new DFExit(rtrn, dstFrame));
             }
 	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
-		for (DFRef ref : frm.getOutputs()) {
+		for (DFVarRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
 		if (frm == dstFrame) break;
@@ -1429,7 +1429,7 @@ public class Java2DF {
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
 	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
-		for (DFRef ref : frm.getOutputs()) {
+		for (DFVarRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame));
 		}
 		if (frm == dstFrame) break;
@@ -1441,7 +1441,7 @@ public class Java2DF {
 	    String dstLabel = (labelName == null)? null : labelName.getIdentifier();
 	    DFFrame dstFrame = frame.find(dstLabel);
 	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
-		for (DFRef ref : frm.getOutputs()) {
+		for (DFVarRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}
 		if (frm == dstFrame) break;
@@ -1483,7 +1483,7 @@ public class Java2DF {
 	    DFFrame dstFrame = frame.find(DFFrame.TRY);
 	    cpt.addExit(new DFExit(exception, dstFrame));
 	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
-		for (DFRef ref : frm.getOutputs()) {
+		for (DFVarRef ref : frm.getOutputs()) {
 		    cpt.addExit(new DFExit(cpt.getValue(ref), dstFrame, true));
 		}
 		if (frm == dstFrame) break;
@@ -1564,7 +1564,7 @@ public class Java2DF {
                      (List<SingleVariableDeclaration>) method.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFTypeRef paramType = new DFTypeRef(decl.getType());
-                DFRef ref = varScope.addRef(decl.getName(), paramType);
+                DFVarRef ref = varScope.addRef(decl.getName(), paramType);
                 DFNode param = new ArgNode(graph, varScope, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varScope, ref, decl);
                 assign.accept(param);

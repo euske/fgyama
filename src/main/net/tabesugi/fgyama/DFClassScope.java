@@ -33,15 +33,15 @@ public class DFClassScope extends DFVarScope {
         return new DFVarScope(this, name);
     }
 
-    public DFRef lookupThis() {
+    public DFVarRef lookupThis() {
         return this.lookupRef("#this");
     }
 
-    public DFRef addField(SimpleName name, DFTypeRef type) {
+    public DFVarRef addField(SimpleName name, DFTypeRef type) {
         return this.addRef("."+name.getIdentifier(), type);
     }
 
-    public DFRef lookupField(SimpleName name) {
+    public DFVarRef lookupField(SimpleName name) {
         return this.lookupRef("."+name.getIdentifier());
     }
 

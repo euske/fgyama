@@ -16,8 +16,8 @@ public class DFComponent {
 
     private DFNode _lval = null;
     private DFNode _rval = null;
-    private Map<DFRef, DFNode> _inputs = new HashMap<DFRef, DFNode>();
-    private Map<DFRef, DFNode> _outputs = new HashMap<DFRef, DFNode>();
+    private Map<DFVarRef, DFNode> _inputs = new HashMap<DFVarRef, DFNode>();
+    private Map<DFVarRef, DFNode> _outputs = new HashMap<DFVarRef, DFNode>();
     private List<DFExit> _exits = new ArrayList<DFExit>();
 
     public DFComponent(DFGraph graph, DFVarScope scope) {
@@ -26,7 +26,7 @@ public class DFComponent {
     }
 
     // getValue(ref): get an output value of the component if defined.
-    public DFNode getValue(DFRef ref) {
+    public DFNode getValue(DFVarRef ref) {
 	DFNode node = _outputs.get(ref);
 	if (node == null) {
 	    node = _inputs.get(ref);
@@ -54,11 +54,11 @@ public class DFComponent {
 	_rval = node;
     }
 
-    public DFNode getInput(DFRef ref) {
+    public DFNode getInput(DFVarRef ref) {
 	return _inputs.get(ref);
     }
 
-    public DFNode getOutput(DFRef ref) {
+    public DFNode getOutput(DFVarRef ref) {
 	return _outputs.get(ref);
     }
 
@@ -66,15 +66,15 @@ public class DFComponent {
 	_outputs.put(node.getRef(), node);
     }
 
-    public DFRef[] getInputRefs() {
-	DFRef[] refs = new DFRef[_inputs.size()];
+    public DFVarRef[] getInputRefs() {
+	DFVarRef[] refs = new DFVarRef[_inputs.size()];
 	_inputs.keySet().toArray(refs);
 	Arrays.sort(refs);
 	return refs;
     }
 
-    public DFRef[] getOutputRefs() {
-	DFRef[] refs = new DFRef[_outputs.size()];
+    public DFVarRef[] getOutputRefs() {
+	DFVarRef[] refs = new DFVarRef[_outputs.size()];
 	_outputs.keySet().toArray(refs);
 	Arrays.sort(refs);
 	return refs;
@@ -107,12 +107,12 @@ public class DFComponent {
     public void dump(PrintStream out) {
 	out.println("DFComponent");
 	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : _inputs.keySet()) {
+	for (DFVarRef ref : _inputs.keySet()) {
 	    inputs.append(" "+ref);
 	}
 	out.println("  inputs:"+inputs);
 	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : _outputs.keySet()) {
+	for (DFVarRef ref : _outputs.keySet()) {
 	    outputs.append(" "+ref);
 	}
 	out.println("  outputs:"+outputs);

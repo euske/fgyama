@@ -15,8 +15,8 @@ public class DFFrame {
     private DFFrame _parent;
 
     private Map<ASTNode, DFFrame> _children = new HashMap<ASTNode, DFFrame>();
-    private Set<DFRef> _inputs = new HashSet<DFRef>();
-    private Set<DFRef> _outputs = new HashSet<DFRef>();
+    private Set<DFVarRef> _inputs = new HashSet<DFVarRef>();
+    private Set<DFVarRef> _outputs = new HashSet<DFVarRef>();
 
     public static final String TRY = "@TRY";
     public static final String METHOD = "@METHOD";
@@ -53,11 +53,11 @@ public class DFFrame {
 	return _children.get(ast);
     }
 
-    public void addInput(DFRef ref) {
+    public void addInput(DFVarRef ref) {
 	_inputs.add(ref);
     }
 
-    public void addOutput(DFRef ref) {
+    public void addOutput(DFVarRef ref) {
 	_outputs.add(ref);
     }
 
@@ -72,17 +72,17 @@ public class DFFrame {
 	return frame;
     }
 
-    public DFRef[] getOutputs() {
-	DFRef[] refs = new DFRef[_outputs.size()];
+    public DFVarRef[] getOutputs() {
+	DFVarRef[] refs = new DFVarRef[_outputs.size()];
 	_outputs.toArray(refs);
 	Arrays.sort(refs);
 	return refs;
     }
 
-    public DFRef[] getInsAndOuts() {
-	Set<DFRef> inouts = new HashSet<DFRef>(_inputs);
+    public DFVarRef[] getInsAndOuts() {
+	Set<DFVarRef> inouts = new HashSet<DFVarRef>(_inputs);
 	inouts.retainAll(_outputs);
-	DFRef[] refs = new DFRef[inouts.size()];
+	DFVarRef[] refs = new DFVarRef[inouts.size()];
 	inouts.toArray(refs);
 	Arrays.sort(refs);
 	return refs;
@@ -96,17 +96,17 @@ public class DFFrame {
 	out.println(indent+_label+" {");
 	String i2 = indent + "  ";
 	StringBuilder inputs = new StringBuilder();
-	for (DFRef ref : _inputs) {
+	for (DFVarRef ref : _inputs) {
 	    inputs.append(" "+ref);
 	}
 	out.println(i2+"inputs:"+inputs);
 	StringBuilder outputs = new StringBuilder();
-	for (DFRef ref : _outputs) {
+	for (DFVarRef ref : _outputs) {
 	    outputs.append(" "+ref);
 	}
 	out.println(i2+"outputs:"+outputs);
 	StringBuilder inouts = new StringBuilder();
-	for (DFRef ref : this.getInsAndOuts()) {
+	for (DFVarRef ref : this.getInsAndOuts()) {
 	    inouts.append(" "+ref);
 	}
 	out.println(i2+"in/outs:"+inouts);
