@@ -16,6 +16,11 @@ public class DFClassScope extends DFVarScope {
     private Map<String, DFMethod> _name2method =
 	new HashMap<String, DFMethod>();
 
+    public DFClassScope(DFTypeScope typeScope) {
+        super("unknown");
+	_typeScope = typeScope;
+    }
+
     public DFClassScope(DFTypeScope typeScope, SimpleName name) {
         super(name.getIdentifier());
 	_typeScope = typeScope;

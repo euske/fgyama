@@ -200,6 +200,7 @@ class TypeCastNode extends ProgNode {
     public TypeCastNode(DFGraph graph, DFVarScope scope, DFTypeRef type,
                         ASTNode ast) {
 	super(graph, scope, type, null, ast);
+	assert(type != null);
     }
 
     @Override
@@ -209,7 +210,7 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getData() {
-	return this.getType().getName();
+	return this.getType().getId();
     }
 }
 
@@ -221,6 +222,7 @@ class InstanceofNode extends ProgNode {
     public InstanceofNode(DFGraph graph, DFVarScope scope,
 			  ASTNode ast, DFTypeRef type) {
 	super(graph, scope, DFTypeRef.BOOLEAN, null, ast);
+	assert(type != null);
 	this.type = type;
     }
 
@@ -231,7 +233,7 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getData() {
-	return this.getType().getName();
+	return this.getType().getId();
     }
 }
 
@@ -541,6 +543,7 @@ class CreateObjectNode extends CallNode {
     public CreateObjectNode(DFGraph graph, DFVarScope scope, DFTypeRef type,
                             ASTNode ast, DFNode obj) {
 	super(graph, scope, type, null, ast);
+	assert(type != null);
 	if (obj != null) {
 	    this.accept(obj, "obj");
 	}
@@ -553,7 +556,7 @@ class CreateObjectNode extends CallNode {
 
     @Override
     public String getData() {
-	return this.getType().getName();
+	return this.getType().getId();
     }
 }
 

@@ -11,31 +11,31 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFTypeRef {
 
-    private String _name;
+    private String _id;
 
-    private DFTypeRef(String name) {
-	_name = name;
+    private DFTypeRef(String id) {
+	_id = id;
     }
 
     public DFTypeRef(PrimitiveType.Code code) {
-	_name = getTypeName(code);
+	_id = getTypeName(code);
     }
 
     public DFTypeRef(Name name) {
-	_name = getTypeName(name);
+	_id = getTypeName(name);
     }
 
     public DFTypeRef(Type type) {
-	_name = getTypeName(type);
+	_id = getTypeName(type);
     }
 
     @Override
     public String toString() {
-	return ("<"+_name+">");
+	return ("<"+_id+">");
     }
 
-    public String getName() {
-	return _name;
+    public String getId() {
+	return _id;
     }
 
     public static String getTypeName(PrimitiveType.Code code) {

@@ -52,7 +52,7 @@ public class DFNode implements Comparable<DFNode> {
 	    elem.setAttribute("data", this.getData());
 	}
         if (_type != null) {
-            elem.setAttribute("type", _type.getName());
+            elem.setAttribute("type", _type.getId());
         }
 	if (_ref != null) {
 	    elem.setAttribute("ref", _ref.getName());

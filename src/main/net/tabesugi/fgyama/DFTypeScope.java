@@ -15,6 +15,7 @@ public class DFTypeScope {
     private DFTypeScope _root;
     private String _name;
     private DFTypeScope _parent;
+    private DFClassScope _default;
 
     private List<DFTypeScope> _children =
 	new ArrayList<DFTypeScope>();
@@ -27,12 +28,14 @@ public class DFTypeScope {
         _root = this;
 	_name = name;
         _parent = null;
+	_default = new DFClassScope(this);
     }
 
     public DFTypeScope(DFTypeScope parent, String name) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
+	_default = null;
     }
 
     @Override
@@ -48,18 +51,24 @@ public class DFTypeScope {
         }
     }
 
+    public DFClassScope getDefaultClass() {
+	return _default;
+    }
+
     protected DFClassScope lookupClass(String name) {
-        // XXX support hierarchical namespace.
         if (name.startsWith(".")) {
-            name = name.substring(1);
-            DFClassScope klass = _name2class.get(name);
-            if (klass != null) {
-                return klass;
-            } else if (_parent != null) {
-                return _parent.lookupClass(name);
+	    int i = name.lastIndexOf('.');
+	    if (i == 0) {
+		DFClassScope klass = _name2class.get(name.substring(i+1));
+		if (klass != null) {
+		    return klass;
+		}
+	    } else if (_parent != null) {
+		DFTypeScope parent = _parent.addChildScope(name.substring(0, i));
+		return parent.lookupClass("."+name.substring(i+1));
             }
         }
-        return null;
+        return _root.getDefaultClass();
     }
 
     public DFClassScope lookupClass(SimpleName name) {
@@ -67,7 +76,11 @@ public class DFTypeScope {
     }
 
     public DFClassScope lookupClass(DFTypeRef type) {
-	return this.lookupClass(type.getName());
+	if (type != null) {
+	    return this.lookupClass(type.getId());
+	} else {
+	    return _root.getDefaultClass();
+	}
     }
 
     public DFClassScope addClass(SimpleName name) {
@@ -77,6 +90,7 @@ public class DFTypeScope {
     }
 
     public DFTypeScope addChildScope(String name) {
+	// XXX support dot names.
         DFTypeScope scope = _name2child.get(name);
         if (scope == null) {
             scope = new DFTypeScope(this, name);
