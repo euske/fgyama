@@ -19,8 +19,10 @@ public class DFNode implements Comparable<DFNode> {
     private DFVarRef _ref;
 
     private DFNode _input = null;
-    private Map<String, DFNode> _inputs = new HashMap<String, DFNode>();
-    private List<DFNode> _outputs = new ArrayList<DFNode>();
+    private Map<String, DFNode> _inputs =
+	new HashMap<String, DFNode>();
+    private List<DFNode> _outputs =
+	new ArrayList<DFNode>();
 
     public DFNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref) {
         _graph = graph;

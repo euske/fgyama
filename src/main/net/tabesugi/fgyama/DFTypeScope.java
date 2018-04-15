@@ -16,9 +16,12 @@ public class DFTypeScope {
     private String _name;
     private DFTypeScope _parent;
 
-    private List<DFTypeScope> _children = new ArrayList<DFTypeScope>();
-    private Map<String, DFTypeScope> _name2child = new HashMap<String, DFTypeScope>();
-    private Map<String, DFClassScope> _name2class = new HashMap<String, DFClassScope>();
+    private List<DFTypeScope> _children =
+	new ArrayList<DFTypeScope>();
+    private Map<String, DFTypeScope> _name2child =
+	new HashMap<String, DFTypeScope>();
+    private Map<String, DFClassScope> _name2class =
+	new HashMap<String, DFClassScope>();
 
     public DFTypeScope(String name) {
         _root = this;
@@ -124,11 +127,12 @@ public class DFTypeScope {
                 child.build((TypeDeclaration)body);
 
             } else if (body instanceof FieldDeclaration) {
+		// XXX support static field.
                 FieldDeclaration decl = (FieldDeclaration)body;
+		DFTypeRef type = new DFTypeRef(decl.getType());
 		for (VariableDeclarationFragment frag :
 			 (List<VariableDeclarationFragment>) decl.fragments()) {
-		    DFTypeRef type = new DFTypeRef(decl.getType());
-		    klass.addRef(frag.getName(), type);
+		    klass.addField(frag.getName(), type);
 		}
 
             } else if (body instanceof MethodDeclaration) {

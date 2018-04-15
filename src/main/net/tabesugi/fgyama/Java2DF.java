@@ -1588,18 +1588,31 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
-        DFTypeScope typeScope, DFClassScope klass,
-        FieldDeclaration method) {
-	// XXX support instance field.
-	// XXX support static field.
+        DFGraph graph, DFTypeScope typeScope, DFClassScope klass,
+        DFFrame frame, FieldDeclaration method)
+        throws UnsupportedSyntax {
+	for (VariableDeclarationFragment frag :
+		 (List<VariableDeclarationFragment>) method.fragments()) {
+	    DFVarRef ref = klass.lookupField(frag.getName());
+	    Expression init = frag.getInitializer();
+	    if (init != null) {
+		DFComponent cpt = new DFComponent(graph, klass);
+		cpt = processExpression(graph, typeScope, klass, frame, cpt, init);
+		DFNode assign = new SingleAssignNode(graph, klass, ref, frag);
+		assign.accept(cpt.getRValue());
+	    }
+	}
     }
 
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(
         DFTypeScope typeScope, TypeDeclaration typeDecl)
         throws IOException {
-        DFTypeRef type = new DFTypeRef(typeDecl.getName());
-        DFClassScope klass = typeScope.lookupClass(typeDecl.getName());
+	SimpleName typeName = typeDecl.getName();
+        DFTypeRef type = new DFTypeRef(typeName);
+        DFClassScope klass = typeScope.lookupClass(typeName);
+	DFGraph classGraph = new DFGraph(klass, typeName.getIdentifier());
+	DFFrame frame = new DFFrame(DFFrame.CLASS);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
 	    try {
@@ -1608,7 +1621,8 @@ public class Java2DF {
 			typeScope, (TypeDeclaration)body);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
-			typeScope, klass, (FieldDeclaration)body);
+			classGraph, typeScope, klass,
+			frame, (FieldDeclaration)body);
 		} else if (body instanceof MethodDeclaration) {
                     DFGraph graph = processMethodDeclaration(
                         typeScope, klass, (MethodDeclaration)body);
@@ -1624,6 +1638,10 @@ public class Java2DF {
                 }
             }
         }
+	if (this.exporter != null) {
+	    this.exporter.writeGraph(classGraph);
+	}
+	klass.dump();
     }
 
     private CompilationUnit parseFile(String path)

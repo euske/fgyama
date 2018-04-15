@@ -15,7 +15,8 @@ public class DFGraph {
     private DFVarScope _root;
     private String _name;
 
-    private Map<Integer, DFNode> _nodes = new HashMap<Integer, DFNode>();
+    private Map<Integer, DFNode> _nodes =
+	new HashMap<Integer, DFNode>();
 
     public DFGraph(DFVarScope root, String name) {
 	_root = root;

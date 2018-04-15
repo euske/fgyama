@@ -16,9 +16,12 @@ public class DFComponent {
 
     private DFNode _lval = null;
     private DFNode _rval = null;
-    private Map<DFVarRef, DFNode> _inputs = new HashMap<DFVarRef, DFNode>();
-    private Map<DFVarRef, DFNode> _outputs = new HashMap<DFVarRef, DFNode>();
-    private List<DFExit> _exits = new ArrayList<DFExit>();
+    private Map<DFVarRef, DFNode> _inputs =
+	new HashMap<DFVarRef, DFNode>();
+    private Map<DFVarRef, DFNode> _outputs =
+	new HashMap<DFVarRef, DFNode>();
+    private List<DFExit> _exits =
+	new ArrayList<DFExit>();
 
     public DFComponent(DFGraph graph, DFVarScope scope) {
         _graph = graph;
@@ -31,7 +34,7 @@ public class DFComponent {
 	if (node == null) {
 	    node = _inputs.get(ref);
 	    if (node == null) {
-		node = new DFNode(_graph, _scope, null, ref);
+		node = new DFNode(_graph, _scope, ref.getType(), ref);
 		_inputs.put(ref, node);
 	    }
 	}

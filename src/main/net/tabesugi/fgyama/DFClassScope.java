@@ -13,7 +13,8 @@ public class DFClassScope extends DFVarScope {
 
     private DFTypeScope _typeScope;
 
-    private Map<String, DFMethod> _name2method = new HashMap<String, DFMethod>();
+    private Map<String, DFMethod> _name2method =
+	new HashMap<String, DFMethod>();
 
     public DFClassScope(DFTypeScope typeScope, SimpleName name) {
         super(name.getIdentifier());
@@ -34,7 +35,7 @@ public class DFClassScope extends DFVarScope {
     }
 
     public DFVarRef lookupThis() {
-        return this.lookupRef("#this");
+        return this.lookupRef("#this", false);
     }
 
     public DFVarRef addField(SimpleName name, DFTypeRef type) {
@@ -42,7 +43,10 @@ public class DFClassScope extends DFVarScope {
     }
 
     public DFVarRef lookupField(SimpleName name) {
-        return this.lookupRef("."+name.getIdentifier());
+	return this.lookupField(name, true);
+    }
+    public DFVarRef lookupField(SimpleName name, boolean add) {
+        return this.lookupRef("."+name.getIdentifier(), add);
     }
 
     public DFMethod addMethod(String name, DFTypeRef returnType) {
@@ -64,6 +68,13 @@ public class DFClassScope extends DFVarScope {
 	    return method;
 	} else {
 	    return this.addMethod(id, null);
+	}
+    }
+
+    public void dumpContents(PrintStream out, String indent) {
+	super.dumpContents(out, indent);
+	for (DFMethod method : _name2method.values()) {
+	    out.println(indent+"defined: "+method);
 	}
     }
 }

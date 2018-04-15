@@ -14,12 +14,16 @@ public class DFFrame {
     private String _label;
     private DFFrame _parent;
 
-    private Map<ASTNode, DFFrame> _children = new HashMap<ASTNode, DFFrame>();
-    private Set<DFVarRef> _inputs = new HashSet<DFVarRef>();
-    private Set<DFVarRef> _outputs = new HashSet<DFVarRef>();
+    private Map<ASTNode, DFFrame> _children =
+	new HashMap<ASTNode, DFFrame>();
+    private Set<DFVarRef> _inputs =
+	new HashSet<DFVarRef>();
+    private Set<DFVarRef> _outputs =
+	new HashSet<DFVarRef>();
 
     public static final String TRY = "@TRY";
     public static final String METHOD = "@METHOD";
+    public static final String CLASS = "@CLASS";
 
     public DFFrame(String label) {
 	this(label, null);
