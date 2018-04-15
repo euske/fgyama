@@ -109,9 +109,13 @@ public class DFVarScope {
     }
 
     public DFVarRef lookupVar(SimpleName name) {
+        return this.lookupRef(name.getIdentifier(), true);
+    }
+
+    public DFVarRef lookupVarOrField(SimpleName name) {
 	DFVarRef ref = this.lookupField(name, false);
 	if (ref == null) {
-	    ref = this.lookupRef(name.getIdentifier(), true);
+	    ref = this.lookupVar(name);
 	}
 	return ref;
     }
@@ -366,9 +370,10 @@ public class DFVarScope {
 	if (ast instanceof Annotation) {
 
 	} else if (ast instanceof Name) {
+            // XXX incomplete ref!
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = this.lookupVar((SimpleName)name);
+		DFVarRef ref = this.lookupVarOrField((SimpleName)name);
 		frame.addInput(ref);
 	    } else {
 		// QualifiedName == FieldAccess
@@ -519,8 +524,7 @@ public class DFVarScope {
 		     (List<Expression>) cstr.arguments()) {
 		this.build(frame, arg);
 	    }
-	    // Ignore getAnonymousClassDeclaration() here.
-	    // It will eventually be picked up as MethodDeclaration.
+	    // XXX Ignored getAnonymousClassDeclaration().
 
 	} else if (ast instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)ast;
@@ -552,9 +556,10 @@ public class DFVarScope {
 	throws UnsupportedSyntax {
 
 	if (ast instanceof Name) {
+            // XXX incomplete ref!
 	    Name name = (Name)ast;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = this.lookupVar((SimpleName)name);
+		DFVarRef ref = this.lookupVarOrField((SimpleName)name);
 		frame.addOutput(ref);
 	    } else {
 		// QualifiedName == FieldAccess

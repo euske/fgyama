@@ -851,7 +851,7 @@ public class Java2DF {
 	if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = varScope.lookupVar((SimpleName)name);
+		DFVarRef ref = varScope.lookupVarOrField((SimpleName)name);
 		cpt.setLValue(new SingleAssignNode(graph, varScope, ref, expr));
 	    } else {
 		// QualifiedName == FieldAccess
@@ -905,7 +905,7 @@ public class Java2DF {
 	} else if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = varScope.lookupVar((SimpleName)name);
+		DFVarRef ref = varScope.lookupVarOrField((SimpleName)name);
                 DFNode node = new VarRefNode(graph, varScope, ref, expr);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
