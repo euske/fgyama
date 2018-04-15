@@ -18,15 +18,15 @@ public class DFTypeRef {
     }
 
     public DFTypeRef(PrimitiveType.Code code) {
-	_name = Utils.getTypeName(code);
-    }
-
-    public DFTypeRef(Type type) {
-	_name = Utils.getTypeName(type);
+	_name = getTypeName(code);
     }
 
     public DFTypeRef(Name name) {
-	_name = Utils.getTypeName(name);
+	_name = getTypeName(name);
+    }
+
+    public DFTypeRef(Type type) {
+	_name = getTypeName(type);
     }
 
     @Override
@@ -36,6 +36,36 @@ public class DFTypeRef {
 
     public String getName() {
 	return _name;
+    }
+
+    public static String getTypeName(PrimitiveType.Code code) {
+        return ("@"+code.toString());
+    }
+    public static String getTypeName(Name name) {
+        return ("."+name.getFullyQualifiedName());
+    }
+    public static String getTypeName(Type type) {
+	if (type instanceof PrimitiveType) {
+            PrimitiveType ptype = (PrimitiveType)type;
+            return getTypeName(ptype.getPrimitiveTypeCode());
+	} else if (type instanceof SimpleType) {
+            SimpleType stype = (SimpleType)type;
+            return getTypeName(stype.getName());
+	} else if (type instanceof ArrayType) {
+            ArrayType atype = (ArrayType)type;
+	    String name = getTypeName(atype.getElementType());
+	    int ndims = atype.getDimensions();
+	    for (int i = 0; i < ndims; i++) {
+		name += "[]";
+	    }
+	    return name;
+	} else if (type instanceof ParameterizedType) {
+            ParameterizedType ptype = (ParameterizedType)type;
+            // ignore ptype.typeArguments()
+	    return getTypeName(ptype.getType());
+	} else {
+	    return null;
+	}
     }
 
     public static DFTypeRef BOOLEAN =

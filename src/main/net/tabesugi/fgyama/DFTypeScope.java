@@ -46,18 +46,21 @@ public class DFTypeScope {
     }
 
     protected DFClassScope lookupClass(String name) {
-        DFClassScope klass = _name2class.get(name);
-        if (klass != null) {
-            return klass;
-        } else if (_parent != null) {
-            return _parent.lookupClass(name);
-        } else {
-            return null;
+        // XXX support hierarchical namespace.
+        if (name.startsWith(".")) {
+            name = name.substring(1);
+            DFClassScope klass = _name2class.get(name);
+            if (klass != null) {
+                return klass;
+            } else if (_parent != null) {
+                return _parent.lookupClass(name);
+            }
         }
+        return null;
     }
 
     public DFClassScope lookupClass(SimpleName name) {
-	return this.lookupClass(name.getIdentifier());
+	return this.lookupClass("."+name.getIdentifier());
     }
 
     public DFClassScope lookupClass(DFTypeRef type) {

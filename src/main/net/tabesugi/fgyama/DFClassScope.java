@@ -22,7 +22,7 @@ public class DFClassScope extends DFVarScope {
     }
 
     public DFClassScope getBase() {
-        return this;            // XXX
+        return this;            // XXX support base class.
     }
 
     public String getName() {

@@ -955,7 +955,7 @@ public class Java2DF {
 	    DFNode lvalue = cpt.getRValue();
 	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
-            DFTypeRef type = lvalue.getType(); // XXX
+            DFTypeRef type = lvalue.getType(); // XXX Todo: implicit type coersion.
 	    cpt.setRValue(new InfixNode(graph, varScope, type,
                                         expr, op, lvalue, rvalue));
 
@@ -1590,8 +1590,8 @@ public class Java2DF {
     public void processFieldDeclaration(
         DFTypeScope typeScope, DFClassScope klass,
         FieldDeclaration method) {
-	// XXX
-	// XXX static
+	// XXX support instance field.
+	// XXX support static field.
     }
 
     @SuppressWarnings("unchecked")
