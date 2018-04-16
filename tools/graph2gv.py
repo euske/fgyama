@@ -16,9 +16,9 @@ def qp(props):
 def write_gv(out, scope, highlight=None, level=0):
     h = ' '*level
     if level == 0:
-        out.write('digraph %s {\n' % scope.name)
+        out.write('digraph %s {\n' % q(scope.name))
     else:
-        out.write(h+'subgraph cluster_%s {\n' % scope.name)
+        out.write(h+'subgraph %s {\n' % q("cluster_"+scope.name))
     out.write(h+' label=%s;\n' % q(scope.name))
     for node in scope.nodes:
         if node.kind in ('join','begin','end'):
