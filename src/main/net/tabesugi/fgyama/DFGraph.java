@@ -13,24 +13,22 @@ import org.w3c.dom.*;
 public class DFGraph {
 
     private DFVarScope _root;
-    private String _name;
 
     private Map<Integer, DFNode> _nodes =
 	new HashMap<Integer, DFNode>();
 
-    public DFGraph(DFVarScope root, String name) {
+    public DFGraph(DFVarScope root) {
 	_root = root;
-	_name = name;
     }
 
     @Override
     public String toString() {
-	return ("<DFGraph("+_name+")>");
+	return ("<DFGraph("+_root.getName()+")>");
     }
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
-        elem.setAttribute("name", _name);
+        elem.setAttribute("name", _root.getName());
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);

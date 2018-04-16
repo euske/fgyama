@@ -43,7 +43,7 @@ public class DFVarScope {
 
     public Element toXML(Document document, DFNode[] nodes) {
 	Element elem = document.createElement("scope");
-	elem.setAttribute("name", _name);
+	elem.setAttribute("name", this.getName());
 	for (DFVarScope child : this.getChildren()) {
 	    elem.appendChild(child.toXML(document, nodes));
 	}

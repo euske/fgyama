@@ -1653,7 +1653,7 @@ public class Java2DF {
             // Setup an initial scope.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             DFVarScope varScope = klass.addChild(funcName);
-            DFGraph graph = new DFGraph(varScope, funcName);
+            DFGraph graph = new DFGraph(varScope);
             DFComponent cpt = new DFComponent(graph, varScope);
             // XXX Ignore isContructor().
             // XXX Ignore getReturnType2().
@@ -1716,7 +1716,7 @@ public class Java2DF {
 	SimpleName typeName = typeDecl.getName();
         DFTypeRef type = new DFTypeRef(typeName);
         DFClassScope klass = typeScope.lookupClass(typeName);
-	DFGraph classGraph = new DFGraph(klass, typeName.getIdentifier());
+	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
