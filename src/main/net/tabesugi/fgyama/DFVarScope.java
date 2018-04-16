@@ -21,10 +21,10 @@ public class DFVarScope {
 	new ArrayList<DFVarScope>();
     private Map<ASTNode, DFVarScope> _ast2child =
 	new HashMap<ASTNode, DFVarScope>();
-    private Map<String, DFVarRef> _name2ref =
+    private Map<String, DFVarRef> _id2ref =
 	new HashMap<String, DFVarRef>();
 
-    public DFVarScope(String name) {
+    protected DFVarScope(String name) {
         _root = this;
 	_name = name;
         _parent = null;
@@ -83,10 +83,10 @@ public class DFVarScope {
     }
 
     protected DFVarRef addRef(String id, DFTypeRef type) {
-	DFVarRef ref = _name2ref.get(id);
+	DFVarRef ref = _id2ref.get(id);
 	if (ref == null) {
             ref = new DFVarRef(this, id, type);
-            _name2ref.put(id, ref);
+            _id2ref.put(id, ref);
         }
 	return ref;
     }
@@ -96,7 +96,7 @@ public class DFVarScope {
     }
 
     protected DFVarRef lookupRef(String id, boolean add) {
-	DFVarRef ref = _name2ref.get(id);
+	DFVarRef ref = _id2ref.get(id);
 	if (ref != null) {
 	    return ref;
 	} else if (_parent != null) {
@@ -108,16 +108,16 @@ public class DFVarScope {
 	}
     }
 
-    public DFVarRef lookupVar(SimpleName name) {
-        return this.lookupRef(name.getIdentifier(), true);
+    public DFVarRef lookupVar(SimpleName name, boolean add) {
+        return this.lookupRef(name.getIdentifier(), add);
     }
 
     public DFVarRef lookupVarOrField(SimpleName name) {
-	DFVarRef ref = this.lookupField(name, false);
-	if (ref == null) {
-	    ref = this.lookupVar(name);
-	}
-	return ref;
+	DFVarRef ref = this.lookupVar(name, false);
+	if (ref != null) return ref;
+        ref = this.lookupField(name, false);
+        if (ref != null) return ref;
+	return this.lookupVar(name, true);
     }
 
     public DFVarRef addReturn(DFTypeRef returnType) {
@@ -133,6 +133,7 @@ public class DFVarScope {
     }
 
     public DFVarRef lookupThis() {
+        assert(_parent != null);
 	return _parent.lookupThis();
     }
 
@@ -140,15 +141,13 @@ public class DFVarScope {
 	return this.lookupField(name, true);
     }
     public DFVarRef lookupField(SimpleName name, boolean add) {
+        assert(_parent != null);
         return _parent.lookupField(name, add);
     }
 
-    public DFMethod lookupMethod(String id) {
-        return _parent.lookupMethod(id);
-    }
-
     public DFMethod lookupMethod(SimpleName name) {
-        return this.lookupMethod(name.getIdentifier());
+        assert(_parent != null);
+        return _parent.lookupMethod(name);
     }
 
     // dump: for debugging.
@@ -165,7 +164,7 @@ public class DFVarScope {
 	out.println(indent+"}");
     }
     public void dumpContents(PrintStream out, String indent) {
-	for (DFVarRef ref : _name2ref.values()) {
+	for (DFVarRef ref : _id2ref.values()) {
 	    out.println(indent+"defined: "+ref);
 	}
     }

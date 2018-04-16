@@ -19,9 +19,9 @@ public class DFTypeScope {
 
     private List<DFTypeScope> _children =
 	new ArrayList<DFTypeScope>();
-    private Map<String, DFTypeScope> _name2child =
+    private Map<String, DFTypeScope> _id2child =
 	new HashMap<String, DFTypeScope>();
-    private Map<String, DFClassScope> _name2class =
+    private Map<String, DFClassScope> _id2class =
 	new HashMap<String, DFClassScope>();
 
     public DFTypeScope(String name) {
@@ -55,17 +55,17 @@ public class DFTypeScope {
 	return _default;
     }
 
-    protected DFClassScope lookupClass(String name) {
-        if (name.startsWith(".")) {
-	    int i = name.lastIndexOf('.');
+    protected DFClassScope lookupClass(String id) {
+        if (id.startsWith(".")) {
+	    int i = id.lastIndexOf('.');
 	    if (i == 0) {
-		DFClassScope klass = _name2class.get(name.substring(i+1));
+		DFClassScope klass = _id2class.get(id.substring(i+1));
 		if (klass != null) {
 		    return klass;
 		}
 	    } else if (_parent != null) {
-		DFTypeScope parent = _parent.addChildScope(name.substring(0, i));
-		return parent.lookupClass("."+name.substring(i+1));
+		DFTypeScope parent = _parent.addChildScope(id.substring(0, i));
+		return parent.lookupClass("."+id.substring(i+1));
             }
         }
         return _root.getDefaultClass();
@@ -85,17 +85,17 @@ public class DFTypeScope {
 
     public DFClassScope addClass(SimpleName name) {
 	DFClassScope klass = new DFClassScope(this, name);
-	_name2class.put(name.getIdentifier(), klass);
+	_id2class.put(name.getIdentifier(), klass);
 	return klass;
     }
 
-    public DFTypeScope addChildScope(String name) {
+    public DFTypeScope addChildScope(String id) {
 	// XXX support dot names.
-        DFTypeScope scope = _name2child.get(name);
+        DFTypeScope scope = _id2child.get(id);
         if (scope == null) {
-            scope = new DFTypeScope(this, name);
+            scope = new DFTypeScope(this, id);
             _children.add(scope);
-            _name2child.put(name, scope);
+            _id2child.put(id, scope);
         }
         return scope;
     }
@@ -119,7 +119,7 @@ public class DFTypeScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+_name+" {");
 	String i2 = indent + "  ";
-	for (DFClassScope klass : _name2class.values()) {
+	for (DFClassScope klass : _id2class.values()) {
 	    out.println(i2+"defined: "+klass);
 	}
 	for (DFTypeScope scope : _children) {

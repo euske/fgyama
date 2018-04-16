@@ -36,7 +36,11 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public String getName() {
-	return _klass.getName()+"/"+_name;
+        if (_klass != null) {
+            return (_klass.getName()+"/"+_name);
+        } else {
+            return ("!"+_name);
+        }
     }
 
     public DFTypeRef getReturnType() {

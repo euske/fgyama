@@ -107,6 +107,14 @@ public class Utils {
 	}
     }
 
+    public static String resolveName(Name name) {
+        IBinding binding = name.resolveBinding();
+        if (binding != null) {
+            return binding.getKey();
+        }
+        return null;
+    }
+
     public static String getTypeName(Type type) {
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
