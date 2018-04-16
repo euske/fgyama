@@ -1630,7 +1630,7 @@ public class Java2DF {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
-        this.rootScope = new DFTypeScope("");
+        this.rootScope = new DFTypeScope("ROOT");
     }
 
     /**
@@ -1651,11 +1651,6 @@ public class Java2DF {
             // Setup an initial scope.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             DFVarScope varScope = klass.addChild(funcName);
-            varScope.build(frame, funcBlock);
-            varScope.addReturn(returnType);
-            varScope.dump();
-            //frame.dump();
-
             DFGraph graph = new DFGraph(varScope, funcName);
             DFComponent cpt = new DFComponent(graph, varScope);
             // XXX Ignore isContructor().
@@ -1672,6 +1667,11 @@ public class Java2DF {
                 assign.accept(param);
                 cpt.setOutput(assign);
             }
+            varScope.build(frame, funcBlock);
+            varScope.addReturn(returnType);
+            varScope.dump();
+            //frame.dump();
+
             // Process the function body.
             cpt = processStatement(
                 graph, typeScope, varScope, frame, cpt, funcBlock);

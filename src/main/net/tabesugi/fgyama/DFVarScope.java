@@ -38,7 +38,7 @@ public class DFVarScope {
 
     @Override
     public String toString() {
-	return ("<DFVarScope("+_name+")>");
+	return ("<DFVarScope("+this.getName()+")>");
     }
 
     public Element toXML(Document document, DFNode[] nodes) {
