@@ -94,7 +94,7 @@ public class DFFrame {
 
     // dump: for debugging.
     public void dump() {
-	dump(System.out, "");
+	dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
 	out.println(indent+_label+" {");

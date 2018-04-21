@@ -105,7 +105,7 @@ public class DFComponent {
 
     // dump: for debugging.
     public void dump() {
-	dump(System.out);
+	dump(System.err);
     }
     public void dump(PrintStream out) {
 	out.println("DFComponent");
