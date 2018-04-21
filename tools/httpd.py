@@ -330,23 +330,22 @@ class GraphApp(WebApp):
 '''
     SAMPLES = './tests/'
 
-    @GET('/')
-    def index(self, text=DEFAULT):
-        yield Response()
-        yield self.show(text)
-        return
-
-    def show(self, text):
-        return Template('''<!DOCTYPE html>
+    INDEX = Template('''<!DOCTYPE html>
 <html><head><title>FGyama Grapher</title></head><body>
 <h1>FGyama Grapher</h1>
 <form method=POST enctype="multipart/form-data" action="/graph">
 <textarea name=t cols=80 rows=10>$(text)</textarea><br>
-<input type=file name=f><br>
-<input type=submit>
+<input type=submit value="Graph it">
 <input type=reset>
+&nbsp; <input type=file name=f>
 </form>
-''', text=text)
+''')
+
+    @GET('/')
+    def index(self, text=DEFAULT):
+        yield Response()
+        yield self.INDEX(text=text)
+        return
 
     @GET('/sample/(?P<name>\w+\.java)')
     def sample(self, name=''):
@@ -356,7 +355,7 @@ class GraphApp(WebApp):
             with open(path) as fp:
                 text = fp.read()
             yield Response()
-            yield self.show(text)
+            yield self.INDEX(text=text)
         else:
             yield NotFound()
         return
