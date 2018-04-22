@@ -13,12 +13,17 @@ import org.w3c.dom.*;
 public class DFGraph {
 
     private DFVarScope _root;
+    private DFMethod _method;
 
     private Map<Integer, DFNode> _nodes =
 	new HashMap<Integer, DFNode>();
 
     public DFGraph(DFVarScope root) {
+	this(root, null);
+    }
+    public DFGraph(DFVarScope root, DFMethod method) {
 	_root = root;
+        _method = method;
     }
 
     @Override
@@ -28,7 +33,11 @@ public class DFGraph {
 
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
-        elem.setAttribute("name", _root.getName());
+        if (_method != null) {
+            elem.setAttribute("name", _method.getName());
+        } else {
+            elem.setAttribute("name", _root.getName());
+        }
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);
 	Arrays.sort(nodes);

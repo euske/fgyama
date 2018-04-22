@@ -1641,26 +1641,27 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
         DFTypeScope typeScope, DFClassScope klass,
-        MethodDeclaration method)
+        MethodDeclaration methodDecl)
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
-	if (method.getBody() == null) return null;
-	String funcName = method.getName().getIdentifier();
-	Block funcBlock = method.getBody();
-        Type rt = method.getReturnType2();
+	if (methodDecl.getBody() == null) return null;
+        DFMethod method = klass.lookupMethod(methodDecl.getName());
+	String funcName = methodDecl.getName().getIdentifier();
+	Block funcBlock = methodDecl.getBody();
+        Type rt = methodDecl.getReturnType2();
         DFTypeRef returnType = (rt == null)? null : new DFTypeRef(rt);
         try {
             // Setup an initial scope.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             DFVarScope varScope = klass.addChild(funcName);
-            DFGraph graph = new DFGraph(varScope);
+            DFGraph graph = new DFGraph(varScope, method);
             DFComponent cpt = new DFComponent(graph, varScope);
             // XXX Ignore isContructor().
             // XXX Ignore getReturnType2().
             // XXX Ignore isVarargs().
             int i = 0;
             for (SingleVariableDeclaration decl :
-                     (List<SingleVariableDeclaration>) method.parameters()) {
+                     (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFTypeRef paramType = new DFTypeRef(decl.getType());
                 DFVarRef ref = varScope.addRef(decl.getName(), paramType);
@@ -1693,10 +1694,10 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
         DFGraph graph, DFTypeScope typeScope, DFClassScope klass,
-        DFFrame frame, FieldDeclaration method)
+        DFFrame frame, FieldDeclaration fieldDecl)
         throws UnsupportedSyntax {
 	for (VariableDeclarationFragment frag :
-		 (List<VariableDeclarationFragment>) method.fragments()) {
+		 (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
 	    DFVarRef ref = klass.lookupField(frag.getName());
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
