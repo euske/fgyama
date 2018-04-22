@@ -13,13 +13,15 @@ def q(s):
 def qp(props):
     return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
 
-def write_gv(out, scope, highlight=None, level=0):
+def write_gv(out, scope, highlight=None, level=0, name=None):
     h = ' '*level
+    if name is None:
+        name = scope.name
     if level == 0:
-        out.write('digraph %s {\n' % q(scope.name))
+        out.write('digraph %s {\n' % q(name))
     else:
-        out.write(h+'subgraph %s {\n' % q("cluster_"+scope.name))
-    out.write(h+' label=%s;\n' % q(scope.name))
+        out.write(h+'subgraph %s {\n' % q("cluster_"+name))
+    out.write(h+' label=%s;\n' % q(name))
     for node in scope.nodes:
         if node.kind in ('join','begin','end'):
             styles = {'shape': 'diamond',
@@ -58,7 +60,7 @@ def run_dot(graph, type='svg'):
     args = ['dot', '-T'+type]
     print('run_dot: %r' % args)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
-    write_gv(p.stdin, graph.root)
+    write_gv(p.stdin, graph.root, name=graph.name)
     p.stdin.close()
     output = ''
     for (i,line) in enumerate(p.stdout):
@@ -87,7 +89,8 @@ def main(argv):
     for path in args:
         for graph in get_graphs(path):
             if isinstance(graph, DFGraph):
-                write_gv(output, graph.root, highlight=highlight)
+                write_gv(output, graph.root,
+                         highlight=highlight, name=graph.name)
                 break
     return 0
 
