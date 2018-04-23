@@ -95,29 +95,35 @@ public class DFVarScope {
         return this.addRef(name.getIdentifier(), type);
     }
 
-    protected DFVarRef lookupRef(String id, boolean add) {
+    protected DFVarRef lookupRef(String id) {
 	DFVarRef ref = _id2ref.get(id);
 	if (ref != null) {
 	    return ref;
 	} else if (_parent != null) {
-	    return _parent.lookupRef(id, add);
-	} else if (add) {
-	    return this.addRef(id, null);
+	    return _parent.lookupRef(id);
 	} else {
 	    return null;
 	}
     }
 
-    public DFVarRef lookupVar(SimpleName name, boolean add) {
-        return this.lookupRef(name.getIdentifier(), add);
+    public DFVarRef lookupVar(SimpleName name) {
+        DFVarRef ref = this.lookupRef(name.getIdentifier());
+        if (ref != null) return ref;
+        String id = Utils.resolveName(name);
+        if (id != null) return this.addRef(id, null);
+        // fallback
+        return this.addRef(name.getIdentifier(), null);
     }
 
     public DFVarRef lookupVarOrField(SimpleName name) {
-	DFVarRef ref = this.lookupVar(name, false);
+        DFVarRef ref = this.lookupRef(name.getIdentifier());
 	if (ref != null) return ref;
-        ref = this.lookupField(name, false);
+        ref = this.lookupField(name.getIdentifier());
         if (ref != null) return ref;
-	return this.lookupVar(name, true);
+        String id = Utils.resolveName(name);
+        if (id != null) return this.addRef(id, null);
+        // fallback
+        return this.addRef(name.getIdentifier(), null);
     }
 
     public DFVarRef addReturn(DFTypeRef returnType) {
@@ -125,7 +131,7 @@ public class DFVarScope {
     }
 
     public DFVarRef lookupReturn() {
-	return this.lookupRef("#return", false);
+	return this.lookupRef("#return");
     }
 
     public DFVarRef lookupArray() {
@@ -137,12 +143,12 @@ public class DFVarScope {
 	return _parent.lookupThis();
     }
 
-    public DFVarRef lookupField(SimpleName name) {
-	return this.lookupField(name, true);
+    protected DFVarRef lookupField(String id) {
+        if (_parent == null) return null;
+	return _parent.lookupField(id);
     }
-    public DFVarRef lookupField(SimpleName name, boolean add) {
-        assert(_parent != null);
-        return _parent.lookupField(name, add);
+    public DFVarRef lookupField(SimpleName name) {
+        return this.lookupField(name.getIdentifier());
     }
 
     public DFMethod lookupMethod(SimpleName name) {

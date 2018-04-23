@@ -40,20 +40,22 @@ public class DFClassScope extends DFVarScope {
     }
 
     public DFVarRef lookupThis() {
-        return this.lookupRef("#this", false);
+        return this.lookupRef("#this");
     }
 
     public DFVarRef addField(SimpleName name, DFTypeRef type) {
         return this.addRef("."+name.getIdentifier(), type);
     }
 
-    public DFVarRef lookupField(SimpleName name) {
-	return this.lookupField(name, true);
+    protected DFVarRef lookupField(String id) {
+	return this.lookupRef("."+id);
     }
-    public DFVarRef lookupField(SimpleName name, boolean add) {
+    public DFVarRef lookupField(SimpleName name) {
+        DFVarRef ref = this.lookupField(name.getIdentifier());
+        if (ref != null) return ref;
         String id = Utils.resolveName(name);
-        if (id != null) { return new DFVarRef(null, id, null); }
-        return this.lookupRef("."+name.getIdentifier(), add);
+        if (id != null) return new DFVarRef(null, id, null);
+        return new DFVarRef(null, name.getIdentifier(), null);
     }
 
     public DFMethod addMethod(String id, DFTypeRef returnType) {
@@ -70,15 +72,11 @@ public class DFClassScope extends DFVarScope {
     }
 
     public DFMethod lookupMethod(SimpleName name) {
+	DFMethod method = _id2method.get(name.getIdentifier());
+	if (method != null) return method;
         String id = Utils.resolveName(name);
         if (id != null) { return new DFMethod(null, id, null); }
-        id = name.getIdentifier();
-	DFMethod method = _id2method.get(id);
-	if (method != null) {
-	    return method;
-	} else {
-	    return this.addMethod(id, null);
-	}
+        return this.addMethod(name.getIdentifier(), null);
     }
 
     public void dumpContents(PrintStream out, String indent) {

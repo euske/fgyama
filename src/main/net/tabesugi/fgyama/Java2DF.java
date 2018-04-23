@@ -826,7 +826,7 @@ public class Java2DF {
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
-	    DFVarRef ref = varScope.lookupVar(frag.getName(), false);
+	    DFVarRef ref = varScope.lookupVar(frag.getName());
             assert(ref != null);
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
@@ -1441,7 +1441,7 @@ public class Java2DF {
 	loopCpt = processExpression(
             graph, typeScope, loopScope, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
-	DFVarRef ref = loopScope.lookupVar(decl.getName(), false);
+	DFVarRef ref = loopScope.lookupVar(decl.getName());
         assert(ref != null);
 	DFNode iterValue = new IterNode(graph, loopScope, ref, expr);
         iterValue.accept(loopCpt.getRValue());
