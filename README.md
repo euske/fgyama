@@ -12,3 +12,10 @@ How to Build:
 
     $ ant get-deps
     $ ant graph -Dinput=samples/f1.java -Dout_svg=out.svg
+
+TODOs:
+
+  * Import namespaces
+  * Class inheritance
+  * Static fields/methods
+  * Anymous class / lambdas

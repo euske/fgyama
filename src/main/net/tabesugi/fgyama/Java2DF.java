@@ -328,7 +328,7 @@ class ArgNode extends ProgNode {
 
     @Override
     public String getData() {
-	return Integer.toString(this.index);
+	return ("arg"+this.index);
     }
 }
 
@@ -939,7 +939,7 @@ public class Java2DF {
 	    char value = ((CharacterLiteral)expr).charValue();
 	    cpt.setRValue(new ConstNode(
                               graph, varScope, DFTypeRef.CHAR,
-                              expr, Character.toString(value)));
+                              expr, "'"+Character.toString(value)+"'"));
 
 	} else if (expr instanceof NullLiteral) {
 	    cpt.setRValue(new ConstNode(
@@ -956,7 +956,7 @@ public class Java2DF {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
                               graph, varScope, DFTypeRef.STRING,
-                              expr, value));
+                              expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)expr).getType();

@@ -7,7 +7,7 @@ public class Foo {
     public static int basic_single(int a, int b, int c) {
 	// This is a statement.
 	// Yes.
-	return (-a) + (a + b) * c; // Variable.
+	return (-a) + f(a + b) * c; // Variable.
     }
 }
 

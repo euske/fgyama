@@ -3,5 +3,6 @@ public class Foo {
 	a = a + b;
 	int x = b * c;
 	int y = c;
+        y += 123;
     }
 }
