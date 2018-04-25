@@ -1772,7 +1772,7 @@ public class Java2DF {
         DFTypeScope typeScope = this.rootScope;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeScope = typeScope.addChildScope(pkg.getName());
+            typeScope = typeScope.getChildScope(pkg.getName());
         }
 	try {
 	    for (TypeDeclaration typeDecl :
@@ -1792,7 +1792,19 @@ public class Java2DF {
         DFTypeScope typeScope = this.rootScope;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeScope = typeScope.addChildScope(pkg.getName());
+            typeScope = typeScope.getChildScope(pkg.getName());
+        }
+        typeScope = new DFTypeScope(typeScope);
+	for (ImportDeclaration importDecl : (List<ImportDeclaration>) cunit.imports()) {
+            // XXX assert(!importDecl.isStatic());
+            if (importDecl.isOnDemand()) {
+            } else {
+                Name name = importDecl.getName();
+                assert(name.isQualifiedName());
+                DFClassScope klass = this.rootScope.lookupClass(name);
+                QualifiedName qname = (QualifiedName)name;
+                typeScope.addClass(qname.getName(), klass);
+            }
         }
 	for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cunit.types()) {
 	    processTypeDeclaration(typeScope, typeDecl);

@@ -38,6 +38,16 @@ public class DFTypeScope {
 	_default = null;
     }
 
+    public DFTypeScope(DFTypeScope scope) {
+        _root = scope._root;
+        _name = scope._name;
+        _parent = scope._parent;
+        _default = scope._default;
+        _children = new ArrayList<DFTypeScope>(scope._children);
+        _id2child = new HashMap<String, DFTypeScope>(scope._id2child);
+        _id2class = new HashMap<String, DFClassScope>(scope._id2class);
+    }
+
     @Override
     public String toString() {
 	return ("<DFTypeScope("+_name+")>");
@@ -55,7 +65,19 @@ public class DFTypeScope {
 	return _default;
     }
 
-    protected DFClassScope lookupClass(String id) {
+    public DFClassScope addClass(SimpleName name) {
+	DFClassScope klass = new DFClassScope(this, name);
+        this.addClass(name, klass);
+	return klass;
+    }
+
+    public void addClass(SimpleName name, DFClassScope klass) {
+        String id = name.getIdentifier();
+        assert(!_id2class.containsKey(id));
+	_id2class.put(id, klass);
+    }
+
+    private DFClassScope lookupClass(String id) {
         if (id.startsWith(".")) {
 	    int i = id.lastIndexOf('.');
 	    if (i == 0) {
@@ -64,15 +86,11 @@ public class DFTypeScope {
 		    return klass;
 		}
 	    } else if (_parent != null) {
-		DFTypeScope parent = _parent.addChildScope(id.substring(0, i));
+		DFTypeScope parent = _parent.getChildScope(id.substring(0, i));
 		return parent.lookupClass("."+id.substring(i+1));
             }
         }
         return _root.getDefaultClass();
-    }
-
-    public DFClassScope lookupClass(SimpleName name) {
-	return this.lookupClass("."+name.getIdentifier());
     }
 
     public DFClassScope lookupClass(DFTypeRef type) {
@@ -83,14 +101,18 @@ public class DFTypeScope {
 	}
     }
 
-    public DFClassScope addClass(SimpleName name) {
-	DFClassScope klass = new DFClassScope(this, name);
-	_id2class.put(name.getIdentifier(), klass);
-	return klass;
+    public DFClassScope lookupClass(Name name) {
+        if (name.isQualifiedName()) {
+	    QualifiedName qname = (QualifiedName)name;
+            DFTypeScope parent = this.getChildScope(qname.getQualifier());
+            return parent.lookupClass(qname.getName());
+        } else {
+            SimpleName sname = (SimpleName)name;
+            return this.lookupClass("."+sname.getIdentifier());
+        }
     }
 
-    public DFTypeScope addChildScope(String id) {
-	// XXX support dot names.
+    private DFTypeScope getChildScope(String id) {
         DFTypeScope scope = _id2child.get(id);
         if (scope == null) {
             scope = new DFTypeScope(this, id);
@@ -100,15 +122,15 @@ public class DFTypeScope {
         return scope;
     }
 
-    public DFTypeScope addChildScope(Name name) {
+    public DFTypeScope getChildScope(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
 	    DFTypeScope parent = (_parent != null)? _parent : this;
-	    parent = parent.addChildScope(qname.getQualifier());
-            return parent.addChildScope(qname.getName());
+	    parent = parent.getChildScope(qname.getQualifier());
+            return parent.getChildScope(qname.getName());
         } else {
             SimpleName sname = (SimpleName)name;
-            return this.addChildScope(sname.getIdentifier());
+            return this.getChildScope(sname.getIdentifier());
         }
     }
 
@@ -133,7 +155,7 @@ public class DFTypeScope {
 	throws UnsupportedSyntax {
 
         DFClassScope klass = this.addClass(typeDecl.getName());
-        DFTypeScope child = this.addChildScope(typeDecl.getName());
+        DFTypeScope child = this.getChildScope(typeDecl.getName());
 
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
