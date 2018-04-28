@@ -206,25 +206,34 @@ public class DFTypeSpace {
         }
     }
 
+    private void importNames(ImportDeclaration importDecl) {
+        // XXX support static import
+        assert(!importDecl.isStatic());
+        Name name = importDecl.getName();
+        if (importDecl.isOnDemand()) {
+            DFTypeSpace typeSpace = _root.lookupSpace(name);
+            for (String id : typeSpace._id2klass.keySet()) {
+                DFTypeSpace space = typeSpace._id2space.get(id);
+                _id2space.put(id, space);
+                DFClassSpace klass = typeSpace._id2klass.get(id);
+                _id2klass.put(id, klass);
+            }
+        } else {
+            assert(name.isQualifiedName());
+            DFClassSpace klass = _root.lookupClass(name);
+            if (klass == null) {
+                Utils.logit("Fail: could not import: "+name);
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                this.addClass(qname.getName(), klass);
+            }
+        }
+    }
     public DFTypeSpace extend(List<ImportDeclaration> imports) {
         // Make a copy as we're polluting the oririnal TypeSpace.
         DFTypeSpace typeSpace = new DFTypeSpace(this);
 	for (ImportDeclaration importDecl : imports) {
-            // XXX support static import
-            assert(!importDecl.isStatic());
-            if (importDecl.isOnDemand()) {
-                // XXX TODO
-            } else {
-                Name name = importDecl.getName();
-                assert(name.isQualifiedName());
-                DFClassSpace klass = _root.lookupClass(name);
-                if (klass == null) {
-                    Utils.logit("Fail: could not import: "+name);
-                } else {
-                    QualifiedName qname = (QualifiedName)name;
-                    typeSpace.addClass(qname.getName(), klass);
-                }
-            }
+            typeSpace.importNames(importDecl);
         }
         return typeSpace;
     }
