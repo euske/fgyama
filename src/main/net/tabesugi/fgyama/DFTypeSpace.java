@@ -151,6 +151,15 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
+    public void build(CompilationUnit cunit)
+	throws UnsupportedSyntax {
+        for (TypeDeclaration typeDecl :
+                 (List<TypeDeclaration>) cunit.types()) {
+            this.build(typeDecl);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
 

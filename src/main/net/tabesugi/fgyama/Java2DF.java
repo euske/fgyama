@@ -1750,7 +1750,7 @@ public class Java2DF {
 	klass.dump();
     }
 
-    private CompilationUnit parseFile(String path)
+    public CompilationUnit parseFile(String path)
 	throws IOException {
 	String src = Utils.readFile(path);
 	Map<String, String> options = JavaCore.getOptions();
@@ -1765,20 +1765,15 @@ public class Java2DF {
 	return (CompilationUnit)parser.createAST(null);
     }
 
-    @SuppressWarnings("unchecked")
-    public void pass1(String path)
-	throws IOException {
-	CompilationUnit cunit = parseFile(path);
+    // pass1
+    public void buildTypeSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
             typeSpace = typeSpace.lookupSpace(pkg.getName());
         }
 	try {
-	    for (TypeDeclaration typeDecl :
-                     (List<TypeDeclaration>) cunit.types()) {
-		typeSpace.build(typeDecl);
-	    }
+            typeSpace.build(cunit);
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
 	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -1786,9 +1781,8 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public void pass2(String path)
-	throws IOException {
-	CompilationUnit cunit = parseFile(path);
+    public void pass2(CompilationUnit cunit)
+        throws IOException {
         DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
@@ -1854,7 +1848,8 @@ public class Java2DF {
 	for (String path : files) {
 	    Utils.logit("Pass1: "+path);
 	    try {
-		converter.pass1(path);
+                CompilationUnit cunit = converter.parseFile(path);
+		converter.buildTypeSpace(cunit);
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
 	    }
@@ -1862,8 +1857,9 @@ public class Java2DF {
 	for (String path : files) {
 	    Utils.logit("Pass2: "+path);
 	    try {
+                CompilationUnit cunit = converter.parseFile(path);
 		exporter.startFile(path);
-		converter.pass2(path);
+		converter.pass2(cunit);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
