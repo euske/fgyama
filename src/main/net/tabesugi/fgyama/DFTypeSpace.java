@@ -8,49 +8,49 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFTypeScope
+//  DFTypeSpace
 //
-public class DFTypeScope {
+public class DFTypeSpace {
 
-    private DFTypeScope _root;
+    private DFTypeSpace _root;
     private String _name;
-    private DFTypeScope _parent;
-    private DFClassScope _default;
+    private DFTypeSpace _parent;
+    private DFClassSpace _default;
 
-    private List<DFTypeScope> _children =
-	new ArrayList<DFTypeScope>();
-    private Map<String, DFTypeScope> _id2child =
-	new HashMap<String, DFTypeScope>();
-    private Map<String, DFClassScope> _id2class =
-	new HashMap<String, DFClassScope>();
+    private List<DFTypeSpace> _children =
+	new ArrayList<DFTypeSpace>();
+    private Map<String, DFTypeSpace> _id2child =
+	new HashMap<String, DFTypeSpace>();
+    private Map<String, DFClassSpace> _id2class =
+	new HashMap<String, DFClassSpace>();
 
-    public DFTypeScope(String name) {
+    public DFTypeSpace(String name) {
         _root = this;
 	_name = name;
         _parent = null;
-	_default = new DFClassScope(this);
+	_default = new DFClassSpace(this);
     }
 
-    public DFTypeScope(DFTypeScope parent, String name) {
+    public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
 	_default = null;
     }
 
-    public DFTypeScope(DFTypeScope scope) {
-        _root = scope._root;
-        _name = scope._name;
-        _parent = scope._parent;
-        _default = scope._default;
-        _children = new ArrayList<DFTypeScope>(scope._children);
-        _id2child = new HashMap<String, DFTypeScope>(scope._id2child);
-        _id2class = new HashMap<String, DFClassScope>(scope._id2class);
+    public DFTypeSpace(DFTypeSpace space) {
+        _root = space._root;
+        _name = space._name;
+        _parent = space._parent;
+        _default = space._default;
+        _children = new ArrayList<DFTypeSpace>(space._children);
+        _id2child = new HashMap<String, DFTypeSpace>(space._id2child);
+        _id2class = new HashMap<String, DFClassSpace>(space._id2class);
     }
 
     @Override
     public String toString() {
-	return ("<DFTypeScope("+_name+")>");
+	return ("<DFTypeSpace("+_name+")>");
     }
 
     public String getName() {
@@ -61,39 +61,39 @@ public class DFTypeScope {
         }
     }
 
-    public DFClassScope getDefaultClass() {
+    public DFClassSpace getDefaultClass() {
 	return _default;
     }
 
-    public DFClassScope addClass(SimpleName name) {
-	DFClassScope klass = new DFClassScope(this, name);
+    public DFClassSpace addClass(SimpleName name) {
+	DFClassSpace klass = new DFClassSpace(this, name);
         this.addClass(name, klass);
 	return klass;
     }
 
-    public void addClass(SimpleName name, DFClassScope klass) {
+    public void addClass(SimpleName name, DFClassSpace klass) {
         String id = name.getIdentifier();
         assert(!_id2class.containsKey(id));
 	_id2class.put(id, klass);
     }
 
-    private DFClassScope lookupClass(String id) {
+    private DFClassSpace lookupClass(String id) {
         if (id.startsWith(".")) {
 	    int i = id.lastIndexOf('.');
 	    if (i == 0) {
-		DFClassScope klass = _id2class.get(id.substring(i+1));
+		DFClassSpace klass = _id2class.get(id.substring(i+1));
 		if (klass != null) {
 		    return klass;
 		}
 	    } else if (_parent != null) {
-		DFTypeScope parent = _parent.getChildScope(id.substring(0, i));
+		DFTypeSpace parent = _parent.getChildSpace(id.substring(0, i));
 		return parent.lookupClass("."+id.substring(i+1));
             }
         }
         return _root.getDefaultClass();
     }
 
-    public DFClassScope lookupClass(DFTypeRef type) {
+    public DFClassSpace lookupClass(DFTypeRef type) {
 	if (type != null) {
 	    return this.lookupClass(type.getId());
 	} else {
@@ -101,10 +101,10 @@ public class DFTypeScope {
 	}
     }
 
-    public DFClassScope lookupClass(Name name) {
+    public DFClassSpace lookupClass(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
-            DFTypeScope parent = this.getChildScope(qname.getQualifier());
+            DFTypeSpace parent = this.getChildSpace(qname.getQualifier());
             return parent.lookupClass(qname.getName());
         } else {
             SimpleName sname = (SimpleName)name;
@@ -112,25 +112,25 @@ public class DFTypeScope {
         }
     }
 
-    private DFTypeScope getChildScope(String id) {
-        DFTypeScope scope = _id2child.get(id);
-        if (scope == null) {
-            scope = new DFTypeScope(this, id);
-            _children.add(scope);
-            _id2child.put(id, scope);
+    private DFTypeSpace getChildSpace(String id) {
+        DFTypeSpace space = _id2child.get(id);
+        if (space == null) {
+            space = new DFTypeSpace(this, id);
+            _children.add(space);
+            _id2child.put(id, space);
         }
-        return scope;
+        return space;
     }
 
-    public DFTypeScope getChildScope(Name name) {
+    public DFTypeSpace getChildSpace(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
-	    DFTypeScope parent = (_parent != null)? _parent : this;
-	    parent = parent.getChildScope(qname.getQualifier());
-            return parent.getChildScope(qname.getName());
+	    DFTypeSpace parent = (_parent != null)? _parent : this;
+	    parent = parent.getChildSpace(qname.getQualifier());
+            return parent.getChildSpace(qname.getName());
         } else {
             SimpleName sname = (SimpleName)name;
-            return this.getChildScope(sname.getIdentifier());
+            return this.getChildSpace(sname.getIdentifier());
         }
     }
 
@@ -141,11 +141,11 @@ public class DFTypeScope {
     public void dump(PrintStream out, String indent) {
 	out.println(indent+_name+" {");
 	String i2 = indent + "  ";
-	for (DFClassScope klass : _id2class.values()) {
+	for (DFClassSpace klass : _id2class.values()) {
 	    out.println(i2+"defined: "+klass);
 	}
-	for (DFTypeScope scope : _children) {
-	    scope.dump(out, i2);
+	for (DFTypeSpace space : _children) {
+	    space.dump(out, i2);
 	}
 	out.println(indent+"}");
     }
@@ -154,8 +154,8 @@ public class DFTypeScope {
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
 
-        DFClassScope klass = this.addClass(typeDecl.getName());
-        DFTypeScope child = this.getChildScope(typeDecl.getName());
+        DFClassSpace klass = this.addClass(typeDecl.getName());
+        DFTypeSpace child = this.getChildSpace(typeDecl.getName());
 
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {

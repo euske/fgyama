@@ -14,7 +14,7 @@ public class DFNode implements Comparable<DFNode> {
 
     private DFGraph _graph;
     private int _id;
-    private DFVarScope _scope;
+    private DFVarSpace _space;
     private DFTypeRef _type;
     private DFVarRef _ref;
 
@@ -24,10 +24,10 @@ public class DFNode implements Comparable<DFNode> {
     private List<DFNode> _outputs =
 	new ArrayList<DFNode>();
 
-    public DFNode(DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref) {
+    public DFNode(DFGraph graph, DFVarSpace space, DFTypeRef type, DFVarRef ref) {
         _graph = graph;
 	_id = graph.addNode(this);
-	_scope = scope;
+	_space = space;
         _type = type;
 	_ref = ref;
     }
@@ -67,8 +67,8 @@ public class DFNode implements Comparable<DFNode> {
         return _id;
     }
 
-    public DFVarScope getScope() {
-        return _scope;
+    public DFVarSpace getSpace() {
+        return _space;
     }
 
     public DFTypeRef getType() {
@@ -80,7 +80,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public String getName() {
-	return ("N"+_scope.getName()+"_"+_id);
+	return ("N"+_space.getName()+"_"+_id);
     }
 
     public String getKind() {

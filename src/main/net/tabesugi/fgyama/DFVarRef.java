@@ -12,12 +12,12 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFVarRef implements Comparable<DFVarRef> {
 
-    private DFVarScope _scope;
+    private DFVarSpace _space;
     private String _name;
     private DFTypeRef _type;
 
-    public DFVarRef(DFVarScope scope, String name, DFTypeRef type) {
-	_scope = scope;
+    public DFVarRef(DFVarSpace space, String name, DFTypeRef type) {
+	_space = space;
 	_name = name;
 	_type = type;
     }
@@ -37,8 +37,8 @@ public class DFVarRef implements Comparable<DFVarRef> {
     }
 
     public String getName() {
-        if (_scope != null) {
-            return (_scope.getName()+"/"+_name);
+        if (_space != null) {
+            return (_space.getName()+"/"+_name);
         } else {
             return ("!"+_name);
         }

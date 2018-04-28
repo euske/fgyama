@@ -12,16 +12,16 @@ import org.w3c.dom.*;
 //
 public class DFGraph {
 
-    private DFVarScope _root;
+    private DFVarSpace _root;
     private DFMethod _method;
 
     private Map<Integer, DFNode> _nodes =
 	new HashMap<Integer, DFNode>();
 
-    public DFGraph(DFVarScope root) {
+    public DFGraph(DFVarSpace root) {
 	this(root, null);
     }
-    public DFGraph(DFVarScope root, DFMethod method) {
+    public DFGraph(DFVarSpace root, DFMethod method) {
 	_root = root;
         _method = method;
     }

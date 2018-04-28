@@ -16,9 +16,9 @@ abstract class ProgNode extends DFNode {
     public ASTNode ast;
 
     public ProgNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFTypeRef type, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, type, ref);
+	super(graph, space, type, ref);
 	this.ast = ast;
     }
 
@@ -40,9 +40,9 @@ abstract class ProgNode extends DFNode {
 class SingleAssignNode extends ProgNode {
 
     public SingleAssignNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, ref.getType(), ref, ast);
+	super(graph, space, ref.getType(), ref, ast);
     }
 
     @Override
@@ -55,9 +55,9 @@ class SingleAssignNode extends ProgNode {
 class ArrayAssignNode extends ProgNode {
 
     public ArrayAssignNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode array, DFNode index) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(array, "array");
 	this.accept(index, "index");
     }
@@ -72,9 +72,9 @@ class ArrayAssignNode extends ProgNode {
 class FieldAssignNode extends ProgNode {
 
     public FieldAssignNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode obj) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(obj, "obj");
     }
 
@@ -88,9 +88,9 @@ class FieldAssignNode extends ProgNode {
 class VarRefNode extends ProgNode {
 
     public VarRefNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, ref.getType(), ref, ast);
+	super(graph, space, ref.getType(), ref, ast);
     }
 
     @Override
@@ -103,9 +103,9 @@ class VarRefNode extends ProgNode {
 class ArrayAccessNode extends ProgNode {
 
     public ArrayAccessNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode array, DFNode index) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(array, "array");
 	this.accept(index, "index");
     }
@@ -120,9 +120,9 @@ class ArrayAccessNode extends ProgNode {
 class FieldAccessNode extends ProgNode {
 
     public FieldAccessNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode obj) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(obj, "obj");
     }
 
@@ -138,9 +138,9 @@ class PrefixNode extends ProgNode {
     public PrefixExpression.Operator op;
 
     public PrefixNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, PrefixExpression.Operator op) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.op = op;
     }
 
@@ -161,9 +161,9 @@ class PostfixNode extends ProgNode {
     public PostfixExpression.Operator op;
 
     public PostfixNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, PostfixExpression.Operator op) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.op = op;
     }
 
@@ -184,10 +184,10 @@ class InfixNode extends ProgNode {
     public InfixExpression.Operator op;
 
     public InfixNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFTypeRef type,
         ASTNode ast, InfixExpression.Operator op,
         DFNode lvalue, DFNode rvalue) {
-	super(graph, scope, type, null, ast);
+	super(graph, space, type, null, ast);
 	this.op = op;
 	this.accept(lvalue, "L");
 	this.accept(rvalue, "R");
@@ -208,9 +208,9 @@ class InfixNode extends ProgNode {
 class TypeCastNode extends ProgNode {
 
     public TypeCastNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFTypeRef type,
         ASTNode ast) {
-	super(graph, scope, type, null, ast);
+	super(graph, space, type, null, ast);
 	assert(type != null);
     }
 
@@ -231,9 +231,9 @@ class InstanceofNode extends ProgNode {
     public DFTypeRef type;
 
     public InstanceofNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarSpace space,
         ASTNode ast, DFTypeRef type) {
-	super(graph, scope, DFTypeRef.BOOLEAN, null, ast);
+	super(graph, space, DFTypeRef.BOOLEAN, null, ast);
 	assert(type != null);
 	this.type = type;
     }
@@ -255,9 +255,9 @@ class CaseNode extends ProgNode {
     public List<DFNode> matches = new ArrayList<DFNode>();
 
     public CaseNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarSpace space,
         ASTNode ast) {
-	super(graph, scope, null, null, ast);
+	super(graph, space, null, null, ast);
     }
 
     @Override
@@ -287,10 +287,10 @@ class AssignOpNode extends ProgNode {
     public Assignment.Operator op;
 
     public AssignOpNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, Assignment.Operator op,
         DFNode lvalue, DFNode rvalue) {
-	super(graph, scope, rvalue.getType(), ref, ast);
+	super(graph, space, rvalue.getType(), ref, ast);
 	this.op = op;
         if (lvalue != null) {
             this.accept(lvalue, "L");
@@ -315,9 +315,9 @@ class ArgNode extends ProgNode {
     public int index;
 
     public ArgNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, int index) {
-	super(graph, scope, ref.getType(), ref, ast);
+	super(graph, space, ref.getType(), ref, ast);
 	this.index = index;
     }
 
@@ -338,9 +338,9 @@ class ConstNode extends ProgNode {
     public String data;
 
     public ConstNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFTypeRef type,
         ASTNode ast, String data) {
-	super(graph, scope, type, null, ast);
+	super(graph, space, type, null, ast);
 	this.data = data;
     }
 
@@ -361,9 +361,9 @@ class ArrayValueNode extends ProgNode {
     public List<DFNode> values = new ArrayList<DFNode>();
 
     public ArrayValueNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarSpace space,
         ASTNode ast) {
-	super(graph, scope, null, null, ast);
+	super(graph, space, null, null, ast);
     }
 
     @Override
@@ -390,9 +390,9 @@ class JoinNode extends ProgNode {
     public boolean recvFalse = false;
 
     public JoinNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode cond) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(cond, "cond");
     }
 
@@ -442,9 +442,9 @@ class JoinNode extends ProgNode {
 class LoopBeginNode extends ProgNode {
 
     public LoopBeginNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode enter) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(enter, "enter");
     }
 
@@ -466,9 +466,9 @@ class LoopBeginNode extends ProgNode {
 class LoopEndNode extends ProgNode {
 
     public LoopEndNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode cond) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
 	this.accept(cond, "cond");
     }
 
@@ -486,9 +486,9 @@ class LoopEndNode extends ProgNode {
 class LoopRepeatNode extends ProgNode {
 
     public LoopRepeatNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
     }
 
     @Override
@@ -505,9 +505,9 @@ class LoopRepeatNode extends ProgNode {
 class IterNode extends ProgNode {
 
     public IterNode(
-        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, null, ref, ast);
+	super(graph, space, null, ref, ast);
     }
 
     @Override
@@ -523,9 +523,9 @@ abstract class CallNode extends ProgNode {
     public DFNode exception;
 
     public CallNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFTypeRef type, DFVarRef ref,
         ASTNode ast) {
-	super(graph, scope, type, ref, ast);
+	super(graph, space, type, ref, ast);
 	this.args = new ArrayList<DFNode>();
         this.exception = null;
     }
@@ -548,9 +548,9 @@ class MethodCallNode extends CallNode {
     public DFMethod method;
 
     public MethodCallNode(
-        DFGraph graph, DFVarScope scope, DFMethod method,
+        DFGraph graph, DFVarSpace space, DFMethod method,
         ASTNode ast, DFNode obj) {
-	super(graph, scope, method.getReturnType(), null, ast);
+	super(graph, space, method.getReturnType(), null, ast);
 	if (obj != null) {
 	    this.accept(obj, "obj");
 	}
@@ -567,9 +567,9 @@ class MethodCallNode extends CallNode {
 class CreateObjectNode extends CallNode {
 
     public CreateObjectNode(
-        DFGraph graph, DFVarScope scope, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFTypeRef type,
         ASTNode ast, DFNode obj) {
-	super(graph, scope, type, null, ast);
+	super(graph, space, type, null, ast);
 	assert(type != null);
 	if (obj != null) {
 	    this.accept(obj, "obj");
@@ -591,9 +591,9 @@ class CreateObjectNode extends CallNode {
 class ReturnNode extends ProgNode {
 
     public ReturnNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarSpace space,
         ASTNode ast) {
-	super(graph, scope, null, scope.lookupReturn(), ast);
+	super(graph, space, null, space.lookupReturn(), ast);
     }
 
     @Override
@@ -606,9 +606,9 @@ class ReturnNode extends ProgNode {
 class ExceptionNode extends ProgNode {
 
     public ExceptionNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarSpace space,
         ASTNode ast, DFNode value) {
-	super(graph, scope, null, null, ast);
+	super(graph, space, null, null, ast);
 	this.accept(value);
     }
 
@@ -630,7 +630,7 @@ public class Java2DF {
      * A JoinNode is added to each variable.
      */
     public DFComponent processConditional(
-        DFGraph graph, DFVarScope varScope,
+        DFGraph graph, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt,
         ASTNode ast, DFNode condValue,
         DFComponent trueCpt, DFComponent falseCpt) {
@@ -659,7 +659,7 @@ public class Java2DF {
 	for (DFVarRef ref : outRefs) {
 	    if (used.contains(ref)) continue;
 	    used.add(ref);
-	    JoinNode join = new JoinNode(graph, varScope, ref, ast, condValue);
+	    JoinNode join = new JoinNode(graph, varSpace, ref, ast, condValue);
 	    if (trueCpt != null) {
 		DFNode dst = trueCpt.getOutput(ref);
 		if (dst != null) {
@@ -683,7 +683,7 @@ public class Java2DF {
 	    for (DFExit exit : trueCpt.getExits()) {
                 DFNode node = exit.getNode();
 		JoinNode join = new JoinNode(
-                    graph, varScope, node.getRef(), null, condValue);
+                    graph, varSpace, node.getRef(), null, condValue);
 		join.recv(true, node);
 		cpt.addExit(exit.wrap(join));
 	    }
@@ -692,7 +692,7 @@ public class Java2DF {
 	    for (DFExit exit : falseCpt.getExits()) {
                 DFNode node = exit.getNode();
 		JoinNode join = new JoinNode(
-                    graph, varScope, node.getRef(), null, condValue);
+                    graph, varSpace, node.getRef(), null, condValue);
 		join.recv(false, node);
 		cpt.addExit(exit.wrap(join));
 	    }
@@ -705,7 +705,7 @@ public class Java2DF {
      * Expands the graph for the loop variables.
      */
     public DFComponent processLoop(
-        DFGraph graph, DFVarScope varScope,
+        DFGraph graph, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt,
         ASTNode ast, DFNode condValue,
         DFFrame loopFrame, DFComponent loopCpt, boolean preTest)
@@ -721,9 +721,9 @@ public class Java2DF {
 	DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
 	for (DFVarRef ref : loopRefs) {
 	    DFNode src = cpt.getValue(ref);
-	    LoopBeginNode begin = new LoopBeginNode(graph, varScope, ref, ast, src);
-	    LoopRepeatNode repeat = new LoopRepeatNode(graph, varScope, ref, ast);
-	    LoopEndNode end = new LoopEndNode(graph, varScope, ref, ast, condValue);
+	    LoopBeginNode begin = new LoopBeginNode(graph, varSpace, ref, ast, src);
+	    LoopRepeatNode repeat = new LoopRepeatNode(graph, varSpace, ref, ast);
+	    LoopEndNode end = new LoopEndNode(graph, varSpace, ref, ast, condValue);
 	    begin.setEnd(end);
 	    end.setBegin(begin);
 	    begins.put(ref, begin);
@@ -820,19 +820,19 @@ public class Java2DF {
      * Creates a new variable node.
      */
     public DFComponent processVariableDeclaration(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt,
         List<VariableDeclarationFragment> frags)
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
-	    DFVarRef ref = varScope.lookupVar(frag.getName());
+	    DFVarRef ref = varSpace.lookupVar(frag.getName());
             assert(ref != null);
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, init);
-		DFNode assign = new SingleAssignNode(graph, varScope, ref, frag);
+                    graph, typeSpace, varSpace, frame, cpt, init);
+		DFNode assign = new SingleAssignNode(graph, varSpace, ref, frag);
 		assign.accept(cpt.getRValue());
 		cpt.setOutput(assign);
 	    }
@@ -845,45 +845,45 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFComponent processAssignment(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Expression expr)
 	throws UnsupportedSyntax {
 
 	if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = varScope.lookupVarOrField((SimpleName)name);
-		cpt.setLValue(new SingleAssignNode(graph, varScope, ref, expr));
+		DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
+		cpt.setLValue(new SingleAssignNode(graph, varSpace, ref, expr));
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, qn.getQualifier());
+                    graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFVarRef ref = varScope.lookupField(fieldName);
-		cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
+		DFVarRef ref = varSpace.lookupField(fieldName);
+		cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
 	    }
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, aa.getArray());
+                graph, typeSpace, varSpace, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, aa.getIndex());
+                graph, typeSpace, varSpace, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
-	    DFVarRef ref = varScope.lookupArray();
-	    cpt.setLValue(new ArrayAssignNode(graph, varScope, ref, expr, array, index));
+	    DFVarRef ref = varSpace.lookupArray();
+	    cpt.setLValue(new ArrayAssignNode(graph, varSpace, ref, expr, array, index));
 
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, fa.getExpression());
+                graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFVarRef ref = varScope.lookupField(fieldName);
-	    cpt.setLValue(new FieldAssignNode(graph, varScope, ref, expr, obj));
+	    DFVarRef ref = varSpace.lookupField(fieldName);
+	    cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
 
 	} else {
 	    throw new UnsupportedSyntax(expr);
@@ -897,7 +897,7 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFComponent processExpression(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Expression expr)
 	throws UnsupportedSyntax {
 
@@ -906,8 +906,8 @@ public class Java2DF {
 	} else if (expr instanceof Name) {
 	    Name name = (Name)expr;
 	    if (name.isSimpleName()) {
-		DFVarRef ref = varScope.lookupVarOrField((SimpleName)name);
-                DFNode node = new VarRefNode(graph, varScope, ref, expr);
+		DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
+                DFNode node = new VarRefNode(graph, varSpace, ref, expr);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
 	    } else {
@@ -915,53 +915,53 @@ public class Java2DF {
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, qn.getQualifier());
+                    graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFVarRef ref = varScope.lookupField(fieldName);
-                DFNode node = new FieldAccessNode(graph, varScope, ref, qn, obj);
+		DFVarRef ref = varSpace.lookupField(fieldName);
+                DFNode node = new FieldAccessNode(graph, varSpace, ref, qn, obj);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
 	    }
 
 	} else if (expr instanceof ThisExpression) {
-	    DFVarRef ref = varScope.lookupThis();
-            DFNode node = new VarRefNode(graph, varScope, ref, expr);
+	    DFVarRef ref = varSpace.lookupThis();
+            DFNode node = new VarRefNode(graph, varSpace, ref, expr);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
 
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.BOOLEAN,
+                              graph, varSpace, DFTypeRef.BOOLEAN,
                               expr, Boolean.toString(value)));
 
 	} else if (expr instanceof CharacterLiteral) {
 	    char value = ((CharacterLiteral)expr).charValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.CHAR,
+                              graph, varSpace, DFTypeRef.CHAR,
                               expr, "'"+Character.toString(value)+"'"));
 
 	} else if (expr instanceof NullLiteral) {
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.NULL,
+                              graph, varSpace, DFTypeRef.NULL,
                               expr, "null"));
 
 	} else if (expr instanceof NumberLiteral) {
 	    String value = ((NumberLiteral)expr).getToken();
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.NUMBER,
+                              graph, varSpace, DFTypeRef.NUMBER,
                               expr, value));
 
 	} else if (expr instanceof StringLiteral) {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.STRING,
+                              graph, varSpace, DFTypeRef.STRING,
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)expr).getType();
 	    cpt.setRValue(new ConstNode(
-                              graph, varScope, DFTypeRef.TYPE,
+                              graph, varSpace, DFTypeRef.TYPE,
                               expr, Utils.getTypeName(value)));
 
 	} else if (expr instanceof PrefixExpression) {
@@ -969,14 +969,14 @@ public class Java2DF {
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, operand);
+                graph, typeSpace, varSpace, frame, cpt, operand);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
 		cpt = processAssignment(
-                    graph, typeScope, varScope, frame, cpt, operand);
+                    graph, typeSpace, varSpace, frame, cpt, operand);
 		DFNode assign = cpt.getLValue();
 		DFNode value = new PrefixNode(
-                    graph, varScope, assign.getRef(),
+                    graph, varSpace, assign.getRef(),
                     expr, op);
                 value.accept(cpt.getRValue());
 		assign.accept(value);
@@ -984,7 +984,7 @@ public class Java2DF {
 		cpt.setRValue(value);
 	    } else {
                 DFNode value = new PrefixNode(
-                    graph, varScope, null,
+                    graph, varSpace, null,
                     expr, op);
                 value.accept(cpt.getRValue());
 		cpt.setRValue(value);
@@ -995,13 +995,13 @@ public class Java2DF {
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
 	    cpt = processAssignment(
-                graph, typeScope, varScope, frame, cpt, operand);
+                graph, typeSpace, varSpace, frame, cpt, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
 		DFNode assign = cpt.getLValue();
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, operand);
-                DFNode node = new PostfixNode(graph, varScope, assign.getRef(),
+                    graph, typeSpace, varSpace, frame, cpt, operand);
+                DFNode node = new PostfixNode(graph, varSpace, assign.getRef(),
                                               expr, op);
                 node.accept(cpt.getRValue());
 		assign.accept(node);
@@ -1011,29 +1011,29 @@ public class Java2DF {
 	} else if (expr instanceof InfixExpression) {
 	    InfixExpression infix = (InfixExpression)expr;
 	    InfixExpression.Operator op = infix.getOperator();
-	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getLeftOperand());
+	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, infix.getLeftOperand());
 	    DFNode lvalue = cpt.getRValue();
-	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, infix.getRightOperand());
+	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
             DFTypeRef type = lvalue.getType(); // XXX Todo: implicit type coersion.
-	    cpt.setRValue(new InfixNode(graph, varScope, type,
+	    cpt.setRValue(new InfixNode(graph, varSpace, type,
                                         expr, op, lvalue, rvalue));
 
 	} else if (expr instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, paren.getExpression());
+	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, paren.getExpression());
 
 	} else if (expr instanceof Assignment) {
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
-	    cpt = processAssignment(graph, typeScope, varScope, frame, cpt, assn.getLeftHandSide());
+	    cpt = processAssignment(graph, typeSpace, varSpace, frame, cpt, assn.getLeftHandSide());
 	    DFNode assign = cpt.getLValue();
-	    cpt = processExpression(graph, typeScope, varScope, frame, cpt, assn.getRightHandSide());
+	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
 	    DFNode lvalue = ((op == Assignment.Operator.ASSIGN)?
                              null : cpt.getValue(assign.getRef()));
 	    assign.accept(new AssignOpNode(
-                              graph, varScope, assign.getRef(), assn,
+                              graph, varSpace, assign.getRef(), assn,
                               op, lvalue, rvalue));
 	    cpt.setOutput(assign);
 	    cpt.setRValue(assign);
@@ -1041,26 +1041,26 @@ public class Java2DF {
 	} else if (expr instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
 	    cpt = processVariableDeclaration(
-                graph, typeScope, varScope, frame, cpt, decl.fragments());
+                graph, typeSpace, varSpace, frame, cpt, decl.fragments());
 
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
 	    DFNode obj;
 	    if (expr1 == null) {
-                obj = cpt.getValue(varScope.lookupThis());
+                obj = cpt.getValue(varSpace.lookupThis());
             } else {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, expr1);
+                    graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-            DFClassScope klass = typeScope.lookupClass(obj.getType());
+            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
             DFMethod method = klass.lookupMethod(invoke.getName());
 	    MethodCallNode call = new MethodCallNode(
-                graph, varScope, method, invoke, obj);
+                graph, varSpace, method, invoke, obj);
 	    for (Expression arg : (List<Expression>) invoke.arguments()) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, arg);
+                    graph, typeSpace, varSpace, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1071,15 +1071,15 @@ public class Java2DF {
 
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-            DFNode obj = cpt.getValue(varScope.lookupThis());
-            DFClassScope klass = typeScope.lookupClass(obj.getType());
-            DFClassScope baseKlass = klass.getBase();
+            DFNode obj = cpt.getValue(varSpace.lookupThis());
+            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
+            DFClassSpace baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName());
 	    MethodCallNode call = new MethodCallNode(
-		graph, varScope, method, sinvoke, obj);
+		graph, varSpace, method, sinvoke, obj);
 	    for (Expression arg : (List<Expression>) sinvoke.arguments()) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, arg);
+                    graph, typeSpace, varSpace, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1093,22 +1093,22 @@ public class Java2DF {
 	    for (Expression dim : (List<Expression>) ac.dimensions()) {
 		// XXX cpt.getRValue() is not used (for now).
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, dim);
+                    graph, typeSpace, varSpace, frame, cpt, dim);
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, init);
+                    graph, typeSpace, varSpace, frame, cpt, init);
 	    } else {
-		cpt.setRValue(new ArrayValueNode(graph, varScope, ac));
+		cpt.setRValue(new ArrayValueNode(graph, varSpace, ac));
 	    }
 
 	} else if (expr instanceof ArrayInitializer) {
 	    ArrayInitializer init = (ArrayInitializer)expr;
-	    ArrayValueNode arr = new ArrayValueNode(graph, varScope, init);
+	    ArrayValueNode arr = new ArrayValueNode(graph, varSpace, init);
 	    for (Expression expr1 : (List<Expression>) init.expressions()) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, expr1);
+                    graph, typeSpace, varSpace, frame, cpt, expr1);
 		arr.addValue(cpt.getRValue());
 	    }
 	    cpt.setRValue(arr);
@@ -1116,15 +1116,15 @@ public class Java2DF {
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
-	    DFVarRef ref = varScope.lookupArray();
+	    DFVarRef ref = varSpace.lookupArray();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, aa.getArray());
+                graph, typeSpace, varSpace, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, aa.getIndex());
+                graph, typeSpace, varSpace, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
             DFNode node = new ArrayAccessNode(
-                graph, varScope, ref, aa,
+                graph, varSpace, ref, aa,
                 array, index);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1133,20 +1133,20 @@ public class Java2DF {
 	    FieldAccess fa = (FieldAccess)expr;
 	    SimpleName fieldName = fa.getName();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, fa.getExpression());
+                graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFVarRef ref = varScope.lookupField(fieldName);
-            DFNode node = new FieldAccessNode(graph, varScope, ref, fa, obj);
+	    DFVarRef ref = varSpace.lookupField(fieldName);
+            DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
 
 	} else if (expr instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
-	    DFNode obj = cpt.getValue(varScope.lookupThis());
-            DFClassScope klass = typeScope.lookupClass(obj.getType());
+	    DFNode obj = cpt.getValue(varSpace.lookupThis());
+            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
 	    DFVarRef ref = klass.lookupField(fieldName);
-            DFNode node = new FieldAccessNode(graph, varScope, ref, sfa, obj);
+            DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
 
@@ -1154,8 +1154,8 @@ public class Java2DF {
 	    CastExpression cast = (CastExpression)expr;
 	    DFTypeRef type = new DFTypeRef(cast.getType());
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, cast.getExpression());
-            DFNode node = new TypeCastNode(graph, varScope, type, cast);
+                graph, typeSpace, varSpace, frame, cpt, cast.getExpression());
+            DFNode node = new TypeCastNode(graph, varSpace, type, cast);
             node.accept(cpt.getRValue());
             cpt.setRValue(node);
 
@@ -1166,14 +1166,14 @@ public class Java2DF {
 	    DFNode obj = null;
 	    if (expr1 != null) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, expr1);
+                    graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
 	    CreateObjectNode call = new CreateObjectNode(
-		graph, varScope, instType, cstr, obj);
+		graph, varSpace, instType, cstr, obj);
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
 		cpt = processExpression(
-                    graph, typeScope, varScope, frame, cpt, arg);
+                    graph, typeSpace, varSpace, frame, cpt, arg);
 		call.addArg(cpt.getRValue());
 	    }
 	    cpt.setRValue(call);
@@ -1183,15 +1183,15 @@ public class Java2DF {
 	} else if (expr instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)expr;
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, cond.getExpression());
+                graph, typeSpace, varSpace, frame, cpt, cond.getExpression());
 	    DFNode condValue = cpt.getRValue();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, cond.getThenExpression());
+                graph, typeSpace, varSpace, frame, cpt, cond.getThenExpression());
 	    DFNode trueValue = cpt.getRValue();
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt, cond.getElseExpression());
+                graph, typeSpace, varSpace, frame, cpt, cond.getElseExpression());
 	    DFNode falseValue = cpt.getRValue();
-	    JoinNode join = new JoinNode(graph, varScope, null, expr, condValue);
+	    JoinNode join = new JoinNode(graph, varSpace, null, expr, condValue);
 	    join.recv(true, trueValue);
 	    join.recv(false, falseValue);
 	    cpt.setRValue(join);
@@ -1200,9 +1200,9 @@ public class Java2DF {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
 	    DFTypeRef type = new DFTypeRef(instof.getRightOperand());
 	    cpt = processExpression(
-                graph, typeScope, varScope, frame, cpt,
+                graph, typeSpace, varSpace, frame, cpt,
                 instof.getLeftOperand());
-            DFNode node = new InstanceofNode(graph, varScope, instof, type);
+            DFNode node = new InstanceofNode(graph, varSpace, instof, type);
             node.accept(cpt.getRValue());
 	    cpt.setRValue(node);
 
@@ -1223,62 +1223,62 @@ public class Java2DF {
     /// Statement processors.
     @SuppressWarnings("unchecked")
     public DFComponent processBlock(
-        DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+        DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Block block)
 	throws UnsupportedSyntax {
-	DFVarScope childScope = varScope.getChildByAST(block);
+	DFVarSpace childSpace = varSpace.getChildByAST(block);
 	for (Statement cstmt : (List<Statement>) block.statements()) {
 	    cpt = processStatement(
-                graph, typeScope, childScope, frame, cpt, cstmt);
+                graph, typeSpace, childSpace, frame, cpt, cstmt);
 	}
 	return cpt;
     }
 
     @SuppressWarnings("unchecked")
     public DFComponent processVariableDeclarationStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, VariableDeclarationStatement varStmt)
 	throws UnsupportedSyntax {
 	return processVariableDeclaration(
-            graph, typeScope, varScope, frame, cpt, varStmt.fragments());
+            graph, typeSpace, varSpace, frame, cpt, varStmt.fragments());
     }
 
     public DFComponent processExpressionStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, ExpressionStatement exprStmt)
 	throws UnsupportedSyntax {
 	Expression expr = exprStmt.getExpression();
 	return processExpression(
-            graph, typeScope, varScope, frame, cpt, expr);
+            graph, typeSpace, varSpace, frame, cpt, expr);
     }
 
     public DFComponent processIfStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, IfStatement ifStmt)
 	throws UnsupportedSyntax {
 	Expression expr = ifStmt.getExpression();
-	cpt = processExpression(graph, typeScope, varScope, frame, cpt, expr);
+	cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, expr);
 	DFNode condValue = cpt.getRValue();
 
 	Statement thenStmt = ifStmt.getThenStatement();
-	DFComponent thenCpt = new DFComponent(graph, varScope);
+	DFComponent thenCpt = new DFComponent(graph, varSpace);
 	thenCpt = processStatement(
-            graph, typeScope, varScope, frame, thenCpt, thenStmt);
+            graph, typeSpace, varSpace, frame, thenCpt, thenStmt);
 
 	Statement elseStmt = ifStmt.getElseStatement();
 	DFComponent elseCpt = null;
 	if (elseStmt != null) {
-	    elseCpt = new DFComponent(graph, varScope);
+	    elseCpt = new DFComponent(graph, varSpace);
 	    elseCpt = processStatement(
-                graph, typeScope, varScope, frame, elseCpt, elseStmt);
+                graph, typeSpace, varSpace, frame, elseCpt, elseStmt);
 	}
 	return processConditional(
-            graph, varScope, frame, cpt, ifStmt,
+            graph, varSpace, frame, cpt, ifStmt,
             condValue, thenCpt, elseCpt);
     }
 
     private DFComponent processCaseStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, ASTNode apt,
         DFNode caseNode, DFComponent caseCpt) {
 
@@ -1289,7 +1289,7 @@ public class Java2DF {
 
 	for (DFVarRef ref : caseCpt.getOutputRefs()) {
 	    DFNode dst = caseCpt.getOutput(ref);
-	    JoinNode join = new JoinNode(graph, varScope, ref, apt, caseNode);
+	    JoinNode join = new JoinNode(graph, varSpace, ref, apt, caseNode);
 	    join.recv(true, dst);
 	    join.close(cpt.getValue(ref));
 	    cpt.setOutput(join);
@@ -1300,13 +1300,13 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFComponent processSwitchStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, SwitchStatement switchStmt)
 	throws UnsupportedSyntax {
-	DFVarScope switchScope = varScope.getChildByAST(switchStmt);
+	DFVarSpace switchSpace = varSpace.getChildByAST(switchStmt);
 	DFFrame switchFrame = frame.getChildByAST(switchStmt);
 	cpt = processExpression(
-            graph, typeScope, varScope,
+            graph, typeSpace, varSpace,
             frame, cpt, switchStmt.getExpression());
 	DFNode switchValue = cpt.getRValue();
 
@@ -1318,17 +1318,17 @@ public class Java2DF {
 		if (caseCpt != null) {
 		    // switchCase, caseNode and caseCpt must be non-null.
 		    cpt = processCaseStatement(
-                        graph, typeScope, switchScope, switchFrame,
+                        graph, typeSpace, switchSpace, switchFrame,
                         cpt, switchCase, caseNode, caseCpt);
 		}
 		switchCase = (SwitchCase)stmt;
-		caseNode = new CaseNode(graph, switchScope, stmt);
+		caseNode = new CaseNode(graph, switchSpace, stmt);
                 caseNode.accept(switchValue);
-		caseCpt = new DFComponent(graph, switchScope);
+		caseCpt = new DFComponent(graph, switchSpace);
 		Expression expr = switchCase.getExpression();
 		if (expr != null) {
 		    cpt = processExpression(
-                        graph, typeScope, switchScope, frame, cpt, expr);
+                        graph, typeSpace, switchSpace, frame, cpt, expr);
 		    caseNode.addMatch(cpt.getRValue());
 		} else {
 		    // "default" case.
@@ -1339,13 +1339,13 @@ public class Java2DF {
 		    throw new UnsupportedSyntax(stmt);
 		}
 		caseCpt = processStatement(
-                    graph, typeScope, switchScope,
+                    graph, typeSpace, switchSpace,
                     switchFrame, caseCpt, stmt);
 	    }
 	}
 	if (caseCpt != null) {
 	    cpt = processCaseStatement(
-                graph, typeScope, switchScope, switchFrame,
+                graph, typeSpace, switchSpace, switchFrame,
                 cpt, switchCase, caseNode, caseCpt);
 	}
 	cpt.endFrame(switchFrame);
@@ -1353,42 +1353,42 @@ public class Java2DF {
     }
 
     public DFComponent processWhileStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, WhileStatement whileStmt)
 	throws UnsupportedSyntax {
-	DFVarScope loopScope = varScope.getChildByAST(whileStmt);
+	DFVarSpace loopSpace = varSpace.getChildByAST(whileStmt);
 	DFFrame loopFrame = frame.getChildByAST(whileStmt);
-	DFComponent loopCpt = new DFComponent(graph, loopScope);
+	DFComponent loopCpt = new DFComponent(graph, loopSpace);
 	loopCpt = processExpression(
-            graph, typeScope, loopScope, frame, loopCpt,
+            graph, typeSpace, loopSpace, frame, loopCpt,
             whileStmt.getExpression());
 	DFNode condValue = loopCpt.getRValue();
 	loopCpt = processStatement(
-            graph, typeScope, loopScope, loopFrame, loopCpt,
+            graph, typeSpace, loopSpace, loopFrame, loopCpt,
             whileStmt.getBody());
 	cpt = processLoop(
-            graph, loopScope, frame, cpt, whileStmt,
+            graph, loopSpace, frame, cpt, whileStmt,
             condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	return cpt;
     }
 
     public DFComponent processDoStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, DoStatement doStmt)
 	throws UnsupportedSyntax {
-	DFVarScope loopScope = varScope.getChildByAST(doStmt);
+	DFVarSpace loopSpace = varSpace.getChildByAST(doStmt);
 	DFFrame loopFrame = frame.getChildByAST(doStmt);
-	DFComponent loopCpt = new DFComponent(graph, loopScope);
+	DFComponent loopCpt = new DFComponent(graph, loopSpace);
 	loopCpt = processStatement(
-            graph, typeScope, loopScope, loopFrame, loopCpt,
+            graph, typeSpace, loopSpace, loopFrame, loopCpt,
             doStmt.getBody());
 	loopCpt = processExpression(
-            graph, typeScope, loopScope, loopFrame, loopCpt,
+            graph, typeSpace, loopSpace, loopFrame, loopCpt,
             doStmt.getExpression());
 	DFNode condValue = loopCpt.getRValue();
 	cpt = processLoop(
-            graph, loopScope, frame, cpt, doStmt,
+            graph, loopSpace, frame, cpt, doStmt,
             condValue, loopFrame, loopCpt, false);
 	cpt.endFrame(loopFrame);
 	return cpt;
@@ -1396,34 +1396,34 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFComponent processForStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, ForStatement forStmt)
 	throws UnsupportedSyntax {
-	DFVarScope loopScope = varScope.getChildByAST(forStmt);
+	DFVarSpace loopSpace = varSpace.getChildByAST(forStmt);
 	DFFrame loopFrame = frame.getChildByAST(forStmt);
-	DFComponent loopCpt = new DFComponent(graph, loopScope);
+	DFComponent loopCpt = new DFComponent(graph, loopSpace);
 	for (Expression init : (List<Expression>) forStmt.initializers()) {
 	    cpt = processExpression(
-                graph, typeScope, loopScope, frame, cpt, init);
+                graph, typeSpace, loopSpace, frame, cpt, init);
 	}
 	Expression expr = forStmt.getExpression();
 	DFNode condValue;
 	if (expr != null) {
 	    loopCpt = processExpression(
-                graph, typeScope, loopScope, loopFrame, loopCpt, expr);
+                graph, typeSpace, loopSpace, loopFrame, loopCpt, expr);
 	    condValue = loopCpt.getRValue();
 	} else {
-	    condValue = new ConstNode(graph, loopScope, DFTypeRef.BOOLEAN, null, "true");
+	    condValue = new ConstNode(graph, loopSpace, DFTypeRef.BOOLEAN, null, "true");
 	}
 	loopCpt = processStatement(
-            graph, typeScope, loopScope, loopFrame, loopCpt,
+            graph, typeSpace, loopSpace, loopFrame, loopCpt,
             forStmt.getBody());
 	for (Expression update : (List<Expression>) forStmt.updaters()) {
 	    loopCpt = processExpression(
-                graph, typeScope, loopScope, loopFrame, loopCpt, update);
+                graph, typeSpace, loopSpace, loopFrame, loopCpt, update);
 	}
 	cpt = processLoop(
-            graph, loopScope, frame, cpt, forStmt,
+            graph, loopSpace, frame, cpt, forStmt,
             condValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	return cpt;
@@ -1431,28 +1431,28 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFComponent processEnhancedForStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, EnhancedForStatement eForStmt)
 	throws UnsupportedSyntax {
-	DFVarScope loopScope = varScope.getChildByAST(eForStmt);
+	DFVarSpace loopSpace = varSpace.getChildByAST(eForStmt);
 	DFFrame loopFrame = frame.getChildByAST(eForStmt);
-	DFComponent loopCpt = new DFComponent(graph, loopScope);
+	DFComponent loopCpt = new DFComponent(graph, loopSpace);
 	Expression expr = eForStmt.getExpression();
 	loopCpt = processExpression(
-            graph, typeScope, loopScope, frame, loopCpt, expr);
+            graph, typeSpace, loopSpace, frame, loopCpt, expr);
 	SingleVariableDeclaration decl = eForStmt.getParameter();
-	DFVarRef ref = loopScope.lookupVar(decl.getName());
+	DFVarRef ref = loopSpace.lookupVar(decl.getName());
         assert(ref != null);
-	DFNode iterValue = new IterNode(graph, loopScope, ref, expr);
+	DFNode iterValue = new IterNode(graph, loopSpace, ref, expr);
         iterValue.accept(loopCpt.getRValue());
-	SingleAssignNode assign = new SingleAssignNode(graph, loopScope, ref, expr);
+	SingleAssignNode assign = new SingleAssignNode(graph, loopSpace, ref, expr);
 	assign.accept(iterValue);
 	cpt.setOutput(assign);
 	loopCpt = processStatement(
-            graph, typeScope, loopScope, loopFrame, loopCpt,
+            graph, typeSpace, loopSpace, loopFrame, loopCpt,
             eForStmt.getBody());
 	cpt = processLoop(
-            graph, loopScope, frame, cpt, eForStmt,
+            graph, loopSpace, frame, cpt, eForStmt,
             iterValue, loopFrame, loopCpt, true);
 	cpt.endFrame(loopFrame);
 	return cpt;
@@ -1460,7 +1460,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFComponent processStatement(
-	DFGraph graph, DFTypeScope typeScope, DFVarScope varScope,
+	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, Statement stmt)
 	throws UnsupportedSyntax {
 
@@ -1469,25 +1469,25 @@ public class Java2DF {
 
 	} else if (stmt instanceof Block) {
 	    cpt = processBlock(
-		graph, typeScope, varScope, frame, cpt, (Block)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (Block)stmt);
 
 	} else if (stmt instanceof EmptyStatement) {
 
 	} else if (stmt instanceof VariableDeclarationStatement) {
 	    cpt = processVariableDeclarationStatement(
-		graph, typeScope, varScope, frame, cpt, (VariableDeclarationStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (VariableDeclarationStatement)stmt);
 
 	} else if (stmt instanceof ExpressionStatement) {
 	    cpt = processExpressionStatement(
-		graph, typeScope, varScope, frame, cpt, (ExpressionStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (ExpressionStatement)stmt);
 
 	} else if (stmt instanceof IfStatement) {
 	    cpt = processIfStatement(
-		graph, typeScope, varScope, frame, cpt, (IfStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (IfStatement)stmt);
 
 	} else if (stmt instanceof SwitchStatement) {
 	    cpt = processSwitchStatement(
-		graph, typeScope, varScope, frame, cpt, (SwitchStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (SwitchStatement)stmt);
 
 	} else if (stmt instanceof SwitchCase) {
 	    // Invalid "case" placement.
@@ -1495,19 +1495,19 @@ public class Java2DF {
 
 	} else if (stmt instanceof WhileStatement) {
 	    cpt = processWhileStatement(
-		graph, typeScope, varScope, frame, cpt, (WhileStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (WhileStatement)stmt);
 
 	} else if (stmt instanceof DoStatement) {
 	    cpt = processDoStatement(
-		graph, typeScope, varScope, frame, cpt, (DoStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (DoStatement)stmt);
 
 	} else if (stmt instanceof ForStatement) {
 	    cpt = processForStatement(
-		graph, typeScope, varScope, frame, cpt, (ForStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (ForStatement)stmt);
 
 	} else if (stmt instanceof EnhancedForStatement) {
 	    cpt = processEnhancedForStatement(
-		graph, typeScope, varScope, frame, cpt, (EnhancedForStatement)stmt);
+		graph, typeSpace, varSpace, frame, cpt, (EnhancedForStatement)stmt);
 
 	} else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
@@ -1515,8 +1515,8 @@ public class Java2DF {
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 cpt = processExpression(
-		    graph, typeScope, varScope, frame, cpt, expr);
-                ReturnNode rtrn = new ReturnNode(graph, varScope, rtrnStmt);
+		    graph, typeSpace, varSpace, frame, cpt, expr);
+                ReturnNode rtrn = new ReturnNode(graph, varSpace, rtrnStmt);
                 rtrn.accept(cpt.getRValue());
                 cpt.addExit(new DFExit(rtrn, dstFrame));
             }
@@ -1555,13 +1555,13 @@ public class Java2DF {
 	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
 	    DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
 	    cpt = processStatement(
-		graph, typeScope, varScope, labeledFrame,
+		graph, typeSpace, varSpace, labeledFrame,
 		cpt, labeledStmt.getBody());
 
 	} else if (stmt instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
 	    cpt = processStatement(
-		graph, typeScope, varScope, frame,
+		graph, typeSpace, varSpace, frame,
 		cpt, syncStmt.getBody());
 
 	} else if (stmt instanceof TryStatement) {
@@ -1569,21 +1569,21 @@ public class Java2DF {
 	    TryStatement tryStmt = (TryStatement)stmt;
 	    DFFrame tryFrame = frame.getChildByAST(tryStmt);
 	    cpt = processStatement(
-		graph, typeScope, varScope, tryFrame,
+		graph, typeSpace, varSpace, tryFrame,
 		cpt, tryStmt.getBody());
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
 		cpt = processStatement(
-		    graph, typeScope, varScope, frame, cpt, finBlock);
+		    graph, typeSpace, varSpace, frame, cpt, finBlock);
 	    }
 
 	} else if (stmt instanceof ThrowStatement) {
 	    ThrowStatement throwStmt = (ThrowStatement)stmt;
 	    cpt = processExpression(
-		graph, typeScope, varScope, frame,
+		graph, typeSpace, varSpace, frame,
 		cpt, throwStmt.getExpression());
             ExceptionNode exception = new ExceptionNode(
-		graph, varScope, stmt, cpt.getRValue());
+		graph, varSpace, stmt, cpt.getRValue());
 	    DFFrame dstFrame = frame.find(DFFrame.TRY);
 	    cpt.addExit(new DFExit(exception, dstFrame));
 	    for (DFFrame frm = frame; frm != null; frm = frm.getParent()) {
@@ -1598,7 +1598,7 @@ public class Java2DF {
 	    ConstructorInvocation ci = (ConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) ci.arguments()) {
 		cpt = processExpression(
-		    graph, typeScope, varScope, frame, cpt, arg);
+		    graph, typeSpace, varSpace, frame, cpt, arg);
 	    }
 
 	} else if (stmt instanceof SuperConstructorInvocation) {
@@ -1606,7 +1606,7 @@ public class Java2DF {
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
 	    for (Expression arg : (List<Expression>) sci.arguments()) {
 		cpt = processExpression(
-		    graph, typeScope, varScope, frame, cpt, arg);
+		    graph, typeSpace, varSpace, frame, cpt, arg);
 	    }
 
 	} else if (stmt instanceof TypeDeclarationStatement) {
@@ -1625,14 +1625,14 @@ public class Java2DF {
     public Exporter exporter;
     public String[] classPath;
     public String[] srcPath;
-    public DFTypeScope rootScope;
+    public DFTypeSpace rootSpace;
 
     public Java2DF(
 	Exporter exporter, String[] classPath, String[] srcPath) {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
-        this.rootScope = new DFTypeScope("ROOT");
+        this.rootSpace = new DFTypeSpace("ROOT");
     }
 
     /**
@@ -1640,7 +1640,7 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
-        DFTypeScope typeScope, DFClassScope klass,
+        DFTypeSpace typeSpace, DFClassSpace klass,
         MethodDeclaration methodDecl)
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
@@ -1651,11 +1651,11 @@ public class Java2DF {
         Type rt = methodDecl.getReturnType2();
         DFTypeRef returnType = (rt == null)? null : new DFTypeRef(rt);
         try {
-            // Setup an initial scope.
+            // Setup an initial space.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
-            DFVarScope varScope = klass.addChild(funcName);
-            DFGraph graph = new DFGraph(varScope, method);
-            DFComponent cpt = new DFComponent(graph, varScope);
+            DFVarSpace varSpace = klass.addChild(funcName);
+            DFGraph graph = new DFGraph(varSpace, method);
+            DFComponent cpt = new DFComponent(graph, varSpace);
             // XXX Ignore isContructor().
             // XXX Ignore getReturnType2().
             // XXX Ignore isVarargs().
@@ -1664,20 +1664,20 @@ public class Java2DF {
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFTypeRef paramType = new DFTypeRef(decl.getType());
-                DFVarRef ref = varScope.addRef(decl.getName(), paramType);
-                DFNode param = new ArgNode(graph, varScope, ref, decl, i++);
-                DFNode assign = new SingleAssignNode(graph, varScope, ref, decl);
+                DFVarRef ref = varSpace.addRef(decl.getName(), paramType);
+                DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
+                DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
                 cpt.setOutput(assign);
             }
-            varScope.build(frame, funcBlock);
-            varScope.addReturn(returnType);
-            varScope.dump();
+            varSpace.build(frame, funcBlock);
+            varSpace.addReturn(returnType);
+            varSpace.dump();
             //frame.dump();
 
             // Process the function body.
             cpt = processStatement(
-                graph, typeScope, varScope, frame, cpt, funcBlock);
+                graph, typeSpace, varSpace, frame, cpt, funcBlock);
             cpt.endFrame(frame);
             // Remove redundant nodes.
             graph.cleanup();
@@ -1693,7 +1693,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
-        DFGraph graph, DFTypeScope typeScope, DFClassScope klass,
+        DFGraph graph, DFTypeSpace typeSpace, DFClassSpace klass,
         DFFrame frame, FieldDeclaration fieldDecl)
         throws UnsupportedSyntax {
 	for (VariableDeclarationFragment frag :
@@ -1703,7 +1703,7 @@ public class Java2DF {
 	    if (init != null) {
 		DFComponent cpt = new DFComponent(graph, klass);
 		cpt = processExpression(
-                    graph, typeScope, klass, frame, cpt, init);
+                    graph, typeSpace, klass, frame, cpt, init);
 		DFNode assign = new SingleAssignNode(graph, klass, ref, frag);
 		assign.accept(cpt.getRValue());
 	    }
@@ -1712,11 +1712,11 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(
-        DFTypeScope typeScope, TypeDeclaration typeDecl)
+        DFTypeSpace typeSpace, TypeDeclaration typeDecl)
         throws IOException {
 	SimpleName typeName = typeDecl.getName();
         DFTypeRef type = new DFTypeRef(typeName);
-        DFClassScope klass = typeScope.lookupClass(typeName);
+        DFClassSpace klass = typeSpace.lookupClass(typeName);
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
         for (BodyDeclaration body :
@@ -1724,14 +1724,14 @@ public class Java2DF {
 	    try {
 		if (body instanceof TypeDeclaration) {
 		    processTypeDeclaration(
-			typeScope, (TypeDeclaration)body);
+			typeSpace, (TypeDeclaration)body);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
-			classGraph, typeScope, klass,
+			classGraph, typeSpace, klass,
 			frame, (FieldDeclaration)body);
 		} else if (body instanceof MethodDeclaration) {
                     DFGraph graph = processMethodDeclaration(
-                        typeScope, klass, (MethodDeclaration)body);
+                        typeSpace, klass, (MethodDeclaration)body);
                     if (this.exporter != null && graph != null) {
                         this.exporter.writeGraph(graph);
                     }
@@ -1769,15 +1769,15 @@ public class Java2DF {
     public void pass1(String path)
 	throws IOException {
 	CompilationUnit cunit = parseFile(path);
-        DFTypeScope typeScope = this.rootScope;
+        DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeScope = typeScope.getChildScope(pkg.getName());
+            typeSpace = typeSpace.getChildSpace(pkg.getName());
         }
 	try {
 	    for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
-		typeScope.build(typeDecl);
+		typeSpace.build(typeDecl);
 	    }
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
@@ -1789,25 +1789,25 @@ public class Java2DF {
     public void pass2(String path)
 	throws IOException {
 	CompilationUnit cunit = parseFile(path);
-        DFTypeScope typeScope = this.rootScope;
+        DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeScope = typeScope.getChildScope(pkg.getName());
+            typeSpace = typeSpace.getChildSpace(pkg.getName());
         }
-        typeScope = new DFTypeScope(typeScope);
+        typeSpace = new DFTypeSpace(typeSpace);
 	for (ImportDeclaration importDecl : (List<ImportDeclaration>) cunit.imports()) {
             // XXX assert(!importDecl.isStatic());
             if (importDecl.isOnDemand()) {
             } else {
                 Name name = importDecl.getName();
                 assert(name.isQualifiedName());
-                DFClassScope klass = this.rootScope.lookupClass(name);
+                DFClassSpace klass = this.rootSpace.lookupClass(name);
                 QualifiedName qname = (QualifiedName)name;
-                typeScope.addClass(qname.getName(), klass);
+                typeSpace.addClass(qname.getName(), klass);
             }
         }
 	for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cunit.types()) {
-	    processTypeDeclaration(typeScope, typeDecl);
+	    processTypeDeclaration(typeSpace, typeDecl);
 	}
     }
 
@@ -1869,7 +1869,7 @@ public class Java2DF {
 		System.err.println("Cannot open input file: "+path);
 	    }
 	}
-	converter.rootScope.dump();
+	converter.rootSpace.dump();
 	exporter.close();
 
 	Utils.printXml(output, exporter.document);

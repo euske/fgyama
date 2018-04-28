@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFComponent {
 
     private DFGraph _graph;
-    private DFVarScope _scope;
+    private DFVarSpace _space;
 
     private DFNode _lval = null;
     private DFNode _rval = null;
@@ -23,9 +23,9 @@ public class DFComponent {
     private List<DFExit> _exits =
 	new ArrayList<DFExit>();
 
-    public DFComponent(DFGraph graph, DFVarScope scope) {
+    public DFComponent(DFGraph graph, DFVarSpace space) {
         _graph = graph;
-	_scope = scope;
+	_space = space;
     }
 
     // getValue(ref): get an output value of the component if defined.
@@ -34,7 +34,7 @@ public class DFComponent {
 	if (node == null) {
 	    node = _inputs.get(ref);
 	    if (node == null) {
-		node = new DFNode(_graph, _scope, ref.getType(), ref);
+		node = new DFNode(_graph, _space, ref.getType(), ref);
 		_inputs.put(ref, node);
 	    }
 	}

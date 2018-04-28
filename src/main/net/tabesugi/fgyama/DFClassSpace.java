@@ -7,36 +7,36 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFClassScope
+//  DFClassSpace
 //
-public class DFClassScope extends DFVarScope {
+public class DFClassSpace extends DFVarSpace {
 
-    private DFTypeScope _typeScope;
+    private DFTypeSpace _typeSpace;
 
     private Map<String, DFMethod> _id2method =
 	new HashMap<String, DFMethod>();
 
-    public DFClassScope(DFTypeScope typeScope) {
+    public DFClassSpace(DFTypeSpace typeSpace) {
         super("unknown");
-	_typeScope = typeScope;
+	_typeSpace = typeSpace;
     }
 
-    public DFClassScope(DFTypeScope typeScope, SimpleName name) {
+    public DFClassSpace(DFTypeSpace typeSpace, SimpleName name) {
         super(name.getIdentifier());
-	_typeScope = typeScope;
+	_typeSpace = typeSpace;
 	this.addRef("#this", new DFTypeRef(name));
     }
 
-    public DFClassScope getBase() {
+    public DFClassSpace getBase() {
         return this;            // XXX support base class.
     }
 
     public String getName() {
-	return _typeScope.getName()+"/"+super.getName();
+	return _typeSpace.getName()+"/"+super.getName();
     }
 
-    public DFVarScope addChild(String name) {
-        return new DFVarScope(this, name);
+    public DFVarSpace addChild(String name) {
+        return new DFVarSpace(this, name);
     }
 
     public DFVarRef lookupThis() {

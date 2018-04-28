@@ -11,11 +11,11 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFMethod implements Comparable<DFMethod> {
 
-    private DFClassScope _klass;
+    private DFClassSpace _klass;
     private String _name;
     private DFTypeRef _returnType;
 
-    public DFMethod(DFClassScope klass, String name, DFTypeRef returnType) {
+    public DFMethod(DFClassSpace klass, String name, DFTypeRef returnType) {
 	_klass = klass;
 	_name = name;
 	_returnType = returnType;
