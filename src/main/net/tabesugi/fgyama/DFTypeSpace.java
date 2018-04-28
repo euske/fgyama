@@ -19,33 +19,33 @@ public class DFTypeSpace {
 
     private List<DFTypeSpace> _children =
 	new ArrayList<DFTypeSpace>();
-    private Map<String, DFTypeSpace> _id2child =
+    private Map<String, DFTypeSpace> _id2space =
 	new HashMap<String, DFTypeSpace>();
-    private Map<String, DFClassSpace> _id2class =
+    private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
     public DFTypeSpace(String name) {
         _root = this;
+	_default = new DFClassSpace(this);
 	_name = name;
         _parent = null;
-	_default = new DFClassSpace(this);
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
+	_default = parent._default;
 	_name = name;
 	_parent = parent;
-	_default = null;
     }
 
     public DFTypeSpace(DFTypeSpace space) {
         _root = space._root;
+        _default = space._default;
         _name = space._name;
         _parent = space._parent;
-        _default = space._default;
         _children = new ArrayList<DFTypeSpace>(space._children);
-        _id2child = new HashMap<String, DFTypeSpace>(space._id2child);
-        _id2class = new HashMap<String, DFClassSpace>(space._id2class);
+        _id2space = new HashMap<String, DFTypeSpace>(space._id2space);
+        _id2klass = new HashMap<String, DFClassSpace>(space._id2klass);
     }
 
     @Override
@@ -61,63 +61,13 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClassSpace getDefaultClass() {
-	return _default;
-    }
-
-    public DFClassSpace addClass(SimpleName name) {
-	DFClassSpace klass = new DFClassSpace(this, name);
-        this.addClass(name, klass);
-	return klass;
-    }
-
-    public void addClass(SimpleName name, DFClassSpace klass) {
+    public DFTypeSpace lookupSpace(SimpleName name) {
         String id = name.getIdentifier();
-        assert(!_id2class.containsKey(id));
-	_id2class.put(id, klass);
-    }
-
-    private DFClassSpace lookupClass(String id) {
-        if (id.startsWith(".")) {
-	    int i = id.lastIndexOf('.');
-	    if (i == 0) {
-		DFClassSpace klass = _id2class.get(id.substring(i+1));
-		if (klass != null) {
-		    return klass;
-		}
-	    } else if (_parent != null) {
-		DFTypeSpace parent = _parent.lookupSpace(id.substring(0, i));
-		return parent.lookupClass("."+id.substring(i+1));
-            }
-        }
-        return _root.getDefaultClass();
-    }
-
-    public DFClassSpace lookupClass(DFTypeRef type) {
-	if (type != null) {
-	    return this.lookupClass(type.getId());
-	} else {
-	    return _root.getDefaultClass();
-	}
-    }
-
-    public DFClassSpace lookupClass(Name name) {
-        if (name.isQualifiedName()) {
-	    QualifiedName qname = (QualifiedName)name;
-            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
-            return parent.lookupClass(qname.getName());
-        } else {
-            SimpleName sname = (SimpleName)name;
-            return this.lookupClass("."+sname.getIdentifier());
-        }
-    }
-
-    private DFTypeSpace lookupSpace(String id) {
-        DFTypeSpace space = _id2child.get(id);
+        DFTypeSpace space = _id2space.get(id);
         if (space == null) {
             space = new DFTypeSpace(this, id);
             _children.add(space);
-            _id2child.put(id, space);
+            _id2space.put(id, space);
         }
         return space;
     }
@@ -129,25 +79,80 @@ public class DFTypeSpace {
 	    parent = parent.lookupSpace(qname.getQualifier());
             return parent.lookupSpace(qname.getName());
         } else {
-            SimpleName sname = (SimpleName)name;
-            return this.lookupSpace(sname.getIdentifier());
+            return this.lookupSpace((SimpleName)name);
         }
     }
 
-    // dump: for debugging.
-    public void dump() {
-	dump(System.err, "");
+    public DFClassSpace getDefaultClass() {
+	return _default;
     }
-    public void dump(PrintStream out, String indent) {
-	out.println(indent+_name+" {");
-	String i2 = indent + "  ";
-	for (DFClassSpace klass : _id2class.values()) {
-	    out.println(i2+"defined: "+klass);
-	}
-	for (DFTypeSpace space : _children) {
-	    space.dump(out, i2);
-	}
-	out.println(indent+"}");
+
+    public void addClass(SimpleName name) {
+        this.addClass(name, new DFClassSpace(this, name));
+    }
+
+    public void addClass(SimpleName name, DFClassSpace klass) {
+        String id = name.getIdentifier();
+        assert(!_id2klass.containsKey(id));
+	_id2klass.put(id, klass);
+    }
+
+    public DFClassSpace lookupClass(SimpleName name) {
+        String id = name.getIdentifier();
+        DFClassSpace klass = _id2klass.get(id);
+        if (klass != null) {
+            return klass;
+        } else {
+            return this.getDefaultClass();
+        }
+    }
+
+    public DFClassSpace lookupClass(Name name) {
+        if (name.isQualifiedName()) {
+	    QualifiedName qname = (QualifiedName)name;
+            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
+            return parent.lookupClass(qname.getName());
+        } else {
+            return this.lookupClass((SimpleName)name);
+        }
+    }
+
+    public DFClassSpace lookupClass(DFType type) {
+        if (type instanceof DFClassType) {
+            return ((DFClassType)type).getKlass();
+        }
+        return this.getDefaultClass();
+    }
+
+    @SuppressWarnings("unchecked")
+    public DFType resolve(Type type) {
+	if (type instanceof PrimitiveType) {
+            PrimitiveType ptype = (PrimitiveType)type;
+            return new DFBasicType(ptype.getPrimitiveTypeCode());
+	} else if (type instanceof SimpleType) {
+            SimpleType stype = (SimpleType)type;
+            DFClassSpace klass = this.lookupClass(stype.getName());
+            return new DFClassType(klass);
+	} else if (type instanceof ArrayType) {
+            ArrayType atype = (ArrayType)type;
+	    DFType elemType = this.resolve(atype.getElementType());
+	    int ndims = atype.getDimensions();
+	    return new DFArrayType(elemType, ndims);
+	} else if (type instanceof ParameterizedType) {
+            ParameterizedType ptype = (ParameterizedType)type;
+            List<Type> args = (List<Type>) ptype.typeArguments();
+            DFType baseType = this.resolve(ptype.getType());
+            DFType[] argTypes = new DFType[args.size()];
+            for (int i = 0; i < args.size(); i++) {
+                argTypes[i] = this.resolve(args.get(i));
+            }
+            if (baseType instanceof DFClassType) {
+                // XXX make DFCompoundType
+                return new DFClassType(
+                    ((DFClassType)baseType).getKlass(), argTypes);
+            }
+        }
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -162,32 +167,35 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
-
-        DFClassSpace klass = this.addClass(typeDecl.getName());
+        this.addClass(typeDecl.getName());
         DFTypeSpace child = this.lookupSpace(typeDecl.getName());
-
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
                 child.build((TypeDeclaration)body);
-
             } else if (body instanceof FieldDeclaration) {
-		// XXX support static field.
-                FieldDeclaration decl = (FieldDeclaration)body;
-		DFTypeRef type = new DFTypeRef(decl.getType());
-		for (VariableDeclarationFragment frag :
-			 (List<VariableDeclarationFragment>) decl.fragments()) {
-		    klass.addField(frag.getName(), type);
-		}
-
+                ;
             } else if (body instanceof MethodDeclaration) {
-                MethodDeclaration decl = (MethodDeclaration)body;
-		DFTypeRef returnType = new DFTypeRef(decl.getReturnType2());
-		klass.addMethod(decl.getName(), returnType);
-
+                ;
             } else {
                 throw new UnsupportedSyntax(body);
             }
         }
+    }
+
+    // dump: for debugging.
+    public void dump() {
+	dump(System.err, "");
+    }
+    public void dump(PrintStream out, String indent) {
+	out.println(indent+_name+" {");
+	String i2 = indent + "  ";
+	for (DFClassSpace klass : _id2klass.values()) {
+	    out.println(i2+"defined: "+klass);
+	}
+	for (DFTypeSpace space : _children) {
+	    space.dump(out, i2);
+	}
+	out.println(indent+"}");
     }
 }

@@ -16,7 +16,7 @@ abstract class ProgNode extends DFNode {
     public ASTNode ast;
 
     public ProgNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFType type, DFVarRef ref,
         ASTNode ast) {
 	super(graph, space, type, ref);
 	this.ast = ast;
@@ -184,7 +184,7 @@ class InfixNode extends ProgNode {
     public InfixExpression.Operator op;
 
     public InfixNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFType type,
         ASTNode ast, InfixExpression.Operator op,
         DFNode lvalue, DFNode rvalue) {
 	super(graph, space, type, null, ast);
@@ -208,7 +208,7 @@ class InfixNode extends ProgNode {
 class TypeCastNode extends ProgNode {
 
     public TypeCastNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFType type,
         ASTNode ast) {
 	super(graph, space, type, null, ast);
 	assert(type != null);
@@ -221,19 +221,19 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getData() {
-	return this.getType().getId();
+	return this.getType().getName();
     }
 }
 
 // InstanceofNode
 class InstanceofNode extends ProgNode {
 
-    public DFTypeRef type;
+    public DFType type;
 
     public InstanceofNode(
         DFGraph graph, DFVarSpace space,
-        ASTNode ast, DFTypeRef type) {
-	super(graph, space, DFTypeRef.BOOLEAN, null, ast);
+        ASTNode ast, DFType type) {
+	super(graph, space, DFType.BOOLEAN, null, ast);
 	assert(type != null);
 	this.type = type;
     }
@@ -245,7 +245,7 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getData() {
-	return this.getType().getId();
+	return this.getType().getName();
     }
 }
 
@@ -338,7 +338,7 @@ class ConstNode extends ProgNode {
     public String data;
 
     public ConstNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFType type,
         ASTNode ast, String data) {
 	super(graph, space, type, null, ast);
 	this.data = data;
@@ -523,7 +523,7 @@ abstract class CallNode extends ProgNode {
     public DFNode exception;
 
     public CallNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type, DFVarRef ref,
+        DFGraph graph, DFVarSpace space, DFType type, DFVarRef ref,
         ASTNode ast) {
 	super(graph, space, type, ref, ast);
 	this.args = new ArrayList<DFNode>();
@@ -567,7 +567,7 @@ class MethodCallNode extends CallNode {
 class CreateObjectNode extends CallNode {
 
     public CreateObjectNode(
-        DFGraph graph, DFVarSpace space, DFTypeRef type,
+        DFGraph graph, DFVarSpace space, DFType type,
         ASTNode ast, DFNode obj) {
 	super(graph, space, type, null, ast);
 	assert(type != null);
@@ -583,7 +583,7 @@ class CreateObjectNode extends CallNode {
 
     @Override
     public String getData() {
-	return this.getType().getId();
+	return this.getType().getName();
     }
 }
 
@@ -932,36 +932,36 @@ public class Java2DF {
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.BOOLEAN,
+                              graph, varSpace, DFType.BOOLEAN,
                               expr, Boolean.toString(value)));
 
 	} else if (expr instanceof CharacterLiteral) {
 	    char value = ((CharacterLiteral)expr).charValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.CHAR,
+                              graph, varSpace, DFType.CHAR,
                               expr, "'"+Character.toString(value)+"'"));
 
 	} else if (expr instanceof NullLiteral) {
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.NULL,
+                              graph, varSpace, DFType.NULL,
                               expr, "null"));
 
 	} else if (expr instanceof NumberLiteral) {
 	    String value = ((NumberLiteral)expr).getToken();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.NUMBER,
+                              graph, varSpace, DFType.NUMBER,
                               expr, value));
 
 	} else if (expr instanceof StringLiteral) {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.STRING,
+                              graph, varSpace, DFType.STRING,
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)expr).getType();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFTypeRef.TYPE,
+                              graph, varSpace, DFType.TYPE,
                               expr, Utils.getTypeName(value)));
 
 	} else if (expr instanceof PrefixExpression) {
@@ -1015,7 +1015,7 @@ public class Java2DF {
 	    DFNode lvalue = cpt.getRValue();
 	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
-            DFTypeRef type = lvalue.getType(); // XXX Todo: implicit type coersion.
+            DFType type = lvalue.getType(); // XXX Todo: implicit type coersion.
 	    cpt.setRValue(new InfixNode(graph, varSpace, type,
                                         expr, op, lvalue, rvalue));
 
@@ -1152,7 +1152,7 @@ public class Java2DF {
 
 	} else if (expr instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)expr;
-	    DFTypeRef type = new DFTypeRef(cast.getType());
+	    DFType type = typeSpace.resolve(cast.getType());
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, cast.getExpression());
             DFNode node = new TypeCastNode(graph, varSpace, type, cast);
@@ -1161,7 +1161,7 @@ public class Java2DF {
 
 	} else if (expr instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-	    DFTypeRef instType = new DFTypeRef(cstr.getType());
+	    DFType instType = typeSpace.resolve(cstr.getType());
 	    Expression expr1 = cstr.getExpression();
 	    DFNode obj = null;
 	    if (expr1 != null) {
@@ -1198,7 +1198,7 @@ public class Java2DF {
 
 	} else if (expr instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
-	    DFTypeRef type = new DFTypeRef(instof.getRightOperand());
+	    DFType type = typeSpace.resolve(instof.getRightOperand());
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt,
                 instof.getLeftOperand());
@@ -1413,7 +1413,7 @@ public class Java2DF {
                 graph, typeSpace, loopSpace, loopFrame, loopCpt, expr);
 	    condValue = loopCpt.getRValue();
 	} else {
-	    condValue = new ConstNode(graph, loopSpace, DFTypeRef.BOOLEAN, null, "true");
+	    condValue = new ConstNode(graph, loopSpace, DFType.BOOLEAN, null, "true");
 	}
 	loopCpt = processStatement(
             graph, typeSpace, loopSpace, loopFrame, loopCpt,
@@ -1649,7 +1649,7 @@ public class Java2DF {
 	String funcName = methodDecl.getName().getIdentifier();
 	Block funcBlock = methodDecl.getBody();
         Type rt = methodDecl.getReturnType2();
-        DFTypeRef returnType = (rt == null)? null : new DFTypeRef(rt);
+        DFType returnType = (rt == null)? null : typeSpace.resolve(rt);
         try {
             // Setup an initial space.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
@@ -1663,14 +1663,14 @@ public class Java2DF {
             for (SingleVariableDeclaration decl :
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
-                DFTypeRef paramType = new DFTypeRef(decl.getType());
+                DFType paramType = typeSpace.resolve(decl.getType());
                 DFVarRef ref = varSpace.addRef(decl.getName(), paramType);
                 DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
                 cpt.setOutput(assign);
             }
-            varSpace.build(frame, funcBlock);
+            varSpace.build(typeSpace, frame, funcBlock);
             varSpace.addReturn(returnType);
             varSpace.dump();
             //frame.dump();
@@ -1715,7 +1715,6 @@ public class Java2DF {
         DFTypeSpace typeSpace, TypeDeclaration typeDecl)
         throws IOException {
 	SimpleName typeName = typeDecl.getName();
-        DFTypeRef type = new DFTypeRef(typeName);
         DFClassSpace klass = typeSpace.lookupClass(typeName);
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
@@ -1765,33 +1764,26 @@ public class Java2DF {
 	return (CompilationUnit)parser.createAST(null);
     }
 
-    // pass1
-    public void buildTypeSpace(CompilationUnit cunit) {
+    private DFTypeSpace getTypeSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
             typeSpace = typeSpace.lookupSpace(pkg.getName());
         }
-	try {
-            typeSpace.build(cunit);
-	} catch (UnsupportedSyntax e) {
-	    String astName = e.ast.getClass().getName();
-	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-	}
+        return typeSpace;
     }
 
     @SuppressWarnings("unchecked")
-    public void pass2(CompilationUnit cunit)
-        throws IOException {
-        DFTypeSpace typeSpace = this.rootSpace;
-        PackageDeclaration pkg = cunit.getPackage();
-        if (pkg != null) {
-            typeSpace = typeSpace.lookupSpace(pkg.getName());
-        }
+    private DFTypeSpace extendTypeSpace(
+        DFTypeSpace typeSpace, CompilationUnit cunit) {
+        // Make a copy as we're polluting the oririnal TypeSpace.
         typeSpace = new DFTypeSpace(typeSpace);
-	for (ImportDeclaration importDecl : (List<ImportDeclaration>) cunit.imports()) {
-            // XXX assert(!importDecl.isStatic());
+	for (ImportDeclaration importDecl :
+                 (List<ImportDeclaration>) cunit.imports()) {
+            // XXX support static import
+            assert(!importDecl.isStatic());
             if (importDecl.isOnDemand()) {
+                // XXX TODO
             } else {
                 Name name = importDecl.getName();
                 assert(name.isQualifiedName());
@@ -1800,7 +1792,45 @@ public class Java2DF {
                 typeSpace.addClass(qname.getName(), klass);
             }
         }
-	for (TypeDeclaration typeDecl : (List<TypeDeclaration>) cunit.types()) {
+        return typeSpace;
+    }
+
+    // pass1
+    public void buildTypeSpace(CompilationUnit cunit) {
+        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
+	try {
+            typeSpace.build(cunit);
+	} catch (UnsupportedSyntax e) {
+	    String astName = e.ast.getClass().getName();
+	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+	}
+    }
+
+    // pass2
+    @SuppressWarnings("unchecked")
+    public void buildClassSpace(CompilationUnit cunit) {
+        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
+        typeSpace = this.extendTypeSpace(typeSpace, cunit);
+	try {
+            for (TypeDeclaration typeDecl :
+                     (List<TypeDeclaration>) cunit.types()) {
+                DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
+                klass.build(typeSpace, typeDecl);
+            }
+	} catch (UnsupportedSyntax e) {
+	    String astName = e.ast.getClass().getName();
+	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+	}
+    }
+
+    // pass3
+    @SuppressWarnings("unchecked")
+    public void buildGraphs(CompilationUnit cunit)
+        throws IOException {
+        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
+        typeSpace = this.extendTypeSpace(typeSpace, cunit);
+	for (TypeDeclaration typeDecl :
+                 (List<TypeDeclaration>) cunit.types()) {
 	    processTypeDeclaration(typeSpace, typeDecl);
 	}
     }
@@ -1858,8 +1888,17 @@ public class Java2DF {
 	    Utils.logit("Pass2: "+path);
 	    try {
                 CompilationUnit cunit = converter.parseFile(path);
+		converter.buildClassSpace(cunit);
+	    } catch (IOException e) {
+		System.err.println("Cannot open input file: "+path);
+	    }
+	}
+	for (String path : files) {
+	    Utils.logit("Pass3: "+path);
+	    try {
+                CompilationUnit cunit = converter.parseFile(path);
 		exporter.startFile(path);
-		converter.pass2(cunit);
+		converter.buildGraphs(cunit);
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);

@@ -13,9 +13,9 @@ public class DFMethod implements Comparable<DFMethod> {
 
     private DFClassSpace _klass;
     private String _name;
-    private DFTypeRef _returnType;
+    private DFType _returnType;
 
-    public DFMethod(DFClassSpace klass, String name, DFTypeRef returnType) {
+    public DFMethod(DFClassSpace klass, String name, DFType returnType) {
 	_klass = klass;
 	_name = name;
 	_returnType = returnType;
@@ -43,7 +43,7 @@ public class DFMethod implements Comparable<DFMethod> {
         }
     }
 
-    public DFTypeRef getReturnType() {
+    public DFType getReturnType() {
 	return _returnType;
     }
 }

@@ -14,9 +14,9 @@ public class DFVarRef implements Comparable<DFVarRef> {
 
     private DFVarSpace _space;
     private String _name;
-    private DFTypeRef _type;
+    private DFType _type;
 
-    public DFVarRef(DFVarSpace space, String name, DFTypeRef type) {
+    public DFVarRef(DFVarSpace space, String name, DFType type) {
 	_space = space;
 	_name = name;
 	_type = type;
@@ -44,7 +44,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
         }
     }
 
-    public DFTypeRef getType() {
+    public DFType getType() {
 	return _type;
     }
 }
