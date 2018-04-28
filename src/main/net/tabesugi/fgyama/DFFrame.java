@@ -92,6 +92,123 @@ public class DFFrame {
 	return refs;
     }
 
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeSpace typeSpace, DFVarSpace varSpace, Statement ast)
+	throws UnsupportedSyntax {
+
+	if (ast instanceof AssertStatement) {
+
+	} else if (ast instanceof Block) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    Block block = (Block)ast;
+	    for (Statement stmt :
+		     (List<Statement>) block.statements()) {
+                this.build(typeSpace, childSpace, stmt);
+	    }
+
+	} else if (ast instanceof EmptyStatement) {
+
+	} else if (ast instanceof VariableDeclarationStatement) {
+
+	} else if (ast instanceof ExpressionStatement) {
+
+	} else if (ast instanceof ReturnStatement) {
+
+	} else if (ast instanceof IfStatement) {
+	    IfStatement ifStmt = (IfStatement)ast;
+	    Statement thenStmt = ifStmt.getThenStatement();
+	    this.build(typeSpace, varSpace, thenStmt);
+	    Statement elseStmt = ifStmt.getElseStatement();
+	    if (elseStmt != null) {
+		this.build(typeSpace, varSpace, elseStmt);
+	    }
+
+	} else if (ast instanceof SwitchStatement) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    SwitchStatement switchStmt = (SwitchStatement)ast;
+	    DFFrame childFrame = this.addChild(null, ast);
+	    for (Statement stmt :
+		     (List<Statement>) switchStmt.statements()) {
+		childFrame.build(typeSpace, childSpace, stmt);
+	    }
+
+	} else if (ast instanceof SwitchCase) {
+
+	} else if (ast instanceof WhileStatement) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    WhileStatement whileStmt = (WhileStatement)ast;
+	    DFFrame childFrame = this.addChild(null, ast);
+	    Statement stmt = whileStmt.getBody();
+            childFrame.build(typeSpace, childSpace, stmt);
+
+	} else if (ast instanceof DoStatement) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    DoStatement doStmt = (DoStatement)ast;
+	    DFFrame childFrame = this.addChild(null, ast);
+	    Statement stmt = doStmt.getBody();
+            childFrame.build(typeSpace, childSpace, stmt);
+
+	} else if (ast instanceof ForStatement) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    ForStatement forStmt = (ForStatement)ast;
+	    DFFrame childFrame = this.addChild(null, ast);
+	    Statement stmt = forStmt.getBody();
+            childFrame.build(typeSpace, childSpace, stmt);
+
+	} else if (ast instanceof EnhancedForStatement) {
+	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
+	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+	    ForStatement forStmt = (ForStatement)ast;
+	    DFFrame childFrame = this.addChild(null, ast);
+	    Statement stmt = eForStmt.getBody();
+            childFrame.build(typeSpace, childSpace, stmt);
+
+	} else if (ast instanceof BreakStatement) {
+
+	} else if (ast instanceof ContinueStatement) {
+
+	} else if (ast instanceof LabeledStatement) {
+	    LabeledStatement labeledStmt = (LabeledStatement)ast;
+	    SimpleName labelName = labeledStmt.getLabel();
+	    String label = labelName.getIdentifier();
+	    DFFrame childFrame = this.addChild(label, ast);
+	    Statement stmt = labeledStmt.getBody();
+            childFrame.build(typeSpace, varSpace, stmt);
+
+	} else if (ast instanceof SynchronizedStatement) {
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+	    Block block = syncStmt.getBody();
+	    this.build(typeSpace, varSpace, block);
+
+	} else if (ast instanceof TryStatement) {
+	    TryStatement tryStmt = (TryStatement)ast;
+	    Block block = tryStmt.getBody();
+	    DFFrame tryFrame = this.addChild(DFFrame.TRY, ast);
+            tryFrame.build(typeSpace, varSpace, block);
+	    for (CatchClause cc :
+		     (List<CatchClause>) tryStmt.catchClauses()) {
+                DFVarSpace childSpace = varSpace.getChildByAST(cc);
+		this.build(typeSpace, childSpace, cc.getBody());
+	    }
+	    Block finBlock = tryStmt.getFinally();
+	    if (finBlock != null) {
+		this.build(typeSpace, varSpace, finBlock);
+	    }
+
+	} else if (ast instanceof ThrowStatement) {
+
+	} else if (ast instanceof ConstructorInvocation) {
+
+	} else if (ast instanceof SuperConstructorInvocation) {
+
+	} else if (ast instanceof TypeDeclarationStatement) {
+
+	} else {
+	    throw new UnsupportedSyntax(ast);
+
+	}
+    }
+
     // dump: for debugging.
     public void dump() {
 	dump(System.err, "");
