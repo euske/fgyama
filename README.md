@@ -15,8 +15,6 @@ How to Build:
 
 TODOs:
 
-  * Import namespaces
-  * Build DFFrame separately.
-  * Class inheritance
+  * Class inheritance / polymorphism.
   * Static fields/methods
   * Anymous class / lambdas
