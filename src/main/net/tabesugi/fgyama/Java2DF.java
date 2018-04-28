@@ -1772,7 +1772,7 @@ public class Java2DF {
         DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeSpace = typeSpace.getChildSpace(pkg.getName());
+            typeSpace = typeSpace.lookupSpace(pkg.getName());
         }
 	try {
 	    for (TypeDeclaration typeDecl :
@@ -1792,7 +1792,7 @@ public class Java2DF {
         DFTypeSpace typeSpace = this.rootSpace;
         PackageDeclaration pkg = cunit.getPackage();
         if (pkg != null) {
-            typeSpace = typeSpace.getChildSpace(pkg.getName());
+            typeSpace = typeSpace.lookupSpace(pkg.getName());
         }
         typeSpace = new DFTypeSpace(typeSpace);
 	for (ImportDeclaration importDecl : (List<ImportDeclaration>) cunit.imports()) {

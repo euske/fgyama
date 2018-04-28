@@ -86,7 +86,7 @@ public class DFTypeSpace {
 		    return klass;
 		}
 	    } else if (_parent != null) {
-		DFTypeSpace parent = _parent.getChildSpace(id.substring(0, i));
+		DFTypeSpace parent = _parent.lookupSpace(id.substring(0, i));
 		return parent.lookupClass("."+id.substring(i+1));
             }
         }
@@ -104,7 +104,7 @@ public class DFTypeSpace {
     public DFClassSpace lookupClass(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
-            DFTypeSpace parent = this.getChildSpace(qname.getQualifier());
+            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
             return parent.lookupClass(qname.getName());
         } else {
             SimpleName sname = (SimpleName)name;
@@ -112,7 +112,7 @@ public class DFTypeSpace {
         }
     }
 
-    private DFTypeSpace getChildSpace(String id) {
+    private DFTypeSpace lookupSpace(String id) {
         DFTypeSpace space = _id2child.get(id);
         if (space == null) {
             space = new DFTypeSpace(this, id);
@@ -122,15 +122,15 @@ public class DFTypeSpace {
         return space;
     }
 
-    public DFTypeSpace getChildSpace(Name name) {
+    public DFTypeSpace lookupSpace(Name name) {
         if (name.isQualifiedName()) {
 	    QualifiedName qname = (QualifiedName)name;
 	    DFTypeSpace parent = (_parent != null)? _parent : this;
-	    parent = parent.getChildSpace(qname.getQualifier());
-            return parent.getChildSpace(qname.getName());
+	    parent = parent.lookupSpace(qname.getQualifier());
+            return parent.lookupSpace(qname.getName());
         } else {
             SimpleName sname = (SimpleName)name;
-            return this.getChildSpace(sname.getIdentifier());
+            return this.lookupSpace(sname.getIdentifier());
         }
     }
 
@@ -155,7 +155,7 @@ public class DFTypeSpace {
 	throws UnsupportedSyntax {
 
         DFClassSpace klass = this.addClass(typeDecl.getName());
-        DFTypeSpace child = this.getChildSpace(typeDecl.getName());
+        DFTypeSpace child = this.lookupSpace(typeDecl.getName());
 
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
