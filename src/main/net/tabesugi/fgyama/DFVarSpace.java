@@ -70,10 +70,9 @@ public class DFVarSpace {
     }
 
     public DFVarSpace addChild(String basename, ASTNode ast) {
-	int id = _children.size();
-	String name = basename+id;
-        Utils.logit("DFVarSpace.addChild: "+this+": "+name);
-	DFVarSpace space = new DFVarSpace(this, name);
+	String id = basename + _children.size();
+        Utils.logit("DFVarSpace.addChild: "+this+": "+id);
+	DFVarSpace space = new DFVarSpace(this, id);
 	_children.add(space);
 	_ast2child.put(ast, space);
 	return space;
@@ -151,25 +150,34 @@ public class DFVarSpace {
         return _parent.lookupMethod(name);
     }
 
-    public DFVarRef addVar(SimpleName name, DFType type) {
+    private DFVarRef addVar(SimpleName name, DFType type) {
         Utils.logit("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
         return this.addRef(name.getIdentifier(), type);
     }
 
     /**
-     * Lists all the variables defined inside a block.
+     * Lists all the variables defined inside a method.
      */
+    @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, DFFrame frame,
-                      Block block, DFType returnType)
+                      MethodDeclaration methodDecl)
 	throws UnsupportedSyntax {
-        this.build(typeSpace, frame, block);
-	this.addRef("#return", returnType);
+        Utils.logit("DFVarSpace.build: "+this);
+        Type returnType = methodDecl.getReturnType2();
+        DFType type = (returnType == null)? null : typeSpace.resolve(returnType);
+	this.addRef("#return", type);
+        for (SingleVariableDeclaration decl :
+                 (List<SingleVariableDeclaration>) methodDecl.parameters()) {
+            // XXX Ignore modifiers.
+            DFType paramType = typeSpace.resolve(decl.getType());
+            this.addVar(decl.getName(), paramType);
+        }
+        this.build(typeSpace, frame, methodDecl.getBody());
     }
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, DFFrame frame, Statement ast)
 	throws UnsupportedSyntax {
-        Utils.logit("DFVarSpace.build: "+this);
 
 	if (ast instanceof AssertStatement) {
 
@@ -186,7 +194,7 @@ public class DFVarSpace {
 	} else if (ast instanceof VariableDeclarationStatement) {
 	    VariableDeclarationStatement varStmt =
 		(VariableDeclarationStatement)ast;
-	    // XXX Ignore modifiers and dimensions.
+	    // XXX Ignore modifiers.
 	    DFType varType = typeSpace.resolve(varStmt.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
@@ -280,7 +288,7 @@ public class DFVarSpace {
 	    DFVarSpace childSpace = this.addChild("efor", ast);
 	    DFFrame childFrame = frame.addChild(null, ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
-	    // XXX Ignore modifiers and dimensions.
+	    // XXX Ignore modifiers.
 	    DFType varType = typeSpace.resolve(decl.getType());
 	    childSpace.addVar(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
@@ -316,7 +324,7 @@ public class DFVarSpace {
 		     (List<CatchClause>) tryStmt.catchClauses()) {
 		DFVarSpace childSpace = this.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
-		// XXX Ignore modifiers and dimensions.
+		// XXX Ignore modifiers.
 		DFType varType = typeSpace.resolve(decl.getType());
 		childSpace.addVar(decl.getName(), varType);
 		childSpace.build(typeSpace, frame, cc.getBody());
@@ -436,7 +444,7 @@ public class DFVarSpace {
 
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
-	    // XXX Ignore modifiers and dimensions.
+	    // XXX Ignore modifiers.
 	    DFType varType = typeSpace.resolve(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {

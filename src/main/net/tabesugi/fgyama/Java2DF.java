@@ -1645,46 +1645,42 @@ public class Java2DF {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
         DFMethod method = klass.lookupMethod(methodDecl.getName());
-	Block funcBlock = methodDecl.getBody();
-        Type rt = methodDecl.getReturnType2();
-        DFType returnType = (rt == null)? null : typeSpace.resolve(rt);
         try {
             // Setup an initial space.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
+            varSpace.build(typeSpace, frame, methodDecl);
+            //varSpace.dump();
+            //frame.dump();
+
             DFGraph graph = new DFGraph(varSpace, method);
             DFComponent cpt = new DFComponent(graph, varSpace);
             // XXX Ignore isContructor().
-            // XXX Ignore getReturnType2().
             // XXX Ignore isVarargs().
             int i = 0;
             for (SingleVariableDeclaration decl :
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
-                DFType paramType = typeSpace.resolve(decl.getType());
-                DFVarRef ref = varSpace.addVar(decl.getName(), paramType);
+                DFVarRef ref = varSpace.lookupVar(decl.getName());
                 assert(ref != null);
                 DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
                 cpt.setOutput(assign);
             }
-            varSpace.build(typeSpace, frame, funcBlock, returnType);
-            //varSpace.dump();
-            //frame.dump();
 
             // Process the function body.
             cpt = processStatement(
-                graph, typeSpace, varSpace, frame, cpt, funcBlock);
+                graph, typeSpace, varSpace, frame, cpt, methodDecl.getBody());
             cpt.endFrame(frame);
             // Remove redundant nodes.
             graph.cleanup();
 
-            Utils.logit("Success: "+method);
+            Utils.logit("Success: "+method.getName());
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
-            e.name = methodDecl.getName().getIdentifier();
+            e.name = method.getName();
             throw e;
         }
     }
