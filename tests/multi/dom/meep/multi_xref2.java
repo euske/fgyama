@@ -2,8 +2,12 @@ package dom.meep;
 
 public class multi_xref2 {
 
+    multi_xref1 xref1;
+
     public void foo() {
-	multi_xref1 xref1 = new multi_xref1();
+	this.xref1 = new multi_xref1();
 	xref1.moo();
+        multi_xref1.baa zzz;
+        int b = zzz.baz;
     }
 }

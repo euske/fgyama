@@ -18,7 +18,7 @@ public class DFBasicType extends DFType {
     }
 
     public DFBasicType(PrimitiveType.Code code) {
-        _name = code.toString();
+        _name = "@"+code.toString();
     }
 
     public String getName()

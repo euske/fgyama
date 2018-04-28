@@ -821,12 +821,11 @@ public class Java2DF {
      */
     public DFComponent processVariableDeclaration(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt,
-        List<VariableDeclarationFragment> frags)
+        DFFrame frame, DFComponent cpt, List<VariableDeclarationFragment> frags)
 	throws UnsupportedSyntax {
 
 	for (VariableDeclarationFragment frag : frags) {
-	    DFVarRef ref = varSpace.lookupVar(frag.getName());
+            DFVarRef ref = varSpace.lookupVar(frag.getName());
             assert(ref != null);
 	    Expression init = frag.getInitializer();
 	    if (init != null) {
@@ -1054,7 +1053,7 @@ public class Java2DF {
                     graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFMethod method = klass.lookupMethod(invoke.getName());
 	    MethodCallNode call = new MethodCallNode(
                 graph, varSpace, method, invoke, obj);
@@ -1072,7 +1071,7 @@ public class Java2DF {
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
             DFNode obj = cpt.getValue(varSpace.lookupThis());
-            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFClassSpace baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName());
 	    MethodCallNode call = new MethodCallNode(
@@ -1144,7 +1143,7 @@ public class Java2DF {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
 	    DFNode obj = cpt.getValue(varSpace.lookupThis());
-            DFClassSpace klass = typeSpace.lookupClass(obj.getType());
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
 	    DFVarRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
             node.accept(cpt.getValue(ref));
@@ -1632,7 +1631,7 @@ public class Java2DF {
 	this.exporter = exporter;
 	this.classPath = classPath;
 	this.srcPath = srcPath;
-        this.rootSpace = new DFTypeSpace("ROOT");
+        this.rootSpace = new DFTypeSpace();
     }
 
     /**
@@ -1646,14 +1645,13 @@ public class Java2DF {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
         DFMethod method = klass.lookupMethod(methodDecl.getName());
-	String funcName = methodDecl.getName().getIdentifier();
 	Block funcBlock = methodDecl.getBody();
         Type rt = methodDecl.getReturnType2();
         DFType returnType = (rt == null)? null : typeSpace.resolve(rt);
         try {
             // Setup an initial space.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
-            DFVarSpace varSpace = klass.addChild(funcName);
+            DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
             DFGraph graph = new DFGraph(varSpace, method);
             DFComponent cpt = new DFComponent(graph, varSpace);
             // XXX Ignore isContructor().
@@ -1664,15 +1662,15 @@ public class Java2DF {
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFType paramType = typeSpace.resolve(decl.getType());
-                DFVarRef ref = varSpace.addRef(decl.getName(), paramType);
+                DFVarRef ref = varSpace.addVar(decl.getName(), paramType);
+                assert(ref != null);
                 DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
                 cpt.setOutput(assign);
             }
-            varSpace.build(typeSpace, frame, funcBlock);
-            varSpace.addReturn(returnType);
-            varSpace.dump();
+            varSpace.build(typeSpace, frame, funcBlock, returnType);
+            //varSpace.dump();
             //frame.dump();
 
             // Process the function body.
@@ -1682,11 +1680,11 @@ public class Java2DF {
             // Remove redundant nodes.
             graph.cleanup();
 
-            Utils.logit("Success: "+funcName);
+            Utils.logit("Success: "+method);
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
-            e.name = funcName;
+            e.name = methodDecl.getName().getIdentifier();
             throw e;
         }
     }
@@ -1714,8 +1712,9 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, TypeDeclaration typeDecl)
         throws IOException {
-	SimpleName typeName = typeDecl.getName();
-        DFClassSpace klass = typeSpace.lookupClass(typeName);
+        DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
+        assert(klass != null);
+        DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
         for (BodyDeclaration body :
@@ -1723,7 +1722,7 @@ public class Java2DF {
 	    try {
 		if (body instanceof TypeDeclaration) {
 		    processTypeDeclaration(
-			typeSpace, (TypeDeclaration)body);
+			child, (TypeDeclaration)body);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
 			classGraph, typeSpace, klass,
@@ -1746,7 +1745,7 @@ public class Java2DF {
 	if (this.exporter != null) {
 	    this.exporter.writeGraph(classGraph);
 	}
-	klass.dump();
+	//klass.dump();
     }
 
     public CompilationUnit parseFile(String path)
@@ -1764,40 +1763,9 @@ public class Java2DF {
 	return (CompilationUnit)parser.createAST(null);
     }
 
-    private DFTypeSpace getTypeSpace(CompilationUnit cunit) {
-        DFTypeSpace typeSpace = this.rootSpace;
-        PackageDeclaration pkg = cunit.getPackage();
-        if (pkg != null) {
-            typeSpace = typeSpace.lookupSpace(pkg.getName());
-        }
-        return typeSpace;
-    }
-
-    @SuppressWarnings("unchecked")
-    private DFTypeSpace extendTypeSpace(
-        DFTypeSpace typeSpace, CompilationUnit cunit) {
-        // Make a copy as we're polluting the oririnal TypeSpace.
-        typeSpace = new DFTypeSpace(typeSpace);
-	for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
-            // XXX support static import
-            assert(!importDecl.isStatic());
-            if (importDecl.isOnDemand()) {
-                // XXX TODO
-            } else {
-                Name name = importDecl.getName();
-                assert(name.isQualifiedName());
-                DFClassSpace klass = this.rootSpace.lookupClass(name);
-                QualifiedName qname = (QualifiedName)name;
-                typeSpace.addClass(qname.getName(), klass);
-            }
-        }
-        return typeSpace;
-    }
-
     // pass1
     public void buildTypeSpace(CompilationUnit cunit) {
-        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
+        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
 	try {
             typeSpace.build(cunit);
 	} catch (UnsupportedSyntax e) {
@@ -1809,13 +1777,14 @@ public class Java2DF {
     // pass2
     @SuppressWarnings("unchecked")
     public void buildClassSpace(CompilationUnit cunit) {
-        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
-        typeSpace = this.extendTypeSpace(typeSpace, cunit);
+        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
+        typeSpace = typeSpace.extend(cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
                 DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
-                klass.build(typeSpace, typeDecl);
+                assert(klass != null);
+                klass.build(typeDecl);
             }
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
@@ -1827,8 +1796,8 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(CompilationUnit cunit)
         throws IOException {
-        DFTypeSpace typeSpace = this.getTypeSpace(cunit);
-        typeSpace = this.extendTypeSpace(typeSpace, cunit);
+        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
+        typeSpace = typeSpace.extend(cunit.imports());
 	for (TypeDeclaration typeDecl :
                  (List<TypeDeclaration>) cunit.types()) {
 	    processTypeDeclaration(typeSpace, typeDecl);
@@ -1904,7 +1873,7 @@ public class Java2DF {
 		System.err.println("Cannot open input file: "+path);
 	    }
 	}
-	converter.rootSpace.dump();
+	//converter.rootSpace.dump();
 	exporter.close();
 
 	Utils.printXml(output, exporter.document);

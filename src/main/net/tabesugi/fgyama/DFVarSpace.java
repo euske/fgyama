@@ -30,9 +30,15 @@ public class DFVarSpace {
         _parent = null;
     }
 
-    public DFVarSpace(DFVarSpace parent, String name) {
+    private DFVarSpace(DFVarSpace parent, String name) {
         _root = parent._root;
 	_name = name;
+	_parent = parent;
+    }
+
+    public DFVarSpace(DFVarSpace parent, SimpleName name) {
+        _root = parent._root;
+	_name = name.getIdentifier();
 	_parent = parent;
     }
 
@@ -66,6 +72,7 @@ public class DFVarSpace {
     public DFVarSpace addChild(String basename, ASTNode ast) {
 	int id = _children.size();
 	String name = basename+id;
+        Utils.logit("DFVarSpace.addChild: "+this+": "+name);
 	DFVarSpace space = new DFVarSpace(this, name);
 	_children.add(space);
 	_ast2child.put(ast, space);
@@ -91,10 +98,6 @@ public class DFVarSpace {
 	return ref;
     }
 
-    public DFVarRef addRef(SimpleName name, DFType type) {
-        return this.addRef(name.getIdentifier(), type);
-    }
-
     protected DFVarRef lookupRef(String id) {
 	DFVarRef ref = _id2ref.get(id);
 	if (ref != null) {
@@ -107,27 +110,21 @@ public class DFVarSpace {
     }
 
     public DFVarRef lookupVar(SimpleName name) {
-        DFVarRef ref = this.lookupRef(name.getIdentifier());
-        if (ref != null) return ref;
-        String id = Utils.resolveName(name);
-        if (id != null) return this.addRef(id, null);
-        // fallback
-        return this.addRef(name.getIdentifier(), null);
+        return this.lookupRef(name.getIdentifier());
     }
 
     public DFVarRef lookupVarOrField(SimpleName name) {
+        // try local variables first.
         DFVarRef ref = this.lookupRef(name.getIdentifier());
 	if (ref != null) return ref;
-        ref = this.lookupField(name.getIdentifier());
+        // try field names.
+        ref = this.lookupField(name);
         if (ref != null) return ref;
+        // builtin names?
         String id = Utils.resolveName(name);
         if (id != null) return this.addRef(id, null);
-        // fallback
+        // fallback...
         return this.addRef(name.getIdentifier(), null);
-    }
-
-    public DFVarRef addReturn(DFType returnType) {
-	return this.addRef("#return", returnType);
     }
 
     public DFVarRef lookupReturn() {
@@ -135,6 +132,7 @@ public class DFVarSpace {
     }
 
     public DFVarRef lookupArray() {
+        // XXX
 	return _root.addRef("#array", null);
     }
 
@@ -143,12 +141,9 @@ public class DFVarSpace {
 	return _parent.lookupThis();
     }
 
-    protected DFVarRef lookupField(String id) {
-        if (_parent == null) return null;
-	return _parent.lookupField(id);
-    }
     public DFVarRef lookupField(SimpleName name) {
-        return this.lookupField(name.getIdentifier());
+        assert(_parent != null);
+	return _parent.lookupField(name);
     }
 
     public DFMethod lookupMethod(SimpleName name) {
@@ -156,31 +151,25 @@ public class DFVarSpace {
         return _parent.lookupMethod(name);
     }
 
-    // dump: for debugging.
-    public void dump() {
-	dump(System.err, "");
-    }
-    public void dump(PrintStream out, String indent) {
-	out.println(indent+getName()+" {");
-	String i2 = indent + "  ";
-	this.dumpContents(out, i2);
-	for (DFVarSpace space : _children) {
-	    space.dump(out, i2);
-	}
-	out.println(indent+"}");
-    }
-    public void dumpContents(PrintStream out, String indent) {
-	for (DFVarRef ref : _id2ref.values()) {
-	    out.println(indent+"defined: "+ref);
-	}
+    public DFVarRef addVar(SimpleName name, DFType type) {
+        Utils.logit("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
+        return this.addRef(name.getIdentifier(), type);
     }
 
     /**
      * Lists all the variables defined inside a block.
      */
+    public void build(DFTypeSpace typeSpace, DFFrame frame,
+                      Block block, DFType returnType)
+	throws UnsupportedSyntax {
+        this.build(typeSpace, frame, block);
+	this.addRef("#return", returnType);
+    }
+
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, DFFrame frame, Statement ast)
 	throws UnsupportedSyntax {
+        Utils.logit("DFVarSpace.build: "+this);
 
 	if (ast instanceof AssertStatement) {
 
@@ -201,7 +190,7 @@ public class DFVarSpace {
 	    DFType varType = typeSpace.resolve(varStmt.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		this.addRef(frag.getName(), varType);
+		this.addVar(frag.getName(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
 		    this.build(typeSpace, frame, expr);
@@ -293,7 +282,7 @@ public class DFVarSpace {
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers and dimensions.
 	    DFType varType = typeSpace.resolve(decl.getType());
-	    childSpace.addRef(decl.getName(), varType);
+	    childSpace.addVar(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
 		childSpace.build(typeSpace, frame, expr);
@@ -329,7 +318,7 @@ public class DFVarSpace {
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers and dimensions.
 		DFType varType = typeSpace.resolve(decl.getType());
-		childSpace.addRef(decl.getName(), varType);
+		childSpace.addVar(decl.getName(), varType);
 		childSpace.build(typeSpace, frame, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
@@ -451,7 +440,7 @@ public class DFVarSpace {
 	    DFType varType = typeSpace.resolve(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
-		DFVarRef ref = this.addRef(frag.getName(), varType);
+		DFVarRef ref = this.addVar(frag.getName(), varType);
 		frame.addOutput(ref);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
@@ -592,6 +581,25 @@ public class DFVarSpace {
 	} else {
 	    throw new UnsupportedSyntax(ast);
 
+	}
+    }
+
+    // dump: for debugging.
+    public void dump() {
+	dump(System.err, "");
+    }
+    public void dump(PrintStream out, String indent) {
+	out.println(indent+getName()+" {");
+	String i2 = indent + "  ";
+	this.dumpContents(out, i2);
+	for (DFVarSpace space : _children) {
+	    space.dump(out, i2);
+	}
+	out.println(indent+"}");
+    }
+    public void dumpContents(PrintStream out, String indent) {
+	for (DFVarRef ref : _id2ref.values()) {
+	    out.println(indent+"defined: "+ref);
 	}
     }
 }

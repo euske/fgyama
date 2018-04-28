@@ -13,6 +13,11 @@ public abstract class DFType {
 
     public abstract String getName();
 
+    @Override
+    public String toString() {
+	return ("<DFType("+this.getName()+")>");
+    }
+
     public static final DFType BOOLEAN =
 	new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFType CHAR =

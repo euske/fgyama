@@ -53,7 +53,7 @@
       <compilerarg value="-Xlint" />
       <src path="${srcDir}" />
       <include name="main/**" />
-      <!--<include name="test/**" />-->
+      <include name="test/**" />
       <exclude name="**/.*/**"/>
       <classpath refid="build.classpath"/>
     </javac>

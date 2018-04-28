@@ -29,7 +29,7 @@ public class DFClassType extends DFType {
 
     public String getName()
     {
-        return "."+_klass.getName();
+        return _klass.getName();
     }
 
     public DFClassSpace getKlass()

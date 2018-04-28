@@ -15,6 +15,7 @@ public class DFTypeSpace {
     private DFTypeSpace _root;
     private String _name;
     private DFTypeSpace _parent;
+
     private DFClassSpace _default;
 
     private List<DFTypeSpace> _children =
@@ -24,10 +25,10 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
-    public DFTypeSpace(String name) {
+    public DFTypeSpace() {
         _root = this;
 	_default = new DFClassSpace(this);
-	_name = name;
+	_name = ".";
         _parent = null;
     }
 
@@ -50,24 +51,32 @@ public class DFTypeSpace {
 
     @Override
     public String toString() {
-	return ("<DFTypeSpace("+_name+")>");
+	return ("<DFTypeSpace("+this.getName()+")>");
     }
 
     public String getName() {
         if (_parent == null) {
             return _name;
+        } else if (_parent == _root) {
+            return "."+_name;
         } else {
             return _parent.getName()+"."+_name;
         }
+    }
+
+    private DFTypeSpace addChild(String id) {
+        Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
+        DFTypeSpace space = new DFTypeSpace(this, id);
+        _children.add(space);
+        _id2space.put(id, space);
+        return space;
     }
 
     public DFTypeSpace lookupSpace(SimpleName name) {
         String id = name.getIdentifier();
         DFTypeSpace space = _id2space.get(id);
         if (space == null) {
-            space = new DFTypeSpace(this, id);
-            _children.add(space);
-            _id2space.put(id, space);
+            space = this.addChild(id);
         }
         return space;
     }
@@ -83,15 +92,23 @@ public class DFTypeSpace {
         }
     }
 
+    public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
+        if (pkgDecl == null) {
+            return this;
+        } else {
+            return this.lookupSpace(pkgDecl.getName());
+        }
+    }
+
     public DFClassSpace getDefaultClass() {
 	return _default;
     }
 
-    public void addClass(SimpleName name) {
+    private void addClass(SimpleName name) {
         this.addClass(name, new DFClassSpace(this, name));
     }
-
-    public void addClass(SimpleName name, DFClassSpace klass) {
+    private void addClass(SimpleName name, DFClassSpace klass) {
+        Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
         String id = name.getIdentifier();
         assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
@@ -102,8 +119,10 @@ public class DFTypeSpace {
         DFClassSpace klass = _id2klass.get(id);
         if (klass != null) {
             return klass;
+        } else if (_parent != null) {
+            return _parent.lookupClass(name);
         } else {
-            return this.getDefaultClass();
+            return null;
         }
     }
 
@@ -117,7 +136,7 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClassSpace lookupClass(DFType type) {
+    public DFClassSpace resolveClass(DFType type) {
         if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         }
@@ -132,6 +151,9 @@ public class DFTypeSpace {
 	} else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             DFClassSpace klass = this.lookupClass(stype.getName());
+            if (klass == null) {
+                klass = this.getDefaultClass();
+            }
             return new DFClassType(klass);
 	} else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
@@ -167,6 +189,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
+        Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         this.addClass(typeDecl.getName());
         DFTypeSpace child = this.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
@@ -181,6 +204,29 @@ public class DFTypeSpace {
                 throw new UnsupportedSyntax(body);
             }
         }
+    }
+
+    public DFTypeSpace extend(List<ImportDeclaration> imports) {
+        // Make a copy as we're polluting the oririnal TypeSpace.
+        DFTypeSpace typeSpace = new DFTypeSpace(this);
+	for (ImportDeclaration importDecl : imports) {
+            // XXX support static import
+            assert(!importDecl.isStatic());
+            if (importDecl.isOnDemand()) {
+                // XXX TODO
+            } else {
+                Name name = importDecl.getName();
+                assert(name.isQualifiedName());
+                DFClassSpace klass = _root.lookupClass(name);
+                if (klass == null) {
+                    Utils.logit("Fail: could not import: "+name);
+                } else {
+                    QualifiedName qname = (QualifiedName)name;
+                    typeSpace.addClass(qname.getName(), klass);
+                }
+            }
+        }
+        return typeSpace;
     }
 
     // dump: for debugging.

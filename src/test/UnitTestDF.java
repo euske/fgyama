@@ -3,6 +3,8 @@
 import java.io.*;
 import java.util.*;
 import org.w3c.dom.*;
+import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.dom.*;
 import org.custommonkey.xmlunit.*;
 import org.junit.Test;
 import net.tabesugi.fgyama.*;
@@ -27,9 +29,11 @@ public class UnitTestDF extends XMLTestCase {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(exporter, null, srcPath);
-	converter.buildTypeSpace(converter.parseFile(javaPath));
+        CompilationUnit cunit = converter.parseFile(javaPath);
+	converter.buildTypeSpace(cunit);
+	converter.buildClassSpace(cunit);
 	exporter.startFile(javaPath);
-	converter.pass2(converter.parseFile(javaPath));
+	converter.buildGraphs(cunit);
 	exporter.endFile();
 	exporter.close();
 	Document refdoc = Utils.readXml(xmlPath);
