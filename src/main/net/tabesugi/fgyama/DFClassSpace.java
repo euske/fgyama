@@ -44,8 +44,12 @@ public class DFClassSpace extends DFVarSpace {
         return this.lookupRef("#this");
     }
 
+    protected DFVarRef lookupField(String id) {
+        return this.lookupRef("."+id);
+    }
+
     public DFVarRef lookupField(SimpleName name) {
-        DFVarRef ref = this.lookupRef("."+name.getIdentifier());
+        DFVarRef ref = this.lookupField(name.getIdentifier());
         if (ref != null) return ref;
         String id = Utils.resolveName(name);
         if (id != null) {
@@ -54,7 +58,7 @@ public class DFClassSpace extends DFVarSpace {
         return new DFVarRef(null, "."+name.getIdentifier(), null);
     }
 
-    public DFMethod lookupMethod(SimpleName name) {
+    private DFMethod lookupMethod(SimpleName name) {
 	DFMethod method = _id2method.get(name.getIdentifier());
 	if (method != null) return method;
         String id = Utils.resolveName(name);
@@ -62,6 +66,16 @@ public class DFClassSpace extends DFVarSpace {
             return new DFMethod(null, id, null);
         }
         return this.addMethod(name, null);
+    }
+    public DFMethod lookupMethod(MethodDeclaration methodDecl) {
+        // XXX
+        return this.lookupMethod(methodDecl.getName());
+    }
+    public DFMethod[] lookupMethods(SimpleName name) {
+        // XXX
+        return new DFMethod[] {
+            this.lookupMethod(name)
+        };
     }
 
     private DFVarRef addField(SimpleName name, DFType type) {

@@ -108,6 +108,11 @@ public class DFVarSpace {
 	}
     }
 
+    protected DFVarRef lookupField(String id) {
+        assert(_parent != null);
+	return _parent.lookupField(id);
+    }
+
     public DFVarRef lookupVar(SimpleName name) {
         return this.lookupRef(name.getIdentifier());
     }
@@ -117,7 +122,7 @@ public class DFVarSpace {
         DFVarRef ref = this.lookupRef(name.getIdentifier());
 	if (ref != null) return ref;
         // try field names.
-        ref = this.lookupField(name);
+        ref = this.lookupField(name.getIdentifier());
         if (ref != null) return ref;
         // builtin names?
         String id = Utils.resolveName(name);
@@ -138,16 +143,6 @@ public class DFVarSpace {
     public DFVarRef lookupThis() {
         assert(_parent != null);
 	return _parent.lookupThis();
-    }
-
-    public DFVarRef lookupField(SimpleName name) {
-        assert(_parent != null);
-	return _parent.lookupField(name);
-    }
-
-    public DFMethod lookupMethod(SimpleName name) {
-        assert(_parent != null);
-        return _parent.lookupMethod(name);
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {
@@ -381,7 +376,7 @@ public class DFVarSpace {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
-		DFVarRef ref = this.lookupField(fieldName);
+		DFVarRef ref = this.lookupField(fieldName.getIdentifier());
 		frame.addInput(ref);
 	    }
 
@@ -503,13 +498,13 @@ public class DFVarSpace {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    this.build(typeSpace, frame, fa.getExpression());
-	    DFVarRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName.getIdentifier());
 	    frame.addInput(ref);
 
 	} else if (ast instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
 	    SimpleName fieldName = sfa.getName();
-	    DFVarRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName.getIdentifier());
 	    frame.addInput(ref);
 
 	} else if (ast instanceof CastExpression) {
@@ -568,7 +563,7 @@ public class DFVarSpace {
 		QualifiedName qn = (QualifiedName)name;
 		SimpleName fieldName = qn.getName();
 		this.build(typeSpace, frame, qn.getQualifier());
-		DFVarRef ref = this.lookupField(fieldName);
+		DFVarRef ref = this.lookupField(fieldName.getIdentifier());
 		frame.addOutput(ref);
 	    }
 
@@ -583,7 +578,7 @@ public class DFVarSpace {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
 	    this.build(typeSpace, frame, fa.getExpression());
-	    DFVarRef ref = this.lookupField(fieldName);
+	    DFVarRef ref = this.lookupField(fieldName.getIdentifier());
 	    frame.addOutput(ref);
 
 	} else {

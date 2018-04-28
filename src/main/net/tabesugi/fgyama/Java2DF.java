@@ -526,7 +526,7 @@ abstract class CallNode extends ProgNode {
         DFGraph graph, DFVarSpace space, DFType type, DFVarRef ref,
         ASTNode ast) {
 	super(graph, space, type, ref, ast);
-	this.args = new ArrayList<DFNode>();
+	this.args = null;
         this.exception = null;
     }
 
@@ -535,10 +535,12 @@ abstract class CallNode extends ProgNode {
 	return "call";
     }
 
-    public void addArg(DFNode arg) {
-	String label = "arg"+this.args.size();
-	this.accept(arg, label);
-	this.args.add(arg);
+    public void setArgs(List<DFNode> args) {
+        for (int i = 0; i < args.size(); i++) {
+            String label = "arg"+i;
+            this.accept(args.get(i), label);
+        }
+	this.args = args;
     }
 }
 
@@ -860,7 +862,8 @@ public class Java2DF {
 		cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFVarRef ref = varSpace.lookupField(fieldName);
+                DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+                DFVarRef ref = klass.lookupField(fieldName);
 		cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
 	    }
 
@@ -881,7 +884,8 @@ public class Java2DF {
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFVarRef ref = varSpace.lookupField(fieldName);
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+	    DFVarRef ref = klass.lookupField(fieldName);
 	    cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
 
 	} else {
@@ -916,7 +920,8 @@ public class Java2DF {
 		cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
 		DFNode obj = cpt.getRValue();
-		DFVarRef ref = varSpace.lookupField(fieldName);
+                DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+		DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varSpace, ref, qn, obj);
                 node.accept(cpt.getValue(ref));
 		cpt.setRValue(node);
@@ -1053,16 +1058,21 @@ public class Java2DF {
                     graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
-            DFMethod method = klass.lookupMethod(invoke.getName());
-	    MethodCallNode call = new MethodCallNode(
-                graph, varSpace, method, invoke, obj);
-	    for (Expression arg : (List<Expression>) invoke.arguments()) {
-		cpt = processExpression(
+            List<DFNode> args = new ArrayList<DFNode>();
+            for (Expression arg : (List<Expression>) invoke.arguments()) {
+                cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, arg);
-		call.addArg(cpt.getRValue());
-	    }
-	    cpt.setRValue(call);
+                args.add(cpt.getRValue());
+            }
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+            DFMethod[] methods = klass.lookupMethods(invoke.getName());
+            MethodCallNode call = null;
+            for (DFMethod method : methods) {
+                call = new MethodCallNode(graph, varSpace, method, invoke, obj);
+                call.setArgs(args);
+            }
+            assert(call != null);
+            cpt.setRValue(call);
             if (call.exception != null) {
 		DFFrame dstFrame = frame.find(DFFrame.TRY);
 		cpt.addExit(new DFExit(call.exception, dstFrame));
@@ -1071,16 +1081,21 @@ public class Java2DF {
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
             DFNode obj = cpt.getValue(varSpace.lookupThis());
+            List<DFNode> args = new ArrayList<DFNode>();
+            for (Expression arg : (List<Expression>) sinvoke.arguments()) {
+                cpt = processExpression(
+                    graph, typeSpace, varSpace, frame, cpt, arg);
+                args.add(cpt.getRValue());
+            }
             DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFClassSpace baseKlass = klass.getBase();
-            DFMethod method = baseKlass.lookupMethod(sinvoke.getName());
-	    MethodCallNode call = new MethodCallNode(
-		graph, varSpace, method, sinvoke, obj);
-	    for (Expression arg : (List<Expression>) sinvoke.arguments()) {
-		cpt = processExpression(
-                    graph, typeSpace, varSpace, frame, cpt, arg);
-		call.addArg(cpt.getRValue());
+            DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName());
+            MethodCallNode call = null;
+            for (DFMethod method : methods) {
+                call = new MethodCallNode(graph, varSpace, method, sinvoke, obj);
+		call.setArgs(args);
 	    }
+            assert(call != null);
 	    cpt.setRValue(call);
             if (call.exception != null) {
 		DFFrame dstFrame = frame.find(DFFrame.TRY);
@@ -1134,7 +1149,8 @@ public class Java2DF {
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
 	    DFNode obj = cpt.getRValue();
-	    DFVarRef ref = varSpace.lookupField(fieldName);
+            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+	    DFVarRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
@@ -1168,13 +1184,15 @@ public class Java2DF {
                     graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-	    CreateObjectNode call = new CreateObjectNode(
-		graph, varSpace, instType, cstr, obj);
+            List<DFNode> args = new ArrayList<DFNode>();
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
 		cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, arg);
-		call.addArg(cpt.getRValue());
-	    }
+                args.add(cpt.getRValue());
+            }
+	    CreateObjectNode call = new CreateObjectNode(
+		graph, varSpace, instType, cstr, obj);
+            call.setArgs(args);
 	    cpt.setRValue(call);
 	    // Ignore getAnonymousClassDeclaration() here.
 	    // It will eventually be picked up as MethodDeclaration.
@@ -1644,7 +1662,8 @@ public class Java2DF {
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
-        DFMethod method = klass.lookupMethod(methodDecl.getName());
+        DFMethod method = klass.lookupMethod(methodDecl);
+        assert(method != null);
         try {
             // Setup an initial space.
             DFFrame frame = new DFFrame(DFFrame.METHOD);
