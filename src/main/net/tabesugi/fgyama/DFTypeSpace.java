@@ -16,8 +16,6 @@ public class DFTypeSpace {
     private String _name;
     private DFTypeSpace _parent;
 
-    private DFClassSpace _default;
-
     private List<DFTypeSpace> _children =
 	new ArrayList<DFTypeSpace>();
     private Map<String, DFTypeSpace> _id2space =
@@ -27,21 +25,18 @@ public class DFTypeSpace {
 
     public DFTypeSpace() {
         _root = this;
-	_default = new DFClassSpace(this);
 	_name = ".";
         _parent = null;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
-	_default = parent._default;
 	_name = name;
 	_parent = parent;
     }
 
     public DFTypeSpace(DFTypeSpace space) {
         _root = space._root;
-        _default = space._default;
         _name = space._name;
         _parent = space._parent;
         _children = new ArrayList<DFTypeSpace>(space._children);
@@ -100,18 +95,45 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClassSpace getDefaultClass() {
-	return _default;
+    private DFClassSpace getDefaultClass(String id) {
+        DFClassSpace klass = _id2klass.get(id);
+        if (klass != null) {
+            return klass;
+        } else if (_parent != null) {
+            return _parent.getDefaultClass(id);
+        } else {
+            return this.addClass(id);
+        }
     }
 
-    private void addClass(SimpleName name) {
-        this.addClass(name, new DFClassSpace(this, name));
+    private DFClassSpace getDefaultClass(Name name) {
+        if (name.isQualifiedName()) {
+	    QualifiedName qname = (QualifiedName)name;
+            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
+            return parent.getDefaultClass(qname.getName());
+        } else {
+	    SimpleName sname = (SimpleName)name;
+            return this.getDefaultClass(sname.getIdentifier());
+        }
     }
-    private void addClass(SimpleName name, DFClassSpace klass) {
+
+    private DFClassSpace getDefaultClass(DFType type) {
+	if (type == null) {
+	    return this.getDefaultClass("unknown");
+	} else {
+	    return this.getDefaultClass(type.getName());
+	}
+    }
+
+    private DFClassSpace addClass(String id) {
+	DFClassSpace klass = new DFClassSpace(this, id);
+        return this.addClass(id, klass);
+    }
+    private DFClassSpace addClass(String id, DFClassSpace klass) {
         Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
-        String id = name.getIdentifier();
         assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
+	return klass;
     }
 
     public DFClassSpace lookupClass(SimpleName name) {
@@ -140,7 +162,7 @@ public class DFTypeSpace {
         if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         }
-        return this.getDefaultClass();
+        return _root.getDefaultClass(type);
     }
     public DFClassSpace resolveClass(Type type) {
         return resolveClass(resolve(type));
@@ -155,7 +177,7 @@ public class DFTypeSpace {
             SimpleType stype = (SimpleType)type;
             DFClassSpace klass = this.lookupClass(stype.getName());
             if (klass == null) {
-                klass = this.getDefaultClass();
+                klass = _root.getDefaultClass(stype.getName());
             }
             return new DFClassType(klass);
 	} else if (type instanceof ArrayType) {
@@ -193,7 +215,7 @@ public class DFTypeSpace {
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
         Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
-        this.addClass(typeDecl.getName());
+        this.addClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = this.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
@@ -228,7 +250,7 @@ public class DFTypeSpace {
                 Utils.logit("Fail: could not import: "+name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                this.addClass(qname.getName(), klass);
+                this.addClass(qname.getName().getIdentifier(), klass);
             }
         }
     }

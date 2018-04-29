@@ -22,8 +22,8 @@ public class DFClassSpace extends DFVarSpace {
 	_typeSpace = typeSpace;
     }
 
-    public DFClassSpace(DFTypeSpace typeSpace, SimpleName name) {
-        super(name.getIdentifier());
+    public DFClassSpace(DFTypeSpace typeSpace, String id) {
+        super(id);
 	_typeSpace = typeSpace;
 	this.addRef("#this", new DFClassType(this));
     }
