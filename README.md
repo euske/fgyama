@@ -18,3 +18,4 @@ TODOs:
   * Class inheritance / polymorphism.
   * Static fields/methods
   * Anymous class / lambdas
+  * Parameterized types.

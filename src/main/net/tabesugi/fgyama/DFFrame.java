@@ -158,7 +158,6 @@ public class DFFrame {
 	} else if (ast instanceof EnhancedForStatement) {
 	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    ForStatement forStmt = (ForStatement)ast;
 	    DFFrame childFrame = this.addChild(null, ast);
 	    Statement stmt = eForStmt.getBody();
             childFrame.build(typeSpace, childSpace, stmt);
