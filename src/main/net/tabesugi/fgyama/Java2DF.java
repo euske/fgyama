@@ -619,7 +619,7 @@ class ExceptionNode extends ProgNode {
     public ExceptionNode(
         DFGraph graph, DFVarSpace space,
         ASTNode ast, DFNode value) {
-	super(graph, space, null, null, ast);
+	super(graph, space, null, space.lookupException(), ast);
 	this.accept(value);
     }
 

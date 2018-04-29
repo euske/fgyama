@@ -135,6 +135,10 @@ public class DFVarSpace {
 	return this.lookupRef("#return");
     }
 
+    public DFVarRef lookupException() {
+	return this.lookupRef("#exception");
+    }
+
     public DFVarRef lookupArray() {
         // XXX
 	return _root.addRef("#array", null);
@@ -160,6 +164,7 @@ public class DFVarSpace {
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : typeSpace.resolve(returnType);
 	this.addRef("#return", type);
+	this.addRef("#exception", null);
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers.
