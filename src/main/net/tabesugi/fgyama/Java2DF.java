@@ -519,7 +519,7 @@ class IterNode extends ProgNode {
 // CallNode
 abstract class CallNode extends ProgNode {
 
-    public List<DFNode> args;
+    public DFNode[] args;
     public DFNode exception;
 
     public CallNode(
@@ -535,10 +535,10 @@ abstract class CallNode extends ProgNode {
 	return "call";
     }
 
-    public void setArgs(List<DFNode> args) {
-        for (int i = 0; i < args.size(); i++) {
+    public void setArgs(DFNode[] args) {
+        for (int i = 0; i < args.length; i++) {
             String label = "arg"+i;
-            this.accept(args.get(i), label);
+            this.accept(args[i], label);
         }
 	this.args = args;
     }
@@ -547,21 +547,30 @@ abstract class CallNode extends ProgNode {
 // MethodCallNode
 class MethodCallNode extends CallNode {
 
-    public DFMethod method;
+    public DFMethod[] methods;
 
     public MethodCallNode(
-        DFGraph graph, DFVarSpace space, DFMethod method,
+        DFGraph graph, DFVarSpace space, DFMethod[] methods,
         ASTNode ast, DFNode obj) {
-	super(graph, space, method.getReturnType(), null, ast);
+	super(graph, space, methods[0].getReturnType(), null, ast);
 	if (obj != null) {
 	    this.accept(obj, "obj");
 	}
-	this.method = method;
+	this.methods = methods;
     }
 
     @Override
     public String getData() {
-        return this.method.getName();
+        int n = 0;
+        String data = "";
+        for (DFMethod method : this.methods) {
+            if (0 < n) {
+                data += " ";
+            }
+            data += method.getName();
+            n++;
+        }
+        return data;
     }
 }
 
@@ -1069,20 +1078,24 @@ public class Java2DF {
                     graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-            List<DFNode> args = new ArrayList<DFNode>();
+            List<DFNode> argList = new ArrayList<DFNode>();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) invoke.arguments()) {
                 cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, arg);
-                args.add(cpt.getRValue());
+                DFNode node = cpt.getRValue();
+                argList.add(node);
+                typeList.add(node.getType());
             }
+            DFNode[] args = new DFNode[argList.size()];
+            argList.toArray(args);
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
             DFClassSpace klass = typeSpace.resolveClass(obj.getType());
-            DFMethod[] methods = klass.lookupMethods(invoke.getName());
-            MethodCallNode call = null;
-            for (DFMethod method : methods) {
-                call = new MethodCallNode(graph, varSpace, method, invoke, obj);
-                call.setArgs(args);
-            }
-            assert(call != null);
+            DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
+            MethodCallNode call = new MethodCallNode(
+                graph, varSpace, methods, invoke, obj);
+            call.setArgs(args);
             cpt.setRValue(call);
             if (call.exception != null) {
 		DFFrame dstFrame = frame.find(DFFrame.TRY);
@@ -1092,21 +1105,25 @@ public class Java2DF {
 	} else if (expr instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
             DFNode obj = cpt.getValue(varSpace.lookupThis());
-            List<DFNode> args = new ArrayList<DFNode>();
+            List<DFNode> argList = new ArrayList<DFNode>();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) sinvoke.arguments()) {
                 cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, arg);
-                args.add(cpt.getRValue());
+                DFNode node = cpt.getRValue();
+                argList.add(node);
+                typeList.add(node.getType());
             }
+            DFNode[] args = new DFNode[argList.size()];
+            argList.toArray(args);
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
             DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFClassSpace baseKlass = klass.getBase();
-            DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName());
-            MethodCallNode call = null;
-            for (DFMethod method : methods) {
-                call = new MethodCallNode(graph, varSpace, method, sinvoke, obj);
-		call.setArgs(args);
-	    }
-            assert(call != null);
+            DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
+            MethodCallNode call = new MethodCallNode(
+                graph, varSpace, methods, sinvoke, obj);
+            call.setArgs(args);
 	    cpt.setRValue(call);
             if (call.exception != null) {
 		DFFrame dstFrame = frame.find(DFFrame.TRY);
@@ -1198,12 +1215,14 @@ public class Java2DF {
                     graph, typeSpace, varSpace, frame, cpt, expr1);
 		obj = cpt.getRValue();
 	    }
-            List<DFNode> args = new ArrayList<DFNode>();
+            List<DFNode> argList = new ArrayList<DFNode>();
 	    for (Expression arg : (List<Expression>) cstr.arguments()) {
 		cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, arg);
-                args.add(cpt.getRValue());
+                argList.add(cpt.getRValue());
             }
+            DFNode[] args = new DFNode[argList.size()];
+            argList.toArray(args);
 	    CreateObjectNode call = new CreateObjectNode(
 		graph, varSpace, instType, cstr, obj);
             call.setArgs(args);

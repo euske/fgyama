@@ -13,11 +13,15 @@ public class DFMethod implements Comparable<DFMethod> {
 
     private DFClassSpace _klass;
     private String _name;
+    private DFType[] _argTypes;
     private DFType _returnType;
 
-    public DFMethod(DFClassSpace klass, String name, DFType returnType) {
+    public DFMethod(
+        DFClassSpace klass, String name,
+        DFType[] argTypes, DFType returnType) {
 	_klass = klass;
 	_name = name;
+        _argTypes = argTypes;
 	_returnType = returnType;
     }
 
@@ -45,5 +49,21 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public DFType getReturnType() {
 	return _returnType;
+    }
+
+    public int canAccept(String name, DFType[] argTypes) {
+        if (!_name.equals(name)) return -1;
+        if (_argTypes == null || argTypes == null) return 0;
+        if (_argTypes.length != argTypes.length) return -1;
+        int dist = 0;
+        for (int i = 0; i < _argTypes.length; i++) {
+            DFType type0 = _argTypes[i];
+            DFType type1 = argTypes[i];
+            if (type0 == null || type1 == null) continue;
+            int d = type0.canConvertFrom(type1);
+            if (d < 0) return -1;
+            dist += d;
+        }
+        return dist;
     }
 }

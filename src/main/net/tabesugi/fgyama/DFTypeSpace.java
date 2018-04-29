@@ -142,6 +142,9 @@ public class DFTypeSpace {
         }
         return this.getDefaultClass();
     }
+    public DFClassSpace resolveClass(Type type) {
+        return resolveClass(resolve(type));
+    }
 
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type) {

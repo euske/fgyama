@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public abstract class DFType {
 
     public abstract String getName();
+    public abstract int canConvertFrom(DFType type);
 
     @Override
     public String toString() {

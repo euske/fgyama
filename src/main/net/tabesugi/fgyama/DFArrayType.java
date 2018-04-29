@@ -25,6 +25,16 @@ public class DFArrayType extends DFType {
         return _elemType.getName()+"[]";
     }
 
+    public int canConvertFrom(DFType type)
+    {
+        if (!(type instanceof DFArrayType)) return -1;
+        DFArrayType atype = (DFArrayType)type;
+        if (_ndims != atype._ndims) return -1;
+        // The element type should be exact match.
+        if (_elemType.canConvertFrom(atype._elemType) != 0) return -1;
+        return 0;
+    }
+
     public DFType getElemType()
     {
         return _elemType;

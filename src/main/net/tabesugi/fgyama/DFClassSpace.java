@@ -12,9 +12,10 @@ import org.eclipse.jdt.core.dom.*;
 public class DFClassSpace extends DFVarSpace {
 
     private DFTypeSpace _typeSpace;
+    private DFClassSpace _baseKlass;
+    private DFClassSpace[] _baseIfaces;
 
-    private Map<String, DFMethod> _id2method =
-	new HashMap<String, DFMethod>();
+    private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
     public DFClassSpace(DFTypeSpace typeSpace) {
         super("unknown");
@@ -33,11 +34,21 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public DFClassSpace getBase() {
-        return this;            // XXX support base class.
+        return _baseKlass;
     }
 
     public String getName() {
 	return _typeSpace.getName()+"/"+super.getName();
+    }
+
+    public int isBaseOf(DFClassSpace klass) {
+        int dist = 0;
+        while (klass != null) {
+            if (klass == this) return dist;
+            dist++;
+            klass = klass._baseKlass;
+        }
+        return -1;
     }
 
     public DFVarRef lookupThis() {
@@ -58,24 +69,50 @@ public class DFClassSpace extends DFVarSpace {
         return new DFVarRef(null, "."+name.getIdentifier(), null);
     }
 
-    private DFMethod lookupMethod(SimpleName name) {
-	DFMethod method = _id2method.get(name.getIdentifier());
-	if (method != null) return method;
+    private DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
+        String id = name.getIdentifier();
+        int bestDist = -1;
+        DFMethod bestMethod = null;
+        for (DFMethod method : _methods) {
+            int dist = method.canAccept(id, argTypes);
+            if (dist < 0) continue;
+            if (bestDist < 0 || dist < bestDist) {
+                bestDist = dist;
+                bestMethod = method;
+            }
+        }
+        return bestMethod;
+    }
+
+    public DFMethod[] lookupMethods(SimpleName name, DFType[] argTypes) {
+        List<DFMethod> methodList = new ArrayList<DFMethod>();
+        DFClassSpace klass = this;
+        while (klass != null) {
+            DFMethod method = klass.lookupMethod1(name, argTypes);
+            if (method != null) {
+                methodList.add(method);
+            }
+            klass = klass._baseKlass;
+        }
+        if (0 < methodList.size()) {
+            DFMethod[] methods = new DFMethod[methodList.size()];
+            methodList.toArray(methods);
+            return methods;
+        }
+        // fallback...
+        DFMethod fallback;
         String id = Utils.resolveName(name);
         if (id != null) {
-            return new DFMethod(null, id, null);
+            fallback = new DFMethod(null, id, null, null);
+        } else {
+            fallback = this.addMethod(name, null, null);
         }
-        return this.addMethod(name, null);
+        return new DFMethod[] { fallback };
     }
+
     public DFMethod lookupMethod(MethodDeclaration methodDecl) {
-        // XXX
-        return this.lookupMethod(methodDecl.getName());
-    }
-    public DFMethod[] lookupMethods(SimpleName name) {
-        // XXX
-        return new DFMethod[] {
-            this.lookupMethod(name)
-        };
+        DFType[] argTypes = getTypeList(methodDecl);
+        return this.lookupMethod1(methodDecl.getName(), argTypes);
     }
 
     private DFVarRef addField(SimpleName name, DFType type) {
@@ -83,15 +120,24 @@ public class DFClassSpace extends DFVarSpace {
         return this.addRef("."+name.getIdentifier(), type);
     }
 
-    private DFMethod addMethod(SimpleName name, DFType returnType) {
+    private DFMethod addMethod(SimpleName name, DFType[] argTypes, DFType returnType) {
         Utils.logit("DFClassSpace.addMethod: "+this+": "+name+" -> "+returnType);
         String id = name.getIdentifier();
-	DFMethod method = _id2method.get(id);
-	if (method == null) {
-            method = new DFMethod(this, id, returnType);
-            _id2method.put(id, method);
-        }
+	DFMethod method = new DFMethod(this, id, argTypes, returnType);
+        _methods.add(method);
 	return method;
+    }
+
+    @SuppressWarnings("unchecked")
+    private DFType[] getTypeList(MethodDeclaration decl) {
+        List<DFType> types = new ArrayList<DFType>();
+        for (SingleVariableDeclaration varDecl :
+                 (List<SingleVariableDeclaration>) decl.parameters()) {
+            types.add(_typeSpace.resolve(varDecl.getType()));
+        }
+        DFType[] argTypes = new DFType[types.size()];
+        types.toArray(argTypes);
+        return argTypes;
     }
 
     @SuppressWarnings("unchecked")
@@ -99,6 +145,14 @@ public class DFClassSpace extends DFVarSpace {
 	throws UnsupportedSyntax {
         Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
         DFTypeSpace child = _typeSpace.lookupSpace(typeDecl.getName());
+
+        _baseKlass = _typeSpace.resolveClass(typeDecl.getSuperclassType());
+        List<Type> ifaces = typeDecl.superInterfaceTypes();
+        _baseIfaces = new DFClassSpace[ifaces.size()];
+        for (int i = 0; i < ifaces.size(); i++) {
+            _baseIfaces[i] = _typeSpace.resolveClass(ifaces.get(i));
+        }
+
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             if (body instanceof TypeDeclaration) {
@@ -119,8 +173,14 @@ public class DFClassSpace extends DFVarSpace {
             } else if (body instanceof MethodDeclaration) {
 		// XXX support static method.
                 MethodDeclaration decl = (MethodDeclaration)body;
-		DFType returnType = _typeSpace.resolve(decl.getReturnType2());
-		this.addMethod(decl.getName(), returnType);
+                DFType[] argTypes = getTypeList(decl);
+                DFType returnType;
+                if (decl.isConstructor()) {
+                    returnType = new DFClassType(this);
+                } else {
+                    returnType = _typeSpace.resolve(decl.getReturnType2());
+                }
+		this.addMethod(decl.getName(), argTypes, returnType);
 
             } else {
                 throw new UnsupportedSyntax(body);
@@ -131,7 +191,7 @@ public class DFClassSpace extends DFVarSpace {
     // dumpContents (for debugging)
     public void dumpContents(PrintStream out, String indent) {
 	super.dumpContents(out, indent);
-	for (DFMethod method : _id2method.values()) {
+	for (DFMethod method : _methods) {
 	    out.println(indent+"defined: "+method);
 	}
     }

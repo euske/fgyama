@@ -25,4 +25,12 @@ public class DFBasicType extends DFType {
     {
         return _name;
     }
+
+    public int canConvertFrom(DFType type)
+    {
+        if (!(type instanceof DFBasicType)) return -1;
+        DFBasicType btype = (DFBasicType)type;
+        if (!_name.equals(btype._name)) return -1;
+        return 0;
+    }
 }
