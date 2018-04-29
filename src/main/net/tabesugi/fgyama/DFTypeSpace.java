@@ -99,8 +99,6 @@ public class DFTypeSpace {
         DFClassSpace klass = _id2klass.get(id);
         if (klass != null) {
             return klass;
-        } else if (_parent != null) {
-            return _parent.getDefaultClass(id);
         } else {
             return this.addClass(id);
         }
