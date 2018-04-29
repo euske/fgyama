@@ -30,7 +30,7 @@ public class DFMethod implements Comparable<DFMethod> {
 	if (_returnType == null) {
 	    return ("<DFMethod("+this.getName()+" -> ?)>");
 	} else {
-	    return ("<DFMethod("+this.getName()+" -> "+_returnType.toString()+">");
+	    return ("<DFMethod("+this.getName()+" -> "+_returnType.getName()+">");
 	}
     }
 
@@ -40,11 +40,20 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public String getName() {
+        String name;
         if (_klass != null) {
-            return (_klass.getName()+"/"+_name);
+            name = (_klass.getName()+"/"+_name);
         } else {
-            return ("!"+_name);
+            name = ("!"+_name);
         }
+        if (_argTypes == null) {
+            name += "?";
+        } else {
+            for (DFType type : _argTypes) {
+                name += ":"+type.getName();
+            }
+        }
+        return name;
     }
 
     public DFType getReturnType() {

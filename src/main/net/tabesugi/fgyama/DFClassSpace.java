@@ -116,14 +116,15 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     private DFVarRef addField(SimpleName name, DFType type) {
-        Utils.logit("DFClassSpace.addField: "+this+": "+name+" -> "+type);
-        return this.addRef("."+name.getIdentifier(), type);
+        DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
+        Utils.logit("DFClassSpace.addField: "+ref);
+        return ref;
     }
 
     private DFMethod addMethod(SimpleName name, DFType[] argTypes, DFType returnType) {
-        Utils.logit("DFClassSpace.addMethod: "+this+": "+name+" -> "+returnType);
         String id = name.getIdentifier();
 	DFMethod method = new DFMethod(this, id, argTypes, returnType);
+        Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
 	return method;
     }
