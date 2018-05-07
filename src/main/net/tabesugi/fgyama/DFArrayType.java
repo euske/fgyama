@@ -20,6 +20,12 @@ public class DFArrayType extends DFType {
         _ndims = ndims;
     }
 
+    public boolean equals(DFType type) {
+        return ((type instanceof DFArrayType) &&
+                _elemType.equals(((DFArrayType)type)._elemType) &&
+                _ndims == ((DFArrayType)type)._ndims);
+    }
+
     public String getName()
     {
         return _elemType.getName()+"[]";

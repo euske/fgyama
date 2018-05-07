@@ -21,6 +21,11 @@ public class DFBasicType extends DFType {
         _name = "@"+code.toString();
     }
 
+    public boolean equals(DFType type) {
+        return ((type instanceof DFBasicType) &&
+                _name.equals(((DFBasicType)type)._name));
+    }
+
     public String getName()
     {
         return _name;

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public abstract class DFType {
 
+    public abstract boolean equals(DFType type);
     public abstract String getName();
     public abstract int canConvertFrom(DFType type);
 

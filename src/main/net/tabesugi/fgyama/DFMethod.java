@@ -39,6 +39,16 @@ public class DFMethod implements Comparable<DFMethod> {
 	return _name.compareTo(method._name);
     }
 
+    public boolean equals(DFMethod method) {
+        if (!_name.equals(method._name)) return false;
+        if (!_returnType.equals(method._returnType)) return false;
+        if (_argTypes.length != method._argTypes.length) return false;
+        for (int i = 0; i < _argTypes.length; i++) {
+            if (!_argTypes[i].equals(method._argTypes[i])) return false;
+        }
+	return true;
+    }
+
     public String getName() {
         String name;
         if (_klass != null) {

@@ -121,12 +121,28 @@ public class DFClassSpace extends DFVarSpace {
         return ref;
     }
 
+    private void overrideMethod(DFMethod method1) {
+        for (DFMethod method0 : _methods) {
+            if (method0.equals(method1)) {
+                _methods.add(method1);
+                Utils.logit("DFClassSpace.overrideMethod: "+method0+" : "+method1);
+                break;
+            }
+        }
+        if (_baseKlass != null) {
+            _baseKlass.overrideMethod(method1);
+        }
+    }
+
     private DFMethod addMethod(SimpleName name, DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
 	DFMethod method = new DFMethod(this, id, argTypes, returnType);
         Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
-	return method;
+        if (_baseKlass != null) {
+            _baseKlass.overrideMethod(method);
+        }
+        return method;
     }
 
     @SuppressWarnings("unchecked")
