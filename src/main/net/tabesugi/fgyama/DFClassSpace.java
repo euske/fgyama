@@ -85,19 +85,13 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public DFMethod[] lookupMethods(SimpleName name, DFType[] argTypes) {
-        List<DFMethod> methodList = new ArrayList<DFMethod>();
         DFClassSpace klass = this;
         while (klass != null) {
             DFMethod method = klass.lookupMethod1(name, argTypes);
             if (method != null) {
-                methodList.add(method);
+                return method.getOverrides();
             }
             klass = klass._baseKlass;
-        }
-        if (0 < methodList.size()) {
-            DFMethod[] methods = new DFMethod[methodList.size()];
-            methodList.toArray(methods);
-            return methods;
         }
         // fallback...
         DFMethod fallback;
@@ -124,7 +118,7 @@ public class DFClassSpace extends DFVarSpace {
     private void overrideMethod(DFMethod method1) {
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
-                _methods.add(method1);
+                method0.addOverride(method1);
                 Utils.logit("DFClassSpace.overrideMethod: "+method0+" : "+method1);
                 break;
             }
@@ -155,6 +149,17 @@ public class DFClassSpace extends DFVarSpace {
         DFType[] argTypes = new DFType[types.size()];
         types.toArray(argTypes);
         return argTypes;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean isStatic(BodyDeclaration body) {
+        for (IExtendedModifier imod :
+                 (List<IExtendedModifier>) body.modifiers()) {
+            if (imod.isModifier()) {
+                if (((Modifier)imod).isStatic()) return true;
+            }
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -197,7 +202,11 @@ public class DFClassSpace extends DFVarSpace {
                 } else {
                     returnType = _typeSpace.resolve(decl.getReturnType2());
                 }
-		this.addMethod(decl.getName(), argTypes, returnType);
+                if (isStatic(decl)) {
+                    //this.addStaticMethod(decl.getName(), argTypes, returnType);
+                } else {
+                    this.addMethod(decl.getName(), argTypes, returnType);
+                }
 
             } else {
                 throw new UnsupportedSyntax(body);

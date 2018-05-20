@@ -16,6 +16,8 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFType[] _argTypes;
     private DFType _returnType;
 
+    private List<DFMethod> _overrides = new ArrayList<DFMethod>();
+
     public DFMethod(
         DFClassSpace klass, String name,
         DFType[] argTypes, DFType returnType) {
@@ -23,6 +25,7 @@ public class DFMethod implements Comparable<DFMethod> {
 	_name = name;
         _argTypes = argTypes;
 	_returnType = returnType;
+        _overrides.add(this);
     }
 
     @Override
@@ -84,5 +87,15 @@ public class DFMethod implements Comparable<DFMethod> {
             dist += d;
         }
         return dist;
+    }
+
+    public void addOverride(DFMethod method) {
+        _overrides.add(method);
+    }
+
+    public DFMethod[] getOverrides() {
+        DFMethod[] methods = new DFMethod[_overrides.size()];
+        _overrides.toArray(methods);
+        return methods;
     }
 }
