@@ -97,9 +97,9 @@ public class DFClassSpace extends DFVarSpace {
         DFMethod fallback;
         String id = Utils.resolveName(name);
         if (id != null) {
-            fallback = new DFMethod(null, id, null, null);
+            fallback = new DFMethod(null, id, false, null, null);
         } else {
-            fallback = this.addMethod(name, null, null);
+            fallback = this.addMethod(name, false, null, null);
         }
         return new DFMethod[] { fallback };
     }
@@ -128,9 +128,11 @@ public class DFClassSpace extends DFVarSpace {
         }
     }
 
-    private DFMethod addMethod(SimpleName name, DFType[] argTypes, DFType returnType) {
+    private DFMethod addMethod(
+        SimpleName name, boolean isStatic,
+        DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
-	DFMethod method = new DFMethod(this, id, argTypes, returnType);
+	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
         Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
@@ -193,7 +195,6 @@ public class DFClassSpace extends DFVarSpace {
 		}
 
             } else if (body instanceof MethodDeclaration) {
-		// XXX support static method.
                 MethodDeclaration decl = (MethodDeclaration)body;
                 DFType[] argTypes = getTypeList(decl);
                 DFType returnType;
@@ -202,11 +203,7 @@ public class DFClassSpace extends DFVarSpace {
                 } else {
                     returnType = _typeSpace.resolve(decl.getReturnType2());
                 }
-                if (isStatic(decl)) {
-                    //this.addStaticMethod(decl.getName(), argTypes, returnType);
-                } else {
-                    this.addMethod(decl.getName(), argTypes, returnType);
-                }
+                this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
 
             } else {
                 throw new UnsupportedSyntax(body);

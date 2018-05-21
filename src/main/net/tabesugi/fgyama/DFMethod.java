@@ -13,16 +13,18 @@ public class DFMethod implements Comparable<DFMethod> {
 
     private DFClassSpace _klass;
     private String _name;
+    private boolean _static;
     private DFType[] _argTypes;
     private DFType _returnType;
 
     private List<DFMethod> _overrides = new ArrayList<DFMethod>();
 
     public DFMethod(
-        DFClassSpace klass, String name,
+        DFClassSpace klass, String name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
 	_klass = klass;
 	_name = name;
+        _static = isStatic;
         _argTypes = argTypes;
 	_returnType = returnType;
         _overrides.add(this);
