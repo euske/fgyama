@@ -1070,14 +1070,23 @@ public class Java2DF {
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
-	    DFNode obj;
+            DFClassSpace klass = null;
+	    DFNode obj = null;
 	    if (expr1 == null) {
                 obj = cpt.getValue(varSpace.lookupThis());
             } else {
-		cpt = processExpression(
-                    graph, typeSpace, varSpace, frame, cpt, expr1);
-		obj = cpt.getRValue();
+                if (expr1 instanceof Name) {
+                    klass = typeSpace.lookupClass((Name)expr1);
+                    if (klass == null) {
+                        cpt = processExpression(
+                            graph, typeSpace, varSpace, frame, cpt, expr1);
+                        obj = cpt.getRValue();
+                    }
+                }
 	    }
+            if (obj != null) {
+                klass = typeSpace.resolveClass(obj.getType());
+            }
             List<DFNode> argList = new ArrayList<DFNode>();
             List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) invoke.arguments()) {
@@ -1091,7 +1100,6 @@ public class Java2DF {
             argList.toArray(args);
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
             MethodCallNode call = new MethodCallNode(
                 graph, varSpace, methods, invoke, obj);

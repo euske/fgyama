@@ -10,4 +10,8 @@ public class multi_xref2 {
         multi_xref1.baa zzz;
         int b = zzz.baz;
     }
+
+    public static int bam() {
+        return 42;
+    }
 }
