@@ -102,13 +102,7 @@ public class UnitTestDF extends XMLTestCase {
     }
 
     @Test
-    public void test_14_canonical_name() throws Exception {
-	String name = PackageNameExtractor.getCanonicalName(TESTDATA+"/basic_names.java");
-	assertEquals(name, "dom.meep.Foo");
-    }
-
-    @Test
-    public void test_15_multi_xref() throws Exception {
+    public void test_14_multi_xref() throws Exception {
 	String[] srcpath = new String[] { TESTDATA+"/multi" };
 	compareXml(TESTDATA+"/multi/dom/meep/multi_xref1.java",
 		   TESTDATA+"/multi/dom/meep/multi_xref1.graph",
