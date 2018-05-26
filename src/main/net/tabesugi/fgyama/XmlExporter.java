@@ -28,29 +28,25 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void close()
-	throws IOException {
+    public void close() {
 	this.document.appendChild(_root);
 	this.document.normalizeDocument();
     }
 
     @Override
-    public void startFile(String path)
-	throws IOException {
+    public void startFile(String path) {
 	_file = this.document.createElement("file");
 	_file.setAttribute("path", path);
     }
 
     @Override
-    public void endFile()
-	throws IOException {
+    public void endFile() {
 	_root.appendChild(_file);
 	_file = null;
     }
 
     @Override
-    public void writeError(String funcName, String astName)
-	throws IOException {
+    public void writeError(String funcName, String astName) {
 	Element failure = this.document.createElement("error");
 	failure.setAttribute("func", funcName);
 	failure.setAttribute("ast", astName);
@@ -58,8 +54,7 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void writeGraph(DFGraph graph)
-	throws IOException {
+    public void writeGraph(DFGraph graph) {
 	_file.appendChild(graph.toXML(this.document));
     }
 }

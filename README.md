@@ -15,6 +15,5 @@ How to Build:
 
 TODOs:
 
-  * Static fields/methods
   * Anymous class / lambdas
   * Parameterized types.

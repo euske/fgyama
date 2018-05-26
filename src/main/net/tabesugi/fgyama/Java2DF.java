@@ -1799,8 +1799,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(
-        DFTypeSpace typeSpace, TypeDeclaration typeDecl)
-        throws IOException {
+        DFTypeSpace typeSpace, TypeDeclaration typeDecl) {
         DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
         assert(klass != null);
         DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
@@ -1883,8 +1882,7 @@ public class Java2DF {
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit)
-        throws IOException {
+    public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         typeSpace = typeSpace.extend(cunit.imports());
 	for (TypeDeclaration typeDecl :
