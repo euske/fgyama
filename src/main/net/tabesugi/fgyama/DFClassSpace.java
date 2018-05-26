@@ -109,7 +109,8 @@ public class DFClassSpace extends DFVarSpace {
         return this.lookupMethod1(methodDecl.getName(), argTypes);
     }
 
-    private DFVarRef addField(SimpleName name, DFType type) {
+    private DFVarRef addField(
+        SimpleName name, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
         Utils.logit("DFClassSpace.addField: "+ref);
         return ref;
@@ -191,7 +192,7 @@ public class DFClassSpace extends DFVarSpace {
 		DFType type = _typeSpace.resolve(decl.getType());
 		for (VariableDeclarationFragment frag :
 			 (List<VariableDeclarationFragment>) decl.fragments()) {
-		    this.addField(frag.getName(), type);
+		    this.addField(frag.getName(), isStatic(decl), type);
 		}
 
             } else if (body instanceof MethodDeclaration) {

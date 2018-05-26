@@ -567,7 +567,7 @@ class MethodCallNode extends CallNode {
             if (0 < n) {
                 data += " ";
             }
-            data += method.getName();
+            data += method.getSignature();
             n++;
         }
         return data;
@@ -869,11 +869,15 @@ public class Java2DF {
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
+                DFNode obj = null;
+                DFClassSpace klass = typeSpace.lookupClass(qn.getQualifier());
+                if (klass == null) {
+                    cpt = processExpression(
+                        graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
+                    obj = cpt.getRValue();
+                    klass = typeSpace.resolveClass(obj.getType());
+                }
 		SimpleName fieldName = qn.getName();
-		cpt = processExpression(
-                    graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
-		DFNode obj = cpt.getRValue();
-                DFClassSpace klass = typeSpace.resolveClass(obj.getType());
                 DFVarRef ref = klass.lookupField(fieldName);
 		cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
 		frame.addOutput(ref);
@@ -893,11 +897,19 @@ public class Java2DF {
 
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
+	    Expression expr1 = fa.getExpression();
+            DFNode obj = null;
+            DFClassSpace klass = null;
+            if (expr1 instanceof Name) {
+                klass = typeSpace.lookupClass((Name)expr1);
+            }
+            if (klass == null) {
+                cpt = processExpression(
+                    graph, typeSpace, varSpace, frame, cpt, expr1);
+                obj = cpt.getRValue();
+                klass = typeSpace.resolveClass(obj.getType());
+            }
 	    SimpleName fieldName = fa.getName();
-	    cpt = processExpression(
-                graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
-	    DFNode obj = cpt.getRValue();
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
 	    DFVarRef ref = klass.lookupField(fieldName);
 	    cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
             frame.addOutput(ref);
@@ -1070,18 +1082,18 @@ public class Java2DF {
 	} else if (expr instanceof MethodInvocation) {
 	    MethodInvocation invoke = (MethodInvocation)expr;
 	    Expression expr1 = invoke.getExpression();
-            DFClassSpace klass = null;
 	    DFNode obj = null;
+            DFClassSpace klass = null;
 	    if (expr1 == null) {
                 obj = cpt.getValue(varSpace.lookupThis());
             } else {
                 if (expr1 instanceof Name) {
                     klass = typeSpace.lookupClass((Name)expr1);
-                    if (klass == null) {
-                        cpt = processExpression(
-                            graph, typeSpace, varSpace, frame, cpt, expr1);
-                        obj = cpt.getRValue();
-                    }
+                }
+                if (klass == null) {
+                    cpt = processExpression(
+                        graph, typeSpace, varSpace, frame, cpt, expr1);
+                    obj = cpt.getRValue();
                 }
 	    }
             if (obj != null) {
@@ -1737,11 +1749,11 @@ public class Java2DF {
             // Remove redundant nodes.
             graph.cleanup();
 
-            Utils.logit("Success: "+method.getName());
+            Utils.logit("Success: "+method.getSignature());
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
-            e.name = method.getName();
+            e.name = method.getSignature();
             throw e;
         }
     }

@@ -33,9 +33,9 @@ public class DFMethod implements Comparable<DFMethod> {
     @Override
     public String toString() {
 	if (_returnType == null) {
-	    return ("<DFMethod("+this.getName()+" -> ?)>");
+	    return ("<DFMethod("+this.getSignature()+" -> ?)>");
 	} else {
-	    return ("<DFMethod("+this.getName()+" -> "+_returnType.getName()+">");
+	    return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getName()+">");
 	}
     }
 
@@ -54,7 +54,7 @@ public class DFMethod implements Comparable<DFMethod> {
 	return true;
     }
 
-    public String getName() {
+    public String getSignature() {
         String name;
         if (_klass != null) {
             name = (_klass.getName()+"/"+_name);

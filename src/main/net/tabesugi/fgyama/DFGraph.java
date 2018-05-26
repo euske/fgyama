@@ -34,7 +34,7 @@ public class DFGraph {
     public Element toXML(Document document) {
 	Element elem = document.createElement("graph");
         if (_method != null) {
-            elem.setAttribute("name", _method.getName());
+            elem.setAttribute("name", _method.getSignature());
         } else {
             elem.setAttribute("name", _root.getName());
         }
