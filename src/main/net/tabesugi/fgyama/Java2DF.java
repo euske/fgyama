@@ -75,7 +75,9 @@ class FieldAssignNode extends ProgNode {
         DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode obj) {
 	super(graph, space, null, ref, ast);
-	this.accept(obj, "obj");
+        if (obj != null) {
+            this.accept(obj, "obj");
+        }
     }
 
     @Override
@@ -123,7 +125,9 @@ class FieldAccessNode extends ProgNode {
         DFGraph graph, DFVarSpace space, DFVarRef ref,
         ASTNode ast, DFNode obj) {
 	super(graph, space, null, ref, ast);
-	this.accept(obj, "obj");
+        if (obj != null) {
+            this.accept(obj, "obj");
+        }
     }
 
     @Override
@@ -870,7 +874,7 @@ public class Java2DF {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
                 DFNode obj = null;
-                DFClassSpace klass = typeSpace.lookupClass(qn.getQualifier());
+                DFClassSpace klass = this.rootSpace.lookupClass(qn.getQualifier());
                 if (klass == null) {
                     cpt = processExpression(
                         graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
@@ -901,7 +905,7 @@ public class Java2DF {
             DFNode obj = null;
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
-                klass = typeSpace.lookupClass((Name)expr1);
+                klass = this.rootSpace.lookupClass((Name)expr1);
             }
             if (klass == null) {
                 cpt = processExpression(
@@ -943,11 +947,15 @@ public class Java2DF {
 	    } else {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
+                DFNode obj = null;
+                DFClassSpace klass = this.rootSpace.lookupClass(qn.getQualifier());
+                if (klass == null) {
+                    cpt = processExpression(
+                        graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
+                    obj = cpt.getRValue();
+                    klass = typeSpace.resolveClass(obj.getType());
+                }
 		SimpleName fieldName = qn.getName();
-		cpt = processExpression(
-                    graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
-		DFNode obj = cpt.getRValue();
-                DFClassSpace klass = typeSpace.resolveClass(obj.getType());
 		DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varSpace, ref, qn, obj);
                 node.accept(cpt.getValue(ref));
@@ -1035,8 +1043,8 @@ public class Java2DF {
 		DFNode assign = cpt.getLValue();
 		cpt = processExpression(
                     graph, typeSpace, varSpace, frame, cpt, operand);
-                DFNode node = new PostfixNode(graph, varSpace, assign.getRef(),
-                                              expr, op);
+                DFNode node = new PostfixNode(
+                    graph, varSpace, assign.getRef(), expr, op);
                 node.accept(cpt.getRValue());
 		assign.accept(node);
 		cpt.setOutput(assign);
@@ -1046,24 +1054,29 @@ public class Java2DF {
 	} else if (expr instanceof InfixExpression) {
 	    InfixExpression infix = (InfixExpression)expr;
 	    InfixExpression.Operator op = infix.getOperator();
-	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, infix.getLeftOperand());
+	    cpt = processExpression(
+                graph, typeSpace, varSpace, frame, cpt, infix.getLeftOperand());
 	    DFNode lvalue = cpt.getRValue();
-	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, infix.getRightOperand());
+	    cpt = processExpression(
+                graph, typeSpace, varSpace, frame, cpt, infix.getRightOperand());
 	    DFNode rvalue = cpt.getRValue();
             DFType type = lvalue.getType(); // XXX Todo: implicit type coersion.
-	    cpt.setRValue(new InfixNode(graph, varSpace, type,
-                                        expr, op, lvalue, rvalue));
+	    cpt.setRValue(new InfixNode(
+                              graph, varSpace, type, expr, op, lvalue, rvalue));
 
 	} else if (expr instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, paren.getExpression());
+	    cpt = processExpression(
+                graph, typeSpace, varSpace, frame, cpt, paren.getExpression());
 
 	} else if (expr instanceof Assignment) {
 	    Assignment assn = (Assignment)expr;
 	    Assignment.Operator op = assn.getOperator();
-	    cpt = processAssignment(graph, typeSpace, varSpace, frame, cpt, assn.getLeftHandSide());
+	    cpt = processAssignment(
+                graph, typeSpace, varSpace, frame, cpt, assn.getLeftHandSide());
 	    DFNode assign = cpt.getLValue();
-	    cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, assn.getRightHandSide());
+	    cpt = processExpression(
+                graph, typeSpace, varSpace, frame, cpt, assn.getRightHandSide());
 	    DFNode rvalue = cpt.getRValue();
 	    DFNode lvalue = ((op == Assignment.Operator.ASSIGN)?
                              null : cpt.getValue(assign.getRef()));
@@ -1088,7 +1101,7 @@ public class Java2DF {
                 obj = cpt.getValue(varSpace.lookupThis());
             } else {
                 if (expr1 instanceof Name) {
-                    klass = typeSpace.lookupClass((Name)expr1);
+                    klass = this.rootSpace.lookupClass((Name)expr1);
                 }
                 if (klass == null) {
                     cpt = processExpression(
@@ -1186,19 +1199,26 @@ public class Java2DF {
                 graph, typeSpace, varSpace, frame, cpt, aa.getIndex());
 	    DFNode index = cpt.getRValue();
             DFNode node = new ArrayAccessNode(
-                graph, varSpace, ref, aa,
-                array, index);
+                graph, varSpace, ref, aa, array, index);
             node.accept(cpt.getValue(ref));
 	    cpt.setRValue(node);
 	    frame.addInput(ref);
 
 	} else if (expr instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)expr;
+	    Expression expr1 = fa.getExpression();
+            DFNode obj = null;
+            DFClassSpace klass = null;
+            if (expr1 instanceof Name) {
+                klass = this.rootSpace.lookupClass((Name)expr1);
+            }
+            if (klass == null) {
+                cpt = processExpression(
+                    graph, typeSpace, varSpace, frame, cpt, expr1);
+                obj = cpt.getRValue();
+                klass = typeSpace.resolveClass(obj.getType());
+            }
 	    SimpleName fieldName = fa.getName();
-	    cpt = processExpression(
-                graph, typeSpace, varSpace, frame, cpt, fa.getExpression());
-	    DFNode obj = cpt.getRValue();
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
 	    DFVarRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
             node.accept(cpt.getValue(ref));

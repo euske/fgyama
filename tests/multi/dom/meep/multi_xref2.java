@@ -9,6 +9,7 @@ public class multi_xref2 {
 	xref1.moo();
         multi_xref1.baa zzz;
         int b = zzz.baz;
+        b = dom.dood.multi_xref3.boo;
     }
 
     public static int bam() {

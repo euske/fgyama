@@ -109,6 +109,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     protected void accept(DFNode node) {
+	assert node != null;
 	assert _input == null;
 	_input = node;
 	if (_type == null) {
@@ -118,6 +119,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     protected void accept(DFNode node, String label) {
+	assert node != null;
 	assert !_inputs.containsKey(label);
 	_inputs.put(label, node);
 	node._outputs.add(this);
