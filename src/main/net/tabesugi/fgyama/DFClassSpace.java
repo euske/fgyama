@@ -131,6 +131,11 @@ public class DFClassSpace extends DFVarSpace {
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method1);
         }
+        if (_baseIfaces != null) {
+            for (DFClassSpace iface : _baseIfaces) {
+                iface.overrideMethod(method1);
+            }
+        }
     }
 
     private DFMethod addMethod(
@@ -142,6 +147,11 @@ public class DFClassSpace extends DFVarSpace {
         _methods.add(method);
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);
+        }
+        if (_baseIfaces != null) {
+            for (DFClassSpace iface : _baseIfaces) {
+                iface.overrideMethod(method);
+            }
         }
         return method;
     }
