@@ -1,3 +1,9 @@
+class Object {
+    public String toString() {
+        return "object";
+    }
+}
+
 public class Foo {
     public static void fa() {
 	int a = 0;
@@ -11,5 +17,8 @@ public class Foo {
 	class moo {
 	    public int fc() { return 123; }
 	}
+        fa();
+        a.toString();
+        moo c = new moo();
     }
 }

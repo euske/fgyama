@@ -1247,7 +1247,29 @@ public class Java2DF {
 
 	} else if (expr instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-	    DFType instType = typeSpace.resolve(cstr.getType());
+            AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
+            DFType instType;
+            if (anonDecl != null) {
+                DFTypeSpace anonSpace = typeSpace.addAnonChild();
+                String id = anonSpace.getName();
+                DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
+                for (BodyDeclaration body :
+                         (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
+                    typeSpace.build(anonSpace, body);
+                }
+                DFClassSpace anonKlass = new DFClassSpace(typeSpace, id, baseKlass);
+                for (BodyDeclaration body :
+                         (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
+                    anonKlass.build(anonSpace, body);
+                }
+                typeSpace.addClass(id, anonKlass);
+                processClassDeclarations(
+                    typeSpace, anonKlass, anonSpace, anonDecl.bodyDeclarations());
+                instType = new DFClassType(anonKlass);
+
+            } else {
+                instType = typeSpace.resolve(cstr.getType());
+            }
 	    Expression expr1 = cstr.getExpression();
 	    DFNode obj = null;
 	    if (expr1 != null) {
@@ -1267,8 +1289,6 @@ public class Java2DF {
 		graph, varSpace, instType, cstr, obj);
             call.setArgs(args);
 	    cpt.setRValue(call);
-	    // Ignore getAnonymousClassDeclaration() here.
-	    // It will eventually be picked up as MethodDeclaration.
 
 	} else if (expr instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)expr;
@@ -1710,6 +1730,40 @@ public class Java2DF {
 	return cpt;
     }
 
+    public void processClassDeclarations(
+        DFTypeSpace typeSpace, DFClassSpace klass, DFTypeSpace child,
+        List<BodyDeclaration> decls) {
+	DFGraph classGraph = new DFGraph(klass);
+	DFFrame frame = new DFFrame(DFFrame.CLASS);
+        for (BodyDeclaration body : decls) {
+	    try {
+		if (body instanceof TypeDeclaration) {
+		    processTypeDeclaration(
+			child, (TypeDeclaration)body);
+		} else if (body instanceof FieldDeclaration) {
+		    processFieldDeclaration(
+			classGraph, typeSpace, klass,
+			frame, (FieldDeclaration)body);
+		} else if (body instanceof MethodDeclaration) {
+                    DFGraph graph = processMethodDeclaration(
+                        typeSpace, klass, (MethodDeclaration)body);
+                    if (this.exporter != null && graph != null) {
+                        this.exporter.writeGraph(graph);
+                    }
+		}
+	    } catch (UnsupportedSyntax e) {
+		String astName = e.ast.getClass().getName();
+		Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+		if (this.exporter != null) {
+		    this.exporter.writeError(e.name, astName);
+                }
+            }
+        }
+	if (this.exporter != null) {
+	    this.exporter.writeGraph(classGraph);
+	}
+    }
+
     /// Top-level functions.
 
     public Exporter exporter;
@@ -1803,36 +1857,8 @@ public class Java2DF {
         DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
         assert(klass != null);
         DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
-	DFGraph classGraph = new DFGraph(klass);
-	DFFrame frame = new DFFrame(DFFrame.CLASS);
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-	    try {
-		if (body instanceof TypeDeclaration) {
-		    processTypeDeclaration(
-			child, (TypeDeclaration)body);
-		} else if (body instanceof FieldDeclaration) {
-		    processFieldDeclaration(
-			classGraph, typeSpace, klass,
-			frame, (FieldDeclaration)body);
-		} else if (body instanceof MethodDeclaration) {
-                    DFGraph graph = processMethodDeclaration(
-                        typeSpace, klass, (MethodDeclaration)body);
-                    if (this.exporter != null && graph != null) {
-                        this.exporter.writeGraph(graph);
-                    }
-		}
-	    } catch (UnsupportedSyntax e) {
-		String astName = e.ast.getClass().getName();
-		Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-		if (this.exporter != null) {
-		    this.exporter.writeError(e.name, astName);
-                }
-            }
-        }
-	if (this.exporter != null) {
-	    this.exporter.writeGraph(classGraph);
-	}
+        processClassDeclarations(
+            typeSpace, klass, child, typeDecl.bodyDeclarations());
 	//klass.dump();
     }
 

@@ -46,19 +46,26 @@ public class DFTypeSpace {
 
     @Override
     public String toString() {
-	return ("<DFTypeSpace("+this.getName()+")>");
+	return ("<DFTypeSpace("+this.getFullName()+")>");
     }
 
     public String getName() {
+        return _name;
+    }
+    public String getFullName() {
         if (_parent == null) {
             return _name;
         } else if (_parent == _root) {
             return "."+_name;
         } else {
-            return _parent.getName()+"."+_name;
+            return _parent.getFullName()+"."+_name;
         }
     }
 
+    public DFTypeSpace addAnonChild() {
+        String id = "anon"+_children.size();
+        return this.addChild(id);
+    }
     private DFTypeSpace addChild(String id) {
         Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
         DFTypeSpace space = new DFTypeSpace(this, id);
@@ -127,7 +134,7 @@ public class DFTypeSpace {
 	DFClassSpace klass = new DFClassSpace(this, id);
         return this.addClass(id, klass);
     }
-    private DFClassSpace addClass(String id, DFClassSpace klass) {
+    public DFClassSpace addClass(String id, DFClassSpace klass) {
         Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
         assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
@@ -217,15 +224,20 @@ public class DFTypeSpace {
         DFTypeSpace child = this.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            if (body instanceof TypeDeclaration) {
-                child.build((TypeDeclaration)body);
-            } else if (body instanceof FieldDeclaration) {
-                ;
-            } else if (body instanceof MethodDeclaration) {
-                ;
-            } else {
-                throw new UnsupportedSyntax(body);
-            }
+            build(child, body);
+        }
+    }
+
+    public void build(DFTypeSpace child, BodyDeclaration body)
+	throws UnsupportedSyntax {
+        if (body instanceof TypeDeclaration) {
+            child.build((TypeDeclaration)body);
+        } else if (body instanceof FieldDeclaration) {
+            ;
+        } else if (body instanceof MethodDeclaration) {
+            ;
+        } else {
+            throw new UnsupportedSyntax(body);
         }
     }
 

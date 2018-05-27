@@ -17,15 +17,19 @@ public class DFClassSpace extends DFVarSpace {
 
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
-    public DFClassSpace(DFTypeSpace typeSpace) {
-        super("unknown");
-	_typeSpace = typeSpace;
-    }
-
     public DFClassSpace(DFTypeSpace typeSpace, String id) {
         super(id);
 	_typeSpace = typeSpace;
 	this.addRef("#this", new DFClassType(this));
+    }
+
+    public DFClassSpace(DFTypeSpace typeSpace) {
+        this(typeSpace, "unknown");
+    }
+
+    public DFClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
+        this(typeSpace, id);
+	_baseKlass = baseKlass;
     }
 
     @Override
@@ -38,7 +42,7 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public String getName() {
-	return _typeSpace.getName()+"/"+super.getName();
+	return _typeSpace.getFullName()+"/"+super.getName();
     }
 
     public int isBaseOf(DFClassSpace klass) {
@@ -180,35 +184,40 @@ public class DFClassSpace extends DFVarSpace {
 
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            if (body instanceof TypeDeclaration) {
-                TypeDeclaration decl = (TypeDeclaration)body;
-                DFClassSpace klass = child.lookupClass(decl.getName());
-                assert(klass != null);
-                klass.build(decl);
+            this.build(child, body);
+        }
+    }
 
-            } else if (body instanceof FieldDeclaration) {
-		// XXX support static field.
-                FieldDeclaration decl = (FieldDeclaration)body;
-		DFType type = _typeSpace.resolve(decl.getType());
-		for (VariableDeclarationFragment frag :
-			 (List<VariableDeclarationFragment>) decl.fragments()) {
-		    this.addField(frag.getName(), isStatic(decl), type);
-		}
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeSpace child, BodyDeclaration body)
+	throws UnsupportedSyntax {
+        if (body instanceof TypeDeclaration) {
+            TypeDeclaration decl = (TypeDeclaration)body;
+            DFClassSpace klass = child.lookupClass(decl.getName());
+            assert(klass != null);
+            klass.build(decl);
 
-            } else if (body instanceof MethodDeclaration) {
-                MethodDeclaration decl = (MethodDeclaration)body;
-                DFType[] argTypes = getTypeList(decl);
-                DFType returnType;
-                if (decl.isConstructor()) {
-                    returnType = new DFClassType(this);
-                } else {
-                    returnType = _typeSpace.resolve(decl.getReturnType2());
-                }
-                this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
-
-            } else {
-                throw new UnsupportedSyntax(body);
+        } else if (body instanceof FieldDeclaration) {
+            FieldDeclaration decl = (FieldDeclaration)body;
+            DFType type = _typeSpace.resolve(decl.getType());
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) decl.fragments()) {
+                this.addField(frag.getName(), isStatic(decl), type);
             }
+
+        } else if (body instanceof MethodDeclaration) {
+            MethodDeclaration decl = (MethodDeclaration)body;
+            DFType[] argTypes = getTypeList(decl);
+            DFType returnType;
+            if (decl.isConstructor()) {
+                returnType = new DFClassType(this);
+            } else {
+                returnType = _typeSpace.resolve(decl.getReturnType2());
+            }
+            this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
+
+        } else {
+            throw new UnsupportedSyntax(body);
         }
     }
 

@@ -15,5 +15,5 @@ How to Build:
 
 TODOs:
 
-  * Anymous class / lambdas
+  * Lambdas
   * Parameterized types.
