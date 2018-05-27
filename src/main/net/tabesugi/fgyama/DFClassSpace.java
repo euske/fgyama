@@ -3,6 +3,8 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
@@ -30,6 +32,24 @@ public class DFClassSpace extends DFVarSpace {
     public DFClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
         this(typeSpace, id);
 	_baseKlass = baseKlass;
+    }
+
+    public DFClassSpace(DFTypeSpace typeSpace, String id, JavaClass jklass) {
+        this(typeSpace, id);
+        for (Field fld : jklass.getFields()) {
+            DFType type = _typeSpace.resolve(fld.getType());
+            this.addRef("."+fld.getName(), type);
+        }
+        for (Method meth : jklass.getMethods()) {
+            org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
+            DFType[] argTypes = new DFType[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argTypes[i] = _typeSpace.resolve(args[i]);
+            }
+            DFType returnType = _typeSpace.resolve(meth.getReturnType());
+            this.addMethod(meth.getName(), meth.isStatic(),
+                           argTypes, returnType);
+        }
     }
 
     @Override
@@ -186,7 +206,7 @@ public class DFClassSpace extends DFVarSpace {
         DFTypeSpace child = _typeSpace.lookupSpace(typeDecl.getName());
 
         _baseKlass = _typeSpace.resolveClass(typeDecl.getSuperclassType());
-        List<Type> ifaces = typeDecl.superInterfaceTypes();
+        List<org.eclipse.jdt.core.dom.Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
             _baseIfaces[i] = _typeSpace.resolveClass(ifaces.get(i));

@@ -3,6 +3,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import org.apache.bcel.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
@@ -154,13 +157,20 @@ public class DFTypeSpace {
     }
 
     public DFClassSpace lookupClass(Name name) {
-        if (name.isQualifiedName()) {
-	    QualifiedName qname = (QualifiedName)name;
-            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
-            return parent.lookupClass(qname.getName());
-        } else {
-            return this.lookupClass((SimpleName)name);
-        }
+	String fullname = name.getFullyQualifiedName();
+	try {
+	    JavaClass jklass = Repository.lookupClass(fullname);
+            DFClassSpace klass = new DFClassSpace(this, fullname, jklass);
+	    return klass;
+	} catch (ClassNotFoundException e) {
+	    if (name.isQualifiedName()) {
+		QualifiedName qname = (QualifiedName)name;
+		DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
+		return parent.lookupClass(qname.getName());
+	    } else {
+		return this.lookupClass((SimpleName)name);
+	    }
+	}
     }
 
     public DFClassSpace resolveClass(DFType type) {
@@ -169,12 +179,12 @@ public class DFTypeSpace {
         }
         return _root.getDefaultClass(type);
     }
-    public DFClassSpace resolveClass(Type type) {
+    public DFClassSpace resolveClass(org.eclipse.jdt.core.dom.Type type) {
         return resolveClass(resolve(type));
     }
 
     @SuppressWarnings("unchecked")
-    public DFType resolve(Type type) {
+    public DFType resolve(org.eclipse.jdt.core.dom.Type type) {
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return new DFBasicType(ptype.getPrimitiveTypeCode());
@@ -185,14 +195,16 @@ public class DFTypeSpace {
                 klass = _root.getDefaultClass(stype.getName());
             }
             return new DFClassType(klass);
-	} else if (type instanceof ArrayType) {
-            ArrayType atype = (ArrayType)type;
+	} else if (type instanceof org.eclipse.jdt.core.dom.ArrayType) {
+            org.eclipse.jdt.core.dom.ArrayType atype =
+                (org.eclipse.jdt.core.dom.ArrayType)type;
 	    DFType elemType = this.resolve(atype.getElementType());
 	    int ndims = atype.getDimensions();
 	    return new DFArrayType(elemType, ndims);
 	} else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
-            List<Type> args = (List<Type>) ptype.typeArguments();
+            List<org.eclipse.jdt.core.dom.Type> args =
+                (List<org.eclipse.jdt.core.dom.Type>) ptype.typeArguments();
             DFType baseType = this.resolve(ptype.getType());
             DFType[] argTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
@@ -205,6 +217,39 @@ public class DFTypeSpace {
             }
         }
         return null;
+    }
+
+    public DFType resolve(org.apache.bcel.generic.Type type) {
+        if (type.equals(BasicType.BOOLEAN)) {
+            return DFType.BOOLEAN;
+        } else if (type.equals(BasicType.BYTE)) {
+            return DFType.BYTE;
+        } else if (type.equals(BasicType.CHAR)) {
+            return DFType.CHAR;
+        } else if (type.equals(BasicType.DOUBLE)) {
+            return DFType.DOUBLE;
+        } else if (type.equals(BasicType.FLOAT)) {
+            return DFType.FLOAT;
+        } else if (type.equals(BasicType.INT)) {
+            return DFType.INT;
+        } else if (type.equals(BasicType.LONG)) {
+            return DFType.LONG;
+        } else if (type.equals(BasicType.SHORT)) {
+            return DFType.SHORT;
+        } else if (type.equals(BasicType.VOID)) {
+            return DFType.VOID;
+        } else if (type instanceof org.apache.bcel.generic.ArrayType) {
+            org.apache.bcel.generic.ArrayType atype =
+                (org.apache.bcel.generic.ArrayType)type;
+            DFType elemType = this.resolve(atype.getElementType());
+            int ndims = atype.getDimensions();
+            return new DFArrayType(elemType, ndims);
+        } else if (type instanceof ObjectType) {
+            ObjectType otype = (ObjectType)type;
+            String className = otype.getClassName();
+            DFClassSpace klass = this.lookupClass(className);
+            return new DFClassType(klass);
+        }
     }
 
     @SuppressWarnings("unchecked")

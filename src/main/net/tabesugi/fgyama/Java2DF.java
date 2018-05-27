@@ -5,6 +5,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import java.util.jar.*;
+import org.apache.bcel.*;
+import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
@@ -1945,6 +1948,22 @@ public class Java2DF {
 	}
     }
 
+    public static void loadJarFile(String path)
+	throws IOException {
+        Utils.logit("Loading: "+path);
+	JarFile jarfile = new JarFile(path);
+	for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
+	    JarEntry je = es.nextElement();
+	    InputStream strm = jarfile.getInputStream(je);
+	    String name = je.getName();
+            if (name.endsWith(".class")) {
+                JavaClass jklass = new ClassParser(strm, name).parse();
+                Repository.addClass(jklass);
+                //Utils.logit("Added: "+name);
+            }
+	}
+    }
+
     /**
      * Provides a command line interface.
      *
@@ -1975,6 +1994,9 @@ public class Java2DF {
 		}
 	    } else if (arg.equals("-C")) {
 		classpath = args[++i].split(";");
+	    } else if (arg.equals("-J")) {
+                String path = args[++i];
+                loadJarFile(path);
 	    } else if (arg.startsWith("-")) {
 		;
 	    } else {
