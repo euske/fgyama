@@ -15,5 +15,6 @@ How to Build:
 
 TODOs:
 
-  * Lambdas
+  * Lambdas.
+  * Method references.
   * Parameterized types.

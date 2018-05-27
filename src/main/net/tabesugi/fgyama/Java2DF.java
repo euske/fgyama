@@ -1253,16 +1253,16 @@ public class Java2DF {
                 DFTypeSpace anonSpace = typeSpace.addAnonChild();
                 String id = anonSpace.getName();
                 DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
+                DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, baseKlass);
+                typeSpace.addClass(id, anonKlass);
                 for (BodyDeclaration body :
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                     typeSpace.build(anonSpace, body);
                 }
-                DFClassSpace anonKlass = new DFClassSpace(typeSpace, id, baseKlass);
                 for (BodyDeclaration body :
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                     anonKlass.build(anonSpace, body);
                 }
-                typeSpace.addClass(id, anonKlass);
                 processClassDeclarations(
                     typeSpace, anonKlass, anonSpace, anonDecl.bodyDeclarations());
                 instType = new DFClassType(anonKlass);
@@ -1316,14 +1316,42 @@ public class Java2DF {
             node.accept(cpt.getRValue());
 	    cpt.setRValue(node);
 
-	} else {
-	    // LambdaExpression
+	} else if (expr instanceof LambdaExpression) {
+	    LambdaExpression lambda = (LambdaExpression)expr;
+            ASTNode body = lambda.getBody();
+            DFTypeSpace anonSpace = typeSpace.addAnonChild();
+            String id = anonSpace.getName();
+            DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
+            if (body instanceof Statement) {
+                // XXX TODO
+            } else if (body instanceof Expression) {
+                // XXX TODO
+            } else {
+                throw new UnsupportedSyntax(body);
+            }
+            DFType instType = new DFClassType(anonKlass);
+	    CreateObjectNode call = new CreateObjectNode(
+		graph, varSpace, instType, lambda, null);
+	    cpt.setRValue(call);
+
+	} else if (expr instanceof MethodReference) {
 	    // MethodReference
 	    //  CreationReference
 	    //  ExpressionMethodReference
 	    //  SuperMethodReference
 	    //  TypeMethodReference
+	    MethodReference mref = (MethodReference)expr;
+            DFTypeSpace anonSpace = typeSpace.addAnonChild();
+            String id = anonSpace.getName();
+            DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
+            // XXX TODO
+            DFType instType = new DFClassType(anonKlass);
+	    CreateObjectNode call = new CreateObjectNode(
+		graph, varSpace, instType, mref, null);
+	    cpt.setRValue(call);
 
+        } else {
+            // ???
 	    throw new UnsupportedSyntax(expr);
 	}
 

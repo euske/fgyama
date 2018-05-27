@@ -30,6 +30,8 @@ public abstract class DFType {
 	new DFBasicType("@number");
     public static final DFType TYPE =
 	new DFBasicType("@type");
+    public static final DFType ANONYMOUS =
+	new DFBasicType("@anonymous");
     public static final DFType STRING =
 	new DFBasicType(".String");
 }
