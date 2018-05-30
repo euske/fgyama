@@ -86,10 +86,6 @@ public class DFClassSpace extends DFVarSpace {
     public DFVarRef lookupField(SimpleName name) {
         DFVarRef ref = this.lookupField(name.getIdentifier());
         if (ref != null) return ref;
-        String id = Utils.resolveName(name);
-        if (id != null) {
-            return new DFVarRef(null, id, null);
-        }
         return new DFVarRef(null, "."+name.getIdentifier(), null);
     }
 
@@ -118,13 +114,7 @@ public class DFClassSpace extends DFVarSpace {
             klass = klass._baseKlass;
         }
         // fallback...
-        DFMethod fallback;
-        String id = Utils.resolveName(name);
-        if (id != null) {
-            fallback = new DFMethod(null, id, false, null, null);
-        } else {
-            fallback = this.addMethod(name, false, null, null);
-        }
+        DFMethod fallback = this.addMethod(name, false, null, null);
         return new DFMethod[] { fallback };
     }
 
@@ -162,6 +152,13 @@ public class DFClassSpace extends DFVarSpace {
         SimpleName name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
+	return this.addMethod(
+	    id, isStatic, argTypes, returnType);
+    }
+
+    private DFMethod addMethod(
+        String id, boolean isStatic,
+        DFType[] argTypes, DFType returnType) {
 	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
         Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);

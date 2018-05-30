@@ -1902,7 +1902,7 @@ public class Java2DF {
         parser.setUnitName(path);
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
-	parser.setResolveBindings(true);
+	parser.setResolveBindings(false);
 	parser.setEnvironment(this.classPath, this.srcPath, null, true);
 	parser.setCompilerOptions(options);
 	return (CompilationUnit)parser.createAST(null);

@@ -124,9 +124,6 @@ public class DFVarSpace {
         // try field names.
         ref = this.lookupField(name.getIdentifier());
         if (ref != null) return ref;
-        // builtin names?
-        String id = Utils.resolveName(name);
-        if (id != null) return this.addRef(id, null);
         // fallback...
         return this.addRef(name.getIdentifier(), null);
     }
