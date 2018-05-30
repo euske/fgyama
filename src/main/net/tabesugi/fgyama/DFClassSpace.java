@@ -3,7 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -203,7 +203,7 @@ public class DFClassSpace extends DFVarSpace {
         DFTypeSpace child = _typeSpace.lookupSpace(typeDecl.getName());
 
         _baseKlass = _typeSpace.resolveClass(typeDecl.getSuperclassType());
-        List<org.eclipse.jdt.core.dom.Type> ifaces = typeDecl.superInterfaceTypes();
+        List<Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
             _baseIfaces[i] = _typeSpace.resolveClass(ifaces.get(i));
