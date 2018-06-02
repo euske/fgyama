@@ -1977,6 +1977,7 @@ public class Java2DF {
 	String[] srcpath = null;
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
+        String sep = System.getProperty("path.separator");
 
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
@@ -1993,10 +1994,11 @@ public class Java2DF {
 		    System.err.println("Cannot open output file: "+path);
 		}
 	    } else if (arg.equals("-C")) {
-		classpath = args[++i].split(";");
+		classpath = args[++i].split(sep);
 	    } else if (arg.equals("-J")) {
-                String path = args[++i];
-                loadJarFile(path);
+                for (String path : args[++i].split(sep)) {
+                    loadJarFile(path);
+                }
 	    } else if (arg.startsWith("-")) {
 		;
 	    } else {

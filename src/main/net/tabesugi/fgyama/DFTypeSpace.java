@@ -157,7 +157,7 @@ public class DFTypeSpace {
 
     public DFClassSpace lookupClass(Name name) {
 	String fullname = name.getFullyQualifiedName();
-	DFClassSpace klass = this.lookupClass(fullname);
+	DFClassSpace klass = _root.loadClass(fullname);
 	if (klass == null) {
 	    if (name.isQualifiedName()) {
 		QualifiedName qname = (QualifiedName)name;
@@ -168,15 +168,6 @@ public class DFTypeSpace {
 	    }
 	}
 	return klass;
-    }
-
-    private DFClassSpace lookupClass(String fullname) {
-	try {
-	    JavaClass jklass = Repository.lookupClass(fullname);
-	    return new DFClassSpace(this, fullname, jklass);
-	} catch (ClassNotFoundException e) {
-	    return null;
-	}
     }
 
     public DFClassSpace resolveClass(DFType type) {
@@ -252,11 +243,26 @@ public class DFTypeSpace {
             org.apache.bcel.generic.ObjectType otype =
 		(org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            DFClassSpace klass = this.lookupClass(className);
+            DFClassSpace klass = _root.loadClass(className);
             return new DFClassType(klass);
         } else {
 	    return null;
 	}
+    }
+
+    private DFClassSpace loadClass(String fullname) {
+        assert(this == _root);
+        DFClassSpace klass = _id2klass.get(fullname);
+        if (klass == null) {
+            try {
+                JavaClass jklass = Repository.lookupClass(fullname);
+                klass = new DFClassSpace(this, fullname);
+                _id2klass.put(fullname, klass);
+                klass.build(jklass);
+            } catch (ClassNotFoundException e) {
+	    }
+	}
+        return klass;
     }
 
     @SuppressWarnings("unchecked")

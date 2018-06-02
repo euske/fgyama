@@ -13,6 +13,7 @@
   <property name="out_graph" location="${tmpDir}/out.graph" />
   <property name="out_gv" location="${tmpDir}/out.gv" />
   <property name="out_svg" location="${tmpDir}/out.svg" />
+  <property name="classpath" location="${java.home}/lib/rt.jar" />
 
   <path id="build.classpath">
     <pathelement location="${libDir}/bcel-6.2.jar"/>
@@ -64,6 +65,8 @@
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.fgyama.Java2DF">
       <jvmarg value="-ea" />
+      <arg value="-J" />
+      <arg value="${classpath}" />
       <arg value="-o" />
       <arg file="${out_graph}" />
       <arg file="${input}" />

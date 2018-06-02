@@ -19,37 +19,19 @@ public class DFClassSpace extends DFVarSpace {
 
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
-    public DFClassSpace(DFTypeSpace typeSpace, String id) {
+    public DFClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
         super(id);
 	_typeSpace = typeSpace;
+	_baseKlass = baseKlass;
+    }
+
+    public DFClassSpace(DFTypeSpace typeSpace, String id) {
+        this(typeSpace, id, null);
 	this.addRef("#this", new DFClassType(this));
     }
 
     public DFClassSpace(DFTypeSpace typeSpace) {
         this(typeSpace, "unknown");
-    }
-
-    public DFClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
-        this(typeSpace, id);
-	_baseKlass = baseKlass;
-    }
-
-    public DFClassSpace(DFTypeSpace typeSpace, String id, JavaClass jklass) {
-        this(typeSpace, id);
-        for (Field fld : jklass.getFields()) {
-            DFType type = _typeSpace.resolve(fld.getType());
-            this.addRef("."+fld.getName(), type);
-        }
-        for (Method meth : jklass.getMethods()) {
-            org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
-            DFType[] argTypes = new DFType[args.length];
-            for (int i = 0; i < args.length; i++) {
-                argTypes[i] = _typeSpace.resolve(args[i]);
-            }
-            DFType returnType = _typeSpace.resolve(meth.getReturnType());
-            this.addMethod(meth.getName(), meth.isStatic(),
-                           argTypes, returnType);
-        }
     }
 
     @Override
@@ -194,6 +176,23 @@ public class DFClassSpace extends DFVarSpace {
             }
         }
         return false;
+    }
+
+    public void build(JavaClass jklass) {
+        for (Field fld : jklass.getFields()) {
+            DFType type = _typeSpace.resolve(fld.getType());
+            this.addRef("."+fld.getName(), type);
+        }
+        for (Method meth : jklass.getMethods()) {
+            org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
+            DFType[] argTypes = new DFType[args.length];
+            for (int i = 0; i < args.length; i++) {
+                argTypes[i] = _typeSpace.resolve(args[i]);
+            }
+            DFType returnType = _typeSpace.resolve(meth.getReturnType());
+            this.addMethod(meth.getName(), meth.isStatic(),
+                           argTypes, returnType);
+        }
     }
 
     @SuppressWarnings("unchecked")
