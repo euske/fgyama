@@ -65,7 +65,7 @@
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.fgyama.Java2DF">
       <jvmarg value="-ea" />
-      <arg value="-J" />
+      <arg value="-C" />
       <arg value="${classpath}" />
       <arg value="-o" />
       <arg file="${out_graph}" />

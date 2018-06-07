@@ -22,13 +22,10 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String javaPath, String xmlPath)
 	throws Exception {
-        compareXml(javaPath, xmlPath, null);
-    }
-    public void compareXml(String javaPath, String xmlPath, String[] srcPath)
-	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
+        DFTypeSpace rootSpace = new DFTypeSpace();
 	XmlExporter exporter = new XmlExporter();
-	Java2DF converter = new Java2DF(exporter, null, srcPath);
+	Java2DF converter = new Java2DF(rootSpace, exporter);
         CompilationUnit cunit = converter.parseFile(javaPath);
 	converter.buildTypeSpace(cunit);
 	converter.buildClassSpace(cunit);
@@ -97,18 +94,14 @@ public class UnitTestDF extends XMLTestCase {
     }
     @Test
     public void test_13_basic_names() throws Exception {
-	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph",
-		   null);
+	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph");
     }
 
     @Test
     public void test_14_multi_xref() throws Exception {
-	String[] srcpath = new String[] { TESTDATA+"/multi" };
 	compareXml(TESTDATA+"/multi/dom/meep/multi_xref1.java",
-		   TESTDATA+"/multi/dom/meep/multi_xref1.graph",
-		   srcpath);
+		   TESTDATA+"/multi/dom/meep/multi_xref1.graph");
 	compareXml(TESTDATA+"/multi/dom/meep/multi_xref2.java",
-		   TESTDATA+"/multi/dom/meep/multi_xref2.graph",
-		   srcpath);
+		   TESTDATA+"/multi/dom/meep/multi_xref2.graph");
     }
 }

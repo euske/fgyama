@@ -5,7 +5,6 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import java.util.jar.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -1797,17 +1796,14 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    public Exporter exporter;
-    public String[] classPath;
-    public String[] srcPath;
     public DFTypeSpace rootSpace;
+    public Exporter exporter;
 
     public Java2DF(
-	Exporter exporter, String[] classPath, String[] srcPath) {
+        DFTypeSpace rootSpace,
+	Exporter exporter) {
+        this.rootSpace = rootSpace;
 	this.exporter = exporter;
-	this.classPath = classPath;
-	this.srcPath = srcPath;
-        this.rootSpace = new DFTypeSpace();
     }
 
     /**
@@ -1899,11 +1895,10 @@ public class Java2DF {
 	Map<String, String> options = JavaCore.getOptions();
 	JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 	ASTParser parser = ASTParser.newParser(AST.JLS8);
-        parser.setUnitName(path);
 	parser.setSource(src.toCharArray());
 	parser.setKind(ASTParser.K_COMPILATION_UNIT);
 	parser.setResolveBindings(false);
-	parser.setEnvironment(this.classPath, this.srcPath, null, true);
+	parser.setEnvironment(null, null, null, false);
 	parser.setCompilerOptions(options);
 	return (CompilationUnit)parser.createAST(null);
     }
@@ -1948,22 +1943,6 @@ public class Java2DF {
 	}
     }
 
-    public static void loadJarFile(String path)
-	throws IOException {
-        Utils.logit("Loading: "+path);
-	JarFile jarfile = new JarFile(path);
-	for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
-	    JarEntry je = es.nextElement();
-	    InputStream strm = jarfile.getInputStream(je);
-	    String name = je.getName();
-            if (name.endsWith(".class")) {
-                JavaClass jklass = new ClassParser(strm, name).parse();
-                Repository.addClass(jklass);
-                //Utils.logit("Added: "+name);
-            }
-	}
-    }
-
     /**
      * Provides a command line interface.
      *
@@ -1973,11 +1952,10 @@ public class Java2DF {
 	throws IOException {
 
 	// Parse the options.
-	String[] classpath = null;
-	String[] srcpath = null;
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
+        DFTypeSpace rootSpace = new DFTypeSpace();
 
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
@@ -1994,10 +1972,8 @@ public class Java2DF {
 		    System.err.println("Cannot open output file: "+path);
 		}
 	    } else if (arg.equals("-C")) {
-		classpath = args[++i].split(sep);
-	    } else if (arg.equals("-J")) {
                 for (String path : args[++i].split(sep)) {
-                    loadJarFile(path);
+                    rootSpace.loadJarFile(path);
                 }
 	    } else if (arg.startsWith("-")) {
 		;
@@ -2008,7 +1984,7 @@ public class Java2DF {
 
 	// Process files.
 	XmlExporter exporter = new XmlExporter();
-        Java2DF converter = new Java2DF(exporter, classpath, srcpath);
+        Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {
 	    Utils.logit("Pass1: "+path);
 	    try {
