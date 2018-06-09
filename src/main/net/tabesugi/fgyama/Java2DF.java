@@ -896,9 +896,11 @@ public class Java2DF {
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, aa.getIndex());
+	    DFVarRef ref = varSpace.lookupArray(array);
 	    DFNode index = cpt.getRValue();
-	    DFVarRef ref = varSpace.lookupArray();
-	    cpt.setLValue(new ArrayAssignNode(graph, varSpace, ref, expr, array, index));
+            DFNode node = new ArrayAssignNode(
+                graph, varSpace, ref, expr, array, index);
+	    cpt.setLValue(node);
             frame.addOutput(ref);
 
 	} else if (expr instanceof FieldAccess) {
@@ -1193,12 +1195,12 @@ public class Java2DF {
 
 	} else if (expr instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)expr;
-	    DFVarRef ref = varSpace.lookupArray();
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, aa.getArray());
 	    DFNode array = cpt.getRValue();
 	    cpt = processExpression(
                 graph, typeSpace, varSpace, frame, cpt, aa.getIndex());
+	    DFVarRef ref = varSpace.lookupArray(array);
 	    DFNode index = cpt.getRValue();
             DFNode node = new ArrayAccessNode(
                 graph, varSpace, ref, aa, array, index);
@@ -1325,9 +1327,9 @@ public class Java2DF {
             String id = anonSpace.getName();
             DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
             if (body instanceof Statement) {
-                // XXX TODO
+                // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
-                // XXX TODO
+                // XXX TODO Expresssion lambda
             } else {
                 throw new UnsupportedSyntax(body);
             }
@@ -1346,7 +1348,7 @@ public class Java2DF {
             DFTypeSpace anonSpace = typeSpace.addAnonChild();
             String id = anonSpace.getName();
             DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
-            // XXX TODO
+            // XXX TODO method ref
             DFType instType = new DFClassType(anonKlass);
 	    CreateObjectNode call = new CreateObjectNode(
 		graph, varSpace, instType, mref, null);

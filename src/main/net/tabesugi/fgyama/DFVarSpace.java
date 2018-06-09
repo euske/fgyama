@@ -136,9 +136,16 @@ public class DFVarSpace {
 	return this.lookupRef("#exception");
     }
 
-    public DFVarRef lookupArray() {
-        // XXX
-	return _root.addRef("#array", null);
+    public DFVarRef lookupArray(DFNode array) {
+        DFType type = array.getType();
+        DFVarRef ref;
+        if (type instanceof DFArrayType) {
+            DFType elemType = ((DFArrayType)type).getElemType();
+            ref = _root.addRef("#array:"+elemType.getName(), elemType);
+        } else {
+            ref = _root.addRef("#array:?", null);
+        }
+        return ref;
     }
 
     public DFVarRef lookupThis() {
