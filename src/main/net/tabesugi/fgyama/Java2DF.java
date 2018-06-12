@@ -1957,7 +1957,6 @@ public class Java2DF {
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
-        DFTypeSpace rootSpace = new DFTypeSpace();
 
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
@@ -1975,16 +1974,19 @@ public class Java2DF {
 		}
 	    } else if (arg.equals("-C")) {
                 for (String path : args[++i].split(sep)) {
-                    rootSpace.loadJarFile(path);
+                    DFRepository.loadJarFile(path);
                 }
 	    } else if (arg.startsWith("-")) {
-		;
+		System.err.println("Unknown option: "+arg);
+		System.exit(1);
 	    } else {
 		files.add(arg);
 	    }
 	}
 
 	// Process files.
+        DFTypeSpace rootSpace = new DFTypeSpace();
+	DFRepository.loadBuiltinClasses(rootSpace);
 	XmlExporter exporter = new XmlExporter();
         Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {

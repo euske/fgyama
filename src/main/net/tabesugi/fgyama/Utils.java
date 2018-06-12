@@ -107,6 +107,10 @@ public class Utils {
 	}
     }
 
+    public static String[] splitName(String name) {
+	return name.split("\\.");
+    }
+
     public static String getTypeName(Type type) {
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;

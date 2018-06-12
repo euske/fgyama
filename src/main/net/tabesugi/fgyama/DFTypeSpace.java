@@ -3,7 +3,6 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import java.util.jar.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -251,16 +250,32 @@ public class DFTypeSpace {
 	}
     }
 
+    public void loadRootClass(JavaClass jklass) {
+        assert(this == _root);
+	assert(jklass.getPackageName().equals("java.lang"));
+	String fullName = jklass.getClassName();
+	String[] names = Utils.splitName(fullName);
+	String id = names[names.length-1];
+	DFClassSpace klass = this.loadClass(jklass);
+	_id2klass.put(id, klass);
+    }
+
+    private DFClassSpace loadClass(JavaClass jklass) {
+        assert(this == _root);
+	String name = jklass.getClassName();
+	DFClassSpace klass = new DFClassSpace(this, name);
+	_id2klass.put(name, klass);
+	klass.build(jklass);
+	return klass;
+    }
+
     private DFClassSpace loadClass(String fullname) {
         assert(this == _root);
         DFClassSpace klass = _id2klass.get(fullname);
         if (klass == null) {
-            try {
-                JavaClass jklass = Repository.lookupClass(fullname);
-                klass = new DFClassSpace(this, fullname);
-                _id2klass.put(fullname, klass);
-                klass.build(jklass);
-            } catch (ClassNotFoundException e) {
+	    JavaClass jklass = DFRepository.loadJavaClass(fullname);
+	    if (jklass != null) {
+		klass = this.loadClass(jklass);
 	    }
 	}
         return klass;
@@ -330,31 +345,6 @@ public class DFTypeSpace {
             typeSpace.importNames(importDecl);
         }
         return typeSpace;
-    }
-
-    public void loadJarFile(String path)
-	throws IOException {
-        Utils.logit("Loading: "+path);
-	JarFile jarfile = new JarFile(path);
-	for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
-	    JarEntry je = es.nextElement();
-	    InputStream strm = jarfile.getInputStream(je);
-	    String name = je.getName();
-            if (name.endsWith(".class")) {
-                JavaClass jklass = new ClassParser(strm, name).parse();
-                Repository.addClass(jklass);
-                String packageName = jklass.getPackageName();
-                if (packageName.equals("java.lang")) {
-                    String fullName = jklass.getClassName();
-                    String[] names = fullName.split("\\.");
-                    assert(names.length == 2);
-                    String id = names[names.length-1];
-                    DFClassSpace klass = _root.loadClass(fullName);
-                    _id2klass.put(id, klass);
-                    Utils.logit("Added: "+fullName+" -> "+id);
-                }
-            }
-	}
     }
 
     // dump: for debugging.
