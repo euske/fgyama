@@ -12,7 +12,6 @@
   <property name="out_xml" location="${tmpDir}/out.xml" />
   <property name="out_graph" location="${tmpDir}/out.graph" />
   <property name="out_gv" location="${tmpDir}/out.gv" />
-  <property name="out_svg" location="${tmpDir}/out.svg" />
   <property name="classpath" location="${java.home}/lib/rt.jar" />
 
   <path id="build.classpath">
@@ -83,8 +82,7 @@
     </exec>
     <exec executable="dot" failonerror="true">
       <arg value="-Tsvg" />
-      <arg value="-o" />
-      <arg file="${out_svg}" />
+      <arg value="-O" />
       <arg file="${out_gv}" />
     </exec>
   </target>
