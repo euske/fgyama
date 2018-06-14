@@ -91,13 +91,14 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, nid, name, scope, kind, ref, data):
+    def __init__(self, nid, name, scope, kind, ref, data, ntype):
         self.nid = nid
         self.name = name
         self.scope = scope
         self.kind = kind
         self.ref = ref
         self.data = data
+        self.ntype = ntype
         self.ast = None
         self.inputs = {}
         self.outputs = []
@@ -105,8 +106,8 @@ class DFNode:
 
     def __repr__(self):
         name = self.nid if self.name is None else self.name
-        return ('<DFNode(%s): kind=%s, ref=%r, data=%r, inputs=%r>' %
-                (name, self.kind, self.ref, self.data, len(self.inputs)))
+        return ('<DFNode(%s): kind=%s, ref=%r, data=%r, ntype=%r, inputs=%r>' %
+                (name, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
 
     def toxml(self):
         enode = Element('node')
@@ -117,6 +118,8 @@ class DFNode:
             enode.set('data', self.data)
         if self.ref is not None:
             enode.set('ref', self.ref)
+        if self.ntype is not None:
+            enode.set('type', self.ntype)
         if self.ast is not None:
             east = Element('ast')
             (astype,astart,alength) = self.ast
@@ -152,7 +155,8 @@ def parse_graph(gid, egraph, src=None):
         kind = enode.get('kind')
         ref = enode.get('ref')
         data = enode.get('data')
-        node = DFNode(nid, nname, scope, kind, ref, data)
+        ntype = enode.get('type')
+        node = DFNode(nid, nname, scope, kind, ref, data, ntype)
         for e in enode.getchildren():
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -245,7 +249,8 @@ CREATE TABLE DFNode (
     Aid INTEGER,
     Kind TEXT,
     Ref TEXT,
-    Data TEXT
+    Data TEXT,
+    Type TEXT
 );
 CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
 
@@ -295,8 +300,8 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
                     node.ast)
                 aid = cur.lastrowid
             cur.execute(
-                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?);',
-                (gid, sid, aid, node.kind, node.ref, node.data))
+                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
+                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
             nid = cur.lastrowid
             node.nid = nid
             return nid
@@ -352,11 +357,11 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data FROM DFNode WHERE Gid=?;',
+            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
             (gid,))
-        for (nid,sid,aid,kind,ref,data) in list(rows):
+        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(nid, None, scope, kind, ref, data)
+            node = DFNode(nid, None, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))
@@ -403,7 +408,8 @@ def get_graphs(arg):
 BASEDIR = os.path.dirname(os.path.dirname(__file__))
 LIBDIR = os.path.join(BASEDIR, 'lib')
 LIBS = (
-    'junit-3.8.1.jar',
+    'junit-4.12.jar',
+    'bcel-6.2.jar',
     'org.eclipse.jdt.core-3.12.3.jar',
     'org.eclipse.core.resources-3.11.1.jar',
     'org.eclipse.core.expressions-3.5.100.jar',
