@@ -242,6 +242,8 @@ public class DFClassSpace extends DFVarSpace {
             }
             this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
 
+        } else if (body instanceof Initializer) {
+
         } else {
             throw new UnsupportedSyntax(body);
         }

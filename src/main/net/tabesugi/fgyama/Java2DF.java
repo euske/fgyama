@@ -1782,6 +1782,15 @@ public class Java2DF {
                     if (this.exporter != null && graph != null) {
                         this.exporter.writeGraph(graph);
                     }
+		} else if (body instanceof Initializer) {
+		    Block block = ((Initializer)body).getBody();
+		    klass.build(typeSpace, block);
+		    frame.build(typeSpace, klass, block);
+		    DFComponent cpt = new DFComponent(classGraph, klass);
+		    cpt = processStatement(
+			classGraph, typeSpace, klass,
+			frame, cpt, block);
+		    cpt.endFrame(frame);
 		}
 	    } catch (UnsupportedSyntax e) {
 		String astName = e.ast.getClass().getName();

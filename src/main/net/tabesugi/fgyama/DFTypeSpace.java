@@ -310,6 +310,8 @@ public class DFTypeSpace {
             ;
         } else if (body instanceof MethodDeclaration) {
             ;
+        } else if (body instanceof Initializer) {
+	    ;
         } else {
             throw new UnsupportedSyntax(body);
         }
