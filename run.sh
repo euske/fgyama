@@ -9,8 +9,8 @@ fi
 BASEDIR=${0%/*}
 LIBDIR=${BASEDIR}/lib
 CLASSPATH=${BASEDIR}/target
-CLASSPATH=${CLASSPATH}:${LIBDIR}/junit-3.8.1.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/bcel-6.2.jar
+CLASSPATH=${CLASSPATH}:${LIBDIR}/junit-4.12.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.jdt.core-3.12.3.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.core.resources-3.11.1.jar
 CLASSPATH=${CLASSPATH}:${LIBDIR}/org.eclipse.core.expressions-3.5.100.jar
