@@ -15,11 +15,6 @@ public abstract class DFType {
     public abstract String getName();
     public abstract int canConvertFrom(DFType type);
 
-    @Override
-    public String toString() {
-	return ("<DFType("+this.getName()+")>");
-    }
-
     public static final DFType BOOLEAN =
 	new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFType BYTE =

@@ -14,29 +14,39 @@ import org.eclipse.jdt.core.dom.*;
 public class DFClassSpace extends DFVarSpace {
 
     private DFTypeSpace _typeSpace;
+    private DFTypeSpace _childSpace;
     private DFClassSpace _baseKlass;
     private DFClassSpace[] _baseIfaces;
 
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
-    public DFClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
+    public DFClassSpace(
+        DFTypeSpace typeSpace, DFTypeSpace childSpace,
+        String id, DFClassSpace baseKlass) {
         super(id);
 	_typeSpace = typeSpace;
+        _childSpace = childSpace;
 	_baseKlass = baseKlass;
     }
 
-    public DFClassSpace(DFTypeSpace typeSpace, String id) {
-        this(typeSpace, id, null);
+    public DFClassSpace(
+        DFTypeSpace typeSpace, DFTypeSpace childSpace, String id) {
+        this(typeSpace, childSpace, id, null);
 	this.addRef("#this", new DFClassType(this));
     }
 
-    public DFClassSpace(DFTypeSpace typeSpace) {
-        this(typeSpace, "unknown");
+    public DFClassSpace(
+        DFTypeSpace typeSpace, DFTypeSpace childSpace) {
+        this(typeSpace, childSpace, "unknown");
     }
 
     @Override
     public String toString() {
 	return ("<DFClassSpace("+this.getName()+")>");
+    }
+
+    public DFTypeSpace getChildSpace() {
+        return _childSpace;
     }
 
     public DFClassSpace getBase() {
@@ -95,12 +105,10 @@ public class DFClassSpace extends DFVarSpace {
             }
             klass = klass._baseKlass;
         }
-        // fallback...
-        DFMethod fallback = this.addMethod(name, false, null, null);
-        return new DFMethod[] { fallback };
+        return null;
     }
 
-    public DFMethod lookupMethodByAST(MethodDeclaration methodDecl) {
+    public DFMethod lookupMethodByDecl(MethodDeclaration methodDecl) {
         DFType[] argTypes = getTypeList(methodDecl);
         return this.lookupMethod1(methodDecl.getName(), argTypes);
     }
@@ -108,7 +116,7 @@ public class DFClassSpace extends DFVarSpace {
     private DFVarRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
-        Utils.logit("DFClassSpace.addField: "+ref);
+        Utils.logit("DFClassSpace.addField: "+this+": "+ref);
         return ref;
     }
 
@@ -142,7 +150,7 @@ public class DFClassSpace extends DFVarSpace {
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
 	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
-        Utils.logit("DFClassSpace.addMethod: "+method);
+        Utils.logit("DFClassSpace.addMethod: "+this+": "+method);
         _methods.add(method);
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);
@@ -178,34 +186,34 @@ public class DFClassSpace extends DFVarSpace {
         return false;
     }
 
-    public void build(JavaClass jklass) {
+    public void build(DFTypeSpace typeSpace, JavaClass jklass) {
         for (Field fld : jklass.getFields()) {
-            DFType type = _typeSpace.resolve(fld.getType());
+            DFType type = typeSpace.resolve(fld.getType());
             this.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
             org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {
-                argTypes[i] = _typeSpace.resolve(args[i]);
+                argTypes[i] = typeSpace.resolve(args[i]);
             }
-            DFType returnType = _typeSpace.resolve(meth.getReturnType());
+            DFType returnType = typeSpace.resolve(meth.getReturnType());
             this.addMethod(meth.getName(), meth.isStatic(),
                            argTypes, returnType);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void build(TypeDeclaration typeDecl)
+    public void build(DFTypeSpace typeSpace, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
         //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
-        DFTypeSpace child = _typeSpace.lookupSpace(typeDecl.getName());
+        DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
 
-        _baseKlass = _typeSpace.resolveClass(typeDecl.getSuperclassType());
+        _baseKlass = typeSpace.resolveClass(typeDecl.getSuperclassType());
         List<Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
-            _baseIfaces[i] = _typeSpace.resolveClass(ifaces.get(i));
+            _baseIfaces[i] = typeSpace.resolveClass(ifaces.get(i));
         }
 
         for (BodyDeclaration body :
@@ -215,16 +223,16 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace child, BodyDeclaration body)
+    public void build(DFTypeSpace typeSpace, BodyDeclaration body)
 	throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
-            DFClassSpace klass = child.lookupClass(decl.getName());
-            klass.build(decl);
+            DFClassSpace klass = typeSpace.lookupClass(decl.getName());
+            klass.build(typeSpace, decl);
 
         } else if (body instanceof FieldDeclaration) {
             FieldDeclaration decl = (FieldDeclaration)body;
-            DFType type = _typeSpace.resolve(decl.getType());
+            DFType type = typeSpace.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 this.addField(frag.getName(), isStatic(decl), type);
@@ -237,7 +245,7 @@ public class DFClassSpace extends DFVarSpace {
             if (decl.isConstructor()) {
                 returnType = new DFClassType(this);
             } else {
-                returnType = _typeSpace.resolve(decl.getReturnType2());
+                returnType = typeSpace.resolve(decl.getReturnType2());
             }
             this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
 

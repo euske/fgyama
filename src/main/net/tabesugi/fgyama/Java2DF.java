@@ -1140,6 +1140,12 @@ public class Java2DF {
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
             DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
+            if (methods == null) {
+                String id = invoke.getName().getIdentifier();
+                DFMethod fallback = new DFMethod(klass, id, false, null, null);
+                Utils.logit("Fallback method: "+klass+": "+fallback);
+                methods = new DFMethod[] { fallback };
+            }
             MethodCallNode call = new MethodCallNode(
                 graph, varSpace, methods, invoke, obj);
             call.setArgs(args);
@@ -1168,6 +1174,12 @@ public class Java2DF {
             DFClassSpace klass = typeSpace.resolveClass(obj.getType());
             DFClassSpace baseKlass = klass.getBase();
             DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
+            if (methods == null) {
+                String id = sinvoke.getName().getIdentifier();
+                DFMethod fallback = new DFMethod(baseKlass, id, false, null, null);
+                Utils.logit("Fallback method: "+baseKlass+": "+fallback);
+                methods = new DFMethod[] { fallback };
+            }
             MethodCallNode call = new MethodCallNode(
                 graph, varSpace, methods, sinvoke, obj);
             call.setArgs(args);
@@ -1267,14 +1279,14 @@ public class Java2DF {
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
             DFType instType;
             if (anonDecl != null) {
+                DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
                 DFTypeSpace anonSpace = typeSpace.addAnonChild();
                 String id = anonSpace.getName();
-                DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
-                DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, baseKlass);
-                typeSpace.addClass(id, anonKlass);
+                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
+                anonSpace.addClass(id, anonKlass);
                 for (BodyDeclaration body :
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                    typeSpace.build(anonSpace, body);
+                    anonSpace.build(body);
                 }
                 try {
                     for (BodyDeclaration body :
@@ -1282,7 +1294,7 @@ public class Java2DF {
                         anonKlass.build(anonSpace, body);
                     }
                     processClassDeclarations(
-                        typeSpace, anonKlass, anonSpace, anonDecl.bodyDeclarations());
+                        anonSpace, anonKlass, anonDecl.bodyDeclarations());
                     instType = new DFClassType(anonKlass);
                 } catch (EntityNotFound e) {
                     instType = null; // XXX what happened?
@@ -1341,7 +1353,7 @@ public class Java2DF {
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = typeSpace.addAnonChild();
             String id = anonSpace.getName();
-            DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
+            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
@@ -1363,7 +1375,7 @@ public class Java2DF {
 	    MethodReference mref = (MethodReference)expr;
             DFTypeSpace anonSpace = typeSpace.addAnonChild();
             String id = anonSpace.getName();
-            DFClassSpace anonKlass = new DFAnonClassSpace(typeSpace, id, null);
+            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             // XXX TODO method ref
             DFType instType = new DFClassType(anonKlass);
 	    CreateObjectNode call = new CreateObjectNode(
@@ -1779,7 +1791,7 @@ public class Java2DF {
     }
 
     public void processClassDeclarations(
-        DFTypeSpace typeSpace, DFClassSpace klass, DFTypeSpace child,
+        DFTypeSpace typeSpace, DFClassSpace klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
 	DFGraph classGraph = new DFGraph(klass);
@@ -1787,8 +1799,8 @@ public class Java2DF {
         for (BodyDeclaration body : decls) {
 	    try {
 		if (body instanceof TypeDeclaration) {
-		    processTypeDeclaration(
-			child, (TypeDeclaration)body);
+                    DFTypeSpace child = klass.getChildSpace();
+		    processTypeDeclaration(child, (TypeDeclaration)body);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
 			classGraph, typeSpace, klass,
@@ -1844,7 +1856,7 @@ public class Java2DF {
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
-        DFMethod method = klass.lookupMethodByAST(methodDecl);
+        DFMethod method = klass.lookupMethodByDecl(methodDecl);
         assert(method != null);
         try {
             // Setup an initial space.
@@ -1910,11 +1922,11 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, TypeDeclaration typeDecl)
         throws EntityNotFound {
+        Utils.logit("processTypeDeclaration: "+typeSpace);
         DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
         assert(klass != null);
-        DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
         processClassDeclarations(
-            typeSpace, klass, child, typeDecl.bodyDeclarations());
+            typeSpace, klass, typeDecl.bodyDeclarations());
 	//klass.dump();
     }
 
@@ -1943,23 +1955,37 @@ public class Java2DF {
 	}
     }
 
+    private DFTypeSpace processImports(
+        DFTypeSpace srcSpace, List<ImportDeclaration> imports) {
+        // Make a copy as we're polluting the original TypeSpace.
+        DFTypeSpace dstSpace = new DFTypeSpace(srcSpace);
+        for (ImportDeclaration importDecl : imports) {
+            try {
+                dstSpace.importNames(importDecl);
+            } catch (EntityNotFound e) {
+                Utils.logit("import: class not found: "+e.name);
+            }
+        }
+        return dstSpace;
+    }
+
     // pass2
     @SuppressWarnings("unchecked")
     public void buildClassSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        typeSpace = typeSpace.extend(cunit.imports());
+        DFTypeSpace refSpace = this.processImports(typeSpace, cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
                 DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
                 assert(klass != null);
-                klass.build(typeDecl);
+                klass.build(refSpace, typeDecl);
             }
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
 	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
 	} catch (EntityNotFound e) {
-            Utils.logit("Class not found: "+e.name);
+            Utils.logit("impossiburu: class not found: "+e.name);
 	}
     }
 
@@ -1968,10 +1994,10 @@ public class Java2DF {
     public void buildGraphs(CompilationUnit cunit)
         throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        typeSpace = typeSpace.extend(cunit.imports());
+        DFTypeSpace refSpace = this.processImports(typeSpace, cunit.imports());
 	for (TypeDeclaration typeDecl :
                  (List<TypeDeclaration>) cunit.types()) {
-	    processTypeDeclaration(typeSpace, typeDecl);
+	    processTypeDeclaration(refSpace, typeDecl);
 	}
     }
 

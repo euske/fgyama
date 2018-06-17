@@ -133,7 +133,8 @@ public class DFTypeSpace {
     }
 
     private DFClassSpace addClass(String id) {
-	DFClassSpace klass = new DFClassSpace(this, id);
+        DFTypeSpace child = this.addChild(id);
+	DFClassSpace klass = new DFClassSpace(this, child, id);
         return this.addClass(id, klass);
     }
     public DFClassSpace addClass(String id, DFClassSpace klass) {
@@ -158,18 +159,17 @@ public class DFTypeSpace {
 
     public DFClassSpace lookupClass(Name name)
         throws EntityNotFound {
-	String fullname = name.getFullyQualifiedName();
-	DFClassSpace klass = _root.loadClass(fullname);
-	if (klass == null) {
-	    if (name.isQualifiedName()) {
+        if (name.isQualifiedName()) {
+            DFClassSpace klass = _root.loadClass(name);
+            if (klass == null) {
 		QualifiedName qname = (QualifiedName)name;
 		DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
 		klass = parent.lookupClass(qname.getName());
-	    } else {
-		klass = this.lookupClass((SimpleName)name);
 	    }
+            return klass;
+        } else {
+            return this.lookupClass((SimpleName)name);
 	}
-	return klass;
     }
 
     public DFClassSpace resolveClass(DFType type) {
@@ -193,7 +193,7 @@ public class DFTypeSpace {
             try {
                 klass = this.lookupClass(stype.getName());
             } catch (EntityNotFound e) {
-                Utils.logit("Class not found: "+e.name);
+                Utils.logit("resolve: class not found: "+this+": "+e.name);
                 klass = _root.getDefaultClass(stype.getName());
             }
             return new DFClassType(klass);
@@ -267,10 +267,9 @@ public class DFTypeSpace {
 
     private DFClassSpace loadClass(JavaClass jklass) {
         assert(this == _root);
-	String name = jklass.getClassName();
-	DFClassSpace klass = new DFClassSpace(this, name);
-	_id2klass.put(name, klass);
-	klass.build(jklass);
+	String id = jklass.getClassName();
+	DFClassSpace klass = this.addClass(id);
+	klass.build(this, jklass); // XXX wrong typeSpace
 	return klass;
     }
 
@@ -286,6 +285,10 @@ public class DFTypeSpace {
         return klass;
     }
 
+    private DFClassSpace loadClass(Name name) {
+        return this.loadClass(name.getFullyQualifiedName());
+    }
+
     @SuppressWarnings("unchecked")
     public void build(CompilationUnit cunit)
 	throws UnsupportedSyntax {
@@ -299,18 +302,18 @@ public class DFTypeSpace {
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
         //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
-        this.addClass(typeDecl.getName().getIdentifier());
-        DFTypeSpace child = this.lookupSpace(typeDecl.getName());
+        DFClassSpace klass = this.addClass(typeDecl.getName().getIdentifier());
+        DFTypeSpace child = klass.getChildSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            build(child, body);
+            child.build(body);
         }
     }
 
-    public void build(DFTypeSpace child, BodyDeclaration body)
+    public void build(BodyDeclaration body)
 	throws UnsupportedSyntax {
         if (body instanceof TypeDeclaration) {
-            child.build((TypeDeclaration)body);
+            this.build((TypeDeclaration)body);
         } else if (body instanceof FieldDeclaration) {
             ;
         } else if (body instanceof MethodDeclaration) {
@@ -322,7 +325,7 @@ public class DFTypeSpace {
         }
     }
 
-    private void importNames(ImportDeclaration importDecl)
+    public void importNames(ImportDeclaration importDecl)
         throws EntityNotFound {
         // XXX support static import
         assert(!importDecl.isStatic());
@@ -341,18 +344,6 @@ public class DFTypeSpace {
             QualifiedName qname = (QualifiedName)name;
             this.addClass(qname.getName().getIdentifier(), klass);
         }
-    }
-    public DFTypeSpace extend(List<ImportDeclaration> imports) {
-        // Make a copy as we're polluting the original TypeSpace.
-        DFTypeSpace typeSpace = new DFTypeSpace(this);
-	for (ImportDeclaration importDecl : imports) {
-            try {
-                typeSpace.importNames(importDecl);
-            } catch (EntityNotFound e) {
-                Utils.logit("Class not found: "+e.name);
-            }
-        }
-        return typeSpace;
     }
 
     // dump: for debugging.

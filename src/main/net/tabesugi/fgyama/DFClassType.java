@@ -27,6 +27,11 @@ public class DFClassType extends DFType {
         _klass = klass;
     }
 
+    @Override
+    public String toString() {
+	return ("<DFClassType("+this.getName()+")>");
+    }
+
     public boolean equals(DFType type) {
         return ((type instanceof DFClassType) &&
                 _klass == ((DFClassType)type)._klass);

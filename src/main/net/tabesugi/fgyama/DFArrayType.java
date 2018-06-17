@@ -20,6 +20,11 @@ public class DFArrayType extends DFType {
         _ndims = ndims;
     }
 
+    @Override
+    public String toString() {
+	return ("<DFArrayType("+this.getName()+")>");
+    }
+
     public boolean equals(DFType type) {
         return ((type instanceof DFArrayType) &&
                 _elemType.equals(((DFArrayType)type)._elemType) &&
