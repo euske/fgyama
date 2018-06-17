@@ -100,7 +100,7 @@ public class DFClassSpace extends DFVarSpace {
         return new DFMethod[] { fallback };
     }
 
-    public DFMethod lookupMethod(MethodDeclaration methodDecl) {
+    public DFMethod lookupMethodByAST(MethodDeclaration methodDecl) {
         DFType[] argTypes = getTypeList(methodDecl);
         return this.lookupMethod1(methodDecl.getName(), argTypes);
     }
@@ -197,8 +197,8 @@ public class DFClassSpace extends DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
-	throws UnsupportedSyntax {
-        Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
+	throws UnsupportedSyntax, EntityNotFound {
+        //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
         DFTypeSpace child = _typeSpace.lookupSpace(typeDecl.getName());
 
         _baseKlass = _typeSpace.resolveClass(typeDecl.getSuperclassType());
@@ -216,11 +216,10 @@ public class DFClassSpace extends DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace child, BodyDeclaration body)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
             DFClassSpace klass = child.lookupClass(decl.getName());
-            assert(klass != null);
             klass.build(decl);
 
         } else if (body instanceof FieldDeclaration) {

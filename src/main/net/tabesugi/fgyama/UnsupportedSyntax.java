@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class UnsupportedSyntax extends Exception {
 
-    static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     public ASTNode ast;
     public String name = null;

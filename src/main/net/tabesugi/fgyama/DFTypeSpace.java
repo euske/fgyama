@@ -137,13 +137,14 @@ public class DFTypeSpace {
         return this.addClass(id, klass);
     }
     public DFClassSpace addClass(String id, DFClassSpace klass) {
-        Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
-        assert(!_id2klass.containsKey(id));
+        Utils.logit("DFTypeSpace.addClass: "+this+": "+id+": "+klass);
+        //assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
 	return klass;
     }
 
-    public DFClassSpace lookupClass(SimpleName name) {
+    public DFClassSpace lookupClass(SimpleName name)
+        throws EntityNotFound {
         String id = name.getIdentifier();
         DFClassSpace klass = _id2klass.get(id);
         if (klass != null) {
@@ -151,11 +152,12 @@ public class DFTypeSpace {
         } else if (_parent != null) {
             return _parent.lookupClass(name);
         } else {
-            return null;
+            throw new EntityNotFound(id);
         }
     }
 
-    public DFClassSpace lookupClass(Name name) {
+    public DFClassSpace lookupClass(Name name)
+        throws EntityNotFound {
 	String fullname = name.getFullyQualifiedName();
 	DFClassSpace klass = _root.loadClass(fullname);
 	if (klass == null) {
@@ -187,8 +189,11 @@ public class DFTypeSpace {
             return new DFBasicType(ptype.getPrimitiveTypeCode());
 	} else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            DFClassSpace klass = this.lookupClass(stype.getName());
-            if (klass == null) {
+            DFClassSpace klass;
+            try {
+                klass = this.lookupClass(stype.getName());
+            } catch (EntityNotFound e) {
+                Utils.logit("Class not found: "+e.name);
                 klass = _root.getDefaultClass(stype.getName());
             }
             return new DFClassType(klass);
@@ -293,7 +298,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
-        Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
+        //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         this.addClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = this.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
@@ -317,7 +322,8 @@ public class DFTypeSpace {
         }
     }
 
-    private void importNames(ImportDeclaration importDecl) {
+    private void importNames(ImportDeclaration importDecl)
+        throws EntityNotFound {
         // XXX support static import
         assert(!importDecl.isStatic());
         Name name = importDecl.getName();
@@ -332,19 +338,19 @@ public class DFTypeSpace {
         } else {
             assert(name.isQualifiedName());
             DFClassSpace klass = _root.lookupClass(name);
-            if (klass == null) {
-                Utils.logit("Fail: could not import: "+name);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                this.addClass(qname.getName().getIdentifier(), klass);
-            }
+            QualifiedName qname = (QualifiedName)name;
+            this.addClass(qname.getName().getIdentifier(), klass);
         }
     }
     public DFTypeSpace extend(List<ImportDeclaration> imports) {
-        // Make a copy as we're polluting the oririnal TypeSpace.
+        // Make a copy as we're polluting the original TypeSpace.
         DFTypeSpace typeSpace = new DFTypeSpace(this);
 	for (ImportDeclaration importDecl : imports) {
-            typeSpace.importNames(importDecl);
+            try {
+                typeSpace.importNames(importDecl);
+            } catch (EntityNotFound e) {
+                Utils.logit("Class not found: "+e.name);
+            }
         }
         return typeSpace;
     }

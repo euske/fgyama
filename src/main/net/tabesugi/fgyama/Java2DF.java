@@ -876,8 +876,10 @@ public class Java2DF {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
                 DFNode obj = null;
-                DFClassSpace klass = this.rootSpace.lookupClass(qn.getQualifier());
-                if (klass == null) {
+                DFClassSpace klass;
+                try {
+                    klass = this.rootSpace.lookupClass(qn.getQualifier());
+                } catch (EntityNotFound e) {
                     cpt = processExpression(
                         graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
                     obj = cpt.getRValue();
@@ -909,7 +911,10 @@ public class Java2DF {
             DFNode obj = null;
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
-                klass = this.rootSpace.lookupClass((Name)expr1);
+                try {
+                    klass = this.rootSpace.lookupClass((Name)expr1);
+                } catch (EntityNotFound e) {
+                }
             }
             if (klass == null) {
                 cpt = processExpression(
@@ -952,8 +957,10 @@ public class Java2DF {
 		// QualifiedName == FieldAccess
 		QualifiedName qn = (QualifiedName)name;
                 DFNode obj = null;
-                DFClassSpace klass = this.rootSpace.lookupClass(qn.getQualifier());
-                if (klass == null) {
+                DFClassSpace klass;
+                try {
+                    klass = this.rootSpace.lookupClass(qn.getQualifier());
+                } catch (EntityNotFound e) {
                     cpt = processExpression(
                         graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
                     obj = cpt.getRValue();
@@ -1105,7 +1112,10 @@ public class Java2DF {
                 obj = cpt.getValue(varSpace.lookupThis());
             } else {
                 if (expr1 instanceof Name) {
-                    klass = this.rootSpace.lookupClass((Name)expr1);
+                    try {
+                        klass = this.rootSpace.lookupClass((Name)expr1);
+                    } catch (EntityNotFound e) {
+                    }
                 }
                 if (klass == null) {
                     cpt = processExpression(
@@ -1214,7 +1224,10 @@ public class Java2DF {
             DFNode obj = null;
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
-                klass = this.rootSpace.lookupClass((Name)expr1);
+                try {
+                    klass = this.rootSpace.lookupClass((Name)expr1);
+                } catch (EntityNotFound e) {
+                }
             }
             if (klass == null) {
                 cpt = processExpression(
@@ -1263,14 +1276,17 @@ public class Java2DF {
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                     typeSpace.build(anonSpace, body);
                 }
-                for (BodyDeclaration body :
-                         (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                    anonKlass.build(anonSpace, body);
+                try {
+                    for (BodyDeclaration body :
+                             (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
+                        anonKlass.build(anonSpace, body);
+                    }
+                    processClassDeclarations(
+                        typeSpace, anonKlass, anonSpace, anonDecl.bodyDeclarations());
+                    instType = new DFClassType(anonKlass);
+                } catch (EntityNotFound e) {
+                    instType = null; // XXX what happened?
                 }
-                processClassDeclarations(
-                    typeSpace, anonKlass, anonSpace, anonDecl.bodyDeclarations());
-                instType = new DFClassType(anonKlass);
-
             } else {
                 instType = typeSpace.resolve(cstr.getType());
             }
@@ -1764,7 +1780,8 @@ public class Java2DF {
 
     public void processClassDeclarations(
         DFTypeSpace typeSpace, DFClassSpace klass, DFTypeSpace child,
-        List<BodyDeclaration> decls) {
+        List<BodyDeclaration> decls)
+        throws EntityNotFound {
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
         for (BodyDeclaration body : decls) {
@@ -1827,7 +1844,7 @@ public class Java2DF {
         throws UnsupportedSyntax {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
-        DFMethod method = klass.lookupMethod(methodDecl);
+        DFMethod method = klass.lookupMethodByAST(methodDecl);
         assert(method != null);
         try {
             // Setup an initial space.
@@ -1891,7 +1908,8 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processTypeDeclaration(
-        DFTypeSpace typeSpace, TypeDeclaration typeDecl) {
+        DFTypeSpace typeSpace, TypeDeclaration typeDecl)
+        throws EntityNotFound {
         DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
         assert(klass != null);
         DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
@@ -1940,12 +1958,15 @@ public class Java2DF {
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
 	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+	} catch (EntityNotFound e) {
+            Utils.logit("Class not found: "+e.name);
 	}
     }
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit) {
+    public void buildGraphs(CompilationUnit cunit)
+        throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         typeSpace = typeSpace.extend(cunit.imports());
 	for (TypeDeclaration typeDecl :
@@ -2025,6 +2046,8 @@ public class Java2DF {
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
+	    } catch (EntityNotFound e) {
+		System.err.println("EntityNotFound: "+e.name);
 	    }
 	}
 	//converter.rootSpace.dump();

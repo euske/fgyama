@@ -164,7 +164,7 @@ public class DFVarSpace {
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, MethodDeclaration methodDecl)
 	throws UnsupportedSyntax {
-        Utils.logit("DFVarSpace.build: "+this);
+        //Utils.logit("DFVarSpace.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : typeSpace.resolve(returnType);
 	this.addRef("#return", type);

@@ -53,7 +53,6 @@ public class DFRepository {
 	}
 	String jarpath = _name2jar.get(name);
 	if (jarpath == null) {
-	    Utils.logit("Error: Unknown class: "+name);
 	    return null;
 	}
 	try {
@@ -81,6 +80,7 @@ public class DFRepository {
 		String[] names = Utils.splitName(name);
 		if (names.length == 3) {
 		    JavaClass jklass = loadJavaClass(name);
+                    assert(jklass != null);
 		    typeSpace.loadRootClass(jklass);
 		}
 	    }
