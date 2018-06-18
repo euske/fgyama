@@ -76,13 +76,12 @@ public class DFRepository {
 
     public static void loadBuiltinClasses(DFTypeSpace typeSpace) {
 	for (String name : _name2jar.keySet()) {
-	    if (name.startsWith("java.lang.")) {
-		String[] names = Utils.splitName(name);
-		if (names.length == 3) {
-		    JavaClass jklass = loadJavaClass(name);
-                    assert(jklass != null);
-		    typeSpace.loadRootClass(jklass);
-		}
+            int i = name.lastIndexOf('.');
+            assert(0 <= i);
+	    if (name.substring(0, i).equals("java.lang")) {
+                JavaClass jklass = loadJavaClass(name);
+                assert(jklass != null);
+                typeSpace.loadRootClass(jklass);
 	    }
 	}
     }

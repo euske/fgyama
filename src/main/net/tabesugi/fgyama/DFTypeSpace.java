@@ -76,100 +76,138 @@ public class DFTypeSpace {
         return space;
     }
 
-    public DFTypeSpace lookupSpace(SimpleName name) {
-        String id = name.getIdentifier();
-        DFTypeSpace space = _id2space.get(id);
-        if (space == null) {
-            space = this.addChild(id);
-        }
-        return space;
-    }
-
-    public DFTypeSpace lookupSpace(Name name) {
-        if (name.isQualifiedName()) {
-	    QualifiedName qname = (QualifiedName)name;
-	    DFTypeSpace parent = (_parent != null)? _parent : this;
-	    parent = parent.lookupSpace(qname.getQualifier());
-            return parent.lookupSpace(qname.getName());
-        } else {
-            return this.lookupSpace((SimpleName)name);
-        }
-    }
-
     public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
         if (pkgDecl == null) {
             return this;
         } else {
-            return this.lookupSpace(pkgDecl.getName());
+            return _root.lookupSpace(pkgDecl.getName());
         }
     }
 
-    private DFClassSpace getDefaultClass(String id) {
-        DFClassSpace klass = _id2klass.get(id);
-        if (klass != null) {
-            return klass;
-        } else {
-            return this.addClass(id);
-        }
-    }
-
-    private DFClassSpace getDefaultClass(Name name) {
+    public DFTypeSpace lookupSpace(Name name) {
         if (name.isQualifiedName()) {
-	    QualifiedName qname = (QualifiedName)name;
-            DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
-            return parent.getDefaultClass(qname.getName());
+	    return this.lookupSpace((QualifiedName)name);
         } else {
-	    SimpleName sname = (SimpleName)name;
-            return this.getDefaultClass(sname.getIdentifier());
+            return this.lookupSpace((SimpleName)name);
+        }
+    }
+    public DFTypeSpace lookupSpace(QualifiedName qname) {
+        DFTypeSpace parent = _root.lookupSpace(qname.getQualifier());
+        return parent.lookupSpace(qname.getName());
+    }
+    public DFTypeSpace lookupSpace(SimpleName sname) {
+        return this.lookupSpace(sname.getIdentifier());
+    }
+
+    public DFTypeSpace lookupSpace(String id) {
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace parent = _root.lookupSpace(id.substring(0, i));
+            return parent.lookupSpace(id.substring(i+1));
+        } else {
+            DFTypeSpace space = _id2space.get(id);
+            if (space == null) {
+                space = this.addChild(id);
+            }
+            return space;
         }
     }
 
-    private DFClassSpace getDefaultClass(DFType type) {
-	if (type == null) {
-	    return this.getDefaultClass("unknown");
-	} else {
-	    return this.getDefaultClass(type.getName());
-	}
+    private DFClassSpace addClass(Name name) {
+        if (name.isQualifiedName()) {
+	    return this.addClass((QualifiedName)name);
+        } else {
+            return this.addClass((SimpleName)name);
+        }
+    }
+    private DFClassSpace addClass(QualifiedName qname) {
+        DFTypeSpace parent = _root.lookupSpace(qname.getQualifier());
+        return parent.addClass(qname.getName());
+    }
+    private DFClassSpace addClass(SimpleName sname) {
+        return this.addClass(sname.getIdentifier());
     }
 
     private DFClassSpace addClass(String id) {
+        assert(id.indexOf('.') < 0);
         DFTypeSpace child = this.addChild(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
         return this.addClass(id, klass);
     }
     public DFClassSpace addClass(String id, DFClassSpace klass) {
         Utils.logit("DFTypeSpace.addClass: "+this+": "+id+": "+klass);
+        assert(id.indexOf('.') < 0);
         //assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
 	return klass;
     }
 
-    public DFClassSpace lookupClass(SimpleName name)
-        throws EntityNotFound {
-        String id = name.getIdentifier();
-        DFClassSpace klass = _id2klass.get(id);
-        if (klass != null) {
-            return klass;
-        } else if (_parent != null) {
-            return _parent.lookupClass(name);
+    private DFClassSpace getDefaultClass(DFType type) {
+        if (type == null) {
+            return this.getDefaultClass("unknown");
         } else {
-            throw new EntityNotFound(id);
+            return this.getDefaultClass(type.getName());
+        }
+    }
+    private DFClassSpace getDefaultClass(Name name) {
+        if (name.isQualifiedName()) {
+            return this.getDefaultClass((QualifiedName)name);
+        } else {
+            return this.getDefaultClass((SimpleName)name);
+        }
+    }
+    private DFClassSpace getDefaultClass(QualifiedName qname) {
+        DFTypeSpace space = _root.lookupSpace(qname.getQualifier());
+        return space.getDefaultClass(qname.getName());
+    }
+    private DFClassSpace getDefaultClass(SimpleName sname) {
+        return this.getDefaultClass(sname.getIdentifier());
+    }
+    private DFClassSpace getDefaultClass(String id) {
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
+            return space.getDefaultClass(id.substring(i+1));
+        } else {
+            try {
+                return this.lookupClass(id);
+            } catch (EntityNotFound e) {
+                return this.addClass(id);
+            }
         }
     }
 
     public DFClassSpace lookupClass(Name name)
         throws EntityNotFound {
         if (name.isQualifiedName()) {
-            DFClassSpace klass = _root.loadClass(name);
-            if (klass == null) {
-		QualifiedName qname = (QualifiedName)name;
-		DFTypeSpace parent = this.lookupSpace(qname.getQualifier());
-		klass = parent.lookupClass(qname.getName());
-	    }
-            return klass;
+            return this.lookupClass((QualifiedName)name);
         } else {
             return this.lookupClass((SimpleName)name);
-	}
+        }
+    }
+    public DFClassSpace lookupClass(QualifiedName qname)
+        throws EntityNotFound {
+        DFTypeSpace space = _root.lookupSpace(qname.getQualifier());
+        return space.lookupClass(qname.getName());
+    }
+    public DFClassSpace lookupClass(SimpleName sname)
+        throws EntityNotFound {
+        return this.lookupClass(sname.getIdentifier());
+    }
+
+    public DFClassSpace lookupClass(String id)
+        throws EntityNotFound {
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
+            return space.lookupClass(id.substring(i+1));
+        } else {
+            DFClassSpace klass = _id2klass.get(id);
+            if (klass == null) {
+                throw new EntityNotFound(id);
+            }
+            return klass;
+        }
     }
 
     public DFClassSpace resolveClass(DFType type) {
@@ -189,13 +227,7 @@ public class DFTypeSpace {
             return new DFBasicType(ptype.getPrimitiveTypeCode());
 	} else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            DFClassSpace klass;
-            try {
-                klass = this.lookupClass(stype.getName());
-            } catch (EntityNotFound e) {
-                Utils.logit("resolve: class not found: "+this+": "+e.name);
-                klass = _root.getDefaultClass(stype.getName());
-            }
+            DFClassSpace klass = _root.getDefaultClass(stype.getName());
             return new DFClassType(klass);
 	} else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
@@ -248,7 +280,7 @@ public class DFTypeSpace {
             org.apache.bcel.generic.ObjectType otype =
 		(org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            DFClassSpace klass = _root.loadClass(className);
+            DFClassSpace klass = _root.getDefaultClass(className);
             return new DFClassType(klass);
         } else {
 	    return null;
@@ -258,35 +290,18 @@ public class DFTypeSpace {
     public void loadRootClass(JavaClass jklass) {
         assert(this == _root);
 	assert(jklass.getPackageName().equals("java.lang"));
-	String fullName = jklass.getClassName();
-	String[] names = Utils.splitName(fullName);
-	String id = names[names.length-1];
-	DFClassSpace klass = this.loadClass(jklass);
-	_id2klass.put(id, klass);
+        this.loadClass(jklass);
     }
 
     private DFClassSpace loadClass(JavaClass jklass) {
         assert(this == _root);
 	String id = jklass.getClassName();
-	DFClassSpace klass = this.addClass(id);
-	klass.build(this, jklass); // XXX wrong typeSpace
+        int i = id.lastIndexOf('.');
+        assert(0 <= i);
+        DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
+	DFClassSpace klass = space.addClass(id.substring(i+1));
+        klass.build(this, jklass);
 	return klass;
-    }
-
-    private DFClassSpace loadClass(String fullname) {
-        assert(this == _root);
-        DFClassSpace klass = _id2klass.get(fullname);
-        if (klass == null) {
-	    JavaClass jklass = DFRepository.loadJavaClass(fullname);
-	    if (jklass != null) {
-		klass = this.loadClass(jklass);
-	    }
-	}
-        return klass;
-    }
-
-    private DFClassSpace loadClass(Name name) {
-        return this.loadClass(name.getFullyQualifiedName());
     }
 
     @SuppressWarnings("unchecked")
