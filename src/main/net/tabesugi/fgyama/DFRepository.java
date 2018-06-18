@@ -68,20 +68,27 @@ public class DFRepository {
 		jarfile.close();
 	    }
 	} catch (IOException e) {
-	    Utils.logit("Error: Corrupt: "+name+" ("+jarpath+")");
+	    Utils.logit("Error: Corrupt jar: "+name+" ("+jarpath+")");
 	    return null;
 	}
 	return jklass;
     }
 
-    public static void loadBuiltinClasses(DFTypeSpace typeSpace) {
+    public static void loadDefaultClasses(
+        DFTypeSpace rootSpace, DFTypeSpace defaultSpace) {
 	for (String name : _name2jar.keySet()) {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
+                String id = name.substring(i+1);
                 JavaClass jklass = loadJavaClass(name);
                 assert(jklass != null);
-                typeSpace.loadRootClass(jklass);
+                try {
+                    DFClassSpace klass = rootSpace.loadClass(jklass);
+                    defaultSpace.addClass(id, klass);
+                } catch (EntityNotFound e) {
+                    Utils.logit("Error: Cannot load class: "+e.name);
+                }
 	    }
 	}
     }

@@ -839,7 +839,7 @@ public class Java2DF {
     public DFComponent processVariableDeclaration(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, List<VariableDeclarationFragment> frags)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	for (VariableDeclarationFragment frag : frags) {
             DFVarRef ref = varSpace.lookupVar(frag.getName());
@@ -864,7 +864,7 @@ public class Java2DF {
     public DFComponent processAssignment(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Expression expr)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (expr instanceof Name) {
 	    Name name = (Name)expr;
@@ -941,7 +941,7 @@ public class Java2DF {
     public DFComponent processExpression(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Expression expr)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (expr instanceof Annotation) {
 
@@ -1291,7 +1291,7 @@ public class Java2DF {
                 try {
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonKlass.build(anonSpace, body);
+                        anonKlass.build(anonSpace, typeSpace, body);
                     }
                     processClassDeclarations(
                         anonSpace, anonKlass, anonDecl.bodyDeclarations());
@@ -1395,7 +1395,7 @@ public class Java2DF {
     public DFComponent processBlock(
         DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Block block)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace childSpace = varSpace.getChildByAST(block);
 	for (Statement cstmt : (List<Statement>) block.statements()) {
 	    cpt = processStatement(
@@ -1408,7 +1408,7 @@ public class Java2DF {
     public DFComponent processVariableDeclarationStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, VariableDeclarationStatement varStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	return processVariableDeclaration(
             graph, typeSpace, varSpace, frame, cpt, varStmt.fragments());
     }
@@ -1416,7 +1416,7 @@ public class Java2DF {
     public DFComponent processExpressionStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, ExpressionStatement exprStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	Expression expr = exprStmt.getExpression();
 	return processExpression(
             graph, typeSpace, varSpace, frame, cpt, expr);
@@ -1425,7 +1425,7 @@ public class Java2DF {
     public DFComponent processIfStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, IfStatement ifStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	Expression expr = ifStmt.getExpression();
 	cpt = processExpression(graph, typeSpace, varSpace, frame, cpt, expr);
 	DFNode condValue = cpt.getRValue();
@@ -1472,7 +1472,7 @@ public class Java2DF {
     public DFComponent processSwitchStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, SwitchStatement switchStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace switchSpace = varSpace.getChildByAST(switchStmt);
 	DFFrame switchFrame = frame.getChildByAST(switchStmt);
 	cpt = processExpression(
@@ -1525,7 +1525,7 @@ public class Java2DF {
     public DFComponent processWhileStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, WhileStatement whileStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace loopSpace = varSpace.getChildByAST(whileStmt);
 	DFFrame loopFrame = frame.getChildByAST(whileStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopSpace);
@@ -1546,7 +1546,7 @@ public class Java2DF {
     public DFComponent processDoStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, DoStatement doStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace loopSpace = varSpace.getChildByAST(doStmt);
 	DFFrame loopFrame = frame.getChildByAST(doStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopSpace);
@@ -1568,7 +1568,7 @@ public class Java2DF {
     public DFComponent processForStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, ForStatement forStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace loopSpace = varSpace.getChildByAST(forStmt);
 	DFFrame loopFrame = frame.getChildByAST(forStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopSpace);
@@ -1603,7 +1603,7 @@ public class Java2DF {
     public DFComponent processEnhancedForStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, EnhancedForStatement eForStmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 	DFVarSpace loopSpace = varSpace.getChildByAST(eForStmt);
 	DFFrame loopFrame = frame.getChildByAST(eForStmt);
 	DFComponent loopCpt = new DFComponent(graph, loopSpace);
@@ -1632,7 +1632,7 @@ public class Java2DF {
     public DFComponent processStatement(
 	DFGraph graph, DFTypeSpace typeSpace, DFVarSpace varSpace,
 	DFFrame frame, DFComponent cpt, Statement stmt)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (stmt instanceof AssertStatement) {
 	    // XXX Ignore asserts.
@@ -1840,9 +1840,9 @@ public class Java2DF {
         DFTypeSpace dstSpace = new DFTypeSpace("copy", srcSpace);
         for (ImportDeclaration importDecl : imports) {
             try {
-                dstSpace.importNames(importDecl);
+                dstSpace.importClass(importDecl);
             } catch (EntityNotFound e) {
-                Utils.logit("import: class not found: "+e.name);
+                Utils.logit("Import: class not found: "+e.name);
             }
         }
         return dstSpace;
@@ -1867,7 +1867,7 @@ public class Java2DF {
     public DFGraph processMethodDeclaration(
         DFTypeSpace typeSpace, DFClassSpace klass,
         MethodDeclaration methodDecl)
-        throws UnsupportedSyntax {
+        throws UnsupportedSyntax, EntityNotFound {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
         DFMethod method = klass.lookupMethodByDecl(methodDecl);
@@ -1917,7 +1917,7 @@ public class Java2DF {
     public void processFieldDeclaration(
         DFGraph graph, DFTypeSpace typeSpace, DFClassSpace klass,
         DFFrame frame, FieldDeclaration fieldDecl)
-        throws UnsupportedSyntax {
+        throws UnsupportedSyntax, EntityNotFound {
 	for (VariableDeclarationFragment frag :
 		 (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
 	    DFVarRef ref = klass.lookupField(frag.getName());
@@ -1979,26 +1979,29 @@ public class Java2DF {
                      (List<TypeDeclaration>) cunit.types()) {
                 DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
                 assert(klass != null);
-                klass.build(refSpace, typeDecl);
+                klass.build(typeSpace, refSpace, typeDecl);
             }
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();
 	    Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
 	} catch (EntityNotFound e) {
-            Utils.logit("impossiburu: class not found: "+e.name);
+            Utils.logit("Fail: class not found: "+e.name);
 	}
     }
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit)
-        throws EntityNotFound {
+    public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeSpace refSpace = this.processImports(typeSpace, cunit.imports());
-	for (TypeDeclaration typeDecl :
-                 (List<TypeDeclaration>) cunit.types()) {
-	    processTypeDeclaration(refSpace, typeDecl);
-	}
+	try {
+            for (TypeDeclaration typeDecl :
+                     (List<TypeDeclaration>) cunit.types()) {
+                processTypeDeclaration(refSpace, typeDecl);
+            }
+	} catch (EntityNotFound e) {
+            Utils.logit("Fail: class not found: "+e.name);
+        }
     }
 
     /**
@@ -2041,9 +2044,9 @@ public class Java2DF {
 	}
 
 	// Process files.
-        DFTypeSpace builtinSpace = new DFTypeSpace("builtin");
-	DFRepository.loadBuiltinClasses(builtinSpace);
-        DFTypeSpace rootSpace = new DFTypeSpace(".", builtinSpace);
+        DFTypeSpace defaultSpace = new DFTypeSpace(".");
+        DFTypeSpace rootSpace = new DFTypeSpace(".", defaultSpace);
+	DFRepository.loadDefaultClasses(rootSpace, defaultSpace);
 	XmlExporter exporter = new XmlExporter();
         Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {
@@ -2073,8 +2076,6 @@ public class Java2DF {
 		exporter.endFile();
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
-	    } catch (EntityNotFound e) {
-		System.err.println("EntityNotFound: "+e.name);
 	    }
 	}
 	//converter.rootSpace.dump();

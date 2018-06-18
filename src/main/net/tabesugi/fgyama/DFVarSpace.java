@@ -167,7 +167,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, MethodDeclaration methodDecl)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
         //Utils.logit("DFVarSpace.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : typeSpace.resolve(returnType);
@@ -184,7 +184,7 @@ public class DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, Statement ast)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof AssertStatement) {
 
@@ -367,7 +367,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, Expression ast)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof Annotation) {
 
@@ -534,7 +534,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void buildLeft(DFTypeSpace typeSpace, Expression ast)
-	throws UnsupportedSyntax {
+	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof Name) {
 
