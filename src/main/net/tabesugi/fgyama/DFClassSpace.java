@@ -42,7 +42,7 @@ public class DFClassSpace extends DFVarSpace {
 
     @Override
     public String toString() {
-	return ("<DFClassSpace("+this.getName()+")>");
+	return ("<DFClassSpace("+this.getFullName()+")>");
     }
 
     public DFTypeSpace getChildSpace() {
@@ -53,8 +53,8 @@ public class DFClassSpace extends DFVarSpace {
         return _baseKlass;
     }
 
-    public String getName() {
-	return _typeSpace.getFullName()+"/"+super.getName();
+    public String getFullName() {
+	return _typeSpace.getFullName()+"/"+super.getFullName();
     }
 
     public int isBaseOf(DFClassSpace klass) {
@@ -117,7 +117,7 @@ public class DFClassSpace extends DFVarSpace {
     private DFVarRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
-        Utils.logit("DFClassSpace.addField: "+this+": "+ref);
+        Utils.logit("DFClassSpace.addField: "+ref);
         return ref;
     }
 
@@ -151,7 +151,7 @@ public class DFClassSpace extends DFVarSpace {
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
 	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
-        Utils.logit("DFClassSpace.addMethod: "+this+": "+method);
+        Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);
@@ -196,7 +196,7 @@ public class DFClassSpace extends DFVarSpace {
     @SuppressWarnings("unchecked")
     public void build(DFTypeSpace typeSpace, DFTypeSpace refSpace, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
-        Utils.logit("DFClassSpace.build: "+this+": "+refSpace+", "+typeDecl.getName());
+        //Utils.logit("DFClassSpace.build: "+this+": "+refSpace+", "+typeDecl.getName());
         Type superClass = typeDecl.getSuperclassType();
         if (superClass != null) {
             _baseKlass = refSpace.resolveClass(superClass);

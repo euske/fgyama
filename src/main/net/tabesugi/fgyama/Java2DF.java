@@ -1281,9 +1281,9 @@ public class Java2DF {
             if (anonDecl != null) {
                 DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
                 DFTypeSpace anonSpace = typeSpace.addAnonChild();
-                String id = anonSpace.getName();
+                String id = anonSpace.getBaseName();
                 DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
-                anonSpace.addClass(id, anonKlass);
+                anonSpace.addClass(anonKlass);
                 for (BodyDeclaration body :
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                     anonSpace.build(body);
@@ -1352,7 +1352,7 @@ public class Java2DF {
 	    LambdaExpression lambda = (LambdaExpression)expr;
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = typeSpace.addAnonChild();
-            String id = anonSpace.getName();
+            String id = anonSpace.getBaseName();
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
@@ -1374,7 +1374,7 @@ public class Java2DF {
 	    //  TypeMethodReference
 	    MethodReference mref = (MethodReference)expr;
             DFTypeSpace anonSpace = typeSpace.addAnonChild();
-            String id = anonSpace.getName();
+            String id = anonSpace.getBaseName();
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             // XXX TODO method ref
             DFType instType = new DFClassType(anonKlass);
@@ -1936,7 +1936,6 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, TypeDeclaration typeDecl)
         throws EntityNotFound {
-        Utils.logit("processTypeDeclaration: "+typeSpace);
         DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
         assert(klass != null);
         processClassDeclarations(

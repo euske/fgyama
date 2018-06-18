@@ -39,7 +39,7 @@ public class DFClassType extends DFType {
 
     public String getName()
     {
-        return _klass.getName();
+        return _klass.getFullName();
     }
 
     public int canConvertFrom(DFType type)

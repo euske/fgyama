@@ -17,7 +17,7 @@ public class DFAnonClassSpace extends DFClassSpace {
 
     @Override
     public String toString() {
-	return ("<DFAnonClassSpace("+this.getName()+")>");
+	return ("<DFAnonClassSpace("+this.getFullName()+")>");
     }
 
 }

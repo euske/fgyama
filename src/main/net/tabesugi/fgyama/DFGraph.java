@@ -28,7 +28,7 @@ public class DFGraph {
 
     @Override
     public String toString() {
-	return ("<DFGraph("+_root.getName()+")>");
+	return ("<DFGraph("+_root.getFullName()+")>");
     }
 
     public Element toXML(Document document) {
@@ -36,7 +36,7 @@ public class DFGraph {
         if (_method != null) {
             elem.setAttribute("name", _method.getSignature());
         } else {
-            elem.setAttribute("name", _root.getName());
+            elem.setAttribute("name", _root.getFullName());
         }
 	DFNode[] nodes = new DFNode[_nodes.size()];
 	_nodes.values().toArray(nodes);

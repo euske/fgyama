@@ -27,18 +27,19 @@ public class DFTypeSpace {
 	new HashMap<String, DFClassSpace>();
 
     public DFTypeSpace(String name) {
-        _root = this;
 	_name = name;
+        _root = this;
     }
 
     public DFTypeSpace(String name, DFTypeSpace next) {
-        _root = this;
 	_name = name;
+        _root = this;
         _next = next;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
+        _next = parent._next;
 	_name = name;
 	_parent = parent;
     }
@@ -48,7 +49,7 @@ public class DFTypeSpace {
 	return ("<DFTypeSpace("+this.getFullName()+")>");
     }
 
-    public String getName() {
+    public String getBaseName() {
         return _name;
     }
     public String getFullName() {
@@ -101,10 +102,11 @@ public class DFTypeSpace {
         assert(id.indexOf('.') < 0);
         DFTypeSpace child = this.addChild(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
-        return this.addClass(id, klass);
+        return this.addClass(klass);
     }
-    public DFClassSpace addClass(String id, DFClassSpace klass) {
-        Utils.logit("DFTypeSpace.addClass: "+this+": "+id+": "+klass);
+    public DFClassSpace addClass(DFClassSpace klass) {
+        String id = klass.getBaseName();
+        Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
         assert(id.indexOf('.') < 0);
         //assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
@@ -123,7 +125,6 @@ public class DFTypeSpace {
                 DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
                 return space.lookupClass(id.substring(i+1));
             } else {
-                Utils.logit("lookupClass: "+this+": "+id);
                 DFClassSpace klass = _id2klass.get(id);
                 if (klass == null) {
                     String fullName = this.getFullName().substring(1)+"."+id;
@@ -160,7 +161,6 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
         throws EntityNotFound {
-        Utils.logit("resolve:"+this+":"+type);
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return new DFBasicType(ptype.getPrimitiveTypeCode());
@@ -301,8 +301,7 @@ public class DFTypeSpace {
         } else {
             assert(name.isQualifiedName());
             DFClassSpace klass = _root.lookupClass(name);
-            QualifiedName qname = (QualifiedName)name;
-            this.addClass(qname.getName().getIdentifier(), klass);
+            this.addClass(klass);
         }
     }
 

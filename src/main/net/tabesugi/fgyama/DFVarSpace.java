@@ -44,12 +44,12 @@ public class DFVarSpace {
 
     @Override
     public String toString() {
-	return ("<DFVarSpace("+this.getName()+")>");
+	return ("<DFVarSpace("+this.getFullName()+")>");
     }
 
     public Element toXML(Document document, DFNode[] nodes) {
 	Element elem = document.createElement("scope");
-	elem.setAttribute("name", this.getName());
+	elem.setAttribute("name", this.getFullName());
 	for (DFVarSpace child : this.getChildren()) {
 	    elem.appendChild(child.toXML(document, nodes));
 	}
@@ -65,11 +65,11 @@ public class DFVarSpace {
         return _name;
     }
 
-    public String getName() {
+    public String getFullName() {
         if (_parent == null) {
             return _name;
         } else {
-            return _parent.getName()+"."+_name;
+            return _parent.getFullName()+"."+_name;
         }
     }
 
@@ -559,7 +559,7 @@ public class DFVarSpace {
 	dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
-	out.println(indent+getName()+" {");
+	out.println(indent+this.getFullName()+" {");
 	String i2 = indent + "  ";
 	this.dumpContents(out, i2);
 	for (DFVarSpace space : _children) {

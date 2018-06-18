@@ -57,7 +57,7 @@ public class DFMethod implements Comparable<DFMethod> {
     public String getSignature() {
         String name;
         if (_klass != null) {
-            name = (_klass.getName()+"/"+_name);
+            name = (_klass.getFullName()+"/"+_name);
         } else {
             name = ("!"+_name);
         }

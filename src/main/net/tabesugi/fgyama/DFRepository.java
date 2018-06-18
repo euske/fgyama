@@ -80,12 +80,11 @@ public class DFRepository {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
-                String id = name.substring(i+1);
                 JavaClass jklass = loadJavaClass(name);
                 assert(jklass != null);
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
-                    defaultSpace.addClass(id, klass);
+                    defaultSpace.addClass(klass);
                 } catch (EntityNotFound e) {
                     Utils.logit("Error: Cannot load class: "+e.name);
                 }

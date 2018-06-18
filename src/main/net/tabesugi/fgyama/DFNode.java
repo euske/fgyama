@@ -55,7 +55,7 @@ public class DFNode implements Comparable<DFNode> {
             elem.setAttribute("type", _type.getName());
         }
 	if (_ref != null) {
-	    elem.setAttribute("ref", _ref.getName());
+	    elem.setAttribute("ref", _ref.getFullName());
 	}
 	for (DFLink link : this.getLinks()) {
 	    elem.appendChild(link.toXML(document));
@@ -80,7 +80,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public String getName() {
-	return ("N"+_space.getName()+"_"+_id);
+	return ("N"+_space.getFullName()+"_"+_id);
     }
 
     public String getKind() {

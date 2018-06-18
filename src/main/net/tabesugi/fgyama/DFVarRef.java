@@ -25,9 +25,9 @@ public class DFVarRef implements Comparable<DFVarRef> {
     @Override
     public String toString() {
 	if (_type == null) {
-	    return ("<DFVarRef("+this.getName()+")>");
+	    return ("<DFVarRef("+this.getFullName()+")>");
 	} else {
-	    return ("<DFVarRef("+this.getName()+": "+_type.toString()+">");
+	    return ("<DFVarRef("+this.getFullName()+": "+_type.toString()+">");
 	}
     }
 
@@ -36,9 +36,9 @@ public class DFVarRef implements Comparable<DFVarRef> {
 	return _name.compareTo(ref._name);
     }
 
-    public String getName() {
+    public String getFullName() {
         if (_space != null) {
-            return (_space.getName()+"/"+_name);
+            return (_space.getFullName()+"/"+_name);
         } else {
             return ("!"+_name);
         }
