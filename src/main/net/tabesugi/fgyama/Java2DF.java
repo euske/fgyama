@@ -1834,6 +1834,20 @@ public class Java2DF {
 	}
     }
 
+    private DFTypeSpace processImports(
+        DFTypeSpace srcSpace, List<ImportDeclaration> imports) {
+        // Make a copy as we're polluting the original TypeSpace.
+        DFTypeSpace dstSpace = new DFTypeSpace("copy", srcSpace);
+        for (ImportDeclaration importDecl : imports) {
+            try {
+                dstSpace.importNames(importDecl);
+            } catch (EntityNotFound e) {
+                Utils.logit("import: class not found: "+e.name);
+            }
+        }
+        return dstSpace;
+    }
+
     /// Top-level functions.
 
     public DFTypeSpace rootSpace;
@@ -1955,20 +1969,6 @@ public class Java2DF {
 	}
     }
 
-    private DFTypeSpace processImports(
-        DFTypeSpace srcSpace, List<ImportDeclaration> imports) {
-        // Make a copy as we're polluting the original TypeSpace.
-        DFTypeSpace dstSpace = new DFTypeSpace(srcSpace);
-        for (ImportDeclaration importDecl : imports) {
-            try {
-                dstSpace.importNames(importDecl);
-            } catch (EntityNotFound e) {
-                Utils.logit("import: class not found: "+e.name);
-            }
-        }
-        return dstSpace;
-    }
-
     // pass2
     @SuppressWarnings("unchecked")
     public void buildClassSpace(CompilationUnit cunit) {
@@ -2041,8 +2041,9 @@ public class Java2DF {
 	}
 
 	// Process files.
-        DFTypeSpace rootSpace = new DFTypeSpace();
-	DFRepository.loadBuiltinClasses(rootSpace);
+        DFTypeSpace builtinSpace = new DFTypeSpace("builtin");
+	DFRepository.loadBuiltinClasses(builtinSpace);
+        DFTypeSpace rootSpace = new DFTypeSpace(".", builtinSpace);
 	XmlExporter exporter = new XmlExporter();
         Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {

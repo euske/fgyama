@@ -16,7 +16,8 @@ public class DFTypeSpace {
 
     private DFTypeSpace _root;
     private String _name;
-    private DFTypeSpace _parent;
+    private DFTypeSpace _parent = null;
+    private DFTypeSpace _next = null;
 
     private List<DFTypeSpace> _children =
 	new ArrayList<DFTypeSpace>();
@@ -25,25 +26,21 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
-    public DFTypeSpace() {
+    public DFTypeSpace(String name) {
         _root = this;
-	_name = ".";
-        _parent = null;
+	_name = name;
+    }
+
+    public DFTypeSpace(String name, DFTypeSpace next) {
+        _root = this;
+	_name = name;
+        _next = next;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
 	_name = name;
 	_parent = parent;
-    }
-
-    public DFTypeSpace(DFTypeSpace space) {
-        _root = space._root;
-        _name = space._name;
-        _parent = space._parent;
-        _children = new ArrayList<DFTypeSpace>(space._children);
-        _id2space = new HashMap<String, DFTypeSpace>(space._id2space);
-        _id2klass = new HashMap<String, DFClassSpace>(space._id2klass);
     }
 
     @Override
@@ -142,6 +139,15 @@ public class DFTypeSpace {
 	return klass;
     }
 
+    private void addClasses(DFTypeSpace typeSpace) {
+        for (String id : typeSpace._id2klass.keySet()) {
+            DFTypeSpace space = typeSpace._id2space.get(id);
+            _id2space.put(id, space);
+            DFClassSpace klass = typeSpace._id2klass.get(id);
+            _id2klass.put(id, klass);
+        }
+    }
+
     private DFClassSpace getDefaultClass(DFType type) {
         if (type == null) {
             return this.getDefaultClass("unknown");
@@ -204,20 +210,25 @@ public class DFTypeSpace {
         } else {
             DFClassSpace klass = _id2klass.get(id);
             if (klass == null) {
-                throw new EntityNotFound(id);
+                String fullName = this.getFullName()+"."+id;
+                JavaClass jklass = DFRepository.loadJavaClass(fullName);
+                if (jklass == null) {
+                    throw new EntityNotFound(id);
+                }
+                klass = this.loadClass(jklass);
             }
             return klass;
         }
     }
 
+    public DFClassSpace resolveClass(Type type) {
+        return resolveClass(resolve(type));
+    }
     public DFClassSpace resolveClass(DFType type) {
         if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         }
-        return _root.getDefaultClass(type);
-    }
-    public DFClassSpace resolveClass(Type type) {
-        return resolveClass(resolve(type));
+        return this.getDefaultClass(type);
     }
 
     @SuppressWarnings("unchecked")
@@ -225,15 +236,15 @@ public class DFTypeSpace {
 	if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return new DFBasicType(ptype.getPrimitiveTypeCode());
-	} else if (type instanceof SimpleType) {
-            SimpleType stype = (SimpleType)type;
-            DFClassSpace klass = _root.getDefaultClass(stype.getName());
-            return new DFClassType(klass);
 	} else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
 	    DFType elemType = this.resolve(atype.getElementType());
 	    int ndims = atype.getDimensions();
 	    return new DFArrayType(elemType, ndims);
+	} else if (type instanceof SimpleType) {
+            SimpleType stype = (SimpleType)type;
+            DFClassSpace klass = this.getDefaultClass(stype.getName());
+            return new DFClassType(klass);
 	} else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
@@ -244,8 +255,8 @@ public class DFTypeSpace {
             }
             if (baseType instanceof DFClassType) {
                 // XXX make DFCompoundType
-                return new DFClassType(
-                    ((DFClassType)baseType).getKlass(), argTypes);
+                DFClassSpace baseKlass = ((DFClassType)baseType).getKlass();
+                return new DFClassType(baseKlass, argTypes);
             }
         }
         return null;
@@ -280,7 +291,7 @@ public class DFTypeSpace {
             org.apache.bcel.generic.ObjectType otype =
 		(org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            DFClassSpace klass = _root.getDefaultClass(className);
+            DFClassSpace klass = this.getDefaultClass(className);
             return new DFClassType(klass);
         } else {
 	    return null;
@@ -290,7 +301,8 @@ public class DFTypeSpace {
     public void loadRootClass(JavaClass jklass) {
         assert(this == _root);
 	assert(jklass.getPackageName().equals("java.lang"));
-        this.loadClass(jklass);
+        DFClassSpace klass = this.loadClass(jklass);
+        this.addClass(klass.getBaseName(), klass);
     }
 
     private DFClassSpace loadClass(JavaClass jklass) {
@@ -347,12 +359,7 @@ public class DFTypeSpace {
         Name name = importDecl.getName();
         if (importDecl.isOnDemand()) {
             DFTypeSpace typeSpace = _root.lookupSpace(name);
-            for (String id : typeSpace._id2klass.keySet()) {
-                DFTypeSpace space = typeSpace._id2space.get(id);
-                _id2space.put(id, space);
-                DFClassSpace klass = typeSpace._id2klass.get(id);
-                _id2klass.put(id, klass);
-            }
+            this.addClasses(typeSpace);
         } else {
             assert(name.isQualifiedName());
             DFClassSpace klass = _root.lookupClass(name);

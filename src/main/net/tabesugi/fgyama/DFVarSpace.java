@@ -61,6 +61,10 @@ public class DFVarSpace {
 	return elem;
     }
 
+    public String getBaseName() {
+        return _name;
+    }
+
     public String getName() {
         if (_parent == null) {
             return _name;

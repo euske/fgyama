@@ -209,7 +209,10 @@ public class DFClassSpace extends DFVarSpace {
         //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
         DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
 
-        _baseKlass = typeSpace.resolveClass(typeDecl.getSuperclassType());
+        Type superClass = typeDecl.getSuperclassType();
+        if (superClass != null) {
+            _baseKlass = typeSpace.resolveClass(superClass);
+        }
         List<Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
