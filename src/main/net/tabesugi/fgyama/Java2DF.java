@@ -2045,6 +2045,7 @@ public class Java2DF {
 	// Process files.
         DFTypeSpace defaultSpace = new DFTypeSpace(".");
         DFTypeSpace rootSpace = new DFTypeSpace(".", defaultSpace);
+        DFRepository.loadDefaultJarFiles();
 	DFRepository.loadDefaultClasses(rootSpace, defaultSpace);
 	XmlExporter exporter = new XmlExporter();
         Java2DF converter = new Java2DF(rootSpace, exporter);

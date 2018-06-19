@@ -31,6 +31,14 @@ public class DFRepository {
 	}
     }
 
+    public static void loadDefaultJarFiles()
+	throws IOException {
+        File homeDir = new File(System.getProperty("java.home"));
+        File libDir = new File(homeDir, "lib");
+        File rtFile = new File(libDir, "rt.jar");
+        DFRepository.loadJarFile(rtFile.getAbsolutePath());
+    }
+
     public static void loadJarFile(String jarpath)
 	throws IOException {
         Utils.logit("Loading: "+jarpath);

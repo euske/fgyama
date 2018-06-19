@@ -112,7 +112,7 @@ public class DFClassSpace extends DFVarSpace {
     private DFVarRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
-        Utils.logit("DFClassSpace.addField: "+ref);
+        //Utils.logit("DFClassSpace.addField: "+ref);
         return ref;
     }
 
@@ -120,7 +120,7 @@ public class DFClassSpace extends DFVarSpace {
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
                 method0.addOverride(method1);
-                Utils.logit("DFClassSpace.overrideMethod: "+method0+" : "+method1);
+                //Utils.logit("DFClassSpace.overrideMethod: "+method0+" : "+method1);
                 break;
             }
         }

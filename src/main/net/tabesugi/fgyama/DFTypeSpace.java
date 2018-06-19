@@ -67,7 +67,7 @@ public class DFTypeSpace {
         return this.addChild(id);
     }
     private DFTypeSpace addChild(String id) {
-        Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
+        //Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
         assert(!_id2space.containsKey(id));
         DFTypeSpace space = new DFTypeSpace(this, id);
         _children.add(space);
@@ -104,11 +104,11 @@ public class DFTypeSpace {
         assert(!_id2space.containsKey(id));
         DFTypeSpace child = this.addChild(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
+        Utils.logit("DFTypeSpace.createClass: "+klass);
         return this.addClass(klass);
     }
     public DFClassSpace addClass(DFClassSpace klass) {
         String id = klass.getBaseName();
-        Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
         assert(id.indexOf('.') < 0);
         assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
@@ -302,7 +302,6 @@ public class DFTypeSpace {
 
     public void importClass(ImportDeclaration importDecl)
         throws EntityNotFound {
-        Utils.logit("DFTypeSpace.importClass: "+importDecl.getName());
         // XXX support static import
         assert(!importDecl.isStatic());
         Name name = importDecl.getName();
@@ -312,6 +311,7 @@ public class DFTypeSpace {
         } else {
             assert(name.isQualifiedName());
             DFClassSpace klass = _root.lookupClass(name);
+            Utils.logit("DFTypeSpace.importClass: "+klass);
             this.addClass(klass);
         }
     }
