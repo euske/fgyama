@@ -73,7 +73,6 @@ public class DFRepository {
 		InputStream strm = jarfile.getInputStream(je);
 		jklass = new ClassParser(strm, path).parse();
 		_name2jklass.put(name, jklass);
-		Utils.logit("Loaded: "+jklass.getClassName());
 	    } finally {
 		jarfile.close();
 	    }
@@ -90,6 +89,7 @@ public class DFRepository {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
+		Utils.logit("Loading: "+name);
                 JavaClass jklass = DFRepository.loadJavaClass(name);
                 assert(jklass != null);
                 try {
