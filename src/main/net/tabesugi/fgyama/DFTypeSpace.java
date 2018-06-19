@@ -25,8 +25,11 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
+    private static DFClassSpace ARRAY_CLASS = null;
+
     public DFTypeSpace() {
         _root = this;
+        DFTypeSpace.ARRAY_CLASS = new DFClassSpace(this, null, "Array", null);
     }
 
     public DFTypeSpace(DFTypeSpace root) {
@@ -106,7 +109,7 @@ public class DFTypeSpace {
         assert(!_id2space.containsKey(id));
         DFTypeSpace child = this.addChild(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
-        Utils.logit("DFTypeSpace.createClass: "+klass);
+        //Utils.logit("DFTypeSpace.createClass: "+klass);
         return this.addClass(klass);
     }
 
@@ -154,8 +157,11 @@ public class DFTypeSpace {
         assert(type != null);
         if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
+        } else if (type instanceof DFArrayType) {
+            return DFTypeSpace.ARRAY_CLASS;
+        } else {
+            throw new EntityNotFound(type.getName());
         }
-        return this.lookupClass(type.getName());
     }
 
     @SuppressWarnings("unchecked")

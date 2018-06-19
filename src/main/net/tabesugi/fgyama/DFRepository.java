@@ -17,6 +17,7 @@ public class DFRepository {
     private static Map<String, String> _name2jar =
 	new HashMap<String, String>();
 
+    public static DFType OBJECT_TYPE = null;
     public static DFType STRING_TYPE = null;
 
     private static String class2file(String name) {
@@ -93,7 +94,9 @@ public class DFRepository {
                 assert(jklass != null);
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
-                    if (jklass.getClassName().equals("java.lang.String")) {
+                    if (name.equals("java.lang.Object")) {
+                        DFRepository.OBJECT_TYPE = new DFClassType(klass);
+                    } else if (name.equals("java.lang.String")) {
                         DFRepository.STRING_TYPE = new DFClassType(klass);
                     }
                 } catch (EntityNotFound e) {

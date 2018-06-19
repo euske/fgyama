@@ -15,6 +15,7 @@ How to Build:
 
 TODOs:
 
+  * Array methods.
+  * Parameterized types.
   * Lambdas.
   * Method references.
-  * Parameterized types.
