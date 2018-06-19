@@ -62,12 +62,13 @@ public class DFTypeSpace {
         }
     }
 
-    public DFTypeSpace addAnonChild() {
-        String id = "anon"+_children.size();
+    public DFTypeSpace addAnonSpace() {
+        String id = "anon"+_children.size(); // assign unique id.
         return this.addChild(id);
     }
     private DFTypeSpace addChild(String id) {
         Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
+        assert(!_id2space.containsKey(id));
         DFTypeSpace space = new DFTypeSpace(this, id);
         _children.add(space);
         _id2space.put(id, space);
@@ -98,8 +99,9 @@ public class DFTypeSpace {
         }
     }
 
-    private DFClassSpace addClass(String id) {
+    private DFClassSpace createClass(String id) {
         assert(id.indexOf('.') < 0);
+        assert(!_id2space.containsKey(id));
         DFTypeSpace child = this.addChild(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
         return this.addClass(klass);
@@ -108,7 +110,7 @@ public class DFTypeSpace {
         String id = klass.getBaseName();
         Utils.logit("DFTypeSpace.addClass: "+this+": "+klass);
         assert(id.indexOf('.') < 0);
-        //assert(!_id2klass.containsKey(id));
+        assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
 	return klass;
     }
@@ -194,23 +196,23 @@ public class DFTypeSpace {
     public DFType resolve(org.apache.bcel.generic.Type type)
         throws EntityNotFound {
         if (type.equals(org.apache.bcel.generic.BasicType.BOOLEAN)) {
-            return DFType.BOOLEAN;
+            return DFBasicType.BOOLEAN;
         } else if (type.equals(org.apache.bcel.generic.BasicType.BYTE)) {
-            return DFType.BYTE;
+            return DFBasicType.BYTE;
         } else if (type.equals(org.apache.bcel.generic.BasicType.CHAR)) {
-            return DFType.CHAR;
+            return DFBasicType.CHAR;
         } else if (type.equals(org.apache.bcel.generic.BasicType.DOUBLE)) {
-            return DFType.DOUBLE;
+            return DFBasicType.DOUBLE;
         } else if (type.equals(org.apache.bcel.generic.BasicType.FLOAT)) {
-            return DFType.FLOAT;
+            return DFBasicType.FLOAT;
         } else if (type.equals(org.apache.bcel.generic.BasicType.INT)) {
-            return DFType.INT;
+            return DFBasicType.INT;
         } else if (type.equals(org.apache.bcel.generic.BasicType.LONG)) {
-            return DFType.LONG;
+            return DFBasicType.LONG;
         } else if (type.equals(org.apache.bcel.generic.BasicType.SHORT)) {
-            return DFType.SHORT;
+            return DFBasicType.SHORT;
         } else if (type.equals(org.apache.bcel.generic.BasicType.VOID)) {
-            return DFType.VOID;
+            return DFBasicType.VOID;
         } else if (type instanceof org.apache.bcel.generic.ArrayType) {
             org.apache.bcel.generic.ArrayType atype =
                 (org.apache.bcel.generic.ArrayType)type;
@@ -249,9 +251,17 @@ public class DFTypeSpace {
         int i = id.lastIndexOf('.');
         assert(0 <= i);
         DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-	DFClassSpace klass = space.addClass(id.substring(i+1));
-        klass.load(this, jklass);
-	return klass;
+        return space.loadClass(id.substring(i+1), jklass);
+    }
+    private DFClassSpace loadClass(String id, JavaClass jklass)
+        throws EntityNotFound {
+        if (_id2klass.containsKey(id)) {
+            return _id2klass.get(id);
+        } else {
+            DFClassSpace klass = this.createClass(id);
+            klass.load(this, jklass);
+            return klass;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -267,7 +277,7 @@ public class DFTypeSpace {
     public void build(TypeDeclaration typeDecl)
 	throws UnsupportedSyntax {
         //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
-        DFClassSpace klass = this.addClass(typeDecl.getName().getIdentifier());
+        DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = klass.getChildSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
@@ -292,6 +302,7 @@ public class DFTypeSpace {
 
     public void importClass(ImportDeclaration importDecl)
         throws EntityNotFound {
+        Utils.logit("DFTypeSpace.importClass: "+importDecl.getName());
         // XXX support static import
         assert(!importDecl.isStatic());
         Name name = importDecl.getName();

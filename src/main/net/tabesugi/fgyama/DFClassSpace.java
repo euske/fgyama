@@ -35,11 +35,6 @@ public class DFClassSpace extends DFVarSpace {
 	this.addRef("#this", new DFClassType(this));
     }
 
-    public DFClassSpace(
-        DFTypeSpace typeSpace, DFTypeSpace childSpace) {
-        this(typeSpace, childSpace, "unknown");
-    }
-
     @Override
     public String toString() {
 	return ("<DFClassSpace("+this.getFullName()+")>");
@@ -151,7 +146,7 @@ public class DFClassSpace extends DFVarSpace {
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
 	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
-        Utils.logit("DFClassSpace.addMethod: "+method);
+        //Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);

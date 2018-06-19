@@ -239,7 +239,7 @@ class InstanceofNode extends ProgNode {
     public InstanceofNode(
         DFGraph graph, DFVarSpace space,
         ASTNode ast, DFType type) {
-	super(graph, space, DFType.BOOLEAN, null, ast);
+	super(graph, space, DFBasicType.BOOLEAN, null, ast);
 	assert(type != null);
 	this.type = type;
     }
@@ -984,36 +984,36 @@ public class Java2DF {
 	} else if (expr instanceof BooleanLiteral) {
 	    boolean value = ((BooleanLiteral)expr).booleanValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.BOOLEAN,
+                              graph, varSpace, DFBasicType.BOOLEAN,
                               expr, Boolean.toString(value)));
 
 	} else if (expr instanceof CharacterLiteral) {
 	    char value = ((CharacterLiteral)expr).charValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.CHAR,
+                              graph, varSpace, DFBasicType.CHAR,
                               expr, "'"+Character.toString(value)+"'"));
 
 	} else if (expr instanceof NullLiteral) {
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.NULL,
+                              graph, varSpace, DFNullType.NULL,
                               expr, "null"));
 
 	} else if (expr instanceof NumberLiteral) {
 	    String value = ((NumberLiteral)expr).getToken();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.NUMBER,
+                              graph, varSpace, DFBasicType.NUMBER,
                               expr, value));
 
 	} else if (expr instanceof StringLiteral) {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.STRING,
+                              graph, varSpace, DFRepository.STRING_TYPE,
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)expr).getType();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFType.TYPE,
+                              graph, varSpace, DFBasicType.TYPE,
                               expr, Utils.getTypeName(value)));
 
 	} else if (expr instanceof PrefixExpression) {
@@ -1280,7 +1280,7 @@ public class Java2DF {
             DFType instType;
             if (anonDecl != null) {
                 DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
-                DFTypeSpace anonSpace = typeSpace.addAnonChild();
+                DFTypeSpace anonSpace = typeSpace.addAnonSpace();
                 String id = anonSpace.getBaseName();
                 DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
                 anonSpace.addClass(anonKlass);
@@ -1351,7 +1351,7 @@ public class Java2DF {
 	} else if (expr instanceof LambdaExpression) {
 	    LambdaExpression lambda = (LambdaExpression)expr;
             ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = typeSpace.addAnonChild();
+            DFTypeSpace anonSpace = typeSpace.addAnonSpace();
             String id = anonSpace.getBaseName();
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             if (body instanceof Statement) {
@@ -1373,7 +1373,7 @@ public class Java2DF {
 	    //  SuperMethodReference
 	    //  TypeMethodReference
 	    MethodReference mref = (MethodReference)expr;
-            DFTypeSpace anonSpace = typeSpace.addAnonChild();
+            DFTypeSpace anonSpace = typeSpace.addAnonSpace();
             String id = anonSpace.getBaseName();
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             // XXX TODO method ref
@@ -1583,7 +1583,7 @@ public class Java2DF {
                 graph, typeSpace, loopSpace, loopFrame, loopCpt, expr);
 	    condValue = loopCpt.getRValue();
 	} else {
-	    condValue = new ConstNode(graph, loopSpace, DFType.BOOLEAN, null, "true");
+	    condValue = new ConstNode(graph, loopSpace, DFBasicType.BOOLEAN, null, "true");
 	}
 	loopCpt = processStatement(
             graph, typeSpace, loopSpace, loopFrame, loopCpt,

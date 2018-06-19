@@ -44,6 +44,7 @@ public class DFClassType extends DFType {
 
     public int canConvertFrom(DFType type)
     {
+        if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFClassType)) return -1;
         DFClassType ctype = (DFClassType)type;
         return _klass.isBaseOf(ctype._klass);

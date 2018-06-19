@@ -17,6 +17,8 @@ public class DFRepository {
     private static Map<String, String> _name2jar =
 	new HashMap<String, String>();
 
+    public static DFType STRING_TYPE = null;
+
     private static String class2file(String name) {
 	return name.replace('.', '/')+".class";
     }
@@ -80,11 +82,14 @@ public class DFRepository {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
-                JavaClass jklass = loadJavaClass(name);
+                JavaClass jklass = DFRepository.loadJavaClass(name);
                 assert(jklass != null);
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
                     defaultSpace.addClass(klass);
+                    if (name.equals("java.lang.String")) {
+                        DFRepository.STRING_TYPE = new DFClassType(klass);
+                    }
                 } catch (EntityNotFound e) {
                     Utils.logit("Error: Cannot load class: "+e.name);
                 }
