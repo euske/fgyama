@@ -119,7 +119,7 @@ public class DFTypeSpace {
         throws EntityNotFound {
         return this.lookupClass(name.getFullyQualifiedName());
     }
-    private DFClassSpace lookupClass(String id)
+    public DFClassSpace lookupClass(String id)
         throws EntityNotFound {
         try {
             int i = id.lastIndexOf('.');

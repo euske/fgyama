@@ -172,6 +172,10 @@ public class DFClassSpace extends DFVarSpace {
 
     public void load(DFTypeSpace refSpace, JavaClass jklass)
         throws EntityNotFound {
+        String superClass = jklass.getSuperclassName();
+        if (superClass != null && !superClass.equals(jklass.getClassName())) {
+            _baseKlass = refSpace.lookupClass(superClass);
+        }
         for (Field fld : jklass.getFields()) {
             DFType type = refSpace.resolve(fld.getType());
             this.addRef("."+fld.getName(), type);
