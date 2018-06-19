@@ -31,14 +31,6 @@ public class DFRepository {
 	}
     }
 
-    public static void loadDefaultJarFiles()
-	throws IOException {
-        File homeDir = new File(System.getProperty("java.home"));
-        File libDir = new File(homeDir, "lib");
-        File rtFile = new File(libDir, "rt.jar");
-        DFRepository.loadJarFile(rtFile.getAbsolutePath());
-    }
-
     public static void loadJarFile(String jarpath)
 	throws IOException {
         Utils.logit("Loading: "+jarpath);
@@ -83,19 +75,25 @@ public class DFRepository {
 	return jklass;
     }
 
-    public static void loadDefaultClasses(
-        DFTypeSpace rootSpace, DFTypeSpace defaultSpace) {
+    public static void loadDefaultJarFiles()
+	throws IOException {
+        File homeDir = new File(System.getProperty("java.home"));
+        File libDir = new File(homeDir, "lib");
+        File rtFile = new File(libDir, "rt.jar");
+        DFRepository.loadJarFile(rtFile.getAbsolutePath());
+    }
+
+    public static void loadDefaultClasses(DFTypeSpace rootSpace) {
 	for (String name : _name2jar.keySet()) {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
-		Utils.logit("Loading: "+name);
+		Utils.logit("Import: "+name);
                 JavaClass jklass = DFRepository.loadJavaClass(name);
                 assert(jklass != null);
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
-                    defaultSpace.addClass(klass);
-                    if (name.equals("java.lang.String")) {
+                    if (jklass.getClassName().equals("java.lang.String")) {
                         DFRepository.STRING_TYPE = new DFClassType(klass);
                     }
                 } catch (EntityNotFound e) {

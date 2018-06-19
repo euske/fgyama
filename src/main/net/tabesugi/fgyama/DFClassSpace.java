@@ -76,7 +76,7 @@ public class DFClassSpace extends DFVarSpace {
         return new DFVarRef(null, "."+name.getIdentifier(), null);
     }
 
-    private DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
         String id = name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
@@ -101,12 +101,6 @@ public class DFClassSpace extends DFVarSpace {
             klass = klass._baseKlass;
         }
         return null;
-    }
-
-    public DFMethod lookupMethodByDecl(MethodDeclaration methodDecl)
-        throws EntityNotFound {
-        DFType[] argTypes = _typeSpace.resolveList(methodDecl);
-        return this.lookupMethod1(methodDecl.getName(), argTypes);
     }
 
     private DFVarRef addField(

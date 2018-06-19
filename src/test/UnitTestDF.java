@@ -23,10 +23,10 @@ public class UnitTestDF extends XMLTestCase {
     public void compareXml(String javaPath, String xmlPath)
 	throws Exception {
 	System.err.println("compareXml: "+javaPath+", "+xmlPath);
-        DFTypeSpace defaultSpace = new DFTypeSpace(".");
-        DFTypeSpace rootSpace = new DFTypeSpace(".", defaultSpace);
+        DFTypeSpace rootSpace = new DFTypeSpace();
+        DFTypeSpace defaultSpace = new DFTypeSpace(rootSpace);
         DFRepository.loadDefaultJarFiles();
-	DFRepository.loadDefaultClasses(rootSpace, defaultSpace);
+	DFRepository.loadDefaultClasses(rootSpace);
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(rootSpace, exporter);
         CompilationUnit cunit = converter.parseFile(javaPath);

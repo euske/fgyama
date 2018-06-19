@@ -878,7 +878,7 @@ public class Java2DF {
                 DFNode obj = null;
                 DFClassSpace klass;
                 try {
-                    klass = this.rootSpace.lookupClass(qn.getQualifier());
+                    klass = typeSpace.lookupClass(qn.getQualifier());
                 } catch (EntityNotFound e) {
                     cpt = processExpression(
                         graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
@@ -912,7 +912,7 @@ public class Java2DF {
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = this.rootSpace.lookupClass((Name)expr1);
+                    klass = typeSpace.lookupClass((Name)expr1);
                 } catch (EntityNotFound e) {
                 }
             }
@@ -959,7 +959,7 @@ public class Java2DF {
                 DFNode obj = null;
                 DFClassSpace klass;
                 try {
-                    klass = this.rootSpace.lookupClass(qn.getQualifier());
+                    klass = typeSpace.lookupClass(qn.getQualifier());
                 } catch (EntityNotFound e) {
                     cpt = processExpression(
                         graph, typeSpace, varSpace, frame, cpt, qn.getQualifier());
@@ -1113,7 +1113,7 @@ public class Java2DF {
             } else {
                 if (expr1 instanceof Name) {
                     try {
-                        klass = this.rootSpace.lookupClass((Name)expr1);
+                        klass = typeSpace.lookupClass((Name)expr1);
                     } catch (EntityNotFound e) {
                     }
                 }
@@ -1237,7 +1237,7 @@ public class Java2DF {
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = this.rootSpace.lookupClass((Name)expr1);
+                    klass = typeSpace.lookupClass((Name)expr1);
                 } catch (EntityNotFound e) {
                 }
             }
@@ -1834,18 +1834,15 @@ public class Java2DF {
 	}
     }
 
-    private DFTypeSpace processImports(
-        DFTypeSpace srcSpace, List<ImportDeclaration> imports) {
-        // Make a copy as we're polluting the original TypeSpace.
-        DFTypeSpace dstSpace = new DFTypeSpace("copy", srcSpace);
+    private void processImports(
+        DFTypeSpace typeSpace, List<ImportDeclaration> imports) {
         for (ImportDeclaration importDecl : imports) {
             try {
-                dstSpace.importClass(importDecl);
+                typeSpace.importClass(importDecl);
             } catch (EntityNotFound e) {
                 Utils.logit("Import: class not found: "+e.name);
             }
         }
-        return dstSpace;
     }
 
     /// Top-level functions.
@@ -1870,7 +1867,8 @@ public class Java2DF {
         throws UnsupportedSyntax, EntityNotFound {
 	// Ignore method prototypes.
 	if (methodDecl.getBody() == null) return null;
-        DFMethod method = klass.lookupMethodByDecl(methodDecl);
+        DFType[] argTypes = typeSpace.resolveList(methodDecl);
+        DFMethod method = klass.lookupMethod1(methodDecl.getName(), argTypes);
         assert(method != null);
         try {
             // Setup an initial space.
@@ -1972,7 +1970,9 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildClassSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeSpace refSpace = this.processImports(typeSpace, cunit.imports());
+        DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        refSpace.importClasses(typeSpace);
+        this.processImports(refSpace, cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
@@ -1992,7 +1992,9 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeSpace refSpace = this.processImports(typeSpace, cunit.imports());
+        DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        refSpace.importClasses(typeSpace);
+        this.processImports(refSpace, cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
@@ -2043,10 +2045,9 @@ public class Java2DF {
 	}
 
 	// Process files.
-        DFTypeSpace defaultSpace = new DFTypeSpace(".");
-        DFTypeSpace rootSpace = new DFTypeSpace(".", defaultSpace);
+        DFTypeSpace rootSpace = new DFTypeSpace();
         DFRepository.loadDefaultJarFiles();
-	DFRepository.loadDefaultClasses(rootSpace, defaultSpace);
+	DFRepository.loadDefaultClasses(rootSpace);
 	XmlExporter exporter = new XmlExporter();
         Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {

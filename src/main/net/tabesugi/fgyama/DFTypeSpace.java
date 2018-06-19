@@ -15,9 +15,8 @@ import org.w3c.dom.*;
 public class DFTypeSpace {
 
     private DFTypeSpace _root;
-    private String _name;
     private DFTypeSpace _parent = null;
-    private DFTypeSpace _next = null;
+    private String _name = null;
 
     private List<DFTypeSpace> _children =
 	new ArrayList<DFTypeSpace>();
@@ -26,22 +25,19 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
-    public DFTypeSpace(String name) {
-	_name = name;
+    public DFTypeSpace() {
         _root = this;
     }
 
-    public DFTypeSpace(String name, DFTypeSpace next) {
-	_name = name;
-        _root = this;
-        _next = next;
+    public DFTypeSpace(DFTypeSpace root) {
+        _root = root;
+        this.importClasses(root.lookupSpace("java.lang"));
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
-        _next = parent._next;
-	_name = name;
 	_parent = parent;
+	_name = name;
     }
 
     @Override
@@ -53,10 +49,12 @@ public class DFTypeSpace {
         return _name;
     }
     public String getFullName() {
-        if (_parent == null) {
-            return _name;
+        if (_root == this) {
+            return "root";
+        } else if (_parent == null) {
+            return "copy";
         } else if (_parent == _root) {
-            return "."+_name;
+            return _name;
         } else {
             return _parent.getFullName()+"."+_name;
         }
@@ -66,25 +64,19 @@ public class DFTypeSpace {
         String id = "anon"+_children.size(); // assign unique id.
         return this.addChild(id);
     }
-    private DFTypeSpace addChild(String id) {
-        //Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
-        assert(!_id2space.containsKey(id));
-        DFTypeSpace space = new DFTypeSpace(this, id);
-        _children.add(space);
-        _id2space.put(id, space);
-        return space;
-    }
 
     public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
         if (pkgDecl == null) {
             return this;
         } else {
-            return _root.lookupSpace(pkgDecl.getName());
+            return this.lookupSpace(pkgDecl.getName());
         }
     }
+
     public DFTypeSpace lookupSpace(Name name) {
         return this.lookupSpace(name.getFullyQualifiedName());
     }
+
     private DFTypeSpace lookupSpace(String id) {
         int i = id.lastIndexOf('.');
         if (0 <= i) {
@@ -99,6 +91,16 @@ public class DFTypeSpace {
         }
     }
 
+    private DFTypeSpace addChild(String id) {
+        //Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
+        assert(id.indexOf('.') < 0);
+        assert(!_id2space.containsKey(id));
+        DFTypeSpace space = new DFTypeSpace(this, id);
+        _children.add(space);
+        _id2space.put(id, space);
+        return space;
+    }
+
     private DFClassSpace createClass(String id) {
         assert(id.indexOf('.') < 0);
         assert(!_id2space.containsKey(id));
@@ -107,11 +109,13 @@ public class DFTypeSpace {
         Utils.logit("DFTypeSpace.createClass: "+klass);
         return this.addClass(klass);
     }
+
     public DFClassSpace addClass(DFClassSpace klass) {
         String id = klass.getBaseName();
         assert(id.indexOf('.') < 0);
         assert(!_id2klass.containsKey(id));
 	_id2klass.put(id, klass);
+        //Utils.logit("DFTypeSpace.addClass: "+this+": "+id);
 	return klass;
     }
 
@@ -121,29 +125,22 @@ public class DFTypeSpace {
     }
     public DFClassSpace lookupClass(String id)
         throws EntityNotFound {
-        try {
-            int i = id.lastIndexOf('.');
-            if (0 <= i) {
-                DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
-                return space.lookupClass(id.substring(i+1));
-            } else {
-                DFClassSpace klass = _id2klass.get(id);
-                if (klass == null) {
-                    String fullName = this.getFullName().substring(1)+"."+id;
-                    JavaClass jklass = DFRepository.loadJavaClass(fullName);
-                    if (jklass == null) {
-                        throw new EntityNotFound(fullName);
-                    }
-                    klass = _root.loadClass(jklass);
+        //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+id);
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
+            return space.lookupClass(id.substring(i+1));
+        } else {
+            DFClassSpace klass = _id2klass.get(id);
+            if (klass == null) {
+                String fullName = this.getFullName()+"."+id;
+                JavaClass jklass = DFRepository.loadJavaClass(fullName);
+                if (jklass == null) {
+                    throw new EntityNotFound(fullName);
                 }
-                return klass;
+                klass = _root.loadClass(jklass);
             }
-        } catch (EntityNotFound e) {
-            if (_next != null) {
-                return _next.lookupClass(id);
-            } else {
-                throw e;
-            }
+            return klass;
         }
     }
 
@@ -154,6 +151,7 @@ public class DFTypeSpace {
 
     public DFClassSpace resolveClass(DFType type)
         throws EntityNotFound {
+        assert(type != null);
         if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         }
@@ -316,10 +314,8 @@ public class DFTypeSpace {
         }
     }
 
-    private void importClasses(DFTypeSpace typeSpace) {
+    public void importClasses(DFTypeSpace typeSpace) {
         for (String id : typeSpace._id2klass.keySet()) {
-            DFTypeSpace space = typeSpace._id2space.get(id);
-            _id2space.put(id, space);
             DFClassSpace klass = typeSpace._id2klass.get(id);
             _id2klass.put(id, klass);
         }

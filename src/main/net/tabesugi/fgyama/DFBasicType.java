@@ -45,7 +45,7 @@ public class DFBasicType extends DFType {
     public int canConvertFrom(DFType type) {
         if (!(type instanceof DFBasicType)) return -1;
         if (this.equals(type)) return 0;
-        return (_numeric && ((DFBasicType)type)._numeric)? 0 : -1;
+        return (_numeric && ((DFBasicType)type)._numeric)? 1 : -1;
     }
 
     public static final DFType NUMBER =
