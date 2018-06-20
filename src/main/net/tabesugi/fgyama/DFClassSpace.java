@@ -171,10 +171,12 @@ public class DFClassSpace extends DFVarSpace {
             _baseKlass = refSpace.lookupClass(superClass);
         }
         for (Field fld : jklass.getFields()) {
+            if (!fld.isPublic()) continue;
             DFType type = refSpace.resolve(fld.getType());
             this.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
+            if (!meth.isPublic()) continue;
             org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {

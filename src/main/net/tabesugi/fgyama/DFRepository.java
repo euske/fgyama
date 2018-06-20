@@ -89,14 +89,16 @@ public class DFRepository {
             int i = name.lastIndexOf('.');
             assert(0 <= i);
 	    if (name.substring(0, i).equals("java.lang")) {
-		Utils.logit("Import: "+name);
                 JavaClass jklass = DFRepository.loadJavaClass(name);
                 assert(jklass != null);
+                if (!jklass.isPublic()) continue;
+                String id = jklass.getClassName();
+		Utils.logit("Import: "+id);
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
-                    if (name.equals("java.lang.Object")) {
+                    if (id.equals("java.lang.Object")) {
                         DFRepository.OBJECT_TYPE = new DFClassType(klass);
-                    } else if (name.equals("java.lang.String")) {
+                    } else if (id.equals("java.lang.String")) {
                         DFRepository.STRING_TYPE = new DFClassType(klass);
                     }
                 } catch (EntityNotFound e) {
