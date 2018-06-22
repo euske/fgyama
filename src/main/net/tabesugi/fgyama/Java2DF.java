@@ -1281,8 +1281,8 @@ public class Java2DF {
             DFType instType;
             if (anonDecl != null) {
                 DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
-                DFTypeSpace anonSpace = typeSpace.addAnonSpace();
-                String id = anonSpace.getBaseName();
+                String id = typeSpace.getAnonName();
+                DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
                 DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
                 anonSpace.addClass(anonKlass);
                 for (BodyDeclaration body :
@@ -1352,8 +1352,8 @@ public class Java2DF {
 	} else if (expr instanceof LambdaExpression) {
 	    LambdaExpression lambda = (LambdaExpression)expr;
             ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = typeSpace.addAnonSpace();
-            String id = anonSpace.getBaseName();
+	    String id = typeSpace.getAnonName();
+	    DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
@@ -1374,8 +1374,8 @@ public class Java2DF {
 	    //  SuperMethodReference
 	    //  TypeMethodReference
 	    MethodReference mref = (MethodReference)expr;
-            DFTypeSpace anonSpace = typeSpace.addAnonSpace();
-            String id = anonSpace.getBaseName();
+	    String id = typeSpace.getAnonName();
+	    DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             // XXX TODO method ref
             DFType instType = new DFClassType(anonKlass);

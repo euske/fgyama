@@ -15,7 +15,7 @@ import org.w3c.dom.*;
 public class DFTypeSpace {
 
     private DFTypeSpace _root;
-    private DFTypeSpace _parent = null;
+    private DFTypeSpace _next = null;
     private String _name = null;
 
     private List<DFTypeSpace> _children =
@@ -29,40 +29,31 @@ public class DFTypeSpace {
         _root = this;
     }
 
-    public DFTypeSpace(DFTypeSpace parent) {
-        _root = parent._root;
-	_parent = parent;
+    public DFTypeSpace(DFTypeSpace next) {
+        _root = next._root;
+	_next = next;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _root = parent._root;
-	_parent = parent;
-	_name = name;
+	if (parent == _root) {
+	    _name = name;
+	} else {
+	    _name = parent._name + "." + name;
+	}
     }
 
     @Override
     public String toString() {
-	return ("<DFTypeSpace("+this.getFullName()+")>");
+	return ("<DFTypeSpace("+_name+")>");
     }
 
-    public String getBaseName() {
-        return _name;
-    }
     public String getFullName() {
-        if (_root == this) {
-            return "root";
-        } else if (_name == null) {
-            return "copy";
-        } else if (_parent == _root) {
-            return _name;
-        } else {
-            return _parent.getFullName()+"."+_name;
-        }
+	return _name;
     }
 
-    public DFTypeSpace addAnonSpace() {
-        String id = "anon"+_children.size(); // assign unique id.
-        return this.addChild(id);
+    public String getAnonName() {
+        return "anon"+_children.size(); // assign unique id.
     }
 
     public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
@@ -104,7 +95,7 @@ public class DFTypeSpace {
     private DFClassSpace createClass(String id) {
         assert(id.indexOf('.') < 0);
         assert(!_id2space.containsKey(id));
-        DFTypeSpace child = this.addChild(id);
+        DFTypeSpace child = this.lookupSpace(id);
 	DFClassSpace klass = new DFClassSpace(this, child, id);
         //Utils.logit("DFTypeSpace.createClass: "+klass);
         return this.addClass(klass);
@@ -123,25 +114,45 @@ public class DFTypeSpace {
         throws EntityNotFound {
         return this.lookupClass(name.getFullyQualifiedName());
     }
-    public DFClassSpace lookupClass(String id)
+    public DFClassSpace lookupClass(String name)
         throws EntityNotFound {
-        //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+id);
-        int i = id.lastIndexOf('.');
-        if (0 <= i) {
-            DFTypeSpace space = _root.lookupSpace(id.substring(0, i));
-            return space.lookupClass(id.substring(i+1));
-        } else {
-            DFClassSpace klass = _id2klass.get(id);
-            if (klass == null) {
-                String fullName = this.getFullName()+"."+id;
-                JavaClass jklass = DFRepository.loadJavaClass(fullName);
-                if (jklass == null) {
-                    throw new EntityNotFound(fullName);
-                }
-                klass = _root.loadClass(jklass);
+        try {
+            return this.lookupClass(name, 0);
+        } catch (EntityNotFound e) {
+            if (_next == null) {
+                throw e;
             }
+            return _next.lookupClass(name);
+        }
+    }
+
+    private DFClassSpace lookupClass(String name, int i0)
+        throws EntityNotFound {
+        //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+name.substring(i0));
+        int i1 = name.indexOf('.', i0);
+        String id = (i1 < 0)? name.substring(i0) : name.substring(i0, i1);
+        DFClassSpace klass = _id2klass.get(id);
+        if (klass != null) {
             return klass;
         }
+        if (i1 < 0) {
+            // not found.
+            return this.lookupExternalClass(name);
+        }
+        DFTypeSpace space = _id2space.get(id);
+        if (space != null) {
+            return space.lookupClass(name, i1+1);
+        }
+        throw new EntityNotFound(name);
+    }
+
+    private DFClassSpace lookupExternalClass(String fullName)
+        throws EntityNotFound {
+        JavaClass jklass = DFRepository.loadJavaClass(fullName);
+        if (jklass == null) {
+            throw new EntityNotFound(fullName);
+        }
+        return _root.loadClass(jklass);
     }
 
     public DFClassSpace resolveClass(Type type)
@@ -262,7 +273,7 @@ public class DFTypeSpace {
             return _id2klass.get(id);
         } else {
             DFClassSpace klass = this.createClass(id);
-            klass.load(this, jklass);
+            klass.load(_root, jklass);
             return klass;
         }
     }
