@@ -1971,6 +1971,7 @@ public class Java2DF {
     public void buildClassSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
         refSpace.importClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
 	try {
@@ -1993,6 +1994,7 @@ public class Java2DF {
     public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
         refSpace.importClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
 	try {
