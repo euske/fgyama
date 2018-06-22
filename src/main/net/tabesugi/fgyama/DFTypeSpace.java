@@ -25,11 +25,8 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
-    private static DFClassSpace ARRAY_CLASS = null;
-
     public DFTypeSpace() {
         _root = this;
-        DFTypeSpace.ARRAY_CLASS = new DFClassSpace(this, null, "Array", null);
     }
 
     public DFTypeSpace(DFTypeSpace parent) {
@@ -154,11 +151,13 @@ public class DFTypeSpace {
 
     public DFClassSpace resolveClass(DFType type)
         throws EntityNotFound {
-        assert(type != null);
-        if (type instanceof DFClassType) {
-            return ((DFClassType)type).getKlass();
+	if (type == null) {
+	    // treat unknown class as Object.
+	    return DFRepository.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
-            return DFTypeSpace.ARRAY_CLASS;
+            return DFRepository.ARRAY_CLASS;
+	} else if (type instanceof DFClassType) {
+            return ((DFClassType)type).getKlass();
         } else {
             throw new EntityNotFound(type.getName());
         }

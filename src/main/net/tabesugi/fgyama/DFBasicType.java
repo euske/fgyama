@@ -48,28 +48,28 @@ public class DFBasicType extends DFType {
         return (_numeric && ((DFBasicType)type)._numeric)? 1 : -1;
     }
 
-    public static final DFType NUMBER =
+    public static final DFBasicType NUMBER =
 	new DFBasicType("@number");
-    public static final DFType BOOLEAN =
+    public static final DFBasicType BOOLEAN =
 	new DFBasicType(PrimitiveType.BOOLEAN);
-    public static final DFType BYTE =
+    public static final DFBasicType BYTE =
 	new DFBasicType(PrimitiveType.BYTE);
-    public static final DFType CHAR =
+    public static final DFBasicType CHAR =
 	new DFBasicType(PrimitiveType.CHAR);
-    public static final DFType DOUBLE =
+    public static final DFBasicType DOUBLE =
 	new DFBasicType(PrimitiveType.DOUBLE);
-    public static final DFType FLOAT =
+    public static final DFBasicType FLOAT =
 	new DFBasicType(PrimitiveType.FLOAT);
-    public static final DFType INT =
+    public static final DFBasicType INT =
 	new DFBasicType(PrimitiveType.INT);
-    public static final DFType LONG =
+    public static final DFBasicType LONG =
 	new DFBasicType(PrimitiveType.LONG);
-    public static final DFType SHORT =
+    public static final DFBasicType SHORT =
 	new DFBasicType(PrimitiveType.SHORT);
-    public static final DFType VOID =
+    public static final DFBasicType VOID =
 	new DFBasicType(PrimitiveType.VOID);
-    public static final DFType TYPE =
+    public static final DFBasicType TYPE =
 	new DFBasicType("@type");
-    public static final DFType ANONYMOUS =
+    public static final DFBasicType ANONYMOUS =
 	new DFBasicType("@anonymous");
 }

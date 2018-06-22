@@ -1007,7 +1007,8 @@ public class Java2DF {
 	} else if (expr instanceof StringLiteral) {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFRepository.STRING_TYPE,
+                              graph, varSpace,
+			      new DFClassType(DFRepository.STRING_CLASS),
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {

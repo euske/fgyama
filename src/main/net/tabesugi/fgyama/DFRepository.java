@@ -17,8 +17,9 @@ public class DFRepository {
     private static Map<String, String> _name2jar =
 	new HashMap<String, String>();
 
-    public static DFType OBJECT_TYPE = null;
-    public static DFType STRING_TYPE = null;
+    public static DFClassSpace OBJECT_CLASS = null;
+    public static DFClassSpace STRING_CLASS = null;
+    public static DFClassSpace ARRAY_CLASS = null;
 
     private static String class2file(String name) {
 	return name.replace('.', '/')+".class";
@@ -97,9 +98,10 @@ public class DFRepository {
                 try {
                     DFClassSpace klass = rootSpace.loadClass(jklass);
                     if (id.equals("java.lang.Object")) {
-                        DFRepository.OBJECT_TYPE = new DFClassType(klass);
+                        DFRepository.OBJECT_CLASS = klass;
+                        DFRepository.ARRAY_CLASS = klass; // XXX Object != Array.
                     } else if (id.equals("java.lang.String")) {
-                        DFRepository.STRING_TYPE = new DFClassType(klass);
+                        DFRepository.STRING_CLASS = klass;
                     }
                 } catch (EntityNotFound e) {
                     Utils.logit("Error: Cannot load class: "+e.name);
