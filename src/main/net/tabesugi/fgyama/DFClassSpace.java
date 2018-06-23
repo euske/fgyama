@@ -222,37 +222,37 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, DFTypeSpace refSpace, TypeDeclaration typeDecl)
+    public void build(DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
-        //Utils.logit("DFClassSpace.build: "+this+": "+refSpace+", "+typeDecl.getName());
+        //Utils.logit("DFClassSpace.build: "+this+": "+typeSpace+", "+typeDecl.getName());
         Type superClass = typeDecl.getSuperclassType();
         if (superClass != null) {
-            _baseKlass = refSpace.resolveClass(superClass);
+            _baseKlass = finder.resolveClass(superClass);
         }
         List<Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
-            _baseIfaces[i] = refSpace.resolveClass(ifaces.get(i));
+            _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
         }
 
         DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            this.build(child, refSpace, body);
+            this.build(child, finder, body);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, DFTypeSpace refSpace, BodyDeclaration body)
+    public void build(DFTypeSpace typeSpace, DFTypeFinder finder, BodyDeclaration body)
 	throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
             DFClassSpace klass = typeSpace.lookupClass(decl.getName());
-            klass.build(typeSpace, refSpace, decl);
+            klass.build(typeSpace, finder, decl);
 
         } else if (body instanceof FieldDeclaration) {
             FieldDeclaration decl = (FieldDeclaration)body;
-            DFType type = refSpace.resolve(decl.getType());
+            DFType type = finder.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 this.addField(frag.getName(), isStatic(decl), type);
@@ -260,12 +260,12 @@ public class DFClassSpace extends DFVarSpace {
 
         } else if (body instanceof MethodDeclaration) {
             MethodDeclaration decl = (MethodDeclaration)body;
-            DFType[] argTypes = refSpace.resolveList(decl);
+            DFType[] argTypes = finder.resolveList(decl);
             DFType returnType;
             if (decl.isConstructor()) {
                 returnType = new DFClassType(this);
             } else {
-                returnType = refSpace.resolve(decl.getReturnType2());
+                returnType = finder.resolve(decl.getReturnType2());
             }
             this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
 

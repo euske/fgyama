@@ -166,24 +166,24 @@ public class DFVarSpace {
      * Lists all the variables defined inside a method.
      */
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, MethodDeclaration methodDecl)
+    public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
 	throws UnsupportedSyntax, EntityNotFound {
         //Utils.logit("DFVarSpace.build: "+this);
         Type returnType = methodDecl.getReturnType2();
-        DFType type = (returnType == null)? null : typeSpace.resolve(returnType);
+        DFType type = (returnType == null)? null : finder.resolve(returnType);
 	this.addRef("#return", type);
 	this.addRef("#exception", null);
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers.
-            DFType paramType = typeSpace.resolve(decl.getType());
+            DFType paramType = finder.resolve(decl.getType());
             this.addVar(decl.getName(), paramType);
         }
-        this.build(typeSpace, methodDecl.getBody());
+        this.build(finder, methodDecl.getBody());
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, Statement ast)
+    public void build(DFTypeFinder finder, Statement ast)
 	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof AssertStatement) {
@@ -193,7 +193,7 @@ public class DFVarSpace {
 	    DFVarSpace childSpace = this.addChild("b", ast);
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
-		childSpace.build(typeSpace, stmt);
+		childSpace.build(finder, stmt);
 	    }
 
 	} else if (ast instanceof EmptyStatement) {
@@ -202,88 +202,88 @@ public class DFVarSpace {
 	    VariableDeclarationStatement varStmt =
 		(VariableDeclarationStatement)ast;
 	    // XXX Ignore modifiers.
-	    DFType varType = typeSpace.resolve(varStmt.getType());
+	    DFType varType = finder.resolve(varStmt.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) varStmt.fragments()) {
 		this.addVar(frag.getName(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
-		    this.build(typeSpace, expr);
+		    this.build(finder, expr);
 		}
 	    }
 
 	} else if (ast instanceof ExpressionStatement) {
 	    ExpressionStatement exprStmt = (ExpressionStatement)ast;
 	    Expression expr = exprStmt.getExpression();
-	    this.build(typeSpace, expr);
+	    this.build(finder, expr);
 
 	} else if (ast instanceof ReturnStatement) {
 	    ReturnStatement returnStmt = (ReturnStatement)ast;
 	    Expression expr = returnStmt.getExpression();
 	    if (expr != null) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 
 	} else if (ast instanceof IfStatement) {
 	    IfStatement ifStmt = (IfStatement)ast;
 	    Expression expr = ifStmt.getExpression();
-	    this.build(typeSpace, expr);
+	    this.build(finder, expr);
 	    Statement thenStmt = ifStmt.getThenStatement();
-	    this.build(typeSpace, thenStmt);
+	    this.build(finder, thenStmt);
 	    Statement elseStmt = ifStmt.getElseStatement();
 	    if (elseStmt != null) {
-		this.build(typeSpace, elseStmt);
+		this.build(finder, elseStmt);
 	    }
 
 	} else if (ast instanceof SwitchStatement) {
 	    SwitchStatement switchStmt = (SwitchStatement)ast;
 	    DFVarSpace childSpace = this.addChild("switch", ast);
 	    Expression expr = switchStmt.getExpression();
-	    childSpace.build(typeSpace, expr);
+	    childSpace.build(finder, expr);
 	    for (Statement stmt :
 		     (List<Statement>) switchStmt.statements()) {
-		childSpace.build(typeSpace, stmt);
+		childSpace.build(finder, stmt);
 	    }
 
 	} else if (ast instanceof SwitchCase) {
 	    SwitchCase switchCase = (SwitchCase)ast;
 	    Expression expr = switchCase.getExpression();
 	    if (expr != null) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 
 	} else if (ast instanceof WhileStatement) {
 	    WhileStatement whileStmt = (WhileStatement)ast;
 	    DFVarSpace childSpace = this.addChild("while", ast);
 	    Expression expr = whileStmt.getExpression();
-	    childSpace.build(typeSpace, expr);
+	    childSpace.build(finder, expr);
 	    Statement stmt = whileStmt.getBody();
-	    childSpace.build(typeSpace, stmt);
+	    childSpace.build(finder, stmt);
 
 	} else if (ast instanceof DoStatement) {
 	    DoStatement doStmt = (DoStatement)ast;
 	    DFVarSpace childSpace = this.addChild("do", ast);
 	    Statement stmt = doStmt.getBody();
-	    childSpace.build(typeSpace, stmt);
+	    childSpace.build(finder, stmt);
 	    Expression expr = doStmt.getExpression();
-	    childSpace.build(typeSpace, expr);
+	    childSpace.build(finder, expr);
 
 	} else if (ast instanceof ForStatement) {
 	    ForStatement forStmt = (ForStatement)ast;
 	    DFVarSpace childSpace = this.addChild("for", ast);
 	    for (Expression init :
 		     (List<Expression>) forStmt.initializers()) {
-		childSpace.build(typeSpace, init);
+		childSpace.build(finder, init);
 	    }
 	    Expression expr = forStmt.getExpression();
 	    if (expr != null) {
-		childSpace.build(typeSpace, expr);
+		childSpace.build(finder, expr);
 	    }
 	    Statement stmt = forStmt.getBody();
-	    childSpace.build(typeSpace, stmt);
+	    childSpace.build(finder, stmt);
 	    for (Expression update :
 		     (List<Expression>) forStmt.updaters()) {
-		childSpace.build(typeSpace, update);
+		childSpace.build(finder, update);
 	    }
 
 	} else if (ast instanceof EnhancedForStatement) {
@@ -291,14 +291,14 @@ public class DFVarSpace {
 	    DFVarSpace childSpace = this.addChild("efor", ast);
 	    SingleVariableDeclaration decl = eForStmt.getParameter();
 	    // XXX Ignore modifiers.
-	    DFType varType = typeSpace.resolve(decl.getType());
+	    DFType varType = finder.resolve(decl.getType());
 	    childSpace.addVar(decl.getName(), varType);
 	    Expression expr = eForStmt.getExpression();
 	    if (expr != null) {
-		childSpace.build(typeSpace, expr);
+		childSpace.build(finder, expr);
 	    }
 	    Statement stmt = eForStmt.getBody();
-	    childSpace.build(typeSpace, stmt);
+	    childSpace.build(finder, stmt);
 
 	} else if (ast instanceof BreakStatement) {
 
@@ -309,50 +309,50 @@ public class DFVarSpace {
 	    SimpleName labelName = labeledStmt.getLabel();
 	    String label = labelName.getIdentifier();
 	    Statement stmt = labeledStmt.getBody();
-	    this.build(typeSpace, stmt);
+	    this.build(finder, stmt);
 
 	} else if (ast instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
 	    Block block = syncStmt.getBody();
-	    this.build(typeSpace, block);
+	    this.build(finder, block);
 
 	} else if (ast instanceof TryStatement) {
 	    TryStatement tryStmt = (TryStatement)ast;
 	    Block block = tryStmt.getBody();
-	    this.build(typeSpace, block);
+	    this.build(finder, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
 		DFVarSpace childSpace = this.addChild("catch", cc);
 		SingleVariableDeclaration decl = cc.getException();
 		// XXX Ignore modifiers.
-		DFType varType = typeSpace.resolve(decl.getType());
+		DFType varType = finder.resolve(decl.getType());
 		childSpace.addVar(decl.getName(), varType);
-		childSpace.build(typeSpace, cc.getBody());
+		childSpace.build(finder, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		this.build(typeSpace, finBlock);
+		this.build(finder, finBlock);
 	    }
 
 	} else if (ast instanceof ThrowStatement) {
 	    ThrowStatement throwStmt = (ThrowStatement)ast;
 	    Expression expr = throwStmt.getExpression();
 	    if (expr != null) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 
 	} else if (ast instanceof ConstructorInvocation) {
 	    ConstructorInvocation ci = (ConstructorInvocation)ast;
 	    for (Expression expr :
 		     (List<Expression>) ci.arguments()) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 
 	} else if (ast instanceof SuperConstructorInvocation) {
 	    SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
 	    for (Expression expr :
 		     (List<Expression>) sci.arguments()) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 	} else if (ast instanceof TypeDeclarationStatement) {
 
@@ -366,7 +366,7 @@ public class DFVarSpace {
      * Lists all the variables defined within an expression.
      */
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, Expression ast)
+    public void build(DFTypeFinder finder, Expression ast)
 	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof Annotation) {
@@ -391,53 +391,53 @@ public class DFVarSpace {
 	    PrefixExpression prefix = (PrefixExpression)ast;
 	    PrefixExpression.Operator op = prefix.getOperator();
 	    Expression operand = prefix.getOperand();
-	    this.build(typeSpace, operand);
+	    this.build(finder, operand);
 	    if (op == PrefixExpression.Operator.INCREMENT ||
 		op == PrefixExpression.Operator.DECREMENT) {
-		this.buildLeft(typeSpace, operand);
+		this.buildLeft(finder, operand);
 	    }
 
 	} else if (ast instanceof PostfixExpression) {
 	    PostfixExpression postfix = (PostfixExpression)ast;
 	    PostfixExpression.Operator op = postfix.getOperator();
 	    Expression operand = postfix.getOperand();
-	    this.build(typeSpace, operand);
+	    this.build(finder, operand);
 	    if (op == PostfixExpression.Operator.INCREMENT ||
 		op == PostfixExpression.Operator.DECREMENT) {
-		this.buildLeft(typeSpace, operand);
+		this.buildLeft(finder, operand);
 	    }
 
 	} else if (ast instanceof InfixExpression) {
 	    InfixExpression infix = (InfixExpression)ast;
 	    InfixExpression.Operator op = infix.getOperator();
 	    Expression loperand = infix.getLeftOperand();
-	    this.build(typeSpace, loperand);
+	    this.build(finder, loperand);
 	    Expression roperand = infix.getRightOperand();
-	    this.build(typeSpace, roperand);
+	    this.build(finder, roperand);
 
 	} else if (ast instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-	    this.build(typeSpace, paren.getExpression());
+	    this.build(finder, paren.getExpression());
 
 	} else if (ast instanceof Assignment) {
 	    Assignment assn = (Assignment)ast;
 	    Assignment.Operator op = assn.getOperator();
-	    this.buildLeft(typeSpace, assn.getLeftHandSide());
+	    this.buildLeft(finder, assn.getLeftHandSide());
 	    if (op != Assignment.Operator.ASSIGN) {
-		this.build(typeSpace, assn.getLeftHandSide());
+		this.build(finder, assn.getLeftHandSide());
 	    }
-	    this.build(typeSpace, assn.getRightHandSide());
+	    this.build(finder, assn.getRightHandSide());
 
 	} else if (ast instanceof VariableDeclarationExpression) {
 	    VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
 	    // XXX Ignore modifiers.
-	    DFType varType = typeSpace.resolve(decl.getType());
+	    DFType varType = finder.resolve(decl.getType());
 	    for (VariableDeclarationFragment frag :
 		     (List<VariableDeclarationFragment>) decl.fragments()) {
 		this.addVar(frag.getName(), varType);
 		Expression expr = frag.getInitializer();
 		if (expr != null) {
-		    this.build(typeSpace, expr);
+		    this.build(finder, expr);
 		}
 	    }
 
@@ -445,47 +445,47 @@ public class DFVarSpace {
 	    MethodInvocation invoke = (MethodInvocation)ast;
 	    Expression expr = invoke.getExpression();
 	    if (expr != null) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 	    for (Expression arg :
 		     (List<Expression>) invoke.arguments()) {
-		this.build(typeSpace, arg);
+		this.build(finder, arg);
 	    }
 
 	} else if (ast instanceof SuperMethodInvocation) {
 	    SuperMethodInvocation si = (SuperMethodInvocation)ast;
 	    for (Expression arg :
 		     (List<Expression>) si.arguments()) {
-		this.build(typeSpace, arg);
+		this.build(finder, arg);
 	    }
 
 	} else if (ast instanceof ArrayCreation) {
 	    ArrayCreation ac = (ArrayCreation)ast;
 	    for (Expression dim :
 		     (List<Expression>) ac.dimensions()) {
-		this.build(typeSpace, dim);
+		this.build(finder, dim);
 	    }
 	    ArrayInitializer init = ac.getInitializer();
 	    if (init != null) {
-		this.build(typeSpace, init);
+		this.build(finder, init);
 	    }
 
 	} else if (ast instanceof ArrayInitializer) {
 	    ArrayInitializer init = (ArrayInitializer)ast;
 	    for (Expression expr :
 		     (List<Expression>) init.expressions()) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 
 	} else if (ast instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)ast;
-	    this.build(typeSpace, aa.getArray());
-	    this.build(typeSpace, aa.getIndex());
+	    this.build(finder, aa.getArray());
+	    this.build(finder, aa.getIndex());
 
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
-	    this.build(typeSpace, fa.getExpression());
+	    this.build(finder, fa.getExpression());
 
 	} else if (ast instanceof SuperFieldAccess) {
 	    SuperFieldAccess sfa = (SuperFieldAccess)ast;
@@ -493,29 +493,29 @@ public class DFVarSpace {
 
 	} else if (ast instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)ast;
-	    this.build(typeSpace, cast.getExpression());
+	    this.build(finder, cast.getExpression());
 
 	} else if (ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
 	    Expression expr = cstr.getExpression();
 	    if (expr != null) {
-		this.build(typeSpace, expr);
+		this.build(finder, expr);
 	    }
 	    for (Expression arg :
 		     (List<Expression>) cstr.arguments()) {
-		this.build(typeSpace, arg);
+		this.build(finder, arg);
 	    }
 	    // XXX Ignored getAnonymousClassDeclaration().
 
 	} else if (ast instanceof ConditionalExpression) {
 	    ConditionalExpression cond = (ConditionalExpression)ast;
-	    this.build(typeSpace, cond.getExpression());
-	    this.build(typeSpace, cond.getThenExpression());
-	    this.build(typeSpace, cond.getElseExpression());
+	    this.build(finder, cond.getExpression());
+	    this.build(finder, cond.getThenExpression());
+	    this.build(finder, cond.getElseExpression());
 
 	} else if (ast instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)ast;
-	    this.build(typeSpace, instof.getLeftOperand());
+	    this.build(finder, instof.getLeftOperand());
 
 	} else {
 	    // LambdaExpression
@@ -533,20 +533,20 @@ public class DFVarSpace {
      * Lists all the l-values for an expression.
      */
     @SuppressWarnings("unchecked")
-    public void buildLeft(DFTypeSpace typeSpace, Expression ast)
+    public void buildLeft(DFTypeFinder finder, Expression ast)
 	throws UnsupportedSyntax, EntityNotFound {
 
 	if (ast instanceof Name) {
 
 	} else if (ast instanceof ArrayAccess) {
 	    ArrayAccess aa = (ArrayAccess)ast;
-	    this.build(typeSpace, aa.getArray());
-	    this.build(typeSpace, aa.getIndex());
+	    this.build(finder, aa.getArray());
+	    this.build(finder, aa.getIndex());
 
 	} else if (ast instanceof FieldAccess) {
 	    FieldAccess fa = (FieldAccess)ast;
 	    SimpleName fieldName = fa.getName();
-	    this.build(typeSpace, fa.getExpression());
+	    this.build(finder, fa.getExpression());
 
 	} else {
 	    throw new UnsupportedSyntax(ast);

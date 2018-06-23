@@ -93,7 +93,7 @@ public class DFFrame {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, DFVarSpace varSpace, Statement ast)
+    public void build(DFVarSpace varSpace, Statement ast)
 	throws UnsupportedSyntax {
 
 	if (ast instanceof AssertStatement) {
@@ -103,7 +103,7 @@ public class DFFrame {
 	    Block block = (Block)ast;
 	    for (Statement stmt :
 		     (List<Statement>) block.statements()) {
-                this.build(typeSpace, childSpace, stmt);
+                this.build(childSpace, stmt);
 	    }
 
 	} else if (ast instanceof EmptyStatement) {
@@ -117,10 +117,10 @@ public class DFFrame {
 	} else if (ast instanceof IfStatement) {
 	    IfStatement ifStmt = (IfStatement)ast;
 	    Statement thenStmt = ifStmt.getThenStatement();
-	    this.build(typeSpace, varSpace, thenStmt);
+	    this.build(varSpace, thenStmt);
 	    Statement elseStmt = ifStmt.getElseStatement();
 	    if (elseStmt != null) {
-		this.build(typeSpace, varSpace, elseStmt);
+		this.build(varSpace, elseStmt);
 	    }
 
 	} else if (ast instanceof SwitchStatement) {
@@ -129,7 +129,7 @@ public class DFFrame {
 	    DFFrame childFrame = this.addChild(null, ast);
 	    for (Statement stmt :
 		     (List<Statement>) switchStmt.statements()) {
-		childFrame.build(typeSpace, childSpace, stmt);
+		childFrame.build(childSpace, stmt);
 	    }
 
 	} else if (ast instanceof SwitchCase) {
@@ -139,28 +139,28 @@ public class DFFrame {
 	    WhileStatement whileStmt = (WhileStatement)ast;
 	    DFFrame childFrame = this.addChild(null, ast);
 	    Statement stmt = whileStmt.getBody();
-            childFrame.build(typeSpace, childSpace, stmt);
+            childFrame.build(childSpace, stmt);
 
 	} else if (ast instanceof DoStatement) {
 	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
 	    DoStatement doStmt = (DoStatement)ast;
 	    DFFrame childFrame = this.addChild(null, ast);
 	    Statement stmt = doStmt.getBody();
-            childFrame.build(typeSpace, childSpace, stmt);
+            childFrame.build(childSpace, stmt);
 
 	} else if (ast instanceof ForStatement) {
 	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
 	    ForStatement forStmt = (ForStatement)ast;
 	    DFFrame childFrame = this.addChild(null, ast);
 	    Statement stmt = forStmt.getBody();
-            childFrame.build(typeSpace, childSpace, stmt);
+            childFrame.build(childSpace, stmt);
 
 	} else if (ast instanceof EnhancedForStatement) {
 	    DFVarSpace childSpace = varSpace.getChildByAST(ast);
 	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
 	    DFFrame childFrame = this.addChild(null, ast);
 	    Statement stmt = eForStmt.getBody();
-            childFrame.build(typeSpace, childSpace, stmt);
+            childFrame.build(childSpace, stmt);
 
 	} else if (ast instanceof BreakStatement) {
 
@@ -172,26 +172,26 @@ public class DFFrame {
 	    String label = labelName.getIdentifier();
 	    DFFrame childFrame = this.addChild(label, ast);
 	    Statement stmt = labeledStmt.getBody();
-            childFrame.build(typeSpace, varSpace, stmt);
+            childFrame.build(varSpace, stmt);
 
 	} else if (ast instanceof SynchronizedStatement) {
 	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
 	    Block block = syncStmt.getBody();
-	    this.build(typeSpace, varSpace, block);
+	    this.build(varSpace, block);
 
 	} else if (ast instanceof TryStatement) {
 	    TryStatement tryStmt = (TryStatement)ast;
 	    Block block = tryStmt.getBody();
 	    DFFrame tryFrame = this.addChild(DFFrame.TRY, ast);
-            tryFrame.build(typeSpace, varSpace, block);
+            tryFrame.build(varSpace, block);
 	    for (CatchClause cc :
 		     (List<CatchClause>) tryStmt.catchClauses()) {
                 DFVarSpace childSpace = varSpace.getChildByAST(cc);
-		this.build(typeSpace, childSpace, cc.getBody());
+		this.build(childSpace, cc.getBody());
 	    }
 	    Block finBlock = tryStmt.getFinally();
 	    if (finBlock != null) {
-		this.build(typeSpace, varSpace, finBlock);
+		this.build(varSpace, finBlock);
 	    }
 
 	} else if (ast instanceof ThrowStatement) {
