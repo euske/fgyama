@@ -170,15 +170,15 @@ public class DFClassSpace extends DFVarSpace {
         return false;
     }
 
-    public void load() throws EntityNotFound {
+    public void load(DFTypeSpace refSpace) throws EntityNotFound {
         if (_jarPath != null) {
             String jarPath = _jarPath;
             _jarPath = null;
-            this.load(jarPath);
+            this.load(refSpace, jarPath);
         }
     }
 
-    public void load(String jarPath) throws EntityNotFound {
+    public void load(DFTypeSpace refSpace, String jarPath) throws EntityNotFound {
         String name = _typeSpace.getFullName()+"."+super.getFullName();
 	try {
 	    JarFile jarfile = new JarFile(jarPath);
@@ -187,7 +187,7 @@ public class DFClassSpace extends DFVarSpace {
 		JarEntry je = jarfile.getJarEntry(path);
 		InputStream strm = jarfile.getInputStream(je);
 		JavaClass jklass = new ClassParser(strm, path).parse();
-                this.load(_typeSpace, jklass);
+                this.load(refSpace, jklass);
 	    } finally {
 		jarfile.close();
 	    }

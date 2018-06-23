@@ -1839,7 +1839,18 @@ public class Java2DF {
         DFTypeSpace typeSpace, List<ImportDeclaration> imports) {
         for (ImportDeclaration importDecl : imports) {
             try {
-                typeSpace.importClass(importDecl);
+                // XXX support static import
+                assert(!importDecl.isStatic());
+                Name name = importDecl.getName();
+                if (importDecl.isOnDemand()) {
+                    Utils.logit("Import: "+name+".*");
+                    typeSpace.addClasses(this.rootSpace.lookupSpace(name));
+                } else {
+                    assert(name.isQualifiedName());
+                    DFClassSpace klass = this.rootSpace.lookupClass(name);
+                    Utils.logit("Import: "+name);
+                    typeSpace.addClass(klass);
+                }
             } catch (EntityNotFound e) {
                 Utils.logit("Import: class not found: "+e.name);
             }
@@ -1972,8 +1983,8 @@ public class Java2DF {
     public void buildClassSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeSpace refSpace = this.rootSpace;
-        refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
-        refSpace.importClasses(typeSpace);
+        refSpace.addClasses(this.rootSpace.lookupSpace("java.lang"));
+        refSpace.addClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
@@ -1995,8 +2006,8 @@ public class Java2DF {
     public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeSpace refSpace = this.rootSpace;
-        refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
-        refSpace.importClasses(typeSpace);
+        refSpace.addClasses(this.rootSpace.lookupSpace("java.lang"));
+        refSpace.addClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
 	try {
             for (TypeDeclaration typeDecl :
