@@ -3,6 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import java.util.jar.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -15,7 +16,6 @@ import org.w3c.dom.*;
 public class DFTypeSpace {
 
     private DFTypeSpace _root;
-    private DFTypeSpace _next = null;
     private String _name = null;
 
     private List<DFTypeSpace> _children =
@@ -25,13 +25,12 @@ public class DFTypeSpace {
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
 
+    public static DFClassSpace OBJECT_CLASS = null;
+    public static DFClassSpace ARRAY_CLASS = null;
+    public static DFClassSpace STRING_CLASS = null;
+
     public DFTypeSpace() {
         _root = this;
-    }
-
-    public DFTypeSpace(DFTypeSpace next) {
-        _root = next._root;
-	_next = next;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
@@ -92,13 +91,17 @@ public class DFTypeSpace {
         return space;
     }
 
-    private DFClassSpace createClass(String id) {
-        assert(id.indexOf('.') < 0);
-        assert(!_id2space.containsKey(id));
-        DFTypeSpace child = this.lookupSpace(id);
-	DFClassSpace klass = new DFClassSpace(this, child, id);
-        //Utils.logit("DFTypeSpace.createClass: "+klass);
-        return this.addClass(klass);
+    public DFClassSpace createClass(String id) {
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = this.lookupSpace(id.substring(0, i));
+            return space.createClass(id.substring(i+1));
+        } else {
+            DFTypeSpace child = this.lookupSpace(id);
+            DFClassSpace klass = new DFClassSpace(this, child, id);
+            //Utils.logit("DFTypeSpace.createClass: "+klass);
+            return this.addClass(klass);
+        }
     }
 
     public DFClassSpace addClass(DFClassSpace klass) {
@@ -114,45 +117,21 @@ public class DFTypeSpace {
         throws EntityNotFound {
         return this.lookupClass(name.getFullyQualifiedName());
     }
-    public DFClassSpace lookupClass(String name)
+    public DFClassSpace lookupClass(String id)
         throws EntityNotFound {
-        try {
-            return this.lookupClass(name, 0);
-        } catch (EntityNotFound e) {
-            if (_next == null) {
-                throw e;
+        //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+id);
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = this.lookupSpace(id.substring(0, i));
+            return space.lookupClass(id.substring(i+1));
+        } else {
+            DFClassSpace klass = _id2klass.get(id);
+            if (klass == null) {
+                throw new EntityNotFound(id);
             }
-            return _next.lookupClass(name);
-        }
-    }
-
-    private DFClassSpace lookupClass(String name, int i0)
-        throws EntityNotFound {
-        //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+name.substring(i0));
-        int i1 = name.indexOf('.', i0);
-        String id = (i1 < 0)? name.substring(i0) : name.substring(i0, i1);
-        DFClassSpace klass = _id2klass.get(id);
-        if (klass != null) {
+            klass.load();
             return klass;
         }
-        if (i1 < 0) {
-            // not found.
-            return this.lookupExternalClass(name);
-        }
-        DFTypeSpace space = _id2space.get(id);
-        if (space != null) {
-            return space.lookupClass(name, i1+1);
-        }
-        throw new EntityNotFound(name);
-    }
-
-    private DFClassSpace lookupExternalClass(String fullName)
-        throws EntityNotFound {
-        JavaClass jklass = DFRepository.loadJavaClass(fullName);
-        if (jklass == null) {
-            throw new EntityNotFound(fullName);
-        }
-        return _root.loadClass(jklass);
     }
 
     public DFClassSpace resolveClass(Type type)
@@ -164,9 +143,9 @@ public class DFTypeSpace {
         throws EntityNotFound {
 	if (type == null) {
 	    // treat unknown class as Object.
-	    return DFRepository.OBJECT_CLASS;
+	    return DFTypeSpace.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
-            return DFRepository.ARRAY_CLASS;
+            return DFTypeSpace.ARRAY_CLASS;
 	} else if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         } else {
@@ -258,26 +237,6 @@ public class DFTypeSpace {
         return argTypes;
     }
 
-    public DFClassSpace loadClass(JavaClass jklass)
-        throws EntityNotFound {
-        assert(this == _root);
-	String id = jklass.getClassName();
-        int i = id.lastIndexOf('.');
-        assert(0 <= i);
-        DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-        return space.loadClass(id.substring(i+1), jklass);
-    }
-    private DFClassSpace loadClass(String id, JavaClass jklass)
-        throws EntityNotFound {
-        if (_id2klass.containsKey(id)) {
-            return _id2klass.get(id);
-        } else {
-            DFClassSpace klass = this.createClass(id);
-            klass.load(_root, jklass);
-            return klass;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public void build(CompilationUnit cunit)
 	throws UnsupportedSyntax {
@@ -340,6 +299,38 @@ public class DFTypeSpace {
         for (DFClassSpace klass : typeSpace._id2klass.values()) {
             this.addClass(klass);
         }
+    }
+
+    public void loadJarFile(String jarPath)
+	throws IOException {
+        assert(this == _root);
+        Utils.logit("Loading: "+jarPath);
+	JarFile jarfile = new JarFile(jarPath);
+	try {
+	    for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
+		JarEntry je = es.nextElement();
+		String path = je.getName();
+                if (path.endsWith(".class")) {
+                    String name = path.substring(0, path.length()-6).replace('/', '.');
+                    DFClassSpace klass = this.createClass(name);
+                    klass.setJarPath(jarPath);
+                }
+	    }
+	} finally {
+	    jarfile.close();
+	}
+    }
+
+    public void loadDefaultClasses()
+	throws IOException, EntityNotFound {
+        assert(this == _root);
+        File homeDir = new File(System.getProperty("java.home"));
+        File libDir = new File(homeDir, "lib");
+        File rtFile = new File(libDir, "rt.jar");
+        this.loadJarFile(rtFile.getAbsolutePath());
+        OBJECT_CLASS = this.lookupClass("java.lang.Object");
+        ARRAY_CLASS = this.lookupClass("java.lang.Object");
+        STRING_CLASS = this.lookupClass("java.lang.String");
     }
 
     // dump: for debugging.

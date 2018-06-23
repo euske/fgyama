@@ -3,6 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import java.util.jar.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -17,6 +18,7 @@ public class DFClassSpace extends DFVarSpace {
     private DFTypeSpace _childSpace;
     private DFClassSpace _baseKlass;
     private DFClassSpace[] _baseIfaces;
+    private String _jarPath = null;
 
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
@@ -38,6 +40,10 @@ public class DFClassSpace extends DFVarSpace {
     @Override
     public String toString() {
 	return ("<DFClassSpace("+this.getFullName()+")>");
+    }
+
+    public void setJarPath(String jarPath) {
+        _jarPath = jarPath;
     }
 
     public DFTypeSpace getChildSpace() {
@@ -162,6 +168,33 @@ public class DFClassSpace extends DFVarSpace {
             }
         }
         return false;
+    }
+
+    public void load() throws EntityNotFound {
+        if (_jarPath != null) {
+            String jarPath = _jarPath;
+            _jarPath = null;
+            this.load(jarPath);
+        }
+    }
+
+    public void load(String jarPath) throws EntityNotFound {
+        String name = _typeSpace.getFullName()+"."+super.getFullName();
+	try {
+	    JarFile jarfile = new JarFile(jarPath);
+	    try {
+                String path = name.replace(".","/")+".class";
+		JarEntry je = jarfile.getJarEntry(path);
+		InputStream strm = jarfile.getInputStream(je);
+		JavaClass jklass = new ClassParser(strm, path).parse();
+                this.load(_typeSpace, jklass);
+	    } finally {
+		jarfile.close();
+	    }
+	} catch (IOException e) {
+	    Utils.logit("Error: Not found: "+name+" ("+jarPath+")");
+	    throw new EntityNotFound(name);
+	}
     }
 
     public void load(DFTypeSpace refSpace, JavaClass jklass)

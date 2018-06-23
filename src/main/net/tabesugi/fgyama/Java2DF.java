@@ -1008,7 +1008,7 @@ public class Java2DF {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
                               graph, varSpace,
-			      new DFClassType(DFRepository.STRING_CLASS),
+			      new DFClassType(DFTypeSpace.STRING_CLASS),
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
@@ -1971,7 +1971,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildClassSpace(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        DFTypeSpace refSpace = this.rootSpace;
         refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
         refSpace.importClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
@@ -1994,7 +1994,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeSpace refSpace = new DFTypeSpace(this.rootSpace);
+        DFTypeSpace refSpace = this.rootSpace;
         refSpace.importClasses(this.rootSpace.lookupSpace("java.lang"));
         refSpace.importClasses(typeSpace);
         this.processImports(refSpace, cunit.imports());
@@ -2014,13 +2014,14 @@ public class Java2DF {
      * Usage: java Java2DF [-o output] input.java ...
      */
     public static void main(String[] args)
-	throws IOException {
+	throws IOException, EntityNotFound {
 
 	// Parse the options.
 	List<String> files = new ArrayList<String>();
 	OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
+        DFTypeSpace rootSpace = new DFTypeSpace();
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
 	    if (arg.equals("--")) {
@@ -2037,7 +2038,7 @@ public class Java2DF {
 		}
 	    } else if (arg.equals("-C")) {
                 for (String path : args[++i].split(sep)) {
-                    DFRepository.loadJarFile(path);
+                    rootSpace.loadJarFile(path);
                 }
 	    } else if (arg.startsWith("-")) {
 		System.err.println("Unknown option: "+arg);
@@ -2048,10 +2049,8 @@ public class Java2DF {
 	}
 
 	// Process files.
-        DFTypeSpace rootSpace = new DFTypeSpace();
-        DFRepository.loadDefaultJarFiles();
-	DFRepository.loadDefaultClasses(rootSpace);
 	XmlExporter exporter = new XmlExporter();
+        rootSpace.loadDefaultClasses();
         Java2DF converter = new Java2DF(rootSpace, exporter);
 	for (String path : files) {
 	    Utils.logit("Pass1: "+path);
