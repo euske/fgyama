@@ -2143,7 +2143,7 @@ public class Java2DF {
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit) throws EntityNotFound {
+    public void buildGraphs(CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2154,7 +2154,6 @@ public class Java2DF {
             }
 	} catch (EntityNotFound e) {
             Utils.logit("Pass3: class not found: "+e.name);
-            throw e;
         }
     }
 

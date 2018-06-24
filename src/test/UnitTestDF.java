@@ -20,21 +20,30 @@ public class UnitTestDF extends XMLTestCase {
 	XMLUnit.setNormalize(true);
     }
 
-    public void compareXml(String javaPath, String xmlPath)
+    public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
-	System.err.println("compareXml: "+javaPath+", "+xmlPath);
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
         rootSpace.loadDefaultClasses();
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(rootSpace, exporter);
-        CompilationUnit cunit = converter.parseFile(javaPath);
-	converter.buildTypeSpace(cunit);
-	converter.buildClassSpace(cunit);
-	exporter.startFile(javaPath);
-	converter.buildGraphs(cunit);
-	exporter.endFile();
+        CompilationUnit[] cunits = new CompilationUnit[javaPaths.length];
+        for (int i = 0; i < javaPaths.length; i++) {
+            System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
+            cunits[i] = converter.parseFile(javaPaths[i]);
+        }
+        for (int i = 0; i < cunits.length; i++) {
+            converter.buildTypeSpace(cunits[i]);
+        }
+        for (int i = 0; i < cunits.length; i++) {
+            converter.buildClassSpace(cunits[i]);
+        }
+        for (int i = 0; i < cunits.length; i++) {
+            exporter.startFile(javaPaths[i]);
+            converter.buildGraphs(cunits[i]);
+            exporter.endFile();
+        }
 	exporter.close();
-	Document refdoc = Utils.readXml(xmlPath);
+        Document refdoc = Utils.readXml(xmlPath);
 	try {
 	    assertXMLEqual(refdoc, exporter.document);
 	} catch (junit.framework.AssertionFailedError e) {
@@ -43,6 +52,11 @@ public class UnitTestDF extends XMLTestCase {
 	    out.close();
 	    throw e;
 	}
+    }
+
+    public void compareXml(String javaPath, String xmlPath)
+	throws Exception {
+        compareXml(new String[] { javaPath }, xmlPath);
     }
 
     @Test
@@ -97,12 +111,19 @@ public class UnitTestDF extends XMLTestCase {
     public void test_13_basic_names() throws Exception {
 	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph");
     }
+    @Test
+    public void test_14_basic_funcs() throws Exception {
+	compareXml(TESTDATA+"/basic_funcs.java", TESTDATA+"/basic_funcs.graph");
+    }
 
     @Test
-    public void test_14_multi_xref() throws Exception {
-	compareXml(TESTDATA+"/multi/dom/meep/multi_xref1.java",
-		   TESTDATA+"/multi/dom/meep/multi_xref1.graph");
-	compareXml(TESTDATA+"/multi/dom/meep/multi_xref2.java",
-		   TESTDATA+"/multi/dom/meep/multi_xref2.graph");
+    public void test_15_multi_xref() throws Exception {
+	compareXml(
+            new String[] {
+                TESTDATA+"/multi/dom/meep/multi_xref1.java",
+                TESTDATA+"/multi/dom/meep/multi_xref2.java",
+                TESTDATA+"/multi/dom/dood/multi_xref3.java",
+            },
+            TESTDATA+"/multi/multi_xref.graph");
     }
 }

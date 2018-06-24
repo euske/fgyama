@@ -1,70 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_return.java">
-    <graph name="basic_single">
-      <scope name="basic_single">
-        <scope name="basic_single_b0">
-          <node name="Nbasic_single_b0_7" ref="basic_single:a" type="ref">
-            <link src="Nbasic_single_2"/>
+    <graph name="null/Foo/basic_single:@int:@int:@int">
+      <scope name="null/Foo.basic_single">
+        <scope name="null/Foo.basic_single.b0">
+          <node kind="ref" name="Nnull/Foo.basic_single.b0_7" ref="null/Foo.basic_single/a" type="@int">
+            <link src="Nnull/Foo.basic_single_2"/>
             <ast length="1" start="192" type="42"/>
           </node>
-          <node data="-" name="Nbasic_single_b0_8" type="prefix">
-            <link src="Nbasic_single_b0_7"/>
+          <node data="-" kind="prefix" name="Nnull/Foo.basic_single.b0_8" type="@int">
+            <link src="Nnull/Foo.basic_single.b0_7"/>
             <ast length="2" start="191" type="38"/>
           </node>
-          <node name="Nbasic_single_b0_9" ref="basic_single:a" type="ref">
-            <link src="Nbasic_single_2"/>
-            <ast length="1" start="198" type="42"/>
+          <node kind="ref" name="Nnull/Foo.basic_single.b0_10" ref="null/Foo.basic_single/a" type="@int">
+            <link src="Nnull/Foo.basic_single_2"/>
+            <ast length="1" start="199" type="42"/>
           </node>
-          <node name="Nbasic_single_b0_10" ref="basic_single:b" type="ref">
-            <link src="Nbasic_single_4"/>
-            <ast length="1" start="202" type="42"/>
+          <node kind="ref" name="Nnull/Foo.basic_single.b0_11" ref="null/Foo.basic_single/b" type="@int">
+            <link src="Nnull/Foo.basic_single_4"/>
+            <ast length="1" start="203" type="42"/>
           </node>
-          <node data="+" name="Nbasic_single_b0_11" type="infix">
-            <link label="L" src="Nbasic_single_b0_9"/>
-            <link label="R" src="Nbasic_single_b0_10"/>
-            <ast length="5" start="198" type="27"/>
+          <node data="+" kind="infix" name="Nnull/Foo.basic_single.b0_12" type="@int">
+            <link label="L" src="Nnull/Foo.basic_single.b0_10"/>
+            <link label="R" src="Nnull/Foo.basic_single.b0_11"/>
+            <ast length="5" start="199" type="27"/>
           </node>
-          <node name="Nbasic_single_b0_12" ref="basic_single:c" type="ref">
-            <link src="Nbasic_single_6"/>
-            <ast length="1" start="207" type="42"/>
+          <node data="null/Foo/f?" kind="call" name="Nnull/Foo.basic_single.b0_13">
+            <link label="arg0" src="Nnull/Foo.basic_single.b0_12"/>
+            <link label="obj" src="Nnull/Foo.basic_single_9"/>
+            <ast length="8" start="197" type="32"/>
           </node>
-          <node data="*" name="Nbasic_single_b0_13" type="infix">
-            <link label="L" src="Nbasic_single_b0_11"/>
-            <link label="R" src="Nbasic_single_b0_12"/>
-            <ast length="11" start="197" type="27"/>
+          <node kind="ref" name="Nnull/Foo.basic_single.b0_14" ref="null/Foo.basic_single/c" type="@int">
+            <link src="Nnull/Foo.basic_single_6"/>
+            <ast length="1" start="208" type="42"/>
           </node>
-          <node data="+" name="Nbasic_single_b0_14" type="infix">
-            <link label="L" src="Nbasic_single_b0_8"/>
-            <link label="R" src="Nbasic_single_b0_13"/>
-            <ast length="18" start="190" type="27"/>
+          <node data="*" kind="infix" name="Nnull/Foo.basic_single.b0_15">
+            <link label="L" src="Nnull/Foo.basic_single.b0_13"/>
+            <link label="R" src="Nnull/Foo.basic_single.b0_14"/>
+            <ast length="12" start="197" type="27"/>
           </node>
-          <node name="Nbasic_single_b0_15" ref="basic_single:#return" type="return">
-            <link src="Nbasic_single_b0_14"/>
-            <ast length="26" start="183" type="41"/>
+          <node data="+" kind="infix" name="Nnull/Foo.basic_single.b0_16" type="@int">
+            <link label="L" src="Nnull/Foo.basic_single.b0_8"/>
+            <link label="R" src="Nnull/Foo.basic_single.b0_15"/>
+            <ast length="19" start="190" type="27"/>
+          </node>
+          <node kind="return" name="Nnull/Foo.basic_single.b0_17" ref="null/Foo.basic_single/#return" type="@int">
+            <link src="Nnull/Foo.basic_single.b0_16"/>
+            <ast length="27" start="183" type="41"/>
           </node>
         </scope>
-        <node data="0" name="Nbasic_single_1" ref="basic_single:a" type="arg">
+        <node data="arg0" kind="arg" name="Nnull/Foo.basic_single_1" ref="null/Foo.basic_single/a" type="@int">
           <ast length="5" start="125" type="44"/>
         </node>
-        <node name="Nbasic_single_2" ref="basic_single:a" type="assign">
-          <link src="Nbasic_single_1"/>
+        <node kind="assign" name="Nnull/Foo.basic_single_2" ref="null/Foo.basic_single/a" type="@int">
+          <link src="Nnull/Foo.basic_single_1"/>
           <ast length="5" start="125" type="44"/>
         </node>
-        <node data="1" name="Nbasic_single_3" ref="basic_single:b" type="arg">
+        <node data="arg1" kind="arg" name="Nnull/Foo.basic_single_3" ref="null/Foo.basic_single/b" type="@int">
           <ast length="5" start="132" type="44"/>
         </node>
-        <node name="Nbasic_single_4" ref="basic_single:b" type="assign">
-          <link src="Nbasic_single_3"/>
+        <node kind="assign" name="Nnull/Foo.basic_single_4" ref="null/Foo.basic_single/b" type="@int">
+          <link src="Nnull/Foo.basic_single_3"/>
           <ast length="5" start="132" type="44"/>
         </node>
-        <node data="2" name="Nbasic_single_5" ref="basic_single:c" type="arg">
+        <node data="arg2" kind="arg" name="Nnull/Foo.basic_single_5" ref="null/Foo.basic_single/c" type="@int">
           <ast length="5" start="139" type="44"/>
         </node>
-        <node name="Nbasic_single_6" ref="basic_single:c" type="assign">
-          <link src="Nbasic_single_5"/>
+        <node kind="assign" name="Nnull/Foo.basic_single_6" ref="null/Foo.basic_single/c" type="@int">
+          <link src="Nnull/Foo.basic_single_5"/>
           <ast length="5" start="139" type="44"/>
         </node>
+        <node name="Nnull/Foo.basic_single_9" ref="null/Foo/#this" type="null/Foo"/>
       </scope>
+    </graph>
+    <graph name="null/Foo">
+      <scope name="null/Foo"/>
     </graph>
   </file>
 </fgyama>

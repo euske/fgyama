@@ -18,5 +18,6 @@ TODOs:
   * Enum support.
   * Array methods.
   * Parameterized types.
+  * Nestable inline class definition.
   * Lambdas.
   * Method references.

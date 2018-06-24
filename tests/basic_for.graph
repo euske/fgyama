@@ -1,113 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_for.java">
-    <graph name="basic_for">
-      <scope name="basic_for">
-        <scope name="basic_for_b0">
-          <scope name="basic_for_b0_for0">
-            <scope name="basic_for_b0_for0_b0">
-              <node name="Nbasic_for_b0_for0_b0_12" ref="basic_for_b0:x" type="assign">
-                <link src="Nbasic_for_b0_for0_b0_15"/>
+    <graph name="null/Foo/basic_for:@int">
+      <scope name="null/Foo.basic_for">
+        <scope name="null/Foo.basic_for.b0">
+          <scope name="null/Foo.basic_for.b0.for0">
+            <scope name="null/Foo.basic_for.b0.for0.b0">
+              <node kind="assign" name="Nnull/Foo.basic_for.b0.for0.b0_12" ref="null/Foo.basic_for.b0/x" type="@int">
+                <link src="Nnull/Foo.basic_for.b0.for0.b0_15"/>
                 <ast length="1" start="111" type="42"/>
               </node>
-              <node name="Nbasic_for_b0_for0_b0_13" ref="basic_for_b0_for0:i" type="ref">
-                <link src="Nbasic_for_b0_for0_20"/>
+              <node kind="ref" name="Nnull/Foo.basic_for.b0.for0.b0_13" ref="null/Foo.basic_for.b0.for0/i" type="@int">
+                <link src="Nnull/Foo.basic_for.b0.for0_20"/>
                 <ast length="1" start="116" type="42"/>
               </node>
-              <node data="+=" name="Nbasic_for_b0_for0_b0_15" ref="basic_for_b0:x" type="assignop">
-                <link label="L" src="Nbasic_for_b0_for0_23"/>
-                <link label="R" src="Nbasic_for_b0_for0_b0_13"/>
+              <node data="+=" kind="assignop" name="Nnull/Foo.basic_for.b0.for0.b0_15" ref="null/Foo.basic_for.b0/x" type="@int">
+                <link label="L" src="Nnull/Foo.basic_for.b0.for0_23"/>
+                <link label="R" src="Nnull/Foo.basic_for.b0.for0.b0_13"/>
                 <ast length="6" start="111" type="7"/>
               </node>
             </scope>
-            <node data="0" name="Nbasic_for_b0_for0_5" type="const">
+            <node data="0" kind="const" name="Nnull/Foo.basic_for.b0.for0_5" type="@number">
               <ast length="1" start="86" type="34"/>
             </node>
-            <node name="Nbasic_for_b0_for0_6" ref="basic_for_b0_for0:i" type="assign">
-              <link src="Nbasic_for_b0_for0_5"/>
+            <node kind="assign" name="Nnull/Foo.basic_for.b0.for0_6" ref="null/Foo.basic_for.b0.for0/i" type="@int">
+              <link src="Nnull/Foo.basic_for.b0.for0_5"/>
               <ast length="5" start="82" type="59"/>
             </node>
-            <node name="Nbasic_for_b0_for0_8" ref="basic_for_b0_for0:i" type="ref">
-              <link src="Nbasic_for_b0_for0_20"/>
+            <node kind="ref" name="Nnull/Foo.basic_for.b0.for0_7" ref="null/Foo.basic_for.b0.for0/i" type="@int">
+              <link src="Nnull/Foo.basic_for.b0.for0_20"/>
               <ast length="1" start="89" type="42"/>
             </node>
-            <node name="Nbasic_for_b0_for0_10" ref="basic_for:n" type="ref">
-              <link src="Nbasic_for_2"/>
+            <node kind="ref" name="Nnull/Foo.basic_for.b0.for0_9" ref="null/Foo.basic_for/n" type="@int">
+              <link src="Nnull/Foo.basic_for_2"/>
               <ast length="1" start="93" type="42"/>
             </node>
-            <node data="&lt;" name="Nbasic_for_b0_for0_11" type="infix">
-              <link label="L" src="Nbasic_for_b0_for0_8"/>
-              <link label="R" src="Nbasic_for_b0_for0_10"/>
+            <node data="&lt;" kind="infix" name="Nnull/Foo.basic_for.b0.for0_11" type="@int">
+              <link label="L" src="Nnull/Foo.basic_for.b0.for0_7"/>
+              <link label="R" src="Nnull/Foo.basic_for.b0.for0_9"/>
               <ast length="5" start="89" type="27"/>
             </node>
-            <node name="Nbasic_for_b0_for0_16" ref="basic_for_b0_for0:i" type="assign">
-              <link src="Nbasic_for_b0_for0_18"/>
+            <node kind="assign" name="Nnull/Foo.basic_for.b0.for0_16" ref="null/Foo.basic_for.b0.for0/i" type="@int">
+              <link src="Nnull/Foo.basic_for.b0.for0_18"/>
               <ast length="1" start="96" type="42"/>
             </node>
-            <node data="1" name="Nbasic_for_b0_for0_17" type="const">
+            <node data="1" kind="const" name="Nnull/Foo.basic_for.b0.for0_17" type="@number">
               <ast length="1" start="101" type="34"/>
             </node>
-            <node data="+=" name="Nbasic_for_b0_for0_18" ref="basic_for_b0_for0:i" type="assignop">
-              <link label="L" src="Nbasic_for_b0_for0_20"/>
-              <link label="R" src="Nbasic_for_b0_for0_17"/>
+            <node data="+=" kind="assignop" name="Nnull/Foo.basic_for.b0.for0_18" ref="null/Foo.basic_for.b0.for0/i" type="@number">
+              <link label="L" src="Nnull/Foo.basic_for.b0.for0_20"/>
+              <link label="R" src="Nnull/Foo.basic_for.b0.for0_17"/>
               <ast length="6" start="96" type="7"/>
             </node>
-            <node name="Nbasic_for_b0_for0_19" ref="basic_for_b0_for0:i" type="begin">
-              <link label="_end" src="Nbasic_for_b0_for0_21"/>
-              <link label="enter" src="Nbasic_for_b0_for0_6"/>
-              <link label="repeat" src="Nbasic_for_b0_for0_16"/>
+            <node kind="begin" name="Nnull/Foo.basic_for.b0.for0_19" ref="null/Foo.basic_for.b0.for0/i">
+              <link label="_end" src="Nnull/Foo.basic_for.b0.for0_21"/>
+              <link label="enter" src="Nnull/Foo.basic_for.b0.for0_6"/>
+              <link label="repeat" src="Nnull/Foo.basic_for.b0.for0_16"/>
               <ast length="48" start="73" type="24"/>
             </node>
-            <node name="Nbasic_for_b0_for0_20" ref="basic_for_b0_for0:i" type="repeat">
-              <link label="_loop" src="Nbasic_for_b0_for0_21"/>
+            <node kind="repeat" name="Nnull/Foo.basic_for.b0.for0_20" ref="null/Foo.basic_for.b0.for0/i">
+              <link label="_loop" src="Nnull/Foo.basic_for.b0.for0_21"/>
               <ast length="48" start="73" type="24"/>
             </node>
-            <node name="Nbasic_for_b0_for0_21" ref="basic_for_b0_for0:i" type="end">
-              <link src="Nbasic_for_b0_for0_19"/>
-              <link label="_begin" src="Nbasic_for_b0_for0_19"/>
-              <link label="cond" src="Nbasic_for_b0_for0_11"/>
+            <node kind="end" name="Nnull/Foo.basic_for.b0.for0_21" ref="null/Foo.basic_for.b0.for0/i">
+              <link src="Nnull/Foo.basic_for.b0.for0_19"/>
+              <link label="_begin" src="Nnull/Foo.basic_for.b0.for0_19"/>
+              <link label="cond" src="Nnull/Foo.basic_for.b0.for0_11"/>
               <ast length="48" start="73" type="24"/>
             </node>
-            <node name="Nbasic_for_b0_for0_22" ref="basic_for_b0:x" type="begin">
-              <link label="_end" src="Nbasic_for_b0_for0_24"/>
-              <link label="enter" src="Nbasic_for_b0_4"/>
-              <link label="repeat" src="Nbasic_for_b0_for0_b0_12"/>
+            <node kind="begin" name="Nnull/Foo.basic_for.b0.for0_22" ref="null/Foo.basic_for.b0/x">
+              <link label="_end" src="Nnull/Foo.basic_for.b0.for0_24"/>
+              <link label="enter" src="Nnull/Foo.basic_for.b0_4"/>
+              <link label="repeat" src="Nnull/Foo.basic_for.b0.for0.b0_12"/>
               <ast length="48" start="73" type="24"/>
             </node>
-            <node name="Nbasic_for_b0_for0_23" ref="basic_for_b0:x" type="repeat">
-              <link label="_loop" src="Nbasic_for_b0_for0_24"/>
+            <node kind="repeat" name="Nnull/Foo.basic_for.b0.for0_23" ref="null/Foo.basic_for.b0/x">
+              <link label="_loop" src="Nnull/Foo.basic_for.b0.for0_24"/>
               <ast length="48" start="73" type="24"/>
             </node>
-            <node name="Nbasic_for_b0_for0_24" ref="basic_for_b0:x" type="end">
-              <link src="Nbasic_for_b0_for0_22"/>
-              <link label="_begin" src="Nbasic_for_b0_for0_22"/>
-              <link label="cond" src="Nbasic_for_b0_for0_11"/>
+            <node kind="end" name="Nnull/Foo.basic_for.b0.for0_24" ref="null/Foo.basic_for.b0/x">
+              <link src="Nnull/Foo.basic_for.b0.for0_22"/>
+              <link label="_begin" src="Nnull/Foo.basic_for.b0.for0_22"/>
+              <link label="cond" src="Nnull/Foo.basic_for.b0.for0_11"/>
               <ast length="48" start="73" type="24"/>
             </node>
           </scope>
-          <node data="0" name="Nbasic_for_b0_3" type="const">
+          <node data="0" kind="const" name="Nnull/Foo.basic_for.b0_3" type="@number">
             <ast length="1" start="69" type="34"/>
           </node>
-          <node name="Nbasic_for_b0_4" ref="basic_for_b0:x" type="assign">
-            <link src="Nbasic_for_b0_3"/>
+          <node kind="assign" name="Nnull/Foo.basic_for.b0_4" ref="null/Foo.basic_for.b0/x" type="@int">
+            <link src="Nnull/Foo.basic_for.b0_3"/>
             <ast length="5" start="65" type="59"/>
           </node>
-          <node name="Nbasic_for_b0_25" ref="basic_for_b0:x" type="ref">
-            <link src="Nbasic_for_b0_for0_24"/>
+          <node kind="ref" name="Nnull/Foo.basic_for.b0_25" ref="null/Foo.basic_for.b0/x" type="@int">
+            <link src="Nnull/Foo.basic_for.b0.for0_24"/>
             <ast length="1" start="130" type="42"/>
           </node>
-          <node name="Nbasic_for_b0_26" ref="basic_for:#return" type="return">
-            <link src="Nbasic_for_b0_25"/>
+          <node kind="return" name="Nnull/Foo.basic_for.b0_26" ref="null/Foo.basic_for/#return" type="@int">
+            <link src="Nnull/Foo.basic_for.b0_25"/>
             <ast length="9" start="123" type="41"/>
           </node>
         </scope>
-        <node data="0" name="Nbasic_for_1" ref="basic_for:n" type="arg">
+        <node data="arg0" kind="arg" name="Nnull/Foo.basic_for_1" ref="null/Foo.basic_for/n" type="@int">
           <ast length="5" start="51" type="44"/>
         </node>
-        <node name="Nbasic_for_2" ref="basic_for:n" type="assign">
-          <link src="Nbasic_for_1"/>
+        <node kind="assign" name="Nnull/Foo.basic_for_2" ref="null/Foo.basic_for/n" type="@int">
+          <link src="Nnull/Foo.basic_for_1"/>
           <ast length="5" start="51" type="44"/>
         </node>
       </scope>
+    </graph>
+    <graph name="null/Foo">
+      <scope name="null/Foo"/>
     </graph>
   </file>
 </fgyama>
