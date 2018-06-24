@@ -1996,6 +1996,7 @@ public class Java2DF {
         DFType[] argTypes = finder.resolveList(methodDecl);
         DFMethod method = klass.lookupMethod1(methodDecl.getName(), argTypes);
         assert(method != null);
+        // add a typespace for inline classes.
         DFTypeSpace typeSpace = new DFTypeSpace();
         finder = new DFTypeFinder(finder, typeSpace);
         try {
@@ -2049,6 +2050,8 @@ public class Java2DF {
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
         DFTypeSpace typeSpace = klass.getChildSpace();
+        // lookup base/child classes.
+        finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
 	    try {
 		if (body instanceof TypeDeclaration) {
@@ -2123,7 +2126,7 @@ public class Java2DF {
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void buildClassSpace(CompilationUnit cunit) {
+    public void buildClassSpace(CompilationUnit cunit) throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2138,12 +2141,13 @@ public class Java2DF {
 	    Utils.logit("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
 	} catch (EntityNotFound e) {
             Utils.logit("Pass2: class not found: "+e.name);
+            throw e;
 	}
     }
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit) {
+    public void buildGraphs(CompilationUnit cunit) throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2154,6 +2158,7 @@ public class Java2DF {
             }
 	} catch (EntityNotFound e) {
             Utils.logit("Pass3: class not found: "+e.name);
+            throw e;
         }
     }
 

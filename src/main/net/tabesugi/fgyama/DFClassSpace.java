@@ -221,6 +221,14 @@ public class DFClassSpace extends DFVarSpace {
         }
     }
 
+    public DFTypeFinder addFinders(DFTypeFinder finder) {
+        if (_baseKlass != null) {
+            finder = _baseKlass.addFinders(finder);
+        }
+        finder = new DFTypeFinder(finder, _childSpace);
+        return finder;
+    }
+
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
@@ -234,7 +242,8 @@ public class DFClassSpace extends DFVarSpace {
         for (int i = 0; i < ifaces.size(); i++) {
             _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
         }
-
+        // Lookup child classes.
+        finder = this.addFinders(finder);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             this.build(finder, body);
