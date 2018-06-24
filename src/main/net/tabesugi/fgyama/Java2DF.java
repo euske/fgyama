@@ -1120,7 +1120,7 @@ public class Java2DF {
             } else {
                 if (expr1 instanceof Name) {
                     try {
-                        klass = typeSpace.lookupClass((Name)expr1);
+                        klass = finder.lookupClass((Name)expr1);
                     } catch (EntityNotFound e) {
                     }
                 }
@@ -1131,7 +1131,7 @@ public class Java2DF {
                 }
 	    }
             if (obj != null) {
-                klass = typeSpace.resolveClass(obj.getType());
+                klass = finder.resolveClass(obj.getType());
             }
             List<DFNode> argList = new ArrayList<DFNode>();
             List<DFType> typeList = new ArrayList<DFType>();
@@ -1178,7 +1178,7 @@ public class Java2DF {
             argList.toArray(args);
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+            DFClassSpace klass = finder.resolveClass(obj.getType());
             DFClassSpace baseKlass = klass.getBase();
             DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
             if (methods == null) {
@@ -1244,7 +1244,7 @@ public class Java2DF {
             DFClassSpace klass = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = typeSpace.lookupClass((Name)expr1);
+                    klass = finder.lookupClass((Name)expr1);
                 } catch (EntityNotFound e) {
                 }
             }
@@ -1252,7 +1252,7 @@ public class Java2DF {
                 cpt = processExpression(
                     graph, typeSpace, finder, varSpace, frame, cpt, expr1);
                 obj = cpt.getRValue();
-                klass = typeSpace.resolveClass(obj.getType());
+                klass = finder.resolveClass(obj.getType());
             }
 	    SimpleName fieldName = fa.getName();
 	    DFVarRef ref = klass.lookupField(fieldName);
@@ -1265,7 +1265,7 @@ public class Java2DF {
 	    SuperFieldAccess sfa = (SuperFieldAccess)expr;
 	    SimpleName fieldName = sfa.getName();
 	    DFNode obj = cpt.getValue(varSpace.lookupThis());
-            DFClassSpace klass = typeSpace.resolveClass(obj.getType());
+            DFClassSpace klass = finder.resolveClass(obj.getType());
 	    DFVarRef ref = klass.lookupField(fieldName);
             DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
             node.accept(cpt.getValue(ref));
@@ -1274,7 +1274,7 @@ public class Java2DF {
 
 	} else if (expr instanceof CastExpression) {
 	    CastExpression cast = (CastExpression)expr;
-	    DFType type = typeSpace.resolve(cast.getType());
+	    DFType type = finder.resolve(cast.getType());
 	    cpt = processExpression(
                 graph, typeSpace, finder, varSpace, frame, cpt, cast.getExpression());
             DFNode node = new TypeCastNode(graph, varSpace, type, cast);
@@ -1286,7 +1286,7 @@ public class Java2DF {
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
             DFType instType;
             if (anonDecl != null) {
-                DFClassSpace baseKlass = typeSpace.resolveClass(cstr.getType());
+                DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
                 String id = typeSpace.getAnonName();
                 DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
                 DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
@@ -1307,7 +1307,7 @@ public class Java2DF {
                     instType = null; // XXX what happened?
                 }
             } else {
-                instType = typeSpace.resolve(cstr.getType());
+                instType = finder.resolve(cstr.getType());
             }
 	    Expression expr1 = cstr.getExpression();
 	    DFNode obj = null;
@@ -1347,7 +1347,7 @@ public class Java2DF {
 
 	} else if (expr instanceof InstanceofExpression) {
 	    InstanceofExpression instof = (InstanceofExpression)expr;
-	    DFType type = typeSpace.resolve(instof.getRightOperand());
+	    DFType type = finder.resolve(instof.getRightOperand());
 	    cpt = processExpression(
                 graph, typeSpace, finder, varSpace, frame, cpt,
                 instof.getLeftOperand());

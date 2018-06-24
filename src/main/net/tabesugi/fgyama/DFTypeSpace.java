@@ -92,7 +92,7 @@ public class DFTypeSpace {
         } else {
             DFTypeSpace child = this.lookupSpace(id);
             DFClassSpace klass = new DFClassSpace(this, child, id);
-            //Utils.logit("DFTypeSpace.createClass: "+klass);
+            //Utils.logit("DFTypeSpace.createClass: "+this+": "+klass);
             return this.addClass(klass);
         }
     }
@@ -119,21 +119,21 @@ public class DFTypeSpace {
     public DFClassSpace lookupClass(String id)
         throws EntityNotFound {
         //Utils.logit("DFTypeSpace.lookupClass: "+this+": "+id);
-        int i = id.indexOf('.');
-        if (0 <= i) {
-            DFTypeSpace space = _id2space.get(id.substring(0, i));
-            if (space == null) {
-                throw new EntityNotFound(id);
+        DFTypeSpace space = this;
+        while (space != null) {
+            int i = id.indexOf('.');
+            if (i < 0) {
+                DFClassSpace klass = space._id2klass.get(id);
+                if (klass == null) {
+                    throw new EntityNotFound(id);
+                }
+                klass.load(_root);
+                return klass;
             }
-            return space.lookupClass(id.substring(i+1));
-        } else {
-            DFClassSpace klass = _id2klass.get(id);
-            if (klass == null) {
-                throw new EntityNotFound(id);
-            }
-            klass.load(_root);
-            return klass;
+            space = space._id2space.get(id.substring(0, i));
+            id = id.substring(i+1);
         }
+        throw new EntityNotFound(id);
     }
 
     public DFClassSpace resolveClass(Type type)
