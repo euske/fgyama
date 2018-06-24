@@ -105,7 +105,11 @@ public class UnitTestDF extends XMLTestCase {
     }
     @Test
     public void test_12_basic_ops() throws Exception {
-	compareXml(TESTDATA+"/basic_ops.java", TESTDATA+"/basic_ops.graph");
+        try {
+            compareXml(TESTDATA+"/basic_ops.java", TESTDATA+"/basic_ops.graph");
+            fail("EntityNotFound expected");
+        } catch (EntityNotFound e) {
+        }
     }
     @Test
     public void test_13_basic_names() throws Exception {
