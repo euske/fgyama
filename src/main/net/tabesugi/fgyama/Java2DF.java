@@ -1299,7 +1299,7 @@ public class Java2DF {
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                         anonKlass.build(finder, body);
                     }
-                    processClassDeclarations(
+                    processBodyDeclarations(
                         finder, anonKlass, anonDecl.bodyDeclarations());
                     instType = new DFClassType(anonKlass);
                 } catch (EntityNotFound e) {
@@ -1804,28 +1804,28 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void buildInlineClasses(
-        DFTypeSpace typeSpace, DFTypeFinder finder, Statement ast)
+        DFTypeSpace typeSpace, DFTypeFinder finder, Statement stmt)
 	throws UnsupportedSyntax, EntityNotFound {
 
-	if (ast instanceof AssertStatement) {
+	if (stmt instanceof AssertStatement) {
 
-	} else if (ast instanceof Block) {
-	    Block block = (Block)ast;
-	    for (Statement stmt :
+	} else if (stmt instanceof Block) {
+	    Block block = (Block)stmt;
+	    for (Statement cstmt :
 		     (List<Statement>) block.statements()) {
-		this.buildInlineClasses(typeSpace, finder, stmt);
+		this.buildInlineClasses(typeSpace, finder, cstmt);
 	    }
 
-	} else if (ast instanceof EmptyStatement) {
+	} else if (stmt instanceof EmptyStatement) {
 
-	} else if (ast instanceof VariableDeclarationStatement) {
+	} else if (stmt instanceof VariableDeclarationStatement) {
 
-	} else if (ast instanceof ExpressionStatement) {
+	} else if (stmt instanceof ExpressionStatement) {
 
-	} else if (ast instanceof ReturnStatement) {
+	} else if (stmt instanceof ReturnStatement) {
 
-	} else if (ast instanceof IfStatement) {
-	    IfStatement ifStmt = (IfStatement)ast;
+	} else if (stmt instanceof IfStatement) {
+	    IfStatement ifStmt = (IfStatement)stmt;
 	    Statement thenStmt = ifStmt.getThenStatement();
 	    this.buildInlineClasses(typeSpace, finder, thenStmt);
 	    Statement elseStmt = ifStmt.getElseStatement();
@@ -1833,51 +1833,51 @@ public class Java2DF {
 		this.buildInlineClasses(typeSpace, finder, elseStmt);
 	    }
 
-	} else if (ast instanceof SwitchStatement) {
-	    SwitchStatement switchStmt = (SwitchStatement)ast;
-	    for (Statement stmt :
+	} else if (stmt instanceof SwitchStatement) {
+	    SwitchStatement switchStmt = (SwitchStatement)stmt;
+	    for (Statement cstmt :
 		     (List<Statement>) switchStmt.statements()) {
-		this.buildInlineClasses(typeSpace, finder, stmt);
+		this.buildInlineClasses(typeSpace, finder, cstmt);
 	    }
 
-	} else if (ast instanceof SwitchCase) {
+	} else if (stmt instanceof SwitchCase) {
 
-	} else if (ast instanceof WhileStatement) {
-	    WhileStatement whileStmt = (WhileStatement)ast;
-	    Statement stmt = whileStmt.getBody();
-	    this.buildInlineClasses(typeSpace, finder, stmt);
+	} else if (stmt instanceof WhileStatement) {
+	    WhileStatement whileStmt = (WhileStatement)stmt;
+	    Statement body = whileStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, body);
 
-	} else if (ast instanceof DoStatement) {
-	    DoStatement doStmt = (DoStatement)ast;
-	    Statement stmt = doStmt.getBody();
-	    this.buildInlineClasses(typeSpace, finder, stmt);
+	} else if (stmt instanceof DoStatement) {
+	    DoStatement doStmt = (DoStatement)stmt;
+	    Statement body = doStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, body);
 
-	} else if (ast instanceof ForStatement) {
-	    ForStatement forStmt = (ForStatement)ast;
-	    Statement stmt = forStmt.getBody();
-	    this.buildInlineClasses(typeSpace, finder, stmt);
+	} else if (stmt instanceof ForStatement) {
+	    ForStatement forStmt = (ForStatement)stmt;
+	    Statement body = forStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, body);
 
-	} else if (ast instanceof EnhancedForStatement) {
-	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-	    Statement stmt = eForStmt.getBody();
-	    this.buildInlineClasses(typeSpace, finder, stmt);
+	} else if (stmt instanceof EnhancedForStatement) {
+	    EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
+	    Statement body = eForStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, body);
 
-	} else if (ast instanceof BreakStatement) {
+	} else if (stmt instanceof BreakStatement) {
 
-	} else if (ast instanceof ContinueStatement) {
+	} else if (stmt instanceof ContinueStatement) {
 
-	} else if (ast instanceof LabeledStatement) {
-	    LabeledStatement labeledStmt = (LabeledStatement)ast;
-	    Statement stmt = labeledStmt.getBody();
-	    this.buildInlineClasses(typeSpace, finder, stmt);
+	} else if (stmt instanceof LabeledStatement) {
+	    LabeledStatement labeledStmt = (LabeledStatement)stmt;
+	    Statement body = labeledStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, body);
 
-	} else if (ast instanceof SynchronizedStatement) {
-	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+	} else if (stmt instanceof SynchronizedStatement) {
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
 	    Block block = syncStmt.getBody();
 	    this.buildInlineClasses(typeSpace, finder, block);
 
-	} else if (ast instanceof TryStatement) {
-	    TryStatement tryStmt = (TryStatement)ast;
+	} else if (stmt instanceof TryStatement) {
+	    TryStatement tryStmt = (TryStatement)stmt;
 	    Block block = tryStmt.getBody();
 	    this.buildInlineClasses(typeSpace, finder, block);
 	    for (CatchClause cc :
@@ -1889,18 +1889,18 @@ public class Java2DF {
 		this.buildInlineClasses(typeSpace, finder, finBlock);
 	    }
 
-	} else if (ast instanceof ThrowStatement) {
+	} else if (stmt instanceof ThrowStatement) {
 
-	} else if (ast instanceof ConstructorInvocation) {
+	} else if (stmt instanceof ConstructorInvocation) {
 
-	} else if (ast instanceof SuperConstructorInvocation) {
+	} else if (stmt instanceof SuperConstructorInvocation) {
 
-	} else if (ast instanceof TypeDeclarationStatement) {
-            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
+	} else if (stmt instanceof TypeDeclarationStatement) {
+            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
             this.buildInlineClasses(typeSpace, finder, typeDeclStmt.getDeclaration());
 
 	} else {
-	    throw new UnsupportedSyntax(ast);
+	    throw new UnsupportedSyntax(stmt);
 
 	}
     }
@@ -1914,7 +1914,7 @@ public class Java2DF {
             TypeDeclaration typeDecl = (TypeDeclaration)abstDecl;
             DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
             klass.build(finder, typeDecl);
-            processClassDeclarations(
+            processBodyDeclarations(
                 finder, klass, typeDecl.bodyDeclarations());
         } else {
             // XXX enum not supported.
@@ -2042,7 +2042,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public void processClassDeclarations(
+    public void processBodyDeclarations(
         DFTypeFinder finder, DFClassSpace klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
@@ -2092,7 +2092,7 @@ public class Java2DF {
         DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
         throws EntityNotFound {
         DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
-        processClassDeclarations(
+        processBodyDeclarations(
             finder, klass, typeDecl.bodyDeclarations());
     }
 
