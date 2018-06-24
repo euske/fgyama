@@ -59,9 +59,9 @@ public class DFTypeFinder {
         throws EntityNotFound {
 	if (type == null) {
 	    // treat unknown class as Object.
-	    return DFTypeSpace.OBJECT_CLASS;
+	    return DFRootTypeSpace.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
-            return DFTypeSpace.ARRAY_CLASS;
+            return DFRootTypeSpace.ARRAY_CLASS;
 	} else if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         } else {

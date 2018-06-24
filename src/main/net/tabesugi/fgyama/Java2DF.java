@@ -1008,7 +1008,7 @@ public class Java2DF {
 	    String value = ((StringLiteral)expr).getLiteralValue();
 	    cpt.setRValue(new ConstNode(
                               graph, varSpace,
-			      new DFClassType(DFTypeSpace.STRING_CLASS),
+			      new DFClassType(DFRootTypeSpace.STRING_CLASS),
                               expr, "\""+value+"\""));
 
 	} else if (expr instanceof TypeLiteral) {
@@ -1805,50 +1805,6 @@ public class Java2DF {
 	return cpt;
     }
 
-    public void processClassDeclarations(
-        DFTypeSpace typeSpace, DFTypeFinder finder, DFClassSpace klass,
-        List<BodyDeclaration> decls)
-        throws EntityNotFound {
-	DFGraph classGraph = new DFGraph(klass);
-	DFFrame frame = new DFFrame(DFFrame.CLASS);
-        for (BodyDeclaration body : decls) {
-	    try {
-		if (body instanceof TypeDeclaration) {
-                    DFTypeSpace child = klass.getChildSpace();
-		    processTypeDeclaration(child, finder, (TypeDeclaration)body);
-		} else if (body instanceof FieldDeclaration) {
-		    processFieldDeclaration(
-			classGraph, typeSpace, finder, klass,
-			frame, (FieldDeclaration)body);
-		} else if (body instanceof MethodDeclaration) {
-                    DFGraph graph = processMethodDeclaration(
-                        typeSpace, finder, klass, (MethodDeclaration)body);
-                    if (this.exporter != null && graph != null) {
-                        this.exporter.writeGraph(graph);
-                    }
-		} else if (body instanceof Initializer) {
-		    Block block = ((Initializer)body).getBody();
-		    klass.build(finder, block);
-		    frame.build(klass, block);
-		    DFComponent cpt = new DFComponent(classGraph, klass);
-		    cpt = processStatement(
-			classGraph, typeSpace, finder, klass,
-			frame, cpt, block);
-		    cpt.endFrame(frame);
-		}
-	    } catch (UnsupportedSyntax e) {
-		String astName = e.ast.getClass().getName();
-		Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-		if (this.exporter != null) {
-		    this.exporter.writeError(e.name, astName);
-                }
-            }
-        }
-	if (this.exporter != null) {
-	    this.exporter.writeGraph(classGraph);
-	}
-    }
-
     private DFTypeFinder prepareTypeFinder(List<ImportDeclaration> imports) {
         DFTypeFinder finder = new DFTypeFinder(this.rootSpace);
         finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace("java.lang"));
@@ -1881,11 +1837,11 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    public DFTypeSpace rootSpace;
+    public DFRootTypeSpace rootSpace;
     public Exporter exporter;
 
     public Java2DF(
-        DFTypeSpace rootSpace,
+        DFRootTypeSpace rootSpace,
 	Exporter exporter) {
         this.rootSpace = rootSpace;
 	this.exporter = exporter;
@@ -1965,14 +1921,51 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public void processTypeDeclaration(
-        DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
+    public void processClassDeclarations(
+        DFTypeSpace typeSpace, DFTypeFinder finder, DFClassSpace klass,
+        List<BodyDeclaration> decls)
         throws EntityNotFound {
-        DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
-        assert(klass != null);
-        processClassDeclarations(
-            typeSpace, finder, klass, typeDecl.bodyDeclarations());
-	//klass.dump();
+	DFGraph classGraph = new DFGraph(klass);
+	DFFrame frame = new DFFrame(DFFrame.CLASS);
+        for (BodyDeclaration body : decls) {
+	    try {
+		if (body instanceof TypeDeclaration) {
+                    TypeDeclaration typeDecl = (TypeDeclaration)body;
+                    DFTypeSpace child = klass.getChildSpace();
+                    DFClassSpace childClass = child.getClass(typeDecl.getName());
+                    processClassDeclarations(
+                        typeSpace, finder, childClass, typeDecl.bodyDeclarations());
+		} else if (body instanceof FieldDeclaration) {
+		    processFieldDeclaration(
+			classGraph, typeSpace, finder, klass,
+			frame, (FieldDeclaration)body);
+		} else if (body instanceof MethodDeclaration) {
+                    DFGraph graph = processMethodDeclaration(
+                        typeSpace, finder, klass, (MethodDeclaration)body);
+                    if (this.exporter != null && graph != null) {
+                        this.exporter.writeGraph(graph);
+                    }
+		} else if (body instanceof Initializer) {
+		    Block block = ((Initializer)body).getBody();
+		    klass.build(finder, block);
+		    frame.build(klass, block);
+		    DFComponent cpt = new DFComponent(classGraph, klass);
+		    cpt = processStatement(
+			classGraph, typeSpace, finder, klass,
+			frame, cpt, block);
+		    cpt.endFrame(frame);
+		}
+	    } catch (UnsupportedSyntax e) {
+		String astName = e.ast.getClass().getName();
+		Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+		if (this.exporter != null) {
+		    this.exporter.writeError(e.name, astName);
+                }
+            }
+        }
+	if (this.exporter != null) {
+	    this.exporter.writeGraph(classGraph);
+	}
     }
 
     public CompilationUnit parseFile(String path)
@@ -2029,7 +2022,9 @@ public class Java2DF {
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
-                processTypeDeclaration(typeSpace, finder, typeDecl);
+                DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+                processClassDeclarations(
+                    typeSpace, finder, klass, typeDecl.bodyDeclarations());
             }
 	} catch (EntityNotFound e) {
             Utils.logit("Pass3: class not found: "+e.name);
@@ -2050,7 +2045,7 @@ public class Java2DF {
 	OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
-        DFTypeSpace rootSpace = new DFTypeSpace();
+        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
 	for (int i = 0; i < args.length; i++) {
 	    String arg = args[i];
 	    if (arg.equals("--")) {
