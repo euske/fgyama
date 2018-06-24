@@ -1298,7 +1298,7 @@ public class Java2DF {
                 try {
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonKlass.build(anonSpace, finder, body);
+                        anonKlass.build(finder, body);
                     }
                     processClassDeclarations(
                         anonSpace, finder, anonKlass, anonDecl.bodyDeclarations());
@@ -2010,8 +2010,7 @@ public class Java2DF {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
                 DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
-                assert(klass != null);
-                klass.build(typeSpace, finder, typeDecl);
+                klass.build(finder, typeDecl);
             }
 	} catch (UnsupportedSyntax e) {
 	    String astName = e.ast.getClass().getName();

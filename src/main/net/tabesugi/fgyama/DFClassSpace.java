@@ -222,9 +222,9 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
+    public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
-        //Utils.logit("DFClassSpace.build: "+this+": "+typeSpace+", "+typeDecl.getName());
+        //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
         Type superClass = typeDecl.getSuperclassType();
         if (superClass != null) {
             _baseKlass = finder.resolveClass(superClass);
@@ -235,20 +235,19 @@ public class DFClassSpace extends DFVarSpace {
             _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
         }
 
-        DFTypeSpace child = typeSpace.lookupSpace(typeDecl.getName());
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            this.build(child, finder, body);
+            this.build(finder, body);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeSpace typeSpace, DFTypeFinder finder, BodyDeclaration body)
+    public void build(DFTypeFinder finder, BodyDeclaration body)
 	throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
-            DFClassSpace klass = typeSpace.getClass(decl.getName());
-            klass.build(typeSpace, finder, decl);
+            DFClassSpace klass = _childSpace.getClass(decl.getName());
+            klass.build(finder, decl);
 
         } else if (body instanceof FieldDeclaration) {
             FieldDeclaration decl = (FieldDeclaration)body;
