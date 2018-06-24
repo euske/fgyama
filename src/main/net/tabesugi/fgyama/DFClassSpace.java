@@ -170,15 +170,15 @@ public class DFClassSpace extends DFVarSpace {
         return false;
     }
 
-    public void load(DFTypeSpace refSpace) throws EntityNotFound {
+    public void load(DFTypeFinder finder) throws EntityNotFound {
         if (_jarPath != null) {
             String jarPath = _jarPath;
             _jarPath = null;
-            this.load(refSpace, jarPath);
+            this.load(finder, jarPath);
         }
     }
 
-    public void load(DFTypeSpace refSpace, String jarPath) throws EntityNotFound {
+    public void load(DFTypeFinder finder, String jarPath) throws EntityNotFound {
         String name = _typeSpace.getFullName()+"."+super.getFullName();
 	try {
 	    JarFile jarfile = new JarFile(jarPath);
@@ -187,7 +187,7 @@ public class DFClassSpace extends DFVarSpace {
 		JarEntry je = jarfile.getJarEntry(path);
 		InputStream strm = jarfile.getInputStream(je);
 		JavaClass jklass = new ClassParser(strm, path).parse();
-                this.load(refSpace, jklass);
+                this.load(finder, jklass);
 	    } finally {
 		jarfile.close();
 	    }
@@ -197,15 +197,15 @@ public class DFClassSpace extends DFVarSpace {
 	}
     }
 
-    public void load(DFTypeSpace refSpace, JavaClass jklass)
+    private void load(DFTypeFinder finder, JavaClass jklass)
         throws EntityNotFound {
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
-            _baseKlass = refSpace.lookupClass(superClass);
+            _baseKlass = finder.lookupClass(superClass);
         }
         for (Field fld : jklass.getFields()) {
             if (!fld.isPublic()) continue;
-            DFType type = refSpace.resolve(fld.getType());
+            DFType type = finder.resolve(fld.getType());
             this.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
@@ -213,9 +213,9 @@ public class DFClassSpace extends DFVarSpace {
             org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {
-                argTypes[i] = refSpace.resolve(args[i]);
+                argTypes[i] = finder.resolve(args[i]);
             }
-            DFType returnType = refSpace.resolve(meth.getReturnType());
+            DFType returnType = finder.resolve(meth.getReturnType());
             this.addMethod(meth.getName(), meth.isStatic(),
                            argTypes, returnType);
         }
@@ -247,7 +247,7 @@ public class DFClassSpace extends DFVarSpace {
 	throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
-            DFClassSpace klass = typeSpace.lookupClass(decl.getName());
+            DFClassSpace klass = typeSpace.getClass(decl.getName());
             klass.build(typeSpace, finder, decl);
 
         } else if (body instanceof FieldDeclaration) {

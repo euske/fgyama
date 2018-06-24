@@ -1864,7 +1864,7 @@ public class Java2DF {
                     finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
                 } else {
                     assert(name.isQualifiedName());
-                    DFClassSpace klass = this.rootSpace.lookupClass(name);
+                    DFClassSpace klass = this.rootSpace.getClass(name);
                     Utils.logit("Import: "+name);
                     importSpace.addClass(klass);
                     n++;
@@ -1968,7 +1968,7 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
         throws EntityNotFound {
-        DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
+        DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
         assert(klass != null);
         processClassDeclarations(
             typeSpace, finder, klass, typeDecl.bodyDeclarations());
@@ -2009,7 +2009,7 @@ public class Java2DF {
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
-                DFClassSpace klass = typeSpace.lookupClass(typeDecl.getName());
+                DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
                 assert(klass != null);
                 klass.build(typeSpace, finder, typeDecl);
             }
