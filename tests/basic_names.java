@@ -9,9 +9,11 @@ class Foo {
         System.out.println("Foo!");
         class Baz {
             int x;
+            void moo() { }
         }
         Baz baz = new Baz();
         baz.x = this.y;
+        baz.moo();
     }
 
     public void meh() {

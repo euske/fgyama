@@ -80,6 +80,9 @@ public class DFTypeSpace {
         }
     }
 
+    public DFClassSpace createClass(SimpleName name) {
+        return this.createClass(name.getIdentifier());
+    }
     public DFClassSpace createClass(String id) {
         int i = id.indexOf('.');
         if (0 <= i) {
@@ -152,14 +155,24 @@ public class DFTypeSpace {
         }
     }
 
+    public void build(AbstractTypeDeclaration abstTypeDecl)
+        throws UnsupportedSyntax {
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            this.build((TypeDeclaration)abstTypeDecl);
+        } else {
+            // XXX enum not supported.
+            throw new UnsupportedSyntax(abstTypeDecl);
+        }
+    }
+
     public void build(BodyDeclaration body)
 	throws UnsupportedSyntax {
-        if (body instanceof TypeDeclaration) {
-            this.build((TypeDeclaration)body);
+        if (body instanceof AbstractTypeDeclaration) {
+            this.build((AbstractTypeDeclaration)body);
         } else if (body instanceof FieldDeclaration) {
             ;
         } else if (body instanceof MethodDeclaration) {
-            this.build(((MethodDeclaration)body).getBody());
+            ;
         } else if (body instanceof Initializer) {
 	    ;
         } else {
@@ -167,9 +180,106 @@ public class DFTypeSpace {
         }
     }
 
-    public void build(Block block)
+    @SuppressWarnings("unchecked")
+    public void build(Statement ast)
 	throws UnsupportedSyntax {
 
+	if (ast instanceof AssertStatement) {
+
+	} else if (ast instanceof Block) {
+	    Block block = (Block)ast;
+	    for (Statement stmt :
+		     (List<Statement>) block.statements()) {
+		this.build(stmt);
+	    }
+
+	} else if (ast instanceof EmptyStatement) {
+
+	} else if (ast instanceof VariableDeclarationStatement) {
+
+	} else if (ast instanceof ExpressionStatement) {
+
+	} else if (ast instanceof ReturnStatement) {
+
+	} else if (ast instanceof IfStatement) {
+	    IfStatement ifStmt = (IfStatement)ast;
+	    Statement thenStmt = ifStmt.getThenStatement();
+	    this.build(thenStmt);
+	    Statement elseStmt = ifStmt.getElseStatement();
+	    if (elseStmt != null) {
+		this.build(elseStmt);
+	    }
+
+	} else if (ast instanceof SwitchStatement) {
+	    SwitchStatement switchStmt = (SwitchStatement)ast;
+	    for (Statement stmt :
+		     (List<Statement>) switchStmt.statements()) {
+		this.build(stmt);
+	    }
+
+	} else if (ast instanceof SwitchCase) {
+
+	} else if (ast instanceof WhileStatement) {
+	    WhileStatement whileStmt = (WhileStatement)ast;
+	    Statement stmt = whileStmt.getBody();
+	    this.build(stmt);
+
+	} else if (ast instanceof DoStatement) {
+	    DoStatement doStmt = (DoStatement)ast;
+	    Statement stmt = doStmt.getBody();
+	    this.build(stmt);
+
+	} else if (ast instanceof ForStatement) {
+	    ForStatement forStmt = (ForStatement)ast;
+	    Statement stmt = forStmt.getBody();
+	    this.build(stmt);
+
+	} else if (ast instanceof EnhancedForStatement) {
+	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+	    Statement stmt = eForStmt.getBody();
+	    this.build(stmt);
+
+	} else if (ast instanceof BreakStatement) {
+
+	} else if (ast instanceof ContinueStatement) {
+
+	} else if (ast instanceof LabeledStatement) {
+	    LabeledStatement labeledStmt = (LabeledStatement)ast;
+	    Statement stmt = labeledStmt.getBody();
+	    this.build(stmt);
+
+	} else if (ast instanceof SynchronizedStatement) {
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+	    Block block = syncStmt.getBody();
+	    this.build(block);
+
+	} else if (ast instanceof TryStatement) {
+	    TryStatement tryStmt = (TryStatement)ast;
+	    Block block = tryStmt.getBody();
+	    this.build(block);
+	    for (CatchClause cc :
+		     (List<CatchClause>) tryStmt.catchClauses()) {
+		this.build(cc.getBody());
+	    }
+	    Block finBlock = tryStmt.getFinally();
+	    if (finBlock != null) {
+		this.build(finBlock);
+	    }
+
+	} else if (ast instanceof ThrowStatement) {
+
+	} else if (ast instanceof ConstructorInvocation) {
+
+	} else if (ast instanceof SuperConstructorInvocation) {
+
+	} else if (ast instanceof TypeDeclarationStatement) {
+            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
+            this.build(typeDeclStmt.getDeclaration());
+
+	} else {
+	    throw new UnsupportedSyntax(ast);
+
+	}
     }
 
     // dump: for debugging.

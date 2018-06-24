@@ -15,6 +15,7 @@ How to Build:
 
 TODOs:
 
+  * Enum support.
   * Array methods.
   * Parameterized types.
   * Lambdas.

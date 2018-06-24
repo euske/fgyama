@@ -1802,6 +1802,126 @@ public class Java2DF {
 	return cpt;
     }
 
+    @SuppressWarnings("unchecked")
+    private void buildInlineClasses(
+        DFTypeSpace typeSpace, DFTypeFinder finder, Statement ast)
+	throws UnsupportedSyntax, EntityNotFound {
+
+	if (ast instanceof AssertStatement) {
+
+	} else if (ast instanceof Block) {
+	    Block block = (Block)ast;
+	    for (Statement stmt :
+		     (List<Statement>) block.statements()) {
+		this.buildInlineClasses(typeSpace, finder, stmt);
+	    }
+
+	} else if (ast instanceof EmptyStatement) {
+
+	} else if (ast instanceof VariableDeclarationStatement) {
+
+	} else if (ast instanceof ExpressionStatement) {
+
+	} else if (ast instanceof ReturnStatement) {
+
+	} else if (ast instanceof IfStatement) {
+	    IfStatement ifStmt = (IfStatement)ast;
+	    Statement thenStmt = ifStmt.getThenStatement();
+	    this.buildInlineClasses(typeSpace, finder, thenStmt);
+	    Statement elseStmt = ifStmt.getElseStatement();
+	    if (elseStmt != null) {
+		this.buildInlineClasses(typeSpace, finder, elseStmt);
+	    }
+
+	} else if (ast instanceof SwitchStatement) {
+	    SwitchStatement switchStmt = (SwitchStatement)ast;
+	    for (Statement stmt :
+		     (List<Statement>) switchStmt.statements()) {
+		this.buildInlineClasses(typeSpace, finder, stmt);
+	    }
+
+	} else if (ast instanceof SwitchCase) {
+
+	} else if (ast instanceof WhileStatement) {
+	    WhileStatement whileStmt = (WhileStatement)ast;
+	    Statement stmt = whileStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, stmt);
+
+	} else if (ast instanceof DoStatement) {
+	    DoStatement doStmt = (DoStatement)ast;
+	    Statement stmt = doStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, stmt);
+
+	} else if (ast instanceof ForStatement) {
+	    ForStatement forStmt = (ForStatement)ast;
+	    Statement stmt = forStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, stmt);
+
+	} else if (ast instanceof EnhancedForStatement) {
+	    EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+	    Statement stmt = eForStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, stmt);
+
+	} else if (ast instanceof BreakStatement) {
+
+	} else if (ast instanceof ContinueStatement) {
+
+	} else if (ast instanceof LabeledStatement) {
+	    LabeledStatement labeledStmt = (LabeledStatement)ast;
+	    Statement stmt = labeledStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, stmt);
+
+	} else if (ast instanceof SynchronizedStatement) {
+	    SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+	    Block block = syncStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, block);
+
+	} else if (ast instanceof TryStatement) {
+	    TryStatement tryStmt = (TryStatement)ast;
+	    Block block = tryStmt.getBody();
+	    this.buildInlineClasses(typeSpace, finder, block);
+	    for (CatchClause cc :
+		     (List<CatchClause>) tryStmt.catchClauses()) {
+		this.buildInlineClasses(typeSpace, finder, cc.getBody());
+	    }
+	    Block finBlock = tryStmt.getFinally();
+	    if (finBlock != null) {
+		this.buildInlineClasses(typeSpace, finder, finBlock);
+	    }
+
+	} else if (ast instanceof ThrowStatement) {
+
+	} else if (ast instanceof ConstructorInvocation) {
+
+	} else if (ast instanceof SuperConstructorInvocation) {
+
+	} else if (ast instanceof TypeDeclarationStatement) {
+            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
+            this.buildInlineClasses(typeSpace, finder, typeDeclStmt.getDeclaration());
+
+	} else {
+	    throw new UnsupportedSyntax(ast);
+
+	}
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildInlineClasses(
+        DFTypeSpace typeSpace, DFTypeFinder finder,
+        AbstractTypeDeclaration abstDecl)
+	throws UnsupportedSyntax, EntityNotFound {
+        if (abstDecl instanceof TypeDeclaration) {
+            TypeDeclaration typeDecl = (TypeDeclaration)abstDecl;
+            DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+            klass.build(finder, typeDecl);
+            processClassDeclarations(
+                finder, klass, typeDecl.bodyDeclarations());
+        } else {
+            // XXX enum not supported.
+            throw new UnsupportedSyntax(abstDecl);
+        }
+    }
+
     private DFTypeFinder prepareTypeFinder(List<ImportDeclaration> imports) {
         DFTypeFinder finder = new DFTypeFinder(this.rootSpace);
         finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace("java.lang"));
@@ -1876,8 +1996,12 @@ public class Java2DF {
         DFType[] argTypes = finder.resolveList(methodDecl);
         DFMethod method = klass.lookupMethod1(methodDecl.getName(), argTypes);
         assert(method != null);
+        DFTypeSpace typeSpace = new DFTypeSpace();
+        finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
+            typeSpace.build(methodDecl.getBody());
+            this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
             DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
             varSpace.build(finder, methodDecl);
             //varSpace.dump();
@@ -1924,14 +2048,12 @@ public class Java2DF {
         throws EntityNotFound {
 	DFGraph classGraph = new DFGraph(klass);
 	DFFrame frame = new DFFrame(DFFrame.CLASS);
+        DFTypeSpace typeSpace = klass.getChildSpace();
         for (BodyDeclaration body : decls) {
 	    try {
 		if (body instanceof TypeDeclaration) {
                     TypeDeclaration typeDecl = (TypeDeclaration)body;
-                    DFTypeSpace child = klass.getChildSpace();
-                    DFClassSpace childClass = child.getClass(typeDecl.getName());
-                    processClassDeclarations(
-                        finder, childClass, typeDecl.bodyDeclarations());
+                    processTypeDeclaration(typeSpace, finder, typeDecl);
 		} else if (body instanceof FieldDeclaration) {
 		    processFieldDeclaration(
 			classGraph, finder, klass,
@@ -1963,6 +2085,15 @@ public class Java2DF {
 	if (this.exporter != null) {
 	    this.exporter.writeGraph(classGraph);
 	}
+    }
+
+    @SuppressWarnings("unchecked")
+    public void processTypeDeclaration(
+        DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
+        throws EntityNotFound {
+        DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+        processClassDeclarations(
+            finder, klass, typeDecl.bodyDeclarations());
     }
 
     public CompilationUnit parseFile(String path)
@@ -2019,9 +2150,7 @@ public class Java2DF {
 	try {
             for (TypeDeclaration typeDecl :
                      (List<TypeDeclaration>) cunit.types()) {
-                DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
-                processClassDeclarations(
-                    finder, klass, typeDecl.bodyDeclarations());
+                processTypeDeclaration(typeSpace, finder, typeDecl);
             }
 	} catch (EntityNotFound e) {
             Utils.logit("Pass3: class not found: "+e.name);
