@@ -103,15 +103,16 @@ public class DFTypeFinder {
 	} else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
-            DFType baseType = this.resolve(ptype.getType());
+            DFType genericType = this.resolve(ptype.getType());
+            assert(genericType instanceof DFClassType);
+            DFClassSpace genericKlass = ((DFClassType)genericType).getKlass();
             DFType[] argTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
                 argTypes[i] = this.resolve(args.get(i));
             }
-            assert(baseType instanceof DFClassType);
-            // XXX make DFCompoundType
-            DFClassSpace baseKlass = ((DFClassType)baseType).getKlass();
-            return new DFClassType(baseKlass, argTypes);
+            DFParameterizedClass paramKlass =
+                new DFParameterizedClass(genericKlass, argTypes);
+            return new DFClassType(paramKlass);
         } else {
             // ???
             throw new EntityNotFound(type.toString());

@@ -22,11 +22,6 @@ public class DFClassType extends DFType {
         _klass = klass;
     }
 
-    // DFCompoundType
-    public DFClassType(DFClassSpace klass, DFType[] types) {
-        _klass = klass;
-    }
-
     @Override
     public String toString() {
 	return ("<DFClassType("+this.getName()+")>");

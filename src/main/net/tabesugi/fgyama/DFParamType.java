@@ -12,11 +12,13 @@ import org.eclipse.jdt.core.dom.*;
 public class DFParamType extends DFType {
 
     private DFClassSpace _klass;
+    private int _index;
     private String _name;
     private DFClassSpace[] _bases = null;
 
-    public DFParamType(DFClassSpace klass, String name) {
+    public DFParamType(DFClassSpace klass, int index, String name) {
         _klass = klass;
+        _index = index;
         _name = name;
     }
 
@@ -47,6 +49,10 @@ public class DFParamType extends DFType {
             return _bases[0].isBaseOf(ptype._bases[0]);
         }
         return -1;
+    }
+
+    public int getIndex() {
+        return _index;
     }
 
     public void setBases(DFClassSpace[] bases) {

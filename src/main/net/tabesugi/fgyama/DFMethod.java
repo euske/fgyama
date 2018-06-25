@@ -30,6 +30,15 @@ public class DFMethod implements Comparable<DFMethod> {
         _overrides.add(this);
     }
 
+    public DFMethod(
+        DFClassSpace klass, String name, boolean isStatic,
+        DFType[] argTypes, DFType returnType, DFMethod[] overrides) {
+        this(klass, name, isStatic, argTypes, returnType);
+        for (DFMethod method : overrides) {
+            _overrides.add(method);
+        }
+    }
+
     @Override
     public String toString() {
 	if (_returnType == null) {
@@ -71,6 +80,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return name;
     }
 
+    public DFType[] getArgTypes() {
+	return _argTypes;
+    }
+
     public DFType getReturnType() {
 	return _returnType;
     }
@@ -99,5 +112,39 @@ public class DFMethod implements Comparable<DFMethod> {
         DFMethod[] methods = new DFMethod[_overrides.size()];
         _overrides.toArray(methods);
         return methods;
+    }
+
+    public DFMethod parameterize(DFType[] types) {
+        boolean changed = false;
+        DFType returnType = _returnType;
+        if (_returnType instanceof DFParamType) {
+            int index = ((DFParamType)_returnType).getIndex();
+            returnType = types[index];
+            changed = true;
+        }
+        DFType[] argTypes = new DFType[_argTypes.length];
+        for (int i = 0; i < _argTypes.length; i++) {
+            argTypes[i] = _argTypes[i];
+            if (argTypes[i] instanceof DFParamType) {
+                int index = ((DFParamType)(argTypes[i])).getIndex();
+                argTypes[i] = types[index];
+                changed = true;
+            }
+        }
+        DFMethod[] overrides = new DFMethod[_overrides.size()-1];
+        for (int i = 1; i < overrides.length; i++) {
+            DFMethod method0 = _overrides.get(i);
+            DFMethod method1 = method0.parameterize(types);
+            overrides[i-1] = method1;
+            if (method0 != method1) {
+                changed = true;
+            }
+        }
+        if (changed) {
+            return new DFMethod(
+                _klass, _name, _static,
+                argTypes, returnType, overrides);
+        }
+        return this;
     }
 }
