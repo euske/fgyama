@@ -19,8 +19,10 @@ public class DFClassSpace extends DFVarSpace {
     private DFClassSpace _baseKlass;
     private DFClassSpace[] _baseIfaces;
     private String _jarPath = null;
+    private DFParamType[] _paramTypes = null;
 
-    private List<DFMethod> _methods = new ArrayList<DFMethod>();
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
 
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
@@ -46,6 +48,10 @@ public class DFClassSpace extends DFVarSpace {
         _jarPath = jarPath;
     }
 
+    public void setParamTypes(DFParamType[] paramTypes) {
+        _paramTypes = paramTypes;
+    }
+
     public DFTypeSpace getChildSpace() {
         return _childSpace;
     }
@@ -60,6 +66,7 @@ public class DFClassSpace extends DFVarSpace {
 
     public int isBaseOf(DFClassSpace klass) {
         int dist = 0;
+        // XXX check interfaces too.
         while (klass != null) {
             if (klass == this) return dist;
             dist++;
@@ -233,14 +240,27 @@ public class DFClassSpace extends DFVarSpace {
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
 	throws UnsupportedSyntax, EntityNotFound {
         //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
+        // Get superclass.
         Type superClass = typeDecl.getSuperclassType();
         if (superClass != null) {
             _baseKlass = finder.resolveClass(superClass);
         }
+        // Get interfaces.
         List<Type> ifaces = typeDecl.superInterfaceTypes();
         _baseIfaces = new DFClassSpace[ifaces.size()];
         for (int i = 0; i < ifaces.size(); i++) {
             _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
+        }
+        // Get type parameters.
+        List<TypeParameter> tps = typeDecl.typeParameters();
+        for (int i = 0; i < tps.size(); i++) {
+            DFParamType pt = _paramTypes[i];
+            List<Type> bounds = tps.get(i).typeBounds();
+            DFClassSpace[] bases = new DFClassSpace[bounds.size()];
+            for (int j = 0; j < bounds.size(); j++) {
+                bases[j] = finder.resolveClass(bounds.get(j));
+            }
+            pt.setBases(bases);
         }
         // Lookup child classes.
         finder = this.addFinders(finder);

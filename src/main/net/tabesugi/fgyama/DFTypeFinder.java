@@ -50,6 +50,20 @@ public class DFTypeFinder {
         return klass;
     }
 
+    public DFParamType lookupParamType(Name name) {
+        return this.lookupParamType(name.getFullyQualifiedName());
+    }
+
+    public DFParamType lookupParamType(String name) {
+        DFParamType pt = _space.getParamType(name);
+        if (pt != null) return pt;
+        if (_next != null) {
+            return _next.lookupParamType(name);
+        } else {
+            return null;
+        }
+    }
+
     public DFClassSpace resolveClass(Type type)
         throws EntityNotFound {
         return this.resolveClass(resolve(type));
@@ -82,6 +96,8 @@ public class DFTypeFinder {
 	    return new DFArrayType(elemType, ndims);
 	} else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
+            DFParamType pt = this.lookupParamType(stype.getName());
+            if (pt != null) return pt;
             DFClassSpace klass = this.lookupClass(stype.getName());
             return new DFClassType(klass);
 	} else if (type instanceof ParameterizedType) {

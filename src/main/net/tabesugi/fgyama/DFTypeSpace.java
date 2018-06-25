@@ -24,6 +24,8 @@ public class DFTypeSpace {
 	new HashMap<String, DFTypeSpace>();
     private Map<String, DFClassSpace> _id2klass =
 	new HashMap<String, DFClassSpace>();
+    private Map<String, DFParamType> _id2paramtype =
+	new HashMap<String, DFParamType>();
 
     public DFTypeSpace() {
         _root = this;
@@ -134,6 +136,10 @@ public class DFTypeSpace {
         throw new EntityNotFound(id);
     }
 
+    public DFParamType getParamType(String id) {
+        return _id2paramtype.get(id);
+    }
+
     @SuppressWarnings("unchecked")
     public void build(CompilationUnit cunit)
 	throws UnsupportedSyntax {
@@ -149,6 +155,15 @@ public class DFTypeSpace {
         //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = klass.getChildSpace();
+        List<TypeParameter> tps = typeDecl.typeParameters();
+        DFParamType[] pts = new DFParamType[tps.size()];
+        for (int i = 0; i < tps.size(); i++) {
+            String id = tps.get(i).getName().getIdentifier();
+            DFParamType pt = new DFParamType(klass, id);
+            pts[i] = pt;
+            child._id2paramtype.put(id, pt);
+        }
+        klass.setParamTypes(pts);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             child.build(body);
