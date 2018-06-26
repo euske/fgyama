@@ -7,14 +7,14 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFParameterizedClass
+//  DFParamClass
 //
-public class DFParameterizedClass extends DFClassSpace {
+public class DFParamClass extends DFClassSpace {
 
     private DFClassSpace _genericKlass;
     private DFType[] _argTypes;
 
-    public DFParameterizedClass(
+    public DFParamClass(
         DFClassSpace genericKlass, DFType[] argTypes) {
         super(null, null, null);
         _genericKlass = genericKlass;
@@ -23,7 +23,7 @@ public class DFParameterizedClass extends DFClassSpace {
 
     @Override
     public String toString() {
-        return ("<DFParameterizedClass("+this.getFullName()+")>");
+        return ("<DFParamClass("+this.getFullName()+")>");
     }
 
     @Override

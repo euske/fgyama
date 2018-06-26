@@ -111,8 +111,7 @@ public class DFTypeFinder {
             for (int i = 0; i < args.size(); i++) {
                 argTypes[i] = this.resolve(args.get(i));
             }
-            DFParameterizedClass paramKlass =
-                new DFParameterizedClass(genericKlass, argTypes);
+            DFParamClass paramKlass = new DFParamClass(genericKlass, argTypes);
             return new DFClassType(paramKlass);
         } else {
             // ???
