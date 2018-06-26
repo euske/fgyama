@@ -17,23 +17,23 @@ public class DFVarRef implements Comparable<DFVarRef> {
     private DFType _type;
 
     public DFVarRef(DFVarSpace space, String name, DFType type) {
-	_space = space;
-	_name = name;
-	_type = type;
+        _space = space;
+        _name = name;
+        _type = type;
     }
 
     @Override
     public String toString() {
-	if (_type == null) {
-	    return ("<DFVarRef("+this.getFullName()+")>");
-	} else {
-	    return ("<DFVarRef("+this.getFullName()+": "+_type.toString()+">");
-	}
+        if (_type == null) {
+            return ("<DFVarRef("+this.getFullName()+")>");
+        } else {
+            return ("<DFVarRef("+this.getFullName()+": "+_type.toString()+">");
+        }
     }
 
     @Override
     public int compareTo(DFVarRef ref) {
-	return _name.compareTo(ref._name);
+        return _name.compareTo(ref._name);
     }
 
     public String getFullName() {
@@ -45,7 +45,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
     }
 
     public DFType getType() {
-	return _type;
+        return _type;
     }
 
     public DFVarRef parameterize(DFType[] types) {

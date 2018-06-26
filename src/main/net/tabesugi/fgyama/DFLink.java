@@ -18,22 +18,22 @@ class DFLink {
 
     public DFLink(DFNode dst, DFNode src, String label)
     {
-	_dst = dst;
-	_src = src;
-	_label = label;
+        _dst = dst;
+        _src = src;
+        _label = label;
     }
 
     @Override
     public String toString() {
-	return ("<DFLink "+_dst+"<-"+_src+">");
+        return ("<DFLink "+_dst+"<-"+_src+">");
     }
 
     public Element toXML(Document document) {
-	Element elem = document.createElement("link");
-	elem.setAttribute("src", _src.getName());
-	if (_label != null) {
-	    elem.setAttribute("label", _label);
-	}
-	return elem;
+        Element elem = document.createElement("link");
+        elem.setAttribute("src", _src.getName());
+        if (_label != null) {
+            elem.setAttribute("label", _label);
+        }
+        return elem;
     }
 }

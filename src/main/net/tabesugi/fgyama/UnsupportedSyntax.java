@@ -15,6 +15,6 @@ public class UnsupportedSyntax extends Exception {
     public String name = null;
 
     public UnsupportedSyntax(ASTNode ast) {
-	this.ast = ast;
+        this.ast = ast;
     }
 }

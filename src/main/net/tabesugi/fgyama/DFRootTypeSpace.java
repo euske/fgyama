@@ -21,31 +21,31 @@ public class DFRootTypeSpace extends DFTypeSpace {
 
     @Override
     public String toString() {
-	return ("<DFRootTypeSpace>");
+        return ("<DFRootTypeSpace>");
     }
 
     public void loadJarFile(String jarPath)
-	throws IOException {
+        throws IOException {
         Utils.logit("Loading: "+jarPath);
-	JarFile jarfile = new JarFile(jarPath);
-	try {
-	    for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
-		JarEntry je = es.nextElement();
-		String filePath = je.getName();
+        JarFile jarfile = new JarFile(jarPath);
+        try {
+            for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
+                JarEntry je = es.nextElement();
+                String filePath = je.getName();
                 if (filePath.endsWith(".class")) {
                     String name = filePath.substring(0, filePath.length()-6);
                     name = name.replace('/', '.').replace('$', '.');
                     DFClassSpace klass = this.createClass(name);
                     klass.setJarPath(jarPath, filePath);
                 }
-	    }
-	} finally {
-	    jarfile.close();
-	}
+            }
+        } finally {
+            jarfile.close();
+        }
     }
 
     public void loadDefaultClasses()
-	throws IOException, EntityNotFound {
+        throws IOException, EntityNotFound {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");

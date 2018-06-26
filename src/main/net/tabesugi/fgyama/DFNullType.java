@@ -12,7 +12,7 @@ public class DFNullType extends DFType {
 
     @Override
     public String toString() {
-	return ("<DFNullType>");
+        return ("<DFNullType>");
     }
 
     public boolean equals(DFType type) {
@@ -31,5 +31,5 @@ public class DFNullType extends DFType {
     }
 
     public static final DFType NULL =
-	new DFNullType();
+        new DFNullType();
 }

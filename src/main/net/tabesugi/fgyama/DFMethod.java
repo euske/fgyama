@@ -22,11 +22,11 @@ public class DFMethod implements Comparable<DFMethod> {
     public DFMethod(
         DFClassSpace klass, String name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
-	_klass = klass;
-	_name = name;
+        _klass = klass;
+        _name = name;
         _static = isStatic;
         _argTypes = argTypes;
-	_returnType = returnType;
+        _returnType = returnType;
         _overrides.add(this);
     }
 
@@ -41,16 +41,16 @@ public class DFMethod implements Comparable<DFMethod> {
 
     @Override
     public String toString() {
-	if (_returnType == null) {
-	    return ("<DFMethod("+this.getSignature()+" -> ?)>");
-	} else {
-	    return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getName()+">");
-	}
+        if (_returnType == null) {
+            return ("<DFMethod("+this.getSignature()+" -> ?)>");
+        } else {
+            return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getName()+">");
+        }
     }
 
     @Override
     public int compareTo(DFMethod method) {
-	return _name.compareTo(method._name);
+        return _name.compareTo(method._name);
     }
 
     public boolean equals(DFMethod method) {
@@ -60,7 +60,7 @@ public class DFMethod implements Comparable<DFMethod> {
         for (int i = 0; i < _argTypes.length; i++) {
             if (!_argTypes[i].equals(method._argTypes[i])) return false;
         }
-	return true;
+        return true;
     }
 
     public String getSignature() {
@@ -81,11 +81,11 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFType[] getArgTypes() {
-	return _argTypes;
+        return _argTypes;
     }
 
     public DFType getReturnType() {
-	return _returnType;
+        return _returnType;
     }
 
     public int canAccept(String name, DFType[] argTypes) {

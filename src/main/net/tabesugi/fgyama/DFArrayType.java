@@ -22,7 +22,7 @@ public class DFArrayType extends DFType {
 
     @Override
     public String toString() {
-	return ("<DFArrayType("+this.getName()+")>");
+        return ("<DFArrayType("+this.getName()+")>");
     }
 
     public boolean equals(DFType type) {

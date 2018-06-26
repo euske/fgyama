@@ -24,7 +24,7 @@ public class DFClassType extends DFType {
 
     @Override
     public String toString() {
-	return ("<DFClassType("+this.getName()+")>");
+        return ("<DFClassType("+this.getName()+")>");
     }
 
     public boolean equals(DFType type) {

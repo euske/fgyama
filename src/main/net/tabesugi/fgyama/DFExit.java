@@ -16,18 +16,18 @@ public class DFExit {
     private boolean _cont;
 
     public DFExit(DFNode node, DFFrame frame) {
-	this(node, frame, false);
+        this(node, frame, false);
     }
 
     public DFExit(DFNode node, DFFrame frame, boolean cont) {
-	_node = node;
-	_frame = frame;
-	_cont = cont;
+        _node = node;
+        _frame = frame;
+        _cont = cont;
     }
 
     @Override
     public String toString() {
-	return ("<DFExit: "+_node+" -> "+_frame+">");
+        return ("<DFExit: "+_node+" -> "+_frame+">");
     }
 
     public DFNode getNode() {
@@ -43,6 +43,6 @@ public class DFExit {
     }
 
     public DFExit wrap(DFNode node) {
-	return new DFExit(node, _frame, _cont);
+        return new DFExit(node, _frame, _cont);
     }
 }

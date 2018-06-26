@@ -19,42 +19,42 @@ public class XmlExporter extends Exporter {
     private Element _file;
 
     public XmlExporter() {
-	try {
-	    this.document = Utils.createXml();
-	    _root = this.document.createElement("fgyama");
-	} catch (ParserConfigurationException e) {
-	    throw new RuntimeException();
-	}
+        try {
+            this.document = Utils.createXml();
+            _root = this.document.createElement("fgyama");
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException();
+        }
     }
 
     @Override
     public void close() {
-	this.document.appendChild(_root);
-	this.document.normalizeDocument();
+        this.document.appendChild(_root);
+        this.document.normalizeDocument();
     }
 
     @Override
     public void startFile(String path) {
-	_file = this.document.createElement("file");
-	_file.setAttribute("path", path);
+        _file = this.document.createElement("file");
+        _file.setAttribute("path", path);
     }
 
     @Override
     public void endFile() {
-	_root.appendChild(_file);
-	_file = null;
+        _root.appendChild(_file);
+        _file = null;
     }
 
     @Override
     public void writeError(String funcName, String astName) {
-	Element failure = this.document.createElement("error");
-	failure.setAttribute("func", funcName);
-	failure.setAttribute("ast", astName);
-	_file.appendChild(failure);
+        Element failure = this.document.createElement("error");
+        failure.setAttribute("func", funcName);
+        failure.setAttribute("ast", astName);
+        _file.appendChild(failure);
     }
 
     @Override
     public void writeGraph(DFGraph graph) {
-	_file.appendChild(graph.toXML(this.document));
+        _file.appendChild(graph.toXML(this.document));
     }
 }

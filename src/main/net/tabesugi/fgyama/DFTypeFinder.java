@@ -37,7 +37,7 @@ public class DFTypeFinder {
     public DFClassSpace lookupClass(String name)
         throws EntityNotFound {
         DFClassSpace klass;
-	name = name.replace('$', '.');
+        name = name.replace('$', '.');
         try {
             klass = _space.getClass(name);
         } catch (EntityNotFound e) {
@@ -72,12 +72,12 @@ public class DFTypeFinder {
 
     public DFClassSpace resolveClass(DFType type)
         throws EntityNotFound {
-	if (type == null) {
-	    // treat unknown class as Object.
-	    return DFRootTypeSpace.OBJECT_CLASS;
+        if (type == null) {
+            // treat unknown class as Object.
+            return DFRootTypeSpace.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
             return DFRootTypeSpace.ARRAY_CLASS;
-	} else if (type instanceof DFClassType) {
+        } else if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         } else {
             throw new EntityNotFound(type.getName());
@@ -87,21 +87,21 @@ public class DFTypeFinder {
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
         throws EntityNotFound {
-	if (type instanceof PrimitiveType) {
+        if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return new DFBasicType(ptype.getPrimitiveTypeCode());
-	} else if (type instanceof ArrayType) {
+        } else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
-	    DFType elemType = this.resolve(atype.getElementType());
-	    int ndims = atype.getDimensions();
-	    return new DFArrayType(elemType, ndims);
-	} else if (type instanceof SimpleType) {
+            DFType elemType = this.resolve(atype.getElementType());
+            int ndims = atype.getDimensions();
+            return new DFArrayType(elemType, ndims);
+        } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             DFParamType pt = this.lookupParamType(stype.getName());
             if (pt != null) return pt;
             DFClassSpace klass = this.lookupClass(stype.getName());
             return new DFClassType(klass);
-	} else if (type instanceof ParameterizedType) {
+        } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
             DFType genericType = this.resolve(ptype.getType());
@@ -148,14 +148,14 @@ public class DFTypeFinder {
             return new DFArrayType(elemType, ndims);
         } else if (type instanceof org.apache.bcel.generic.ObjectType) {
             org.apache.bcel.generic.ObjectType otype =
-		(org.apache.bcel.generic.ObjectType)type;
+                (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
             DFClassSpace klass = this.lookupClass(className);
             return new DFClassType(klass);
         } else {
             // ???
             throw new EntityNotFound(type.toString());
-	}
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -23,7 +23,7 @@ public class DFParameterizedClass extends DFClassSpace {
 
     @Override
     public String toString() {
-	return ("<DFParameterizedClass("+this.getFullName()+")>");
+        return ("<DFParameterizedClass("+this.getFullName()+")>");
     }
 
     @Override

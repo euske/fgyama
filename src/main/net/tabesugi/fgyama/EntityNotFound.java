@@ -15,12 +15,12 @@ public class EntityNotFound extends Exception {
     public ASTNode ast = null;
 
     public EntityNotFound(String name) {
-	this.name = name;
+        this.name = name;
     }
 
     public void setAst(ASTNode ast) {
-	if (this.ast == null) {
-	    this.ast = ast;
-	}
+        if (this.ast == null) {
+            this.ast = ast;
+        }
     }
 }

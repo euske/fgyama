@@ -30,7 +30,7 @@ public class DFBasicType extends DFType {
 
     @Override
     public String toString() {
-	return ("<DFBasicType("+this.getName()+")>");
+        return ("<DFBasicType("+this.getName()+")>");
     }
 
     public boolean equals(DFType type) {
@@ -49,27 +49,27 @@ public class DFBasicType extends DFType {
     }
 
     public static final DFBasicType NUMBER =
-	new DFBasicType("@number");
+        new DFBasicType("@number");
     public static final DFBasicType BOOLEAN =
-	new DFBasicType(PrimitiveType.BOOLEAN);
+        new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFBasicType BYTE =
-	new DFBasicType(PrimitiveType.BYTE);
+        new DFBasicType(PrimitiveType.BYTE);
     public static final DFBasicType CHAR =
-	new DFBasicType(PrimitiveType.CHAR);
+        new DFBasicType(PrimitiveType.CHAR);
     public static final DFBasicType DOUBLE =
-	new DFBasicType(PrimitiveType.DOUBLE);
+        new DFBasicType(PrimitiveType.DOUBLE);
     public static final DFBasicType FLOAT =
-	new DFBasicType(PrimitiveType.FLOAT);
+        new DFBasicType(PrimitiveType.FLOAT);
     public static final DFBasicType INT =
-	new DFBasicType(PrimitiveType.INT);
+        new DFBasicType(PrimitiveType.INT);
     public static final DFBasicType LONG =
-	new DFBasicType(PrimitiveType.LONG);
+        new DFBasicType(PrimitiveType.LONG);
     public static final DFBasicType SHORT =
-	new DFBasicType(PrimitiveType.SHORT);
+        new DFBasicType(PrimitiveType.SHORT);
     public static final DFBasicType VOID =
-	new DFBasicType(PrimitiveType.VOID);
+        new DFBasicType(PrimitiveType.VOID);
     public static final DFBasicType TYPE =
-	new DFBasicType("@type");
+        new DFBasicType("@type");
     public static final DFBasicType ANONYMOUS =
-	new DFBasicType("@anonymous");
+        new DFBasicType("@anonymous");
 }
