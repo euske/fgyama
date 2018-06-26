@@ -136,6 +136,10 @@ public class DFTypeSpace {
         throw new EntityNotFound(id);
     }
 
+    public void addParamType(DFParamType pt) {
+        _id2paramtype.put(pt.getBaseName(), pt);
+    }
+
     public DFParamType getParamType(String id) {
         return _id2paramtype.get(id);
     }
@@ -155,13 +159,10 @@ public class DFTypeSpace {
         //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = klass.getChildSpace();
-        List<TypeParameter> tps = typeDecl.typeParameters();
-        DFParamType[] pts = new DFParamType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            String id = tps.get(i).getName().getIdentifier();
-            DFParamType pt = new DFParamType(klass, i, id);
-            pts[i] = pt;
-            child._id2paramtype.put(id, pt);
+        DFParamType[] pts = DFParamType.createParamTypes(
+            klass.getFullName(), typeDecl.typeParameters());
+        for (DFParamType pt : pts) {
+            child.addParamType(pt);
         }
         klass.setParamTypes(pts);
         for (BodyDeclaration body :

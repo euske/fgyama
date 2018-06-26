@@ -59,4 +59,9 @@ public class DFParameterizedClass extends DFClassSpace {
         }
         return methods;
     }
+
+    @Override
+    public DFTypeFinder addFinders(DFTypeFinder finder) {
+        return _genericKlass.addFinders(finder);
+    }
 }

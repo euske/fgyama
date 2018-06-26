@@ -11,15 +11,26 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFParamType extends DFType {
 
-    private DFClassSpace _klass;
+    private String _parentName;
     private int _index;
     private String _name;
     private DFClassSpace[] _bases = null;
 
-    public DFParamType(DFClassSpace klass, int index, String name) {
-        _klass = klass;
+    public DFParamType(String parentName, int index, String name) {
+        _parentName = parentName;
         _index = index;
         _name = name;
+    }
+
+    public static DFParamType[] createParamTypes(
+        String baseName, List<TypeParameter> tps) {
+        DFParamType[] pts = new DFParamType[tps.size()];
+        for (int i = 0; i < tps.size(); i++) {
+            String id = tps.get(i).getName().getIdentifier();
+            DFParamType pt = new DFParamType(baseName, i, id);
+            pts[i] = pt;
+        }
+        return pts;
     }
 
     @Override
@@ -31,8 +42,12 @@ public class DFParamType extends DFType {
         return type == this;
     }
 
+    public String getBaseName() {
+        return _name;
+    }
+
     public String getName() {
-        return "T"+_klass.getFullName()+"/"+_name;
+        return "T"+_parentName+"/"+_name;
     }
 
     public int canConvertFrom(DFType type) {

@@ -31,11 +31,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
 	try {
 	    for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
 		JarEntry je = es.nextElement();
-		String path = je.getName();
-                if (path.endsWith(".class")) {
-                    String name = path.substring(0, path.length()-6).replace('/', '.');
+		String filePath = je.getName();
+                if (filePath.endsWith(".class")) {
+                    String name = filePath.substring(0, filePath.length()-6);
+                    name = name.replace('/', '.').replace('$', '.');
                     DFClassSpace klass = this.createClass(name);
-                    klass.setJarPath(jarPath);
+                    klass.setJarPath(jarPath, filePath);
                 }
 	    }
 	} finally {

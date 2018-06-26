@@ -2,7 +2,12 @@ package dom.meep;
 
 class Foo {
 
-    class Bar {}
+    class Bar {
+        void a() { }
+        class Baz {
+            void a() { }
+        }
+    }
     int y = 123;
 
     public void doit() {

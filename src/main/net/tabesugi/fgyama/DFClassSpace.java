@@ -18,8 +18,10 @@ public class DFClassSpace extends DFVarSpace {
     private DFTypeSpace _childSpace;
     private DFClassSpace _baseKlass;
     private DFClassSpace[] _baseIfaces;
-    private String _jarPath = null;
     private DFParamType[] _paramTypes = null;
+    private String _jarPath = null;
+    private String _filePath = null;
+    private boolean _loaded = true;
 
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
@@ -28,24 +30,26 @@ public class DFClassSpace extends DFVarSpace {
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
         String id, DFClassSpace baseKlass) {
         super(id);
-	_typeSpace = typeSpace;
+        _typeSpace = typeSpace;
         _childSpace = childSpace;
-	_baseKlass = baseKlass;
+        _baseKlass = baseKlass;
     }
 
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace, String id) {
         this(typeSpace, childSpace, id, null);
-	this.addRef("#this", new DFClassType(this));
+        this.addRef("#this", new DFClassType(this));
     }
 
     @Override
     public String toString() {
-	return ("<DFClassSpace("+this.getFullName()+")>");
+        return ("<DFClassSpace("+this.getFullName()+")>");
     }
 
-    public void setJarPath(String jarPath) {
+    public void setJarPath(String jarPath, String filePath) {
         _jarPath = jarPath;
+        _filePath = filePath;
+        _loaded = false;
     }
 
     public void setParamTypes(DFParamType[] paramTypes) {
@@ -61,7 +65,7 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public String getFullName() {
-	return _typeSpace.getFullName()+"/"+super.getFullName();
+        return _typeSpace.getFullName()+"/"+super.getFullName();
     }
 
     public int isBaseOf(DFClassSpace klass) {
@@ -145,14 +149,13 @@ public class DFClassSpace extends DFVarSpace {
         SimpleName name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
-	return this.addMethod(
-	    id, isStatic, argTypes, returnType);
+        return this.addMethod(id, isStatic, argTypes, returnType);
     }
 
     private DFMethod addMethod(
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
-	DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
+        DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
         //Utils.logit("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
@@ -178,30 +181,22 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public void load(DFTypeFinder finder) throws EntityNotFound {
-        if (_jarPath != null) {
-            String jarPath = _jarPath;
-            _jarPath = null;
-            this.load(finder, jarPath);
-        }
-    }
-
-    public void load(DFTypeFinder finder, String jarPath) throws EntityNotFound {
-        String name = _typeSpace.getFullName()+"."+super.getFullName();
-	try {
-	    JarFile jarfile = new JarFile(jarPath);
-	    try {
-                String path = name.replace(".","/")+".class";
-		JarEntry je = jarfile.getJarEntry(path);
-		InputStream strm = jarfile.getInputStream(je);
-		JavaClass jklass = new ClassParser(strm, path).parse();
+        if (_loaded) return;
+        _loaded = true;
+        try {
+            JarFile jarfile = new JarFile(_jarPath);
+            try {
+                JarEntry je = jarfile.getJarEntry(_filePath);
+                InputStream strm = jarfile.getInputStream(je);
+                JavaClass jklass = new ClassParser(strm, _filePath).parse();
                 this.load(finder, jklass);
-	    } finally {
-		jarfile.close();
-	    }
-	} catch (IOException e) {
-	    Utils.logit("Error: Not found: "+name+" ("+jarPath+")");
-	    throw new EntityNotFound(name);
-	}
+            } finally {
+                jarfile.close();
+            }
+        } catch (IOException e) {
+            Utils.logit("Error: Not found: "+_jarPath+"/"+_filePath);
+            throw new EntityNotFound(this.getFullName());
+        }
     }
 
     private void load(DFTypeFinder finder, JavaClass jklass)
@@ -238,41 +233,47 @@ public class DFClassSpace extends DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
-	throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, EntityNotFound {
         //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
         // Get superclass.
-        Type superClass = typeDecl.getSuperclassType();
-        if (superClass != null) {
-            _baseKlass = finder.resolveClass(superClass);
-        }
-        // Get interfaces.
-        List<Type> ifaces = typeDecl.superInterfaceTypes();
-        _baseIfaces = new DFClassSpace[ifaces.size()];
-        for (int i = 0; i < ifaces.size(); i++) {
-            _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
-        }
-        // Get type parameters.
-        List<TypeParameter> tps = typeDecl.typeParameters();
-        for (int i = 0; i < tps.size(); i++) {
-            DFParamType pt = _paramTypes[i];
-            List<Type> bounds = tps.get(i).typeBounds();
-            DFClassSpace[] bases = new DFClassSpace[bounds.size()];
-            for (int j = 0; j < bounds.size(); j++) {
-                bases[j] = finder.resolveClass(bounds.get(j));
+        try {
+            finder = new DFTypeFinder(finder, _childSpace);
+            Type superClass = typeDecl.getSuperclassType();
+            if (superClass != null) {
+                _baseKlass = finder.resolveClass(superClass);
+                finder = _baseKlass.addFinders(finder);
             }
-            pt.setBases(bases);
-        }
-        // Lookup child classes.
-        finder = this.addFinders(finder);
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            this.build(finder, body);
+            // Get interfaces.
+            List<Type> ifaces = typeDecl.superInterfaceTypes();
+            _baseIfaces = new DFClassSpace[ifaces.size()];
+            for (int i = 0; i < ifaces.size(); i++) {
+                _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
+            }
+            // Get type parameters.
+            List<TypeParameter> tps = typeDecl.typeParameters();
+            for (int i = 0; i < tps.size(); i++) {
+                DFParamType pt = _paramTypes[i];
+                List<Type> bounds = tps.get(i).typeBounds();
+                DFClassSpace[] bases = new DFClassSpace[bounds.size()];
+                for (int j = 0; j < bounds.size(); j++) {
+                    bases[j] = finder.resolveClass(bounds.get(j));
+                }
+                pt.setBases(bases);
+            }
+            // Lookup child classes.
+            for (BodyDeclaration body :
+                     (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
+                this.build(finder, body);
+            }
+        } catch (EntityNotFound e) {
+            e.setAst(typeDecl);
+            throw e;
         }
     }
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, BodyDeclaration body)
-	throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, EntityNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
             DFClassSpace klass = _childSpace.getClass(decl.getName());
@@ -288,14 +289,26 @@ public class DFClassSpace extends DFVarSpace {
 
         } else if (body instanceof MethodDeclaration) {
             MethodDeclaration decl = (MethodDeclaration)body;
-            DFType[] argTypes = finder.resolveList(decl);
+            List<TypeParameter> tps = decl.typeParameters();
+            DFTypeFinder finder2 = finder;
+            if (0 < tps.size()) {
+                DFTypeSpace typeSpace = new DFTypeSpace();
+                finder2 = new DFTypeFinder(finder, typeSpace);
+                DFParamType[] pts = DFParamType.createParamTypes(
+                    this.getFullName(), tps);
+                for (DFParamType pt : pts) {
+                    typeSpace.addParamType(pt);
+                }
+            }
+            DFType[] argTypes = finder2.resolveList(decl);
             DFType returnType;
             if (decl.isConstructor()) {
                 returnType = new DFClassType(this);
             } else {
-                returnType = finder.resolve(decl.getReturnType2());
+                returnType = finder2.resolve(decl.getReturnType2());
             }
-            this.addMethod(decl.getName(), isStatic(decl), argTypes, returnType);
+            this.addMethod(decl.getName(), isStatic(decl),
+                           argTypes, returnType);
 
         } else if (body instanceof Initializer) {
 
@@ -306,9 +319,9 @@ public class DFClassSpace extends DFVarSpace {
 
     // dumpContents (for debugging)
     public void dumpContents(PrintStream out, String indent) {
-	super.dumpContents(out, indent);
-	for (DFMethod method : _methods) {
-	    out.println(indent+"defined: "+method);
-	}
+        super.dumpContents(out, indent);
+        for (DFMethod method : _methods) {
+            out.println(indent+"defined: "+method);
+        }
     }
 }
