@@ -232,7 +232,7 @@ public class CommentExtractor extends ASTVisitor {
 
 	String[] srcpath = { "." };
 	for (String path : files) {
-	    Utils.logit("Parsing: "+path);
+	    Logger.info("Parsing: "+path);
 	    out.println("+ "+path);
 	    String src = Utils.readFile(path);
 

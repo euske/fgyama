@@ -15,10 +15,6 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
-    public static void logit(String s) {
-        System.err.println(s);
-    }
-
     public static String quote(String s) {
         if (s == null) {
             return "\"\"";

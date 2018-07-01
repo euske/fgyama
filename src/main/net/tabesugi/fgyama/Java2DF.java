@@ -1150,7 +1150,7 @@ public class Java2DF {
             if (methods == null) {
                 String id = invoke.getName().getIdentifier();
                 DFMethod fallback = new DFMethod(klass, id, false, null, null);
-                Utils.logit("Fallback method: "+klass+": "+fallback);
+                Logger.error("Fallback method: "+klass+": "+fallback);
                 methods = new DFMethod[] { fallback };
             }
             MethodCallNode call = new MethodCallNode(
@@ -1184,7 +1184,7 @@ public class Java2DF {
             if (methods == null) {
                 String id = sinvoke.getName().getIdentifier();
                 DFMethod fallback = new DFMethod(baseKlass, id, false, null, null);
-                Utils.logit("Fallback method: "+baseKlass+": "+fallback);
+                Logger.error("Fallback method: "+baseKlass+": "+fallback);
                 methods = new DFMethod[] { fallback };
             }
             MethodCallNode call = new MethodCallNode(
@@ -1932,17 +1932,17 @@ public class Java2DF {
                 assert(!importDecl.isStatic());
                 Name name = importDecl.getName();
                 if (importDecl.isOnDemand()) {
-                    Utils.logit("Import: "+name+".*");
+                    Logger.info("Import: "+name+".*");
                     finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
                 } else {
                     assert(name.isQualifiedName());
                     DFClassSpace klass = this.rootSpace.getClass(name);
-                    Utils.logit("Import: "+name);
+                    Logger.info("Import: "+name);
                     importSpace.addClass(klass);
                     n++;
                 }
             } catch (EntityNotFound e) {
-                Utils.logit("Import: class not found: "+e.name);
+                Logger.error("Import: class not found: "+e.name);
             }
         }
         if (0 < n) {
@@ -2038,7 +2038,7 @@ public class Java2DF {
             // Remove redundant nodes.
             graph.cleanup();
 
-            Utils.logit("Success: "+method.getSignature());
+            Logger.info("Success: "+method.getSignature());
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
@@ -2084,7 +2084,7 @@ public class Java2DF {
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
-                Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
                 if (this.exporter != null) {
                     this.exporter.writeError(e.name, astName);
                 }
@@ -2125,7 +2125,7 @@ public class Java2DF {
             typeSpace.build(cunit);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
-            Utils.logit("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+            Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         }
     }
 
@@ -2143,9 +2143,9 @@ public class Java2DF {
             }
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
-            Utils.logit("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+            Logger.error("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         } catch (EntityNotFound e) {
-            Utils.logit("Pass2: class not found: "+e.name+" ast="+e.ast);
+            Logger.error("Pass2: class not found: "+e.name+" ast="+e.ast);
             throw e;
         }
     }
@@ -2162,7 +2162,7 @@ public class Java2DF {
                 processTypeDeclaration(typeSpace, finder, typeDecl);
             }
         } catch (EntityNotFound e) {
-            Utils.logit("Pass3: class not found: "+e.name+" ast="+e.ast);
+            Logger.error("Pass3: class not found: "+e.name+" ast="+e.ast);
             throw e;
         }
     }
@@ -2191,7 +2191,7 @@ public class Java2DF {
                 String path = args[++i];
                 try {
                     output = new FileOutputStream(path);
-                    Utils.logit("Exporting: "+path);
+                    Logger.info("Exporting: "+path);
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
                 }
@@ -2212,7 +2212,7 @@ public class Java2DF {
         rootSpace.loadDefaultClasses();
         Java2DF converter = new Java2DF(rootSpace, exporter);
         for (String path : files) {
-            Utils.logit("Pass1: "+path);
+            Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
                 converter.buildTypeSpace(cunit);
@@ -2221,7 +2221,7 @@ public class Java2DF {
             }
         }
         for (String path : files) {
-            Utils.logit("Pass2: "+path);
+            Logger.info("Pass2: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
                 converter.buildClassSpace(cunit);
@@ -2230,7 +2230,7 @@ public class Java2DF {
             }
         }
         for (String path : files) {
-            Utils.logit("Pass3: "+path);
+            Logger.info("Pass3: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
                 exporter.startFile(path);

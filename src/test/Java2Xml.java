@@ -57,7 +57,7 @@ public class Java2Xml extends ASTVisitor {
 	}
 
 	for (String path : files) {
-	    Utils.logit("Parsing: "+path);
+	    Logger.info("Parsing: "+path);
 	    String src = Utils.readFile(path);
 
 	    Map<String, String> options = JavaCore.getOptions();

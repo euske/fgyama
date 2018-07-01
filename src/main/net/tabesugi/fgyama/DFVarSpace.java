@@ -75,7 +75,7 @@ public class DFVarSpace {
 
     public DFVarSpace addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
-        Utils.logit("DFVarSpace.addChild: "+this+": "+id);
+        Logger.info("DFVarSpace.addChild: "+this+": "+id);
         DFVarSpace space = new DFVarSpace(this, id);
         _children.add(space);
         _ast2child.put(ast, space);
@@ -158,7 +158,7 @@ public class DFVarSpace {
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {
-        Utils.logit("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
+        Logger.info("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
         return this.addRef(name.getIdentifier(), type);
     }
 
@@ -168,7 +168,7 @@ public class DFVarSpace {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        //Utils.logit("DFVarSpace.build: "+this);
+        //Logger.info("DFVarSpace.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : finder.resolve(returnType);
         this.addRef("#return", type);

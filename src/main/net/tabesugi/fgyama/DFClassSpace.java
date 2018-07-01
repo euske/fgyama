@@ -123,7 +123,7 @@ public class DFClassSpace extends DFVarSpace {
     private DFVarRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
-        //Utils.logit("DFClassSpace.addField: "+ref);
+        //Logger.info("DFClassSpace.addField: "+ref);
         return ref;
     }
 
@@ -131,7 +131,7 @@ public class DFClassSpace extends DFVarSpace {
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
                 method0.addOverride(method1);
-                //Utils.logit("DFClassSpace.overrideMethod: "+method0+" : "+method1);
+                //Logger.info("DFClassSpace.overrideMethod: "+method0+" : "+method1);
                 break;
             }
         }
@@ -156,7 +156,7 @@ public class DFClassSpace extends DFVarSpace {
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
-        //Utils.logit("DFClassSpace.addMethod: "+method);
+        //Logger.info("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);
@@ -194,7 +194,7 @@ public class DFClassSpace extends DFVarSpace {
                 jarfile.close();
             }
         } catch (IOException e) {
-            Utils.logit("Error: Not found: "+_jarPath+"/"+_filePath);
+            Logger.error("Error: Not found: "+_jarPath+"/"+_filePath);
             throw new EntityNotFound(this.getFullName());
         }
     }
@@ -234,7 +234,7 @@ public class DFClassSpace extends DFVarSpace {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        //Utils.logit("DFClassSpace.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFClassSpace.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);

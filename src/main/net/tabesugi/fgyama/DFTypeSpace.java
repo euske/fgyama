@@ -76,7 +76,7 @@ public class DFTypeSpace {
                 space = new DFTypeSpace(this, id);
                 _children.add(space);
                 _id2space.put(id, space);
-                //Utils.logit("DFTypeSpace.addChild: "+this+": "+id);
+                //Logger.info("DFTypeSpace.addChild: "+this+": "+id);
             }
             return space;
         }
@@ -93,7 +93,7 @@ public class DFTypeSpace {
         } else {
             DFTypeSpace child = this.lookupSpace(id);
             DFClassSpace klass = new DFClassSpace(this, child, id);
-            //Utils.logit("DFTypeSpace.createClass: "+this+": "+klass);
+            //Logger.info("DFTypeSpace.createClass: "+this+": "+klass);
             return this.addClass(klass);
         }
     }
@@ -103,7 +103,7 @@ public class DFTypeSpace {
         assert(id.indexOf('.') < 0);
         //assert(!_id2klass.containsKey(id));
         _id2klass.put(id, klass);
-        //Utils.logit("DFTypeSpace.addClass: "+this+": "+id);
+        //Logger.info("DFTypeSpace.addClass: "+this+": "+id);
         return klass;
     }
 
@@ -119,7 +119,7 @@ public class DFTypeSpace {
     }
     public DFClassSpace getClass(String id)
         throws EntityNotFound {
-        //Utils.logit("DFTypeSpace.getClass: "+this+": "+id);
+        //Logger.info("DFTypeSpace.getClass: "+this+": "+id);
         DFTypeSpace space = this;
         while (space != null) {
             int i = id.indexOf('.');
@@ -156,7 +156,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(TypeDeclaration typeDecl)
         throws UnsupportedSyntax {
-        //Utils.logit("DFTypeSpace.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = klass.getChildSpace();
         DFParamType[] pts = DFParamType.createParamTypes(
