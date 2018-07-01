@@ -1,108 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <graph name="null/Object/toString">
-      <scope name="null/Object.toString">
-        <scope name="null/Object.toString.b0">
-          <node data="&quot;object&quot;" kind="const" name="Nnull/Object.toString.b0_1" type="java.lang/String">
+    <graph name="ROOT/Object/toString">
+      <scope name="ROOT/Object.toString">
+        <scope name="ROOT/Object.toString.b0">
+          <node data="&quot;object&quot;" kind="const" name="NROOT/Object.toString.b0_1" type="java.lang/String">
             <ast length="8" start="61" type="45"/>
           </node>
-          <node kind="return" name="Nnull/Object.toString.b0_2" ref="null/Object.toString/#return" type="java.lang/String">
-            <link src="Nnull/Object.toString.b0_1"/>
+          <node kind="return" name="NROOT/Object.toString.b0_2" ref="ROOT/Object.toString/#return" type="java.lang/String">
+            <link src="NROOT/Object.toString.b0_1"/>
             <ast length="16" start="54" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph name="null/Object">
-      <scope name="null/Object"/>
+    <graph name="ROOT/Object">
+      <scope name="ROOT/Object"/>
     </graph>
-    <graph name="null/Foo/fa">
-      <scope name="null/Foo.fa">
-        <scope name="null/Foo.fa.b0">
-          <node data="0" kind="const" name="Nnull/Foo.fa.b0_1" type="@number">
+    <graph name="ROOT/Foo/fa">
+      <scope name="ROOT/Foo.fa">
+        <scope name="ROOT/Foo.fa.b0">
+          <node data="0" kind="const" name="NROOT/Foo.fa.b0_1" type="@number">
             <ast length="1" start="138" type="34"/>
           </node>
-          <node kind="assign" name="Nnull/Foo.fa.b0_2" ref="null/Foo.fa.b0/a" type="@int">
-            <link src="Nnull/Foo.fa.b0_1"/>
+          <node kind="assign" name="NROOT/Foo.fa.b0_2" ref="ROOT/Foo.fa.b0/a" type="@int">
+            <link src="NROOT/Foo.fa.b0_1"/>
             <ast length="5" start="134" type="59"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph name="null/moo/fc">
-      <scope name="null/moo.fc">
-        <scope name="null/moo.fc.b0">
-          <node data="123" kind="const" name="Nnull/moo.fc.b0_1" type="@number">
+    <graph name="ROOT/Foo.fb/inline/moo/fc">
+      <scope name="ROOT/Foo.fb/inline/moo.fc">
+        <scope name="ROOT/Foo.fb/inline/moo.fc.b0">
+          <node data="123" kind="const" name="NROOT/Foo.fb/inline/moo.fc.b0_1" type="@number">
             <ast length="3" start="317" type="34"/>
           </node>
-          <node kind="return" name="Nnull/moo.fc.b0_2" ref="null/moo.fc/#return" type="@number">
-            <link src="Nnull/moo.fc.b0_1"/>
+          <node kind="return" name="NROOT/Foo.fb/inline/moo.fc.b0_2" ref="ROOT/Foo.fb/inline/moo.fc/#return" type="@number">
+            <link src="NROOT/Foo.fb/inline/moo.fc.b0_1"/>
             <ast length="11" start="310" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph name="null/moo">
-      <scope name="null/moo"/>
+    <graph name="ROOT/Foo.fb/inline/moo">
+      <scope name="ROOT/Foo.fb/inline/moo"/>
     </graph>
-    <graph name="null/anon/toString">
-      <scope name="null/anon.toString">
-        <scope name="null/anon.toString.b0">
-          <node data="&quot;foo&quot;" kind="const" name="Nnull/anon.toString.b0_1" type="java.lang/String">
+    <graph name="ROOT/Foo.fb.b0/anonymous/anonymous/toString">
+      <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString">
+        <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString.b0">
+          <node data="&quot;foo&quot;" kind="const" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" type="java.lang/String">
             <ast length="5" start="257" type="45"/>
           </node>
-          <node kind="return" name="Nnull/anon.toString.b0_2" ref="null/anon.toString/#return" type="java.lang/String">
-            <link src="Nnull/anon.toString.b0_1"/>
+          <node kind="return" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" ref="ROOT/Foo.fb.b0/anonymous/anonymous.toString/#return" type="java.lang/String">
+            <link src="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1"/>
             <ast length="13" start="250" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph name="null/anon">
-      <scope name="null/anon"/>
+    <graph name="ROOT/Foo.fb.b0/anonymous/anonymous">
+      <scope name="ROOT/Foo.fb.b0/anonymous/anonymous"/>
     </graph>
-    <graph name="null/Foo/fb">
-      <scope name="null/Foo.fb">
-        <scope name="null/Foo.fb.b0">
-          <node data="0" kind="const" name="Nnull/Foo.fb.b0_1" type="@number">
+    <graph name="ROOT/Foo/fb">
+      <scope name="ROOT/Foo.fb">
+        <scope name="ROOT/Foo.fb.b0">
+          <node data="0" kind="const" name="NROOT/Foo.fb.b0_1" type="@number">
             <ast length="1" start="186" type="34"/>
           </node>
-          <node kind="assign" name="Nnull/Foo.fb.b0_2" ref="null/Foo.fb.b0/b" type="@int">
-            <link src="Nnull/Foo.fb.b0_1"/>
+          <node kind="assign" name="NROOT/Foo.fb.b0_2" ref="ROOT/Foo.fb.b0/b" type="@int">
+            <link src="NROOT/Foo.fb.b0_1"/>
             <ast length="5" start="182" type="59"/>
           </node>
-          <node data="null/anon" kind="new" name="Nnull/Foo.fb.b0_3" type="null/anon">
+          <node data="ROOT/Foo.fb.b0/anonymous/anonymous" kind="new" name="NROOT/Foo.fb.b0_3" type="ROOT/Foo.fb.b0/anonymous/anonymous">
             <ast length="71" start="201" type="14"/>
           </node>
-          <node kind="assign" name="Nnull/Foo.fb.b0_4" ref="null/Foo.fb.b0/a" type="null/Object">
-            <link src="Nnull/Foo.fb.b0_3"/>
+          <node kind="assign" name="NROOT/Foo.fb.b0_4" ref="ROOT/Foo.fb.b0/a" type="ROOT/Object">
+            <link src="NROOT/Foo.fb.b0_3"/>
             <ast length="75" start="197" type="59"/>
           </node>
-          <node data="null/Foo/fa" kind="call" name="Nnull/Foo.fb.b0_6" type="@void">
-            <link label="obj" src="Nnull/Foo.fb_5"/>
+          <node data="ROOT/Foo/fa" kind="call" name="NROOT/Foo.fb.b0_6" type="@void">
+            <link label="obj" src="NROOT/Foo.fb_5"/>
             <ast length="4" start="335" type="32"/>
           </node>
-          <node kind="ref" name="Nnull/Foo.fb.b0_7" ref="null/Foo.fb.b0/a" type="null/Object">
-            <link src="Nnull/Foo.fb.b0_4"/>
+          <node kind="ref" name="NROOT/Foo.fb.b0_7" ref="ROOT/Foo.fb.b0/a" type="ROOT/Object">
+            <link src="NROOT/Foo.fb.b0_4"/>
             <ast length="1" start="349" type="42"/>
           </node>
-          <node data="null/Object/toString null/anon/toString" kind="call" name="Nnull/Foo.fb.b0_8" type="java.lang/String">
-            <link label="obj" src="Nnull/Foo.fb.b0_7"/>
+          <node data="ROOT/Object/toString ROOT/Foo.fb.b0/anonymous/anonymous/toString" kind="call" name="NROOT/Foo.fb.b0_8" type="java.lang/String">
+            <link label="obj" src="NROOT/Foo.fb.b0_7"/>
             <ast length="12" start="349" type="32"/>
           </node>
-          <node data="null/moo" kind="new" name="Nnull/Foo.fb.b0_9" type="null/moo">
+          <node data="ROOT/Foo.fb/inline/moo" kind="new" name="NROOT/Foo.fb.b0_9" type="ROOT/Foo.fb/inline/moo">
             <ast length="9" start="379" type="14"/>
           </node>
-          <node kind="assign" name="Nnull/Foo.fb.b0_10" ref="null/Foo.fb.b0/c" type="null/moo">
-            <link src="Nnull/Foo.fb.b0_9"/>
+          <node kind="assign" name="NROOT/Foo.fb.b0_10" ref="ROOT/Foo.fb.b0/c" type="ROOT/Foo.fb/inline/moo">
+            <link src="NROOT/Foo.fb.b0_9"/>
             <ast length="13" start="375" type="59"/>
           </node>
         </scope>
-        <node name="Nnull/Foo.fb_5" ref="null/Foo/#this" type="null/Foo"/>
+        <node name="NROOT/Foo.fb_5" ref="ROOT/Foo/#this" type="ROOT/Foo"/>
       </scope>
     </graph>
-    <graph name="null/Foo">
-      <scope name="null/Foo"/>
+    <graph name="ROOT/Foo">
+      <scope name="ROOT/Foo"/>
     </graph>
   </file>
 </fgyama>
