@@ -149,13 +149,18 @@ public class DFClassSpace extends DFVarSpace {
         SimpleName name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
-        return this.addMethod(id, isStatic, argTypes, returnType);
+        DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
+        return this.addMethod(method);
     }
 
     private DFMethod addMethod(
         String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
+        return this.addMethod(method);
+    }
+
+    private DFMethod addMethod(DFMethod method) {
         //Logger.info("DFClassSpace.addMethod: "+method);
         _methods.add(method);
         if (_baseKlass != null) {
