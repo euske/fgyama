@@ -27,8 +27,9 @@ public class DFTypeSpace {
     private Map<String, DFParamType> _id2paramtype =
         new HashMap<String, DFParamType>();
 
-    public DFTypeSpace() {
+    public DFTypeSpace(String name) {
         _root = this;
+        _name = name;
     }
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
@@ -93,7 +94,7 @@ public class DFTypeSpace {
         } else {
             DFTypeSpace child = this.lookupSpace(id);
             DFClassSpace klass = new DFClassSpace(this, child, id);
-            //Logger.info("DFTypeSpace.createClass: "+this+": "+klass);
+            //Logger.info("DFTypeSpace.createClass: "+klass);
             return this.addClass(klass);
         }
     }
@@ -120,17 +121,25 @@ public class DFTypeSpace {
     public DFClassSpace getClass(String id)
         throws EntityNotFound {
         //Logger.info("DFTypeSpace.getClass: "+this+": "+id);
+        DFClassSpace klass = null;
         DFTypeSpace space = this;
         while (space != null) {
             int i = id.indexOf('.');
             if (i < 0) {
-                DFClassSpace klass = space._id2klass.get(id);
+                klass = space._id2klass.get(id);
                 if (klass == null) {
                     throw new EntityNotFound(id);
                 }
                 return klass;
             }
-            space = space._id2space.get(id.substring(0, i));
+            String key = id.substring(0, i);
+            klass = space._id2klass.get(key);
+            if (klass != null) {
+                // Search inner classes from now...
+                space = klass.getChildSpace();
+            } else {
+                space = space._id2space.get(key);
+            }
             id = id.substring(i+1);
         }
         throw new EntityNotFound(id);

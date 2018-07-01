@@ -1286,9 +1286,10 @@ public class Java2DF {
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
             DFType instType;
             if (anonDecl != null) {
+                String id = "anonymous";
                 DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
-                DFTypeSpace anonSpace = new DFTypeSpace();
-                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "anon", baseKlass);
+                DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
+                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
                 anonSpace.addClass(anonKlass);
                 for (BodyDeclaration body :
                          (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
@@ -1356,9 +1357,10 @@ public class Java2DF {
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
+            String id = "lambda";
             ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = new DFTypeSpace();
-            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "lambda", null);
+            DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
+            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
@@ -1378,7 +1380,7 @@ public class Java2DF {
             //  SuperMethodReference
             //  TypeMethodReference
             MethodReference mref = (MethodReference)expr;
-            DFTypeSpace anonSpace = new DFTypeSpace();
+            DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
             DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "methodref", null);
             // XXX TODO method ref
             DFType instType = new DFClassType(anonKlass);
@@ -1924,7 +1926,7 @@ public class Java2DF {
     private DFTypeFinder prepareTypeFinder(List<ImportDeclaration> imports) {
         DFTypeFinder finder = new DFTypeFinder(this.rootSpace);
         finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace("java.lang"));
-        DFTypeSpace importSpace = new DFTypeSpace();
+        DFTypeSpace importSpace = new DFTypeSpace("Import");
         int n = 0;
         for (ImportDeclaration importDecl : imports) {
             try {
@@ -1996,7 +1998,8 @@ public class Java2DF {
         DFMethod method = klass.lookupMethod1(methodDecl.getName(), argTypes);
         assert(method != null);
         // add a typespace for inline classes.
-        DFTypeSpace typeSpace = new DFTypeSpace();
+        DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
+        DFTypeSpace typeSpace = new DFTypeSpace(varSpace.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
@@ -2008,7 +2011,6 @@ public class Java2DF {
             }
             typeSpace.build(methodDecl.getBody());
             this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
-            DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
             varSpace.build(finder, methodDecl);
             //varSpace.dump();
             DFFrame frame = new DFFrame(DFFrame.METHOD);

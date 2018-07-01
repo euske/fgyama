@@ -292,7 +292,7 @@ public class DFClassSpace extends DFVarSpace {
             List<TypeParameter> tps = decl.typeParameters();
             DFTypeFinder finder2 = finder;
             if (0 < tps.size()) {
-                DFTypeSpace typeSpace = new DFTypeSpace();
+                DFTypeSpace typeSpace = new DFTypeSpace("MethodDecl");
                 finder2 = new DFTypeFinder(finder, typeSpace);
                 DFParamType[] pts = DFParamType.createParamTypes(
                     this.getFullName(), tps);

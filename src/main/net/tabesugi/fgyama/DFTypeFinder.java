@@ -37,6 +37,7 @@ public class DFTypeFinder {
     public DFClassSpace lookupClass(String name)
         throws EntityNotFound {
         DFClassSpace klass;
+        //Logger.info("lookupClass: "+_space+": "+name);
         name = name.replace('$', '.');
         try {
             klass = _space.getClass(name);

@@ -19,6 +19,10 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public static DFClassSpace ARRAY_CLASS = null;
     public static DFClassSpace STRING_CLASS = null;
 
+    public DFRootTypeSpace() {
+        super("ROOT");
+    }
+
     @Override
     public String toString() {
         return ("<DFRootTypeSpace>");
