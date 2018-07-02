@@ -169,7 +169,7 @@ public class DFTypeSpace {
         DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
         DFTypeSpace child = klass.getChildSpace();
         DFParamType[] pts = DFParamType.createParamTypes(
-            klass.getFullName(), typeDecl.typeParameters());
+            child, typeDecl.typeParameters());
         for (DFParamType pt : pts) {
             child.addParamType(pt);
         }

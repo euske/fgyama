@@ -146,17 +146,19 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     private DFMethod addMethod(
-        SimpleName name, boolean isStatic,
+        DFTypeSpace methodSpace, SimpleName name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
-        DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
+        DFMethod method = new DFMethod(
+            this, methodSpace, id, isStatic, argTypes, returnType);
         return this.addMethod(method);
     }
 
     private DFMethod addMethod(
-        String id, boolean isStatic,
+        DFTypeSpace methodSpace, String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
-        DFMethod method = new DFMethod(this, id, isStatic, argTypes, returnType);
+        DFMethod method = new DFMethod(
+            this, methodSpace, id, isStatic, argTypes, returnType);
         return this.addMethod(method);
     }
 
@@ -223,7 +225,7 @@ public class DFClassSpace extends DFVarSpace {
                 argTypes[i] = finder.resolve(args[i]);
             }
             DFType returnType = finder.resolve(meth.getReturnType());
-            this.addMethod(meth.getName(), meth.isStatic(),
+            this.addMethod(null, meth.getName(), meth.isStatic(),
                            argTypes, returnType);
         }
     }
@@ -256,11 +258,11 @@ public class DFClassSpace extends DFVarSpace {
             }
             // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
-            for (int i = 0; i < tps.size(); i++) {
+            for (int i = 0; i < _paramTypes.length; i++) {
                 DFParamType pt = _paramTypes[i];
                 List<Type> bounds = tps.get(i).typeBounds();
                 DFClassSpace[] bases = new DFClassSpace[bounds.size()];
-                for (int j = 0; j < bounds.size(); j++) {
+                for (int j = 0; j < bases.length; j++) {
                     bases[j] = finder.resolveClass(bounds.get(j));
                 }
                 pt.setBases(bases);
@@ -296,13 +298,21 @@ public class DFClassSpace extends DFVarSpace {
             MethodDeclaration decl = (MethodDeclaration)body;
             List<TypeParameter> tps = decl.typeParameters();
             DFTypeFinder finder2 = finder;
+            DFTypeSpace methodSpace = null;
             if (0 < tps.size()) {
-                DFTypeSpace typeSpace = new DFTypeSpace("MethodDecl");
-                finder2 = new DFTypeFinder(finder, typeSpace);
-                DFParamType[] pts = DFParamType.createParamTypes(
-                    this.getFullName(), tps);
-                for (DFParamType pt : pts) {
-                    typeSpace.addParamType(pt);
+                methodSpace = new DFTypeSpace("MethodDecl");
+                finder2 = new DFTypeFinder(finder, methodSpace);
+                DFParamType[] paramTypes = DFParamType.createParamTypes(
+                    methodSpace, tps);
+                for (int i = 0; i < paramTypes.length; i++) {
+                    DFParamType pt = paramTypes[i];
+                    List<Type> bounds = tps.get(i).typeBounds();
+                    DFClassSpace[] bases = new DFClassSpace[bounds.size()];
+                    for (int j = 0; j < bases.length; j++) {
+                        bases[j] = finder.resolveClass(bounds.get(j));
+                    }
+                    pt.setBases(bases);
+                    methodSpace.addParamType(pt);
                 }
             }
             DFType[] argTypes = finder2.resolveList(decl);
@@ -312,7 +322,7 @@ public class DFClassSpace extends DFVarSpace {
             } else {
                 returnType = finder2.resolve(decl.getReturnType2());
             }
-            this.addMethod(decl.getName(), isStatic(decl),
+            this.addMethod(methodSpace, decl.getName(), isStatic(decl),
                            argTypes, returnType);
 
         } else if (body instanceof Initializer) {

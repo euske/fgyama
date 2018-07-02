@@ -11,26 +11,27 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFParamType extends DFType {
 
-    private String _parentName;
+    public static DFParamType[] createParamTypes(
+        DFTypeSpace typeSpace, List<TypeParameter> tps) {
+        DFParamType[] pts = new DFParamType[tps.size()];
+        for (int i = 0; i < tps.size(); i++) {
+            String id = tps.get(i).getName().getIdentifier();
+            DFParamType pt = new DFParamType(typeSpace, i, id);
+            pts[i] = pt;
+        }
+        return pts;
+    }
+
+    private DFTypeSpace _typeSpace;
     private int _index;
     private String _name;
     private DFClassSpace[] _bases = null;
 
-    public DFParamType(String parentName, int index, String name) {
-        _parentName = parentName;
+    public DFParamType(DFTypeSpace typeSpace, int index, String name) {
+        assert(typeSpace != null);
+        _typeSpace = typeSpace;
         _index = index;
         _name = name;
-    }
-
-    public static DFParamType[] createParamTypes(
-        String baseName, List<TypeParameter> tps) {
-        DFParamType[] pts = new DFParamType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            String id = tps.get(i).getName().getIdentifier();
-            DFParamType pt = new DFParamType(baseName, i, id);
-            pts[i] = pt;
-        }
-        return pts;
     }
 
     @Override
@@ -47,7 +48,7 @@ public class DFParamType extends DFType {
     }
 
     public String getName() {
-        return "T"+_parentName+"/"+_name;
+        return "T"+_typeSpace.getFullName()+"/"+_name;
     }
 
     public int canConvertFrom(DFType type) {
@@ -58,6 +59,7 @@ public class DFParamType extends DFType {
             return _bases[0].isBaseOf(ctype.getKlass());
         } else if (type instanceof DFParamType) {
             DFParamType ptype = (DFParamType)type;
+            if (_typeSpace != ptype._typeSpace) return -1;
             if (_bases.length == 0) return 0;
             if (ptype._bases.length == 0) return -1;
             // XXX check interfaces.

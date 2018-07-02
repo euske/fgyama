@@ -1149,7 +1149,7 @@ public class Java2DF {
             DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
             if (methods == null) {
                 String id = invoke.getName().getIdentifier();
-                DFMethod fallback = new DFMethod(klass, id, false, null, null);
+                DFMethod fallback = new DFMethod(klass, null, id, false, null, null);
                 Logger.error("Fallback method: "+klass+": "+fallback);
                 methods = new DFMethod[] { fallback };
             }
@@ -1183,7 +1183,7 @@ public class Java2DF {
             DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
             if (methods == null) {
                 String id = sinvoke.getName().getIdentifier();
-                DFMethod fallback = new DFMethod(baseKlass, id, false, null, null);
+                DFMethod fallback = new DFMethod(baseKlass, null, id, false, null, null);
                 Logger.error("Fallback method: "+baseKlass+": "+fallback);
                 methods = new DFMethod[] { fallback };
             }
@@ -1999,16 +1999,14 @@ public class Java2DF {
         assert(method != null);
         // add a typespace for inline classes.
         DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
+        DFTypeSpace methodSpace = method.getChildSpace();
+        if (methodSpace != null) {
+            finder = new DFTypeFinder(finder, methodSpace);
+        }
         DFTypeSpace typeSpace = new DFTypeSpace(varSpace.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            List<TypeParameter> tps = methodDecl.typeParameters();
-            DFParamType[] pts = DFParamType.createParamTypes(
-                typeSpace.getFullName(), tps);
-            for (DFParamType pt : pts) {
-                typeSpace.addParamType(pt);
-            }
             typeSpace.build(methodDecl.getBody());
             this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
             varSpace.build(finder, methodDecl);
