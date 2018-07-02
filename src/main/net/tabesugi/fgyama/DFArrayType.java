@@ -16,6 +16,7 @@ public class DFArrayType extends DFType {
 
     // DFArrayType
     public DFArrayType(DFType elemType, int ndims) {
+        assert(0 < ndims);
         _elemType = elemType;
         _ndims = ndims;
     }
@@ -33,7 +34,11 @@ public class DFArrayType extends DFType {
 
     public String getName()
     {
-        return _elemType.getName()+"[]";
+        String name = _elemType.getName();
+        for (int i = 0; i < _ndims; i++) {
+            name += "[]";
+        }
+        return name;
     }
 
     public int canConvertFrom(DFType type)
@@ -48,6 +53,10 @@ public class DFArrayType extends DFType {
 
     public DFType getElemType()
     {
-        return _elemType;
+        if (_ndims == 1) {
+            return _elemType;
+        } else {
+            return new DFArrayType(_elemType, _ndims-1);
+        }
     }
 }
