@@ -25,6 +25,8 @@ public class DFClassSpace extends DFVarSpace {
 
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
+    private Map<String, DFMethod> _ast2method =
+        new HashMap<String, DFMethod>();
 
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
@@ -118,6 +120,10 @@ public class DFClassSpace extends DFVarSpace {
             klass = klass._baseKlass;
         }
         return null;
+    }
+
+    public DFMethod getMethodByAST(ASTNode ast) {
+        return _ast2method.get(Utils.encodeASTNode(ast));
     }
 
     private DFVarRef addField(
@@ -322,8 +328,10 @@ public class DFClassSpace extends DFVarSpace {
             } else {
                 returnType = finder2.resolve(decl.getReturnType2());
             }
-            this.addMethod(methodSpace, decl.getName(), isStatic(decl),
-                           argTypes, returnType);
+            DFMethod method = this.addMethod(
+                methodSpace, decl.getName(), isStatic(decl),
+                argTypes, returnType);
+            _ast2method.put(Utils.encodeASTNode(decl), method);
 
         } else if (body instanceof Initializer) {
 

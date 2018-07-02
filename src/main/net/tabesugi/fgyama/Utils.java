@@ -127,6 +127,11 @@ public class Utils {
         }
     }
 
+    public static String encodeASTNode(ASTNode node) {
+        return ("AST"+node.getNodeType()+":"+
+                node.getStartPosition()+","+node.getLength());
+    }
+
     public static String getASTNodeTypeName(int type) {
         switch (type) {
         case ASTNode.ANNOTATION_TYPE_DECLARATION:

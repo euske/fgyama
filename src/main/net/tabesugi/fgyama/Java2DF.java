@@ -1994,15 +1994,15 @@ public class Java2DF {
         throws UnsupportedSyntax, EntityNotFound {
         // Ignore method prototypes.
         if (methodDecl.getBody() == null) return null;
-        DFType[] argTypes = finder.resolveList(methodDecl);
-        DFMethod method = klass.lookupMethod1(methodDecl.getName(), argTypes);
+        DFMethod method = klass.getMethodByAST(methodDecl);
         assert(method != null);
-        // add a typespace for inline classes.
-        DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
         DFTypeSpace methodSpace = method.getChildSpace();
         if (methodSpace != null) {
             finder = new DFTypeFinder(finder, methodSpace);
         }
+        DFType[] argTypes = finder.resolveList(methodDecl);
+        DFVarSpace varSpace = new DFVarSpace(klass, methodDecl.getName());
+        // add a typespace for inline classes.
         DFTypeSpace typeSpace = new DFTypeSpace(varSpace.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
         try {

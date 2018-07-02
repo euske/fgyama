@@ -19,8 +19,8 @@ public class DFVarSpace {
 
     private List<DFVarSpace> _children =
         new ArrayList<DFVarSpace>();
-    private Map<ASTNode, DFVarSpace> _ast2child =
-        new HashMap<ASTNode, DFVarSpace>();
+    private Map<String, DFVarSpace> _ast2child =
+        new HashMap<String, DFVarSpace>();
     private Map<String, DFVarRef> _id2ref =
         new HashMap<String, DFVarRef>();
 
@@ -78,12 +78,12 @@ public class DFVarSpace {
         Logger.info("DFVarSpace.addChild: "+this+": "+id);
         DFVarSpace space = new DFVarSpace(this, id);
         _children.add(space);
-        _ast2child.put(ast, space);
+        _ast2child.put(Utils.encodeASTNode(ast), space);
         return space;
     }
 
     public DFVarSpace getChildByAST(ASTNode ast) {
-        return _ast2child.get(ast);
+        return _ast2child.get(Utils.encodeASTNode(ast));
     }
 
     public DFVarSpace[] getChildren() {
