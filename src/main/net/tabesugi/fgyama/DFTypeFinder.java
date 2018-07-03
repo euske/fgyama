@@ -30,22 +30,22 @@ public class DFTypeFinder {
     }
 
     public DFClassSpace lookupClass(Name name)
-        throws EntityNotFound {
+        throws TypeNotFound {
         return this.lookupClass(name.getFullyQualifiedName());
     }
 
     public DFClassSpace lookupClass(String name)
-        throws EntityNotFound {
+        throws TypeNotFound {
         DFClassSpace klass;
         //Logger.info("lookupClass: "+_space+": "+name);
         name = name.replace('$', '.');
         try {
             klass = _space.getClass(name);
-        } catch (EntityNotFound e) {
+        } catch (TypeNotFound e) {
             if (_next != null) {
                 klass = _next.lookupClass(name);
             } else {
-                throw new EntityNotFound(name);
+                throw new TypeNotFound(name);
             }
         }
         klass.load(this);
@@ -67,12 +67,12 @@ public class DFTypeFinder {
     }
 
     public DFClassSpace resolveClass(Type type)
-        throws EntityNotFound {
+        throws TypeNotFound {
         return this.resolveClass(resolve(type));
     }
 
     public DFClassSpace resolveClass(DFType type)
-        throws EntityNotFound {
+        throws TypeNotFound {
         if (type == null) {
             // treat unknown class as Object.
             return DFRootTypeSpace.OBJECT_CLASS;
@@ -81,13 +81,13 @@ public class DFTypeFinder {
         } else if (type instanceof DFClassType) {
             return ((DFClassType)type).getKlass();
         } else {
-            throw new EntityNotFound(type.getName());
+            throw new TypeNotFound(type.getName());
         }
     }
 
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
-        throws EntityNotFound {
+        throws TypeNotFound {
         if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return new DFBasicType(ptype.getPrimitiveTypeCode());
@@ -116,12 +116,12 @@ public class DFTypeFinder {
             return new DFClassType(paramKlass);
         } else {
             // ???
-            throw new EntityNotFound(type.toString());
+            throw new TypeNotFound(type.toString());
         }
     }
 
     public DFType resolve(org.apache.bcel.generic.Type type)
-        throws EntityNotFound {
+        throws TypeNotFound {
         if (type.equals(org.apache.bcel.generic.BasicType.BOOLEAN)) {
             return DFBasicType.BOOLEAN;
         } else if (type.equals(org.apache.bcel.generic.BasicType.BYTE)) {
@@ -154,13 +154,13 @@ public class DFTypeFinder {
             return new DFClassType(klass);
         } else {
             // ???
-            throw new EntityNotFound(type.toString());
+            throw new TypeNotFound(type.toString());
         }
     }
 
     @SuppressWarnings("unchecked")
     public DFType[] resolveList(MethodDeclaration decl)
-        throws EntityNotFound {
+        throws TypeNotFound {
         List<DFType> types = new ArrayList<DFType>();
         for (SingleVariableDeclaration varDecl :
                  (List<SingleVariableDeclaration>) decl.parameters()) {

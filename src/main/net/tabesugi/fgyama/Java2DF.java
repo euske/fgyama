@@ -660,7 +660,7 @@ public class Java2DF {
     // 		try {
     // 		    DFClassSpace klass = finder.lookupClass(qname.getQualifier());
     // 		    return klass.getField(qname.getName());
-    //             } catch (EntityNotFound e) {
+    //             } catch (TypeNotFound e) {
     // 		    return null;
     // 		}
     // 	    }
@@ -868,7 +868,6 @@ public class Java2DF {
 
         for (VariableDeclarationFragment frag : frags) {
             DFVarRef ref = varSpace.lookupVar(frag.getName());
-            assert(ref != null);
             Expression init = frag.getInitializer();
             if (init != null) {
                 cpt = processExpression(
@@ -1642,7 +1641,6 @@ public class Java2DF {
             graph, finder, loopSpace, frame, loopCpt, expr);
         SingleVariableDeclaration decl = eForStmt.getParameter();
         DFVarRef ref = loopSpace.lookupVar(decl.getName());
-        assert(ref != null);
         DFNode iterValue = new IterNode(graph, loopSpace, ref, expr);
         iterValue.accept(loopCpt.getRValue());
         SingleAssignNode assign = new SingleAssignNode(graph, loopSpace, ref, expr);
@@ -1968,7 +1966,7 @@ public class Java2DF {
                     importSpace.addClass(klass);
                     n++;
                 }
-            } catch (EntityNotFound e) {
+            } catch (TypeNotFound e) {
                 Logger.error("Import: class not found: "+e.name);
             }
         }
@@ -2048,7 +2046,6 @@ public class Java2DF {
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFVarRef ref = varSpace.lookupVar(decl.getName());
-                assert(ref != null);
                 DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
@@ -2169,15 +2166,16 @@ public class Java2DF {
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-        } catch (EntityNotFound e) {
-            Logger.error("Pass2: class not found: "+e.name+" ast="+e.ast);
+        } catch (TypeNotFound e) {
+            Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
             throw e;
         }
     }
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit) throws EntityNotFound {
+    public void buildGraphs(CompilationUnit cunit)
+        throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2187,7 +2185,7 @@ public class Java2DF {
                 processTypeDeclaration(typeSpace, finder, typeDecl);
             }
         } catch (EntityNotFound e) {
-            Logger.error("Pass3: class not found: "+e.name+" ast="+e.ast);
+            Logger.error("Pass3: entity not found: "+e.name+" ast="+e.ast);
             throw e;
         }
     }

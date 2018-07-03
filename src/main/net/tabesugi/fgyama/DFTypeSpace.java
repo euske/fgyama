@@ -115,11 +115,11 @@ public class DFTypeSpace {
     }
 
     public DFClassSpace getClass(Name name)
-        throws EntityNotFound {
+        throws TypeNotFound {
         return this.getClass(name.getFullyQualifiedName());
     }
     public DFClassSpace getClass(String id)
-        throws EntityNotFound {
+        throws TypeNotFound {
         //Logger.info("DFTypeSpace.getClass: "+this+": "+id);
         DFClassSpace klass = null;
         DFTypeSpace space = this;
@@ -128,7 +128,7 @@ public class DFTypeSpace {
             if (i < 0) {
                 klass = space._id2klass.get(id);
                 if (klass == null) {
-                    throw new EntityNotFound(id);
+                    throw new TypeNotFound(id);
                 }
                 return klass;
             }
@@ -142,7 +142,7 @@ public class DFTypeSpace {
             }
             id = id.substring(i+1);
         }
-        throw new EntityNotFound(id);
+        throw new TypeNotFound(id);
     }
 
     public void addParamType(DFParamType pt) {

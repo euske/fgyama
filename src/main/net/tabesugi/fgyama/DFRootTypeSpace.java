@@ -49,7 +49,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     }
 
     public void loadDefaultClasses()
-        throws IOException, EntityNotFound {
+        throws IOException, TypeNotFound {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");

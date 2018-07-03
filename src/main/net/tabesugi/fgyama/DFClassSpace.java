@@ -22,6 +22,7 @@ public class DFClassSpace extends DFVarSpace {
     private String _jarPath = null;
     private String _filePath = null;
     private boolean _loaded = true;
+    private DFVarRef _this = null;
 
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
@@ -40,7 +41,7 @@ public class DFClassSpace extends DFVarSpace {
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace, String id) {
         this(typeSpace, childSpace, id, null);
-        this.addRef("#this", new DFClassType(this));
+        _this = this.addRef("#this", new DFClassType(this));
     }
 
     @Override
@@ -82,20 +83,20 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public DFVarRef lookupThis() {
-        return this.lookupRef("#this");
+        return _this;
     }
 
-    protected DFVarRef lookupField(String id) {
+    protected DFVarRef lookupField(String id)
+        throws VariableNotFound {
         return this.lookupRef("."+id);
     }
 
-    public DFVarRef lookupField(SimpleName name) {
-        DFVarRef ref = this.lookupField(name.getIdentifier());
-        if (ref != null) return ref;
-        return new DFVarRef(null, "."+name.getIdentifier(), null);
+    public DFVarRef lookupField(SimpleName name)
+        throws VariableNotFound {
+        return this.lookupField(name.getIdentifier());
     }
 
-    public DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
+    protected DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
         String id = name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
@@ -193,7 +194,7 @@ public class DFClassSpace extends DFVarSpace {
         return false;
     }
 
-    public void load(DFTypeFinder finder) throws EntityNotFound {
+    public void load(DFTypeFinder finder) throws TypeNotFound {
         if (_loaded) return;
         _loaded = true;
         try {
@@ -208,12 +209,12 @@ public class DFClassSpace extends DFVarSpace {
             }
         } catch (IOException e) {
             Logger.error("Error: Not found: "+_jarPath+"/"+_filePath);
-            throw new EntityNotFound(this.getFullName());
+            throw new TypeNotFound(this.getFullName());
         }
     }
 
     private void load(DFTypeFinder finder, JavaClass jklass)
-        throws EntityNotFound {
+        throws TypeNotFound {
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
             _baseKlass = finder.lookupClass(superClass);
@@ -246,7 +247,7 @@ public class DFClassSpace extends DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFClassSpace.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
@@ -278,7 +279,7 @@ public class DFClassSpace extends DFVarSpace {
                      (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
                 this.build(finder, body);
             }
-        } catch (EntityNotFound e) {
+        } catch (TypeNotFound e) {
             e.setAst(typeDecl);
             throw e;
         }
@@ -286,7 +287,7 @@ public class DFClassSpace extends DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, BodyDeclaration body)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
             DFClassSpace klass = _childSpace.getClass(decl.getName());

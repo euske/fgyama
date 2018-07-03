@@ -32,21 +32,21 @@ public class DFParamClass extends DFClassSpace {
     }
 
     @Override
-    protected DFVarRef lookupField(String id) {
+    protected DFVarRef lookupField(String id)
+        throws VariableNotFound {
         DFVarRef ref = _genericKlass.lookupField(id);
-        if (ref == null) return null;
         return ref.parameterize(_argTypes);
     }
 
     @Override
-    public DFVarRef lookupField(SimpleName name) {
+    public DFVarRef lookupField(SimpleName name)
+        throws VariableNotFound {
         DFVarRef ref = _genericKlass.lookupField(name);
-        if (ref == null) return null;
         return ref.parameterize(_argTypes);
     }
 
     @Override
-    public DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
+    protected DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
         DFMethod method = _genericKlass.lookupMethod1(name, argTypes);
         if (method == null) return null;
         return method.parameterize(_argTypes);

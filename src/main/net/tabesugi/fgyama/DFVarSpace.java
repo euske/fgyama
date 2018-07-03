@@ -101,43 +101,54 @@ public class DFVarSpace {
         return ref;
     }
 
-    protected DFVarRef lookupRef(String id) {
+    protected DFVarRef lookupRef(String id)
+        throws VariableNotFound {
         DFVarRef ref = _id2ref.get(id);
         if (ref != null) {
             return ref;
         } else if (_parent != null) {
             return _parent.lookupRef(id);
         } else {
-            return null;
+            throw new VariableNotFound(id);
         }
     }
 
-    protected DFVarRef lookupField(String id) {
+    protected DFVarRef lookupField(String id)
+        throws VariableNotFound {
         assert(_parent != null);
         return _parent.lookupField(id);
     }
 
-    public DFVarRef lookupVar(SimpleName name) {
+    public DFVarRef lookupVar(SimpleName name)
+        throws VariableNotFound {
         return this.lookupRef(name.getIdentifier());
     }
 
-    public DFVarRef lookupVarOrField(SimpleName name) {
+    public DFVarRef lookupVarOrField(SimpleName name)
+        throws VariableNotFound {
         // try local variables first.
-        DFVarRef ref = this.lookupRef(name.getIdentifier());
-        if (ref != null) return ref;
-        // try field names.
-        ref = this.lookupField(name.getIdentifier());
-        if (ref != null) return ref;
-        // fallback...
-        return this.addRef(name.getIdentifier(), null);
+        try {
+            return this.lookupRef(name.getIdentifier());
+        } catch (VariableNotFound e) {
+            // try field names.
+            return this.lookupField(name.getIdentifier());
+        }
     }
 
     public DFVarRef lookupReturn() {
-        return this.lookupRef("#return");
+        try {
+            return this.lookupRef("#return");
+        } catch (VariableNotFound e) {
+            return null;        // ???
+        }
     }
 
     public DFVarRef lookupException() {
-        return this.lookupRef("#exception");
+        try {
+            return this.lookupRef("#exception");
+        } catch (VariableNotFound e) {
+            return null;        // ???
+        }
     }
 
     public DFVarRef lookupArray(DFNode array) {
@@ -167,7 +178,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFVarSpace.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : finder.resolve(returnType);
@@ -184,7 +195,7 @@ public class DFVarSpace {
 
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, Statement ast)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
 
         if (ast instanceof AssertStatement) {
 
@@ -367,7 +378,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, Expression ast)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
 
         if (ast instanceof Annotation) {
 
@@ -534,7 +545,7 @@ public class DFVarSpace {
      */
     @SuppressWarnings("unchecked")
     public void buildLeft(DFTypeFinder finder, Expression ast)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
 
         if (ast instanceof Name) {
 
