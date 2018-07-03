@@ -642,322 +642,6 @@ public class Java2DF {
 
     /// General graph operations.
 
-    // public DFVarRef resolveName(
-    // 	DFTypeFinder finder, DFVarSpace varSpace, DFComponent cpt, Name name) {
-    // 	if (name.isSimpleName()) {
-    // 	    SimpleName sname = (SimpleName)name;
-    // 	    return varSpace.getVarOrField(sname);
-    // 	} else {
-    // 	    QualifiedName qname = (QualifiedName)name;
-    // 	    DFVarRef ref = resolveName(finder, varSpace, cpt, qname.getQualifier());
-    // 	    if (ref != null) {
-    // 		DFNode obj = cpt.getValue(ref);
-    // 		DFClassSpace klass = finder.resolveClass(obj.getType());
-    //             return klass.getField(qname.getName());
-    // 	    } else {
-    // 		// There's no variable in the left handside.
-    // 		// So this must be a classname.
-    // 		try {
-    // 		    DFClassSpace klass = finder.lookupClass(qname.getQualifier());
-    // 		    return klass.getField(qname.getName());
-    //             } catch (TypeNotFound e) {
-    // 		    return null;
-    // 		}
-    // 	    }
-    // 	}
-    // }
-
-    /**
-     * Combines two components into one.
-     * A JoinNode is added to each variable.
-     */
-    public DFComponent processConditional(
-        DFGraph graph, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt,
-        ASTNode ast, DFNode condValue,
-        DFComponent trueCpt, DFComponent falseCpt) {
-
-        // outRefs: all the references from both component.
-        List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
-        if (trueCpt != null) {
-            for (DFVarRef ref : trueCpt.getInputRefs()) {
-                DFNode src = trueCpt.getInput(ref);
-                assert src != null;
-                src.accept(cpt.getValue(ref));
-            }
-            outRefs.addAll(Arrays.asList(trueCpt.getOutputRefs()));
-        }
-        if (falseCpt != null) {
-            for (DFVarRef ref : falseCpt.getInputRefs()) {
-                DFNode src = falseCpt.getInput(ref);
-                assert src != null;
-                src.accept(cpt.getValue(ref));
-            }
-            outRefs.addAll(Arrays.asList(falseCpt.getOutputRefs()));
-        }
-
-        // Attach a JoinNode to each variable.
-        Set<DFVarRef> used = new HashSet<DFVarRef>();
-        for (DFVarRef ref : outRefs) {
-            if (used.contains(ref)) continue;
-            used.add(ref);
-            JoinNode join = new JoinNode(graph, varSpace, ref, ast, condValue);
-            if (trueCpt != null) {
-                DFNode dst = trueCpt.getOutput(ref);
-                if (dst != null) {
-                    join.recv(true, dst);
-                }
-            }
-            if (falseCpt != null) {
-                DFNode dst = falseCpt.getOutput(ref);
-                if (dst != null) {
-                    join.recv(false, dst);
-                }
-            }
-            if (!join.isClosed()) {
-                join.close(cpt.getValue(ref));
-            }
-            cpt.setOutput(join);
-        }
-
-        // Take care of exits.
-        if (trueCpt != null) {
-            for (DFExit exit : trueCpt.getExits()) {
-                DFNode node = exit.getNode();
-                JoinNode join = new JoinNode(
-                    graph, varSpace, node.getRef(), null, condValue);
-                join.recv(true, node);
-                cpt.addExit(exit.wrap(join));
-            }
-        }
-        if (falseCpt != null) {
-            for (DFExit exit : falseCpt.getExits()) {
-                DFNode node = exit.getNode();
-                JoinNode join = new JoinNode(
-                    graph, varSpace, node.getRef(), null, condValue);
-                join.recv(false, node);
-                cpt.addExit(exit.wrap(join));
-            }
-        }
-
-        return cpt;
-    }
-
-    /**
-     * Expands the graph for the loop variables.
-     */
-    public DFComponent processLoop(
-        DFGraph graph, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt,
-        ASTNode ast, DFNode condValue,
-        DFFrame loopFrame, DFComponent loopCpt, boolean preTest)
-        throws UnsupportedSyntax {
-
-        // Add four nodes for each loop variable.
-        Map<DFVarRef, LoopBeginNode> begins =
-            new HashMap<DFVarRef, LoopBeginNode>();
-        Map<DFVarRef, LoopRepeatNode> repeats =
-            new HashMap<DFVarRef, LoopRepeatNode>();
-        Map<DFVarRef, DFNode> ends =
-            new HashMap<DFVarRef, DFNode>();
-        DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
-        for (DFVarRef ref : loopRefs) {
-            DFNode src = cpt.getValue(ref);
-            LoopBeginNode begin = new LoopBeginNode(graph, varSpace, ref, ast, src);
-            LoopRepeatNode repeat = new LoopRepeatNode(graph, varSpace, ref, ast);
-            LoopEndNode end = new LoopEndNode(graph, varSpace, ref, ast, condValue);
-            begin.setEnd(end);
-            end.setBegin(begin);
-            begins.put(ref, begin);
-            ends.put(ref, end);
-            repeats.put(ref, repeat);
-        }
-
-        if (preTest) {  // Repeat -> [S] -> Begin -> End
-            // Connect the repeats to the loop inputs.
-            for (DFVarRef ref : loopCpt.getInputRefs()) {
-                DFNode input = loopCpt.getInput(ref);
-                DFNode src = repeats.get(ref);
-                if (src == null) {
-                    src = cpt.getValue(ref);
-                }
-                input.accept(src);
-            }
-            // Connect the loop outputs to the begins.
-            for (DFVarRef ref : loopCpt.getOutputRefs()) {
-                DFNode output = loopCpt.getOutput(ref);
-                LoopBeginNode begin = begins.get(ref);
-                if (begin != null) {
-                    begin.setRepeat(output);
-                } else {
-                    //assert !loopRefs.contains(ref);
-                    cpt.setOutput(output);
-                }
-            }
-            // Connect the beings and ends.
-            for (DFVarRef ref : loopRefs) {
-                LoopBeginNode begin = begins.get(ref);
-                DFNode end = ends.get(ref);
-                end.accept(begin);
-            }
-
-        } else {  // Begin -> [S] -> End -> Repeat
-            // Connect the begins to the loop inputs.
-            for (DFVarRef ref : loopCpt.getInputRefs()) {
-                DFNode input = loopCpt.getInput(ref);
-                DFNode src = begins.get(ref);
-                if (src == null) {
-                    src = cpt.getValue(ref);
-                }
-                input.accept(src);
-            }
-            // Connect the loop outputs to the ends.
-            for (DFVarRef ref : loopCpt.getOutputRefs()) {
-                DFNode output = loopCpt.getOutput(ref);
-                DFNode dst = ends.get(ref);
-                if (dst != null) {
-                    dst.accept(output);
-                } else {
-                    //assert !loopRefs.contains(ref);
-                    cpt.setOutput(output);
-                }
-            }
-            // Connect the repeats and begins.
-            for (DFVarRef ref : loopRefs) {
-                LoopRepeatNode repeat = repeats.get(ref);
-                LoopBeginNode begin = begins.get(ref);
-                begin.setRepeat(repeat);
-            }
-        }
-
-        // Redirect the continue statements.
-        for (DFExit exit : loopCpt.getExits()) {
-            if (exit.isCont() && exit.getFrame() == loopFrame) {
-                DFNode node = exit.getNode();
-                DFNode end = ends.get(node.getRef());
-                if (end == null) {
-                    end = cpt.getValue(node.getRef());
-                }
-                if (node instanceof JoinNode) {
-                    ((JoinNode)node).close(end);
-                }
-                ends.put(node.getRef(), node);
-            } else {
-                cpt.addExit(exit);
-            }
-        }
-
-        // Closing the loop.
-        for (DFVarRef ref : loopRefs) {
-            DFNode end = ends.get(ref);
-            LoopRepeatNode repeat = repeats.get(ref);
-            cpt.setOutput(end);
-            repeat.setLoop(end);
-        }
-
-        return cpt;
-    }
-
-    /**
-     * Creates a new variable node.
-     */
-    public DFComponent processVariableDeclaration(
-        DFGraph graph, DFTypeFinder finder, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt, List<VariableDeclarationFragment> frags)
-        throws UnsupportedSyntax, EntityNotFound {
-
-        for (VariableDeclarationFragment frag : frags) {
-            DFVarRef ref = varSpace.lookupVar(frag.getName());
-            Expression init = frag.getInitializer();
-            if (init != null) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, init);
-                DFNode assign = new SingleAssignNode(graph, varSpace, ref, frag);
-                assign.accept(cpt.getRValue());
-                cpt.setOutput(assign);
-            }
-            frame.addOutput(ref);
-        }
-        return cpt;
-    }
-
-    /**
-     * Creates an assignment node.
-     */
-    @SuppressWarnings("unchecked")
-    public DFComponent processAssignment(
-        DFGraph graph, DFTypeFinder finder, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt, Expression expr)
-        throws UnsupportedSyntax, EntityNotFound {
-
-        if (expr instanceof Name) {
-            Name name = (Name)expr;
-            if (name.isSimpleName()) {
-                DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
-                cpt.setLValue(new SingleAssignNode(graph, varSpace, ref, expr));
-                frame.addOutput(ref);
-            } else {
-                // QualifiedName == FieldAccess
-                QualifiedName qn = (QualifiedName)name;
-                DFNode obj = null;
-                DFClassSpace klass;
-                try {
-                    klass = finder.lookupClass(qn.getQualifier());
-                } catch (EntityNotFound e) {
-                    cpt = processExpression(
-                        graph, finder, varSpace, frame, cpt, qn.getQualifier());
-                    obj = cpt.getRValue();
-                    klass = finder.resolveClass(obj.getType());
-                }
-                SimpleName fieldName = qn.getName();
-                DFVarRef ref = klass.lookupField(fieldName);
-                cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
-                frame.addOutput(ref);
-            }
-
-        } else if (expr instanceof ArrayAccess) {
-            ArrayAccess aa = (ArrayAccess)expr;
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, aa.getArray());
-            DFNode array = cpt.getRValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = varSpace.getArray(array);
-            DFNode index = cpt.getRValue();
-            DFNode node = new ArrayAssignNode(
-                graph, varSpace, ref, expr, array, index);
-            cpt.setLValue(node);
-            frame.addOutput(ref);
-
-        } else if (expr instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess)expr;
-            Expression expr1 = fa.getExpression();
-            DFNode obj = null;
-            DFClassSpace klass = null;
-            if (expr1 instanceof Name) {
-                try {
-                    klass = finder.lookupClass((Name)expr1);
-                } catch (EntityNotFound e) {
-                }
-            }
-            if (klass == null) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, expr1);
-                obj = cpt.getRValue();
-                klass = finder.resolveClass(obj.getType());
-            }
-            SimpleName fieldName = fa.getName();
-            DFVarRef ref = klass.lookupField(fieldName);
-            cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
-            frame.addOutput(ref);
-
-        } else {
-            throw new UnsupportedSyntax(expr);
-        }
-
-        return cpt;
-    }
-
     /**
      * Creates a value node.
      */
@@ -978,21 +662,22 @@ public class Java2DF {
                 cpt.setRValue(node);
                 frame.addInput(ref);
             } else {
-                // QualifiedName == FieldAccess
-                QualifiedName qn = (QualifiedName)name;
+                QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
                 DFClassSpace klass;
                 try {
-                    klass = finder.lookupClass(qn.getQualifier());
-                } catch (EntityNotFound e) {
+                    // Try assuming it's a variable access.
                     cpt = processExpression(
-                        graph, finder, varSpace, frame, cpt, qn.getQualifier());
+                        graph, finder, varSpace, frame, cpt, qname.getQualifier());
                     obj = cpt.getRValue();
                     klass = finder.resolveClass(obj.getType());
+                } catch (EntityNotFound e) {
+                    // Turned out it's a class variable.
+                    klass = finder.lookupClass(qname.getQualifier());
                 }
-                SimpleName fieldName = qn.getName();
+                SimpleName fieldName = qname.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
-                DFNode node = new FieldAccessNode(graph, varSpace, ref, qn, obj);
+                DFNode node = new FieldAccessNode(graph, varSpace, ref, qname, obj);
                 node.accept(cpt.getValue(ref));
                 cpt.setRValue(node);
                 frame.addInput(ref);
@@ -1416,6 +1101,288 @@ public class Java2DF {
             // ???
             throw new UnsupportedSyntax(expr);
         }
+        return cpt;
+    }
+
+    /**
+     * Creates an assignment node.
+     */
+    @SuppressWarnings("unchecked")
+    public DFComponent processAssignment(
+        DFGraph graph, DFTypeFinder finder, DFVarSpace varSpace,
+        DFFrame frame, DFComponent cpt, Expression expr)
+        throws UnsupportedSyntax, EntityNotFound {
+
+        if (expr instanceof Name) {
+            Name name = (Name)expr;
+            if (name.isSimpleName()) {
+                DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
+                cpt.setLValue(new SingleAssignNode(graph, varSpace, ref, expr));
+                frame.addOutput(ref);
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                DFNode obj = null;
+                DFClassSpace klass;
+                try {
+                    // Try assuming it's a variable access.
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, qname.getQualifier());
+                    obj = cpt.getRValue();
+                    klass = finder.resolveClass(obj.getType());
+                } catch (EntityNotFound e) {
+                    // Turned out it's a class variable.
+                    klass = finder.lookupClass(qname.getQualifier());
+                }
+                SimpleName fieldName = qname.getName();
+                DFVarRef ref = klass.lookupField(fieldName);
+                cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
+                frame.addOutput(ref);
+            }
+
+        } else if (expr instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess)expr;
+            cpt = processExpression(
+                graph, finder, varSpace, frame, cpt, aa.getArray());
+            DFNode array = cpt.getRValue();
+            cpt = processExpression(
+                graph, finder, varSpace, frame, cpt, aa.getIndex());
+            DFVarRef ref = varSpace.getArray(array);
+            DFNode index = cpt.getRValue();
+            DFNode node = new ArrayAssignNode(
+                graph, varSpace, ref, expr, array, index);
+            cpt.setLValue(node);
+            frame.addOutput(ref);
+
+        } else if (expr instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess)expr;
+            Expression expr1 = fa.getExpression();
+            cpt = processExpression(
+                graph, finder, varSpace, frame, cpt, expr1);
+            DFNode obj = cpt.getRValue();
+            DFClassSpace klass = finder.resolveClass(obj.getType());
+            SimpleName fieldName = fa.getName();
+            DFVarRef ref = klass.lookupField(fieldName);
+            cpt.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
+            frame.addOutput(ref);
+
+        } else {
+            throw new UnsupportedSyntax(expr);
+        }
+
+        return cpt;
+    }
+
+    /**
+     * Creates a new variable node.
+     */
+    public DFComponent processVariableDeclaration(
+        DFGraph graph, DFTypeFinder finder, DFVarSpace varSpace,
+        DFFrame frame, DFComponent cpt, List<VariableDeclarationFragment> frags)
+        throws UnsupportedSyntax, EntityNotFound {
+
+        for (VariableDeclarationFragment frag : frags) {
+            DFVarRef ref = varSpace.lookupVar(frag.getName());
+            Expression init = frag.getInitializer();
+            if (init != null) {
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt, init);
+                DFNode assign = new SingleAssignNode(graph, varSpace, ref, frag);
+                assign.accept(cpt.getRValue());
+                cpt.setOutput(assign);
+            }
+            frame.addOutput(ref);
+        }
+        return cpt;
+    }
+
+    /**
+     * Combines two components into one.
+     * A JoinNode is added to each variable.
+     */
+    public DFComponent processConditional(
+        DFGraph graph, DFVarSpace varSpace,
+        DFFrame frame, DFComponent cpt,
+        ASTNode ast, DFNode condValue,
+        DFComponent trueCpt, DFComponent falseCpt) {
+
+        // outRefs: all the references from both component.
+        List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
+        if (trueCpt != null) {
+            for (DFVarRef ref : trueCpt.getInputRefs()) {
+                DFNode src = trueCpt.getInput(ref);
+                assert src != null;
+                src.accept(cpt.getValue(ref));
+            }
+            outRefs.addAll(Arrays.asList(trueCpt.getOutputRefs()));
+        }
+        if (falseCpt != null) {
+            for (DFVarRef ref : falseCpt.getInputRefs()) {
+                DFNode src = falseCpt.getInput(ref);
+                assert src != null;
+                src.accept(cpt.getValue(ref));
+            }
+            outRefs.addAll(Arrays.asList(falseCpt.getOutputRefs()));
+        }
+
+        // Attach a JoinNode to each variable.
+        Set<DFVarRef> used = new HashSet<DFVarRef>();
+        for (DFVarRef ref : outRefs) {
+            if (used.contains(ref)) continue;
+            used.add(ref);
+            JoinNode join = new JoinNode(graph, varSpace, ref, ast, condValue);
+            if (trueCpt != null) {
+                DFNode dst = trueCpt.getOutput(ref);
+                if (dst != null) {
+                    join.recv(true, dst);
+                }
+            }
+            if (falseCpt != null) {
+                DFNode dst = falseCpt.getOutput(ref);
+                if (dst != null) {
+                    join.recv(false, dst);
+                }
+            }
+            if (!join.isClosed()) {
+                join.close(cpt.getValue(ref));
+            }
+            cpt.setOutput(join);
+        }
+
+        // Take care of exits.
+        if (trueCpt != null) {
+            for (DFExit exit : trueCpt.getExits()) {
+                DFNode node = exit.getNode();
+                JoinNode join = new JoinNode(
+                    graph, varSpace, node.getRef(), null, condValue);
+                join.recv(true, node);
+                cpt.addExit(exit.wrap(join));
+            }
+        }
+        if (falseCpt != null) {
+            for (DFExit exit : falseCpt.getExits()) {
+                DFNode node = exit.getNode();
+                JoinNode join = new JoinNode(
+                    graph, varSpace, node.getRef(), null, condValue);
+                join.recv(false, node);
+                cpt.addExit(exit.wrap(join));
+            }
+        }
+
+        return cpt;
+    }
+
+    /**
+     * Expands the graph for the loop variables.
+     */
+    public DFComponent processLoop(
+        DFGraph graph, DFVarSpace varSpace,
+        DFFrame frame, DFComponent cpt,
+        ASTNode ast, DFNode condValue,
+        DFFrame loopFrame, DFComponent loopCpt, boolean preTest)
+        throws UnsupportedSyntax {
+
+        // Add four nodes for each loop variable.
+        Map<DFVarRef, LoopBeginNode> begins =
+            new HashMap<DFVarRef, LoopBeginNode>();
+        Map<DFVarRef, LoopRepeatNode> repeats =
+            new HashMap<DFVarRef, LoopRepeatNode>();
+        Map<DFVarRef, DFNode> ends =
+            new HashMap<DFVarRef, DFNode>();
+        DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
+        for (DFVarRef ref : loopRefs) {
+            DFNode src = cpt.getValue(ref);
+            LoopBeginNode begin = new LoopBeginNode(graph, varSpace, ref, ast, src);
+            LoopRepeatNode repeat = new LoopRepeatNode(graph, varSpace, ref, ast);
+            LoopEndNode end = new LoopEndNode(graph, varSpace, ref, ast, condValue);
+            begin.setEnd(end);
+            end.setBegin(begin);
+            begins.put(ref, begin);
+            ends.put(ref, end);
+            repeats.put(ref, repeat);
+        }
+
+        if (preTest) {  // Repeat -> [S] -> Begin -> End
+            // Connect the repeats to the loop inputs.
+            for (DFVarRef ref : loopCpt.getInputRefs()) {
+                DFNode input = loopCpt.getInput(ref);
+                DFNode src = repeats.get(ref);
+                if (src == null) {
+                    src = cpt.getValue(ref);
+                }
+                input.accept(src);
+            }
+            // Connect the loop outputs to the begins.
+            for (DFVarRef ref : loopCpt.getOutputRefs()) {
+                DFNode output = loopCpt.getOutput(ref);
+                LoopBeginNode begin = begins.get(ref);
+                if (begin != null) {
+                    begin.setRepeat(output);
+                } else {
+                    //assert !loopRefs.contains(ref);
+                    cpt.setOutput(output);
+                }
+            }
+            // Connect the beings and ends.
+            for (DFVarRef ref : loopRefs) {
+                LoopBeginNode begin = begins.get(ref);
+                DFNode end = ends.get(ref);
+                end.accept(begin);
+            }
+
+        } else {  // Begin -> [S] -> End -> Repeat
+            // Connect the begins to the loop inputs.
+            for (DFVarRef ref : loopCpt.getInputRefs()) {
+                DFNode input = loopCpt.getInput(ref);
+                DFNode src = begins.get(ref);
+                if (src == null) {
+                    src = cpt.getValue(ref);
+                }
+                input.accept(src);
+            }
+            // Connect the loop outputs to the ends.
+            for (DFVarRef ref : loopCpt.getOutputRefs()) {
+                DFNode output = loopCpt.getOutput(ref);
+                DFNode dst = ends.get(ref);
+                if (dst != null) {
+                    dst.accept(output);
+                } else {
+                    //assert !loopRefs.contains(ref);
+                    cpt.setOutput(output);
+                }
+            }
+            // Connect the repeats and begins.
+            for (DFVarRef ref : loopRefs) {
+                LoopRepeatNode repeat = repeats.get(ref);
+                LoopBeginNode begin = begins.get(ref);
+                begin.setRepeat(repeat);
+            }
+        }
+
+        // Redirect the continue statements.
+        for (DFExit exit : loopCpt.getExits()) {
+            if (exit.isCont() && exit.getFrame() == loopFrame) {
+                DFNode node = exit.getNode();
+                DFNode end = ends.get(node.getRef());
+                if (end == null) {
+                    end = cpt.getValue(node.getRef());
+                }
+                if (node instanceof JoinNode) {
+                    ((JoinNode)node).close(end);
+                }
+                ends.put(node.getRef(), node);
+            } else {
+                cpt.addExit(exit);
+            }
+        }
+
+        // Closing the loop.
+        for (DFVarRef ref : loopRefs) {
+            DFNode end = ends.get(ref);
+            LoopRepeatNode repeat = repeats.get(ref);
+            cpt.setOutput(end);
+            repeat.setLoop(end);
+        }
+
         return cpt;
     }
 
