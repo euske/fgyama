@@ -642,6 +642,31 @@ public class Java2DF {
 
     /// General graph operations.
 
+    // public DFVarRef resolveName(
+    // 	DFTypeFinder finder, DFVarSpace varSpace, DFComponent cpt, Name name) {
+    // 	if (name.isSimpleName()) {
+    // 	    SimpleName sname = (SimpleName)name;
+    // 	    return varSpace.getVarOrField(sname);
+    // 	} else {
+    // 	    QualifiedName qname = (QualifiedName)name;
+    // 	    DFVarRef ref = resolveName(finder, varSpace, cpt, qname.getQualifier());
+    // 	    if (ref != null) {
+    // 		DFNode obj = cpt.getValue(ref);
+    // 		DFClassSpace klass = finder.resolveClass(obj.getType());
+    //             return klass.getField(qname.getName());
+    // 	    } else {
+    // 		// There's no variable in the left handside.
+    // 		// So this must be a classname.
+    // 		try {
+    // 		    DFClassSpace klass = finder.lookupClass(qname.getQualifier());
+    // 		    return klass.getField(qname.getName());
+    //             } catch (EntityNotFound e) {
+    // 		    return null;
+    // 		}
+    // 	    }
+    // 	}
+    // }
+
     /**
      * Combines two components into one.
      * A JoinNode is added to each variable.
