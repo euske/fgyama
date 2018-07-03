@@ -46,13 +46,6 @@ public class DFParamClass extends DFClassSpace {
     }
 
     @Override
-    protected DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
-        DFMethod method = _genericKlass.lookupMethod1(name, argTypes);
-        if (method == null) return null;
-        return method.parameterize(_argTypes);
-    }
-
-    @Override
     public DFMethod[] lookupMethods(SimpleName name, DFType[] argTypes) {
         DFMethod[] methods = _genericKlass.lookupMethods(name, argTypes);
         if (methods != null) {

@@ -96,7 +96,7 @@ public class DFClassSpace extends DFVarSpace {
         return this.lookupField(name.getIdentifier());
     }
 
-    protected DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
+    private DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
         String id = name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;

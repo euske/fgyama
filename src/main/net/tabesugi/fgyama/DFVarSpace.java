@@ -135,23 +135,22 @@ public class DFVarSpace {
         }
     }
 
-    public DFVarRef lookupReturn() {
-        try {
-            return this.lookupRef("#return");
-        } catch (VariableNotFound e) {
-            return null;        // ???
-        }
+    public DFVarRef lookupReturn()
+        throws VariableNotFound {
+        return this.lookupRef("#return");
     }
 
-    public DFVarRef lookupException() {
-        try {
-            return this.lookupRef("#exception");
-        } catch (VariableNotFound e) {
-            return null;        // ???
-        }
+    public DFVarRef lookupException()
+        throws VariableNotFound {
+        return this.lookupRef("#exception");
     }
 
-    public DFVarRef lookupArray(DFNode array) {
+    public DFVarRef lookupThis() {
+        assert(_parent != null);
+        return _parent.lookupThis();
+    }
+
+    public DFVarRef getArray(DFNode array) {
         DFType type = array.getType();
         DFVarRef ref;
         if (type instanceof DFArrayType) {
@@ -161,11 +160,6 @@ public class DFVarSpace {
             ref = _root.addRef("#array:?", null);
         }
         return ref;
-    }
-
-    public DFVarRef lookupThis() {
-        assert(_parent != null);
-        return _parent.lookupThis();
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {

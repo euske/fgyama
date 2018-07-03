@@ -609,7 +609,7 @@ class ReturnNode extends ProgNode {
 
     public ReturnNode(
         DFGraph graph, DFVarSpace space,
-        ASTNode ast) {
+        ASTNode ast) throws VariableNotFound {
         super(graph, space, null, space.lookupReturn(), ast);
     }
 
@@ -624,7 +624,7 @@ class ExceptionNode extends ProgNode {
 
     public ExceptionNode(
         DFGraph graph, DFVarSpace space,
-        ASTNode ast, DFNode value) {
+        ASTNode ast, DFNode value) throws VariableNotFound {
         super(graph, space, null, space.lookupException(), ast);
         this.accept(value);
     }
@@ -922,7 +922,7 @@ public class Java2DF {
             DFNode array = cpt.getRValue();
             cpt = processExpression(
                 graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = varSpace.lookupArray(array);
+            DFVarRef ref = varSpace.getArray(array);
             DFNode index = cpt.getRValue();
             DFNode node = new ArrayAssignNode(
                 graph, varSpace, ref, expr, array, index);
@@ -1253,7 +1253,7 @@ public class Java2DF {
             DFNode array = cpt.getRValue();
             cpt = processExpression(
                 graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = varSpace.lookupArray(array);
+            DFVarRef ref = varSpace.getArray(array);
             DFNode index = cpt.getRValue();
             DFNode node = new ArrayAccessNode(
                 graph, varSpace, ref, aa, array, index);
