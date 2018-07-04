@@ -129,7 +129,12 @@ public class DFClassSpace extends DFVarSpace {
 
     private DFVarRef addField(
         SimpleName name, boolean isStatic, DFType type) {
-        DFVarRef ref = this.addRef("."+name.getIdentifier(), type);
+        return this.addField(name.getIdentifier(), isStatic, type);
+    }
+
+    public DFVarRef addField(
+        String id, boolean isStatic, DFType type) {
+        DFVarRef ref = this.addRef("."+id, type);
         //Logger.info("DFClassSpace.addField: "+ref);
         return ref;
     }
