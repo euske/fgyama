@@ -88,7 +88,12 @@ public class DFClassSpace extends DFVarSpace {
 
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
-        return this.lookupRef("."+id);
+        try {
+            return this.lookupRef("."+id);
+        } catch (VariableNotFound e) {
+            if (_baseKlass == null) throw e;
+            return _baseKlass.lookupField(id);
+        }
     }
 
     public DFVarRef lookupField(SimpleName name)
@@ -225,12 +230,12 @@ public class DFClassSpace extends DFVarSpace {
             _baseKlass = finder.lookupClass(superClass);
         }
         for (Field fld : jklass.getFields()) {
-            if (!fld.isPublic()) continue;
+            if (fld.isPrivate()) continue;
             DFType type = finder.resolve(fld.getType());
             this.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
-            if (!meth.isPublic()) continue;
+            if (meth.isPrivate()) continue;
             org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {
