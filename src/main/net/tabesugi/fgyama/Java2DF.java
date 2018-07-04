@@ -650,183 +650,307 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
+        try {
+            if (expr instanceof Annotation) {
 
-        if (expr instanceof Annotation) {
+            } else if (expr instanceof Name) {
+                Name name = (Name)expr;
+                if (name.isSimpleName()) {
+                    DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
+                    DFNode node = new VarRefNode(graph, varSpace, ref, expr);
+                    node.accept(cpt.getValue(ref));
+                    cpt.setRValue(node);
+                    frame.addInput(ref);
+                } else {
+                    QualifiedName qname = (QualifiedName)name;
+                    DFNode obj = null;
+                    DFClassSpace klass;
+                    try {
+                        // Try assuming it's a variable access.
+                        cpt = processExpression(
+                            graph, finder, varSpace, frame, cpt, qname.getQualifier());
+                        obj = cpt.getRValue();
+                        klass = finder.resolveClass(obj.getType());
+                    } catch (EntityNotFound e) {
+                        // Turned out it's a class variable.
+                        klass = finder.lookupClass(qname.getQualifier());
+                    }
+                    SimpleName fieldName = qname.getName();
+                    DFVarRef ref = klass.lookupField(fieldName);
+                    DFNode node = new FieldAccessNode(graph, varSpace, ref, qname, obj);
+                    node.accept(cpt.getValue(ref));
+                    cpt.setRValue(node);
+                    frame.addInput(ref);
+                }
 
-        } else if (expr instanceof Name) {
-            Name name = (Name)expr;
-            if (name.isSimpleName()) {
-                DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
+            } else if (expr instanceof ThisExpression) {
+                DFVarRef ref = varSpace.lookupThis();
                 DFNode node = new VarRefNode(graph, varSpace, ref, expr);
                 node.accept(cpt.getValue(ref));
                 cpt.setRValue(node);
                 frame.addInput(ref);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                DFNode obj = null;
-                DFClassSpace klass;
-                try {
-                    // Try assuming it's a variable access.
-                    cpt = processExpression(
-                        graph, finder, varSpace, frame, cpt, qname.getQualifier());
-                    obj = cpt.getRValue();
-                    klass = finder.resolveClass(obj.getType());
-                } catch (EntityNotFound e) {
-                    // Turned out it's a class variable.
-                    klass = finder.lookupClass(qname.getQualifier());
+
+            } else if (expr instanceof BooleanLiteral) {
+                boolean value = ((BooleanLiteral)expr).booleanValue();
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace, DFBasicType.BOOLEAN,
+                                  expr, Boolean.toString(value)));
+
+            } else if (expr instanceof CharacterLiteral) {
+                char value = ((CharacterLiteral)expr).charValue();
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace, DFBasicType.CHAR,
+                                  expr, "'"+Character.toString(value)+"'"));
+
+            } else if (expr instanceof NullLiteral) {
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace, DFNullType.NULL,
+                                  expr, "null"));
+
+            } else if (expr instanceof NumberLiteral) {
+                String value = ((NumberLiteral)expr).getToken();
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace, DFBasicType.NUMBER,
+                                  expr, value));
+
+            } else if (expr instanceof StringLiteral) {
+                String value = ((StringLiteral)expr).getLiteralValue();
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace,
+                                  new DFClassType(DFRootTypeSpace.STRING_CLASS),
+                                  expr, "\""+value+"\""));
+
+            } else if (expr instanceof TypeLiteral) {
+                Type value = ((TypeLiteral)expr).getType();
+                cpt.setRValue(new ConstNode(
+                                  graph, varSpace, DFBasicType.TYPE,
+                                  expr, Utils.getTypeName(value)));
+
+            } else if (expr instanceof PrefixExpression) {
+                PrefixExpression prefix = (PrefixExpression)expr;
+                PrefixExpression.Operator op = prefix.getOperator();
+                Expression operand = prefix.getOperand();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt, operand);
+                if (op == PrefixExpression.Operator.INCREMENT ||
+                    op == PrefixExpression.Operator.DECREMENT) {
+                    cpt = processAssignment(
+                        graph, finder, varSpace, frame, cpt, operand);
+                    DFNode assign = cpt.getLValue();
+                    DFNode value = new PrefixNode(
+                        graph, varSpace, assign.getRef(),
+                        expr, op);
+                    value.accept(cpt.getRValue());
+                    assign.accept(value);
+                    cpt.setOutput(assign);
+                    cpt.setRValue(value);
+                    frame.addInput(assign.getRef());
+                } else {
+                    DFNode value = new PrefixNode(
+                        graph, varSpace, null,
+                        expr, op);
+                    value.accept(cpt.getRValue());
+                    cpt.setRValue(value);
                 }
-                SimpleName fieldName = qname.getName();
-                DFVarRef ref = klass.lookupField(fieldName);
-                DFNode node = new FieldAccessNode(graph, varSpace, ref, qname, obj);
+
+            } else if (expr instanceof PostfixExpression) {
+                PostfixExpression postfix = (PostfixExpression)expr;
+                PostfixExpression.Operator op = postfix.getOperator();
+                Expression operand = postfix.getOperand();
+                cpt = processAssignment(
+                    graph, finder, varSpace, frame, cpt, operand);
+                if (op == PostfixExpression.Operator.INCREMENT ||
+                    op == PostfixExpression.Operator.DECREMENT) {
+                    DFNode assign = cpt.getLValue();
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, operand);
+                    DFNode node = new PostfixNode(
+                        graph, varSpace, assign.getRef(), expr, op);
+                    node.accept(cpt.getRValue());
+                    assign.accept(node);
+                    cpt.setOutput(assign);
+                    frame.addInput(assign.getRef());
+                }
+
+            } else if (expr instanceof InfixExpression) {
+                InfixExpression infix = (InfixExpression)expr;
+                InfixExpression.Operator op = infix.getOperator();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt,
+                    infix.getLeftOperand());
+                DFNode lvalue = cpt.getRValue();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt,
+                    infix.getRightOperand());
+                DFNode rvalue = cpt.getRValue();
+                DFType type = lvalue.getType(); // XXX Todo: implicit type coersion.
+                cpt.setRValue(new InfixNode(
+                                  graph, varSpace, type, expr, op, lvalue, rvalue));
+
+            } else if (expr instanceof ParenthesizedExpression) {
+                ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt,
+                    paren.getExpression());
+
+            } else if (expr instanceof Assignment) {
+                Assignment assn = (Assignment)expr;
+                Assignment.Operator op = assn.getOperator();
+                cpt = processAssignment(
+                    graph, finder, varSpace, frame, cpt,
+                    assn.getLeftHandSide());
+                DFNode assign = cpt.getLValue();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt,
+                    assn.getRightHandSide());
+                DFNode rvalue = cpt.getRValue();
+                DFNode lvalue = ((op == Assignment.Operator.ASSIGN)?
+                                 null : cpt.getValue(assign.getRef()));
+                assign.accept(new AssignOpNode(
+                                  graph, varSpace, assign.getRef(), assn,
+                                  op, lvalue, rvalue));
+                cpt.setOutput(assign);
+                cpt.setRValue(assign);
+                frame.addInput(assign.getRef());
+
+            } else if (expr instanceof VariableDeclarationExpression) {
+                VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
+                cpt = processVariableDeclaration(
+                    graph, finder, varSpace, frame, cpt,
+                    decl.fragments());
+
+            } else if (expr instanceof MethodInvocation) {
+                MethodInvocation invoke = (MethodInvocation)expr;
+                Expression expr1 = invoke.getExpression();
+                DFNode obj = null;
+                DFClassSpace klass = null;
+                if (expr1 == null) {
+                    obj = cpt.getValue(varSpace.lookupThis());
+                } else {
+                    if (expr1 instanceof Name) {
+                        try {
+                            klass = finder.lookupClass((Name)expr1);
+                        } catch (EntityNotFound e) {
+                        }
+                    }
+                    if (klass == null) {
+                        cpt = processExpression(
+                            graph, finder, varSpace, frame, cpt, expr1);
+                        obj = cpt.getRValue();
+                    }
+                }
+                if (obj != null) {
+                    klass = finder.resolveClass(obj.getType());
+                }
+                List<DFNode> argList = new ArrayList<DFNode>();
+                List<DFType> typeList = new ArrayList<DFType>();
+                for (Expression arg : (List<Expression>) invoke.arguments()) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, arg);
+                    DFNode node = cpt.getRValue();
+                    argList.add(node);
+                    typeList.add(node.getType());
+                }
+                DFNode[] args = new DFNode[argList.size()];
+                argList.toArray(args);
+                DFType[] argTypes = new DFType[typeList.size()];
+                typeList.toArray(argTypes);
+                DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
+                if (methods == null) {
+                    String id = invoke.getName().getIdentifier();
+                    DFMethod fallback = new DFMethod(klass, null, id, false, null, null);
+                    Logger.error("Fallback method: "+klass+": "+fallback);
+                    methods = new DFMethod[] { fallback };
+                }
+                MethodCallNode call = new MethodCallNode(
+                    graph, varSpace, methods, invoke, obj);
+                call.setArgs(args);
+                cpt.setRValue(call);
+                if (call.exception != null) {
+                    DFFrame dstFrame = frame.find(DFFrame.TRY);
+                    cpt.addExit(new DFExit(call.exception, dstFrame));
+                }
+
+            } else if (expr instanceof SuperMethodInvocation) {
+                SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
+                DFNode obj = cpt.getValue(varSpace.lookupThis());
+                List<DFNode> argList = new ArrayList<DFNode>();
+                List<DFType> typeList = new ArrayList<DFType>();
+                for (Expression arg : (List<Expression>) sinvoke.arguments()) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, arg);
+                    DFNode node = cpt.getRValue();
+                    argList.add(node);
+                    typeList.add(node.getType());
+                }
+                DFNode[] args = new DFNode[argList.size()];
+                argList.toArray(args);
+                DFType[] argTypes = new DFType[typeList.size()];
+                typeList.toArray(argTypes);
+                DFClassSpace klass = finder.resolveClass(obj.getType());
+                DFClassSpace baseKlass = klass.getBase();
+                DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
+                if (methods == null) {
+                    String id = sinvoke.getName().getIdentifier();
+                    DFMethod fallback = new DFMethod(baseKlass, null, id, false, null, null);
+                    Logger.error("Fallback method: "+baseKlass+": "+fallback);
+                    methods = new DFMethod[] { fallback };
+                }
+                MethodCallNode call = new MethodCallNode(
+                    graph, varSpace, methods, sinvoke, obj);
+                call.setArgs(args);
+                cpt.setRValue(call);
+                if (call.exception != null) {
+                    DFFrame dstFrame = frame.find(DFFrame.TRY);
+                    cpt.addExit(new DFExit(call.exception, dstFrame));
+                }
+
+            } else if (expr instanceof ArrayCreation) {
+                ArrayCreation ac = (ArrayCreation)expr;
+                for (Expression dim : (List<Expression>) ac.dimensions()) {
+                    // XXX cpt.getRValue() is not used (for now).
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, dim);
+                }
+                ArrayInitializer init = ac.getInitializer();
+                if (init != null) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, init);
+                } else {
+                    cpt.setRValue(new ArrayValueNode(graph, varSpace, ac));
+                }
+
+            } else if (expr instanceof ArrayInitializer) {
+                ArrayInitializer init = (ArrayInitializer)expr;
+                ArrayValueNode arr = new ArrayValueNode(graph, varSpace, init);
+                for (Expression expr1 : (List<Expression>) init.expressions()) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, expr1);
+                    arr.addValue(cpt.getRValue());
+                }
+                cpt.setRValue(arr);
+                // XXX array ref is not used.
+
+            } else if (expr instanceof ArrayAccess) {
+                ArrayAccess aa = (ArrayAccess)expr;
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt, aa.getArray());
+                DFNode array = cpt.getRValue();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt, aa.getIndex());
+                DFVarRef ref = varSpace.getArray(array);
+                DFNode index = cpt.getRValue();
+                DFNode node = new ArrayAccessNode(
+                    graph, varSpace, ref, aa, array, index);
                 node.accept(cpt.getValue(ref));
                 cpt.setRValue(node);
                 frame.addInput(ref);
-            }
 
-        } else if (expr instanceof ThisExpression) {
-            DFVarRef ref = varSpace.lookupThis();
-            DFNode node = new VarRefNode(graph, varSpace, ref, expr);
-            node.accept(cpt.getValue(ref));
-            cpt.setRValue(node);
-            frame.addInput(ref);
-
-        } else if (expr instanceof BooleanLiteral) {
-            boolean value = ((BooleanLiteral)expr).booleanValue();
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFBasicType.BOOLEAN,
-                              expr, Boolean.toString(value)));
-
-        } else if (expr instanceof CharacterLiteral) {
-            char value = ((CharacterLiteral)expr).charValue();
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFBasicType.CHAR,
-                              expr, "'"+Character.toString(value)+"'"));
-
-        } else if (expr instanceof NullLiteral) {
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFNullType.NULL,
-                              expr, "null"));
-
-        } else if (expr instanceof NumberLiteral) {
-            String value = ((NumberLiteral)expr).getToken();
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFBasicType.NUMBER,
-                              expr, value));
-
-        } else if (expr instanceof StringLiteral) {
-            String value = ((StringLiteral)expr).getLiteralValue();
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace,
-                              new DFClassType(DFRootTypeSpace.STRING_CLASS),
-                              expr, "\""+value+"\""));
-
-        } else if (expr instanceof TypeLiteral) {
-            Type value = ((TypeLiteral)expr).getType();
-            cpt.setRValue(new ConstNode(
-                              graph, varSpace, DFBasicType.TYPE,
-                              expr, Utils.getTypeName(value)));
-
-        } else if (expr instanceof PrefixExpression) {
-            PrefixExpression prefix = (PrefixExpression)expr;
-            PrefixExpression.Operator op = prefix.getOperator();
-            Expression operand = prefix.getOperand();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, operand);
-            if (op == PrefixExpression.Operator.INCREMENT ||
-                op == PrefixExpression.Operator.DECREMENT) {
-                cpt = processAssignment(
-                    graph, finder, varSpace, frame, cpt, operand);
-                DFNode assign = cpt.getLValue();
-                DFNode value = new PrefixNode(
-                    graph, varSpace, assign.getRef(),
-                    expr, op);
-                value.accept(cpt.getRValue());
-                assign.accept(value);
-                cpt.setOutput(assign);
-                cpt.setRValue(value);
-                frame.addInput(assign.getRef());
-            } else {
-                DFNode value = new PrefixNode(
-                    graph, varSpace, null,
-                    expr, op);
-                value.accept(cpt.getRValue());
-                cpt.setRValue(value);
-            }
-
-        } else if (expr instanceof PostfixExpression) {
-            PostfixExpression postfix = (PostfixExpression)expr;
-            PostfixExpression.Operator op = postfix.getOperator();
-            Expression operand = postfix.getOperand();
-            cpt = processAssignment(
-                graph, finder, varSpace, frame, cpt, operand);
-            if (op == PostfixExpression.Operator.INCREMENT ||
-                op == PostfixExpression.Operator.DECREMENT) {
-                DFNode assign = cpt.getLValue();
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, operand);
-                DFNode node = new PostfixNode(
-                    graph, varSpace, assign.getRef(), expr, op);
-                node.accept(cpt.getRValue());
-                assign.accept(node);
-                cpt.setOutput(assign);
-                frame.addInput(assign.getRef());
-            }
-
-        } else if (expr instanceof InfixExpression) {
-            InfixExpression infix = (InfixExpression)expr;
-            InfixExpression.Operator op = infix.getOperator();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt,
-                infix.getLeftOperand());
-            DFNode lvalue = cpt.getRValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt,
-                infix.getRightOperand());
-            DFNode rvalue = cpt.getRValue();
-            DFType type = lvalue.getType(); // XXX Todo: implicit type coersion.
-            cpt.setRValue(new InfixNode(
-                              graph, varSpace, type, expr, op, lvalue, rvalue));
-
-        } else if (expr instanceof ParenthesizedExpression) {
-            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt,
-                paren.getExpression());
-
-        } else if (expr instanceof Assignment) {
-            Assignment assn = (Assignment)expr;
-            Assignment.Operator op = assn.getOperator();
-            cpt = processAssignment(
-                graph, finder, varSpace, frame, cpt,
-                assn.getLeftHandSide());
-            DFNode assign = cpt.getLValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt,
-                assn.getRightHandSide());
-            DFNode rvalue = cpt.getRValue();
-            DFNode lvalue = ((op == Assignment.Operator.ASSIGN)?
-                             null : cpt.getValue(assign.getRef()));
-            assign.accept(new AssignOpNode(
-                              graph, varSpace, assign.getRef(), assn,
-                              op, lvalue, rvalue));
-            cpt.setOutput(assign);
-            cpt.setRValue(assign);
-            frame.addInput(assign.getRef());
-
-        } else if (expr instanceof VariableDeclarationExpression) {
-            VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
-            cpt = processVariableDeclaration(
-                graph, finder, varSpace, frame, cpt,
-                decl.fragments());
-
-        } else if (expr instanceof MethodInvocation) {
-            MethodInvocation invoke = (MethodInvocation)expr;
-            Expression expr1 = invoke.getExpression();
-            DFNode obj = null;
-            DFClassSpace klass = null;
-            if (expr1 == null) {
-                obj = cpt.getValue(varSpace.lookupThis());
-            } else {
+            } else if (expr instanceof FieldAccess) {
+                FieldAccess fa = (FieldAccess)expr;
+                Expression expr1 = fa.getExpression();
+                DFNode obj = null;
+                DFClassSpace klass = null;
                 if (expr1 instanceof Name) {
                     try {
                         klass = finder.lookupClass((Name)expr1);
@@ -837,270 +961,151 @@ public class Java2DF {
                     cpt = processExpression(
                         graph, finder, varSpace, frame, cpt, expr1);
                     obj = cpt.getRValue();
+                    klass = finder.resolveClass(obj.getType());
                 }
-            }
-            if (obj != null) {
-                klass = finder.resolveClass(obj.getType());
-            }
-            List<DFNode> argList = new ArrayList<DFNode>();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) invoke.arguments()) {
+                SimpleName fieldName = fa.getName();
+                DFVarRef ref = klass.lookupField(fieldName);
+                DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
+                node.accept(cpt.getValue(ref));
+                cpt.setRValue(node);
+                frame.addInput(ref);
+
+            } else if (expr instanceof SuperFieldAccess) {
+                SuperFieldAccess sfa = (SuperFieldAccess)expr;
+                SimpleName fieldName = sfa.getName();
+                DFNode obj = cpt.getValue(varSpace.lookupThis());
+                DFClassSpace klass = finder.resolveClass(obj.getType());
+                DFVarRef ref = klass.lookupField(fieldName);
+                DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
+                node.accept(cpt.getValue(ref));
+                cpt.setRValue(node);
+                frame.addInput(ref);
+
+            } else if (expr instanceof CastExpression) {
+                CastExpression cast = (CastExpression)expr;
+                DFType type = finder.resolve(cast.getType());
                 cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, arg);
-                DFNode node = cpt.getRValue();
-                argList.add(node);
-                typeList.add(node.getType());
-            }
-            DFNode[] args = new DFNode[argList.size()];
-            argList.toArray(args);
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
-            DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
-            if (methods == null) {
-                String id = invoke.getName().getIdentifier();
-                DFMethod fallback = new DFMethod(klass, null, id, false, null, null);
-                Logger.error("Fallback method: "+klass+": "+fallback);
-                methods = new DFMethod[] { fallback };
-            }
-            MethodCallNode call = new MethodCallNode(
-                graph, varSpace, methods, invoke, obj);
-            call.setArgs(args);
-            cpt.setRValue(call);
-            if (call.exception != null) {
-                DFFrame dstFrame = frame.find(DFFrame.TRY);
-                cpt.addExit(new DFExit(call.exception, dstFrame));
-            }
+                    graph, finder, varSpace, frame, cpt, cast.getExpression());
+                DFNode node = new TypeCastNode(graph, varSpace, type, cast);
+                node.accept(cpt.getRValue());
+                cpt.setRValue(node);
 
-        } else if (expr instanceof SuperMethodInvocation) {
-            SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-            DFNode obj = cpt.getValue(varSpace.lookupThis());
-            List<DFNode> argList = new ArrayList<DFNode>();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) sinvoke.arguments()) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, arg);
-                DFNode node = cpt.getRValue();
-                argList.add(node);
-                typeList.add(node.getType());
-            }
-            DFNode[] args = new DFNode[argList.size()];
-            argList.toArray(args);
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
-            DFClassSpace klass = finder.resolveClass(obj.getType());
-            DFClassSpace baseKlass = klass.getBase();
-            DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
-            if (methods == null) {
-                String id = sinvoke.getName().getIdentifier();
-                DFMethod fallback = new DFMethod(baseKlass, null, id, false, null, null);
-                Logger.error("Fallback method: "+baseKlass+": "+fallback);
-                methods = new DFMethod[] { fallback };
-            }
-            MethodCallNode call = new MethodCallNode(
-                graph, varSpace, methods, sinvoke, obj);
-            call.setArgs(args);
-            cpt.setRValue(call);
-            if (call.exception != null) {
-                DFFrame dstFrame = frame.find(DFFrame.TRY);
-                cpt.addExit(new DFExit(call.exception, dstFrame));
-            }
-
-        } else if (expr instanceof ArrayCreation) {
-            ArrayCreation ac = (ArrayCreation)expr;
-            for (Expression dim : (List<Expression>) ac.dimensions()) {
-                // XXX cpt.getRValue() is not used (for now).
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, dim);
-            }
-            ArrayInitializer init = ac.getInitializer();
-            if (init != null) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, init);
-            } else {
-                cpt.setRValue(new ArrayValueNode(graph, varSpace, ac));
-            }
-
-        } else if (expr instanceof ArrayInitializer) {
-            ArrayInitializer init = (ArrayInitializer)expr;
-            ArrayValueNode arr = new ArrayValueNode(graph, varSpace, init);
-            for (Expression expr1 : (List<Expression>) init.expressions()) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, expr1);
-                arr.addValue(cpt.getRValue());
-            }
-            cpt.setRValue(arr);
-            // XXX array ref is not used.
-
-        } else if (expr instanceof ArrayAccess) {
-            ArrayAccess aa = (ArrayAccess)expr;
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, aa.getArray());
-            DFNode array = cpt.getRValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = varSpace.getArray(array);
-            DFNode index = cpt.getRValue();
-            DFNode node = new ArrayAccessNode(
-                graph, varSpace, ref, aa, array, index);
-            node.accept(cpt.getValue(ref));
-            cpt.setRValue(node);
-            frame.addInput(ref);
-
-        } else if (expr instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess)expr;
-            Expression expr1 = fa.getExpression();
-            DFNode obj = null;
-            DFClassSpace klass = null;
-            if (expr1 instanceof Name) {
-                try {
-                    klass = finder.lookupClass((Name)expr1);
-                } catch (EntityNotFound e) {
-                }
-            }
-            if (klass == null) {
-                cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, expr1);
-                obj = cpt.getRValue();
-                klass = finder.resolveClass(obj.getType());
-            }
-            SimpleName fieldName = fa.getName();
-            DFVarRef ref = klass.lookupField(fieldName);
-            DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
-            node.accept(cpt.getValue(ref));
-            cpt.setRValue(node);
-            frame.addInput(ref);
-
-        } else if (expr instanceof SuperFieldAccess) {
-            SuperFieldAccess sfa = (SuperFieldAccess)expr;
-            SimpleName fieldName = sfa.getName();
-            DFNode obj = cpt.getValue(varSpace.lookupThis());
-            DFClassSpace klass = finder.resolveClass(obj.getType());
-            DFVarRef ref = klass.lookupField(fieldName);
-            DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
-            node.accept(cpt.getValue(ref));
-            cpt.setRValue(node);
-            frame.addInput(ref);
-
-        } else if (expr instanceof CastExpression) {
-            CastExpression cast = (CastExpression)expr;
-            DFType type = finder.resolve(cast.getType());
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, cast.getExpression());
-            DFNode node = new TypeCastNode(graph, varSpace, type, cast);
-            node.accept(cpt.getRValue());
-            cpt.setRValue(node);
-
-        } else if (expr instanceof ClassInstanceCreation) {
-            ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
-            DFType instType;
-            if (anonDecl != null) {
-                String id = "anonymous";
-                DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
-                DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
-                anonSpace.addClass(anonKlass);
-                for (BodyDeclaration body :
-                         (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                    anonSpace.build(body);
-                }
-                try {
+            } else if (expr instanceof ClassInstanceCreation) {
+                ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
+                AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
+                DFType instType;
+                if (anonDecl != null) {
+                    String id = "anonymous";
+                    DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
+                    DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
+                    DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
+                    anonSpace.addClass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonKlass.build(finder, body);
+                        anonSpace.build(body);
                     }
-                    processBodyDeclarations(
-                        finder, anonKlass, anonDecl.bodyDeclarations());
-                    instType = new DFClassType(anonKlass);
-                } catch (EntityNotFound e) {
-                    instType = null; // XXX what happened?
+                    try {
+                        for (BodyDeclaration body :
+                                 (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
+                            anonKlass.build(finder, body);
+                        }
+                        processBodyDeclarations(
+                            finder, anonKlass, anonDecl.bodyDeclarations());
+                        instType = new DFClassType(anonKlass);
+                    } catch (EntityNotFound e) {
+                        instType = null; // XXX what happened?
+                    }
+                } else {
+                    instType = finder.resolve(cstr.getType());
                 }
-            } else {
-                instType = finder.resolve(cstr.getType());
-            }
-            Expression expr1 = cstr.getExpression();
-            DFNode obj = null;
-            if (expr1 != null) {
+                Expression expr1 = cstr.getExpression();
+                DFNode obj = null;
+                if (expr1 != null) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, expr1);
+                    obj = cpt.getRValue();
+                }
+                List<DFNode> argList = new ArrayList<DFNode>();
+                for (Expression arg : (List<Expression>) cstr.arguments()) {
+                    cpt = processExpression(
+                        graph, finder, varSpace, frame, cpt, arg);
+                    argList.add(cpt.getRValue());
+                }
+                DFNode[] args = new DFNode[argList.size()];
+                argList.toArray(args);
+                CreateObjectNode call = new CreateObjectNode(
+                    graph, varSpace, instType, cstr, obj);
+                call.setArgs(args);
+                cpt.setRValue(call);
+
+            } else if (expr instanceof ConditionalExpression) {
+                ConditionalExpression cond = (ConditionalExpression)expr;
                 cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, expr1);
-                obj = cpt.getRValue();
-            }
-            List<DFNode> argList = new ArrayList<DFNode>();
-            for (Expression arg : (List<Expression>) cstr.arguments()) {
+                    graph, finder, varSpace, frame, cpt, cond.getExpression());
+                DFNode condValue = cpt.getRValue();
                 cpt = processExpression(
-                    graph, finder, varSpace, frame, cpt, arg);
-                argList.add(cpt.getRValue());
-            }
-            DFNode[] args = new DFNode[argList.size()];
-            argList.toArray(args);
-            CreateObjectNode call = new CreateObjectNode(
-                graph, varSpace, instType, cstr, obj);
-            call.setArgs(args);
-            cpt.setRValue(call);
+                    graph, finder, varSpace, frame, cpt, cond.getThenExpression());
+                DFNode trueValue = cpt.getRValue();
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt, cond.getElseExpression());
+                DFNode falseValue = cpt.getRValue();
+                JoinNode join = new JoinNode(graph, varSpace, null, expr, condValue);
+                join.recv(true, trueValue);
+                join.recv(false, falseValue);
+                cpt.setRValue(join);
 
-        } else if (expr instanceof ConditionalExpression) {
-            ConditionalExpression cond = (ConditionalExpression)expr;
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, cond.getExpression());
-            DFNode condValue = cpt.getRValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, cond.getThenExpression());
-            DFNode trueValue = cpt.getRValue();
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt, cond.getElseExpression());
-            DFNode falseValue = cpt.getRValue();
-            JoinNode join = new JoinNode(graph, varSpace, null, expr, condValue);
-            join.recv(true, trueValue);
-            join.recv(false, falseValue);
-            cpt.setRValue(join);
+            } else if (expr instanceof InstanceofExpression) {
+                InstanceofExpression instof = (InstanceofExpression)expr;
+                DFType type = finder.resolve(instof.getRightOperand());
+                cpt = processExpression(
+                    graph, finder, varSpace, frame, cpt,
+                    instof.getLeftOperand());
+                DFNode node = new InstanceofNode(graph, varSpace, instof, type);
+                node.accept(cpt.getRValue());
+                cpt.setRValue(node);
 
-        } else if (expr instanceof InstanceofExpression) {
-            InstanceofExpression instof = (InstanceofExpression)expr;
-            DFType type = finder.resolve(instof.getRightOperand());
-            cpt = processExpression(
-                graph, finder, varSpace, frame, cpt,
-                instof.getLeftOperand());
-            DFNode node = new InstanceofNode(graph, varSpace, instof, type);
-            node.accept(cpt.getRValue());
-            cpt.setRValue(node);
+            } else if (expr instanceof LambdaExpression) {
+                LambdaExpression lambda = (LambdaExpression)expr;
+                String id = "lambda";
+                ASTNode body = lambda.getBody();
+                DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
+                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
+                if (body instanceof Statement) {
+                    // XXX TODO Statement lambda
+                } else if (body instanceof Expression) {
+                    // XXX TODO Expresssion lambda
+                } else {
+                    throw new UnsupportedSyntax(body);
+                }
+                DFType instType = new DFClassType(anonKlass);
+                CreateObjectNode call = new CreateObjectNode(
+                    graph, varSpace, instType, lambda, null);
+                cpt.setRValue(call);
 
-        } else if (expr instanceof LambdaExpression) {
-            LambdaExpression lambda = (LambdaExpression)expr;
-            String id = "lambda";
-            ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
-            if (body instanceof Statement) {
-                // XXX TODO Statement lambda
-            } else if (body instanceof Expression) {
-                // XXX TODO Expresssion lambda
+            } else if (expr instanceof MethodReference) {
+                // MethodReference
+                //  CreationReference
+                //  ExpressionMethodReference
+                //  SuperMethodReference
+                //  TypeMethodReference
+                MethodReference mref = (MethodReference)expr;
+                DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
+                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "methodref", null);
+                // XXX TODO method ref
+                DFType instType = new DFClassType(anonKlass);
+                CreateObjectNode call = new CreateObjectNode(
+                    graph, varSpace, instType, mref, null);
+                cpt.setRValue(call);
+
             } else {
-                throw new UnsupportedSyntax(body);
+                // ???
+                throw new UnsupportedSyntax(expr);
             }
-            DFType instType = new DFClassType(anonKlass);
-            CreateObjectNode call = new CreateObjectNode(
-                graph, varSpace, instType, lambda, null);
-            cpt.setRValue(call);
-
-        } else if (expr instanceof MethodReference) {
-            // MethodReference
-            //  CreationReference
-            //  ExpressionMethodReference
-            //  SuperMethodReference
-            //  TypeMethodReference
-            MethodReference mref = (MethodReference)expr;
-            DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-            DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "methodref", null);
-            // XXX TODO method ref
-            DFType instType = new DFClassType(anonKlass);
-            CreateObjectNode call = new CreateObjectNode(
-                graph, varSpace, instType, mref, null);
-            cpt.setRValue(call);
-
-        } else {
-            // ???
-            throw new UnsupportedSyntax(expr);
+        } catch (EntityNotFound e) {
+            e.setAst(expr);
+            throw e;
         }
+
         return cpt;
     }
 
