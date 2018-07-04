@@ -1,4 +1,4 @@
-public class test_funcs {
+public class basic_funcs {
 
     public static void main(String[] args) {
         String a = args[0];

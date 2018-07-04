@@ -119,9 +119,13 @@ public class UnitTestDF extends XMLTestCase {
     public void test_14_basic_funcs() throws Exception {
 	compareXml(TESTDATA+"/basic_funcs.java", TESTDATA+"/basic_funcs.graph");
     }
+    @Test
+    public void test_15_basic_generics() throws Exception {
+	compareXml(TESTDATA+"/basic_generics.java", TESTDATA+"/basic_generics.graph");
+    }
 
     @Test
-    public void test_15_multi_xref() throws Exception {
+    public void test_16_multi_xref() throws Exception {
 	compareXml(
             new String[] {
                 TESTDATA+"/multi/dom/meep/multi_xref1.java",

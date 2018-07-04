@@ -1,4 +1,4 @@
-public class basic_generic {
+public class basic_generics {
 
     static class Moo<T> {
 
