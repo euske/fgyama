@@ -3,7 +3,7 @@
     <graph name="ROOT/Object/toString">
       <scope name="ROOT/Object.toString">
         <scope name="ROOT/Object.toString.b0">
-          <node data="&quot;object&quot;" kind="const" name="NROOT/Object.toString.b0_1" type="java.lang/String">
+          <node data="object" kind="const" name="NROOT/Object.toString.b0_1" type="java.lang/String">
             <ast length="8" start="61" type="45"/>
           </node>
           <node kind="return" name="NROOT/Object.toString.b0_2" ref="ROOT/Object.toString/#return" type="java.lang/String">
@@ -48,7 +48,7 @@
     <graph name="ROOT/Foo.fb.b0/anonymous/anonymous/toString">
       <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString">
         <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString.b0">
-          <node data="&quot;foo&quot;" kind="const" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" type="java.lang/String">
+          <node data="foo" kind="const" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" type="java.lang/String">
             <ast length="5" start="257" type="45"/>
           </node>
           <node kind="return" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" ref="ROOT/Foo.fb.b0/anonymous/anonymous.toString/#return" type="java.lang/String">

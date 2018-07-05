@@ -15,29 +15,37 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
+    public static String quote(char c) {
+	switch (c) {
+	case '\0':
+	    return "\\0";
+	case '\t':
+	    return "\\t";
+	case '\b':
+	    return "\\b";
+	case '\n':
+	    return "\\n";
+	case '\r':
+	    return "\\r";
+	case '\f':
+	    return "\\f";
+	case '\'':
+	    return "\\'";
+	case '\"':
+	    return "\\\"";
+	case '\\':
+	    return "\\\\";
+	default:
+	    return Character.toString(c);
+	}
+    }
+
     public static String quote(String s) {
-        if (s == null) {
-            return "\"\"";
-        } else {
-            return "\"" + s.replace("\"", "\\\"") + "\"";
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            b.append(quote(s.charAt(i)));
         }
-    }
-
-    public static String sanitize(String s) {
-        if (s == null) {
-            return "";
-        } else {
-            return s.replaceAll("[\\s,]+", "_");
-        }
-
-    }
-
-    public static String indent(int n) {
-        StringBuilder s = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            s.append(" ");
-        }
-        return s.toString();
+	return b.toString();
     }
 
     public static String readFile(String path)

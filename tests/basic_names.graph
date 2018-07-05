@@ -18,7 +18,7 @@
             <link src="Ndom.meep/Foo.doit_2"/>
             <ast length="10" start="100" type="40"/>
           </node>
-          <node data="&quot;Foo!&quot;" kind="const" name="Ndom.meep/Foo.doit.b0_3" type="java.lang/String">
+          <node data="Foo!" kind="const" name="Ndom.meep/Foo.doit.b0_3" type="java.lang/String">
             <ast length="6" start="119" type="45"/>
           </node>
           <node data="java.io/PrintStream/println:java.lang/String" kind="call" name="Ndom.meep/Foo.doit.b0_4" type="@void">

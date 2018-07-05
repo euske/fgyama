@@ -71,7 +71,7 @@
     <graph name="ROOT/basic_generics/test">
       <scope name="ROOT/basic_generics.test">
         <scope name="ROOT/basic_generics.test.b0">
-          <node data="&quot;moo&quot;" kind="const" name="NROOT/basic_generics.test.b0_1" type="java.lang/String">
+          <node data="moo" kind="const" name="NROOT/basic_generics.test.b0_1" type="java.lang/String">
             <ast length="5" start="326" type="45"/>
           </node>
           <node data="basic_generics/Moo&lt;&gt;" kind="new" name="NROOT/basic_generics.test.b0_2" type="basic_generics/Moo&lt;&gt;">

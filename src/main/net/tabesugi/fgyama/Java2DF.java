@@ -700,7 +700,7 @@ public class Java2DF {
                 char value = ((CharacterLiteral)expr).charValue();
                 cpt.setRValue(new ConstNode(
                                   graph, varSpace, DFBasicType.CHAR,
-                                  expr, "'"+Character.toString(value)+"'"));
+                                  expr, Utils.quote(value)));
 
             } else if (expr instanceof NullLiteral) {
                 cpt.setRValue(new ConstNode(
@@ -718,7 +718,7 @@ public class Java2DF {
                 cpt.setRValue(new ConstNode(
                                   graph, varSpace,
                                   new DFClassType(DFRootTypeSpace.STRING_CLASS),
-                                  expr, "\""+value+"\""));
+                                  expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
                 Type value = ((TypeLiteral)expr).getType();
