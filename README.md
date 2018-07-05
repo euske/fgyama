@@ -16,8 +16,8 @@ How to Build:
 TODOs:
 
   * Enum support.
-  * Array methods.
-  * Parameterized types.
-  * Nestable inline class definition.
+  * separate: DFClassSpace is not a DFVarSpace.
+  * DFType should be lookup up from DFTypeSpace (not DFTypeFinder).
+  * Treat each parametered type differently.
   * Lambdas.
   * Method references.
