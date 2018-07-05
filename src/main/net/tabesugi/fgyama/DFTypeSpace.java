@@ -83,17 +83,17 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClassSpace createClass(SimpleName name) {
-        return this.createClass(name.getIdentifier());
+    public DFClassSpace createClass(DFVarSpace parent, SimpleName name) {
+        return this.createClass(parent, name.getIdentifier());
     }
-    public DFClassSpace createClass(String id) {
+    public DFClassSpace createClass(DFVarSpace parent, String id) {
         int i = id.indexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-            return space.createClass(id.substring(i+1));
+            return space.createClass(parent, id.substring(i+1));
         } else {
             DFTypeSpace child = this.lookupSpace(id);
-            DFClassSpace klass = new DFClassSpace(this, child, id);
+            DFClassSpace klass = new DFClassSpace(this, child, parent, id);
             //Logger.info("DFTypeSpace.createClass: "+klass);
             return this.addClass(klass);
         }
@@ -158,15 +158,15 @@ public class DFTypeSpace {
         throws UnsupportedSyntax {
         for (TypeDeclaration typeDecl :
                  (List<TypeDeclaration>) cunit.types()) {
-            this.build(typeDecl);
+            this.build(typeDecl, null);
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void build(TypeDeclaration typeDecl)
+    public void build(TypeDeclaration typeDecl, DFVarSpace parent)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
-        DFClassSpace klass = this.createClass(typeDecl.getName().getIdentifier());
+        DFClassSpace klass = this.createClass(parent, typeDecl.getName());
         DFTypeSpace child = klass.getChildSpace();
         DFParamType[] pts = DFParamType.createParamTypes(
             child, typeDecl.typeParameters());
@@ -176,24 +176,24 @@ public class DFTypeSpace {
         klass.setParamTypes(pts);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            child.build(body);
+            child.build(body, klass);
         }
     }
 
-    public void build(AbstractTypeDeclaration abstTypeDecl)
+    public void build(AbstractTypeDeclaration abstTypeDecl, DFVarSpace parent)
         throws UnsupportedSyntax {
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build((TypeDeclaration)abstTypeDecl);
+            this.build((TypeDeclaration)abstTypeDecl, parent);
         } else {
             // XXX enum not supported.
             throw new UnsupportedSyntax(abstTypeDecl);
         }
     }
 
-    public void build(BodyDeclaration body)
+    public void build(BodyDeclaration body, DFVarSpace parent)
         throws UnsupportedSyntax {
         if (body instanceof AbstractTypeDeclaration) {
-            this.build((AbstractTypeDeclaration)body);
+            this.build((AbstractTypeDeclaration)body, parent);
         } else if (body instanceof FieldDeclaration) {
             ;
         } else if (body instanceof MethodDeclaration) {
@@ -206,7 +206,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(Statement ast)
+    public void build(Statement ast, DFVarSpace parent)
         throws UnsupportedSyntax {
 
         if (ast instanceof AssertStatement) {
@@ -215,7 +215,7 @@ public class DFTypeSpace {
             Block block = (Block)ast;
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                this.build(stmt);
+                this.build(stmt, parent);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -229,17 +229,17 @@ public class DFTypeSpace {
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Statement thenStmt = ifStmt.getThenStatement();
-            this.build(thenStmt);
+            this.build(thenStmt, parent);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.build(elseStmt);
+                this.build(elseStmt, parent);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.build(stmt);
+                this.build(stmt, parent);
             }
 
         } else if (ast instanceof SwitchCase) {
@@ -247,22 +247,22 @@ public class DFTypeSpace {
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             Statement stmt = whileStmt.getBody();
-            this.build(stmt);
+            this.build(stmt, parent);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             Statement stmt = doStmt.getBody();
-            this.build(stmt);
+            this.build(stmt, parent);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             Statement stmt = forStmt.getBody();
-            this.build(stmt);
+            this.build(stmt, parent);
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             Statement stmt = eForStmt.getBody();
-            this.build(stmt);
+            this.build(stmt, parent);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -271,24 +271,24 @@ public class DFTypeSpace {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.build(stmt);
+            this.build(stmt, parent);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
             Block block = syncStmt.getBody();
-            this.build(block);
+            this.build(block, parent);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             Block block = tryStmt.getBody();
-            this.build(block);
+            this.build(block, parent);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                this.build(cc.getBody());
+                this.build(cc.getBody(), parent);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.build(finBlock);
+                this.build(finBlock, parent);
             }
 
         } else if (ast instanceof ThrowStatement) {
@@ -299,7 +299,7 @@ public class DFTypeSpace {
 
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
-            this.build(typeDeclStmt.getDeclaration());
+            this.build(typeDeclStmt.getDeclaration(), parent);
 
         } else {
             throw new UnsupportedSyntax(ast);

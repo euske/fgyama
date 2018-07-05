@@ -31,16 +31,17 @@ public class DFClassSpace extends DFVarSpace {
 
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
-        String id, DFClassSpace baseKlass) {
-        super(id);
+        DFVarSpace parent, String id, DFClassSpace baseKlass) {
+        super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;
         _baseKlass = baseKlass;
     }
 
     public DFClassSpace(
-        DFTypeSpace typeSpace, DFTypeSpace childSpace, String id) {
-        this(typeSpace, childSpace, id, null);
+        DFTypeSpace typeSpace, DFTypeSpace childSpace,
+	DFVarSpace parent, String id) {
+        this(typeSpace, childSpace, parent, id, null);
         _this = this.addRef("#this", new DFClassType(this));
     }
 

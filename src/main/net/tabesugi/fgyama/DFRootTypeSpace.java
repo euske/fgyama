@@ -19,6 +19,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public static DFClassSpace ARRAY_CLASS = null;
     public static DFClassSpace STRING_CLASS = null;
 
+    private Map<String, DFVarRef> _id2ref =
+        new HashMap<String, DFVarRef>();
+
     public DFRootTypeSpace() {
         super("ROOT");
     }
@@ -26,6 +29,27 @@ public class DFRootTypeSpace extends DFTypeSpace {
     @Override
     public String toString() {
         return ("<DFRootTypeSpace>");
+    }
+
+    public DFVarRef getArrayRef(DFType type) {
+        DFVarRef ref;
+        if (type instanceof DFArrayType) {
+            DFType elemType = ((DFArrayType)type).getElemType();
+	    String id = "#array:"+elemType.getName();
+	    ref = _id2ref.get(id);
+	    if (ref == null) {
+		ref = new DFVarRef(null, id, elemType);
+		_id2ref.put(id, ref);
+	    }
+        } else {
+	    String id = "#array:?";
+	    ref = _id2ref.get(id);
+	    if (ref == null) {
+		ref = new DFVarRef(null, id, null);
+		_id2ref.put(id, ref);
+	    }
+        }
+        return ref;
     }
 
     public void loadJarFile(String jarPath)
@@ -39,7 +63,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
                 if (filePath.endsWith(".class")) {
                     String name = filePath.substring(0, filePath.length()-6);
                     name = name.replace('/', '.').replace('$', '.');
-                    DFClassSpace klass = this.createClass(name);
+                    DFClassSpace klass = this.createClass(null, name);
                     klass.setJarPath(jarPath, filePath);
                 }
             }
@@ -56,7 +80,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         this.loadJarFile(rtFile.getAbsolutePath());
         OBJECT_CLASS = this.getClass("java.lang.Object");
         DFTypeSpace space = this.lookupSpace("java.lang");
-        ARRAY_CLASS = new DFClassSpace(space, null, "java.lang._Array", OBJECT_CLASS);
+        ARRAY_CLASS = new DFClassSpace(space, null, null, "java.lang._Array", OBJECT_CLASS);
         ARRAY_CLASS.addField("length", false, DFBasicType.INT);
         STRING_CLASS = this.getClass("java.lang.String");
     }

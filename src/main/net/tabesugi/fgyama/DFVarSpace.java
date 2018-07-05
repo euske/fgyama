@@ -13,9 +13,8 @@ import org.w3c.dom.*;
 //
 public class DFVarSpace {
 
-    private DFVarSpace _root;
-    private String _name;
     private DFVarSpace _parent;
+    private String _name;
 
     private List<DFVarSpace> _children =
         new ArrayList<DFVarSpace>();
@@ -24,22 +23,13 @@ public class DFVarSpace {
     private Map<String, DFVarRef> _id2ref =
         new HashMap<String, DFVarRef>();
 
-    protected DFVarSpace(String name) {
-        _root = this;
-        _name = name;
-        _parent = null;
-    }
-
-    private DFVarSpace(DFVarSpace parent, String name) {
-        _root = parent._root;
-        _name = name;
+    protected DFVarSpace(DFVarSpace parent, String name) {
         _parent = parent;
+        _name = name;
     }
 
     public DFVarSpace(DFVarSpace parent, SimpleName name) {
-        _root = parent._root;
-        _name = name.getIdentifier();
-        _parent = parent;
+        this(parent, name.getIdentifier());
     }
 
     @Override
@@ -148,18 +138,6 @@ public class DFVarSpace {
     public DFVarRef lookupThis() {
         assert(_parent != null);
         return _parent.lookupThis();
-    }
-
-    public DFVarRef getArray(DFNode array) {
-        DFType type = array.getType();
-        DFVarRef ref;
-        if (type instanceof DFArrayType) {
-            DFType elemType = ((DFArrayType)type).getElemType();
-            ref = _root.addRef("#array:"+elemType.getName(), elemType);
-        } else {
-            ref = _root.addRef("#array:?", null);
-        }
-        return ref;
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {

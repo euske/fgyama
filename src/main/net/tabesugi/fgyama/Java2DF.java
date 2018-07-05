@@ -938,7 +938,7 @@ public class Java2DF {
                 DFNode array = cpt.getRValue();
                 cpt = processExpression(
                     graph, finder, varSpace, frame, cpt, aa.getIndex());
-                DFVarRef ref = varSpace.getArray(array);
+                DFVarRef ref = this.rootSpace.getArrayRef(array.getType());
                 DFNode index = cpt.getRValue();
                 DFNode node = new ArrayAccessNode(
                     graph, varSpace, ref, aa, array, index);
@@ -998,11 +998,12 @@ public class Java2DF {
                     String id = "anonymous";
                     DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-                    DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, baseKlass);
+                    DFClassSpace anonKlass = new DFAnonClassSpace(
+			anonSpace, varSpace, id, baseKlass);
                     anonSpace.addClass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonSpace.build(body);
+                        anonSpace.build(body, varSpace);
                     }
                     try {
                         for (BodyDeclaration body :
@@ -1069,7 +1070,8 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, id, null);
+                DFClassSpace anonKlass = new DFAnonClassSpace(
+		    anonSpace, varSpace, id, null);
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
                 } else if (body instanceof Expression) {
@@ -1090,7 +1092,8 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-                DFClassSpace anonKlass = new DFAnonClassSpace(anonSpace, "methodref", null);
+                DFClassSpace anonKlass = new DFAnonClassSpace(
+		    anonSpace, varSpace, "methodref", null);
                 // XXX TODO method ref
                 DFType instType = new DFClassType(anonKlass);
                 CreateObjectNode call = new CreateObjectNode(
@@ -1151,7 +1154,7 @@ public class Java2DF {
             DFNode array = cpt.getRValue();
             cpt = processExpression(
                 graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = varSpace.getArray(array);
+            DFVarRef ref = this.rootSpace.getArrayRef(array.getType());
             DFNode index = cpt.getRValue();
             DFNode node = new ArrayAssignNode(
                 graph, varSpace, ref, expr, array, index);
@@ -2002,7 +2005,7 @@ public class Java2DF {
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            typeSpace.build(methodDecl.getBody());
+            typeSpace.build(methodDecl.getBody(), varSpace);
             this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
             varSpace.build(finder, methodDecl);
             //varSpace.dump();
@@ -2037,6 +2040,9 @@ public class Java2DF {
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
             e.name = method.getSignature();
+            throw e;
+        } catch (EntityNotFound e) {
+            Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+method);
             throw e;
         }
     }
@@ -2151,15 +2157,10 @@ public class Java2DF {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
-        try {
-            for (TypeDeclaration typeDecl :
-                     (List<TypeDeclaration>) cunit.types()) {
-                processTypeDeclaration(typeSpace, finder, typeDecl);
-            }
-        } catch (EntityNotFound e) {
-            Logger.error("Pass3: entity not found: "+e.name+" ast="+e.ast);
-            throw e;
-        }
+	for (TypeDeclaration typeDecl :
+		 (List<TypeDeclaration>) cunit.types()) {
+	    processTypeDeclaration(typeSpace, finder, typeDecl);
+	}
     }
 
     /**
@@ -2213,7 +2214,7 @@ public class Java2DF {
                 converter.buildTypeSpace(cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
-            }
+	    }
         }
         for (String path : files) {
             Logger.info("Pass2: "+path);
@@ -2222,7 +2223,10 @@ public class Java2DF {
                 converter.buildClassSpace(cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
-            }
+            } catch (EntityNotFound e) {
+                System.err.println("Pass2: Error at "+path);
+		throw e;
+	    }
         }
         for (String path : files) {
             Logger.info("Pass3: "+path);
@@ -2233,6 +2237,9 @@ public class Java2DF {
                 exporter.endFile();
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
+            } catch (EntityNotFound e) {
+                System.err.println("Pass3: Error at "+path);
+		throw e;
             }
         }
         //converter.rootSpace.dump();

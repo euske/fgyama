@@ -11,8 +11,10 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFAnonClassSpace extends DFClassSpace {
 
-    public DFAnonClassSpace(DFTypeSpace typeSpace, String id, DFClassSpace baseKlass) {
-        super(typeSpace, typeSpace, id, baseKlass);
+    public DFAnonClassSpace(
+	DFTypeSpace typeSpace,
+	DFVarSpace parent, String id, DFClassSpace baseKlass) {
+        super(typeSpace, typeSpace, parent, id, baseKlass);
     }
 
     @Override
