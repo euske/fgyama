@@ -88,9 +88,8 @@ def main(argv):
 
     for path in args:
         for graph in get_graphs(path):
-            if isinstance(graph, DFGraph):
-                write_gv(output, graph.root,
-                         highlight=highlight, name=graph.name)
+            write_gv(output, graph.root,
+                     highlight=highlight, name=graph.name)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
