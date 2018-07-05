@@ -10,7 +10,7 @@
           <node data="0" kind="const" name="NROOT/basic_funcs.main.b0_4" type="@number">
             <ast length="1" start="97" type="34"/>
           </node>
-          <node kind="arrayaccess" name="NROOT/basic_funcs.main.b0_5" ref="ROOT/basic_funcs/#array:java.lang/String" type="java.lang/String">
+          <node kind="arrayaccess" name="NROOT/basic_funcs.main.b0_5" ref="!#array:java.lang/String" type="java.lang/String">
             <link src="NROOT/basic_funcs.main_6"/>
             <link label="array" src="NROOT/basic_funcs.main.b0_3"/>
             <link label="index" src="NROOT/basic_funcs.main.b0_4"/>
@@ -66,7 +66,7 @@
           <link src="NROOT/basic_funcs.main_1"/>
           <ast length="13" start="56" type="44"/>
         </node>
-        <node name="NROOT/basic_funcs.main_6" ref="ROOT/basic_funcs/#array:java.lang/String" type="java.lang/String"/>
+        <node name="NROOT/basic_funcs.main_6" ref="!#array:java.lang/String" type="java.lang/String"/>
         <node name="NROOT/basic_funcs.main_11" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs"/>
         <node name="NROOT/basic_funcs.main_16" ref="java.lang/System/.out" type="java.io/PrintStream"/>
       </scope>

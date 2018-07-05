@@ -69,7 +69,7 @@ public class DFClassSpace extends DFVarSpace {
     }
 
     public String getFullName() {
-        return _typeSpace.getFullName()+"/"+super.getFullName();
+        return _typeSpace.getFullName()+"/"+super.getBaseName();
     }
 
     public int isBaseOf(DFClassSpace klass) {
