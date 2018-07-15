@@ -145,24 +145,6 @@ public class DFClassSpace extends DFVarSpace {
         return ref;
     }
 
-    private void overrideMethod(DFMethod method1) {
-        for (DFMethod method0 : _methods) {
-            if (method0.equals(method1)) {
-                method0.addOverride(method1);
-                //Logger.info("DFClassSpace.overrideMethod: "+method0+" : "+method1);
-                break;
-            }
-        }
-        if (_baseKlass != null) {
-            _baseKlass.overrideMethod(method1);
-        }
-        if (_baseIfaces != null) {
-            for (DFClassSpace iface : _baseIfaces) {
-                iface.overrideMethod(method1);
-            }
-        }
-    }
-
     private DFMethod addMethod(
         DFTypeSpace methodSpace, SimpleName name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
@@ -183,15 +165,38 @@ public class DFClassSpace extends DFVarSpace {
     private DFMethod addMethod(DFMethod method) {
         //Logger.info("DFClassSpace.addMethod: "+method);
         _methods.add(method);
+        return method;
+    }
+
+    public void addOverrides() {
+        for (DFMethod method : _methods) {
+            if (_baseKlass != null) {
+                _baseKlass.overrideMethod(method);
+            }
+            if (_baseIfaces != null) {
+                for (DFClassSpace iface : _baseIfaces) {
+                    iface.overrideMethod(method);
+                }
+            }
+        }
+    }
+
+    private void overrideMethod(DFMethod method1) {
+        for (DFMethod method0 : _methods) {
+            if (method0.equals(method1)) {
+                method0.addOverride(method1);
+                //Logger.info("DFClassSpace.overrideMethod: "+method0+" : "+method1);
+                break;
+            }
+        }
         if (_baseKlass != null) {
-            _baseKlass.overrideMethod(method);
+            _baseKlass.overrideMethod(method1);
         }
         if (_baseIfaces != null) {
             for (DFClassSpace iface : _baseIfaces) {
-                iface.overrideMethod(method);
+                iface.overrideMethod(method1);
             }
         }
-        return method;
     }
 
     @SuppressWarnings("unchecked")

@@ -1003,13 +1003,14 @@ public class Java2DF {
                     anonSpace.addClass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonSpace.build(body, varSpace);
+                        anonSpace.build(null, body, varSpace);
                     }
                     try {
                         for (BodyDeclaration body :
                                  (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                             anonKlass.build(finder, body);
                         }
+                        anonKlass.addOverrides();
                         processBodyDeclarations(
                             finder, anonKlass, anonDecl.bodyDeclarations());
                         instType = new DFClassType(anonKlass);
@@ -2005,8 +2006,13 @@ public class Java2DF {
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            typeSpace.build(methodDecl.getBody(), varSpace);
+            List<DFClassSpace> classes = new ArrayList<DFClassSpace>();
+            typeSpace.build(classes, methodDecl.getBody(), varSpace);
             this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
+            // Add overrides.
+            for (DFClassSpace klass1 : classes) {
+                klass1.addOverrides();
+            }
             varSpace.build(finder, methodDecl);
             //varSpace.dump();
             DFFrame frame = new DFFrame(DFFrame.METHOD);
@@ -2119,10 +2125,11 @@ public class Java2DF {
     }
 
     // pass1
-    public void buildTypeSpace(CompilationUnit cunit) {
+    public void buildTypeSpace(
+        List<DFClassSpace> classes, CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         try {
-            typeSpace.build(cunit);
+            typeSpace.build(classes, cunit);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -2207,11 +2214,12 @@ public class Java2DF {
         XmlExporter exporter = new XmlExporter();
         rootSpace.loadDefaultClasses();
         Java2DF converter = new Java2DF(rootSpace, exporter);
+        List<DFClassSpace> classes = new ArrayList<DFClassSpace>();
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
-                converter.buildTypeSpace(cunit);
+                converter.buildTypeSpace(classes, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
 	    }
@@ -2227,6 +2235,10 @@ public class Java2DF {
                 System.err.println("Pass2: Error at "+path);
 		throw e;
 	    }
+        }
+        // Add overrides.
+        for (DFClassSpace klass : classes) {
+            klass.addOverrides();
         }
         for (String path : files) {
             Logger.info("Pass3: "+path);
