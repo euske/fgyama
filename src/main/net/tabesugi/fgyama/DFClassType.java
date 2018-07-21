@@ -42,7 +42,7 @@ public class DFClassType extends DFType {
         if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFClassType)) return -1;
         DFClassType ctype = (DFClassType)type;
-        return _klass.isBaseOf(ctype._klass);
+        return ctype._klass.isSubclassOf(_klass);
     }
 
     public DFClassSpace getKlass()

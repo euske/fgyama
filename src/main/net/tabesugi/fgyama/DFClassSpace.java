@@ -31,7 +31,7 @@ public class DFClassSpace extends DFVarSpace {
 
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
-        DFVarSpace parent, String id, DFClassSpace baseKlass) {
+	DFVarSpace parent, String id, DFClassSpace baseKlass) {
         super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;
@@ -41,7 +41,9 @@ public class DFClassSpace extends DFVarSpace {
     public DFClassSpace(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
 	DFVarSpace parent, String id) {
-        this(typeSpace, childSpace, parent, id, null);
+        super(parent, id);
+        _typeSpace = typeSpace;
+        _childSpace = childSpace;
         _this = this.addRef("#this", new DFClassType(this));
     }
 
@@ -72,13 +74,17 @@ public class DFClassSpace extends DFVarSpace {
         return _typeSpace.getFullName()+"/"+super.getBaseName();
     }
 
-    public int isBaseOf(DFClassSpace klass) {
-        int dist = 0;
-        // XXX check interfaces too.
-        while (klass != null) {
-            if (klass == this) return dist;
-            dist++;
-            klass = klass._baseKlass;
+    public int isSubclassOf(DFClassSpace klass) {
+        if (this == klass) return 0;
+        if (_baseKlass != null) {
+            int dist = _baseKlass.isSubclassOf(klass);
+            if (0 <= dist) return dist+1;
+        }
+        if (_baseIfaces != null) {
+            for (DFClassSpace iface : _baseIfaces) {
+                int dist = iface.isSubclassOf(klass);
+                if (0 <= dist) return dist+1;
+            }
         }
         return -1;
     }
@@ -271,6 +277,7 @@ public class DFClassSpace extends DFVarSpace {
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
                 _baseKlass = finder.resolveClass(superClass);
+                //Logger.info("DFClassSpace.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
             }
             // Get interfaces.

@@ -74,12 +74,11 @@ public class DFMethod implements Comparable<DFMethod> {
         } else {
             name = ("!"+_name);
         }
-        if (_argTypes == null) {
+        for (DFType type : _argTypes) {
+            name += ":"+type.getName();
+        }
+        if (_returnType == null) {
             name += "?";
-        } else {
-            for (DFType type : _argTypes) {
-                name += ":"+type.getName();
-            }
         }
         return name;
     }

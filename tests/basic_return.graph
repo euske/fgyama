@@ -24,7 +24,7 @@
             <link label="R" src="NROOT/Foo.basic_single.b0_11"/>
             <ast length="5" start="199" type="27"/>
           </node>
-          <node data="ROOT/Foo/f?" kind="call" name="NROOT/Foo.basic_single.b0_13">
+          <node data="ROOT/Foo/f:@int?" kind="call" name="NROOT/Foo.basic_single.b0_13">
             <link label="arg0" src="NROOT/Foo.basic_single.b0_12"/>
             <link label="obj" src="NROOT/Foo.basic_single_9"/>
             <ast length="8" start="197" type="32"/>

@@ -56,14 +56,14 @@ public class DFParamType extends DFType {
         if (type instanceof DFClassType) {
             DFClassType ctype = (DFClassType)type;
             if (_bases.length == 0) return 0;
-            return _bases[0].isBaseOf(ctype.getKlass());
+            return ctype.getKlass().isSubclassOf(_bases[0]);
         } else if (type instanceof DFParamType) {
             DFParamType ptype = (DFParamType)type;
             if (_typeSpace != ptype._typeSpace) return -1;
             if (_bases.length == 0) return 0;
             if (ptype._bases.length == 0) return -1;
             // XXX check interfaces.
-            return _bases[0].isBaseOf(ptype._bases[0]);
+            return ptype._bases[0].isSubclassOf(_bases[0]);
         }
         return -1;
     }

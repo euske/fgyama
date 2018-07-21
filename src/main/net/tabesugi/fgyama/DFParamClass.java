@@ -61,11 +61,11 @@ public class DFParamClass extends DFClassSpace {
         return _genericKlass.addFinders(finder);
     }
 
-    public int isBaseOf(DFClassSpace klass) {
+    public int isSubclassOf(DFClassSpace klass) {
         if (!(klass instanceof DFParamClass)) return -1;
         DFParamClass pklass = (DFParamClass)klass;
         if (_argTypes.length != pklass._argTypes.length) return -1;
-        int dist = _genericKlass.isBaseOf(pklass._genericKlass);
+        int dist = pklass._genericKlass.isSubclassOf(_genericKlass);
         if (dist < 0) return dist;
         for (int i = 0; i < _argTypes.length; i++) {
             int d = _argTypes[i].canConvertFrom(pklass._argTypes[i]);
