@@ -73,21 +73,24 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-h nid] [graph ...]' % argv[0])
+        print('usage: %s [-o output] [-n name] [-h nid] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:h:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:h:n:')
     except getopt.GetoptError:
         return usage()
     output = sys.stdout
     highlight = None
+    names = None
     for (k, v) in opts:
         if k == '-o': output = open(v, 'w')
         elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
+        elif k == '-n': names = [v]
     if not args: return usage()
 
     for path in args:
         for graph in get_graphs(path):
+            if names and graph.name not in names: continue
             write_gv(output, graph.root,
                      highlight=highlight, name=graph.name)
     return 0
