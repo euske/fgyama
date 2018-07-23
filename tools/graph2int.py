@@ -19,19 +19,57 @@ def main(argv):
         if k == '-o': output = open(v, 'w')
     if not args: return usage()
 
+    # load graphs
     graphs = {}
     for path in args:
         for graph in get_graphs(path):
             graphs[graph.name] = graph
-    for graph in graphs.values():
-        for node in graph.nodes.values():
-            if (node.kind == 'call'):
+    print ('graphs: %r' % len(graphs), file=sys.stderr)
+
+    # enumerate links
+    linkto = {}
+    linkfrom = {}
+    def add(x, y):
+        if x in linkto:
+            a = linkto[x]
+        else:
+            a = linkto[x] = []
+        if y not in a:
+            a.append(y)
+        if y in linkfrom:
+            a = linkfrom[y]
+        else:
+            a = linkfrom[y] = []
+        if x not in a:
+            a.append(x)
+        return
+    for src in graphs.values():
+        for node in src.nodes.values():
+            if node.kind == 'call':
                 for name in node.data.split(' '):
-                    try:
-                        dst = graphs[name]
-                        #print(graph.name, dst.name)
-                    except KeyError:
-                        print('!notfound', name)
+                    add(src.name, name)
+            elif node.kind == 'new':
+                name = node.data
+                add(src.name, name)
+
+    # find starts
+    starts = []
+    for src in graphs.values():
+        if src.name not in linkfrom:
+            starts.append(src.name)
+
+    def enum_context(src, path):
+        if src in path: return
+        path = path+[src]
+        if src in linkto:
+            for dst in linkto[src]:
+                enum_context(dst, path)
+        else:
+            print (' '.join(path))
+    for name in starts:
+        print ('start: %r' % name, file=sys.stderr)
+        enum_context(name, [])
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
