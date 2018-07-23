@@ -47,7 +47,13 @@ def main(argv):
         for node in src.nodes.values():
             if node.kind == 'call':
                 for name in node.data.split(' '):
-                    add(src.name, name)
+                    if name in graphs:
+                        add(src.name, name)
+                        break
+                else:
+                    # not found
+                    for name in node.data.split(' '):
+                        add(src.name, name)
             elif node.kind == 'new':
                 name = node.data
                 add(src.name, name)
@@ -58,6 +64,7 @@ def main(argv):
         if src.name not in linkfrom:
             starts.append(src.name)
 
+    # enum contexts
     def enum_context(src, path):
         if src in path: return
         path = path+[src]
@@ -67,7 +74,7 @@ def main(argv):
         else:
             print (' '.join(path))
     for name in starts:
-        print ('start: %r' % name, file=sys.stderr)
+        print ('# start: %r' % name)
         enum_context(name, [])
 
     return 0
