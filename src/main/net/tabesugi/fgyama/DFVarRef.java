@@ -17,6 +17,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
     private DFType _type;
 
     public DFVarRef(DFVarSpace space, String name, DFType type) {
+        assert(2 <= name.length());
         _space = space;
         _name = name;
         _type = type;
@@ -38,9 +39,10 @@ public class DFVarRef implements Comparable<DFVarRef> {
 
     public String getFullName() {
         if (_space != null) {
-            return (_space.getFullName()+"/"+_name);
+            return (_name.substring(0,1)+_space.getFullName()+"/"+
+                    _name.substring(1));
         } else {
-            return ("!"+_name);
+            return _name;
         }
     }
 

@@ -35,14 +35,14 @@ public class DFRootTypeSpace extends DFTypeSpace {
         DFVarRef ref;
         if (type instanceof DFArrayType) {
             DFType elemType = ((DFArrayType)type).getElemType();
-	    String id = "#array:"+elemType.getName();
+	    String id = "%:"+elemType.getName();
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
 		ref = new DFVarRef(null, id, elemType);
 		_id2ref.put(id, ref);
 	    }
         } else {
-	    String id = "#array:?";
+	    String id = "%:?";
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
 		ref = new DFVarRef(null, id, null);

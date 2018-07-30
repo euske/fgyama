@@ -111,14 +111,14 @@ public class DFVarSpace {
 
     public DFVarRef lookupVar(SimpleName name)
         throws VariableNotFound {
-        return this.lookupRef(name.getIdentifier());
+        return this.lookupRef("$"+name.getIdentifier());
     }
 
     public DFVarRef lookupVarOrField(SimpleName name)
         throws VariableNotFound {
         // try local variables first.
         try {
-            return this.lookupRef(name.getIdentifier());
+            return this.lookupVar(name);
         } catch (VariableNotFound e) {
             // try field names.
             return this.lookupField(name.getIdentifier());
@@ -142,7 +142,7 @@ public class DFVarSpace {
 
     private DFVarRef addVar(SimpleName name, DFType type) {
         Logger.info("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
-        return this.addRef(name.getIdentifier(), type);
+        return this.addRef("$"+name.getIdentifier(), type);
     }
 
     /**
