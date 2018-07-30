@@ -3,7 +3,7 @@
     <graph name="ROOT/Foo/basic_single:@int:@int:@int">
       <scope name="ROOT/Foo.basic_single">
         <scope name="ROOT/Foo.basic_single.b0">
-          <node kind="ref" name="NROOT/Foo.basic_single.b0_7" ref="ROOT/Foo.basic_single/a" type="@int">
+          <node kind="ref" name="NROOT/Foo.basic_single.b0_7" ref="$ROOT/Foo.basic_single/a" type="@int">
             <link src="NROOT/Foo.basic_single_2"/>
             <ast length="1" start="192" type="42"/>
           </node>
@@ -11,11 +11,11 @@
             <link src="NROOT/Foo.basic_single.b0_7"/>
             <ast length="2" start="191" type="38"/>
           </node>
-          <node kind="ref" name="NROOT/Foo.basic_single.b0_10" ref="ROOT/Foo.basic_single/a" type="@int">
+          <node kind="ref" name="NROOT/Foo.basic_single.b0_10" ref="$ROOT/Foo.basic_single/a" type="@int">
             <link src="NROOT/Foo.basic_single_2"/>
             <ast length="1" start="199" type="42"/>
           </node>
-          <node kind="ref" name="NROOT/Foo.basic_single.b0_11" ref="ROOT/Foo.basic_single/b" type="@int">
+          <node kind="ref" name="NROOT/Foo.basic_single.b0_11" ref="$ROOT/Foo.basic_single/b" type="@int">
             <link src="NROOT/Foo.basic_single_4"/>
             <ast length="1" start="203" type="42"/>
           </node>
@@ -29,7 +29,7 @@
             <link label="obj" src="NROOT/Foo.basic_single_9"/>
             <ast length="8" start="197" type="32"/>
           </node>
-          <node kind="ref" name="NROOT/Foo.basic_single.b0_14" ref="ROOT/Foo.basic_single/c" type="@int">
+          <node kind="ref" name="NROOT/Foo.basic_single.b0_14" ref="$ROOT/Foo.basic_single/c" type="@int">
             <link src="NROOT/Foo.basic_single_6"/>
             <ast length="1" start="208" type="42"/>
           </node>
@@ -43,33 +43,33 @@
             <link label="R" src="NROOT/Foo.basic_single.b0_15"/>
             <ast length="19" start="190" type="27"/>
           </node>
-          <node kind="return" name="NROOT/Foo.basic_single.b0_17" ref="ROOT/Foo.basic_single/#return" type="@int">
+          <node kind="return" name="NROOT/Foo.basic_single.b0_17" ref="#ROOT/Foo.basic_single/return" type="@int">
             <link src="NROOT/Foo.basic_single.b0_16"/>
             <ast length="27" start="183" type="41"/>
           </node>
         </scope>
-        <node data="arg0" kind="arg" name="NROOT/Foo.basic_single_1" ref="ROOT/Foo.basic_single/a" type="@int">
+        <node data="arg0" kind="arg" name="NROOT/Foo.basic_single_1" ref="$ROOT/Foo.basic_single/a" type="@int">
           <ast length="5" start="125" type="44"/>
         </node>
-        <node kind="assign" name="NROOT/Foo.basic_single_2" ref="ROOT/Foo.basic_single/a" type="@int">
+        <node kind="assign" name="NROOT/Foo.basic_single_2" ref="$ROOT/Foo.basic_single/a" type="@int">
           <link src="NROOT/Foo.basic_single_1"/>
           <ast length="5" start="125" type="44"/>
         </node>
-        <node data="arg1" kind="arg" name="NROOT/Foo.basic_single_3" ref="ROOT/Foo.basic_single/b" type="@int">
+        <node data="arg1" kind="arg" name="NROOT/Foo.basic_single_3" ref="$ROOT/Foo.basic_single/b" type="@int">
           <ast length="5" start="132" type="44"/>
         </node>
-        <node kind="assign" name="NROOT/Foo.basic_single_4" ref="ROOT/Foo.basic_single/b" type="@int">
+        <node kind="assign" name="NROOT/Foo.basic_single_4" ref="$ROOT/Foo.basic_single/b" type="@int">
           <link src="NROOT/Foo.basic_single_3"/>
           <ast length="5" start="132" type="44"/>
         </node>
-        <node data="arg2" kind="arg" name="NROOT/Foo.basic_single_5" ref="ROOT/Foo.basic_single/c" type="@int">
+        <node data="arg2" kind="arg" name="NROOT/Foo.basic_single_5" ref="$ROOT/Foo.basic_single/c" type="@int">
           <ast length="5" start="139" type="44"/>
         </node>
-        <node kind="assign" name="NROOT/Foo.basic_single_6" ref="ROOT/Foo.basic_single/c" type="@int">
+        <node kind="assign" name="NROOT/Foo.basic_single_6" ref="$ROOT/Foo.basic_single/c" type="@int">
           <link src="NROOT/Foo.basic_single_5"/>
           <ast length="5" start="139" type="44"/>
         </node>
-        <node name="NROOT/Foo.basic_single_9" ref="ROOT/Foo/#this" type="ROOT/Foo"/>
+        <node name="NROOT/Foo.basic_single_9" ref="#ROOT/Foo/this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph name="ROOT/Foo">
