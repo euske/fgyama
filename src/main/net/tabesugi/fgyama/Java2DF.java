@@ -2235,7 +2235,7 @@ public class Java2DF {
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
-                System.err.println("Pass2: Error at "+path);
+                System.err.println("Pass2: Error at "+path+" ("+e.name+")");
 		throw e;
 	    }
         }
@@ -2253,7 +2253,7 @@ public class Java2DF {
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
-                System.err.println("Pass3: Error at "+path);
+                System.err.println("Pass3: Error at "+path+" ("+e.name+")");
 		throw e;
             }
         }
