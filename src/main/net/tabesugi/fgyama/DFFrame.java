@@ -76,6 +76,13 @@ public class DFFrame {
         return frame;
     }
 
+    public DFVarRef[] getInputs() {
+        DFVarRef[] refs = new DFVarRef[_inputs.size()];
+        _inputs.toArray(refs);
+        Arrays.sort(refs);
+        return refs;
+    }
+
     public DFVarRef[] getOutputs() {
         DFVarRef[] refs = new DFVarRef[_outputs.size()];
         _outputs.toArray(refs);

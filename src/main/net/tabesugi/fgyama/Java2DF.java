@@ -2021,7 +2021,7 @@ public class Java2DF {
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             frame.build(varSpace, methodDecl.getBody());
 
-            DFGraph graph = new DFGraph(varSpace, method);
+            DFGraph graph = new DFGraph(varSpace, frame, method);
             DFComponent cpt = new DFComponent(graph, varSpace);
             // XXX Ignore isContructor().
             // XXX Ignore isVarargs().
@@ -2061,8 +2061,8 @@ public class Java2DF {
         DFTypeFinder finder, DFClassSpace klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
-        DFGraph classGraph = new DFGraph(klass);
         DFFrame frame = new DFFrame(DFFrame.CLASS);
+        DFGraph classGraph = new DFGraph(klass, frame);
         DFTypeSpace typeSpace = klass.getChildSpace();
         // lookup base/child classes.
         finder = klass.addFinders(finder);

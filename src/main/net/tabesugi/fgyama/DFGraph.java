@@ -13,17 +13,22 @@ import org.w3c.dom.*;
 public class DFGraph {
 
     private DFVarSpace _root;
+    private DFFrame _frame;
     private DFMethod _method;
 
     private Map<Integer, DFNode> _nodes =
         new HashMap<Integer, DFNode>();
 
-    public DFGraph(DFVarSpace root) {
-        this(root, null);
-    }
-    public DFGraph(DFVarSpace root, DFMethod method) {
+    // DFGraph for a method.
+    public DFGraph(DFVarSpace root, DFFrame frame, DFMethod method) {
         _root = root;
+        _frame = frame;
         _method = method;
+    }
+
+    // DFGraph for a class static block.
+    public DFGraph(DFVarSpace root, DFFrame frame) {
+        this(root, frame, null);
     }
 
     @Override
@@ -38,11 +43,26 @@ public class DFGraph {
         } else {
             elem.setAttribute("name", _root.getFullName());
         }
+        elem.setAttribute("ins", list2str(_frame.getInputs()));
+        elem.setAttribute("outs", list2str(_frame.getOutputs()));
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.values().toArray(nodes);
         Arrays.sort(nodes);
         elem.appendChild(_root.toXML(document, nodes));
         return elem;
+    }
+
+    private static String list2str(DFVarRef[] refs) {
+        int n = 0;
+        String data = "";
+        for (DFVarRef ref : refs) {
+            if (0 < n) {
+                data += " ";
+            }
+            data += ref.getFullName();
+            n++;
+        }
+        return data;
     }
 
     public int addNode(DFNode node) {
