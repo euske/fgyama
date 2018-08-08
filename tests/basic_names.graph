@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph name="dom.meep.Foo/Bar">
+    <graph ins="" name="dom.meep.Foo/Bar" outs="">
       <scope name="dom.meep.Foo/Bar"/>
     </graph>
-    <graph name="dom.meep/Foo.doit/inline/Baz/moo">
+    <graph ins="" name="dom.meep/Foo.doit/inline/Baz/moo" outs="">
       <scope name="dom.meep/Foo.doit/inline/Baz.moo">
         <scope name="dom.meep/Foo.doit/inline/Baz.moo.b0"/>
       </scope>
     </graph>
-    <graph name="dom.meep/Foo.doit/inline/Baz">
+    <graph ins="" name="dom.meep/Foo.doit/inline/Baz" outs="">
       <scope name="dom.meep/Foo.doit/inline/Baz"/>
     </graph>
-    <graph name="dom.meep/Foo/doit">
+    <graph ins="#dom.meep/Foo/this $dom.meep/Foo.doit.b0/baz .java.lang/System/out .dom.meep/Foo.doit/inline/Baz/x .dom.meep/Foo/y" name="dom.meep/Foo/doit" outs="$dom.meep/Foo.doit.b0/baz .dom.meep/Foo.doit/inline/Baz/x">
       <scope name="dom.meep/Foo.doit">
         <scope name="dom.meep/Foo.doit.b0">
           <node kind="fieldaccess" name="Ndom.meep/Foo.doit.b0_1" ref=".java.lang/System/out" type="java.io/PrintStream">
@@ -69,7 +69,7 @@
         <node name="Ndom.meep/Foo.doit_12" ref=".dom.meep/Foo/y" type="@int"/>
       </scope>
     </graph>
-    <graph name="dom.meep/Foo/meh">
+    <graph ins="" name="dom.meep/Foo/meh" outs="">
       <scope name="dom.meep/Foo.meh">
         <scope name="dom.meep/Foo.meh.b0">
           <node data="dom.meep/Foo/m33p?" kind="call" name="Ndom.meep/Foo.meh.b0_2">
@@ -80,7 +80,7 @@
         <node name="Ndom.meep/Foo.meh_1" ref="#dom.meep/Foo/this" type="dom.meep/Foo"/>
       </scope>
     </graph>
-    <graph name="dom.meep/Foo/main:java.lang/String[]">
+    <graph ins="$dom.meep/Foo.main.b0/foo" name="dom.meep/Foo/main:java.lang/String[]" outs="$dom.meep/Foo.main.b0/foo">
       <scope name="dom.meep/Foo.main">
         <scope name="dom.meep/Foo.main.b0">
           <node data="dom.meep/Foo" kind="new" name="Ndom.meep/Foo.main.b0_3" type="dom.meep/Foo">
@@ -108,7 +108,7 @@
         </node>
       </scope>
     </graph>
-    <graph name="dom.meep/Foo">
+    <graph ins="" name="dom.meep/Foo" outs="">
       <scope name="dom.meep/Foo">
         <node data="123" kind="const" name="Ndom.meep/Foo_1" type="@number">
           <ast length="3" start="61" type="34"/>

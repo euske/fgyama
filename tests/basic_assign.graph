@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_assign.java">
-    <graph name="ROOT/Foo/basic_multi:@int:@int:@int">
+    <graph ins="$ROOT/Foo.basic_multi/a $ROOT/Foo.basic_multi/b $ROOT/Foo.basic_multi/c $ROOT/Foo.basic_multi.b0/y" name="ROOT/Foo/basic_multi:@int:@int:@int" outs="$ROOT/Foo.basic_multi/a $ROOT/Foo.basic_multi.b0/x $ROOT/Foo.basic_multi.b0/y">
       <scope name="ROOT/Foo.basic_multi">
         <scope name="ROOT/Foo.basic_multi.b0">
           <node kind="assign" name="NROOT/Foo.basic_multi.b0_7" ref="$ROOT/Foo.basic_multi/a" type="@int">
@@ -85,7 +85,7 @@
         </node>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>

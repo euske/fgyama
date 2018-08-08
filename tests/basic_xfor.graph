@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_xfor.java">
-    <graph name="ROOT/Foo/basic_xfor:@int[]">
+    <graph ins="$ROOT/Foo.basic_xfor/a $ROOT/Foo.basic_xfor.b0/s" name="ROOT/Foo/basic_xfor:@int[]" outs="$ROOT/Foo.basic_xfor.b0/s">
       <scope name="ROOT/Foo.basic_xfor">
         <scope name="ROOT/Foo.basic_xfor.b0">
           <scope name="ROOT/Foo.basic_xfor.b0.efor0">
@@ -73,7 +73,7 @@
         </node>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>

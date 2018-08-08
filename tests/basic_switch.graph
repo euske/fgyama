@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_switch.java">
-    <graph name="ROOT/Foo/basic_switch:@int">
+    <graph ins="$ROOT/Foo.basic_switch/n $ROOT/Foo.basic_switch.b0/x" name="ROOT/Foo/basic_switch:@int" outs="$ROOT/Foo.basic_switch.b0/x">
       <scope name="ROOT/Foo.basic_switch">
         <scope name="ROOT/Foo.basic_switch.b0">
           <scope name="ROOT/Foo.basic_switch.b0.switch0">
@@ -82,7 +82,7 @@
         <node name="NROOT/Foo.basic_switch_12" ref="$ROOT/Foo.basic_switch.b0/x" type="@int"/>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>

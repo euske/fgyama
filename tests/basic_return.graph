@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_return.java">
-    <graph name="ROOT/Foo/basic_single:@int:@int:@int">
+    <graph ins="$ROOT/Foo.basic_single/a $ROOT/Foo.basic_single/b $ROOT/Foo.basic_single/c" name="ROOT/Foo/basic_single:@int:@int:@int" outs="">
       <scope name="ROOT/Foo.basic_single">
         <scope name="ROOT/Foo.basic_single.b0">
           <node kind="ref" name="NROOT/Foo.basic_single.b0_7" ref="$ROOT/Foo.basic_single/a" type="@int">
@@ -72,7 +72,7 @@
         <node name="NROOT/Foo.basic_single_9" ref="#ROOT/Foo/this" type="ROOT/Foo"/>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>

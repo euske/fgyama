@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph name="ROOT/basic_funcs/main:java.lang/String[]">
+    <graph ins="$ROOT/basic_funcs.main.b0/a $ROOT/basic_funcs.main/args $ROOT/basic_funcs.main.b0/b $ROOT/basic_funcs.main.b0/c %:java.lang/String .java.lang/System/out" name="ROOT/basic_funcs/main:java.lang/String[]" outs="$ROOT/basic_funcs.main.b0/a $ROOT/basic_funcs.main.b0/b $ROOT/basic_funcs.main.b0/c">
       <scope name="ROOT/basic_funcs.main">
         <scope name="ROOT/basic_funcs.main.b0">
           <node kind="ref" name="NROOT/basic_funcs.main.b0_3" ref="$ROOT/basic_funcs.main/args" type="java.lang/String[]">
@@ -71,7 +71,7 @@
         <node name="NROOT/basic_funcs.main_16" ref=".java.lang/System/out" type="java.io/PrintStream"/>
       </scope>
     </graph>
-    <graph name="ROOT/basic_funcs/moo:@int">
+    <graph ins="$ROOT/basic_funcs.moo/x" name="ROOT/basic_funcs/moo:@int" outs="">
       <scope name="ROOT/basic_funcs.moo">
         <scope name="ROOT/basic_funcs.moo.b0">
           <scope name="ROOT/basic_funcs.moo.b0.b0">
@@ -149,7 +149,7 @@
         <node name="NROOT/basic_funcs.moo_21" ref="#ROOT/basic_funcs.moo/return" type="@int"/>
       </scope>
     </graph>
-    <graph name="ROOT/basic_funcs/foo">
+    <graph ins="" name="ROOT/basic_funcs/foo" outs="">
       <scope name="ROOT/basic_funcs.foo">
         <scope name="ROOT/basic_funcs.foo.b0">
           <node data="3" kind="const" name="NROOT/basic_funcs.foo.b0_1" type="@number">
@@ -162,7 +162,7 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/basic_funcs">
+    <graph ins="" name="ROOT/basic_funcs" outs="">
       <scope name="ROOT/basic_funcs"/>
     </graph>
   </file>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T">
+    <graph ins="#basic_generics/Moo/this $basic_generics/Moo.Moo/x .basic_generics/Moo/x" name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T" outs=".basic_generics/Moo/x">
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
           <node kind="ref" name="Nbasic_generics/Moo.Moo.b0_3" ref="#basic_generics/Moo/this" type="basic_generics/Moo">
@@ -31,7 +31,7 @@
         <node name="Nbasic_generics/Moo.Moo_4" ref="#basic_generics/Moo/this" type="basic_generics/Moo"/>
       </scope>
     </graph>
-    <graph name="basic_generics/Moo/get">
+    <graph ins=".basic_generics/Moo/x" name="basic_generics/Moo/get" outs="">
       <scope name="basic_generics/Moo.get">
         <scope name="basic_generics/Moo.get.b0">
           <node kind="ref" name="Nbasic_generics/Moo.get.b0_1" ref=".basic_generics/Moo/x" type="Tbasic_generics.Moo/T">
@@ -46,7 +46,7 @@
         <node name="Nbasic_generics/Moo.get_2" ref=".basic_generics/Moo/x" type="Tbasic_generics.Moo/T"/>
       </scope>
     </graph>
-    <graph name="basic_generics/Moo/copy">
+    <graph ins=".basic_generics/Moo/x" name="basic_generics/Moo/copy" outs="">
       <scope name="basic_generics/Moo.copy">
         <scope name="basic_generics/Moo.copy.b0">
           <node kind="ref" name="Nbasic_generics/Moo.copy.b0_1" ref=".basic_generics/Moo/x" type="Tbasic_generics.Moo/T">
@@ -65,10 +65,10 @@
         <node name="Nbasic_generics/Moo.copy_2" ref=".basic_generics/Moo/x" type="Tbasic_generics.Moo/T"/>
       </scope>
     </graph>
-    <graph name="basic_generics/Moo">
+    <graph ins="" name="basic_generics/Moo" outs="">
       <scope name="basic_generics/Moo"/>
     </graph>
-    <graph name="ROOT/basic_generics/test">
+    <graph ins="$ROOT/basic_generics.test.b0/moo" name="ROOT/basic_generics/test" outs="$ROOT/basic_generics.test.b0/b $ROOT/basic_generics.test.b0/boo $ROOT/basic_generics.test.b0/moo">
       <scope name="ROOT/basic_generics.test">
         <scope name="ROOT/basic_generics.test.b0">
           <node data="moo" kind="const" name="NROOT/basic_generics.test.b0_1" type="java.lang/String">
@@ -109,7 +109,7 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/basic_generics/foo:TMethodDecl/T">
+    <graph ins="$ROOT/basic_generics.foo/x" name="ROOT/basic_generics/foo:TMethodDecl/T" outs="">
       <scope name="ROOT/basic_generics.foo">
         <scope name="ROOT/basic_generics.foo.b0">
           <node kind="ref" name="NROOT/basic_generics.foo.b0_3" ref="$ROOT/basic_generics.foo/x" type="TMethodDecl/T">
@@ -130,7 +130,7 @@
         </node>
       </scope>
     </graph>
-    <graph name="ROOT/basic_generics">
+    <graph ins="" name="ROOT/basic_generics" outs="">
       <scope name="ROOT/basic_generics"/>
     </graph>
   </file>

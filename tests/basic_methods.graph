@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <graph name="ROOT/Object/toString">
+    <graph ins="" name="ROOT/Object/toString" outs="">
       <scope name="ROOT/Object.toString">
         <scope name="ROOT/Object.toString.b0">
           <node data="object" kind="const" name="NROOT/Object.toString.b0_1" type="java.lang/String">
@@ -13,10 +13,10 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/Object">
+    <graph ins="" name="ROOT/Object" outs="">
       <scope name="ROOT/Object"/>
     </graph>
-    <graph name="ROOT/Foo/fa">
+    <graph ins="" name="ROOT/Foo/fa" outs="$ROOT/Foo.fa.b0/a">
       <scope name="ROOT/Foo.fa">
         <scope name="ROOT/Foo.fa.b0">
           <node data="0" kind="const" name="NROOT/Foo.fa.b0_1" type="@number">
@@ -29,7 +29,7 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/Foo.fb/inline/moo/fc">
+    <graph ins="" name="ROOT/Foo.fb/inline/moo/fc" outs="">
       <scope name="ROOT/Foo.fb/inline/moo.fc">
         <scope name="ROOT/Foo.fb/inline/moo.fc.b0">
           <node data="123" kind="const" name="NROOT/Foo.fb/inline/moo.fc.b0_1" type="@number">
@@ -42,10 +42,10 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/Foo.fb/inline/moo">
+    <graph ins="" name="ROOT/Foo.fb/inline/moo" outs="">
       <scope name="ROOT/Foo.fb/inline/moo"/>
     </graph>
-    <graph name="ROOT/Foo.fb.b0/anonymous/anonymous/toString">
+    <graph ins="" name="ROOT/Foo.fb.b0/anonymous/anonymous/toString" outs="">
       <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString">
         <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString.b0">
           <node data="foo" kind="const" name="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" type="java.lang/String">
@@ -58,10 +58,10 @@
         </scope>
       </scope>
     </graph>
-    <graph name="ROOT/Foo.fb.b0/anonymous/anonymous">
+    <graph ins="" name="ROOT/Foo.fb.b0/anonymous/anonymous" outs="">
       <scope name="ROOT/Foo.fb.b0/anonymous/anonymous"/>
     </graph>
-    <graph name="ROOT/Foo/fb">
+    <graph ins="$ROOT/Foo.fb.b0/a" name="ROOT/Foo/fb" outs="$ROOT/Foo.fb.b0/a $ROOT/Foo.fb.b0/b $ROOT/Foo.fb.b0/c">
       <scope name="ROOT/Foo.fb">
         <scope name="ROOT/Foo.fb.b0">
           <node data="0" kind="const" name="NROOT/Foo.fb.b0_1" type="@number">
@@ -101,7 +101,7 @@
         <node name="NROOT/Foo.fb_5" ref="#ROOT/Foo/this" type="ROOT/Foo"/>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>

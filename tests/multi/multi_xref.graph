@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/multi/dom/meep/multi_xref1.java">
-    <graph name="dom.meep.multi_xref1/baa">
+    <graph ins="" name="dom.meep.multi_xref1/baa" outs="">
       <scope name="dom.meep.multi_xref1/baa"/>
     </graph>
-    <graph name="dom.meep/multi_xref1/moo">
+    <graph ins="#dom.meep/multi_xref1/this .dom.dood/multi_xref3/boo .dom.meep/multi_xref1/xref2" name="dom.meep/multi_xref1/moo" outs=".dom.dood/multi_xref3/boo .dom.meep/multi_xref1/xref2">
       <scope name="dom.meep/multi_xref1.moo">
         <scope name="dom.meep/multi_xref1.moo.b0">
           <node kind="ref" name="Ndom.meep/multi_xref1.moo.b0_1" ref="#dom.meep/multi_xref1/this" type="dom.meep/multi_xref1">
@@ -48,12 +48,12 @@
         <node name="Ndom.meep/multi_xref1.moo_2" ref="#dom.meep/multi_xref1/this" type="dom.meep/multi_xref1"/>
       </scope>
     </graph>
-    <graph name="dom.meep/multi_xref1">
+    <graph ins="" name="dom.meep/multi_xref1" outs="">
       <scope name="dom.meep/multi_xref1"/>
     </graph>
   </file>
   <file path="tests/multi/dom/meep/multi_xref2.java">
-    <graph name="dom.meep/multi_xref2/foo">
+    <graph ins="#dom.meep/multi_xref2/this $dom.meep/multi_xref2.foo.b0/b $dom.meep/multi_xref2.foo.b0/zzz .dom.meep.multi_xref1/baa/baz .dom.dood/multi_xref3/boo .dom.meep/multi_xref2/xref1" name="dom.meep/multi_xref2/foo" outs="$dom.meep/multi_xref2.foo.b0/b $dom.meep/multi_xref2.foo.b0/zzz .dom.meep/multi_xref2/xref1">
       <scope name="dom.meep/multi_xref2.foo">
         <scope name="dom.meep/multi_xref2.foo.b0">
           <node kind="ref" name="Ndom.meep/multi_xref2.foo.b0_1" ref="#dom.meep/multi_xref2/this" type="dom.meep/multi_xref2">
@@ -112,7 +112,7 @@
         <node name="Ndom.meep/multi_xref2.foo_15" ref=".dom.dood/multi_xref3/boo" type="@int"/>
       </scope>
     </graph>
-    <graph name="dom.meep/multi_xref2/bam">
+    <graph ins="" name="dom.meep/multi_xref2/bam" outs="">
       <scope name="dom.meep/multi_xref2.bam">
         <scope name="dom.meep/multi_xref2.bam.b0">
           <node data="42" kind="const" name="Ndom.meep/multi_xref2.bam.b0_1" type="@number">
@@ -125,12 +125,12 @@
         </scope>
       </scope>
     </graph>
-    <graph name="dom.meep/multi_xref2">
+    <graph ins="" name="dom.meep/multi_xref2" outs="">
       <scope name="dom.meep/multi_xref2"/>
     </graph>
   </file>
   <file path="tests/multi/dom/dood/multi_xref3.java">
-    <graph name="dom.dood/multi_xref3/baa">
+    <graph ins="$dom.dood/multi_xref3.baa.b0/xref1" name="dom.dood/multi_xref3/baa" outs="$dom.dood/multi_xref3.baa.b0/xref1">
       <scope name="dom.dood/multi_xref3.baa">
         <scope name="dom.dood/multi_xref3.baa.b0">
           <node data="dom.meep/multi_xref1" kind="new" name="Ndom.dood/multi_xref3.baa.b0_1" type="dom.meep/multi_xref1">
@@ -151,7 +151,7 @@
         </scope>
       </scope>
     </graph>
-    <graph name="dom.dood/multi_xref3">
+    <graph ins="" name="dom.dood/multi_xref3" outs="">
       <scope name="dom.dood/multi_xref3">
         <node data="100" kind="const" name="Ndom.dood/multi_xref3_1" type="@number">
           <ast length="3" start="104" type="34"/>

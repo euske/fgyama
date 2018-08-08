@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_while.java">
-    <graph name="ROOT/Foo/basic_while:@int">
+    <graph ins="$ROOT/Foo.basic_while/x" name="ROOT/Foo/basic_while:@int" outs="$ROOT/Foo.basic_while/x">
       <scope name="ROOT/Foo.basic_while">
         <scope name="ROOT/Foo.basic_while.b0">
           <scope name="ROOT/Foo.basic_while.b0.while0">
@@ -69,7 +69,7 @@
         </node>
       </scope>
     </graph>
-    <graph name="ROOT/Foo">
+    <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo"/>
     </graph>
   </file>
