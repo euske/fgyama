@@ -1215,7 +1215,8 @@ public class Java2DF {
         DFGraph graph, DFVarSpace varSpace,
         DFFrame frame, DFComponent cpt,
         ASTNode ast, DFNode condValue,
-        DFComponent trueCpt, DFComponent falseCpt) {
+        DFFrame trueFrame, DFComponent trueCpt,
+        DFFrame falseFrame, DFComponent falseCpt) {
 
         // outRefs: all the references from both component.
         List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
@@ -1440,19 +1441,22 @@ public class Java2DF {
 
         Statement thenStmt = ifStmt.getThenStatement();
         DFComponent thenCpt = new DFComponent(graph, varSpace);
+        DFFrame thenFrame = frame.getChildByAST(thenStmt);
         thenCpt = processStatement(
             graph, finder, varSpace, frame, thenCpt, thenStmt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFComponent elseCpt = null;
+        DFFrame elseFrame = null;
         if (elseStmt != null) {
+            elseFrame = frame.getChildByAST(elseStmt);
             elseCpt = new DFComponent(graph, varSpace);
             elseCpt = processStatement(
                 graph, finder, varSpace, frame, elseCpt, elseStmt);
         }
         return processConditional(
-            graph, varSpace, frame, cpt, ifStmt,
-            condValue, thenCpt, elseCpt);
+            graph, varSpace, frame, cpt, ifStmt, condValue,
+            thenFrame, thenCpt, elseFrame, elseCpt);
     }
 
     private DFComponent processCaseStatement(

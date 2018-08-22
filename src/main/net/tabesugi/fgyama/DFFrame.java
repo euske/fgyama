@@ -124,10 +124,12 @@ public class DFFrame {
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Statement thenStmt = ifStmt.getThenStatement();
-            this.build(varSpace, thenStmt);
+            DFFrame thenFrame = this.addChild(null, thenStmt);
+            thenFrame.build(varSpace, thenStmt);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.build(varSpace, elseStmt);
+                DFFrame elseFrame = this.addChild(null, elseStmt);
+                elseFrame.build(varSpace, elseStmt);
             }
 
         } else if (ast instanceof SwitchStatement) {
