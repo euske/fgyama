@@ -31,12 +31,15 @@ class DFGraph:
                 (self.gid, self.name, len(self.nodes)))
 
     def fixate(self):
+        # Make every node double-linked.
         for node in self.nodes.values():
             for (label,name) in node.inputs.items():
                 src = self.nodes[name]
                 node.inputs[label] = src
+                # links with _ in its name is informational.
+                # and should not be considered as a real dataflow.
                 if not label.startswith('_'):
-                    src.outputs.append(node)
+                    src.outputs.append((label, node))
         return self
 
     def toxml(self):
