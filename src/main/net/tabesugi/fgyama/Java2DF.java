@@ -855,15 +855,16 @@ public class Java2DF {
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFMethod[] methods = klass.lookupMethods(invoke.getName(), argTypes);
-                if (methods == null) {
+                DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
+                if (method == null) {
                     String id = invoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         klass, null, id, false, argTypes, null);
                     klass.dump();
                     Logger.error("Fallback method: "+klass+": "+fallback);
-                    methods = new DFMethod[] { fallback };
+                    method = fallback;
                 }
+                DFMethod methods[] = method.getOverrides();
                 MethodCallNode call = new MethodCallNode(
                     graph, varSpace, methods, invoke, obj);
                 call.setArgs(args);
@@ -891,14 +892,15 @@ public class Java2DF {
                 typeList.toArray(argTypes);
                 DFClassSpace klass = finder.resolveClass(obj.getType());
                 DFClassSpace baseKlass = klass.getBase();
-                DFMethod[] methods = baseKlass.lookupMethods(sinvoke.getName(), argTypes);
-                if (methods == null) {
+                DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
+                if (method == null) {
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, false, argTypes, null);
                     Logger.error("Fallback method: "+baseKlass+": "+fallback);
-                    methods = new DFMethod[] { fallback };
+                    method = fallback;
                 }
+                DFMethod methods[] = new DFMethod[] { method };
                 MethodCallNode call = new MethodCallNode(
                     graph, varSpace, methods, sinvoke, obj);
                 call.setArgs(args);

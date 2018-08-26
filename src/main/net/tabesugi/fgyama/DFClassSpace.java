@@ -123,12 +123,12 @@ public class DFClassSpace extends DFVarSpace {
         return bestMethod;
     }
 
-    public DFMethod[] lookupMethods(SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
         DFClassSpace klass = this;
         while (klass != null) {
             DFMethod method = klass.lookupMethod1(name, argTypes);
             if (method != null) {
-                return method.getOverrides();
+                return method;
             }
             klass = klass._baseKlass;
         }
