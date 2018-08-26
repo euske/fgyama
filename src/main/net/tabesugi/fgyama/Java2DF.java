@@ -1445,7 +1445,7 @@ public class Java2DF {
         DFComponent thenCpt = new DFComponent(graph, varSpace);
         DFFrame thenFrame = frame.getChildByAST(thenStmt);
         thenCpt = processStatement(
-            graph, finder, varSpace, frame, thenCpt, thenStmt);
+            graph, finder, varSpace, thenFrame, thenCpt, thenStmt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFComponent elseCpt = null;
@@ -1454,7 +1454,7 @@ public class Java2DF {
             elseFrame = frame.getChildByAST(elseStmt);
             elseCpt = new DFComponent(graph, varSpace);
             elseCpt = processStatement(
-                graph, finder, varSpace, frame, elseCpt, elseStmt);
+                graph, finder, varSpace, elseFrame, elseCpt, elseStmt);
         }
         return processConditional(
             graph, varSpace, frame, cpt, ifStmt, condValue,

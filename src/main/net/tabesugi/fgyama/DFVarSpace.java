@@ -73,7 +73,9 @@ public class DFVarSpace {
     }
 
     public DFVarSpace getChildByAST(ASTNode ast) {
-        return _ast2child.get(Utils.encodeASTNode(ast));
+        String key = Utils.encodeASTNode(ast);
+        assert(_ast2child.containsKey(key));
+        return _ast2child.get(key);
     }
 
     public DFVarSpace[] getChildren() {

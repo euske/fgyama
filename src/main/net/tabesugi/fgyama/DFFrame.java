@@ -14,8 +14,8 @@ public class DFFrame {
     private String _label;
     private DFFrame _parent;
 
-    private Map<ASTNode, DFFrame> _children =
-        new HashMap<ASTNode, DFFrame>();
+    private Map<String, DFFrame> _ast2child =
+        new HashMap<String, DFFrame>();
     private Set<DFVarRef> _inputs =
         new HashSet<DFVarRef>();
     private Set<DFVarRef> _outputs =
@@ -41,7 +41,7 @@ public class DFFrame {
 
     public DFFrame addChild(String label, ASTNode ast) {
         DFFrame frame = new DFFrame(label, this);
-        _children.put(ast, frame);
+        _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
 
@@ -54,7 +54,9 @@ public class DFFrame {
     }
 
     public DFFrame getChildByAST(ASTNode ast) {
-        return _children.get(ast);
+        String key = Utils.encodeASTNode(ast);
+        assert(_ast2child.containsKey(key));
+        return _ast2child.get(key);
     }
 
     public void addInput(DFVarRef ref) {
@@ -239,7 +241,7 @@ public class DFFrame {
             inouts.append(" "+ref);
         }
         out.println(i2+"in/outs:"+inouts);
-        for (DFFrame frame : _children.values()) {
+        for (DFFrame frame : _ast2child.values()) {
             frame.dump(out, i2);
         }
         out.println(indent+"}");
