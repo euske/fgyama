@@ -4,12 +4,42 @@ from subprocess import Popen, PIPE
 from graph import DFGraph, DFNode
 from graph import get_graphs
 
-def get_args(graph):
-    for node in graph.nodes.values():
+class IPVertex:
+
+    def __init__(self, node):
+        self.node = node
+        self.inputs = []
+        self.outputs = []
+        return
+
+    def __repr__(self):
+        return '<IPVertex: %r>' % self.node
+
+    def connect(self, label, vtx):
+        self.outputs.append((label, vtx))
+        vtx.inputs.append((label, self))
+        return
+
+    def follow(self, traversed, indent=0):
+        for (label, vtx) in self.outputs:
+            print(' '*indent, '-'+label+' '+str(vtx.node))
+            if vtx not in traversed:
+                traversed.add(vtx)
+                vtx.follow(traversed, indent+1)
+        return
+
+def get_ins(graph):
+    for node in graph:
         if node.kind == 'arg':
             assert node.data.startswith('arg')
-            i = int(node.data[3:])
-            yield (node, i)
+            label = node.data
+            yield (label, node)
+    return
+
+def get_outs(graph):
+    for node in graph:
+        if node.kind == 'return':
+            yield node
     return
 
 def main(argv):
@@ -52,7 +82,7 @@ def main(argv):
             a.append(x)
         return
     for src in graphs.values():
-        for node in src.nodes.values():
+        for node in src:
             if node.kind == 'call':
                 for name in node.data.split(' '):
                     # In order to stop the number of possible contexts grow
@@ -76,65 +106,71 @@ def main(argv):
 
     if 0:
         # enum contexts
-        def enum_context(src, path):
-            if src in path: return
-            path = path+[src]
+        def enum_context(src, ctx):
+            if src in ctx: return
+            ctx = ctx+[src]
             if src in linkto:
                 for dst in linkto[src]:
-                    enum_context(dst, path)
+                    enum_context(dst, ctx)
             else:
-                print (' '.join(path))
+                print (' '.join(ctx))
         for name in starts:
             print ('# start: %r' % name)
             enum_context(name, [])
 
     # enum dataflow
-    def enum_dataflow(graph, args):
-        calls = {}
-        rtrn = []
-        def traverse(src, paths):
-            paths = [ (src,p) for p in paths ]
-            for (label,dst) in src.outputs:
-                if label.startswith('arg'):
-                    i = int(label[3:])
-                    if dst.kind == 'call':
-                        for name in dst.data.split(' '):
-                            if name in graphs:
-                                if name not in calls:
-                                    calls[name] = {}
-                                calls[name][i] = paths
-                                break
-                        else:
-                            for name in dst.data.split(' '):
-                                if name not in calls:
-                                    calls[name] = {}
-                                calls[name][i] = paths
-                    elif dst.kind == 'new':
-                        name = dst.data
-                        if name not in calls:
-                            calls[name] = {}
-                        calls[name][i] = paths
-                elif dst.kind == 'return':
-                    rtrn.extend(paths)
-                else:
-                    traverse(dst, paths)
-        for (node, i) in get_args(graph):
-            if i in args:
-                paths = [args[i]]
+    def enum_dataflow(graph, inputs, ctx):
+        print ('# enum_dataflow(%r, %r)' % (graph.name, inputs))
+        if graph.name in ctx: return []
+        ctx = ctx + [graph.name]
+        vtxs = {}
+        for node in graph:
+            vtxs[node] = IPVertex(node)
+        sends = {}
+        recvs = {}
+        outputs = []
+        for node in graph:
+            v1 = vtxs[node]
+            if node.kind == 'arg':
+                label = node.data
+                inputs[label].connect('pass', v1)
+            elif node.kind in ('call', 'new'):
+                funcall = node
+                sends[funcall] = args = {}
+                for (label,src) in funcall.inputs.items():
+                    args[label] = vtxs[src]
             else:
-                paths = []
-            traverse(node, paths)
-        print('calls:', calls)
-        print('rtrn:', rtrn)
-
+                for (label,src) in node.inputs.items():
+                    v0 = vtxs[src]
+                    if src.kind in ('call', 'new'):
+                        funcall = src
+                        recvs[funcall] = v0
+                    v0.connect(label, v1)
+                if node.kind == 'return':
+                    outputs.append(v1)
+        for (funcall,recv) in recvs.items():
+            assert funcall in sends
+            args = sends[funcall]
+            for name in funcall.data.split(' '):
+                if name in graphs:
+                    rtns = enum_dataflow(graphs[name], args, ctx)
+                    for rtn in rtns:
+                        rtn.connect('return', recv)
+                    break
+                else:
+                    # fallback
+                    for (label,vtx) in args.items():
+                        vtx.connect(label, recv)
+        return outputs
     for name in starts:
-        print ('# start: %r' % name)
+        print('# start: %r' % name)
         graph = graphs[name]
-        args = {}
-        for (node, i) in get_args(graph):
-            args[i] = node
-        enum_dataflow(graph, args)
-
+        inputs = {}
+        for (label,node) in get_ins(graph):
+            inputs[label] = IPVertex(node)
+        outputs = enum_dataflow(graph, inputs, [])
+        for vtx in inputs.values():
+            vtx.follow(set())
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
