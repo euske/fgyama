@@ -119,10 +119,9 @@ def main(argv):
             enum_context(name, [])
 
     # enum dataflow
+    graph2info = {}
     def enum_dataflow(graph, inputs, ctx):
         print ('# enum_dataflow(%r, %r)' % (graph.name, inputs))
-        if graph.name in ctx: return []
-        ctx = ctx + [graph.name]
         vtxs = {}
         for node in graph:
             vtxs[node] = IPVertex(node)
@@ -148,29 +147,39 @@ def main(argv):
                     v0.connect(label, v1)
                 if node.kind == 'return':
                     outputs.append(v1)
-        for (funcall,recv) in recvs.items():
-            assert funcall in sends
-            args = sends[funcall]
-            for name in funcall.data.split(' '):
-                if name in graphs:
-                    rtns = enum_dataflow(graphs[name], args, ctx)
-                    for rtn in rtns:
-                        rtn.connect('return', recv)
-                    break
-                else:
-                    # fallback
-                    for (label,vtx) in args.items():
-                        vtx.connect(label, recv)
+        if graph.name in graph2info:
+            info = graph2info[graph.name]
+        else:
+            info = graph2info[graph.name] = []
+        info.append((inputs, outputs))
+        if graph.name not in ctx:
+            ctx = ctx + [graph.name]
+            for (funcall,recv) in recvs.items():
+                assert funcall in sends
+                args = sends[funcall]
+                for name in funcall.data.split(' '):
+                    if name in graphs:
+                        rtns = enum_dataflow(graphs[name], args, ctx)
+                        for rtn in rtns:
+                            rtn.connect('return', recv)
+                        break
+                    else:
+                        # fallback
+                        for (label,vtx) in args.items():
+                            vtx.connect(label, recv)
         return outputs
+
     for name in starts:
         print('# start: %r' % name)
         graph = graphs[name]
         inputs = {}
         for (label,node) in get_ins(graph):
             inputs[label] = IPVertex(node)
-        outputs = enum_dataflow(graph, inputs, [])
-        for vtx in inputs.values():
-            vtx.follow(set())
+        enum_dataflow(graph, inputs, [])
+
+    for (name,info) in graph2info.items():
+        for (inputs,outputs) in info:
+            print (name,inputs,outputs)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
