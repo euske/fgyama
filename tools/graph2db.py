@@ -96,7 +96,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
             return
 
         print (graph)
-        for node in graph.nodes.values():
+        for node in graph:
             if not node.outputs:
                 index_tree('', node, [0])
         return
@@ -150,7 +150,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
             return (maxnodes,maxdepth)
 
         votes = {}
-        for node in graph.nodes.values():
+        for node in graph:
             if node.outputs: continue
             # start from each terminal node.
             result = {}

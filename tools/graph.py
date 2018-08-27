@@ -30,9 +30,12 @@ class DFGraph:
         return ('<DFGraph(%s), name=%r (%d nodes)>' %
                 (self.gid, self.name, len(self.nodes)))
 
+    def __iter__(self):
+        return iter(self.nodes.values())
+
     def fixate(self):
         # Make every node double-linked.
-        for node in self.nodes.values():
+        for node in self:
             for (label,name) in node.inputs.items():
                 src = self.nodes[name]
                 node.inputs[label] = src
@@ -328,7 +331,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             return
 
         store_scope(graph.root)
-        for node in graph.nodes.values():
+        for node in graph:
             for (label,src) in node.inputs.items():
                 store_link(node, src, label)
         return gid
