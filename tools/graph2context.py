@@ -20,12 +20,20 @@ class IPVertex:
         vtx.inputs.append((label, self))
         return
 
-    def follow(self, traversed, indent=0):
+    def follow_out(self, label, traversed, indent=0):
+        print('  '*indent+label+' -> '+str(self.node))
+        if self in traversed: return
+        traversed.add(self)
         for (label, vtx) in self.outputs:
-            print(' '*indent, '-'+label+' '+str(vtx.node))
-            if vtx not in traversed:
-                traversed.add(vtx)
-                vtx.follow(traversed, indent+1)
+            vtx.follow_out(label, traversed, indent+1)
+        return
+
+    def follow_in(self, label, traversed, indent=0):
+        print('  '*indent+label+' <- '+str(self.node))
+        if self in traversed: return
+        traversed.add(self)
+        for (label, vtx) in self.inputs:
+            vtx.follow_in(label, traversed, indent+1)
         return
 
 def get_ins(graph):
@@ -127,7 +135,7 @@ def main(argv):
             vtxs[node] = IPVertex(node)
         sends = {}
         recvs = {}
-        outputs = []
+        outputs = {}
         for node in graph:
             v1 = vtxs[node]
             if node.kind == 'arg':
@@ -146,7 +154,7 @@ def main(argv):
                         recvs[funcall] = v0
                     v0.connect(label, v1)
                 if node.kind == 'return':
-                    outputs.append(v1)
+                    outputs['return'] = v1
         if graph.name in graph2info:
             info = graph2info[graph.name]
         else:
@@ -160,13 +168,9 @@ def main(argv):
                 for name in funcall.data.split(' '):
                     if name in graphs:
                         rtns = enum_dataflow(graphs[name], args, ctx)
-                        for rtn in rtns:
-                            rtn.connect('return', recv)
-                        break
-                    else:
-                        # fallback
-                        for (label,vtx) in args.items():
+                        for (label,vtx) in rtns.items():
                             vtx.connect(label, recv)
+                        break
         return outputs
 
     for name in starts:
@@ -179,7 +183,11 @@ def main(argv):
 
     for (name,info) in graph2info.items():
         for (inputs,outputs) in info:
-            print (name,inputs,outputs)
+            print(name)
+            for (label,vtx) in inputs.items():
+                vtx.follow_in(label, set())
+            for (label,vtx) in outputs.items():
+                vtx.follow_out(label, set())
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
