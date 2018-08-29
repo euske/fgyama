@@ -83,7 +83,7 @@
         <node name="NROOT/Baa.moo_8" ref=".ROOT/Foo/x" type="@int"/>
       </scope>
     </graph>
-    <graph ins="$ROOT/Baa.main.b0/a $ROOT/Baa.main.b0/b $ROOT/Baa.main.b0/c $ROOT/Baa.main.b0/x" name="ROOT/Baa/main" outs="$ROOT/Baa.main.b0/a $ROOT/Baa.main.b0/b $ROOT/Baa.main.b0/c $ROOT/Baa.main.b0/x">
+    <graph ins="$ROOT/Baa.main.b0/a $ROOT/Baa.main.b0/b $ROOT/Baa.main.b0/c" name="ROOT/Baa/main" outs="$ROOT/Baa.main.b0/a $ROOT/Baa.main.b0/b $ROOT/Baa.main.b0/c $ROOT/Baa.main.b0/x">
       <scope name="ROOT/Baa.main">
         <scope name="ROOT/Baa.main.b0">
           <node data="ROOT/Foo" kind="new" name="NROOT/Baa.main.b0_1" type="ROOT/Foo">

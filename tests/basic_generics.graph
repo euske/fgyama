@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph ins="#basic_generics/Moo/this $basic_generics/Moo.Moo/x .basic_generics/Moo/x" name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T" outs=".basic_generics/Moo/x">
+    <graph ins="#basic_generics/Moo/this $basic_generics/Moo.Moo/x" name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T" outs=".basic_generics/Moo/x">
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
           <node kind="ref" name="Nbasic_generics/Moo.Moo.b0_3" ref="#basic_generics/Moo/this" type="basic_generics/Moo">
