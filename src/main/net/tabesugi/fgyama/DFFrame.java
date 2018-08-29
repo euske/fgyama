@@ -20,6 +20,8 @@ public class DFFrame {
         new HashSet<DFVarRef>();
     private Set<DFVarRef> _outputs =
         new HashSet<DFVarRef>();
+    private List<DFExit> _exits =
+        new ArrayList<DFExit>();
 
     public static final String TRY = "@TRY";
     public static final String METHOD = "@METHOD";
@@ -99,6 +101,33 @@ public class DFFrame {
         inouts.toArray(refs);
         Arrays.sort(refs);
         return refs;
+    }
+
+    public DFExit[] getExits() {
+        DFExit[] exits = new DFExit[_exits.size()];
+        _exits.toArray(exits);
+        return exits;
+    }
+
+    public void addExit(DFExit exit) {
+        _exits.add(exit);
+    }
+
+    public void addAllExits(DFFrame frame, DFComponent cpt, boolean cont) {
+        while (frame != this) {
+            for (DFVarRef ref : frame.getOutputs()) {
+                this.addExit(new DFExit(cpt.getValue(ref), cont));
+            }
+            frame = frame.getParent();
+        }
+    }
+
+    public void finish(DFComponent cpt) {
+        for (DFExit exit : _exits) {
+            DFNode node = exit.getNode();
+            node.finish(cpt);
+            cpt.setOutput(node);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -20,8 +20,6 @@ public class DFComponent {
         new HashMap<DFVarRef, DFNode>();
     private Map<DFVarRef, DFNode> _outputs =
         new HashMap<DFVarRef, DFNode>();
-    private List<DFExit> _exits =
-        new ArrayList<DFExit>();
 
     public DFComponent(DFGraph graph, DFVarSpace space) {
         _graph = graph;
@@ -81,26 +79,6 @@ public class DFComponent {
         _outputs.keySet().toArray(refs);
         Arrays.sort(refs);
         return refs;
-    }
-
-    public DFExit[] getExits() {
-        DFExit[] exits = new DFExit[_exits.size()];
-        _exits.toArray(exits);
-        return exits;
-    }
-
-    public void addExit(DFExit exit) {
-        _exits.add(exit);
-    }
-
-    public void endFrame(DFFrame frame) {
-        for (DFExit exit : _exits) {
-            if (frame == exit.getFrame()) {
-                DFNode node = exit.getNode();
-                node.finish(this);
-                this.setOutput(node);
-            }
-        }
     }
 
     // dump: for debugging.

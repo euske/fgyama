@@ -12,30 +12,24 @@ import org.eclipse.jdt.core.dom.*;
 public class DFExit {
 
     private DFNode _node;
-    private DFFrame _frame;
     private boolean _cont;
 
-    public DFExit(DFNode node, DFFrame frame) {
-        this(node, frame, false);
+    public DFExit(DFNode node) {
+        this(node, false);
     }
 
-    public DFExit(DFNode node, DFFrame frame, boolean cont) {
+    public DFExit(DFNode node, boolean cont) {
         _node = node;
-        _frame = frame;
         _cont = cont;
     }
 
     @Override
     public String toString() {
-        return ("<DFExit: "+_node+" -> "+_frame+">");
+        return ("<DFExit: "+_node+">");
     }
 
     public DFNode getNode() {
         return _node;
-    }
-
-    public DFFrame getFrame() {
-        return _frame;
     }
 
     public boolean isCont() {
@@ -43,6 +37,6 @@ public class DFExit {
     }
 
     public DFExit wrap(DFNode node) {
-        return new DFExit(node, _frame, _cont);
+        return new DFExit(node, _cont);
     }
 }
