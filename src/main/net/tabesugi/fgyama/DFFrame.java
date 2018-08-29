@@ -116,7 +116,7 @@ public class DFFrame {
     public void addAllExits(DFFrame frame, DFComponent cpt, boolean cont) {
         while (frame != this) {
             for (DFVarRef ref : frame.getOutputs()) {
-                this.addExit(new DFExit(cpt.getValue(ref), cont));
+                this.addExit(new DFExit(cpt.getCurrent(ref), cont));
             }
             frame = frame.getParent();
         }
@@ -126,7 +126,7 @@ public class DFFrame {
         for (DFExit exit : _exits) {
             DFNode node = exit.getNode();
             node.finish(cpt);
-            cpt.setOutput(node);
+            cpt.setCurrent(node);
         }
     }
 

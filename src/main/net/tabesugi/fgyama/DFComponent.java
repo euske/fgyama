@@ -14,57 +14,56 @@ public class DFComponent {
     private DFGraph _graph;
     private DFVarSpace _space;
 
+    private Map<DFVarRef, DFNode> _current =
+        new HashMap<DFVarRef, DFNode>();
+    private Map<DFVarRef, DFNode> _first =
+        new HashMap<DFVarRef, DFNode>();
     private DFNode _lval = null;
     private DFNode _rval = null;
-    private Map<DFVarRef, DFNode> _inputs =
-        new HashMap<DFVarRef, DFNode>();
-    private Map<DFVarRef, DFNode> _outputs =
-        new HashMap<DFVarRef, DFNode>();
 
     public DFComponent(DFGraph graph, DFVarSpace space) {
         _graph = graph;
         _space = space;
     }
 
-    // getValue(ref): get an output value of the component if defined.
-    public DFNode getValue(DFVarRef ref) {
-        DFNode node = _outputs.get(ref);
+    // getCurrent(ref): get a current value of the component if defined.
+    public DFNode getCurrent(DFVarRef ref) {
+        DFNode node = _current.get(ref);
         if (node == null) {
-            node = _inputs.get(ref);
-            if (node == null) {
-                node = new DFNode(_graph, _space, ref.getType(), ref);
-                _inputs.put(ref, node);
-            }
+            assert(!_first.containsKey(ref));
+            node = new DFNode(_graph, _space, ref.getType(), ref);
+            _current.put(ref, node);
+            _first.put(ref, node);
         }
         return node;
+    }
+
+    public DFNode getFirst(DFVarRef ref) {
+        return _first.get(ref);
     }
 
     public DFNode getLValue() {
         return _lval;
     }
 
-    public void setLValue(DFNode node) {
-        _lval = node;
-    }
-
     public DFNode getRValue() {
         return _rval;
     }
 
+    public void setCurrent(DFNode node) {
+        DFVarRef ref = node.getRef();
+        _current.put(ref, node);
+        if (!_first.containsKey(ref)) {
+            _first.put(ref, node);
+        }
+    }
+
+    public void setLValue(DFNode node) {
+        _lval = node;
+    }
+
     public void setRValue(DFNode node) {
         _rval = node;
-    }
-
-    public DFNode getInput(DFVarRef ref) {
-        return _inputs.get(ref);
-    }
-
-    public DFNode getOutput(DFVarRef ref) {
-        return _outputs.get(ref);
-    }
-
-    public void setOutput(DFNode node) {
-        _outputs.put(node.getRef(), node);
     }
 
     // dump: for debugging.
@@ -73,16 +72,16 @@ public class DFComponent {
     }
     public void dump(PrintStream out) {
         out.println("DFComponent");
-        StringBuilder inputs = new StringBuilder();
-        for (DFVarRef ref : _inputs.keySet()) {
-            inputs.append(" "+ref);
+        StringBuilder firsts = new StringBuilder();
+        for (DFVarRef ref : _first.keySet()) {
+            firsts.append(" "+ref);
         }
-        out.println("  inputs:"+inputs);
-        StringBuilder outputs = new StringBuilder();
-        for (DFVarRef ref : _outputs.keySet()) {
-            outputs.append(" "+ref);
+        out.println("  firsts:"+firsts);
+        StringBuilder currents = new StringBuilder();
+        for (DFVarRef ref : _current.keySet()) {
+            currents.append(" "+ref);
         }
-        out.println("  outputs:"+outputs);
+        out.println("  currents:"+currents);
         if (_rval != null) {
             out.println("  rval: "+_rval);
         }
