@@ -155,11 +155,12 @@ public class DFTypeSpace {
 
     @SuppressWarnings("unchecked")
     public void build(
-        List<DFClassSpace> classes, CompilationUnit cunit)
+        List<DFClassSpace> classes,
+        CompilationUnit cunit, DFGlobalVarSpace global)
         throws UnsupportedSyntax {
         for (TypeDeclaration typeDecl :
                  (List<TypeDeclaration>) cunit.types()) {
-            this.build(classes, typeDecl, null);
+            this.build(classes, typeDecl, global);
         }
     }
 

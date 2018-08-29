@@ -16,7 +16,7 @@ public class DFParamClass extends DFClassSpace {
 
     public DFParamClass(
         DFClassSpace genericKlass, DFType[] argTypes) {
-        super(null, null, null, null);
+        super(null, null, genericKlass, null);
         _genericKlass = genericKlass;
         _argTypes = argTypes;
     }

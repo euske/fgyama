@@ -13,6 +13,7 @@ import org.w3c.dom.*;
 //
 public class DFVarSpace {
 
+    private DFVarSpace _global;
     private DFVarSpace _parent;
     private String _name;
 
@@ -23,7 +24,13 @@ public class DFVarSpace {
     private Map<String, DFVarRef> _id2ref =
         new HashMap<String, DFVarRef>();
 
+    protected DFVarSpace(String name) {
+        _global = this;
+        _name = name;
+    }
+
     protected DFVarSpace(DFVarSpace parent, String name) {
+        _global = parent._global;
         _parent = parent;
         _name = name;
     }
@@ -140,6 +147,11 @@ public class DFVarSpace {
     public DFVarRef lookupThis() {
         assert(_parent != null);
         return _parent.lookupThis();
+    }
+
+    public DFVarRef lookupArray(DFType type)
+    {
+        return _global.lookupArray(type);
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {

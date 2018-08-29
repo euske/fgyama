@@ -943,7 +943,7 @@ public class Java2DF {
                 DFNode array = cpt.getRValue();
                 cpt = processExpression(
                     graph, finder, varSpace, frame, cpt, aa.getIndex());
-                DFVarRef ref = this.rootSpace.getArrayRef(array.getType());
+                DFVarRef ref = varSpace.lookupArray(array.getType());
                 frame.addInput(ref);
                 DFNode index = cpt.getRValue();
                 DFNode node = new ArrayAccessNode(
@@ -1160,7 +1160,7 @@ public class Java2DF {
             DFNode array = cpt.getRValue();
             cpt = processExpression(
                 graph, finder, varSpace, frame, cpt, aa.getIndex());
-            DFVarRef ref = this.rootSpace.getArrayRef(array.getType());
+            DFVarRef ref = varSpace.lookupArray(array.getType());
             frame.addOutput(ref);
             DFNode index = cpt.getRValue();
             DFNode node = new ArrayAssignNode(
@@ -2134,8 +2134,9 @@ public class Java2DF {
     public void buildTypeSpace(
         List<DFClassSpace> classes, CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
+        DFGlobalVarSpace global = this.rootSpace.getGlobalSpace();
         try {
-            typeSpace.build(classes, cunit);
+            typeSpace.build(classes, cunit, global);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
