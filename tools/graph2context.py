@@ -1,68 +1,48 @@
 #!/usr/bin/env python
 import sys
-from subprocess import Popen, PIPE
-from graph import DFGraph, DFNode
 from graph import get_graphs
 
-class IPVertex:
+##  Chain Link
+##
+class CLink:
 
-    def __init__(self, node):
-        self.node = node
-        self.inputs = []
-        self.outputs = []
+    def __init__(self, obj, prev=None):
+        self.obj = obj
+        self.prev = prev
+        self.length = 1
+        if (prev is not None):
+            self.length = prev.length+1
         return
 
-    def __repr__(self):
-        return '<IPVertex: %r>' % self.node
+    def __len__(self):
+        return self.length
 
-    def connect(self, label, vtx):
-        self.outputs.append((label, vtx))
-        vtx.inputs.append((label, self))
+    def __iter__(self):
+        c = self
+        while c is not None:
+            yield c.obj
+            c = c.prev
         return
 
-    def follow_out(self, label, traversed, indent=0):
-        print('  '*indent+label+' -> '+str(self.node))
-        if self in traversed: return
-        traversed.add(self)
-        for (label, vtx) in self.outputs:
-            vtx.follow_out(label, traversed, indent+1)
-        return
+    def __contains__(self, obj0):
+        for obj in self:
+            if obj is obj0: return True
+        return False
 
-    def follow_in(self, label, traversed, indent=0):
-        print('  '*indent+label+' <- '+str(self.node))
-        if self in traversed: return
-        traversed.add(self)
-        for (label, vtx) in self.inputs:
-            vtx.follow_in(label, traversed, indent+1)
-        return
-
-def get_ins(graph):
-    for node in graph:
-        if node.kind == 'arg':
-            assert node.data.startswith('arg')
-            label = node.data
-            yield (label, node)
-    return
-
-def get_outs(graph):
-    for node in graph:
-        if node.kind == 'return':
-            yield node
-    return
-
+# main
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [graph ...]' % argv[0])
+        print('usage: %s [-d] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:')
+        (opts, args) = getopt.getopt(argv[1:], 'd')
     except getopt.GetoptError:
         return usage()
-    output = sys.stdout
+    debug = 0
     for (k, v) in opts:
-        if k == '-o': output = open(v, 'w')
+        if k == '-d': debug += 1
     if not args: return usage()
 
     # Load graphs.
@@ -70,7 +50,8 @@ def main(argv):
     for path in args:
         for graph in get_graphs(path):
             graphs[graph.name] = graph
-    print ('graphs: %r' % len(graphs), file=sys.stderr)
+
+    print ('# graphs: %r' % len(graphs), file=sys.stderr)
 
     # Enumerate caller/callee relationships.
     linkto = {}                 # callee
@@ -106,88 +87,22 @@ def main(argv):
                 name = node.data
                 link(src.name, name)
 
+    # enum contexts
+    def enum_context(src, chain=None):
+        if chain is not None and src in chain: return
+        chain = CLink(src, chain)
+        if 2 <= len(chain):
+            print (' '.join(chain))
+        if src in linkto:
+            for dst in linkto[src]:
+                enum_context(dst, chain)
+        return
+
     # Find start nodes.
-    starts = []
-    for src in graphs.values():
-        if src.name not in linkfrom:
-            starts.append(src.name)
-
-    if 0:
-        # enum contexts
-        def enum_context(src, ctx):
-            if src in ctx: return
-            ctx = ctx+[src]
-            if src in linkto:
-                for dst in linkto[src]:
-                    enum_context(dst, ctx)
-            else:
-                print (' '.join(ctx))
-        for name in starts:
-            print ('# start: %r' % name)
-            enum_context(name, [])
-
-    # enum dataflow
-    graph2info = {}
-    def enum_dataflow(graph, inputs, ctx):
-        print ('# enum_dataflow(%r, %r)' % (graph.name, inputs))
-        vtxs = {}
-        for node in graph:
-            vtxs[node] = IPVertex(node)
-        sends = {}
-        recvs = {}
-        outputs = {}
-        for node in graph:
-            v1 = vtxs[node]
-            if node.kind == 'arg':
-                label = node.data
-                inputs[label].connect('pass', v1)
-            elif node.kind in ('call', 'new'):
-                funcall = node
-                sends[funcall] = args = {}
-                for (label,src) in funcall.inputs.items():
-                    args[label] = vtxs[src]
-            else:
-                for (label,src) in node.inputs.items():
-                    v0 = vtxs[src]
-                    if src.kind in ('call', 'new'):
-                        funcall = src
-                        recvs[funcall] = v0
-                    v0.connect(label, v1)
-                if node.kind == 'return':
-                    outputs['return'] = v1
-        if graph.name in graph2info:
-            info = graph2info[graph.name]
-        else:
-            info = graph2info[graph.name] = []
-        info.append((inputs, outputs))
-        if graph.name not in ctx:
-            ctx = ctx + [graph.name]
-            for (funcall,recv) in recvs.items():
-                assert funcall in sends
-                args = sends[funcall]
-                for name in funcall.data.split(' '):
-                    if name in graphs:
-                        rtns = enum_dataflow(graphs[name], args, ctx)
-                        for (label,vtx) in rtns.items():
-                            vtx.connect(label, recv)
-                        break
-        return outputs
-
-    for name in starts:
-        print('# start: %r' % name)
-        graph = graphs[name]
-        inputs = {}
-        for (label,node) in get_ins(graph):
-            inputs[label] = IPVertex(node)
-        enum_dataflow(graph, inputs, [])
-
-    for (name,info) in graph2info.items():
-        for (inputs,outputs) in info:
-            print(name)
-            for (label,vtx) in inputs.items():
-                vtx.follow_in(label, set())
-            for (label,vtx) in outputs.items():
-                vtx.follow_out(label, set())
+    for graph in graphs.values():
+        if graph.name not in linkfrom:
+            print ('# start: %r' % graph.name, file=sys.stderr)
+            enum_context(graph.name)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
