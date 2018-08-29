@@ -7,8 +7,9 @@
   <property name="tmpDir" location="tmp" />
   <property name="buildDir" location="target" />
   <property name="toolsDir" location="tools" />
+  <property name="testsDir" location="tests" />
 
-  <property name="input" location="tests/basic_return.java" />
+  <property name="input" location="${testsDir}/basic_return.java" />
   <property name="out_xml" location="${tmpDir}/out.xml" />
   <property name="out_graph" location="${tmpDir}/out.graph" />
   <property name="out_gv" location="${tmpDir}/out.gv" />
@@ -39,6 +40,9 @@
 
   <target name="clean">
     <delete dir="${buildDir}" />
+    <delete>
+      <fileset dir="${testsDir}" includes="**/*.err" />
+    </delete>
   </target>
 
   <target name="compile">
