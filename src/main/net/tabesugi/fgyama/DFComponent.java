@@ -67,20 +67,6 @@ public class DFComponent {
         _outputs.put(node.getRef(), node);
     }
 
-    public DFVarRef[] getInputRefs() {
-        DFVarRef[] refs = new DFVarRef[_inputs.size()];
-        _inputs.keySet().toArray(refs);
-        Arrays.sort(refs);
-        return refs;
-    }
-
-    public DFVarRef[] getOutputRefs() {
-        DFVarRef[] refs = new DFVarRef[_outputs.size()];
-        _outputs.keySet().toArray(refs);
-        Arrays.sort(refs);
-        return refs;
-    }
-
     // dump: for debugging.
     public void dump() {
         dump(System.err);
