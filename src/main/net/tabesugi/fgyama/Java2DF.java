@@ -1733,14 +1733,14 @@ public class Java2DF {
         } else if (stmt instanceof BreakStatement) {
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
-            String dstLabel = (labelName == null)? null : labelName.getIdentifier();
+            String dstLabel = (labelName == null)? DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
             dstFrame.addAllExits(frame, cpt, false);
 
         } else if (stmt instanceof ContinueStatement) {
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
-            String dstLabel = (labelName == null)? null : labelName.getIdentifier();
+            String dstLabel = (labelName == null)? DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
             dstFrame.addAllExits(frame, cpt, true);
 

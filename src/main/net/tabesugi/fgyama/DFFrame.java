@@ -23,6 +23,8 @@ public class DFFrame {
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
+    public static final String COND = "@COND";
+    public static final String LOOP = "@LOOP";
     public static final String TRY = "@TRY";
     public static final String METHOD = "@METHOD";
     public static final String CLASS = "@CLASS";
@@ -32,6 +34,7 @@ public class DFFrame {
     }
 
     public DFFrame(String label, DFFrame parent) {
+        assert(label != null);
         _label = label;
         _parent = parent;
     }
@@ -114,10 +117,11 @@ public class DFFrame {
     }
 
     public void addAllExits(DFFrame frame, DFComponent cpt, boolean cont) {
-        while (frame != this) {
+        while (true) {
             for (DFVarRef ref : frame.getOutputs()) {
                 this.addExit(new DFExit(cpt.getCurrent(ref), cont));
             }
+            if (frame == this) break;
             frame = frame.getParent();
         }
     }
@@ -155,18 +159,18 @@ public class DFFrame {
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Statement thenStmt = ifStmt.getThenStatement();
-            DFFrame thenFrame = this.addChild(null, thenStmt);
+            DFFrame thenFrame = this.addChild(DFFrame.COND, thenStmt);
             thenFrame.build(varSpace, thenStmt);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                DFFrame elseFrame = this.addChild(null, elseStmt);
+                DFFrame elseFrame = this.addChild(DFFrame.COND, elseStmt);
                 elseFrame.build(varSpace, elseStmt);
             }
 
         } else if (ast instanceof SwitchStatement) {
             DFVarSpace childSpace = varSpace.getChildByAST(ast);
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFFrame childFrame = this.addChild(null, ast);
+            DFFrame childFrame = this.addChild(DFFrame.LOOP, ast);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
                 childFrame.build(childSpace, stmt);
@@ -177,28 +181,28 @@ public class DFFrame {
         } else if (ast instanceof WhileStatement) {
             DFVarSpace childSpace = varSpace.getChildByAST(ast);
             WhileStatement whileStmt = (WhileStatement)ast;
-            DFFrame childFrame = this.addChild(null, ast);
+            DFFrame childFrame = this.addChild(DFFrame.LOOP, ast);
             Statement stmt = whileStmt.getBody();
             childFrame.build(childSpace, stmt);
 
         } else if (ast instanceof DoStatement) {
             DFVarSpace childSpace = varSpace.getChildByAST(ast);
             DoStatement doStmt = (DoStatement)ast;
-            DFFrame childFrame = this.addChild(null, ast);
+            DFFrame childFrame = this.addChild(DFFrame.LOOP, ast);
             Statement stmt = doStmt.getBody();
             childFrame.build(childSpace, stmt);
 
         } else if (ast instanceof ForStatement) {
             DFVarSpace childSpace = varSpace.getChildByAST(ast);
             ForStatement forStmt = (ForStatement)ast;
-            DFFrame childFrame = this.addChild(null, ast);
+            DFFrame childFrame = this.addChild(DFFrame.LOOP, ast);
             Statement stmt = forStmt.getBody();
             childFrame.build(childSpace, stmt);
 
         } else if (ast instanceof EnhancedForStatement) {
             DFVarSpace childSpace = varSpace.getChildByAST(ast);
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            DFFrame childFrame = this.addChild(null, ast);
+            DFFrame childFrame = this.addChild(DFFrame.LOOP, ast);
             Statement stmt = eForStmt.getBody();
             childFrame.build(childSpace, stmt);
 
