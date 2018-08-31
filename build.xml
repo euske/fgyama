@@ -66,7 +66,6 @@
   <target name="run" depends="build">
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.fgyama.Java2DF">
-      <jvmarg value="-ea" />
       <arg value="-o" />
       <arg file="${out_graph}" />
       <arg file="${input}" />
@@ -101,8 +100,7 @@
   </target>
 
   <target name="test" depends="build">
-    <junit fork="true">
-      <jvmarg value="-ea" />
+    <junit>
       <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
@@ -111,8 +109,7 @@
   </target>
 
   <target name="java2xml" depends="build">
-    <java fork="true" classname="Java2Xml">
-      <jvmarg value="-ea" />
+    <java classname="Java2Xml">
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg value="-o" />
@@ -122,8 +119,7 @@
   </target>
 
   <target name="comm" depends="build">
-    <java fork="true" classname="CommentExtractor">
-      <jvmarg value="-ea" />
+    <java classname="CommentExtractor">
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg file="${input}" />
