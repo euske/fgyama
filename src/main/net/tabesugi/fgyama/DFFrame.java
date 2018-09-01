@@ -116,21 +116,13 @@ public class DFFrame {
         _exits.add(exit);
     }
 
-    public void addAllExits(DFFrame frame, DFComponent cpt, boolean cont) {
-        while (true) {
-            for (DFVarRef ref : frame.getOutputs()) {
-                this.addExit(new DFExit(cpt.getCurrent(ref), cont));
-            }
-            if (frame == this) break;
-            frame = frame.getParent();
-        }
-    }
-
     public void finish(DFComponent cpt) {
         for (DFExit exit : _exits) {
-            DFNode node = exit.getNode();
-            node.finish(cpt);
-            cpt.setCurrent(node);
+            if (exit.getFrame() == this) {
+                DFNode node = exit.getNode();
+                node.finish(cpt);
+                cpt.setCurrent(node);
+            }
         }
     }
 

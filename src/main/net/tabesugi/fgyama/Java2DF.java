@@ -605,12 +605,12 @@ class CreateObjectNode extends CallNode {
 }
 
 // ReturnNode: represents a return value.
-class ReturnNode extends ProgNode {
+class ReturnNode extends SingleAssignNode {
 
     public ReturnNode(
         DFGraph graph, DFVarSpace space,
         ASTNode ast) throws VariableNotFound {
-        super(graph, space, null, space.lookupReturn(), ast);
+        super(graph, space, space.lookupReturn(), ast);
     }
 
     @Override
@@ -867,7 +867,7 @@ public class Java2DF {
                 cpt.setRValue(call);
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.TRY);
-                    dstFrame.addExit(new DFExit(call.exception));
+                    frame.addExit(new DFExit(dstFrame, call.exception));
                 }
 
             } else if (expr instanceof SuperMethodInvocation) {
@@ -903,7 +903,7 @@ public class Java2DF {
                 cpt.setRValue(call);
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.TRY);
-                    dstFrame.addExit(new DFExit(call.exception));
+                    frame.addExit(new DFExit(dstFrame, call.exception));
                 }
 
             } else if (expr instanceof ArrayCreation) {
@@ -1278,8 +1278,6 @@ public class Java2DF {
                 frame.addExit(exit.wrap(join));
             }
         }
-        frame.finish(cpt);
-
         return cpt;
     }
 
@@ -1720,23 +1718,32 @@ public class Java2DF {
                     graph, finder, varSpace, frame, cpt, expr);
                 ReturnNode rtrn = new ReturnNode(graph, varSpace, rtrnStmt);
                 rtrn.accept(cpt.getRValue());
-                dstFrame.addExit(new DFExit(rtrn));
+                cpt.setCurrent(rtrn);
+                frame.addExit(new DFExit(dstFrame, rtrn));
             }
-            dstFrame.addAllExits(frame, cpt, false);
+            for (DFVarRef ref : frame.getOutputs()) {
+                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+            }
 
         } else if (stmt instanceof BreakStatement) {
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
-            String dstLabel = (labelName == null)? DFFrame.LOOP : labelName.getIdentifier();
+            String dstLabel = (labelName == null)?
+                DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
-            dstFrame.addAllExits(frame, cpt, false);
+            for (DFVarRef ref : frame.getOutputs()) {
+                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+            }
 
         } else if (stmt instanceof ContinueStatement) {
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
-            String dstLabel = (labelName == null)? DFFrame.LOOP : labelName.getIdentifier();
+            String dstLabel = (labelName == null)?
+                DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
-            dstFrame.addAllExits(frame, cpt, true);
+            for (DFVarRef ref : frame.getOutputs()) {
+                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref), true));
+            }
 
         } else if (stmt instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
@@ -1744,6 +1751,7 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, labeledFrame,
                 cpt, labeledStmt.getBody());
+            labeledFrame.finish(cpt);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -1763,6 +1771,7 @@ public class Java2DF {
                 cpt = processStatement(
                     graph, finder, varSpace, frame, cpt, finBlock);
             }
+            tryFrame.finish(cpt);
 
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
@@ -1772,8 +1781,10 @@ public class Java2DF {
             ExceptionNode exception = new ExceptionNode(
                 graph, varSpace, stmt, cpt.getRValue());
             DFFrame dstFrame = frame.find(DFFrame.TRY);
-            dstFrame.addExit(new DFExit(exception));
-            dstFrame.addAllExits(frame, cpt, false);
+            frame.addExit(new DFExit(dstFrame, exception));
+            for (DFVarRef ref : frame.getOutputs()) {
+                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+            }
 
         } else if (stmt instanceof ConstructorInvocation) {
             // XXX Ignore all side effects.
