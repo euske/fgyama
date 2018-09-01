@@ -14,9 +14,9 @@ public class DFComponent {
     private DFGraph _graph;
     private DFVarSpace _space;
 
-    private Map<DFVarRef, DFNode> _current =
-        new HashMap<DFVarRef, DFNode>();
     private Map<DFVarRef, DFNode> _first =
+        new HashMap<DFVarRef, DFNode>();
+    private Map<DFVarRef, DFNode> _last =
         new HashMap<DFVarRef, DFNode>();
     private DFNode _lval = null;
     private DFNode _rval = null;
@@ -26,13 +26,13 @@ public class DFComponent {
         _space = space;
     }
 
-    // getCurrent(ref): get a current value of the component if defined.
-    public DFNode getCurrent(DFVarRef ref) {
-        DFNode node = _current.get(ref);
+    // get(ref): get a current value of the component if defined.
+    public DFNode get(DFVarRef ref) {
+        DFNode node = _last.get(ref);
         if (node == null) {
             assert(!_first.containsKey(ref));
             node = new DFNode(_graph, _space, ref.getType(), ref);
-            _current.put(ref, node);
+            _last.put(ref, node);
             _first.put(ref, node);
         }
         return node;
@@ -50,9 +50,9 @@ public class DFComponent {
         return _rval;
     }
 
-    public void setCurrent(DFNode node) {
+    public void set(DFNode node) {
         DFVarRef ref = node.getRef();
-        _current.put(ref, node);
+        _last.put(ref, node);
         if (!_first.containsKey(ref)) {
             _first.put(ref, node);
         }
@@ -77,11 +77,11 @@ public class DFComponent {
             firsts.append(" "+ref);
         }
         out.println("  firsts:"+firsts);
-        StringBuilder currents = new StringBuilder();
-        for (DFVarRef ref : _current.keySet()) {
-            currents.append(" "+ref);
+        StringBuilder lasts = new StringBuilder();
+        for (DFVarRef ref : _last.keySet()) {
+            lasts.append(" "+ref);
         }
-        out.println("  currents:"+currents);
+        out.println("  lasts:"+lasts);
         if (_rval != null) {
             out.println("  rval: "+_rval);
         }

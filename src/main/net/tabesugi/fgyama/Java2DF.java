@@ -410,7 +410,7 @@ class JoinNode extends ProgNode {
     @Override
     public void finish(DFComponent cpt) {
         if (!this.isClosed()) {
-            this.close(cpt.getCurrent(this.getRef()));
+            this.close(cpt.get(this.getRef()));
         }
     }
 
@@ -658,7 +658,7 @@ public class Java2DF {
                 if (name.isSimpleName()) {
                     DFVarRef ref = varSpace.lookupVarOrField((SimpleName)name);
                     DFNode node = new VarRefNode(graph, varSpace, ref, expr);
-                    node.accept(cpt.getCurrent(ref));
+                    node.accept(cpt.get(ref));
                     cpt.setRValue(node);
                 } else {
                     QualifiedName qname = (QualifiedName)name;
@@ -677,14 +677,14 @@ public class Java2DF {
                     SimpleName fieldName = qname.getName();
                     DFVarRef ref = klass.lookupField(fieldName);
                     DFNode node = new FieldAccessNode(graph, varSpace, ref, qname, obj);
-                    node.accept(cpt.getCurrent(ref));
+                    node.accept(cpt.get(ref));
                     cpt.setRValue(node);
                 }
 
             } else if (expr instanceof ThisExpression) {
                 DFVarRef ref = varSpace.lookupThis();
                 DFNode node = new VarRefNode(graph, varSpace, ref, expr);
-                node.accept(cpt.getCurrent(ref));
+                node.accept(cpt.get(ref));
                 cpt.setRValue(node);
 
             } else if (expr instanceof BooleanLiteral) {
@@ -739,7 +739,7 @@ public class Java2DF {
                         expr, op);
                     value.accept(cpt.getRValue());
                     assign.accept(value);
-                    cpt.setCurrent(assign);
+                    cpt.set(assign);
                     cpt.setRValue(value);
                 } else {
                     DFNode value = new PrefixNode(
@@ -764,7 +764,7 @@ public class Java2DF {
                         graph, varSpace, assign.getRef(), expr, op);
                     node.accept(cpt.getRValue());
                     assign.accept(node);
-                    cpt.setCurrent(assign);
+                    cpt.set(assign);
                 }
 
             } else if (expr instanceof InfixExpression) {
@@ -801,12 +801,12 @@ public class Java2DF {
                 DFNode rvalue = cpt.getRValue();
                 DFNode lvalue = null;
                 if (op != Assignment.Operator.ASSIGN) {
-                    lvalue = cpt.getCurrent(assign.getRef());
+                    lvalue = cpt.get(assign.getRef());
                 }
                 assign.accept(new AssignOpNode(
                                   graph, varSpace, assign.getRef(), assn,
                                   op, lvalue, rvalue));
-                cpt.setCurrent(assign);
+                cpt.set(assign);
                 cpt.setRValue(assign);
 
             } else if (expr instanceof VariableDeclarationExpression) {
@@ -821,7 +821,7 @@ public class Java2DF {
                 DFNode obj = null;
                 DFClassSpace klass = null;
                 if (expr1 == null) {
-                    obj = cpt.getCurrent(varSpace.lookupThis());
+                    obj = cpt.get(varSpace.lookupThis());
                 } else {
                     if (expr1 instanceof Name) {
                         try {
@@ -872,7 +872,7 @@ public class Java2DF {
 
             } else if (expr instanceof SuperMethodInvocation) {
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-                DFNode obj = cpt.getCurrent(varSpace.lookupThis());
+                DFNode obj = cpt.get(varSpace.lookupThis());
                 List<DFNode> argList = new ArrayList<DFNode>();
                 List<DFType> typeList = new ArrayList<DFType>();
                 for (Expression arg : (List<Expression>) sinvoke.arguments()) {
@@ -949,7 +949,7 @@ public class Java2DF {
                 DFNode index = cpt.getRValue();
                 DFNode node = new ArrayAccessNode(
                     graph, varSpace, ref, aa, array, index);
-                node.accept(cpt.getCurrent(ref));
+                node.accept(cpt.get(ref));
                 cpt.setRValue(node);
 
             } else if (expr instanceof FieldAccess) {
@@ -972,17 +972,17 @@ public class Java2DF {
                 SimpleName fieldName = fa.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varSpace, ref, fa, obj);
-                node.accept(cpt.getCurrent(ref));
+                node.accept(cpt.get(ref));
                 cpt.setRValue(node);
 
             } else if (expr instanceof SuperFieldAccess) {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
-                DFNode obj = cpt.getCurrent(varSpace.lookupThis());
+                DFNode obj = cpt.get(varSpace.lookupThis());
                 DFClassSpace klass = finder.resolveClass(obj.getType());
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
-                node.accept(cpt.getCurrent(ref));
+                node.accept(cpt.get(ref));
                 cpt.setRValue(node);
 
             } else if (expr instanceof CastExpression) {
@@ -1197,7 +1197,7 @@ public class Java2DF {
                     graph, finder, varSpace, frame, cpt, init);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, frag);
                 assign.accept(cpt.getRValue());
-                cpt.setCurrent(assign);
+                cpt.set(assign);
             }
         }
         return cpt;
@@ -1220,7 +1220,7 @@ public class Java2DF {
             for (DFVarRef ref : trueFrame.getInputs()) {
                 DFNode src = trueCpt.getFirst(ref);
                 if (src != null) {
-                    src.accept(cpt.getCurrent(ref));
+                    src.accept(cpt.get(ref));
                 }
             }
             outRefs.addAll(Arrays.asList(trueFrame.getOutputs()));
@@ -1229,7 +1229,7 @@ public class Java2DF {
             for (DFVarRef ref : falseFrame.getInputs()) {
                 DFNode src = falseCpt.getFirst(ref);
                 if (src != null) {
-                    src.accept(cpt.getCurrent(ref));
+                    src.accept(cpt.get(ref));
                 }
             }
             outRefs.addAll(Arrays.asList(falseFrame.getOutputs()));
@@ -1242,21 +1242,21 @@ public class Java2DF {
             used.add(ref);
             JoinNode join = new JoinNode(graph, varSpace, ref, ast, condValue);
             if (trueCpt != null) {
-                DFNode dst = trueCpt.getCurrent(ref);
+                DFNode dst = trueCpt.get(ref);
                 if (dst != null) {
                     join.recv(true, dst);
                 }
             }
             if (falseCpt != null) {
-                DFNode dst = falseCpt.getCurrent(ref);
+                DFNode dst = falseCpt.get(ref);
                 if (dst != null) {
                     join.recv(false, dst);
                 }
             }
             if (!join.isClosed()) {
-                join.close(cpt.getCurrent(ref));
+                join.close(cpt.get(ref));
             }
-            cpt.setCurrent(join);
+            cpt.set(join);
         }
 
         // Take care of exits.
@@ -1300,7 +1300,7 @@ public class Java2DF {
             new HashMap<DFVarRef, DFNode>();
         DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
         for (DFVarRef ref : loopRefs) {
-            DFNode src = cpt.getCurrent(ref);
+            DFNode src = cpt.get(ref);
             LoopBeginNode begin = new LoopBeginNode(graph, varSpace, ref, ast, src);
             LoopRepeatNode repeat = new LoopRepeatNode(graph, varSpace, ref, ast);
             LoopEndNode end = new LoopEndNode(graph, varSpace, ref, ast, condValue);
@@ -1318,21 +1318,21 @@ public class Java2DF {
                 if (input != null) {
                     DFNode src = repeats.get(ref);
                     if (src == null) {
-                        src = cpt.getCurrent(ref);
+                        src = cpt.get(ref);
                     }
                     input.accept(src);
                 }
             }
             // Connect the loop outputs to the begins.
             for (DFVarRef ref : loopFrame.getOutputs()) {
-                DFNode output = loopCpt.getCurrent(ref);
+                DFNode output = loopCpt.get(ref);
                 if (output != null) {
                     LoopBeginNode begin = begins.get(ref);
                     if (begin != null) {
                         begin.setRepeat(output);
                     } else {
                         //assert !loopRefs.contains(ref);
-                        cpt.setCurrent(output);
+                        cpt.set(output);
                     }
                 }
             }
@@ -1350,21 +1350,21 @@ public class Java2DF {
                 if (input != null) {
                     DFNode src = begins.get(ref);
                     if (src == null) {
-                        src = cpt.getCurrent(ref);
+                        src = cpt.get(ref);
                     }
                     input.accept(src);
                 }
             }
             // Connect the loop outputs to the ends.
             for (DFVarRef ref : loopFrame.getOutputs()) {
-                DFNode output = loopCpt.getCurrent(ref);
+                DFNode output = loopCpt.get(ref);
                 if (output != null) {
                     DFNode dst = ends.get(ref);
                     if (dst != null) {
                         dst.accept(output);
                     } else {
                         //assert !loopRefs.contains(ref);
-                        cpt.setCurrent(output);
+                        cpt.set(output);
                     }
                 }
             }
@@ -1382,7 +1382,7 @@ public class Java2DF {
                 DFNode node = exit.getNode();
                 DFNode end = ends.get(node.getRef());
                 if (end == null) {
-                    end = cpt.getCurrent(node.getRef());
+                    end = cpt.get(node.getRef());
                 }
                 if (node instanceof JoinNode) {
                     ((JoinNode)node).close(end);
@@ -1397,7 +1397,7 @@ public class Java2DF {
         for (DFVarRef ref : loopRefs) {
             DFNode end = ends.get(ref);
             LoopRepeatNode repeat = repeats.get(ref);
-            cpt.setCurrent(end);
+            cpt.set(end);
             repeat.setLoop(end);
         }
 
@@ -1474,17 +1474,17 @@ public class Java2DF {
         for (DFVarRef ref : frame.getInputs()) {
             DFNode src = caseCpt.getFirst(ref);
             if (src != null) {
-                src.accept(cpt.getCurrent(ref));
+                src.accept(cpt.get(ref));
             }
         }
 
         for (DFVarRef ref : frame.getOutputs()) {
-            DFNode dst = caseCpt.getCurrent(ref);
+            DFNode dst = caseCpt.get(ref);
             if (dst != null) {
                 JoinNode join = new JoinNode(graph, varSpace, ref, apt, caseNode);
                 join.recv(true, dst);
-                join.close(cpt.getCurrent(ref));
-                cpt.setCurrent(join);
+                join.close(cpt.get(ref));
+                cpt.set(join);
             }
         }
 
@@ -1639,7 +1639,7 @@ public class Java2DF {
         iterValue.accept(loopCpt.getRValue());
         SingleAssignNode assign = new SingleAssignNode(graph, loopSpace, ref, expr);
         assign.accept(iterValue);
-        cpt.setCurrent(assign);
+        cpt.set(assign);
         loopCpt = processStatement(
             graph, finder, loopSpace, loopFrame, loopCpt,
             eForStmt.getBody());
@@ -1718,11 +1718,11 @@ public class Java2DF {
                     graph, finder, varSpace, frame, cpt, expr);
                 ReturnNode rtrn = new ReturnNode(graph, varSpace, rtrnStmt);
                 rtrn.accept(cpt.getRValue());
-                cpt.setCurrent(rtrn);
+                cpt.set(rtrn);
                 frame.addExit(new DFExit(dstFrame, rtrn));
             }
             for (DFVarRef ref : frame.getOutputs()) {
-                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+                frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
         } else if (stmt instanceof BreakStatement) {
@@ -1732,7 +1732,7 @@ public class Java2DF {
                 DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : frame.getOutputs()) {
-                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+                frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
         } else if (stmt instanceof ContinueStatement) {
@@ -1742,7 +1742,7 @@ public class Java2DF {
                 DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : frame.getOutputs()) {
-                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref), true));
+                frame.addExit(new DFExit(dstFrame, cpt.get(ref), true));
             }
 
         } else if (stmt instanceof LabeledStatement) {
@@ -1783,7 +1783,7 @@ public class Java2DF {
             DFFrame dstFrame = frame.find(DFFrame.TRY);
             frame.addExit(new DFExit(dstFrame, exception));
             for (DFVarRef ref : frame.getOutputs()) {
-                frame.addExit(new DFExit(dstFrame, cpt.getCurrent(ref)));
+                frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
@@ -2041,7 +2041,7 @@ public class Java2DF {
                 DFNode param = new ArgNode(graph, varSpace, ref, decl, i++);
                 DFNode assign = new SingleAssignNode(graph, varSpace, ref, decl);
                 assign.accept(param);
-                cpt.setCurrent(assign);
+                cpt.set(assign);
             }
 
             // Process the function body.

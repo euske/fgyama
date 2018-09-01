@@ -121,7 +121,7 @@ public class DFFrame {
             if (exit.getFrame() == this) {
                 DFNode node = exit.getNode();
                 node.finish(cpt);
-                cpt.setCurrent(node);
+                cpt.set(node);
             }
         }
     }
