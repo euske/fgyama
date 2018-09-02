@@ -44,7 +44,7 @@ public class DFFrame {
         return ("<DFFrame("+_label+")>");
     }
 
-    public DFFrame addChild(String label, ASTNode ast) {
+    private DFFrame addChild(String label, ASTNode ast) {
         DFFrame frame = new DFFrame(label, this);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
@@ -68,8 +68,7 @@ public class DFFrame {
         if (label == null) return this;
         DFFrame frame = this;
         while (frame.getParent() != null) {
-            if (frame.getLabel() != null &&
-                frame.getLabel().equals(label)) break;
+            if (frame.getLabel().equals(label)) break;
             frame = frame.getParent();
         }
         return frame;
@@ -116,7 +115,7 @@ public class DFFrame {
         _exits.add(exit);
     }
 
-    public void finish(DFComponent cpt) {
+    public void sendTo(DFComponent cpt) {
         for (DFExit exit : _exits) {
             if (exit.getFrame() == this) {
                 DFNode node = exit.getNode();
@@ -124,6 +123,11 @@ public class DFFrame {
                 cpt.set(node);
             }
         }
+    }
+
+    private void finish(DFFrame childFrame) {
+        _inputs.addAll(childFrame._inputs);
+        _outputs.addAll(childFrame._outputs);
     }
 
     private void buildAssignment(
@@ -184,7 +188,7 @@ public class DFFrame {
     }
     
     @SuppressWarnings("unchecked")
-    public DFType build(
+    private DFType build(
         DFTypeFinder finder, DFVarSpace varSpace, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
         if (expr instanceof Annotation) {
@@ -494,10 +498,12 @@ public class DFFrame {
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild(DFFrame.COND, thenStmt);
             thenFrame.build(finder, varSpace, thenStmt);
+            this.finish(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = this.addChild(DFFrame.COND, elseStmt);
                 elseFrame.build(finder, varSpace, elseStmt);
+                this.finish(elseFrame);
             }
 
         } else if (stmt instanceof SwitchStatement) {
@@ -509,6 +515,7 @@ public class DFFrame {
                      (List<Statement>) switchStmt.statements()) {
                 childFrame.build(finder, childSpace, cstmt);
             }
+            this.finish(childFrame);
 
         } else if (stmt instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)stmt;
@@ -523,6 +530,7 @@ public class DFFrame {
             DFVarSpace childSpace = varSpace.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childSpace, whileStmt.getBody());
+            this.finish(childFrame);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
@@ -530,6 +538,7 @@ public class DFFrame {
             DFVarSpace childSpace = varSpace.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childSpace, doStmt.getBody());
+            this.finish(childFrame);
 
         } else if (stmt instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)stmt;
@@ -543,6 +552,7 @@ public class DFFrame {
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 childFrame.build(finder, childSpace, update);
             }
+            this.finish(childFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
@@ -553,6 +563,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childSpace, eForStmt.getExpression());
             childFrame.build(finder, childSpace, eForStmt.getBody());
+            this.finish(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
@@ -572,6 +583,7 @@ public class DFFrame {
             String label = labelName.getIdentifier();
             DFFrame childFrame = this.addChild(label, stmt);
             childFrame.build(finder, varSpace, labeledStmt.getBody());
+            this.finish(childFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -582,6 +594,7 @@ public class DFFrame {
             Block block = tryStmt.getBody();
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
             tryFrame.build(finder, varSpace, block);
+            this.finish(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -628,12 +641,12 @@ public class DFFrame {
         out.println(indent+_label+" {");
         String i2 = indent + "  ";
         StringBuilder inputs = new StringBuilder();
-        for (DFVarRef ref : _inputs) {
+        for (DFVarRef ref : this.getInputs()) {
             inputs.append(" "+ref);
         }
         out.println(i2+"inputs:"+inputs);
         StringBuilder outputs = new StringBuilder();
-        for (DFVarRef ref : _outputs) {
+        for (DFVarRef ref : this.getOutputs()) {
             outputs.append(" "+ref);
         }
         out.println(i2+"outputs:"+outputs);

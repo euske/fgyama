@@ -70,7 +70,7 @@ public class DFVarSpace {
         }
     }
 
-    public DFVarSpace addChild(String basename, ASTNode ast) {
+    private DFVarSpace addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
         Logger.info("DFVarSpace.addChild: "+this+": "+id);
         DFVarSpace space = new DFVarSpace(this, id);

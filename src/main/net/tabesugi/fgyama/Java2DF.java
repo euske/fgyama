@@ -1449,7 +1449,7 @@ public class Java2DF {
         DFFrame thenFrame = frame.getChildByAST(thenStmt);
         thenCpt = processStatement(
             graph, finder, varSpace, thenFrame, thenCpt, thenStmt);
-        thenFrame.finish(thenCpt);
+        thenFrame.sendTo(thenCpt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFComponent elseCpt = null;
@@ -1459,7 +1459,7 @@ public class Java2DF {
             elseCpt = new DFComponent(graph, varSpace);
             elseCpt = processStatement(
                 graph, finder, varSpace, elseFrame, elseCpt, elseStmt);
-            elseFrame.finish(elseCpt);
+            elseFrame.sendTo(elseCpt);
         }
         return processConditional(
             graph, varSpace, frame, cpt, ifStmt, condValue,
@@ -1541,7 +1541,7 @@ public class Java2DF {
                 graph, switchSpace, switchFrame,
                 cpt, switchCase, caseNode, caseCpt);
         }
-        switchFrame.finish(cpt);
+        switchFrame.sendTo(cpt);
         return cpt;
     }
 
@@ -1562,7 +1562,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, whileStmt,
             condValue, loopFrame, loopCpt, true);
-        loopFrame.finish(cpt);
+        loopFrame.sendTo(cpt);
         return cpt;
     }
 
@@ -1583,7 +1583,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, doStmt,
             condValue, loopFrame, loopCpt, false);
-        loopFrame.finish(cpt);
+        loopFrame.sendTo(cpt);
         return cpt;
     }
 
@@ -1618,7 +1618,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, forStmt,
             condValue, loopFrame, loopCpt, true);
-        loopFrame.finish(cpt);
+        loopFrame.sendTo(cpt);
         return cpt;
     }
 
@@ -1646,7 +1646,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, eForStmt,
             iterValue, loopFrame, loopCpt, true);
-        loopFrame.finish(cpt);
+        loopFrame.sendTo(cpt);
         return cpt;
     }
 
@@ -1731,7 +1731,8 @@ public class Java2DF {
             String dstLabel = (labelName == null)?
                 DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
-            for (DFVarRef ref : frame.getOutputs()) {
+            Logger.info("break: frame="+frame+", dstFrame="+dstFrame);
+            for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
@@ -1741,7 +1742,7 @@ public class Java2DF {
             String dstLabel = (labelName == null)?
                 DFFrame.LOOP : labelName.getIdentifier();
             DFFrame dstFrame = frame.find(dstLabel);
-            for (DFVarRef ref : frame.getOutputs()) {
+            for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref), true));
             }
 
@@ -1751,7 +1752,7 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, labeledFrame,
                 cpt, labeledStmt.getBody());
-            labeledFrame.finish(cpt);
+            labeledFrame.sendTo(cpt);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -1766,7 +1767,7 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, tryFrame,
                 cpt, tryStmt.getBody());
-            tryFrame.finish(cpt);
+            tryFrame.sendTo(cpt);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -2056,7 +2057,7 @@ public class Java2DF {
             // Process the function body.
             cpt = processStatement(
                 graph, finder, varSpace, frame, cpt, methodDecl.getBody());
-            frame.finish(cpt);
+            frame.sendTo(cpt);
             frame.dump();
             // Remove redundant nodes.
             graph.cleanup();
@@ -2106,7 +2107,7 @@ public class Java2DF {
                     cpt = processStatement(
                         classGraph, finder, klass,
                         frame, cpt, block);
-                    frame.finish(cpt);
+                    frame.sendTo(cpt);
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
