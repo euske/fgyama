@@ -349,6 +349,7 @@ public class DFClassSpace extends DFVarSpace {
             DFType returnType;
             if (decl.isConstructor()) {
                 returnType = new DFClassType(this);
+                // XXX treat method name specially.
             } else {
                 returnType = finder2.resolve(decl.getReturnType2());
             }

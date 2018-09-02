@@ -65,9 +65,8 @@ public class DFFrame {
     }
 
     public DFFrame find(String label) {
-        if (label == null) return this;
         DFFrame frame = this;
-        while (frame.getParent() != null) {
+        while (frame != null) {
             if (frame.getLabel().equals(label)) break;
             frame = frame.getParent();
         }
@@ -112,11 +111,13 @@ public class DFFrame {
     }
 
     public void addExit(DFExit exit) {
+        Logger.info("add: "+this+": "+exit);
         _exits.add(exit);
     }
 
-    public void sendTo(DFComponent cpt) {
+    public void close(DFComponent cpt) {
         for (DFExit exit : _exits) {
+            Logger.info("closing: "+this+": "+exit);
             if (exit.getFrame() == this) {
                 DFNode node = exit.getNode();
                 node.finish(cpt);

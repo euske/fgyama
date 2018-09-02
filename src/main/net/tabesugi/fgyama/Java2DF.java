@@ -1204,84 +1204,6 @@ public class Java2DF {
     }
 
     /**
-     * Combines two components into one.
-     * A JoinNode is added to each variable.
-     */
-    public DFComponent processConditional(
-        DFGraph graph, DFVarSpace varSpace,
-        DFFrame frame, DFComponent cpt,
-        ASTNode ast, DFNode condValue,
-        DFFrame trueFrame, DFComponent trueCpt,
-        DFFrame falseFrame, DFComponent falseCpt) {
-
-        // outRefs: all the references from both component.
-        List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
-        if (trueCpt != null) {
-            for (DFVarRef ref : trueFrame.getInputs()) {
-                DFNode src = trueCpt.getFirst(ref);
-                if (src != null) {
-                    src.accept(cpt.get(ref));
-                }
-            }
-            outRefs.addAll(Arrays.asList(trueFrame.getOutputs()));
-        }
-        if (falseCpt != null) {
-            for (DFVarRef ref : falseFrame.getInputs()) {
-                DFNode src = falseCpt.getFirst(ref);
-                if (src != null) {
-                    src.accept(cpt.get(ref));
-                }
-            }
-            outRefs.addAll(Arrays.asList(falseFrame.getOutputs()));
-        }
-
-        // Attach a JoinNode to each variable.
-        Set<DFVarRef> used = new HashSet<DFVarRef>();
-        for (DFVarRef ref : outRefs) {
-            if (used.contains(ref)) continue;
-            used.add(ref);
-            JoinNode join = new JoinNode(graph, varSpace, ref, ast, condValue);
-            if (trueCpt != null) {
-                DFNode dst = trueCpt.get(ref);
-                if (dst != null) {
-                    join.recv(true, dst);
-                }
-            }
-            if (falseCpt != null) {
-                DFNode dst = falseCpt.get(ref);
-                if (dst != null) {
-                    join.recv(false, dst);
-                }
-            }
-            if (!join.isClosed()) {
-                join.close(cpt.get(ref));
-            }
-            cpt.set(join);
-        }
-
-        // Take care of exits.
-        if (trueFrame != null) {
-            for (DFExit exit : trueFrame.getExits()) {
-                DFNode node = exit.getNode();
-                JoinNode join = new JoinNode(
-                    graph, varSpace, node.getRef(), null, condValue);
-                join.recv(true, node);
-                frame.addExit(exit.wrap(join));
-            }
-        }
-        if (falseFrame != null) {
-            for (DFExit exit : falseFrame.getExits()) {
-                DFNode node = exit.getNode();
-                JoinNode join = new JoinNode(
-                    graph, varSpace, node.getRef(), null, condValue);
-                join.recv(false, node);
-                frame.addExit(exit.wrap(join));
-            }
-        }
-        return cpt;
-    }
-
-    /**
      * Expands the graph for the loop variables.
      */
     public DFComponent processLoop(
@@ -1449,7 +1371,6 @@ public class Java2DF {
         DFFrame thenFrame = frame.getChildByAST(thenStmt);
         thenCpt = processStatement(
             graph, finder, varSpace, thenFrame, thenCpt, thenStmt);
-        thenFrame.sendTo(thenCpt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFComponent elseCpt = null;
@@ -1459,11 +1380,79 @@ public class Java2DF {
             elseCpt = new DFComponent(graph, varSpace);
             elseCpt = processStatement(
                 graph, finder, varSpace, elseFrame, elseCpt, elseStmt);
-            elseFrame.sendTo(elseCpt);
         }
-        return processConditional(
-            graph, varSpace, frame, cpt, ifStmt, condValue,
-            thenFrame, thenCpt, elseFrame, elseCpt);
+        
+        // Combines two components into one.
+        // A JoinNode is added to each variable.
+
+        // outRefs: all the references from both component.
+        List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
+        if (thenFrame != null && thenCpt != null) {
+            for (DFVarRef ref : thenFrame.getInputs()) {
+                DFNode src = thenCpt.getFirst(ref);
+                if (src != null) {
+                    src.accept(cpt.get(ref));
+                }
+            }
+            outRefs.addAll(Arrays.asList(thenFrame.getOutputs()));
+        }
+        if (elseFrame != null && elseCpt != null) {
+            for (DFVarRef ref : elseFrame.getInputs()) {
+                DFNode src = elseCpt.getFirst(ref);
+                if (src != null) {
+                    src.accept(cpt.get(ref));
+                }
+            }
+            outRefs.addAll(Arrays.asList(elseFrame.getOutputs()));
+        }
+
+        // Attach a JoinNode to each variable.
+        Set<DFVarRef> used = new HashSet<DFVarRef>();
+        for (DFVarRef ref : outRefs) {
+            if (used.contains(ref)) continue;
+            used.add(ref);
+            JoinNode join = new JoinNode(graph, varSpace, ref, ifStmt, condValue);
+            if (thenCpt != null) {
+                DFNode dst = thenCpt.get(ref);
+                if (dst != null) {
+                    join.recv(true, dst);
+                }
+            }
+            if (elseCpt != null) {
+                DFNode dst = elseCpt.get(ref);
+                if (dst != null) {
+                    join.recv(false, dst);
+                }
+            }
+            if (!join.isClosed()) {
+                join.close(cpt.get(ref));
+            }
+            cpt.set(join);
+        }
+
+        // Take care of exits.
+        if (thenFrame != null) {
+            for (DFExit exit : thenFrame.getExits()) {
+                DFNode node = exit.getNode();
+                JoinNode join = new JoinNode(
+                    graph, varSpace, node.getRef(), null, condValue);
+                join.recv(true, node);
+                frame.addExit(exit.wrap(join));
+            }
+            thenFrame.close(thenCpt);
+        }
+        if (elseFrame != null) {
+            for (DFExit exit : elseFrame.getExits()) {
+                DFNode node = exit.getNode();
+                JoinNode join = new JoinNode(
+                    graph, varSpace, node.getRef(), null, condValue);
+                join.recv(false, node);
+                frame.addExit(exit.wrap(join));
+            }
+            elseFrame.close(elseCpt);
+        }
+        
+        return cpt;
     }
 
     private DFComponent processCaseStatement(
@@ -1541,7 +1530,7 @@ public class Java2DF {
                 graph, switchSpace, switchFrame,
                 cpt, switchCase, caseNode, caseCpt);
         }
-        switchFrame.sendTo(cpt);
+        switchFrame.close(cpt);
         return cpt;
     }
 
@@ -1562,7 +1551,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, whileStmt,
             condValue, loopFrame, loopCpt, true);
-        loopFrame.sendTo(cpt);
+        loopFrame.close(cpt);
         return cpt;
     }
 
@@ -1583,7 +1572,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, doStmt,
             condValue, loopFrame, loopCpt, false);
-        loopFrame.sendTo(cpt);
+        loopFrame.close(cpt);
         return cpt;
     }
 
@@ -1618,7 +1607,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, forStmt,
             condValue, loopFrame, loopCpt, true);
-        loopFrame.sendTo(cpt);
+        loopFrame.close(cpt);
         return cpt;
     }
 
@@ -1646,7 +1635,7 @@ public class Java2DF {
         cpt = processLoop(
             graph, loopSpace, frame, cpt, eForStmt,
             iterValue, loopFrame, loopCpt, true);
-        loopFrame.sendTo(cpt);
+        loopFrame.close(cpt);
         return cpt;
     }
 
@@ -1721,17 +1710,16 @@ public class Java2DF {
                 cpt.set(rtrn);
                 frame.addExit(new DFExit(dstFrame, rtrn));
             }
-            for (DFVarRef ref : frame.getOutputs()) {
+            for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
         } else if (stmt instanceof BreakStatement) {
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
-            String dstLabel = (labelName == null)?
-                DFFrame.LOOP : labelName.getIdentifier();
+            String dstLabel = (labelName != null)?
+                labelName.getIdentifier() : DFFrame.LOOP;
             DFFrame dstFrame = frame.find(dstLabel);
-            Logger.info("break: frame="+frame+", dstFrame="+dstFrame);
             for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
@@ -1740,7 +1728,7 @@ public class Java2DF {
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
             String dstLabel = (labelName == null)?
-                DFFrame.LOOP : labelName.getIdentifier();
+                labelName.getIdentifier() : DFFrame.LOOP;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref), true));
@@ -1752,7 +1740,7 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, labeledFrame,
                 cpt, labeledStmt.getBody());
-            labeledFrame.sendTo(cpt);
+            labeledFrame.close(cpt);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -1767,7 +1755,7 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, tryFrame,
                 cpt, tryStmt.getBody());
-            tryFrame.sendTo(cpt);
+            tryFrame.close(cpt);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -1792,12 +1780,12 @@ public class Java2DF {
                 graph, varSpace, stmt, cpt.getRValue());
             DFFrame dstFrame = frame.find(DFFrame.TRY);
             frame.addExit(new DFExit(dstFrame, exception));
-            for (DFVarRef ref : frame.getOutputs()) {
+            for (DFVarRef ref : dstFrame.getOutputs()) {
                 frame.addExit(new DFExit(dstFrame, cpt.get(ref)));
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
-            // XXX Ignore all side effects.
+            // XXX Use MethodCallNode.
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) ci.arguments()) {
                 cpt = processExpression(
@@ -1805,7 +1793,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
-            // XXX Ignore all side effects.
+            // XXX Use MethodCallNode.
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) sci.arguments()) {
                 cpt = processExpression(
@@ -2057,7 +2045,7 @@ public class Java2DF {
             // Process the function body.
             cpt = processStatement(
                 graph, finder, varSpace, frame, cpt, methodDecl.getBody());
-            frame.sendTo(cpt);
+            frame.close(cpt);
             frame.dump();
             // Remove redundant nodes.
             graph.cleanup();
@@ -2107,7 +2095,7 @@ public class Java2DF {
                     cpt = processStatement(
                         classGraph, finder, klass,
                         frame, cpt, block);
-                    frame.sendTo(cpt);
+                    frame.close(cpt);
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
