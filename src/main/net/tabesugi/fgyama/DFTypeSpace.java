@@ -158,9 +158,25 @@ public class DFTypeSpace {
         List<DFClassSpace> classes,
         CompilationUnit cunit, DFGlobalVarSpace global)
         throws UnsupportedSyntax {
-        for (TypeDeclaration typeDecl :
-                 (List<TypeDeclaration>) cunit.types()) {
-            this.build(classes, typeDecl, global);
+        for (AbstractTypeDeclaration abstTypeDecl :
+                 (List<AbstractTypeDeclaration>) cunit.types()) {
+            this.build(classes, abstTypeDecl, global);
+        }
+    }
+
+    public void build(
+        List<DFClassSpace> classes,
+        AbstractTypeDeclaration abstTypeDecl, DFVarSpace parent)
+        throws UnsupportedSyntax {
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            this.build(classes, (TypeDeclaration)abstTypeDecl, parent);
+        } else if (abstTypeDecl instanceof EnumDeclaration) {
+            // XXX enum not supported.
+            //this.build(classes, (EnumDeclaration)abstTypeDecl, parent);
+        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+            ;
+        } else {
+            throw new UnsupportedSyntax(abstTypeDecl);
         }
     }
 
@@ -184,18 +200,6 @@ public class DFTypeSpace {
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             child.build(classes, body, klass);
-        }
-    }
-
-    public void build(
-        List<DFClassSpace> classes,
-        AbstractTypeDeclaration abstTypeDecl, DFVarSpace parent)
-        throws UnsupportedSyntax {
-        if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build(classes, (TypeDeclaration)abstTypeDecl, parent);
-        } else {
-            // XXX enum not supported.
-            throw new UnsupportedSyntax(abstTypeDecl);
         }
     }
 

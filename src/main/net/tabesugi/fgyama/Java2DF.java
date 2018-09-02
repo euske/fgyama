@@ -2153,10 +2153,15 @@ public class Java2DF {
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
         try {
-            for (TypeDeclaration typeDecl :
-                     (List<TypeDeclaration>) cunit.types()) {
-                DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
-                klass.build(finder, typeDecl);
+            for (AbstractTypeDeclaration abstTypeDecl :
+                     (List<AbstractTypeDeclaration>) cunit.types()) {
+                if (abstTypeDecl instanceof TypeDeclaration) {
+                    TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
+                    DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+                    klass.build(finder, typeDecl);
+                } else if (abstTypeDecl instanceof EnumDeclaration) {
+                    // XXX enum not supported.
+                }
             }
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
@@ -2174,9 +2179,12 @@ public class Java2DF {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
-	for (TypeDeclaration typeDecl :
-		 (List<TypeDeclaration>) cunit.types()) {
-	    processTypeDeclaration(typeSpace, finder, typeDecl);
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+            if (abstTypeDecl instanceof TypeDeclaration) {
+                TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
+                processTypeDeclaration(typeSpace, finder, typeDecl);
+            }
 	}
     }
 
