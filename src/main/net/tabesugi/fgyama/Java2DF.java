@@ -1766,12 +1766,21 @@ public class Java2DF {
             cpt = processStatement(
                 graph, finder, varSpace, tryFrame,
                 cpt, tryStmt.getBody());
+            tryFrame.finish(cpt);
+            for (CatchClause cc :
+                     (List<CatchClause>) tryStmt.catchClauses()) {
+                SingleVariableDeclaration decl = cc.getException();
+                DFVarSpace childSpace = varSpace.getChildByAST(cc);
+                DFVarRef ref = childSpace.lookupVar(decl.getName());
+                //this.addOutput(ref);
+                cpt = processStatement(
+                    graph, finder, varSpace, frame, cpt, cc.getBody());
+            }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
                 cpt = processStatement(
                     graph, finder, varSpace, frame, cpt, finBlock);
             }
-            tryFrame.finish(cpt);
 
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;

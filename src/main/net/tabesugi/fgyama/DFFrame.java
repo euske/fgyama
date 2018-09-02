@@ -488,9 +488,6 @@ public class DFFrame {
             ExpressionStatement exprStmt = (ExpressionStatement)stmt;
             this.build(finder, varSpace, exprStmt.getExpression());
 
-        } else if (stmt instanceof ReturnStatement) {
-            this.addOutput(varSpace.lookupReturn());
-
         } else if (stmt instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)stmt;
             this.build(finder, varSpace, ifStmt.getExpression());
@@ -550,9 +547,20 @@ public class DFFrame {
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            SingleVariableDeclaration decl = eForStmt.getParameter();
+            DFVarRef ref = childSpace.lookupVar(decl.getName());
+            //this.addOutput(ref);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childSpace, eForStmt.getExpression());
             childFrame.build(finder, childSpace, eForStmt.getBody());
+
+        } else if (stmt instanceof ReturnStatement) {
+            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+            Expression expr = rtrnStmt.getExpression();
+            if (expr != null) {
+                this.build(finder, varSpace, expr);
+            }
+            this.addOutput(varSpace.lookupReturn());
 
         } else if (stmt instanceof BreakStatement) {
 
@@ -576,8 +584,10 @@ public class DFFrame {
             tryFrame.build(finder, varSpace, block);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                // XXX add catch variables.
+                SingleVariableDeclaration decl = cc.getException();
                 DFVarSpace childSpace = varSpace.getChildByAST(cc);
+                DFVarRef ref = childSpace.lookupVar(decl.getName());
+                //this.addOutput(ref);
                 this.build(finder, childSpace, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
