@@ -66,6 +66,10 @@ public class DFContext {
         _rval = node;
     }
 
+    public Collection<DFNode> getFirsts() {
+        return _first.values();
+    }
+
     // dump: for debugging.
     public void dump() {
         dump(System.err);

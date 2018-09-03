@@ -1235,15 +1235,13 @@ public class Java2DF {
 
         if (preTest) {  // Repeat -> [S] -> Begin -> End
             // Connect the repeats to the loop inputs.
-            for (DFVarRef ref : loopFrame.getInputs()) {
-                DFNode input = loopCtx.getFirst(ref);
-                if (input != null) {
-                    DFNode src = repeats.get(ref);
-                    if (src == null) {
-                        src = ctx.get(ref);
-                    }
-                    input.accept(src);
+            for (DFNode input : loopCtx.getFirsts()) {
+                DFVarRef ref = input.getRef();
+                DFNode src = repeats.get(ref);
+                if (src == null) {
+                    src = ctx.get(ref);
                 }
+                input.accept(src);
             }
             // Connect the loop outputs to the begins.
             for (DFVarRef ref : loopFrame.getOutputs()) {
@@ -1267,15 +1265,13 @@ public class Java2DF {
 
         } else {  // Begin -> [S] -> End -> Repeat
             // Connect the begins to the loop inputs.
-            for (DFVarRef ref : loopFrame.getInputs()) {
-                DFNode input = loopCtx.getFirst(ref);
-                if (input != null) {
-                    DFNode src = begins.get(ref);
-                    if (src == null) {
-                        src = ctx.get(ref);
-                    }
-                    input.accept(src);
+            for (DFNode input : loopCtx.getFirsts()) {
+                DFVarRef ref = input.getRef();
+                DFNode src = begins.get(ref);
+                if (src == null) {
+                    src = ctx.get(ref);
                 }
+                input.accept(src);
             }
             // Connect the loop outputs to the ends.
             for (DFVarRef ref : loopFrame.getOutputs()) {
@@ -1388,20 +1384,14 @@ public class Java2DF {
         // outRefs: all the references from both contexts.
         List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
         if (thenFrame != null && thenCtx != null) {
-            for (DFVarRef ref : thenFrame.getInputs()) {
-                DFNode src = thenCtx.getFirst(ref);
-                if (src != null) {
-                    src.accept(ctx.get(ref));
-                }
+            for (DFNode src : thenCtx.getFirsts()) {
+                src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(Arrays.asList(thenFrame.getOutputs()));
         }
         if (elseFrame != null && elseCtx != null) {
-            for (DFVarRef ref : elseFrame.getInputs()) {
-                DFNode src = elseCtx.getFirst(ref);
-                if (src != null) {
-                    src.accept(ctx.get(ref));
-                }
+            for (DFNode src : elseCtx.getFirsts()) {
+                src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(Arrays.asList(elseFrame.getOutputs()));
         }
@@ -1460,11 +1450,8 @@ public class Java2DF {
         DFFrame frame, DFContext ctx, ASTNode apt,
         DFNode caseNode, DFContext caseCtx) {
 
-        for (DFVarRef ref : frame.getInputs()) {
-            DFNode src = caseCtx.getFirst(ref);
-            if (src != null) {
-                src.accept(ctx.get(ref));
-            }
+        for (DFNode src : caseCtx.getFirsts()) {
+            src.accept(ctx.get(src.getRef()));
         }
 
         for (DFVarRef ref : frame.getOutputs()) {
@@ -1727,7 +1714,7 @@ public class Java2DF {
         } else if (stmt instanceof ContinueStatement) {
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
-            String dstLabel = (labelName == null)?
+            String dstLabel = (labelName != null)?
                 labelName.getIdentifier() : DFFrame.LOOP;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : dstFrame.getOutputs()) {
