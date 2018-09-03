@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFComponent
+//  DFContext
 //
-public class DFComponent {
+public class DFContext {
 
     private DFGraph _graph;
     private DFVarSpace _space;
@@ -21,12 +21,12 @@ public class DFComponent {
     private DFNode _lval = null;
     private DFNode _rval = null;
 
-    public DFComponent(DFGraph graph, DFVarSpace space) {
+    public DFContext(DFGraph graph, DFVarSpace space) {
         _graph = graph;
         _space = space;
     }
 
-    // get(ref): get a current value of the component if defined.
+    // get(ref): get a current value of the context if defined.
     public DFNode get(DFVarRef ref) {
         DFNode node = _last.get(ref);
         if (node == null) {
@@ -71,7 +71,7 @@ public class DFComponent {
         dump(System.err);
     }
     public void dump(PrintStream out) {
-        out.println("DFComponent");
+        out.println("DFContext");
         StringBuilder firsts = new StringBuilder();
         for (DFVarRef ref : _first.keySet()) {
             firsts.append(" "+ref);

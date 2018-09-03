@@ -115,13 +115,13 @@ public class DFFrame {
         _exits.add(exit);
     }
 
-    public void close(DFComponent cpt) {
+    public void close(DFContext ctx) {
         for (DFExit exit : _exits) {
             Logger.info("closing: "+this+": "+exit);
             if (exit.getFrame() == this) {
                 DFNode node = exit.getNode();
-                node.finish(cpt);
-                cpt.set(node);
+                node.finish(ctx);
+                ctx.set(node);
             }
         }
     }
