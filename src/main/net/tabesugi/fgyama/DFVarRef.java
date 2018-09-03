@@ -34,7 +34,12 @@ public class DFVarRef implements Comparable<DFVarRef> {
 
     @Override
     public int compareTo(DFVarRef ref) {
-        return _name.compareTo(ref._name);
+        if (ref == this) return 0;
+        if (ref._space == _space) {
+            return _name.compareTo(ref._name);
+        }
+        if (_space == null) return -1;
+        return _space.compareTo(ref._space);
     }
 
     public String getFullName() {

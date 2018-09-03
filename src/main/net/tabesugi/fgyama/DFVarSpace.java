@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 //  DFVarSpace
 //  Mapping from name -> reference.
 //
-public class DFVarSpace {
+public class DFVarSpace implements Comparable<DFVarSpace> {
 
     private DFVarSpace _global;
     private DFVarSpace _parent;
@@ -37,6 +37,17 @@ public class DFVarSpace {
 
     public DFVarSpace(DFVarSpace parent, SimpleName name) {
         this(parent, name.getIdentifier());
+    }
+
+    @Override
+    public int compareTo(DFVarSpace space) {
+        if (space == null) return +1;
+        if (space == this) return 0;
+        if (space._parent == _parent) {
+            return _name.compareTo(space._name);
+        }
+        if (_parent == null) return -1;
+        return _parent.compareTo(space._parent);
     }
 
     @Override
