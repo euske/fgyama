@@ -262,9 +262,9 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
 
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
-            DFVarSpace childSpace = this.addChild("while", ast);
             Expression expr = whileStmt.getExpression();
-            childSpace.build(finder, expr);
+            this.build(finder, expr);
+            DFVarSpace childSpace = this.addChild("while", ast);
             Statement stmt = whileStmt.getBody();
             childSpace.build(finder, stmt);
 
@@ -330,8 +330,8 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
             this.build(finder, block);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                DFVarSpace childSpace = this.addChild("catch", cc);
                 SingleVariableDeclaration decl = cc.getException();
+                DFVarSpace childSpace = this.addChild("catch", cc);
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
                 childSpace.addVar(decl.getName(), varType);

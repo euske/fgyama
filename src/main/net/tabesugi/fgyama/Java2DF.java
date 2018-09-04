@@ -1236,6 +1236,7 @@ public class Java2DF {
         if (preTest) {  // Repeat -> [S] -> Begin -> End
             // Connect the repeats to the loop inputs.
             for (DFNode input : loopCtx.getFirsts()) {
+                if (input.hasInput()) continue;
                 DFVarRef ref = input.getRef();
                 DFNode src = repeats.get(ref);
                 if (src == null) {
@@ -1266,6 +1267,7 @@ public class Java2DF {
         } else {  // Begin -> [S] -> End -> Repeat
             // Connect the begins to the loop inputs.
             for (DFNode input : loopCtx.getFirsts()) {
+                if (input.hasInput()) continue;
                 DFVarRef ref = input.getRef();
                 DFNode src = begins.get(ref);
                 if (src == null) {
@@ -1377,7 +1379,7 @@ public class Java2DF {
             elseCtx = processStatement(
                 graph, finder, varSpace, elseFrame, elseCtx, elseStmt);
         }
-        
+
         // Combines two contexts into one.
         // A JoinNode is added to each variable.
 
@@ -1385,12 +1387,14 @@ public class Java2DF {
         List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
         if (thenFrame != null && thenCtx != null) {
             for (DFNode src : thenCtx.getFirsts()) {
+                if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(Arrays.asList(thenFrame.getOutputs()));
         }
         if (elseFrame != null && elseCtx != null) {
             for (DFNode src : elseCtx.getFirsts()) {
+                if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(Arrays.asList(elseFrame.getOutputs()));
@@ -1441,7 +1445,7 @@ public class Java2DF {
             }
             elseFrame.close(elseCtx);
         }
-        
+
         return ctx;
     }
 
@@ -1451,6 +1455,7 @@ public class Java2DF {
         DFNode caseNode, DFContext caseCtx) {
 
         for (DFNode src : caseCtx.getFirsts()) {
+            if (src.hasInput()) continue;
             src.accept(ctx.get(src.getRef()));
         }
 
@@ -1529,7 +1534,7 @@ public class Java2DF {
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(graph, loopSpace);
         loopCtx = processExpression(
-            graph, finder, loopSpace, frame, loopCtx,
+            graph, finder, varSpace, loopFrame, loopCtx,
             whileStmt.getExpression());
         DFNode condValue = loopCtx.getRValue();
         loopCtx = processStatement(
@@ -1750,7 +1755,7 @@ public class Java2DF {
                 DFVarRef ref = childSpace.lookupVar(decl.getName());
                 //this.addOutput(ref);
                 ctx = processStatement(
-                    graph, finder, varSpace, frame, ctx, cc.getBody());
+                    graph, finder, childSpace, frame, ctx, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
@@ -1766,9 +1771,11 @@ public class Java2DF {
             ExceptionNode exception = new ExceptionNode(
                 graph, varSpace, stmt, ctx.getRValue());
             DFFrame dstFrame = frame.find(DFFrame.TRY);
-            frame.addExit(new DFExit(dstFrame, exception));
-            for (DFVarRef ref : dstFrame.getOutputs()) {
-                frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
+            if (dstFrame != null) {
+                frame.addExit(new DFExit(dstFrame, exception));
+                for (DFVarRef ref : dstFrame.getOutputs()) {
+                    frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
+                }
             }
 
         } else if (stmt instanceof ConstructorInvocation) {

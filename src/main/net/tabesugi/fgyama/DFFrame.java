@@ -187,7 +187,7 @@ public class DFFrame {
             throw new UnsupportedSyntax(expr);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private DFType build(
         DFTypeFinder finder, DFVarSpace varSpace, Expression expr)
@@ -527,18 +527,18 @@ public class DFFrame {
 
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;
-            this.build(finder, varSpace, whileStmt.getExpression());
             DFVarSpace childSpace = varSpace.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            childFrame.build(finder, varSpace, whileStmt.getExpression());
             childFrame.build(finder, childSpace, whileStmt.getBody());
             this.finish(childFrame);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
-            this.build(finder, varSpace, doStmt.getExpression());
             DFVarSpace childSpace = varSpace.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childSpace, doStmt.getBody());
+            childFrame.build(finder, varSpace, doStmt.getExpression());
             this.finish(childFrame);
 
         } else if (stmt instanceof ForStatement) {
@@ -548,7 +548,10 @@ public class DFFrame {
                 this.build(finder, childSpace, init);
             }
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
-            childFrame.build(finder, childSpace, forStmt.getExpression());
+            Expression expr = forStmt.getExpression();
+            if (expr != null) {
+                childFrame.build(finder, childSpace, expr);
+            }
             childFrame.build(finder, childSpace, forStmt.getBody());
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 childFrame.build(finder, childSpace, update);

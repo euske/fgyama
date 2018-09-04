@@ -108,6 +108,10 @@ public class DFNode implements Comparable<DFNode> {
         return links;
     }
 
+    protected boolean hasInput() {
+        return _input != null;
+    }
+
     protected void accept(DFNode node) {
         assert node != null;
         assert _input == null;
