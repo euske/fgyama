@@ -368,9 +368,11 @@ public class DFFrame {
             ArrayAccess aa = (ArrayAccess)expr;
             this.build(finder, varSpace, aa.getIndex());
             DFType type = this.build(finder, varSpace, aa.getArray());
-            if (type == null) return type;
-            DFVarRef ref = varSpace.lookupArray(type);
-            this.addInput(ref);
+            if (type instanceof DFArrayType) {
+                type = ((DFArrayType)type).getElemType();
+                DFVarRef ref = varSpace.lookupArray(type);
+                this.addInput(ref);
+            }
             return type;
 
         } else if (expr instanceof FieldAccess) {
