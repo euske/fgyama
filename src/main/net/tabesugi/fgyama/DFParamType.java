@@ -25,7 +25,7 @@ public class DFParamType implements DFType {
     private DFTypeSpace _typeSpace;
     private int _index;
     private String _name;
-    private DFClassSpace[] _bases = null;
+    private DFClass[] _bases = null;
 
     public DFParamType(DFTypeSpace typeSpace, int index, String name) {
         assert(typeSpace != null);
@@ -53,10 +53,10 @@ public class DFParamType implements DFType {
 
     public int canConvertFrom(DFType type) {
         if (type instanceof DFNullType) return 0;
-        if (type instanceof DFClassSpace) {
-            DFClassSpace ctype = (DFClassSpace)type;
+        if (type instanceof DFClass) {
+            DFClass klass = (DFClass)type;
             if (_bases.length == 0) return 0;
-            return ctype.isSubclassOf(_bases[0]);
+            return klass.isSubclassOf(_bases[0]);
         } else if (type instanceof DFParamType) {
             DFParamType ptype = (DFParamType)type;
             if (_typeSpace != ptype._typeSpace) return -1;
@@ -72,7 +72,7 @@ public class DFParamType implements DFType {
         return _index;
     }
 
-    public void setBases(DFClassSpace[] bases) {
+    public void setBases(DFClass[] bases) {
         _bases = bases;
     }
 }

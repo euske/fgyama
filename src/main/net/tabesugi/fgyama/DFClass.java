@@ -10,14 +10,14 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFClassSpace
+//  DFClass
 //
-public class DFClassSpace extends DFVarSpace implements DFType {
+public class DFClass extends DFVarSpace implements DFType {
 
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
-    private DFClassSpace _baseKlass;
-    private DFClassSpace[] _baseIfaces;
+    private DFClass _baseKlass;
+    private DFClass[] _baseIfaces;
     private DFParamType[] _paramTypes = null;
     private String _jarPath = null;
     private String _filePath = null;
@@ -29,16 +29,16 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     private Map<String, DFMethod> _ast2method =
         new HashMap<String, DFMethod>();
 
-    public DFClassSpace(
+    public DFClass(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
-	DFVarSpace parent, String id, DFClassSpace baseKlass) {
+	DFVarSpace parent, String id, DFClass baseKlass) {
         super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;
         _baseKlass = baseKlass;
     }
 
-    public DFClassSpace(
+    public DFClass(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
 	DFVarSpace parent, String id) {
         super(parent, id);
@@ -49,7 +49,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFClassSpace("+this.getFullName()+")>");
+        return ("<DFClass("+this.getFullName()+")>");
     }
 
     public boolean equals(DFType type) {
@@ -64,8 +64,8 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     public int canConvertFrom(DFType type)
     {
         if (type instanceof DFNullType) return 0;
-        if (!(type instanceof DFClassSpace)) return -1;
-        return this.isSubclassOf((DFClassSpace)type);
+        if (!(type instanceof DFClass)) return -1;
+        return this.isSubclassOf((DFClass)type);
     }
 
     public void setJarPath(String jarPath, String filePath) {
@@ -82,7 +82,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
         return _childSpace;
     }
 
-    public DFClassSpace getBase() {
+    public DFClass getBase() {
         return _baseKlass;
     }
 
@@ -90,14 +90,14 @@ public class DFClassSpace extends DFVarSpace implements DFType {
         return _typeSpace.getFullName()+"/"+super.getBaseName();
     }
 
-    public int isSubclassOf(DFClassSpace klass) {
+    public int isSubclassOf(DFClass klass) {
         if (this == klass) return 0;
         if (_baseKlass != null) {
             int dist = _baseKlass.isSubclassOf(klass);
             if (0 <= dist) return dist+1;
         }
         if (_baseIfaces != null) {
-            for (DFClassSpace iface : _baseIfaces) {
+            for (DFClass iface : _baseIfaces) {
                 int dist = iface.isSubclassOf(klass);
                 if (0 <= dist) return dist+1;
             }
@@ -140,7 +140,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     }
 
     public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
-        DFClassSpace klass = this;
+        DFClass klass = this;
         while (klass != null) {
             DFMethod method = klass.lookupMethod1(name, argTypes);
             if (method != null) {
@@ -163,7 +163,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     public DFVarRef addField(
         String id, boolean isStatic, DFType type) {
         DFVarRef ref = this.addRef("."+id, type);
-        //Logger.info("DFClassSpace.addField: "+ref);
+        //Logger.info("DFClass.addField: "+ref);
         return ref;
     }
 
@@ -185,7 +185,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     }
 
     private DFMethod addMethod(DFMethod method) {
-        //Logger.info("DFClassSpace.addMethod: "+method);
+        //Logger.info("DFClass.addMethod: "+method);
         _methods.add(method);
         return method;
     }
@@ -196,7 +196,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
                 _baseKlass.overrideMethod(method);
             }
             if (_baseIfaces != null) {
-                for (DFClassSpace iface : _baseIfaces) {
+                for (DFClass iface : _baseIfaces) {
                     iface.overrideMethod(method);
                 }
             }
@@ -207,7 +207,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
                 method0.addOverride(method1);
-                //Logger.info("DFClassSpace.overrideMethod: "+method0+" : "+method1);
+                //Logger.info("DFClass.overrideMethod: "+method0+" : "+method1);
                 break;
             }
         }
@@ -215,7 +215,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
             _baseKlass.overrideMethod(method1);
         }
         if (_baseIfaces != null) {
-            for (DFClassSpace iface : _baseIfaces) {
+            for (DFClass iface : _baseIfaces) {
                 iface.overrideMethod(method1);
             }
         }
@@ -286,19 +286,19 @@ public class DFClassSpace extends DFVarSpace implements DFType {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFClassSpace.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFClass.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
                 _baseKlass = finder.resolveClass(superClass);
-                //Logger.info("DFClassSpace.build: "+this+" extends "+_baseKlass);
+                //Logger.info("DFClass.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
             }
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
-            _baseIfaces = new DFClassSpace[ifaces.size()];
+            _baseIfaces = new DFClass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
                 _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
             }
@@ -307,7 +307,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
             for (int i = 0; i < _paramTypes.length; i++) {
                 DFParamType pt = _paramTypes[i];
                 List<Type> bounds = tps.get(i).typeBounds();
-                DFClassSpace[] bases = new DFClassSpace[bounds.size()];
+                DFClass[] bases = new DFClass[bounds.size()];
                 for (int j = 0; j < bases.length; j++) {
                     bases[j] = finder.resolveClass(bounds.get(j));
                 }
@@ -329,7 +329,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
         throws UnsupportedSyntax, TypeNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
-            DFClassSpace klass = _childSpace.getClass(decl.getName());
+            DFClass klass = _childSpace.getClass(decl.getName());
             klass.build(finder, decl);
 
         } else if (body instanceof FieldDeclaration) {
@@ -353,7 +353,7 @@ public class DFClassSpace extends DFVarSpace implements DFType {
                 for (int i = 0; i < paramTypes.length; i++) {
                     DFParamType pt = paramTypes[i];
                     List<Type> bounds = tps.get(i).typeBounds();
-                    DFClassSpace[] bases = new DFClassSpace[bounds.size()];
+                    DFClass[] bases = new DFClass[bounds.size()];
                     for (int j = 0; j < bases.length; j++) {
                         bases[j] = finder.resolveClass(bounds.get(j));
                     }

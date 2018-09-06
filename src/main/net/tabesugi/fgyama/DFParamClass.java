@@ -9,13 +9,13 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFParamClass
 //
-public class DFParamClass extends DFClassSpace {
+public class DFParamClass extends DFClass {
 
-    private DFClassSpace _genericKlass;
+    private DFClass _genericKlass;
     private DFType[] _argTypes;
 
     public DFParamClass(
-        DFClassSpace genericKlass, DFType[] argTypes) {
+        DFClass genericKlass, DFType[] argTypes) {
         super(null, null, genericKlass, null);
         _genericKlass = genericKlass;
         _argTypes = argTypes;
@@ -59,7 +59,7 @@ public class DFParamClass extends DFClassSpace {
         return _genericKlass.addFinders(finder);
     }
 
-    public int isSubclassOf(DFClassSpace klass) {
+    public int isSubclassOf(DFClass klass) {
         if (!(klass instanceof DFParamClass)) return -1;
         DFParamClass pklass = (DFParamClass)klass;
         if (_argTypes.length != pklass._argTypes.length) return -1;

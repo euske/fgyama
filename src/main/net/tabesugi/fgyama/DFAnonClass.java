@@ -7,19 +7,19 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFAnonClassSpace
+//  DFAnonClass
 //
-public class DFAnonClassSpace extends DFClassSpace {
+public class DFAnonClass extends DFClass {
 
-    public DFAnonClassSpace(
+    public DFAnonClass(
 	DFTypeSpace typeSpace,
-	DFVarSpace parent, String id, DFClassSpace baseKlass) {
+	DFVarSpace parent, String id, DFClass baseKlass) {
         super(typeSpace, typeSpace, parent, id, baseKlass);
     }
 
     @Override
     public String toString() {
-        return ("<DFAnonClassSpace("+this.getFullName()+")>");
+        return ("<DFAnonClass("+this.getFullName()+")>");
     }
 
 }

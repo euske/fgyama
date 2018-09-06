@@ -29,14 +29,14 @@ public class DFTypeFinder {
         return ("<DFTypeFinder: "+_space+" "+_next+">");
     }
 
-    public DFClassSpace lookupClass(Name name)
+    public DFClass lookupClass(Name name)
         throws TypeNotFound {
         return this.lookupClass(name.getFullyQualifiedName());
     }
 
-    public DFClassSpace lookupClass(String name)
+    public DFClass lookupClass(String name)
         throws TypeNotFound {
-        DFClassSpace klass;
+        DFClass klass;
         //Logger.info("lookupClass: "+_space+": "+name);
         name = name.replace('$', '.');
         try {
@@ -66,20 +66,20 @@ public class DFTypeFinder {
         }
     }
 
-    public DFClassSpace resolveClass(Type type)
+    public DFClass resolveClass(Type type)
         throws TypeNotFound {
         return this.resolveClass(resolve(type));
     }
 
-    public DFClassSpace resolveClass(DFType type)
+    public DFClass resolveClass(DFType type)
         throws TypeNotFound {
         if (type == null) {
             // treat unknown class as Object.
             return DFRootTypeSpace.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
             return DFRootTypeSpace.ARRAY_CLASS;
-        } else if (type instanceof DFClassSpace) {
-            return (DFClassSpace)type;
+        } else if (type instanceof DFClass) {
+            return (DFClass)type;
         } else {
             throw new TypeNotFound(type.getName());
         }
@@ -105,8 +105,8 @@ public class DFTypeFinder {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
             DFType genericType = this.resolve(ptype.getType());
-            assert(genericType instanceof DFClassSpace);
-            DFClassSpace genericKlass = (DFClassSpace)genericType;
+            assert(genericType instanceof DFClass);
+            DFClass genericKlass = (DFClass)genericType;
             DFType[] argTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
                 argTypes[i] = this.resolve(args.get(i));

@@ -15,9 +15,9 @@ import org.w3c.dom.*;
 //
 public class DFRootTypeSpace extends DFTypeSpace {
 
-    public static DFClassSpace OBJECT_CLASS = null;
-    public static DFClassSpace ARRAY_CLASS = null;
-    public static DFClassSpace STRING_CLASS = null;
+    public static DFClass OBJECT_CLASS = null;
+    public static DFClass ARRAY_CLASS = null;
+    public static DFClass STRING_CLASS = null;
 
     private DFGlobalVarSpace _global = new DFGlobalVarSpace();
 
@@ -45,7 +45,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
                 if (filePath.endsWith(".class")) {
                     String name = filePath.substring(0, filePath.length()-6);
                     name = name.replace('/', '.').replace('$', '.');
-                    DFClassSpace klass = this.createClass(_global, name);
+                    DFClass klass = this.createClass(_global, name);
                     klass.setJarPath(jarPath, filePath);
                 }
             }
@@ -62,7 +62,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         this.loadJarFile(rtFile.getAbsolutePath());
         OBJECT_CLASS = this.getClass("java.lang.Object");
         DFTypeSpace space = this.lookupSpace("java.lang");
-        ARRAY_CLASS = new DFClassSpace(
+        ARRAY_CLASS = new DFClass(
             space, null, _global, "java.lang._Array", OBJECT_CLASS);
         ARRAY_CLASS.addField("length", false, DFBasicType.INT);
         STRING_CLASS = this.getClass("java.lang.String");

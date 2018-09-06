@@ -141,7 +141,7 @@ public class DFFrame {
                 ref = varSpace.lookupVarOrField((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFClassSpace klass;
+                DFClass klass;
                 try {
                     // Try assuming it's a variable access.
                     DFType type = this.build(finder, varSpace, qname.getQualifier());
@@ -167,7 +167,7 @@ public class DFFrame {
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFClassSpace klass = null;
+            DFClass klass = null;
             if (expr1 instanceof Name) {
                 try {
                     klass = finder.lookupClass((Name)expr1);
@@ -202,7 +202,7 @@ public class DFFrame {
                 ref = varSpace.lookupVarOrField((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFClassSpace klass;
+                DFClass klass;
                 try {
                     // Try assuming it's a variable access.
                     DFType type = this.build(finder, varSpace, qname.getQualifier());
@@ -298,7 +298,7 @@ public class DFFrame {
         } else if (expr instanceof MethodInvocation) {
             MethodInvocation invoke = (MethodInvocation)expr;
             Expression expr1 = invoke.getExpression();
-            DFClassSpace klass = null;
+            DFClass klass = null;
             if (expr1 == null) {
                 DFVarRef ref = varSpace.lookupThis();
                 this.addInput(ref);
@@ -338,9 +338,9 @@ public class DFFrame {
             }
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFClassSpace klass =
+            DFClass klass =
                 finder.resolveClass(varSpace.lookupThis().getType());
-            DFClassSpace baseKlass = klass.getBase();
+            DFClass baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
             if (method == null) return null;
             return method.getReturnType();
@@ -378,7 +378,7 @@ public class DFFrame {
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFClassSpace klass = null;
+            DFClass klass = null;
             if (expr1 instanceof Name) {
                 try {
                     klass = finder.lookupClass((Name)expr1);
@@ -398,7 +398,7 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFClassSpace klass =
+            DFClass klass =
                 finder.resolveClass(varSpace.lookupThis().getType());
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInput(ref);
@@ -436,8 +436,7 @@ public class DFFrame {
             String id = "lambda";
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-            DFClassSpace anonKlass = new DFAnonClassSpace(
-                anonSpace, varSpace, id, null);
+            DFClass anonKlass = new DFAnonClass(anonSpace, varSpace, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {

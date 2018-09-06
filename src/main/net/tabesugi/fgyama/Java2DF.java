@@ -663,7 +663,7 @@ public class Java2DF {
                 } else {
                     QualifiedName qname = (QualifiedName)name;
                     DFNode obj = null;
-                    DFClassSpace klass;
+                    DFClass klass;
                     try {
                         // Try assuming it's a variable access.
                         ctx = processExpression(
@@ -819,7 +819,7 @@ public class Java2DF {
                 MethodInvocation invoke = (MethodInvocation)expr;
                 Expression expr1 = invoke.getExpression();
                 DFNode obj = null;
-                DFClassSpace klass = null;
+                DFClass klass = null;
                 if (expr1 == null) {
                     obj = ctx.get(varSpace.lookupThis());
                 } else {
@@ -886,8 +886,8 @@ public class Java2DF {
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFClassSpace klass = finder.resolveClass(obj.getType());
-                DFClassSpace baseKlass = klass.getBase();
+                DFClass klass = finder.resolveClass(obj.getType());
+                DFClass baseKlass = klass.getBase();
                 DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
                 if (method == null) {
                     String id = sinvoke.getName().getIdentifier();
@@ -956,7 +956,7 @@ public class Java2DF {
                 FieldAccess fa = (FieldAccess)expr;
                 Expression expr1 = fa.getExpression();
                 DFNode obj = null;
-                DFClassSpace klass = null;
+                DFClass klass = null;
                 if (expr1 instanceof Name) {
                     try {
                         klass = finder.lookupClass((Name)expr1);
@@ -979,7 +979,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(varSpace.lookupThis());
-                DFClassSpace klass = finder.resolveClass(obj.getType());
+                DFClass klass = finder.resolveClass(obj.getType());
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, varSpace, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -1000,9 +1000,9 @@ public class Java2DF {
                 DFType instType;
                 if (anonDecl != null) {
                     String id = "anonymous";
-                    DFClassSpace baseKlass = finder.resolveClass(cstr.getType());
+                    DFClass baseKlass = finder.resolveClass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-                    DFClassSpace anonKlass = new DFAnonClassSpace(
+                    DFClass anonKlass = new DFAnonClass(
 			anonSpace, varSpace, id, baseKlass);
                     anonSpace.addClass(anonKlass);
                     for (BodyDeclaration body :
@@ -1075,7 +1075,7 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-                DFClassSpace anonKlass = new DFAnonClassSpace(
+                DFClass anonKlass = new DFAnonClass(
 		    anonSpace, varSpace, id, null);
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1096,7 +1096,7 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-                DFClassSpace anonKlass = new DFAnonClassSpace(
+                DFClass anonKlass = new DFAnonClass(
 		    anonSpace, varSpace, "methodref", null);
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
@@ -1132,7 +1132,7 @@ public class Java2DF {
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
-                DFClassSpace klass;
+                DFClass klass;
                 try {
                     // Try assuming it's a variable access.
                     ctx = processExpression(
@@ -1167,7 +1167,7 @@ public class Java2DF {
             ctx = processExpression(
                 graph, finder, varSpace, frame, ctx, expr1);
             DFNode obj = ctx.getRValue();
-            DFClassSpace klass = finder.resolveClass(obj.getType());
+            DFClass klass = finder.resolveClass(obj.getType());
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, varSpace, ref, expr, obj));
@@ -1913,7 +1913,7 @@ public class Java2DF {
         throws UnsupportedSyntax, EntityNotFound {
         if (abstDecl instanceof TypeDeclaration) {
             TypeDeclaration typeDecl = (TypeDeclaration)abstDecl;
-            DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+            DFClass klass = typeSpace.getClass(typeDecl.getName());
             klass.build(finder, typeDecl);
             processBodyDeclarations(
                 finder, klass, typeDecl.bodyDeclarations());
@@ -1938,7 +1938,7 @@ public class Java2DF {
                     finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
                 } else {
                     assert(name.isQualifiedName());
-                    DFClassSpace klass = this.rootSpace.getClass(name);
+                    DFClass klass = this.rootSpace.getClass(name);
                     Logger.info("Import: "+name);
                     importSpace.addClass(klass);
                     n++;
@@ -1970,7 +1970,7 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
-        DFGraph graph, DFTypeFinder finder, DFClassSpace klass,
+        DFGraph graph, DFTypeFinder finder, DFClass klass,
         DFFrame frame, FieldDeclaration fieldDecl)
         throws UnsupportedSyntax, EntityNotFound {
         for (VariableDeclarationFragment frag :
@@ -1989,7 +1989,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
-        DFTypeFinder finder, DFClassSpace klass,
+        DFTypeFinder finder, DFClass klass,
         MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
         // Ignore method prototypes.
@@ -2007,11 +2007,11 @@ public class Java2DF {
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            List<DFClassSpace> classes = new ArrayList<DFClassSpace>();
+            List<DFClass> classes = new ArrayList<DFClass>();
             typeSpace.build(classes, methodDecl.getBody(), varSpace);
             this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
             // Add overrides.
-            for (DFClassSpace klass1 : classes) {
+            for (DFClass klass1 : classes) {
                 klass1.addOverrides();
             }
             varSpace.build(finder, methodDecl);
@@ -2056,7 +2056,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processBodyDeclarations(
-        DFTypeFinder finder, DFClassSpace klass,
+        DFTypeFinder finder, DFClass klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
         DFFrame frame = new DFFrame(DFFrame.CLASS);
@@ -2106,7 +2106,7 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
         throws EntityNotFound {
-        DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+        DFClass klass = typeSpace.getClass(typeDecl.getName());
         processBodyDeclarations(
             finder, klass, typeDecl.bodyDeclarations());
     }
@@ -2127,7 +2127,7 @@ public class Java2DF {
 
     // pass1
     public void buildTypeSpace(
-        List<DFClassSpace> classes, CompilationUnit cunit) {
+        List<DFClass> classes, CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFGlobalVarSpace global = this.rootSpace.getGlobalSpace();
         try {
@@ -2149,7 +2149,7 @@ public class Java2DF {
                      (List<AbstractTypeDeclaration>) cunit.types()) {
                 if (abstTypeDecl instanceof TypeDeclaration) {
                     TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-                    DFClassSpace klass = typeSpace.getClass(typeDecl.getName());
+                    DFClass klass = typeSpace.getClass(typeDecl.getName());
                     klass.build(finder, typeDecl);
                 } else if (abstTypeDecl instanceof EnumDeclaration) {
                     // XXX enum not supported.
@@ -2224,7 +2224,7 @@ public class Java2DF {
         XmlExporter exporter = new XmlExporter();
         rootSpace.loadDefaultClasses();
         Java2DF converter = new Java2DF(rootSpace, exporter);
-        List<DFClassSpace> classes = new ArrayList<DFClassSpace>();
+        List<DFClass> classes = new ArrayList<DFClass>();
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
@@ -2247,7 +2247,7 @@ public class Java2DF {
 	    }
         }
         // Add overrides.
-        for (DFClassSpace klass : classes) {
+        for (DFClass klass : classes) {
             klass.addOverrides();
         }
         for (String path : files) {

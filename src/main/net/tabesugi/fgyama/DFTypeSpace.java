@@ -22,8 +22,8 @@ public class DFTypeSpace {
         new ArrayList<DFTypeSpace>();
     private Map<String, DFTypeSpace> _id2space =
         new HashMap<String, DFTypeSpace>();
-    private Map<String, DFClassSpace> _id2klass =
-        new HashMap<String, DFClassSpace>();
+    private Map<String, DFClass> _id2klass =
+        new HashMap<String, DFClass>();
     private Map<String, DFParamType> _id2paramtype =
         new HashMap<String, DFParamType>();
 
@@ -83,23 +83,23 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClassSpace createClass(DFVarSpace parent, SimpleName name) {
+    public DFClass createClass(DFVarSpace parent, SimpleName name) {
         return this.createClass(parent, name.getIdentifier());
     }
-    public DFClassSpace createClass(DFVarSpace parent, String id) {
+    public DFClass createClass(DFVarSpace parent, String id) {
         int i = id.indexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
             return space.createClass(parent, id.substring(i+1));
         } else {
             DFTypeSpace child = this.lookupSpace(id);
-            DFClassSpace klass = new DFClassSpace(this, child, parent, id);
+            DFClass klass = new DFClass(this, child, parent, id);
             //Logger.info("DFTypeSpace.createClass: "+klass);
             return this.addClass(klass);
         }
     }
 
-    public DFClassSpace addClass(DFClassSpace klass) {
+    public DFClass addClass(DFClass klass) {
         String id = klass.getBaseName();
         assert(id.indexOf('.') < 0);
         //assert(!_id2klass.containsKey(id));
@@ -109,19 +109,19 @@ public class DFTypeSpace {
     }
 
     public void addClasses(DFTypeSpace typeSpace) {
-        for (DFClassSpace klass : typeSpace._id2klass.values()) {
+        for (DFClass klass : typeSpace._id2klass.values()) {
             this.addClass(klass);
         }
     }
 
-    public DFClassSpace getClass(Name name)
+    public DFClass getClass(Name name)
         throws TypeNotFound {
         return this.getClass(name.getFullyQualifiedName());
     }
-    public DFClassSpace getClass(String id)
+    public DFClass getClass(String id)
         throws TypeNotFound {
         //Logger.info("DFTypeSpace.getClass: "+this+": "+id);
-        DFClassSpace klass = null;
+        DFClass klass = null;
         DFTypeSpace space = this;
         while (space != null) {
             int i = id.indexOf('.');
@@ -155,7 +155,7 @@ public class DFTypeSpace {
 
     @SuppressWarnings("unchecked")
     public void build(
-        List<DFClassSpace> classes,
+        List<DFClass> classes,
         CompilationUnit cunit, DFGlobalVarSpace global)
         throws UnsupportedSyntax {
         for (AbstractTypeDeclaration abstTypeDecl :
@@ -165,7 +165,7 @@ public class DFTypeSpace {
     }
 
     public void build(
-        List<DFClassSpace> classes,
+        List<DFClass> classes,
         AbstractTypeDeclaration abstTypeDecl, DFVarSpace parent)
         throws UnsupportedSyntax {
         if (abstTypeDecl instanceof TypeDeclaration) {
@@ -182,11 +182,11 @@ public class DFTypeSpace {
 
     @SuppressWarnings("unchecked")
     public void build(
-        List<DFClassSpace> classes,
+        List<DFClass> classes,
         TypeDeclaration typeDecl, DFVarSpace parent)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
-        DFClassSpace klass = this.createClass(parent, typeDecl.getName());
+        DFClass klass = this.createClass(parent, typeDecl.getName());
         if (classes != null) {
             classes.add(klass);
         }
@@ -204,7 +204,7 @@ public class DFTypeSpace {
     }
 
     public void build(
-        List<DFClassSpace> classes,
+        List<DFClass> classes,
         BodyDeclaration body, DFVarSpace parent)
         throws UnsupportedSyntax {
         if (body instanceof AbstractTypeDeclaration) {
@@ -222,7 +222,7 @@ public class DFTypeSpace {
 
     @SuppressWarnings("unchecked")
     public void build(
-        List<DFClassSpace> classes,
+        List<DFClass> classes,
         Statement ast, DFVarSpace parent)
         throws UnsupportedSyntax {
 
@@ -331,7 +331,7 @@ public class DFTypeSpace {
     public void dump(PrintStream out, String indent) {
         out.println(indent+_name+" {");
         String i2 = indent + "  ";
-        for (DFClassSpace klass : _id2klass.values()) {
+        for (DFClass klass : _id2klass.values()) {
             out.println(i2+"defined: "+klass);
         }
         for (DFTypeSpace space : _children) {
