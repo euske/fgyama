@@ -5,7 +5,7 @@ package net.tabesugi.fgyama;
 
 //  DFNullType
 //
-public class DFNullType extends DFType {
+public class DFNullType implements DFType {
 
     public DFNullType() {
     }

@@ -236,7 +236,7 @@ public class DFFrame {
             return DFBasicType.NUMBER;
 
         } else if (expr instanceof StringLiteral) {
-            return new DFClassType(DFRootTypeSpace.STRING_CLASS);
+            return DFRootTypeSpace.STRING_CLASS;
 
         } else if (expr instanceof TypeLiteral) {
             return DFBasicType.TYPE;
@@ -445,7 +445,7 @@ public class DFFrame {
             } else {
                 throw new UnsupportedSyntax(body);
             }
-            return new DFClassType(anonKlass);
+            return anonKlass;
 
         } else if (expr instanceof MethodReference) {
             // MethodReference

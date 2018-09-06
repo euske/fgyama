@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFParamType
 //
-public class DFParamType extends DFType {
+public class DFParamType implements DFType {
 
     public static DFParamType[] createParamTypes(
         DFTypeSpace typeSpace, List<TypeParameter> tps) {
@@ -53,10 +53,10 @@ public class DFParamType extends DFType {
 
     public int canConvertFrom(DFType type) {
         if (type instanceof DFNullType) return 0;
-        if (type instanceof DFClassType) {
-            DFClassType ctype = (DFClassType)type;
+        if (type instanceof DFClassSpace) {
+            DFClassSpace ctype = (DFClassSpace)type;
             if (_bases.length == 0) return 0;
-            return ctype.getKlass().isSubclassOf(_bases[0]);
+            return ctype.isSubclassOf(_bases[0]);
         } else if (type instanceof DFParamType) {
             DFParamType ptype = (DFParamType)type;
             if (_typeSpace != ptype._typeSpace) return -1;

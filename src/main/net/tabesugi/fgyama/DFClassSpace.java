@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFClassSpace
 //
-public class DFClassSpace extends DFVarSpace {
+public class DFClassSpace extends DFVarSpace implements DFType {
 
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
@@ -44,12 +44,28 @@ public class DFClassSpace extends DFVarSpace {
         super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;
-        _this = this.addRef("#this", new DFClassType(this));
+        _this = this.addRef("#this", this);
     }
 
     @Override
     public String toString() {
         return ("<DFClassSpace("+this.getFullName()+")>");
+    }
+
+    public boolean equals(DFType type) {
+        return (this == type);
+    }
+
+    public String getName()
+    {
+        return this.getFullName();
+    }
+
+    public int canConvertFrom(DFType type)
+    {
+        if (type instanceof DFNullType) return 0;
+        if (!(type instanceof DFClassSpace)) return -1;
+        return this.isSubclassOf((DFClassSpace)type);
     }
 
     public void setJarPath(String jarPath, String filePath) {
@@ -348,7 +364,7 @@ public class DFClassSpace extends DFVarSpace {
             DFType[] argTypes = finder2.resolveList(decl);
             DFType returnType;
             if (decl.isConstructor()) {
-                returnType = new DFClassType(this);
+                returnType = this;
                 // XXX treat method name specially.
             } else {
                 returnType = finder2.resolve(decl.getReturnType2());

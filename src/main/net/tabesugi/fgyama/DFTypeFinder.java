@@ -78,8 +78,8 @@ public class DFTypeFinder {
             return DFRootTypeSpace.OBJECT_CLASS;
         } else if (type instanceof DFArrayType) {
             return DFRootTypeSpace.ARRAY_CLASS;
-        } else if (type instanceof DFClassType) {
-            return ((DFClassType)type).getKlass();
+        } else if (type instanceof DFClassSpace) {
+            return (DFClassSpace)type;
         } else {
             throw new TypeNotFound(type.getName());
         }
@@ -100,20 +100,18 @@ public class DFTypeFinder {
             SimpleType stype = (SimpleType)type;
             DFParamType pt = this.lookupParamType(stype.getName());
             if (pt != null) return pt;
-            DFClassSpace klass = this.lookupClass(stype.getName());
-            return new DFClassType(klass);
+            return this.lookupClass(stype.getName());
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
             DFType genericType = this.resolve(ptype.getType());
-            assert(genericType instanceof DFClassType);
-            DFClassSpace genericKlass = ((DFClassType)genericType).getKlass();
+            assert(genericType instanceof DFClassSpace);
+            DFClassSpace genericKlass = (DFClassSpace)genericType;
             DFType[] argTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
                 argTypes[i] = this.resolve(args.get(i));
             }
-            DFParamClass paramKlass = new DFParamClass(genericKlass, argTypes);
-            return new DFClassType(paramKlass);
+            return new DFParamClass(genericKlass, argTypes);
         } else {
             // ???
             throw new TypeNotFound(type.toString());
@@ -150,8 +148,7 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            DFClassSpace klass = this.lookupClass(className);
-            return new DFClassType(klass);
+            return this.lookupClass(className);
         } else {
             // ???
             throw new TypeNotFound(type.toString());

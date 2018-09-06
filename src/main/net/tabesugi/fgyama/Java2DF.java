@@ -714,7 +714,7 @@ public class Java2DF {
                 String value = ((StringLiteral)expr).getLiteralValue();
                 ctx.setRValue(new ConstNode(
                                   graph, varSpace,
-                                  new DFClassType(DFRootTypeSpace.STRING_CLASS),
+                                  DFRootTypeSpace.STRING_CLASS,
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
@@ -1017,7 +1017,7 @@ public class Java2DF {
                         anonKlass.addOverrides();
                         processBodyDeclarations(
                             finder, anonKlass, anonDecl.bodyDeclarations());
-                        instType = new DFClassType(anonKlass);
+                        instType = anonKlass;
                     } catch (EntityNotFound e) {
                         instType = null; // XXX what happened?
                     }
@@ -1084,9 +1084,8 @@ public class Java2DF {
                 } else {
                     throw new UnsupportedSyntax(body);
                 }
-                DFType instType = new DFClassType(anonKlass);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, varSpace, instType, lambda, null);
+                    graph, varSpace, anonKlass, lambda, null);
                 ctx.setRValue(call);
 
             } else if (expr instanceof MethodReference) {
@@ -1100,9 +1099,8 @@ public class Java2DF {
                 DFClassSpace anonKlass = new DFAnonClassSpace(
 		    anonSpace, varSpace, "methodref", null);
                 // XXX TODO method ref
-                DFType instType = new DFClassType(anonKlass);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, varSpace, instType, mref, null);
+                    graph, varSpace, anonKlass, mref, null);
                 ctx.setRValue(call);
 
             } else {
