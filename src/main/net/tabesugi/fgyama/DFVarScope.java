@@ -119,6 +119,11 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
+    public DFVarRef lookupThis() {
+        assert(_parent != null);
+        return _parent.lookupThis();
+    }
+
     public DFVarRef lookupVar(SimpleName name)
         throws VariableNotFound {
         return this.lookupRef("$"+name.getIdentifier());
@@ -132,11 +137,6 @@ public class DFVarScope implements Comparable<DFVarScope> {
     public DFVarRef lookupException()
         throws VariableNotFound {
         return this.lookupRef("#exception");
-    }
-
-    public DFVarRef lookupThis() {
-        assert(_parent != null);
-        return _parent.lookupThis();
     }
 
     public DFVarRef lookupArray(DFType type)

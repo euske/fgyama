@@ -406,6 +406,14 @@ public class DFKlass extends DFType {
             _this = this.addRef("#this", klass);
         }
 
+        public String getFullName() {
+            return _klass.getFullName();
+        }
+
+        public DFVarRef lookupThis() {
+            return _this;
+        }
+
         public DFVarRef lookupVar(SimpleName name)
             throws VariableNotFound {
             // try local variables first.
@@ -415,10 +423,6 @@ public class DFKlass extends DFType {
                 // try field names.
                 return _klass.lookupField(name.getIdentifier());
             }
-        }
-
-        public DFVarRef lookupThis() {
-            return _this;
         }
 
         // dumpContents (for debugging)

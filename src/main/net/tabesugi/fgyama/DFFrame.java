@@ -111,13 +111,11 @@ public class DFFrame {
     }
 
     public void addExit(DFExit exit) {
-        Logger.info("add: "+this+": "+exit);
         _exits.add(exit);
     }
 
     public void close(DFContext ctx) {
         for (DFExit exit : _exits) {
-            Logger.info("closing: "+this+": "+exit);
             if (exit.getFrame() == this) {
                 DFNode node = exit.getNode();
                 node.finish(ctx);
