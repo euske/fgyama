@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFContext {
 
     private DFGraph _graph;
-    private DFVarSpace _space;
+    private DFVarScope _scope;
 
     private Map<DFVarRef, DFNode> _first =
         new HashMap<DFVarRef, DFNode>();
@@ -21,9 +21,9 @@ public class DFContext {
     private DFNode _lval = null;
     private DFNode _rval = null;
 
-    public DFContext(DFGraph graph, DFVarSpace space) {
+    public DFContext(DFGraph graph, DFVarScope scope) {
         _graph = graph;
-        _space = space;
+        _scope = scope;
     }
 
     // get(ref): get a current value of the context if defined.
@@ -31,7 +31,7 @@ public class DFContext {
         DFNode node = _last.get(ref);
         if (node == null) {
             assert(!_first.containsKey(ref));
-            node = new DFNode(_graph, _space, ref.getType(), ref);
+            node = new DFNode(_graph, _scope, ref.getType(), ref);
             _last.put(ref, node);
             _first.put(ref, node);
         }

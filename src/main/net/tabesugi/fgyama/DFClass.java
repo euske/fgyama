@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFClass
 //
-public class DFClass extends DFVarSpace implements DFType {
+public class DFClass extends DFVarScope implements DFType {
 
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
@@ -31,7 +31,7 @@ public class DFClass extends DFVarSpace implements DFType {
 
     public DFClass(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
-	DFVarSpace parent, String id, DFClass baseKlass) {
+	DFVarScope parent, String id, DFClass baseKlass) {
         super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;
@@ -40,7 +40,7 @@ public class DFClass extends DFVarSpace implements DFType {
 
     public DFClass(
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
-	DFVarSpace parent, String id) {
+	DFVarScope parent, String id) {
         super(parent, id);
         _typeSpace = typeSpace;
         _childSpace = childSpace;

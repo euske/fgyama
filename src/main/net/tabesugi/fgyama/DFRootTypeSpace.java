@@ -19,7 +19,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public static DFClass ARRAY_CLASS = null;
     public static DFClass STRING_CLASS = null;
 
-    private DFGlobalVarSpace _global = new DFGlobalVarSpace();
+    private DFGlobalVarScope _global = new DFGlobalVarScope();
 
     public DFRootTypeSpace() {
         super("ROOT");
@@ -30,7 +30,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         return ("<DFRootTypeSpace>");
     }
 
-    public DFGlobalVarSpace getGlobalSpace() {
+    public DFGlobalVarScope getGlobalScope() {
         return _global;
     }
 

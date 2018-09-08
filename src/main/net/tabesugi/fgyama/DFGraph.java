@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 //
 public class DFGraph {
 
-    private DFVarSpace _root;
+    private DFVarScope _root;
     private DFFrame _frame;
     private DFMethod _method;
 
@@ -20,14 +20,14 @@ public class DFGraph {
         new HashMap<Integer, DFNode>();
 
     // DFGraph for a method.
-    public DFGraph(DFVarSpace root, DFFrame frame, DFMethod method) {
+    public DFGraph(DFVarScope root, DFFrame frame, DFMethod method) {
         _root = root;
         _frame = frame;
         _method = method;
     }
 
     // DFGraph for a class static block.
-    public DFGraph(DFVarSpace root, DFFrame frame) {
+    public DFGraph(DFVarScope root, DFFrame frame) {
         this(root, frame, null);
     }
 

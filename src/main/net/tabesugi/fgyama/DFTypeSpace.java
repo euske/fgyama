@@ -83,10 +83,10 @@ public class DFTypeSpace {
         }
     }
 
-    public DFClass createClass(DFVarSpace parent, SimpleName name) {
+    public DFClass createClass(DFVarScope parent, SimpleName name) {
         return this.createClass(parent, name.getIdentifier());
     }
-    public DFClass createClass(DFVarSpace parent, String id) {
+    public DFClass createClass(DFVarScope parent, String id) {
         int i = id.indexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
@@ -156,7 +156,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(
         List<DFClass> classes,
-        CompilationUnit cunit, DFGlobalVarSpace global)
+        CompilationUnit cunit, DFGlobalVarScope global)
         throws UnsupportedSyntax {
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) cunit.types()) {
@@ -166,7 +166,7 @@ public class DFTypeSpace {
 
     public void build(
         List<DFClass> classes,
-        AbstractTypeDeclaration abstTypeDecl, DFVarSpace parent)
+        AbstractTypeDeclaration abstTypeDecl, DFVarScope parent)
         throws UnsupportedSyntax {
         if (abstTypeDecl instanceof TypeDeclaration) {
             this.build(classes, (TypeDeclaration)abstTypeDecl, parent);
@@ -183,7 +183,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(
         List<DFClass> classes,
-        TypeDeclaration typeDecl, DFVarSpace parent)
+        TypeDeclaration typeDecl, DFVarScope parent)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFClass klass = this.createClass(parent, typeDecl.getName());
@@ -205,7 +205,7 @@ public class DFTypeSpace {
 
     public void build(
         List<DFClass> classes,
-        BodyDeclaration body, DFVarSpace parent)
+        BodyDeclaration body, DFVarScope parent)
         throws UnsupportedSyntax {
         if (body instanceof AbstractTypeDeclaration) {
             this.build(classes, (AbstractTypeDeclaration)body, parent);
@@ -223,7 +223,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public void build(
         List<DFClass> classes,
-        Statement ast, DFVarSpace parent)
+        Statement ast, DFVarScope parent)
         throws UnsupportedSyntax {
 
         if (ast instanceof AssertStatement) {

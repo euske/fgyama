@@ -132,19 +132,19 @@ public class DFFrame {
     }
 
     private void buildAssignment(
-        DFTypeFinder finder, DFVarSpace varSpace, Expression expr)
+        DFTypeFinder finder, DFVarScope varScope, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
         if (expr instanceof Name) {
             Name name = (Name)expr;
             DFVarRef ref;
             if (name.isSimpleName()) {
-                ref = varSpace.lookupVarOrField((SimpleName)name);
+                ref = varScope.lookupVarOrField((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFClass klass;
                 try {
                     // Try assuming it's a variable access.
-                    DFType type = this.build(finder, varSpace, qname.getQualifier());
+                    DFType type = this.build(finder, varScope, qname.getQualifier());
                     if (type == null) return;
                     klass = finder.resolveClass(type);
                 } catch (EntityNotFound e) {
@@ -158,10 +158,10 @@ public class DFFrame {
 
         } else if (expr instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)expr;
-            DFType type = this.build(finder, varSpace, aa.getArray());
-            this.build(finder, varSpace, aa.getIndex());
+            DFType type = this.build(finder, varScope, aa.getArray());
+            this.build(finder, varScope, aa.getIndex());
             if (type == null) return;
-            DFVarRef ref = varSpace.lookupArray(type);
+            DFVarRef ref = varScope.lookupArray(type);
             this.addOutput(ref);
 
         } else if (expr instanceof FieldAccess) {
@@ -175,7 +175,7 @@ public class DFFrame {
                 }
             }
             if (klass == null) {
-                DFType type = this.build(finder, varSpace, expr1);
+                DFType type = this.build(finder, varScope, expr1);
                 if (type == null) return;
                 klass = finder.resolveClass(type);
             }
@@ -190,7 +190,7 @@ public class DFFrame {
 
     @SuppressWarnings("unchecked")
     private DFType build(
-        DFTypeFinder finder, DFVarSpace varSpace, Expression expr)
+        DFTypeFinder finder, DFVarScope varScope, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
         if (expr instanceof Annotation) {
             return null;
@@ -199,13 +199,13 @@ public class DFFrame {
             Name name = (Name)expr;
             DFVarRef ref;
             if (name.isSimpleName()) {
-                ref = varSpace.lookupVarOrField((SimpleName)name);
+                ref = varScope.lookupVarOrField((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFClass klass;
                 try {
                     // Try assuming it's a variable access.
-                    DFType type = this.build(finder, varSpace, qname.getQualifier());
+                    DFType type = this.build(finder, varScope, qname.getQualifier());
                     if (type == null) return type;
                     klass = finder.resolveClass(type);
                 } catch (EntityNotFound e) {
@@ -219,7 +219,7 @@ public class DFFrame {
             return ref.getType();
 
         } else if (expr instanceof ThisExpression) {
-            DFVarRef ref = varSpace.lookupThis();
+            DFVarRef ref = varScope.lookupThis();
             this.addInput(ref);
             return ref.getType();
 
@@ -247,9 +247,9 @@ public class DFFrame {
             Expression operand = prefix.getOperand();
             if (op == PrefixExpression.Operator.INCREMENT ||
                 op == PrefixExpression.Operator.DECREMENT) {
-                this.buildAssignment(finder, varSpace, operand);
+                this.buildAssignment(finder, varScope, operand);
             }
-            return this.build(finder, varSpace, operand);
+            return this.build(finder, varScope, operand);
 
         } else if (expr instanceof PostfixExpression) {
             PostfixExpression postfix = (PostfixExpression)expr;
@@ -257,40 +257,40 @@ public class DFFrame {
             Expression operand = postfix.getOperand();
             if (op == PostfixExpression.Operator.INCREMENT ||
                 op == PostfixExpression.Operator.DECREMENT) {
-                this.buildAssignment(finder, varSpace, operand);
+                this.buildAssignment(finder, varScope, operand);
             }
-            return this.build(finder, varSpace, operand);
+            return this.build(finder, varScope, operand);
 
         } else if (expr instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)expr;
             InfixExpression.Operator op = infix.getOperator();
-            this.build(finder, varSpace, infix.getLeftOperand());
+            this.build(finder, varScope, infix.getLeftOperand());
             // XXX Todo: implicit type coersion.
-            return this.build(finder, varSpace, infix.getRightOperand());
+            return this.build(finder, varScope, infix.getRightOperand());
 
         } else if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            return this.build(finder, varSpace, paren.getExpression());
+            return this.build(finder, varScope, paren.getExpression());
 
         } else if (expr instanceof Assignment) {
             Assignment assn = (Assignment)expr;
             Assignment.Operator op = assn.getOperator();
             if (op != Assignment.Operator.ASSIGN) {
-                this.build(finder, varSpace, assn.getLeftHandSide());
+                this.build(finder, varScope, assn.getLeftHandSide());
             }
-            this.buildAssignment(finder, varSpace, assn.getLeftHandSide());
-            return this.build(finder, varSpace, assn.getRightHandSide());
+            this.buildAssignment(finder, varScope, assn.getLeftHandSide());
+            return this.build(finder, varScope, assn.getRightHandSide());
 
         } else if (expr instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl =
                 (VariableDeclarationExpression)expr;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
-                DFVarRef ref = varSpace.lookupVar(frag.getName());
+                DFVarRef ref = varScope.lookupVar(frag.getName());
                 this.addOutput(ref);
                 Expression init = frag.getInitializer();
                 if (init != null) {
-                    this.build(finder, varSpace, init);
+                    this.build(finder, varScope, init);
                 }
             }
             return null; // XXX what do?
@@ -300,7 +300,7 @@ public class DFFrame {
             Expression expr1 = invoke.getExpression();
             DFClass klass = null;
             if (expr1 == null) {
-                DFVarRef ref = varSpace.lookupThis();
+                DFVarRef ref = varScope.lookupThis();
                 this.addInput(ref);
                 klass = finder.resolveClass(ref.getType());
             } else {
@@ -311,14 +311,14 @@ public class DFFrame {
                     }
                 }
                 if (klass == null) {
-                    DFType type = this.build(finder, varSpace, expr1);
+                    DFType type = this.build(finder, varScope, expr1);
                     if (type == null) return type;
                     klass = finder.resolveClass(type);
                 }
             }
             List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) invoke.arguments()) {
-                DFType type = this.build(finder, varSpace, arg);
+                DFType type = this.build(finder, varScope, arg);
                 if (type == null) return type;
                 typeList.add(type);
             }
@@ -332,14 +332,14 @@ public class DFFrame {
             SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
             List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) sinvoke.arguments()) {
-                DFType type = this.build(finder, varSpace, arg);
+                DFType type = this.build(finder, varScope, arg);
                 if (type == null) return type;
                 typeList.add(type);
             }
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
             DFClass klass =
-                finder.resolveClass(varSpace.lookupThis().getType());
+                finder.resolveClass(varScope.lookupThis().getType());
             DFClass baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
             if (method == null) return null;
@@ -348,11 +348,11 @@ public class DFFrame {
         } else if (expr instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)expr;
             for (Expression dim : (List<Expression>) ac.dimensions()) {
-                this.build(finder, varSpace, dim);
+                this.build(finder, varScope, dim);
             }
             ArrayInitializer init = ac.getInitializer();
             if (init != null) {
-                this.build(finder, varSpace, init);
+                this.build(finder, varScope, init);
             }
             return finder.resolve(ac.getType().getElementType());
 
@@ -360,17 +360,17 @@ public class DFFrame {
             ArrayInitializer init = (ArrayInitializer)expr;
             DFType type = null;
             for (Expression expr1 : (List<Expression>) init.expressions()) {
-                type = this.build(finder, varSpace, expr1);
+                type = this.build(finder, varScope, expr1);
             }
             return type;
 
         } else if (expr instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)expr;
-            this.build(finder, varSpace, aa.getIndex());
-            DFType type = this.build(finder, varSpace, aa.getArray());
+            this.build(finder, varScope, aa.getIndex());
+            DFType type = this.build(finder, varScope, aa.getArray());
             if (type instanceof DFArrayType) {
                 type = ((DFArrayType)type).getElemType();
-                DFVarRef ref = varSpace.lookupArray(type);
+                DFVarRef ref = varScope.lookupArray(type);
                 this.addInput(ref);
             }
             return type;
@@ -386,7 +386,7 @@ public class DFFrame {
                 }
             }
             if (klass == null) {
-                DFType type = this.build(finder, varSpace, expr1);
+                DFType type = this.build(finder, varScope, expr1);
                 if (type == null) return type;
                 klass = finder.resolveClass(type);
             }
@@ -399,14 +399,14 @@ public class DFFrame {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFClass klass =
-                finder.resolveClass(varSpace.lookupThis().getType());
+                finder.resolveClass(varScope.lookupThis().getType());
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInput(ref);
             return ref.getType();
 
         } else if (expr instanceof CastExpression) {
             CastExpression cast = (CastExpression)expr;
-            this.build(finder, varSpace, cast.getExpression());
+            this.build(finder, varScope, cast.getExpression());
             return finder.resolve(cast.getType());
 
         } else if (expr instanceof ClassInstanceCreation) {
@@ -415,18 +415,18 @@ public class DFFrame {
             assert(anonDecl == null); // XXX anonymous class unsupported.
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
-                this.build(finder, varSpace, expr1);
+                this.build(finder, varScope, expr1);
             }
             for (Expression arg : (List<Expression>) cstr.arguments()) {
-                this.build(finder, varSpace, arg);
+                this.build(finder, varScope, arg);
             }
             return finder.resolve(cstr.getType());
 
         } else if (expr instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)expr;
-            this.build(finder, varSpace, cond.getExpression());
-            this.build(finder, varSpace, cond.getThenExpression());
-            return this.build(finder, varSpace, cond.getElseExpression());
+            this.build(finder, varScope, cond.getExpression());
+            this.build(finder, varScope, cond.getThenExpression());
+            return this.build(finder, varScope, cond.getElseExpression());
 
         } else if (expr instanceof InstanceofExpression) {
             return DFBasicType.BOOLEAN;
@@ -435,8 +435,8 @@ public class DFFrame {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = "lambda";
             ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = new DFTypeSpace(varSpace.getFullName()+"/"+id);
-            DFClass anonKlass = new DFAnonClass(anonSpace, varSpace, id, null);
+            DFTypeSpace anonSpace = new DFTypeSpace(varScope.getFullName()+"/"+id);
+            DFClass anonKlass = new DFAnonClass(anonSpace, varScope, id, null);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
@@ -462,17 +462,17 @@ public class DFFrame {
 
     @SuppressWarnings("unchecked")
     public void build(
-        DFTypeFinder finder, DFVarSpace varSpace, Statement stmt)
+        DFTypeFinder finder, DFVarScope varScope, Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
 
         if (stmt instanceof AssertStatement) {
 
         } else if (stmt instanceof Block) {
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             Block block = (Block)stmt;
             for (Statement cstmt :
                      (List<Statement>) block.statements()) {
-                this.build(finder, childSpace, cstmt);
+                this.build(finder, childScope, cstmt);
             }
 
         } else if (stmt instanceof EmptyStatement) {
@@ -482,40 +482,40 @@ public class DFFrame {
                 (VariableDeclarationStatement)stmt;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                DFVarRef ref = varSpace.lookupVar(frag.getName());
+                DFVarRef ref = varScope.lookupVar(frag.getName());
                 this.addOutput(ref);
                 Expression init = frag.getInitializer();
                 if (init != null) {
-                    this.build(finder, varSpace, init);
+                    this.build(finder, varScope, init);
                 }
             }
 
         } else if (stmt instanceof ExpressionStatement) {
             ExpressionStatement exprStmt = (ExpressionStatement)stmt;
-            this.build(finder, varSpace, exprStmt.getExpression());
+            this.build(finder, varScope, exprStmt.getExpression());
 
         } else if (stmt instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)stmt;
-            this.build(finder, varSpace, ifStmt.getExpression());
+            this.build(finder, varScope, ifStmt.getExpression());
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild(DFFrame.COND, thenStmt);
-            thenFrame.build(finder, varSpace, thenStmt);
+            thenFrame.build(finder, varScope, thenStmt);
             this.finish(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = this.addChild(DFFrame.COND, elseStmt);
-                elseFrame.build(finder, varSpace, elseStmt);
+                elseFrame.build(finder, varScope, elseStmt);
                 this.finish(elseFrame);
             }
 
         } else if (stmt instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)stmt;
-            this.build(finder, varSpace, switchStmt.getExpression());
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            this.build(finder, varScope, switchStmt.getExpression());
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
-                childFrame.build(finder, childSpace, cstmt);
+                childFrame.build(finder, childScope, cstmt);
             }
             this.finish(childFrame);
 
@@ -523,60 +523,60 @@ public class DFFrame {
             SwitchCase switchCase = (SwitchCase)stmt;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
-                this.build(finder, varSpace, switchCase.getExpression());
+                this.build(finder, varScope, switchCase.getExpression());
             }
 
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
-            childFrame.build(finder, varSpace, whileStmt.getExpression());
-            childFrame.build(finder, childSpace, whileStmt.getBody());
+            childFrame.build(finder, varScope, whileStmt.getExpression());
+            childFrame.build(finder, childScope, whileStmt.getBody());
             this.finish(childFrame);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
-            childFrame.build(finder, childSpace, doStmt.getBody());
-            childFrame.build(finder, varSpace, doStmt.getExpression());
+            childFrame.build(finder, childScope, doStmt.getBody());
+            childFrame.build(finder, varScope, doStmt.getExpression());
             this.finish(childFrame);
 
         } else if (stmt instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)stmt;
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             for (Expression init : (List<Expression>) forStmt.initializers()) {
-                this.build(finder, childSpace, init);
+                this.build(finder, childScope, init);
             }
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                childFrame.build(finder, childSpace, expr);
+                childFrame.build(finder, childScope, expr);
             }
-            childFrame.build(finder, childSpace, forStmt.getBody());
+            childFrame.build(finder, childScope, forStmt.getBody());
             for (Expression update : (List<Expression>) forStmt.updaters()) {
-                childFrame.build(finder, childSpace, update);
+                childFrame.build(finder, childScope, update);
             }
             this.finish(childFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
-            DFVarSpace childSpace = varSpace.getChildByAST(stmt);
+            DFVarScope childScope = varScope.getChildByAST(stmt);
             SingleVariableDeclaration decl = eForStmt.getParameter();
-            DFVarRef ref = childSpace.lookupVar(decl.getName());
+            DFVarRef ref = childScope.lookupVar(decl.getName());
             //this.addOutput(ref);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
-            childFrame.build(finder, childSpace, eForStmt.getExpression());
-            childFrame.build(finder, childSpace, eForStmt.getBody());
+            childFrame.build(finder, childScope, eForStmt.getExpression());
+            childFrame.build(finder, childScope, eForStmt.getBody());
             this.finish(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
-                this.build(finder, varSpace, expr);
+                this.build(finder, varScope, expr);
             }
-            this.addOutput(varSpace.lookupReturn());
+            this.addOutput(varScope.lookupReturn());
 
         } else if (stmt instanceof BreakStatement) {
 
@@ -587,47 +587,47 @@ public class DFFrame {
             SimpleName labelName = labeledStmt.getLabel();
             String label = labelName.getIdentifier();
             DFFrame childFrame = this.addChild(label, stmt);
-            childFrame.build(finder, varSpace, labeledStmt.getBody());
+            childFrame.build(finder, varScope, labeledStmt.getBody());
             this.finish(childFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-            this.build(finder, varSpace, syncStmt.getBody());
+            this.build(finder, varScope, syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
             Block block = tryStmt.getBody();
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
-            tryFrame.build(finder, varSpace, block);
+            tryFrame.build(finder, varScope, block);
             this.finish(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFVarSpace childSpace = varSpace.getChildByAST(cc);
-                DFVarRef ref = childSpace.lookupVar(decl.getName());
+                DFVarScope childScope = varScope.getChildByAST(cc);
+                DFVarRef ref = childScope.lookupVar(decl.getName());
                 //this.addOutput(ref);
-                this.build(finder, childSpace, cc.getBody());
+                this.build(finder, childScope, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.build(finder, varSpace, finBlock);
+                this.build(finder, varScope, finBlock);
             }
 
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
-            this.build(finder, varSpace, throwStmt.getExpression());
-            this.addOutput(varSpace.lookupException());
+            this.build(finder, varScope, throwStmt.getExpression());
+            this.addOutput(varScope.lookupException());
 
         } else if (stmt instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) ci.arguments()) {
-                this.build(finder, varSpace, arg);
+                this.build(finder, varScope, arg);
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) sci.arguments()) {
-                this.build(finder, varSpace, arg);
+                this.build(finder, varScope, arg);
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {

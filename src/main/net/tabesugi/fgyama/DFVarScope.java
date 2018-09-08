@@ -8,61 +8,61 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFVarSpace
+//  DFVarScope
 //  Mapping from name -> reference.
 //
-public class DFVarSpace implements Comparable<DFVarSpace> {
+public class DFVarScope implements Comparable<DFVarScope> {
 
-    private DFVarSpace _global;
-    private DFVarSpace _parent;
+    private DFVarScope _global;
+    private DFVarScope _parent;
     private String _name;
 
-    private List<DFVarSpace> _children =
-        new ArrayList<DFVarSpace>();
-    private Map<String, DFVarSpace> _ast2child =
-        new HashMap<String, DFVarSpace>();
+    private List<DFVarScope> _children =
+        new ArrayList<DFVarScope>();
+    private Map<String, DFVarScope> _ast2child =
+        new HashMap<String, DFVarScope>();
     private Map<String, DFVarRef> _id2ref =
         new HashMap<String, DFVarRef>();
 
-    protected DFVarSpace(String name) {
+    protected DFVarScope(String name) {
         _global = this;
         _name = name;
     }
 
-    protected DFVarSpace(DFVarSpace parent, String name) {
+    protected DFVarScope(DFVarScope parent, String name) {
         _global = parent._global;
         _parent = parent;
         _name = name;
     }
 
-    public DFVarSpace(DFVarSpace parent, SimpleName name) {
+    public DFVarScope(DFVarScope parent, SimpleName name) {
         this(parent, name.getIdentifier());
     }
 
     @Override
-    public int compareTo(DFVarSpace space) {
-        if (space == null) return +1;
-        if (space == this) return 0;
-        if (space._parent == _parent) {
-            return _name.compareTo(space._name);
+    public int compareTo(DFVarScope scope) {
+        if (scope == null) return +1;
+        if (scope == this) return 0;
+        if (scope._parent == _parent) {
+            return _name.compareTo(scope._name);
         }
         if (_parent == null) return -1;
-        return _parent.compareTo(space._parent);
+        return _parent.compareTo(scope._parent);
     }
 
     @Override
     public String toString() {
-        return ("<DFVarSpace("+this.getFullName()+")>");
+        return ("<DFVarScope("+this.getFullName()+")>");
     }
 
     public Element toXML(Document document, DFNode[] nodes) {
         Element elem = document.createElement("scope");
         elem.setAttribute("name", this.getFullName());
-        for (DFVarSpace child : this.getChildren()) {
+        for (DFVarScope child : this.getChildren()) {
             elem.appendChild(child.toXML(document, nodes));
         }
         for (DFNode node : nodes) {
-            if (node.getSpace() == this) {
+            if (node.getScope() == this) {
                 elem.appendChild(node.toXML(document));
             }
         }
@@ -81,25 +81,25 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
         }
     }
 
-    private DFVarSpace addChild(String basename, ASTNode ast) {
+    private DFVarScope addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
-        Logger.info("DFVarSpace.addChild: "+this+": "+id);
-        DFVarSpace space = new DFVarSpace(this, id);
-        _children.add(space);
-        _ast2child.put(Utils.encodeASTNode(ast), space);
-        return space;
+        Logger.info("DFVarScope.addChild: "+this+": "+id);
+        DFVarScope scope = new DFVarScope(this, id);
+        _children.add(scope);
+        _ast2child.put(Utils.encodeASTNode(ast), scope);
+        return scope;
     }
 
-    public DFVarSpace getChildByAST(ASTNode ast) {
+    public DFVarScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert(_ast2child.containsKey(key));
         return _ast2child.get(key);
     }
 
-    public DFVarSpace[] getChildren() {
-        DFVarSpace[] spaces = new DFVarSpace[_children.size()];
-        _children.toArray(spaces);
-        return spaces;
+    public DFVarScope[] getChildren() {
+        DFVarScope[] scopes = new DFVarScope[_children.size()];
+        _children.toArray(scopes);
+        return scopes;
     }
 
     protected DFVarRef addRef(String id, DFType type) {
@@ -166,7 +166,7 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {
-        Logger.info("DFVarSpace.addVar: "+this+": "+name+" -> "+type);
+        Logger.info("DFVarScope.addVar: "+this+": "+name+" -> "+type);
         return this.addRef("$"+name.getIdentifier(), type);
     }
 
@@ -176,7 +176,7 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFVarSpace.build: "+this);
+        //Logger.info("DFVarScope.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? null : finder.resolve(returnType);
         this.addRef("#return", type);
@@ -198,10 +198,10 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFVarSpace childSpace = this.addChild("b", ast);
+            DFVarScope childScope = this.addChild("b", ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                childSpace.build(finder, stmt);
+                childScope.build(finder, stmt);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -245,12 +245,12 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFVarSpace childSpace = this.addChild("switch", ast);
+            DFVarScope childScope = this.addChild("switch", ast);
             Expression expr = switchStmt.getExpression();
-            childSpace.build(finder, expr);
+            childScope.build(finder, expr);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                childSpace.build(finder, stmt);
+                childScope.build(finder, stmt);
             }
 
         } else if (ast instanceof SwitchCase) {
@@ -264,49 +264,49 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
             this.build(finder, expr);
-            DFVarSpace childSpace = this.addChild("while", ast);
+            DFVarScope childScope = this.addChild("while", ast);
             Statement stmt = whileStmt.getBody();
-            childSpace.build(finder, stmt);
+            childScope.build(finder, stmt);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFVarSpace childSpace = this.addChild("do", ast);
+            DFVarScope childScope = this.addChild("do", ast);
             Statement stmt = doStmt.getBody();
-            childSpace.build(finder, stmt);
+            childScope.build(finder, stmt);
             Expression expr = doStmt.getExpression();
-            childSpace.build(finder, expr);
+            childScope.build(finder, expr);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFVarSpace childSpace = this.addChild("for", ast);
+            DFVarScope childScope = this.addChild("for", ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                childSpace.build(finder, init);
+                childScope.build(finder, init);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                childSpace.build(finder, expr);
+                childScope.build(finder, expr);
             }
             Statement stmt = forStmt.getBody();
-            childSpace.build(finder, stmt);
+            childScope.build(finder, stmt);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                childSpace.build(finder, update);
+                childScope.build(finder, update);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            DFVarSpace childSpace = this.addChild("efor", ast);
+            DFVarScope childScope = this.addChild("efor", ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
-            childSpace.addVar(decl.getName(), varType);
+            childScope.addVar(decl.getName(), varType);
             Expression expr = eForStmt.getExpression();
             if (expr != null) {
-                childSpace.build(finder, expr);
+                childScope.build(finder, expr);
             }
             Statement stmt = eForStmt.getBody();
-            childSpace.build(finder, stmt);
+            childScope.build(finder, stmt);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -331,11 +331,11 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFVarSpace childSpace = this.addChild("catch", cc);
+                DFVarScope childScope = this.addChild("catch", cc);
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
-                childSpace.addVar(decl.getName(), varType);
-                childSpace.build(finder, cc.getBody());
+                childScope.addVar(decl.getName(), varType);
+                childScope.build(finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
@@ -570,8 +570,8 @@ public class DFVarSpace implements Comparable<DFVarSpace> {
         out.println(indent+this.getFullName()+" {");
         String i2 = indent + "  ";
         this.dumpContents(out, i2);
-        for (DFVarSpace space : _children) {
-            space.dump(out, i2);
+        for (DFVarScope scope : _children) {
+            scope.dump(out, i2);
         }
         out.println(indent+"}");
     }

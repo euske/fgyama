@@ -13,7 +13,7 @@ public class DFAnonClass extends DFClass {
 
     public DFAnonClass(
 	DFTypeSpace typeSpace,
-	DFVarSpace parent, String id, DFClass baseKlass) {
+	DFVarScope parent, String id, DFClass baseKlass) {
         super(typeSpace, typeSpace, parent, id, baseKlass);
     }
 
