@@ -11,17 +11,6 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFParamType implements DFType {
 
-    public static DFParamType[] createParamTypes(
-        DFTypeSpace typeSpace, List<TypeParameter> tps) {
-        DFParamType[] pts = new DFParamType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            String id = tps.get(i).getName().getIdentifier();
-            DFParamType pt = new DFParamType(typeSpace, i, id);
-            pts[i] = pt;
-        }
-        return pts;
-    }
-
     private DFTypeSpace _typeSpace;
     private int _index;
     private String _name;
@@ -37,10 +26,6 @@ public class DFParamType implements DFType {
     @Override
     public String toString() {
         return ("<ParamType:"+_name+">");
-    }
-
-    public String getBaseName() {
-        return _name;
     }
 
     public String getTypeName() {

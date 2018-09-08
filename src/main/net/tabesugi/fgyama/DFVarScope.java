@@ -69,10 +69,6 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return elem;
     }
 
-    public String getBaseName() {
-        return _name;
-    }
-
     public String getFullName() {
         if (_parent == null) {
             return _name;

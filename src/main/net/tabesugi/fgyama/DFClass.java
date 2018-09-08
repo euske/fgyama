@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFClass extends DFVarScope implements DFType {
 
+    private String _name;
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
     private DFClass _baseKlass;
@@ -33,6 +34,7 @@ public class DFClass extends DFVarScope implements DFType {
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
 	DFVarScope parent, String id, DFClass baseKlass) {
         super(parent, id);
+        _name = id;
         _typeSpace = typeSpace;
         _childSpace = childSpace;
         _baseKlass = baseKlass;
@@ -42,6 +44,7 @@ public class DFClass extends DFVarScope implements DFType {
         DFTypeSpace typeSpace, DFTypeSpace childSpace,
 	DFVarScope parent, String id) {
         super(parent, id);
+        _name = id;
         _typeSpace = typeSpace;
         _childSpace = childSpace;
         _this = this.addRef("#this", this);
@@ -78,6 +81,10 @@ public class DFClass extends DFVarScope implements DFType {
         _paramTypes = paramTypes;
     }
 
+    public String getClassName() {
+        return _name;
+    }
+
     public DFTypeSpace getChildSpace() {
         return _childSpace;
     }
@@ -87,7 +94,7 @@ public class DFClass extends DFVarScope implements DFType {
     }
 
     public String getFullName() {
-        return _typeSpace.getFullName()+"/"+super.getBaseName();
+        return _typeSpace.getFullName()+"/"+_name;
     }
 
     public int isSubclassOf(DFClass klass) {
@@ -348,17 +355,17 @@ public class DFClass extends DFVarScope implements DFType {
             if (0 < tps.size()) {
                 methodSpace = new DFTypeSpace("MethodDecl");
                 finder2 = new DFTypeFinder(finder, methodSpace);
-                DFParamType[] paramTypes = DFParamType.createParamTypes(
-                    methodSpace, tps);
-                for (int i = 0; i < paramTypes.length; i++) {
-                    DFParamType pt = paramTypes[i];
-                    List<Type> bounds = tps.get(i).typeBounds();
+                for (int i = 0; i < tps.size(); i++) {
+                    TypeParameter tp = tps.get(i);
+                    String id = tp.getName().getIdentifier();
+                    DFParamType pt = new DFParamType(methodSpace, i, id);
+                    List<Type> bounds = tp.typeBounds();
                     DFClass[] bases = new DFClass[bounds.size()];
                     for (int j = 0; j < bases.length; j++) {
                         bases[j] = finder.resolveClass(bounds.get(j));
                     }
                     pt.setBases(bases);
-                    methodSpace.addParamType(pt);
+                    methodSpace.addParamType(id, pt);
                 }
             }
             DFType[] argTypes = finder2.resolveList(decl);

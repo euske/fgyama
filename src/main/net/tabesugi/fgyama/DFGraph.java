@@ -59,7 +59,7 @@ public class DFGraph {
             if (0 < n) {
                 data += " ";
             }
-            data += ref.getFullName();
+            data += ref.getRefName();
             n++;
         }
         return data;
