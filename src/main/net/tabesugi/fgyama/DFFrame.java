@@ -94,12 +94,14 @@ public class DFFrame {
     public DFVarRef[] getInputRefs() {
         DFVarRef[] refs = new DFVarRef[_inputRefs.size()];
         _inputRefs.toArray(refs);
+        Arrays.sort(refs);
         return refs;
     }
 
     public DFVarRef[] getOutputRefs() {
         DFVarRef[] refs = new DFVarRef[_outputRefs.size()];
         _outputRefs.toArray(refs);
+        Arrays.sort(refs);
         return refs;
     }
 
@@ -108,6 +110,7 @@ public class DFFrame {
         inouts.retainAll(_outputRefs);
         DFVarRef[] refs = new DFVarRef[inouts.size()];
         inouts.toArray(refs);
+        Arrays.sort(refs);
         return refs;
     }
 
