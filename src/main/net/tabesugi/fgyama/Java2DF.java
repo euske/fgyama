@@ -227,7 +227,7 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getData() {
-        return this.getType().getName();
+        return this.getType().getTypeName();
     }
 }
 
@@ -251,7 +251,7 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getData() {
-        return this.getType().getName();
+        return this.getType().getTypeName();
     }
 }
 
@@ -600,7 +600,7 @@ class CreateObjectNode extends CallNode {
 
     @Override
     public String getData() {
-        return this.getType().getName();
+        return this.getType().getTypeName();
     }
 }
 

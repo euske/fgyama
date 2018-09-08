@@ -23,22 +23,22 @@ public class DFArrayType implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFArrayType("+this.getName()+")>");
+        return ("<DFArrayType("+this.getTypeName()+")>");
+    }
+
+    public String getTypeName()
+    {
+        String name = _elemType.getTypeName();
+        for (int i = 0; i < _ndims; i++) {
+            name += "[]";
+        }
+        return name;
     }
 
     public boolean equals(DFType type) {
         return ((type instanceof DFArrayType) &&
                 _elemType.equals(((DFArrayType)type)._elemType) &&
                 _ndims == ((DFArrayType)type)._ndims);
-    }
-
-    public String getName()
-    {
-        String name = _elemType.getName();
-        for (int i = 0; i < _ndims; i++) {
-            name += "[]";
-        }
-        return name;
     }
 
     public int canConvertFrom(DFType type)

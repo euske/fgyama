@@ -81,7 +81,7 @@ public class DFTypeFinder {
         } else if (type instanceof DFClass) {
             return (DFClass)type;
         } else {
-            throw new TypeNotFound(type.getName());
+            throw new TypeNotFound(type.getTypeName());
         }
     }
 

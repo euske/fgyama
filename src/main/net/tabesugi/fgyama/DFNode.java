@@ -34,7 +34,7 @@ public class DFNode implements Comparable<DFNode> {
 
     @Override
     public String toString() {
-        return ("<DFNode("+this.getName()+") "+this.getData()+">");
+        return ("<DFNode("+this.getNodeId()+") "+this.getData()+">");
     }
 
     @Override
@@ -44,7 +44,7 @@ public class DFNode implements Comparable<DFNode> {
 
     public Element toXML(Document document) {
         Element elem = document.createElement("node");
-        elem.setAttribute("name", this.getName());
+        elem.setAttribute("name", this.getNodeId());
         if (this.getKind() != null) {
             elem.setAttribute("kind", this.getKind());
         }
@@ -52,7 +52,7 @@ public class DFNode implements Comparable<DFNode> {
             elem.setAttribute("data", this.getData());
         }
         if (_type != null) {
-            elem.setAttribute("type", _type.getName());
+            elem.setAttribute("type", _type.getTypeName());
         }
         if (_ref != null) {
             elem.setAttribute("ref", _ref.getFullName());
@@ -79,7 +79,7 @@ public class DFNode implements Comparable<DFNode> {
         return _ref;
     }
 
-    public String getName() {
+    public String getNodeId() {
         return ("N"+_scope.getFullName()+"_"+_id);
     }
 

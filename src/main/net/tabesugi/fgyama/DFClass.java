@@ -52,13 +52,13 @@ public class DFClass extends DFVarScope implements DFType {
         return ("<DFClass("+this.getFullName()+")>");
     }
 
-    public boolean equals(DFType type) {
-        return (this == type);
-    }
-
-    public String getName()
+    public String getTypeName()
     {
         return this.getFullName();
+    }
+
+    public boolean equals(DFType type) {
+        return (this == type);
     }
 
     public int canConvertFrom(DFType type)

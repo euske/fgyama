@@ -108,12 +108,6 @@ public class DFTypeSpace {
         return klass;
     }
 
-    public void addClasses(DFTypeSpace typeSpace) {
-        for (DFClass klass : typeSpace._id2klass.values()) {
-            this.addClass(klass);
-        }
-    }
-
     public DFClass getClass(Name name)
         throws TypeNotFound {
         return this.getClass(name.getFullyQualifiedName());

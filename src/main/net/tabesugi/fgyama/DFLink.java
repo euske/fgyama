@@ -30,7 +30,7 @@ class DFLink {
 
     public Element toXML(Document document) {
         Element elem = document.createElement("link");
-        elem.setAttribute("src", _src.getName());
+        elem.setAttribute("src", _src.getNodeId());
         if (_label != null) {
             elem.setAttribute("label", _label);
         }

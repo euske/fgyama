@@ -28,7 +28,7 @@ public class DFGlobalVarScope extends DFVarScope {
         DFVarRef ref;
         if (type instanceof DFArrayType) {
             DFType elemType = ((DFArrayType)type).getElemType();
-	    String id = "%:"+elemType.getName();
+	    String id = "%:"+elemType.getTypeName();
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
 		ref = new DFVarRef(null, id, elemType);

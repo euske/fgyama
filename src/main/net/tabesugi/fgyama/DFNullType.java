@@ -15,13 +15,13 @@ public class DFNullType implements DFType {
         return ("<DFNullType>");
     }
 
-    public boolean equals(DFType type) {
-        return (type instanceof DFNullType);
-    }
-
-    public String getName()
+    public String getTypeName()
     {
         return "@null";
+    }
+
+    public boolean equals(DFType type) {
+        return (type instanceof DFNullType);
     }
 
     public int canConvertFrom(DFType type)

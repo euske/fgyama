@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.dom.*;
 //
 public interface DFType {
 
+    String getTypeName();
     boolean equals(DFType type);
-    String getName();
     int canConvertFrom(DFType type);
 
 }

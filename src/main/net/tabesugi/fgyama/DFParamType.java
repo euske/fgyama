@@ -39,16 +39,16 @@ public class DFParamType implements DFType {
         return ("<ParamType:"+_name+">");
     }
 
-    public boolean equals(DFType type) {
-        return type == this;
-    }
-
     public String getBaseName() {
         return _name;
     }
 
-    public String getName() {
+    public String getTypeName() {
         return "T"+_typeSpace.getFullName()+"/"+_name;
+    }
+
+    public boolean equals(DFType type) {
+        return type == this;
     }
 
     public int canConvertFrom(DFType type) {

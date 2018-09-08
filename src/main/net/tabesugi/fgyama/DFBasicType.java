@@ -30,16 +30,16 @@ public class DFBasicType implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFBasicType("+this.getName()+")>");
+        return ("<DFBasicType("+this.getTypeName()+")>");
+    }
+
+    public String getTypeName() {
+        return _name;
     }
 
     public boolean equals(DFType type) {
         return ((type instanceof DFBasicType) &&
                 _name.equals(((DFBasicType)type)._name));
-    }
-
-    public String getName() {
-        return _name;
     }
 
     public int canConvertFrom(DFType type) {

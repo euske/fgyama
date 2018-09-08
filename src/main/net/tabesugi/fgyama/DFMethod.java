@@ -48,7 +48,7 @@ public class DFMethod implements Comparable<DFMethod> {
         if (_returnType == null) {
             return ("<DFMethod("+this.getSignature()+" -> ?)>");
         } else {
-            return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getName()+">");
+            return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getTypeName()+">");
         }
     }
 
@@ -75,7 +75,7 @@ public class DFMethod implements Comparable<DFMethod> {
             name = ("!"+_name);
         }
         for (DFType type : _argTypes) {
-            name += ":"+type.getName();
+            name += ":"+type.getTypeName();
         }
         if (_returnType == null) {
             name += "?";
