@@ -7,28 +7,28 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFAnonClass
+//  DFAnonKlass
 //
-public class DFAnonClass extends DFClass {
+public class DFAnonKlass extends DFKlass {
 
-    public DFAnonClass(
+    public DFAnonKlass(
 	String name,
         DFTypeSpace typeSpace,
 	DFVarScope parentScope) {
         super(name, typeSpace, typeSpace, parentScope);
     }
 
-    public DFAnonClass(
+    public DFAnonKlass(
 	String name,
         DFTypeSpace typeSpace,
 	DFVarScope parentScope,
-        DFClass baseKlass) {
+        DFKlass baseKlass) {
         super(name, typeSpace, typeSpace, parentScope, baseKlass);
     }
 
     @Override
     public String toString() {
-        return ("<DFAnonClass("+this.getFullName()+")>");
+        return ("<DFAnonKlass("+this.getFullName()+")>");
     }
 
 }

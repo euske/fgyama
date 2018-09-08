@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFMethod implements Comparable<DFMethod> {
 
-    private DFClass _klass;
+    private DFKlass _klass;
     private DFTypeSpace _childSpace;
     private String _name;
     private boolean _static;
@@ -21,7 +21,7 @@ public class DFMethod implements Comparable<DFMethod> {
     private List<DFMethod> _overrides = new ArrayList<DFMethod>();
 
     public DFMethod(
-        DFClass klass, DFTypeSpace childSpace,
+        DFKlass klass, DFTypeSpace childSpace,
         String name, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         _klass = klass;
@@ -34,7 +34,7 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFMethod(
-        DFClass klass, DFTypeSpace childSpace,
+        DFKlass klass, DFTypeSpace childSpace,
         String name, boolean isStatic,
         DFType[] argTypes, DFType returnType, DFMethod[] overrides) {
         this(klass, childSpace, name, isStatic, argTypes, returnType);

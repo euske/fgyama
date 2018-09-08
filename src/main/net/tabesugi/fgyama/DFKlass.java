@@ -10,17 +10,17 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFClass
+//  DFKlass
 //
-public class DFClass extends DFType {
+public class DFKlass extends DFType {
 
     private String _name;
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
     private DFVarScope _scope;
 
-    private DFClass _baseKlass = null;
-    private DFClass[] _baseIfaces = null;
+    private DFKlass _baseKlass = null;
+    private DFKlass[] _baseIfaces = null;
     private DFParamType[] _paramTypes = null;
 
     private List<DFMethod> _methods =
@@ -32,24 +32,24 @@ public class DFClass extends DFType {
     private String _filePath = null;
     private boolean _loaded = true;
 
-    public DFClass(
+    public DFKlass(
         String name, DFTypeSpace typeSpace,
         DFTypeSpace childSpace, DFVarScope parentScope) {
         _name = name;
         _typeSpace = typeSpace;
         _childSpace = childSpace;
-        _scope = new DFClassScope(this, parentScope, name);
+        _scope = new DFKlassScope(this, parentScope, name);
     }
 
-    public DFClass(
+    public DFKlass(
         String name, DFTypeSpace typeSpace,
         DFTypeSpace childSpace, DFVarScope parentScope,
-        DFClass baseKlass) {
+        DFKlass baseKlass) {
         this(name, typeSpace, childSpace, parentScope);
         _baseKlass = baseKlass;
     }
 
-    public DFClass(String name, DFClass klass) {
+    public DFKlass(String name, DFKlass klass) {
         _name = name;
         _typeSpace = klass._typeSpace;
         _childSpace = klass._childSpace;
@@ -58,7 +58,7 @@ public class DFClass extends DFType {
 
     @Override
     public String toString() {
-        return ("<DFClass("+this.getFullName()+")>");
+        return ("<DFKlass("+this.getFullName()+")>");
     }
 
     public String getTypeName()
@@ -73,15 +73,15 @@ public class DFClass extends DFType {
     public int canConvertFrom(DFType type)
     {
         if (type instanceof DFNullType) return 0;
-        if (!(type instanceof DFClass)) return -1;
-        return this.isSubclassOf((DFClass)type);
+        if (!(type instanceof DFKlass)) return -1;
+        return this.isSubclassOf((DFKlass)type);
     }
 
     public void setParamTypes(DFParamType[] paramTypes) {
         _paramTypes = paramTypes;
     }
 
-    public String getClassName() {
+    public String getKlassName() {
         return _name;
     }
 
@@ -93,7 +93,7 @@ public class DFClass extends DFType {
         return _scope;
     }
 
-    public DFClass getBase() {
+    public DFKlass getBase() {
         return _baseKlass;
     }
 
@@ -101,14 +101,14 @@ public class DFClass extends DFType {
         return _typeSpace.getFullName()+"/"+_name;
     }
 
-    public int isSubclassOf(DFClass klass) {
+    public int isSubclassOf(DFKlass klass) {
         if (this == klass) return 0;
         if (_baseKlass != null) {
             int dist = _baseKlass.isSubclassOf(klass);
             if (0 <= dist) return dist+1;
         }
         if (_baseIfaces != null) {
-            for (DFClass iface : _baseIfaces) {
+            for (DFKlass iface : _baseIfaces) {
                 int dist = iface.isSubclassOf(klass);
                 if (0 <= dist) return dist+1;
             }
@@ -147,7 +147,7 @@ public class DFClass extends DFType {
     }
 
     public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
-        DFClass klass = this;
+        DFKlass klass = this;
         while (klass != null) {
             DFMethod method = klass.lookupMethod1(name, argTypes);
             if (method != null) {
@@ -170,7 +170,7 @@ public class DFClass extends DFType {
     public DFVarRef addField(
         String id, boolean isStatic, DFType type) {
         DFVarRef ref = _scope.addRef("."+id, type);
-        //Logger.info("DFClass.addField: "+ref);
+        //Logger.info("DFKlass.addField: "+ref);
         return ref;
     }
 
@@ -192,7 +192,7 @@ public class DFClass extends DFType {
     }
 
     private DFMethod addMethod(DFMethod method) {
-        //Logger.info("DFClass.addMethod: "+method);
+        //Logger.info("DFKlass.addMethod: "+method);
         _methods.add(method);
         return method;
     }
@@ -203,7 +203,7 @@ public class DFClass extends DFType {
                 _baseKlass.overrideMethod(method);
             }
             if (_baseIfaces != null) {
-                for (DFClass iface : _baseIfaces) {
+                for (DFKlass iface : _baseIfaces) {
                     iface.overrideMethod(method);
                 }
             }
@@ -214,7 +214,7 @@ public class DFClass extends DFType {
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
                 method0.addOverride(method1);
-                //Logger.info("DFClass.overrideMethod: "+method0+" : "+method1);
+                //Logger.info("DFKlass.overrideMethod: "+method0+" : "+method1);
                 break;
             }
         }
@@ -222,7 +222,7 @@ public class DFClass extends DFType {
             _baseKlass.overrideMethod(method1);
         }
         if (_baseIfaces != null) {
-            for (DFClass iface : _baseIfaces) {
+            for (DFKlass iface : _baseIfaces) {
                 iface.overrideMethod(method1);
             }
         }
@@ -268,7 +268,7 @@ public class DFClass extends DFType {
         throws TypeNotFound {
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
-            _baseKlass = finder.lookupClass(superClass);
+            _baseKlass = finder.lookupKlass(superClass);
         }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
@@ -299,34 +299,34 @@ public class DFClass extends DFType {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFClass.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
-                _baseKlass = finder.resolveClass(superClass);
-                //Logger.info("DFClass.build: "+this+" extends "+_baseKlass);
+                _baseKlass = finder.resolveKlass(superClass);
+                //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
             }
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
-            _baseIfaces = new DFClass[ifaces.size()];
+            _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-                _baseIfaces[i] = finder.resolveClass(ifaces.get(i));
+                _baseIfaces[i] = finder.resolveKlass(ifaces.get(i));
             }
             // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
             for (int i = 0; i < _paramTypes.length; i++) {
                 DFParamType pt = _paramTypes[i];
                 List<Type> bounds = tps.get(i).typeBounds();
-                DFClass[] bases = new DFClass[bounds.size()];
+                DFKlass[] bases = new DFKlass[bounds.size()];
                 for (int j = 0; j < bases.length; j++) {
-                    bases[j] = finder.resolveClass(bounds.get(j));
+                    bases[j] = finder.resolveKlass(bounds.get(j));
                 }
                 pt.setBases(bases);
             }
-            // Lookup child classes.
+            // Lookup child klasses.
             for (BodyDeclaration body :
                      (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
                 this.build(finder, body);
@@ -342,7 +342,7 @@ public class DFClass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
-            DFClass klass = _childSpace.getClass(decl.getName());
+            DFKlass klass = _childSpace.getKlass(decl.getName());
             klass.build(finder, decl);
 
         } else if (body instanceof FieldDeclaration) {
@@ -366,9 +366,9 @@ public class DFClass extends DFType {
                     String id = tp.getName().getIdentifier();
                     DFParamType pt = new DFParamType(methodSpace, i, id);
                     List<Type> bounds = tp.typeBounds();
-                    DFClass[] bases = new DFClass[bounds.size()];
+                    DFKlass[] bases = new DFKlass[bounds.size()];
                     for (int j = 0; j < bases.length; j++) {
-                        bases[j] = finder.resolveClass(bounds.get(j));
+                        bases[j] = finder.resolveKlass(bounds.get(j));
                     }
                     pt.setBases(bases);
                     methodSpace.addParamType(id, pt);
@@ -394,13 +394,13 @@ public class DFClass extends DFType {
         }
     }
 
-    // DFClassScope
-    private class DFClassScope extends DFVarScope {
+    // DFKlassScope
+    private class DFKlassScope extends DFVarScope {
 
-        private DFClass _klass;
+        private DFKlass _klass;
         private DFVarRef _this;
 
-        public DFClassScope(DFClass klass, DFVarScope parent, String id) {
+        public DFKlassScope(DFKlass klass, DFVarScope parent, String id) {
             super(parent, id);
             _klass = klass;
             _this = this.addRef("#this", klass);

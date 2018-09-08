@@ -23,7 +23,7 @@ public class UnitTestDF extends XMLTestCase {
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
-        rootSpace.loadDefaultClasses();
+        rootSpace.loadDefaultKlasses();
 	XmlExporter exporter = new XmlExporter();
 	Java2DF converter = new Java2DF(rootSpace, exporter);
         CompilationUnit[] cunits = new CompilationUnit[javaPaths.length];
@@ -35,7 +35,7 @@ public class UnitTestDF extends XMLTestCase {
             converter.buildTypeSpace(null, cunits[i]);
         }
         for (int i = 0; i < cunits.length; i++) {
-            converter.buildClassSpace(cunits[i]);
+            converter.buildKlassSpace(cunits[i]);
         }
         for (int i = 0; i < cunits.length; i++) {
             exporter.startFile(javaPaths[i]);

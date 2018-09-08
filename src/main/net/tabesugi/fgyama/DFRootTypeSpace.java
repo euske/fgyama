@@ -15,9 +15,9 @@ import org.w3c.dom.*;
 //
 public class DFRootTypeSpace extends DFTypeSpace {
 
-    public static DFClass OBJECT_CLASS = null;
-    public static DFClass ARRAY_CLASS = null;
-    public static DFClass STRING_CLASS = null;
+    public static DFKlass OBJECT_KLASS = null;
+    public static DFKlass ARRAY_KLASS = null;
+    public static DFKlass STRING_KLASS = null;
 
     private DFGlobalVarScope _global = new DFGlobalVarScope();
 
@@ -45,7 +45,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
                 if (filePath.endsWith(".class")) {
                     String name = filePath.substring(0, filePath.length()-6);
                     name = name.replace('/', '.').replace('$', '.');
-                    DFClass klass = this.createClass(_global, name);
+                    DFKlass klass = this.createKlass(_global, name);
                     klass.setJarPath(jarPath, filePath);
                 }
             }
@@ -54,17 +54,17 @@ public class DFRootTypeSpace extends DFTypeSpace {
         }
     }
 
-    public void loadDefaultClasses()
+    public void loadDefaultKlasses()
         throws IOException, TypeNotFound {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
         this.loadJarFile(rtFile.getAbsolutePath());
-        OBJECT_CLASS = this.getClass("java.lang.Object");
+        OBJECT_KLASS = this.getKlass("java.lang.Object");
         DFTypeSpace space = this.lookupSpace("java.lang");
-        ARRAY_CLASS = new DFClass(
-            "java.lang._Array", space, null, _global, OBJECT_CLASS);
-        ARRAY_CLASS.addField("length", false, DFBasicType.INT);
-        STRING_CLASS = this.getClass("java.lang.String");
+        ARRAY_KLASS = new DFKlass(
+            "java.lang._Array", space, null, _global, OBJECT_KLASS);
+        ARRAY_KLASS.addField("length", false, DFBasicType.INT);
+        STRING_KLASS = this.getKlass("java.lang.String");
     }
 }

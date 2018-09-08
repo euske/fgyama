@@ -663,16 +663,16 @@ public class Java2DF {
                 } else {
                     QualifiedName qname = (QualifiedName)name;
                     DFNode obj = null;
-                    DFClass klass;
+                    DFKlass klass;
                     try {
                         // Try assuming it's a variable access.
                         ctx = processExpression(
                             graph, finder, scope, frame, ctx, qname.getQualifier());
                         obj = ctx.getRValue();
-                        klass = finder.resolveClass(obj.getType());
+                        klass = finder.resolveKlass(obj.getType());
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
-                        klass = finder.lookupClass(qname.getQualifier());
+                        klass = finder.lookupKlass(qname.getQualifier());
                     }
                     SimpleName fieldName = qname.getName();
                     DFVarRef ref = klass.lookupField(fieldName);
@@ -714,7 +714,7 @@ public class Java2DF {
                 String value = ((StringLiteral)expr).getLiteralValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
-                                  DFRootTypeSpace.STRING_CLASS,
+                                  DFRootTypeSpace.STRING_KLASS,
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
@@ -819,13 +819,13 @@ public class Java2DF {
                 MethodInvocation invoke = (MethodInvocation)expr;
                 Expression expr1 = invoke.getExpression();
                 DFNode obj = null;
-                DFClass klass = null;
+                DFKlass klass = null;
                 if (expr1 == null) {
                     obj = ctx.get(scope.lookupThis());
                 } else {
                     if (expr1 instanceof Name) {
                         try {
-                            klass = finder.lookupClass((Name)expr1);
+                            klass = finder.lookupKlass((Name)expr1);
                         } catch (EntityNotFound e) {
                         }
                     }
@@ -836,7 +836,7 @@ public class Java2DF {
                     }
                 }
                 if (obj != null) {
-                    klass = finder.resolveClass(obj.getType());
+                    klass = finder.resolveKlass(obj.getType());
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
                 List<DFType> typeList = new ArrayList<DFType>();
@@ -885,8 +885,8 @@ public class Java2DF {
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFClass klass = finder.resolveClass(obj.getType());
-                DFClass baseKlass = klass.getBase();
+                DFKlass klass = finder.resolveKlass(obj.getType());
+                DFKlass baseKlass = klass.getBase();
                 DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
                 if (method == null) {
                     String id = sinvoke.getName().getIdentifier();
@@ -955,10 +955,10 @@ public class Java2DF {
                 FieldAccess fa = (FieldAccess)expr;
                 Expression expr1 = fa.getExpression();
                 DFNode obj = null;
-                DFClass klass = null;
+                DFKlass klass = null;
                 if (expr1 instanceof Name) {
                     try {
-                        klass = finder.lookupClass((Name)expr1);
+                        klass = finder.lookupKlass((Name)expr1);
                     } catch (EntityNotFound e) {
                     }
                 }
@@ -966,7 +966,7 @@ public class Java2DF {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, expr1);
                     obj = ctx.getRValue();
-                    klass = finder.resolveClass(obj.getType());
+                    klass = finder.resolveKlass(obj.getType());
                 }
                 SimpleName fieldName = fa.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
@@ -978,7 +978,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
-                DFClass klass = finder.resolveClass(obj.getType());
+                DFKlass klass = finder.resolveKlass(obj.getType());
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -999,10 +999,10 @@ public class Java2DF {
                 DFType instType;
                 if (anonDecl != null) {
                     String id = "anonymous";
-                    DFClass baseKlass = finder.resolveClass(cstr.getType());
+                    DFKlass baseKlass = finder.resolveKlass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-                    DFClass anonKlass = new DFAnonClass(id, anonSpace, scope, baseKlass);
-                    anonSpace.addClass(anonKlass);
+                    DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope, baseKlass);
+                    anonSpace.addKlass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
                         anonSpace.build(null, body, scope);
@@ -1073,7 +1073,7 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-                DFClass anonKlass = new DFAnonClass(id, anonSpace, scope);
+                DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope);
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
                 } else if (body instanceof Expression) {
@@ -1093,7 +1093,7 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-                DFClass anonKlass = new DFAnonClass("methodref", anonSpace, scope);
+                DFKlass anonKlass = new DFAnonKlass("methodref", anonSpace, scope);
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -1128,16 +1128,16 @@ public class Java2DF {
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
-                DFClass klass;
+                DFKlass klass;
                 try {
                     // Try assuming it's a variable access.
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, qname.getQualifier());
                     obj = ctx.getRValue();
-                    klass = finder.resolveClass(obj.getType());
+                    klass = finder.resolveKlass(obj.getType());
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    klass = finder.lookupClass(qname.getQualifier());
+                    klass = finder.lookupKlass(qname.getQualifier());
                 }
                 SimpleName fieldName = qname.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
@@ -1163,7 +1163,7 @@ public class Java2DF {
             ctx = processExpression(
                 graph, finder, scope, frame, ctx, expr1);
             DFNode obj = ctx.getRValue();
-            DFClass klass = finder.resolveClass(obj.getType());
+            DFKlass klass = finder.resolveKlass(obj.getType());
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
@@ -1800,7 +1800,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildInlineClasses(
+    private void buildInlineKlasses(
         DFTypeSpace typeSpace, DFTypeFinder finder, Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
 
@@ -1810,7 +1810,7 @@ public class Java2DF {
             Block block = (Block)stmt;
             for (Statement cstmt :
                      (List<Statement>) block.statements()) {
-                this.buildInlineClasses(typeSpace, finder, cstmt);
+                this.buildInlineKlasses(typeSpace, finder, cstmt);
             }
 
         } else if (stmt instanceof EmptyStatement) {
@@ -1824,17 +1824,17 @@ public class Java2DF {
         } else if (stmt instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)stmt;
             Statement thenStmt = ifStmt.getThenStatement();
-            this.buildInlineClasses(typeSpace, finder, thenStmt);
+            this.buildInlineKlasses(typeSpace, finder, thenStmt);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.buildInlineClasses(typeSpace, finder, elseStmt);
+                this.buildInlineKlasses(typeSpace, finder, elseStmt);
             }
 
         } else if (stmt instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)stmt;
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.buildInlineClasses(typeSpace, finder, cstmt);
+                this.buildInlineKlasses(typeSpace, finder, cstmt);
             }
 
         } else if (stmt instanceof SwitchCase) {
@@ -1842,22 +1842,22 @@ public class Java2DF {
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;
             Statement body = whileStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, body);
+            this.buildInlineKlasses(typeSpace, finder, body);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
             Statement body = doStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, body);
+            this.buildInlineKlasses(typeSpace, finder, body);
 
         } else if (stmt instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)stmt;
             Statement body = forStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, body);
+            this.buildInlineKlasses(typeSpace, finder, body);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             Statement body = eForStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, body);
+            this.buildInlineKlasses(typeSpace, finder, body);
 
         } else if (stmt instanceof BreakStatement) {
 
@@ -1866,24 +1866,24 @@ public class Java2DF {
         } else if (stmt instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             Statement body = labeledStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, body);
+            this.buildInlineKlasses(typeSpace, finder, body);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             Block block = syncStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, block);
+            this.buildInlineKlasses(typeSpace, finder, block);
 
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
             Block block = tryStmt.getBody();
-            this.buildInlineClasses(typeSpace, finder, block);
+            this.buildInlineKlasses(typeSpace, finder, block);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                this.buildInlineClasses(typeSpace, finder, cc.getBody());
+                this.buildInlineKlasses(typeSpace, finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.buildInlineClasses(typeSpace, finder, finBlock);
+                this.buildInlineKlasses(typeSpace, finder, finBlock);
             }
 
         } else if (stmt instanceof ThrowStatement) {
@@ -1894,7 +1894,7 @@ public class Java2DF {
 
         } else if (stmt instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
-            this.buildInlineClasses(typeSpace, finder, typeDeclStmt.getDeclaration());
+            this.buildInlineKlasses(typeSpace, finder, typeDeclStmt.getDeclaration());
 
         } else {
             throw new UnsupportedSyntax(stmt);
@@ -1903,13 +1903,13 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildInlineClasses(
+    private void buildInlineKlasses(
         DFTypeSpace typeSpace, DFTypeFinder finder,
         AbstractTypeDeclaration abstDecl)
         throws UnsupportedSyntax, EntityNotFound {
         if (abstDecl instanceof TypeDeclaration) {
             TypeDeclaration typeDecl = (TypeDeclaration)abstDecl;
-            DFClass klass = typeSpace.getClass(typeDecl.getName());
+            DFKlass klass = typeSpace.getKlass(typeDecl.getName());
             klass.build(finder, typeDecl);
             processBodyDeclarations(
                 finder, klass, typeDecl.bodyDeclarations());
@@ -1934,9 +1934,9 @@ public class Java2DF {
                     finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
                 } else {
                     assert(name.isQualifiedName());
-                    DFClass klass = this.rootSpace.getClass(name);
+                    DFKlass klass = this.rootSpace.getKlass(name);
                     Logger.info("Import: "+name);
-                    importSpace.addClass(klass);
+                    importSpace.addKlass(klass);
                     n++;
                 }
             } catch (TypeNotFound e) {
@@ -1966,7 +1966,7 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public void processFieldDeclaration(
-        DFGraph graph, DFTypeFinder finder, DFClass klass,
+        DFGraph graph, DFTypeFinder finder, DFKlass klass,
         DFFrame frame, FieldDeclaration fieldDecl)
         throws UnsupportedSyntax, EntityNotFound {
         for (VariableDeclarationFragment frag :
@@ -1986,7 +1986,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFGraph processMethodDeclaration(
-        DFTypeFinder finder, DFClass klass,
+        DFTypeFinder finder, DFKlass klass,
         MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
         // Ignore method prototypes.
@@ -1999,16 +1999,16 @@ public class Java2DF {
         }
         DFType[] argTypes = finder.resolveList(methodDecl);
         DFVarScope scope = new DFVarScope(klass.getScope(), methodDecl.getName());
-        // add a typespace for inline classes.
+        // add a typespace for inline klasses.
         DFTypeSpace typeSpace = new DFTypeSpace(scope.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            List<DFClass> classes = new ArrayList<DFClass>();
-            typeSpace.build(classes, methodDecl.getBody(), scope);
-            this.buildInlineClasses(typeSpace, finder, methodDecl.getBody());
+            List<DFKlass> klasses = new ArrayList<DFKlass>();
+            typeSpace.build(klasses, methodDecl.getBody(), scope);
+            this.buildInlineKlasses(typeSpace, finder, methodDecl.getBody());
             // Add overrides.
-            for (DFClass klass1 : classes) {
+            for (DFKlass klass1 : klasses) {
                 klass1.addOverrides();
             }
             scope.build(finder, methodDecl);
@@ -2036,8 +2036,6 @@ public class Java2DF {
                 graph, finder, scope, frame, ctx, methodDecl.getBody());
             frame.close(ctx);
             frame.dump();
-            // Remove redundant nodes.
-            graph.cleanup();
 
             Logger.info("Success: "+method.getSignature());
             return graph;
@@ -2053,14 +2051,14 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public void processBodyDeclarations(
-        DFTypeFinder finder, DFClass klass,
+        DFTypeFinder finder, DFKlass klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
         DFFrame frame = new DFFrame(DFFrame.CLASS);
         DFVarScope scope = klass.getScope();
         DFTypeSpace typeSpace = klass.getChildSpace();
-        DFGraph classGraph = new DFGraph(scope, frame);
-        // lookup base/child classes.
+        DFGraph klassGraph = new DFGraph(scope, frame);
+        // lookup base/child klasses.
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
             try {
@@ -2069,21 +2067,21 @@ public class Java2DF {
                     processTypeDeclaration(typeSpace, finder, typeDecl);
                 } else if (body instanceof FieldDeclaration) {
                     processFieldDeclaration(
-                        classGraph, finder, klass,
+                        klassGraph, finder, klass,
                         frame, (FieldDeclaration)body);
                 } else if (body instanceof MethodDeclaration) {
-                    DFGraph graph = processMethodDeclaration(
+                    DFGraph methodGraph = processMethodDeclaration(
                         finder, klass, (MethodDeclaration)body);
-                    if (this.exporter != null && graph != null) {
-                        this.exporter.writeGraph(graph);
+                    if (this.exporter != null && methodGraph != null) {
+                        this.exporter.writeGraph(methodGraph);
                     }
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
                     scope.build(finder, block);
                     frame.build(finder, scope, block);
-                    DFContext ctx = new DFContext(classGraph, scope);
+                    DFContext ctx = new DFContext(klassGraph, scope);
                     ctx = processStatement(
-                        classGraph, finder, scope,
+                        klassGraph, finder, scope,
                         frame, ctx, block);
                     frame.close(ctx);
                 }
@@ -2096,7 +2094,7 @@ public class Java2DF {
             }
         }
         if (this.exporter != null) {
-            this.exporter.writeGraph(classGraph);
+            this.exporter.writeGraph(klassGraph);
         }
     }
 
@@ -2104,7 +2102,7 @@ public class Java2DF {
     public void processTypeDeclaration(
         DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
         throws EntityNotFound {
-        DFClass klass = typeSpace.getClass(typeDecl.getName());
+        DFKlass klass = typeSpace.getKlass(typeDecl.getName());
         processBodyDeclarations(
             finder, klass, typeDecl.bodyDeclarations());
     }
@@ -2125,11 +2123,11 @@ public class Java2DF {
 
     // pass1
     public void buildTypeSpace(
-        List<DFClass> classes, CompilationUnit cunit) {
+        List<DFKlass> klasses, CompilationUnit cunit) {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFGlobalVarScope global = this.rootSpace.getGlobalScope();
         try {
-            typeSpace.build(classes, cunit, global);
+            typeSpace.build(klasses, cunit, global);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -2138,7 +2136,7 @@ public class Java2DF {
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void buildClassSpace(CompilationUnit cunit) throws EntityNotFound {
+    public void buildKlassSpace(CompilationUnit cunit) throws EntityNotFound {
         DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2147,7 +2145,7 @@ public class Java2DF {
                      (List<AbstractTypeDeclaration>) cunit.types()) {
                 if (abstTypeDecl instanceof TypeDeclaration) {
                     TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-                    DFClass klass = typeSpace.getClass(typeDecl.getName());
+                    DFKlass klass = typeSpace.getKlass(typeDecl.getName());
                     klass.build(finder, typeDecl);
                 } else if (abstTypeDecl instanceof EnumDeclaration) {
                     // XXX enum not supported.
@@ -2220,14 +2218,14 @@ public class Java2DF {
 
         // Process files.
         XmlExporter exporter = new XmlExporter();
-        rootSpace.loadDefaultClasses();
+        rootSpace.loadDefaultKlasses();
         Java2DF converter = new Java2DF(rootSpace, exporter);
-        List<DFClass> classes = new ArrayList<DFClass>();
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
-                converter.buildTypeSpace(classes, cunit);
+                converter.buildTypeSpace(klasses, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
 	    }
@@ -2236,7 +2234,7 @@ public class Java2DF {
             Logger.info("Pass2: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
-                converter.buildClassSpace(cunit);
+                converter.buildKlassSpace(cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
@@ -2245,7 +2243,7 @@ public class Java2DF {
 	    }
         }
         // Add overrides.
-        for (DFClass klass : classes) {
+        for (DFKlass klass : klasses) {
             klass.addOverrides();
         }
         for (String path : files) {

@@ -7,21 +7,21 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFParamClass
+//  DFParamKlass
 //
-public class DFParamClass extends DFClass {
+public class DFParamKlass extends DFKlass {
 
-    private DFClass _genericKlass;
+    private DFKlass _genericKlass;
     private DFType[] _argTypes;
 
-    public DFParamClass(DFClass genericKlass, DFType[] argTypes) {
-        super(genericKlass.getClassName()+"<>", genericKlass);
+    public DFParamKlass(DFKlass genericKlass, DFType[] argTypes) {
+        super(genericKlass.getKlassName()+"<>", genericKlass);
         _argTypes = argTypes;
     }
 
     @Override
     public String toString() {
-        return ("<DFParamClass("+this.getFullName()+")>");
+        return ("<DFParamKlass("+this.getFullName()+")>");
     }
 
     @Override
@@ -57,9 +57,9 @@ public class DFParamClass extends DFClass {
         return _genericKlass.addFinders(finder);
     }
 
-    public int isSubclassOf(DFClass klass) {
-        if (!(klass instanceof DFParamClass)) return -1;
-        DFParamClass pklass = (DFParamClass)klass;
+    public int isSubclassOf(DFKlass klass) {
+        if (!(klass instanceof DFParamKlass)) return -1;
+        DFParamKlass pklass = (DFParamKlass)klass;
         if (_argTypes.length != pklass._argTypes.length) return -1;
         int dist = pklass._genericKlass.isSubclassOf(_genericKlass);
         if (dist < 0) return dist;

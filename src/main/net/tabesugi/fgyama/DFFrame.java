@@ -141,15 +141,15 @@ public class DFFrame {
                 ref = scope.lookupVar((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFClass klass;
+                DFKlass klass;
                 try {
                     // Try assuming it's a variable access.
                     DFType type = this.build(finder, scope, qname.getQualifier());
                     if (type == null) return;
-                    klass = finder.resolveClass(type);
+                    klass = finder.resolveKlass(type);
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    klass = finder.lookupClass(qname.getQualifier());
+                    klass = finder.lookupKlass(qname.getQualifier());
                 }
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
@@ -167,17 +167,17 @@ public class DFFrame {
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFClass klass = null;
+            DFKlass klass = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = finder.lookupClass((Name)expr1);
+                    klass = finder.lookupKlass((Name)expr1);
                 } catch (EntityNotFound e) {
                 }
             }
             if (klass == null) {
                 DFType type = this.build(finder, scope, expr1);
                 if (type == null) return;
-                klass = finder.resolveClass(type);
+                klass = finder.resolveKlass(type);
             }
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
@@ -202,15 +202,15 @@ public class DFFrame {
                 ref = scope.lookupVar((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFClass klass;
+                DFKlass klass;
                 try {
                     // Try assuming it's a variable access.
                     DFType type = this.build(finder, scope, qname.getQualifier());
                     if (type == null) return type;
-                    klass = finder.resolveClass(type);
+                    klass = finder.resolveKlass(type);
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    klass = finder.lookupClass(qname.getQualifier());
+                    klass = finder.lookupKlass(qname.getQualifier());
                 }
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
@@ -236,7 +236,7 @@ public class DFFrame {
             return DFBasicType.NUMBER;
 
         } else if (expr instanceof StringLiteral) {
-            return DFRootTypeSpace.STRING_CLASS;
+            return DFRootTypeSpace.STRING_KLASS;
 
         } else if (expr instanceof TypeLiteral) {
             return DFBasicType.TYPE;
@@ -298,22 +298,22 @@ public class DFFrame {
         } else if (expr instanceof MethodInvocation) {
             MethodInvocation invoke = (MethodInvocation)expr;
             Expression expr1 = invoke.getExpression();
-            DFClass klass = null;
+            DFKlass klass = null;
             if (expr1 == null) {
                 DFVarRef ref = scope.lookupThis();
                 this.addInput(ref);
-                klass = finder.resolveClass(ref.getType());
+                klass = finder.resolveKlass(ref.getType());
             } else {
                 if (expr1 instanceof Name) {
                     try {
-                        klass = finder.lookupClass((Name)expr1);
+                        klass = finder.lookupKlass((Name)expr1);
                     } catch (EntityNotFound e) {
                     }
                 }
                 if (klass == null) {
                     DFType type = this.build(finder, scope, expr1);
                     if (type == null) return type;
-                    klass = finder.resolveClass(type);
+                    klass = finder.resolveKlass(type);
                 }
             }
             List<DFType> typeList = new ArrayList<DFType>();
@@ -338,9 +338,9 @@ public class DFFrame {
             }
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFClass klass =
-                finder.resolveClass(scope.lookupThis().getType());
-            DFClass baseKlass = klass.getBase();
+            DFKlass klass =
+                finder.resolveKlass(scope.lookupThis().getType());
+            DFKlass baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
             if (method == null) return null;
             return method.getReturnType();
@@ -378,17 +378,17 @@ public class DFFrame {
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFClass klass = null;
+            DFKlass klass = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = finder.lookupClass((Name)expr1);
+                    klass = finder.lookupKlass((Name)expr1);
                 } catch (EntityNotFound e) {
                 }
             }
             if (klass == null) {
                 DFType type = this.build(finder, scope, expr1);
                 if (type == null) return type;
-                klass = finder.resolveClass(type);
+                klass = finder.resolveKlass(type);
             }
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
@@ -398,8 +398,8 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFClass klass =
-                finder.resolveClass(scope.lookupThis().getType());
+            DFKlass klass =
+                finder.resolveKlass(scope.lookupThis().getType());
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInput(ref);
             return ref.getType();
@@ -436,7 +436,7 @@ public class DFFrame {
             String id = "lambda";
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-            DFClass anonKlass = new DFAnonClass(id, anonSpace, scope);
+            DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
