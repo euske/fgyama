@@ -125,7 +125,7 @@ public class DFNode implements Comparable<DFNode> {
         node._outputs.add(this);
     }
 
-    public void finish(DFContext ctx) {
+    public void close(DFNode ctx) {
     }
 
     public boolean purge() {

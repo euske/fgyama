@@ -384,13 +384,6 @@ class JoinNode extends ProgNode {
         return "join";
     }
 
-    @Override
-    public void finish(DFContext ctx) {
-        if (!this.isClosed()) {
-            this.close(ctx.get(this.getRef()));
-        }
-    }
-
     public void recv(boolean cond, DFNode node) {
         if (cond) {
             assert(!this.recvTrue);
@@ -403,10 +396,7 @@ class JoinNode extends ProgNode {
         }
     }
 
-    public boolean isClosed() {
-        return (this.recvTrue && this.recvFalse);
-    };
-
+    @Override
     public void close(DFNode node) {
         if (!this.recvTrue) {
             assert(this.recvFalse);
@@ -1404,7 +1394,7 @@ public class Java2DF {
                     join.recv(false, dst);
                 }
             }
-            if (!join.isClosed()) {
+            if (thenCtx == null || elseCtx == null) {
                 join.close(ctx.get(ref));
             }
             ctx.set(join);
@@ -1687,7 +1677,6 @@ public class Java2DF {
                 OutputNode output = new OutputNode(graph, scope, ref, rtrnStmt);
                 output.accept(ctx.getRValue());
                 ctx.set(output);
-                frame.addExit(new DFExit(dstFrame, output));
             }
             for (DFVarRef ref : dstFrame.getOutputRefs()) {
                 frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
