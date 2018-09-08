@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFArrayType
 //
-public class DFArrayType implements DFType {
+public class DFArrayType extends DFType {
 
     private DFType _elemType;
     private int _ndims;

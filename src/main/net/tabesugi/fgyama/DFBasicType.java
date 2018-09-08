@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFBasicType
 //
-public class DFBasicType implements DFType {
+public class DFBasicType extends DFType {
 
     private boolean _numeric;
     private String _name;

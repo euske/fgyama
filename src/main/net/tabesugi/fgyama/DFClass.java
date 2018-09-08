@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFClass
 //
-public class DFClass implements DFType {
+public class DFClass extends DFType {
 
     private String _name;
     private DFTypeSpace _typeSpace;

@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFParamType
 //
-public class DFParamType implements DFType {
+public class DFParamType extends DFType {
 
     private DFTypeSpace _typeSpace;
     private int _index;

@@ -9,10 +9,10 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFType
 //
-public interface DFType {
+public abstract class DFType {
 
-    String getTypeName();
-    boolean equals(DFType type);
-    int canConvertFrom(DFType type);
+    public abstract String getTypeName();
+    public abstract boolean equals(DFType type);
+    public abstract int canConvertFrom(DFType type);
 
 }
