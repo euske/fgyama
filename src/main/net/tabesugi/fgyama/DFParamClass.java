@@ -14,10 +14,8 @@ public class DFParamClass extends DFClass {
     private DFClass _genericKlass;
     private DFType[] _argTypes;
 
-    public DFParamClass(
-        DFClass genericKlass, DFType[] argTypes) {
-        super(null, null, genericKlass, null);
-        _genericKlass = genericKlass;
+    public DFParamClass(DFClass genericKlass, DFType[] argTypes) {
+        super(genericKlass.getClassName()+"<>", genericKlass);
         _argTypes = argTypes;
     }
 

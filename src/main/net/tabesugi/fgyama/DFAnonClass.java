@@ -12,9 +12,18 @@ import org.eclipse.jdt.core.dom.*;
 public class DFAnonClass extends DFClass {
 
     public DFAnonClass(
-	DFTypeSpace typeSpace,
-	DFVarScope parent, String id, DFClass baseKlass) {
-        super(typeSpace, typeSpace, parent, id, baseKlass);
+	String name,
+        DFTypeSpace typeSpace,
+	DFVarScope parentScope) {
+        super(name, typeSpace, typeSpace, parentScope);
+    }
+
+    public DFAnonClass(
+	String name,
+        DFTypeSpace typeSpace,
+	DFVarScope parentScope,
+        DFClass baseKlass) {
+        super(name, typeSpace, typeSpace, parentScope, baseKlass);
     }
 
     @Override

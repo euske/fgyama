@@ -119,26 +119,9 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    protected DFVarRef lookupField(String id)
-        throws VariableNotFound {
-        assert(_parent != null);
-        return _parent.lookupField(id);
-    }
-
     public DFVarRef lookupVar(SimpleName name)
         throws VariableNotFound {
         return this.lookupRef("$"+name.getIdentifier());
-    }
-
-    public DFVarRef lookupVarOrField(SimpleName name)
-        throws VariableNotFound {
-        // try local variables first.
-        try {
-            return this.lookupVar(name);
-        } catch (VariableNotFound e) {
-            // try field names.
-            return this.lookupField(name.getIdentifier());
-        }
     }
 
     public DFVarRef lookupReturn()

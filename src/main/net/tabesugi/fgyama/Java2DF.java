@@ -656,7 +656,7 @@ public class Java2DF {
             } else if (expr instanceof Name) {
                 Name name = (Name)expr;
                 if (name.isSimpleName()) {
-                    DFVarRef ref = scope.lookupVarOrField((SimpleName)name);
+                    DFVarRef ref = scope.lookupVar((SimpleName)name);
                     DFNode node = new VarRefNode(graph, scope, ref, expr);
                     node.accept(ctx.get(ref));
                     ctx.setRValue(node);
@@ -856,7 +856,6 @@ public class Java2DF {
                     String id = invoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         klass, null, id, false, argTypes, null);
-                    klass.dump();
                     Logger.error("Fallback method: "+klass+": "+fallback);
                     method = fallback;
                 }
@@ -1002,8 +1001,7 @@ public class Java2DF {
                     String id = "anonymous";
                     DFClass baseKlass = finder.resolveClass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-                    DFClass anonKlass = new DFAnonClass(
-			anonSpace, scope, id, baseKlass);
+                    DFClass anonKlass = new DFAnonClass(id, anonSpace, scope, baseKlass);
                     anonSpace.addClass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
@@ -1075,8 +1073,7 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-                DFClass anonKlass = new DFAnonClass(
-		    anonSpace, scope, id, null);
+                DFClass anonKlass = new DFAnonClass(id, anonSpace, scope);
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
                 } else if (body instanceof Expression) {
@@ -1096,8 +1093,7 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-                DFClass anonKlass = new DFAnonClass(
-		    anonSpace, scope, "methodref", null);
+                DFClass anonKlass = new DFAnonClass("methodref", anonSpace, scope);
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -1127,7 +1123,7 @@ public class Java2DF {
         if (expr instanceof Name) {
             Name name = (Name)expr;
             if (name.isSimpleName()) {
-                DFVarRef ref = scope.lookupVarOrField((SimpleName)name);
+                DFVarRef ref = scope.lookupVar((SimpleName)name);
                 ctx.setLValue(new SingleAssignNode(graph, scope, ref, expr));
             } else {
                 QualifiedName qname = (QualifiedName)name;
@@ -1978,10 +1974,11 @@ public class Java2DF {
             DFVarRef ref = klass.lookupField(frag.getName());
             Expression init = frag.getInitializer();
             if (init != null) {
-                DFContext ctx = new DFContext(graph, klass);
+                DFVarScope scope = klass.getScope();
+                DFContext ctx = new DFContext(graph, scope);
                 ctx = processExpression(
-                    graph, finder, klass, frame, ctx, init);
-                DFNode assign = new SingleAssignNode(graph, klass, ref, frag);
+                    graph, finder, scope, frame, ctx, init);
+                DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
                 assign.accept(ctx.getRValue());
             }
         }
@@ -2001,7 +1998,7 @@ public class Java2DF {
             finder = new DFTypeFinder(finder, methodSpace);
         }
         DFType[] argTypes = finder.resolveList(methodDecl);
-        DFVarScope scope = new DFVarScope(klass, methodDecl.getName());
+        DFVarScope scope = new DFVarScope(klass.getScope(), methodDecl.getName());
         // add a typespace for inline classes.
         DFTypeSpace typeSpace = new DFTypeSpace(scope.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2060,8 +2057,9 @@ public class Java2DF {
         List<BodyDeclaration> decls)
         throws EntityNotFound {
         DFFrame frame = new DFFrame(DFFrame.CLASS);
-        DFGraph classGraph = new DFGraph(klass, frame);
+        DFVarScope scope = klass.getScope();
         DFTypeSpace typeSpace = klass.getChildSpace();
+        DFGraph classGraph = new DFGraph(scope, frame);
         // lookup base/child classes.
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
@@ -2081,11 +2079,11 @@ public class Java2DF {
                     }
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
-                    klass.build(finder, block);
-                    frame.build(finder, klass, block);
-                    DFContext ctx = new DFContext(classGraph, klass);
+                    scope.build(finder, block);
+                    frame.build(finder, scope, block);
+                    DFContext ctx = new DFContext(classGraph, scope);
                     ctx = processStatement(
-                        classGraph, finder, klass,
+                        classGraph, finder, scope,
                         frame, ctx, block);
                     frame.close(ctx);
                 }

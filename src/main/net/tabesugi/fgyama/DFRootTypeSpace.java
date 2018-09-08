@@ -63,7 +63,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         OBJECT_CLASS = this.getClass("java.lang.Object");
         DFTypeSpace space = this.lookupSpace("java.lang");
         ARRAY_CLASS = new DFClass(
-            space, null, _global, "java.lang._Array", OBJECT_CLASS);
+            "java.lang._Array", space, null, _global, OBJECT_CLASS);
         ARRAY_CLASS.addField("length", false, DFBasicType.INT);
         STRING_CLASS = this.getClass("java.lang.String");
     }

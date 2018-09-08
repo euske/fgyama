@@ -93,7 +93,7 @@ public class DFTypeSpace {
             return space.createClass(parent, id.substring(i+1));
         } else {
             DFTypeSpace child = this.lookupSpace(id);
-            DFClass klass = new DFClass(this, child, parent, id);
+            DFClass klass = new DFClass(id, this, child, parent);
             //Logger.info("DFTypeSpace.createClass: "+klass);
             return this.addClass(klass);
         }
@@ -197,7 +197,7 @@ public class DFTypeSpace {
         klass.setParamTypes(pts);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            child.build(classes, body, klass);
+            child.build(classes, body, klass.getScope());
         }
     }
 

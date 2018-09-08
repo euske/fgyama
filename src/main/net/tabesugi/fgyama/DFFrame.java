@@ -138,7 +138,7 @@ public class DFFrame {
             Name name = (Name)expr;
             DFVarRef ref;
             if (name.isSimpleName()) {
-                ref = scope.lookupVarOrField((SimpleName)name);
+                ref = scope.lookupVar((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFClass klass;
@@ -199,7 +199,7 @@ public class DFFrame {
             Name name = (Name)expr;
             DFVarRef ref;
             if (name.isSimpleName()) {
-                ref = scope.lookupVarOrField((SimpleName)name);
+                ref = scope.lookupVar((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFClass klass;
@@ -436,7 +436,7 @@ public class DFFrame {
             String id = "lambda";
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
-            DFClass anonKlass = new DFAnonClass(anonSpace, scope, id, null);
+            DFClass anonKlass = new DFAnonClass(id, anonSpace, scope);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {

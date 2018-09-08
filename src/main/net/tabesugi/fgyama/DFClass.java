@@ -12,42 +12,48 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFClass
 //
-public class DFClass extends DFVarScope implements DFType {
+public class DFClass implements DFType {
 
     private String _name;
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace;
-    private DFClass _baseKlass;
-    private DFClass[] _baseIfaces;
+    private DFVarScope _scope;
+
+    private DFClass _baseKlass = null;
+    private DFClass[] _baseIfaces = null;
     private DFParamType[] _paramTypes = null;
-    private String _jarPath = null;
-    private String _filePath = null;
-    private boolean _loaded = true;
-    private DFVarRef _this = null;
 
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _ast2method =
         new HashMap<String, DFMethod>();
 
+    private String _jarPath = null;
+    private String _filePath = null;
+    private boolean _loaded = true;
+
     public DFClass(
-        DFTypeSpace typeSpace, DFTypeSpace childSpace,
-	DFVarScope parent, String id, DFClass baseKlass) {
-        super(parent, id);
-        _name = id;
+        String name, DFTypeSpace typeSpace,
+        DFTypeSpace childSpace, DFVarScope parentScope) {
+        _name = name;
         _typeSpace = typeSpace;
         _childSpace = childSpace;
-        _baseKlass = baseKlass;
+        _scope = new DFClassScope(this, parentScope, name);
     }
 
     public DFClass(
-        DFTypeSpace typeSpace, DFTypeSpace childSpace,
-	DFVarScope parent, String id) {
-        super(parent, id);
-        _name = id;
-        _typeSpace = typeSpace;
-        _childSpace = childSpace;
-        _this = this.addRef("#this", this);
+        String name, DFTypeSpace typeSpace,
+        DFTypeSpace childSpace, DFVarScope parentScope,
+        DFClass baseKlass) {
+        this(name, typeSpace, childSpace, parentScope);
+        _baseKlass = baseKlass;
+    }
+
+    public DFClass(String name, DFClass klass) {
+        _name = name;
+        _typeSpace = klass._typeSpace;
+        _childSpace = klass._childSpace;
+        _scope = klass._scope;
     }
 
     @Override
@@ -71,12 +77,6 @@ public class DFClass extends DFVarScope implements DFType {
         return this.isSubclassOf((DFClass)type);
     }
 
-    public void setJarPath(String jarPath, String filePath) {
-        _jarPath = jarPath;
-        _filePath = filePath;
-        _loaded = false;
-    }
-
     public void setParamTypes(DFParamType[] paramTypes) {
         _paramTypes = paramTypes;
     }
@@ -87,6 +87,10 @@ public class DFClass extends DFVarScope implements DFType {
 
     public DFTypeSpace getChildSpace() {
         return _childSpace;
+    }
+
+    public DFVarScope getScope() {
+        return _scope;
     }
 
     public DFClass getBase() {
@@ -112,14 +116,10 @@ public class DFClass extends DFVarScope implements DFType {
         return -1;
     }
 
-    public DFVarRef lookupThis() {
-        return _this;
-    }
-
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
         try {
-            return this.lookupRef("."+id);
+            return _scope.lookupRef("."+id);
         } catch (VariableNotFound e) {
             if (_baseKlass == null) throw e;
             return _baseKlass.lookupField(id);
@@ -169,7 +169,7 @@ public class DFClass extends DFVarScope implements DFType {
 
     public DFVarRef addField(
         String id, boolean isStatic, DFType type) {
-        DFVarRef ref = this.addRef("."+id, type);
+        DFVarRef ref = _scope.addRef("."+id, type);
         //Logger.info("DFClass.addField: "+ref);
         return ref;
     }
@@ -239,6 +239,12 @@ public class DFClass extends DFVarScope implements DFType {
         return false;
     }
 
+    public void setJarPath(String jarPath, String filePath) {
+        _jarPath = jarPath;
+        _filePath = filePath;
+        _loaded = false;
+    }
+
     public void load(DFTypeFinder finder) throws TypeNotFound {
         if (_loaded) return;
         _loaded = true;
@@ -267,7 +273,7 @@ public class DFClass extends DFVarScope implements DFType {
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
             DFType type = finder.resolve(fld.getType());
-            this.addRef("."+fld.getName(), type);
+            _scope.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
@@ -388,11 +394,39 @@ public class DFClass extends DFVarScope implements DFType {
         }
     }
 
-    // dumpContents (for debugging)
-    public void dumpContents(PrintStream out, String indent) {
-        super.dumpContents(out, indent);
-        for (DFMethod method : _methods) {
-            out.println(indent+"defined: "+method);
+    // DFClassScope
+    private class DFClassScope extends DFVarScope {
+
+        private DFClass _klass;
+        private DFVarRef _this;
+
+        public DFClassScope(DFClass klass, DFVarScope parent, String id) {
+            super(parent, id);
+            _klass = klass;
+            _this = this.addRef("#this", klass);
+        }
+
+        public DFVarRef lookupVar(SimpleName name)
+            throws VariableNotFound {
+            // try local variables first.
+            try {
+                return super.lookupVar(name);
+            } catch (VariableNotFound e) {
+                // try field names.
+                return _klass.lookupField(name.getIdentifier());
+            }
+        }
+
+        public DFVarRef lookupThis() {
+            return _this;
+        }
+
+        // dumpContents (for debugging)
+        public void dumpContents(PrintStream out, String indent) {
+            super.dumpContents(out, indent);
+            for (DFMethod method : _methods) {
+                out.println(indent+"defined: "+method);
+            }
         }
     }
 }
