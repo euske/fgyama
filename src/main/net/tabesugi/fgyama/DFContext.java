@@ -31,7 +31,7 @@ public class DFContext {
         DFNode node = _last.get(ref);
         if (node == null) {
             assert(!_first.containsKey(ref));
-            node = new DFNode(_graph, _scope, ref.getType(), ref);
+            node = new DFNode(_graph, _scope, ref.getRefType(), ref);
             _last.put(ref, node);
             _first.put(ref, node);
         }

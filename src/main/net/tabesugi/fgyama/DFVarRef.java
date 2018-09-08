@@ -50,7 +50,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
         }
     }
 
-    public DFType getType() {
+    public DFType getRefType() {
         return _type;
     }
 

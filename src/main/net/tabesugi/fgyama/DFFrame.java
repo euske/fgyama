@@ -234,12 +234,12 @@ public class DFFrame {
                 ref = klass.lookupField(fieldName);
             }
             this.addInputRef(ref);
-            return ref.getType();
+            return ref.getRefType();
 
         } else if (expr instanceof ThisExpression) {
             DFVarRef ref = scope.lookupThis();
             this.addInputRef(ref);
-            return ref.getType();
+            return ref.getRefType();
 
         } else if (expr instanceof BooleanLiteral) {
             return DFBasicType.BOOLEAN;
@@ -320,7 +320,7 @@ public class DFFrame {
             if (expr1 == null) {
                 DFVarRef ref = scope.lookupThis();
                 this.addInputRef(ref);
-                klass = finder.resolveKlass(ref.getType());
+                klass = finder.resolveKlass(ref.getRefType());
             } else {
                 if (expr1 instanceof Name) {
                     try {
@@ -357,7 +357,7 @@ public class DFFrame {
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
             DFKlass klass =
-                finder.resolveKlass(scope.lookupThis().getType());
+                finder.resolveKlass(scope.lookupThis().getRefType());
             DFKlass baseKlass = klass.getBase();
             DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
             if (method == null) return null;
@@ -411,16 +411,16 @@ public class DFFrame {
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInputRef(ref);
-            return ref.getType();
+            return ref.getRefType();
 
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFKlass klass =
-                finder.resolveKlass(scope.lookupThis().getType());
+                finder.resolveKlass(scope.lookupThis().getRefType());
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInputRef(ref);
-            return ref.getType();
+            return ref.getRefType();
 
         } else if (expr instanceof CastExpression) {
             CastExpression cast = (CastExpression)expr;

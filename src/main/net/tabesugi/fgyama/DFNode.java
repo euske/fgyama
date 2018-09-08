@@ -67,7 +67,7 @@ public class DFNode implements Comparable<DFNode> {
         return _scope;
     }
 
-    public DFType getType() {
+    public DFType getNodeType() {
         return _type;
     }
 
@@ -113,7 +113,7 @@ public class DFNode implements Comparable<DFNode> {
         assert _input == null;
         _input = node;
         if (_type == null) {
-            _type = node.getType();
+            _type = node.getNodeType();
         }
         node._outputs.add(this);
     }

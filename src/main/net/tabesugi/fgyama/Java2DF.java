@@ -44,7 +44,7 @@ class SingleAssignNode extends ProgNode {
     public SingleAssignNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast) {
-        super(graph, scope, ref.getType(), ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
     }
 
     @Override
@@ -94,7 +94,7 @@ class VarRefNode extends ProgNode {
     public VarRefNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast) {
-        super(graph, scope, ref.getType(), ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
     }
 
     @Override
@@ -227,7 +227,7 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getData() {
-        return this.getType().getTypeName();
+        return this.getNodeType().getTypeName();
     }
 }
 
@@ -251,7 +251,7 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getData() {
-        return this.getType().getTypeName();
+        return this.getNodeType().getTypeName();
     }
 }
 
@@ -296,7 +296,7 @@ class AssignOpNode extends ProgNode {
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, Assignment.Operator op,
         DFNode lvalue, DFNode rvalue) {
-        super(graph, scope, rvalue.getType(), ref, ast);
+        super(graph, scope, rvalue.getNodeType(), ref, ast);
         this.op = op;
         if (lvalue != null) {
             this.accept(lvalue, "L");
@@ -577,7 +577,7 @@ class CreateObjectNode extends CallNode {
 
     @Override
     public String getData() {
-        return this.getType().getTypeName();
+        return this.getNodeType().getTypeName();
     }
 }
 
@@ -661,7 +661,7 @@ public class Java2DF {
                         ctx = processExpression(
                             graph, finder, scope, frame, ctx, qname.getQualifier());
                         obj = ctx.getRValue();
-                        klass = finder.resolveKlass(obj.getType());
+                        klass = finder.resolveKlass(obj.getNodeType());
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
                         klass = finder.lookupKlass(qname.getQualifier());
@@ -770,7 +770,7 @@ public class Java2DF {
                     graph, finder, scope, frame, ctx,
                     infix.getRightOperand());
                 DFNode rvalue = ctx.getRValue();
-                DFType type = lvalue.getType(); // XXX Todo: implicit type coersion.
+                DFType type = lvalue.getNodeType(); // XXX Todo: implicit type coersion.
                 ctx.setRValue(new InfixNode(
                                   graph, scope, type, expr, op, lvalue, rvalue));
 
@@ -828,7 +828,7 @@ public class Java2DF {
                     }
                 }
                 if (obj != null) {
-                    klass = finder.resolveKlass(obj.getType());
+                    klass = finder.resolveKlass(obj.getNodeType());
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
                 List<DFType> typeList = new ArrayList<DFType>();
@@ -837,7 +837,7 @@ public class Java2DF {
                         graph, finder, scope, frame, ctx, arg);
                     DFNode node = ctx.getRValue();
                     argList.add(node);
-                    typeList.add(node.getType());
+                    typeList.add(node.getNodeType());
                 }
                 DFNode[] args = new DFNode[argList.size()];
                 argList.toArray(args);
@@ -871,13 +871,13 @@ public class Java2DF {
                         graph, finder, scope, frame, ctx, arg);
                     DFNode node = ctx.getRValue();
                     argList.add(node);
-                    typeList.add(node.getType());
+                    typeList.add(node.getNodeType());
                 }
                 DFNode[] args = new DFNode[argList.size()];
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFKlass klass = finder.resolveKlass(obj.getType());
+                DFKlass klass = finder.resolveKlass(obj.getNodeType());
                 DFKlass baseKlass = klass.getBase();
                 DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
                 if (method == null) {
@@ -922,7 +922,7 @@ public class Java2DF {
                     DFNode value = ctx.getRValue();
                     if (arr == null) {
                         arr = new ArrayValueNode(
-                            graph, scope, value.getType(), init);
+                            graph, scope, value.getNodeType(), init);
                     }
                     arr.addValue(value);
                 }
@@ -936,7 +936,7 @@ public class Java2DF {
                 DFNode array = ctx.getRValue();
                 ctx = processExpression(
                     graph, finder, scope, frame, ctx, aa.getIndex());
-                DFVarRef ref = scope.lookupArray(array.getType());
+                DFVarRef ref = scope.lookupArray(array.getNodeType());
                 DFNode index = ctx.getRValue();
                 DFNode node = new ArrayAccessNode(
                     graph, scope, ref, aa, array, index);
@@ -958,7 +958,7 @@ public class Java2DF {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, expr1);
                     obj = ctx.getRValue();
-                    klass = finder.resolveKlass(obj.getType());
+                    klass = finder.resolveKlass(obj.getNodeType());
                 }
                 SimpleName fieldName = fa.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
@@ -970,7 +970,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
-                DFKlass klass = finder.resolveKlass(obj.getType());
+                DFKlass klass = finder.resolveKlass(obj.getNodeType());
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldAccessNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -1126,7 +1126,7 @@ public class Java2DF {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, qname.getQualifier());
                     obj = ctx.getRValue();
-                    klass = finder.resolveKlass(obj.getType());
+                    klass = finder.resolveKlass(obj.getNodeType());
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
                     klass = finder.lookupKlass(qname.getQualifier());
@@ -1143,7 +1143,7 @@ public class Java2DF {
             DFNode array = ctx.getRValue();
             ctx = processExpression(
                 graph, finder, scope, frame, ctx, aa.getIndex());
-            DFVarRef ref = scope.lookupArray(array.getType());
+            DFVarRef ref = scope.lookupArray(array.getNodeType());
             DFNode index = ctx.getRValue();
             DFNode node = new ArrayAssignNode(
                 graph, scope, ref, expr, array, index);
@@ -1155,7 +1155,7 @@ public class Java2DF {
             ctx = processExpression(
                 graph, finder, scope, frame, ctx, expr1);
             DFNode obj = ctx.getRValue();
-            DFKlass klass = finder.resolveKlass(obj.getType());
+            DFKlass klass = finder.resolveKlass(obj.getNodeType());
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
