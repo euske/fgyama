@@ -57,6 +57,7 @@ public class DFGraph {
         for (int i = 0; i < nodes.length; i++) {
             names[i] = nodes[i].getNodeId();
         }
+        Arrays.sort(names);
         return Utils.join(" ", names);
     }
 

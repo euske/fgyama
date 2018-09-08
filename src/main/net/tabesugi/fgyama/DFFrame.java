@@ -130,10 +130,14 @@ public class DFFrame {
             }
         }
         for (DFVarRef ref : _inputRefs) {
-            _inputNodes.add(ctx.getFirst(ref));
+            DFNode node = ctx.getFirst(ref);
+            assert node != null;
+            _inputNodes.add(node);
         }
         for (DFVarRef ref : _outputRefs) {
-            _outputNodes.add(ctx.get(ref));
+            DFNode node = ctx.get(ref);
+            assert node != null;
+            _outputNodes.add(node);
         }
     }
 
@@ -178,9 +182,10 @@ public class DFFrame {
             ArrayAccess aa = (ArrayAccess)expr;
             DFType type = this.build(finder, scope, aa.getArray());
             this.build(finder, scope, aa.getIndex());
-            if (type == null) return;
-            DFVarRef ref = scope.lookupArray(type);
-            this.addOutputRef(ref);
+            if (type instanceof DFArrayType) {
+                DFVarRef ref = scope.lookupArray(type);
+                this.addOutputRef(ref);
+            }
 
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
@@ -387,9 +392,9 @@ public class DFFrame {
             this.build(finder, scope, aa.getIndex());
             DFType type = this.build(finder, scope, aa.getArray());
             if (type instanceof DFArrayType) {
-                type = ((DFArrayType)type).getElemType();
                 DFVarRef ref = scope.lookupArray(type);
                 this.addInputRef(ref);
+                type = ((DFArrayType)type).getElemType();
             }
             return type;
 
