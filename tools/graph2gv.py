@@ -26,7 +26,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         if node.kind in ('join','begin','end'):
             styles = {'shape': 'diamond',
                       'label': '%s (%s)' % (node.kind, node.ref)}
-        elif node.kind in ('return',):
+        elif node.kind in ('input','output'):
             styles = {'shape': 'box',
                       'label': '%s (%s)' % (node.kind, node.ref)}
         elif node.data is not None:

@@ -43,8 +43,8 @@ public class DFGraph {
         } else {
             elem.setAttribute("name", _root.getFullName());
         }
-        elem.setAttribute("ins", list2str(_frame.getInputs()));
-        elem.setAttribute("outs", list2str(_frame.getOutputs()));
+        elem.setAttribute("ins", getNodeIds(_frame.getInputNodes()));
+        elem.setAttribute("outs", getNodeIds(_frame.getOutputNodes()));
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.values().toArray(nodes);
         Arrays.sort(nodes);
@@ -52,17 +52,12 @@ public class DFGraph {
         return elem;
     }
 
-    private static String list2str(DFVarRef[] refs) {
-        int n = 0;
-        String data = "";
-        for (DFVarRef ref : refs) {
-            if (0 < n) {
-                data += " ";
-            }
-            data += ref.getRefName();
-            n++;
+    private static String getNodeIds(DFNode[] nodes) {
+        String[] names = new String[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            names[i] = nodes[i].getNodeId();
         }
-        return data;
+        return Utils.join(" ", names);
     }
 
     public int addNode(DFNode node) {
@@ -73,9 +68,10 @@ public class DFGraph {
 
     public void cleanup() {
         ArrayList<Integer> removed = new ArrayList<Integer>();
-        for (DFNode node : _nodes.values()) {
+        for (Map.Entry<Integer, DFNode> ent : _nodes.entrySet()) {
+            DFNode node = ent.getValue();
             if (node.getKind() == null && node.purge()) {
-                removed.add(node.getId());
+                removed.add(ent.getKey());
             }
         }
         for (int id : removed) {

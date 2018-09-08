@@ -15,6 +15,17 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
+    public static String join(String delim, String[] a) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < a.length; i++) {
+            if (0 < i) {
+                b.append(delim);
+            }
+            b.append(a[i]);
+        }
+	return b.toString();
+    }
+
     public static String quote(char c) {
 	switch (c) {
 	case '\0':

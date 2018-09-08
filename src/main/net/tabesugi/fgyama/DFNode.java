@@ -44,7 +44,7 @@ public class DFNode implements Comparable<DFNode> {
 
     public Element toXML(Document document) {
         Element elem = document.createElement("node");
-        elem.setAttribute("name", this.getNodeId());
+        elem.setAttribute("id", this.getNodeId());
         if (this.getKind() != null) {
             elem.setAttribute("kind", this.getKind());
         }
@@ -61,10 +61,6 @@ public class DFNode implements Comparable<DFNode> {
             elem.appendChild(link.toXML(document));
         }
         return elem;
-    }
-
-    public int getId() {
-        return _id;
     }
 
     public DFVarScope getScope() {

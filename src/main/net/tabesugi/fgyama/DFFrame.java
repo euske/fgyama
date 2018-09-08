@@ -16,12 +16,17 @@ public class DFFrame {
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
-    private Set<DFVarRef> _inputs =
+    private Set<DFVarRef> _inputRefs =
         new HashSet<DFVarRef>();
-    private Set<DFVarRef> _outputs =
+    private Set<DFVarRef> _outputRefs =
         new HashSet<DFVarRef>();
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
+
+    private List<DFNode> _inputNodes =
+        new ArrayList<DFNode>();
+    private List<DFNode> _outputNodes =
+        new ArrayList<DFNode>();
 
     public static final String COND = "@COND";
     public static final String LOOP = "@LOOP";
@@ -73,34 +78,36 @@ public class DFFrame {
         return frame;
     }
 
-    private void addInput(DFVarRef ref) {
-        _inputs.add(ref);
+    private void addInputRef(DFVarRef ref) {
+        _inputRefs.add(ref);
     }
 
-    private void addOutput(DFVarRef ref) {
-        _outputs.add(ref);
+    private void addOutputRef(DFVarRef ref) {
+        _outputRefs.add(ref);
     }
 
-    public DFVarRef[] getInputs() {
-        DFVarRef[] refs = new DFVarRef[_inputs.size()];
-        _inputs.toArray(refs);
-        Arrays.sort(refs);
+    private void expandRefs(DFFrame childFrame) {
+        _inputRefs.addAll(childFrame._inputRefs);
+        _outputRefs.addAll(childFrame._outputRefs);
+    }
+
+    public DFVarRef[] getInputRefs() {
+        DFVarRef[] refs = new DFVarRef[_inputRefs.size()];
+        _inputRefs.toArray(refs);
         return refs;
     }
 
-    public DFVarRef[] getOutputs() {
-        DFVarRef[] refs = new DFVarRef[_outputs.size()];
-        _outputs.toArray(refs);
-        Arrays.sort(refs);
+    public DFVarRef[] getOutputRefs() {
+        DFVarRef[] refs = new DFVarRef[_outputRefs.size()];
+        _outputRefs.toArray(refs);
         return refs;
     }
 
     public DFVarRef[] getInsAndOuts() {
-        Set<DFVarRef> inouts = new HashSet<DFVarRef>(_inputs);
-        inouts.retainAll(_outputs);
+        Set<DFVarRef> inouts = new HashSet<DFVarRef>(_inputRefs);
+        inouts.retainAll(_outputRefs);
         DFVarRef[] refs = new DFVarRef[inouts.size()];
         inouts.toArray(refs);
-        Arrays.sort(refs);
         return refs;
     }
 
@@ -122,11 +129,24 @@ public class DFFrame {
                 ctx.set(node);
             }
         }
+        for (DFVarRef ref : _inputRefs) {
+            _inputNodes.add(ctx.getFirst(ref));
+        }
+        for (DFVarRef ref : _outputRefs) {
+            _outputNodes.add(ctx.get(ref));
+        }
     }
 
-    private void finish(DFFrame childFrame) {
-        _inputs.addAll(childFrame._inputs);
-        _outputs.addAll(childFrame._outputs);
+    public DFNode[] getInputNodes() {
+        DFNode[] nodes = new DFNode[_inputNodes.size()];
+        _inputNodes.toArray(nodes);
+        return nodes;
+    }
+
+    public DFNode[] getOutputNodes() {
+        DFNode[] nodes = new DFNode[_outputNodes.size()];
+        _outputNodes.toArray(nodes);
+        return nodes;
     }
 
     private void buildAssignment(
@@ -152,7 +172,7 @@ public class DFFrame {
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
             }
-            this.addOutput(ref);
+            this.addOutputRef(ref);
 
         } else if (expr instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)expr;
@@ -160,7 +180,7 @@ public class DFFrame {
             this.build(finder, scope, aa.getIndex());
             if (type == null) return;
             DFVarRef ref = scope.lookupArray(type);
-            this.addOutput(ref);
+            this.addOutputRef(ref);
 
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
@@ -179,7 +199,7 @@ public class DFFrame {
             }
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
-            this.addOutput(ref);
+            this.addOutputRef(ref);
 
         } else {
             throw new UnsupportedSyntax(expr);
@@ -213,12 +233,12 @@ public class DFFrame {
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
             }
-            this.addInput(ref);
+            this.addInputRef(ref);
             return ref.getType();
 
         } else if (expr instanceof ThisExpression) {
             DFVarRef ref = scope.lookupThis();
-            this.addInput(ref);
+            this.addInputRef(ref);
             return ref.getType();
 
         } else if (expr instanceof BooleanLiteral) {
@@ -285,7 +305,7 @@ public class DFFrame {
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 DFVarRef ref = scope.lookupVar(frag.getName());
-                this.addOutput(ref);
+                this.addOutputRef(ref);
                 Expression init = frag.getInitializer();
                 if (init != null) {
                     this.build(finder, scope, init);
@@ -299,7 +319,7 @@ public class DFFrame {
             DFKlass klass = null;
             if (expr1 == null) {
                 DFVarRef ref = scope.lookupThis();
-                this.addInput(ref);
+                this.addInputRef(ref);
                 klass = finder.resolveKlass(ref.getType());
             } else {
                 if (expr1 instanceof Name) {
@@ -369,7 +389,7 @@ public class DFFrame {
             if (type instanceof DFArrayType) {
                 type = ((DFArrayType)type).getElemType();
                 DFVarRef ref = scope.lookupArray(type);
-                this.addInput(ref);
+                this.addInputRef(ref);
             }
             return type;
 
@@ -390,7 +410,7 @@ public class DFFrame {
             }
             SimpleName fieldName = fa.getName();
             DFVarRef ref = klass.lookupField(fieldName);
-            this.addInput(ref);
+            this.addInputRef(ref);
             return ref.getType();
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -399,7 +419,7 @@ public class DFFrame {
             DFKlass klass =
                 finder.resolveKlass(scope.lookupThis().getType());
             DFVarRef ref = klass.lookupField(fieldName);
-            this.addInput(ref);
+            this.addInputRef(ref);
             return ref.getType();
 
         } else if (expr instanceof CastExpression) {
@@ -481,7 +501,7 @@ public class DFFrame {
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 DFVarRef ref = scope.lookupVar(frag.getName());
-                this.addOutput(ref);
+                this.addOutputRef(ref);
                 Expression init = frag.getInitializer();
                 if (init != null) {
                     this.build(finder, scope, init);
@@ -498,12 +518,12 @@ public class DFFrame {
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild(DFFrame.COND, thenStmt);
             thenFrame.build(finder, scope, thenStmt);
-            this.finish(thenFrame);
+            this.expandRefs(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = this.addChild(DFFrame.COND, elseStmt);
                 elseFrame.build(finder, scope, elseStmt);
-                this.finish(elseFrame);
+                this.expandRefs(elseFrame);
             }
 
         } else if (stmt instanceof SwitchStatement) {
@@ -515,7 +535,7 @@ public class DFFrame {
                      (List<Statement>) switchStmt.statements()) {
                 childFrame.build(finder, childScope, cstmt);
             }
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)stmt;
@@ -530,7 +550,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, scope, whileStmt.getExpression());
             childFrame.build(finder, childScope, whileStmt.getBody());
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
@@ -538,7 +558,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childScope, doStmt.getBody());
             childFrame.build(finder, scope, doStmt.getExpression());
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)stmt;
@@ -555,18 +575,18 @@ public class DFFrame {
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 childFrame.build(finder, childScope, update);
             }
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             DFVarScope childScope = scope.getChildByAST(stmt);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFVarRef ref = childScope.lookupVar(decl.getName());
-            //this.addOutput(ref);
+            //this.addOutputRef(ref);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childScope, eForStmt.getExpression());
             childFrame.build(finder, childScope, eForStmt.getBody());
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
@@ -574,7 +594,7 @@ public class DFFrame {
             if (expr != null) {
                 this.build(finder, scope, expr);
             }
-            this.addOutput(scope.lookupReturn());
+            this.addOutputRef(scope.lookupReturn());
 
         } else if (stmt instanceof BreakStatement) {
 
@@ -586,7 +606,7 @@ public class DFFrame {
             String label = labelName.getIdentifier();
             DFFrame childFrame = this.addChild(label, stmt);
             childFrame.build(finder, scope, labeledStmt.getBody());
-            this.finish(childFrame);
+            this.expandRefs(childFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -597,13 +617,13 @@ public class DFFrame {
             Block block = tryStmt.getBody();
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
             tryFrame.build(finder, scope, block);
-            this.finish(tryFrame);
+            this.expandRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
                 DFVarScope childScope = scope.getChildByAST(cc);
                 DFVarRef ref = childScope.lookupVar(decl.getName());
-                //this.addOutput(ref);
+                //this.addOutputRef(ref);
                 this.build(finder, childScope, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
@@ -614,7 +634,7 @@ public class DFFrame {
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             this.build(finder, scope, throwStmt.getExpression());
-            this.addOutput(scope.lookupException());
+            this.addOutputRef(scope.lookupException());
 
         } else if (stmt instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
@@ -644,12 +664,12 @@ public class DFFrame {
         out.println(indent+_label+" {");
         String i2 = indent + "  ";
         StringBuilder inputs = new StringBuilder();
-        for (DFVarRef ref : this.getInputs()) {
+        for (DFVarRef ref : this.getInputRefs()) {
             inputs.append(" "+ref);
         }
         out.println(i2+"inputs:"+inputs);
         StringBuilder outputs = new StringBuilder();
-        for (DFVarRef ref : this.getOutputs()) {
+        for (DFVarRef ref : this.getOutputRefs()) {
             outputs.append(" "+ref);
         }
         out.println(i2+"outputs:"+outputs);

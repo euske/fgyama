@@ -111,13 +111,12 @@ class DFNode:
         return
 
     def __repr__(self):
-        name = self.nid if self.name is None else self.name
         return ('<DFNode(%s): kind=%s, ref=%r, data=%r, ntype=%r, inputs=%r>' %
-                (name, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
+                (self.name, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
 
     def toxml(self):
         enode = Element('node')
-        enode.set('name', ns(self.nid))
+        enode.set('id', ns(self.nid))
         if self.kind is not None:
             enode.set('kind', self.kind)
         if self.data is not None:
@@ -157,12 +156,12 @@ def parse_graph(gid, egraph, src=None):
 
     def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
-        nname = enode.get('name')
+        name = enode.get('id')
         kind = enode.get('kind')
         ref = enode.get('ref')
         data = enode.get('data')
         ntype = enode.get('type')
-        node = DFNode(nid, nname, scope, kind, ref, data, ntype)
+        node = DFNode(nid, name, scope, kind, ref, data, ntype)
         for e in enode.getchildren():
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -367,7 +366,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             (gid,))
         for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(nid, None, scope, kind, ref, data, ntype)
+            node = DFNode(nid, nid, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))

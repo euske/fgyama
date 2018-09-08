@@ -44,8 +44,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
 
     public String getRefName() {
         if (_scope != null) {
-            return (_name.substring(0,1)+_scope.getFullName()+"/"+
-                    _name.substring(1));
+            return _scope.getFullName()+"/"+_name;
         } else {
             return _name;
         }

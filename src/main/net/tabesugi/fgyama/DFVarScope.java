@@ -129,6 +129,11 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return this.lookupRef("$"+name.getIdentifier());
     }
 
+    public DFVarRef lookupArgument(int index)
+        throws VariableNotFound {
+        return this.lookupRef("#arg"+index);
+    }
+
     public DFVarRef lookupReturn()
         throws VariableNotFound {
         return this.lookupRef("#return");
@@ -160,11 +165,14 @@ public class DFVarScope implements Comparable<DFVarScope> {
         DFType type = (returnType == null)? null : finder.resolve(returnType);
         this.addRef("#return", type);
         this.addRef("#exception", null);
+        int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers.
             DFType paramType = finder.resolve(decl.getType());
+            this.addRef("#arg"+i, paramType);
             this.addVar(decl.getName(), paramType);
+            i++;
         }
         this.build(finder, methodDecl.getBody());
     }
