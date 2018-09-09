@@ -15,10 +15,9 @@ How to Build:
 
 TODOs:
 
+  * Handle consecutive SwitchCases.
   * Enum support.
-  * separate: DFClassSpace is not a DFVarSpace.
   * DFType should be lookup up from DFTypeSpace (not DFTypeFinder).
   * Treat each parametered type differently.
-  * construct in/out refs of DFGraph first.
   * Lambdas.
   * Method references.
