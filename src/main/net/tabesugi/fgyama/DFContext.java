@@ -52,6 +52,7 @@ public class DFContext {
 
     public void set(DFNode node) {
         DFVarRef ref = node.getRef();
+        assert ref != null;
         _last.put(ref, node);
         if (!_first.containsKey(ref)) {
             _first.put(ref, node);

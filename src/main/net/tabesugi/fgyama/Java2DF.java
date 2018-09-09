@@ -547,6 +547,17 @@ class MethodCallNode extends CallNode {
     }
 }
 
+// ObjectUpdateNode:
+class ObjectUpdateNode extends SingleAssignNode {
+
+    public ObjectUpdateNode(
+        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        ASTNode ast, MethodCallNode call) {
+        super(graph, scope, ref, ast);
+        this.accept(call, "obj");
+    }
+}
+
 // CreateObjectNode
 class CreateObjectNode extends CallNode {
 
@@ -846,6 +857,11 @@ public class Java2DF {
                     graph, scope, methods, invoke, obj);
                 call.setArgs(args);
                 ctx.setRValue(call);
+                if (obj != null) {
+                    // the object is updated.
+                    ctx.set(new ObjectUpdateNode(
+                                graph, scope, obj.getRef(), invoke, call));
+                }
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.TRY);
                     frame.addExit(new DFExit(dstFrame, call.exception));
@@ -882,6 +898,11 @@ public class Java2DF {
                     graph, scope, methods, sinvoke, obj);
                 call.setArgs(args);
                 ctx.setRValue(call);
+                if (obj != null) {
+                    // the object is updated.
+                    ctx.set(new ObjectUpdateNode(
+                                graph, scope, obj.getRef(), sinvoke, call));
+                }
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.TRY);
                     frame.addExit(new DFExit(dstFrame, call.exception));
