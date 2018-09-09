@@ -1,85 +1,92 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_switch.java">
-    <graph ins="$ROOT/Foo.basic_switch/n $ROOT/Foo.basic_switch.b0/x" name="ROOT/Foo/basic_switch:@int" outs="$ROOT/Foo.basic_switch.b0/x">
+    <graph ins="NROOT/Foo.basic_switch_2 NROOT/Foo.basic_switch_8" name="ROOT/Foo/basic_switch:@int" outs="NROOT/Foo.basic_switch.b0.switch0_16 NROOT/Foo.basic_switch.b0_21">
       <scope name="ROOT/Foo.basic_switch">
         <scope name="ROOT/Foo.basic_switch.b0">
           <scope name="ROOT/Foo.basic_switch.b0.switch0">
-            <node data="case(1)" kind="case" name="NROOT/Foo.basic_switch.b0.switch0_4" type="@int">
+            <node data="case(1)" id="NROOT/Foo.basic_switch.b0.switch0_4" kind="case" type="@int">
               <link src="NROOT/Foo.basic_switch.b0_3"/>
               <link label="match0" src="NROOT/Foo.basic_switch.b0.switch0_5"/>
               <ast length="7" start="86" type="49"/>
             </node>
-            <node data="1" kind="const" name="NROOT/Foo.basic_switch.b0.switch0_5" type="@number">
+            <node data="1" id="NROOT/Foo.basic_switch.b0.switch0_5" kind="const" type="@number">
               <ast length="1" start="91" type="34"/>
             </node>
-            <node data="case(1)" kind="case" name="NROOT/Foo.basic_switch.b0.switch0_6" type="@int">
+            <node id="NROOT/Foo.basic_switch.b0.switch0_6" ref="ROOT/Foo.basic_switch.b0/$x" type="@int"/>
+            <node id="NROOT/Foo.basic_switch.b0.switch0_7" kind="join" ref="ROOT/Foo.basic_switch.b0/$x">
+              <link label="cond" src="NROOT/Foo.basic_switch.b0.switch0_4"/>
+              <link label="false" src="NROOT/Foo.basic_switch_8"/>
+              <link label="true" src="NROOT/Foo.basic_switch.b0.switch0_6"/>
+              <ast length="7" start="86" type="49"/>
+            </node>
+            <node data="case(1)" id="NROOT/Foo.basic_switch.b0.switch0_9" kind="case" type="@int">
               <link src="NROOT/Foo.basic_switch.b0_3"/>
-              <link label="match0" src="NROOT/Foo.basic_switch.b0.switch0_7"/>
+              <link label="match0" src="NROOT/Foo.basic_switch.b0.switch0_10"/>
               <ast length="7" start="95" type="49"/>
             </node>
-            <node data="2" kind="const" name="NROOT/Foo.basic_switch.b0.switch0_7" type="@number">
+            <node data="2" id="NROOT/Foo.basic_switch.b0.switch0_10" kind="const" type="@number">
               <ast length="1" start="100" type="34"/>
             </node>
-            <node kind="assign" name="NROOT/Foo.basic_switch.b0.switch0_8" ref="$ROOT/Foo.basic_switch.b0/x" type="@int">
-              <link src="NROOT/Foo.basic_switch.b0.switch0_10"/>
+            <node id="NROOT/Foo.basic_switch.b0.switch0_11" kind="assign" ref="ROOT/Foo.basic_switch.b0/$x" type="@int">
+              <link src="NROOT/Foo.basic_switch.b0.switch0_13"/>
               <ast length="1" start="108" type="42"/>
             </node>
-            <node data="100" kind="const" name="NROOT/Foo.basic_switch.b0.switch0_9" type="@number">
+            <node data="100" id="NROOT/Foo.basic_switch.b0.switch0_12" kind="const" type="@number">
               <ast length="3" start="112" type="34"/>
             </node>
-            <node data="=" kind="assignop" name="NROOT/Foo.basic_switch.b0.switch0_10" ref="$ROOT/Foo.basic_switch.b0/x" type="@number">
-              <link label="R" src="NROOT/Foo.basic_switch.b0.switch0_9"/>
+            <node data="=" id="NROOT/Foo.basic_switch.b0.switch0_13" kind="assignop" ref="ROOT/Foo.basic_switch.b0/$x" type="@number">
+              <link label="R" src="NROOT/Foo.basic_switch.b0.switch0_12"/>
               <ast length="7" start="108" type="7"/>
             </node>
-            <node kind="join" name="NROOT/Foo.basic_switch.b0.switch0_11" ref="$ROOT/Foo.basic_switch.b0/x">
-              <link label="cond" src="NROOT/Foo.basic_switch.b0.switch0_6"/>
-              <link label="false" src="NROOT/Foo.basic_switch_12"/>
-              <link label="true" src="NROOT/Foo.basic_switch.b0.switch0_8"/>
+            <node id="NROOT/Foo.basic_switch.b0.switch0_14" kind="join" ref="ROOT/Foo.basic_switch.b0/$x">
+              <link label="cond" src="NROOT/Foo.basic_switch.b0.switch0_9"/>
+              <link label="false" src="NROOT/Foo.basic_switch.b0.switch0_7"/>
+              <link label="true" src="NROOT/Foo.basic_switch.b0.switch0_11"/>
               <ast length="7" start="95" type="49"/>
             </node>
-            <node data="default" kind="case" name="NROOT/Foo.basic_switch.b0.switch0_13" type="@int">
+            <node data="default" id="NROOT/Foo.basic_switch.b0.switch0_15" kind="case" type="@int">
               <link src="NROOT/Foo.basic_switch.b0_3"/>
               <ast length="8" start="130" type="49"/>
             </node>
-            <node kind="assign" name="NROOT/Foo.basic_switch.b0.switch0_14" ref="$ROOT/Foo.basic_switch.b0/x" type="@int">
-              <link src="NROOT/Foo.basic_switch.b0.switch0_16"/>
+            <node id="NROOT/Foo.basic_switch.b0.switch0_16" kind="assign" ref="ROOT/Foo.basic_switch.b0/$x" type="@int">
+              <link src="NROOT/Foo.basic_switch.b0.switch0_18"/>
               <ast length="1" start="144" type="42"/>
             </node>
-            <node data="200" kind="const" name="NROOT/Foo.basic_switch.b0.switch0_15" type="@number">
+            <node data="200" id="NROOT/Foo.basic_switch.b0.switch0_17" kind="const" type="@number">
               <ast length="3" start="148" type="34"/>
             </node>
-            <node data="=" kind="assignop" name="NROOT/Foo.basic_switch.b0.switch0_16" ref="$ROOT/Foo.basic_switch.b0/x" type="@number">
-              <link label="R" src="NROOT/Foo.basic_switch.b0.switch0_15"/>
+            <node data="=" id="NROOT/Foo.basic_switch.b0.switch0_18" kind="assignop" ref="ROOT/Foo.basic_switch.b0/$x" type="@number">
+              <link label="R" src="NROOT/Foo.basic_switch.b0.switch0_17"/>
               <ast length="7" start="144" type="7"/>
             </node>
-            <node kind="join" name="NROOT/Foo.basic_switch.b0.switch0_17" ref="$ROOT/Foo.basic_switch.b0/x">
-              <link label="cond" src="NROOT/Foo.basic_switch.b0.switch0_13"/>
-              <link label="false" src="NROOT/Foo.basic_switch.b0.switch0_11"/>
-              <link label="true" src="NROOT/Foo.basic_switch.b0.switch0_14"/>
+            <node id="NROOT/Foo.basic_switch.b0.switch0_19" kind="join" ref="ROOT/Foo.basic_switch.b0/$x">
+              <link label="cond" src="NROOT/Foo.basic_switch.b0.switch0_15"/>
+              <link label="false" src="NROOT/Foo.basic_switch.b0.switch0_14"/>
+              <link label="true" src="NROOT/Foo.basic_switch.b0.switch0_16"/>
               <ast length="8" start="130" type="49"/>
             </node>
           </scope>
-          <node kind="ref" name="NROOT/Foo.basic_switch.b0_3" ref="$ROOT/Foo.basic_switch/n" type="@int">
+          <node id="NROOT/Foo.basic_switch.b0_3" kind="ref" ref="ROOT/Foo.basic_switch/$n" type="@int">
             <link src="NROOT/Foo.basic_switch_2"/>
             <ast length="1" start="80" type="42"/>
           </node>
-          <node kind="ref" name="NROOT/Foo.basic_switch.b0_18" ref="$ROOT/Foo.basic_switch.b0/x" type="@int">
-            <link src="NROOT/Foo.basic_switch.b0.switch0_17"/>
+          <node id="NROOT/Foo.basic_switch.b0_20" kind="ref" ref="ROOT/Foo.basic_switch.b0/$x" type="@int">
+            <link src="NROOT/Foo.basic_switch.b0.switch0_16"/>
             <ast length="1" start="176" type="42"/>
           </node>
-          <node kind="return" name="NROOT/Foo.basic_switch.b0_19" ref="#ROOT/Foo.basic_switch/return" type="@int">
-            <link src="NROOT/Foo.basic_switch.b0_18"/>
+          <node id="NROOT/Foo.basic_switch.b0_21" kind="output" ref="ROOT/Foo.basic_switch/#return" type="@int">
+            <link src="NROOT/Foo.basic_switch.b0_20"/>
             <ast length="9" start="169" type="41"/>
           </node>
         </scope>
-        <node data="arg0" kind="arg" name="NROOT/Foo.basic_switch_1" ref="$ROOT/Foo.basic_switch/n" type="@int">
+        <node id="NROOT/Foo.basic_switch_1" kind="input" ref="ROOT/Foo.basic_switch/#arg0" type="@int">
           <ast length="5" start="54" type="44"/>
         </node>
-        <node kind="assign" name="NROOT/Foo.basic_switch_2" ref="$ROOT/Foo.basic_switch/n" type="@int">
+        <node id="NROOT/Foo.basic_switch_2" kind="assign" ref="ROOT/Foo.basic_switch/$n" type="@int">
           <link src="NROOT/Foo.basic_switch_1"/>
           <ast length="5" start="54" type="44"/>
         </node>
-        <node name="NROOT/Foo.basic_switch_12" ref="$ROOT/Foo.basic_switch.b0/x" type="@int"/>
+        <node id="NROOT/Foo.basic_switch_8" ref="ROOT/Foo.basic_switch.b0/$x" type="@int"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

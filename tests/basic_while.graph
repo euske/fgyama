@@ -1,69 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_while.java">
-    <graph ins="$ROOT/Foo.basic_while/x" name="ROOT/Foo/basic_while:@int" outs="$ROOT/Foo.basic_while/x">
+    <graph ins="NROOT/Foo.basic_while_2" name="ROOT/Foo/basic_while:@int" outs="NROOT/Foo.basic_while.b0_13">
       <scope name="ROOT/Foo.basic_while">
         <scope name="ROOT/Foo.basic_while.b0">
           <scope name="ROOT/Foo.basic_while.b0.while0">
             <scope name="ROOT/Foo.basic_while.b0.while0.b0">
-              <node kind="assign" name="NROOT/Foo.basic_while.b0.while0.b0_7" ref="$ROOT/Foo.basic_while/x" type="@int">
+              <node id="NROOT/Foo.basic_while.b0.while0.b0_7" kind="assign" ref="ROOT/Foo.basic_while/$x" type="@int">
                 <link src="NROOT/Foo.basic_while.b0.while0.b0_9"/>
                 <ast length="1" start="86" type="42"/>
               </node>
-              <node data="1" kind="const" name="NROOT/Foo.basic_while.b0.while0.b0_8" type="@number">
+              <node data="1" id="NROOT/Foo.basic_while.b0.while0.b0_8" kind="const" type="@number">
                 <ast length="1" start="91" type="34"/>
               </node>
-              <node data="-=" kind="assignop" name="NROOT/Foo.basic_while.b0.while0.b0_9" ref="$ROOT/Foo.basic_while/x" type="@number">
+              <node data="-=" id="NROOT/Foo.basic_while.b0.while0.b0_9" kind="assignop" ref="ROOT/Foo.basic_while/$x" type="@number">
                 <link label="L" src="NROOT/Foo.basic_while.b0.while0_11"/>
                 <link label="R" src="NROOT/Foo.basic_while.b0.while0.b0_8"/>
                 <ast length="6" start="86" type="7"/>
               </node>
             </scope>
-            <node kind="ref" name="NROOT/Foo.basic_while.b0.while0_3" ref="$ROOT/Foo.basic_while/x" type="@int">
-              <link src="NROOT/Foo.basic_while.b0.while0_11"/>
-              <ast length="1" start="71" type="42"/>
-            </node>
-            <node data="0" kind="const" name="NROOT/Foo.basic_while.b0.while0_5" type="@number">
-              <ast length="1" start="76" type="34"/>
-            </node>
-            <node data="!=" kind="infix" name="NROOT/Foo.basic_while.b0.while0_6" type="@int">
-              <link label="L" src="NROOT/Foo.basic_while.b0.while0_3"/>
-              <link label="R" src="NROOT/Foo.basic_while.b0.while0_5"/>
-              <ast length="6" start="71" type="27"/>
-            </node>
-            <node kind="begin" name="NROOT/Foo.basic_while.b0.while0_10" ref="$ROOT/Foo.basic_while/x">
+            <node id="NROOT/Foo.basic_while.b0.while0_10" kind="begin" ref="ROOT/Foo.basic_while/$x">
               <link label="_end" src="NROOT/Foo.basic_while.b0.while0_12"/>
               <link label="enter" src="NROOT/Foo.basic_while_2"/>
               <link label="repeat" src="NROOT/Foo.basic_while.b0.while0.b0_7"/>
               <ast length="32" start="64" type="61"/>
             </node>
-            <node kind="repeat" name="NROOT/Foo.basic_while.b0.while0_11" ref="$ROOT/Foo.basic_while/x">
+            <node id="NROOT/Foo.basic_while.b0.while0_11" kind="repeat" ref="ROOT/Foo.basic_while/$x">
               <link label="_loop" src="NROOT/Foo.basic_while.b0.while0_12"/>
               <ast length="32" start="64" type="61"/>
             </node>
-            <node kind="end" name="NROOT/Foo.basic_while.b0.while0_12" ref="$ROOT/Foo.basic_while/x">
+            <node id="NROOT/Foo.basic_while.b0.while0_12" kind="end" ref="ROOT/Foo.basic_while/$x">
               <link src="NROOT/Foo.basic_while.b0.while0_10"/>
               <link label="_begin" src="NROOT/Foo.basic_while.b0.while0_10"/>
-              <link label="cond" src="NROOT/Foo.basic_while.b0.while0_6"/>
+              <link label="cond" src="NROOT/Foo.basic_while.b0_6"/>
               <ast length="32" start="64" type="61"/>
             </node>
           </scope>
-          <node kind="assign" name="NROOT/Foo.basic_while.b0_13" ref="$ROOT/Foo.basic_while/x" type="@int">
+          <node id="NROOT/Foo.basic_while.b0_3" kind="ref" ref="ROOT/Foo.basic_while/$x" type="@int">
+            <link src="NROOT/Foo.basic_while.b0.while0_11"/>
+            <ast length="1" start="71" type="42"/>
+          </node>
+          <node data="0" id="NROOT/Foo.basic_while.b0_5" kind="const" type="@number">
+            <ast length="1" start="76" type="34"/>
+          </node>
+          <node data="!=" id="NROOT/Foo.basic_while.b0_6" kind="infix" type="@int">
+            <link label="L" src="NROOT/Foo.basic_while.b0_3"/>
+            <link label="R" src="NROOT/Foo.basic_while.b0_5"/>
+            <ast length="6" start="71" type="27"/>
+          </node>
+          <node id="NROOT/Foo.basic_while.b0_13" kind="assign" ref="ROOT/Foo.basic_while/$x" type="@int">
             <link src="NROOT/Foo.basic_while.b0_15"/>
             <ast length="1" start="98" type="42"/>
           </node>
-          <node kind="ref" name="NROOT/Foo.basic_while.b0_14" ref="$ROOT/Foo.basic_while/x" type="@int">
+          <node id="NROOT/Foo.basic_while.b0_14" kind="ref" ref="ROOT/Foo.basic_while/$x" type="@int">
             <link src="NROOT/Foo.basic_while.b0.while0_12"/>
             <ast length="1" start="98" type="42"/>
           </node>
-          <node data="++" kind="postfix" name="NROOT/Foo.basic_while.b0_15" ref="$ROOT/Foo.basic_while/x" type="@int">
+          <node data="++" id="NROOT/Foo.basic_while.b0_15" kind="postfix" ref="ROOT/Foo.basic_while/$x" type="@int">
             <link src="NROOT/Foo.basic_while.b0_14"/>
             <ast length="3" start="98" type="37"/>
           </node>
         </scope>
-        <node data="arg0" kind="arg" name="NROOT/Foo.basic_while_1" ref="$ROOT/Foo.basic_while/x" type="@int">
+        <node id="NROOT/Foo.basic_while_1" kind="input" ref="ROOT/Foo.basic_while/#arg0" type="@int">
           <ast length="5" start="54" type="44"/>
         </node>
-        <node kind="assign" name="NROOT/Foo.basic_while_2" ref="$ROOT/Foo.basic_while/x" type="@int">
+        <node id="NROOT/Foo.basic_while_2" kind="assign" ref="ROOT/Foo.basic_while/$x" type="@int">
           <link src="NROOT/Foo.basic_while_1"/>
           <ast length="5" start="54" type="44"/>
         </node>

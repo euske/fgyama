@@ -3,7 +3,6 @@ public class Foo {
 	while (true) {
 	    if (x != 0) { continue; }
 	    x -= 1;
-	    break;
 	}
         x++;
     }
