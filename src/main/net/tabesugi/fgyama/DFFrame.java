@@ -39,7 +39,7 @@ public class DFFrame {
     }
 
     public DFFrame(String label, DFFrame parent) {
-        assert(label != null);
+        assert label != null;
         _label = label;
         _parent = parent;
     }
@@ -65,7 +65,7 @@ public class DFFrame {
 
     public DFFrame getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
-        assert(_ast2child.containsKey(key));
+        assert _ast2child.containsKey(key);
         return _ast2child.get(key);
     }
 
@@ -440,7 +440,7 @@ public class DFFrame {
         } else if (expr instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
-            assert(anonDecl == null); // XXX anonymous class unsupported.
+            assert anonDecl == null; // XXX anonymous class unsupported.
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.build(finder, scope, expr1);

@@ -16,7 +16,7 @@ public class DFArrayType extends DFType {
 
     // DFArrayType
     public DFArrayType(DFType elemType, int ndims) {
-        assert(0 < ndims);
+        assert 0 < ndims;
         _elemType = elemType;
         _ndims = ndims;
     }

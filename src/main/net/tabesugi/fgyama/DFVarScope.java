@@ -88,7 +88,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFVarScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
-        assert(_ast2child.containsKey(key));
+        assert _ast2child.containsKey(key);
         return _ast2child.get(key);
     }
 
@@ -118,7 +118,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
     }
 
     public DFVarRef lookupThis() {
-        assert(_parent != null);
+        assert _parent != null;
         return _parent.lookupThis();
     }
 

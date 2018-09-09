@@ -101,8 +101,8 @@ public class DFTypeSpace {
 
     public DFKlass addKlass(DFKlass klass) {
         String id = klass.getKlassName();
-        assert(id.indexOf('.') < 0);
-        //assert(!_id2klass.containsKey(id));
+        assert id.indexOf('.') < 0;
+        //assert !_id2klass.containsKey(id);
         _id2klass.put(id, klass);
         //Logger.info("DFTypeSpace.addKlass: "+this+": "+id);
         return klass;

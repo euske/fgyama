@@ -217,7 +217,7 @@ class TypeCastNode extends ProgNode {
         DFGraph graph, DFVarScope scope, DFType type,
         ASTNode ast) {
         super(graph, scope, type, null, ast);
-        assert(type != null);
+        assert type != null;
     }
 
     @Override
@@ -240,7 +240,7 @@ class InstanceofNode extends ProgNode {
         DFGraph graph, DFVarScope scope,
         ASTNode ast, DFType type) {
         super(graph, scope, DFBasicType.BOOLEAN, null, ast);
-        assert(type != null);
+        assert type != null;
         this.type = type;
     }
 
@@ -386,11 +386,11 @@ class JoinNode extends ProgNode {
 
     public void recv(boolean cond, DFNode node) {
         if (cond) {
-            assert(!this.recvTrue);
+            assert !this.recvTrue;
             this.recvTrue = true;
             this.accept(node, "true");
         } else {
-            assert(!this.recvFalse);
+            assert !this.recvFalse;
             this.recvFalse = true;
             this.accept(node, "false");
         }
@@ -399,12 +399,12 @@ class JoinNode extends ProgNode {
     @Override
     public void close(DFNode node) {
         if (!this.recvTrue) {
-            assert(this.recvFalse);
+            assert this.recvFalse;
             this.recvTrue = true;
             this.accept(node, "true");
         }
         if (!this.recvFalse) {
-            assert(this.recvTrue);
+            assert this.recvTrue;
             this.recvFalse = true;
             this.accept(node, "false");
         }
@@ -565,7 +565,7 @@ class CreateObjectNode extends CallNode {
         DFGraph graph, DFVarScope scope, DFType type,
         ASTNode ast, DFNode obj) {
         super(graph, scope, type, null, ast);
-        assert(type != null);
+        assert type != null;
         if (obj != null) {
             this.accept(obj, "obj");
         }
@@ -1930,13 +1930,13 @@ public class Java2DF {
         for (ImportDeclaration importDecl : imports) {
             try {
                 // XXX support static import
-                assert(!importDecl.isStatic());
+                assert !importDecl.isStatic();
                 Name name = importDecl.getName();
                 if (importDecl.isOnDemand()) {
                     Logger.info("Import: "+name+".*");
                     finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
                 } else {
-                    assert(name.isQualifiedName());
+                    assert name.isQualifiedName();
                     DFKlass klass = this.rootSpace.getKlass(name);
                     Logger.info("Import: "+name);
                     importSpace.addKlass(klass);
@@ -1995,7 +1995,7 @@ public class Java2DF {
         // Ignore method prototypes.
         if (methodDecl.getBody() == null) return null;
         DFMethod method = klass.getMethodByAST(methodDecl);
-        assert(method != null);
+        assert method != null;
         DFTypeSpace methodSpace = method.getChildSpace();
         if (methodSpace != null) {
             finder = new DFTypeFinder(finder, methodSpace);

@@ -105,7 +105,7 @@ public class DFTypeFinder {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
             DFType genericType = this.resolve(ptype.getType());
-            assert(genericType instanceof DFKlass);
+            assert genericType instanceof DFKlass;
             DFKlass genericKlass = (DFKlass)genericType;
             DFType[] argTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
