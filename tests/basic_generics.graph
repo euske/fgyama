@@ -68,7 +68,7 @@
     <graph ins="" name="basic_generics/Moo" outs="">
       <scope name="basic_generics/Moo"/>
     </graph>
-    <graph ins="NROOT/basic_generics.test.b0_3" name="ROOT/basic_generics/test" outs="NROOT/basic_generics.test.b0_3 NROOT/basic_generics.test.b0_6 NROOT/basic_generics.test.b0_9">
+    <graph ins="NROOT/basic_generics.test.b0_3" name="ROOT/basic_generics/test" outs="NROOT/basic_generics.test.b0_10 NROOT/basic_generics.test.b0_11 NROOT/basic_generics.test.b0_7">
       <scope name="ROOT/basic_generics.test">
         <scope name="ROOT/basic_generics.test.b0">
           <node data="moo" id="NROOT/basic_generics.test.b0_1" kind="const" type="java.lang/String">
@@ -90,20 +90,28 @@
             <link label="obj" src="NROOT/basic_generics.test.b0_4"/>
             <ast length="9" start="353" type="32"/>
           </node>
-          <node id="NROOT/basic_generics.test.b0_6" kind="assign" ref="ROOT/basic_generics.test.b0/$b" type="java.lang/String">
+          <node id="NROOT/basic_generics.test.b0_6" kind="assign" ref="ROOT/basic_generics.test.b0/$moo" type="basic_generics/Moo&lt;&gt;">
+            <link label="obj" src="NROOT/basic_generics.test.b0_5"/>
+            <ast length="9" start="353" type="32"/>
+          </node>
+          <node id="NROOT/basic_generics.test.b0_7" kind="assign" ref="ROOT/basic_generics.test.b0/$b" type="java.lang/String">
             <link src="NROOT/basic_generics.test.b0_5"/>
             <ast length="13" start="349" type="59"/>
           </node>
-          <node id="NROOT/basic_generics.test.b0_7" kind="ref" ref="ROOT/basic_generics.test.b0/$moo" type="basic_generics/Moo&lt;&gt;">
-            <link src="NROOT/basic_generics.test.b0_3"/>
+          <node id="NROOT/basic_generics.test.b0_8" kind="ref" ref="ROOT/basic_generics.test.b0/$moo" type="basic_generics/Moo&lt;&gt;">
+            <link src="NROOT/basic_generics.test.b0_6"/>
             <ast length="3" start="390" type="42"/>
           </node>
-          <node data="basic_generics/Moo/copy" id="NROOT/basic_generics.test.b0_8" kind="call" type="basic_generics/Moo&lt;&gt;">
-            <link label="obj" src="NROOT/basic_generics.test.b0_7"/>
+          <node data="basic_generics/Moo/copy" id="NROOT/basic_generics.test.b0_9" kind="call" type="basic_generics/Moo&lt;&gt;">
+            <link label="obj" src="NROOT/basic_generics.test.b0_8"/>
             <ast length="10" start="390" type="32"/>
           </node>
-          <node id="NROOT/basic_generics.test.b0_9" kind="assign" ref="ROOT/basic_generics.test.b0/$boo" type="basic_generics/Moo&lt;&gt;">
-            <link src="NROOT/basic_generics.test.b0_8"/>
+          <node id="NROOT/basic_generics.test.b0_10" kind="assign" ref="ROOT/basic_generics.test.b0/$moo" type="basic_generics/Moo&lt;&gt;">
+            <link label="obj" src="NROOT/basic_generics.test.b0_9"/>
+            <ast length="10" start="390" type="32"/>
+          </node>
+          <node id="NROOT/basic_generics.test.b0_11" kind="assign" ref="ROOT/basic_generics.test.b0/$boo" type="basic_generics/Moo&lt;&gt;">
+            <link src="NROOT/basic_generics.test.b0_9"/>
             <ast length="16" start="384" type="59"/>
           </node>
         </scope>

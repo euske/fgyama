@@ -3,7 +3,7 @@
     <graph ins="" name="dom.meep.multi_xref1/baa" outs="">
       <scope name="dom.meep.multi_xref1/baa"/>
     </graph>
-    <graph ins="Ndom.meep/multi_xref1.moo.b0_3 Ndom.meep/multi_xref1.moo_2" name="dom.meep/multi_xref1/moo" outs="Ndom.meep/multi_xref1.moo.b0_3 Ndom.meep/multi_xref1.moo.b0_9">
+    <graph ins="Ndom.meep/multi_xref1.moo.b0_3 Ndom.meep/multi_xref1.moo_2" name="dom.meep/multi_xref1/moo" outs="Ndom.meep/multi_xref1.moo.b0_10 Ndom.meep/multi_xref1.moo.b0_8">
       <scope name="dom.meep/multi_xref1.moo">
         <scope name="dom.meep/multi_xref1.moo.b0">
           <node id="Ndom.meep/multi_xref1.moo.b0_1" kind="ref" ref="dom.meep/multi_xref1/#this" type="dom.meep/multi_xref1">
@@ -30,18 +30,22 @@
             <link label="obj" src="Ndom.meep/multi_xref1.moo.b0_6"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node data="dom.meep/multi_xref2/bam" id="Ndom.meep/multi_xref1.moo.b0_8" kind="call" type="@int">
+          <node id="Ndom.meep/multi_xref1.moo.b0_8" kind="assign" ref="dom.meep/multi_xref1/.xref2" type="dom.meep/multi_xref2">
+            <link label="obj" src="Ndom.meep/multi_xref1.moo.b0_7"/>
+            <ast length="11" start="169" type="32"/>
+          </node>
+          <node data="dom.meep/multi_xref2/bam" id="Ndom.meep/multi_xref1.moo.b0_9" kind="call" type="@int">
             <ast length="17" start="190" type="32"/>
           </node>
-          <node id="Ndom.meep/multi_xref1.moo.b0_9" kind="fieldassign" ref="dom.dood/multi_xref3/.boo" type="@number">
-            <link src="Ndom.meep/multi_xref1.moo.b0_11"/>
+          <node id="Ndom.meep/multi_xref1.moo.b0_10" kind="fieldassign" ref="dom.dood/multi_xref3/.boo" type="@number">
+            <link src="Ndom.meep/multi_xref1.moo.b0_12"/>
             <ast length="24" start="217" type="40"/>
           </node>
-          <node data="123" id="Ndom.meep/multi_xref1.moo.b0_10" kind="const" type="@number">
+          <node data="123" id="Ndom.meep/multi_xref1.moo.b0_11" kind="const" type="@number">
             <ast length="3" start="244" type="34"/>
           </node>
-          <node data="=" id="Ndom.meep/multi_xref1.moo.b0_11" kind="assignop" ref="dom.dood/multi_xref3/.boo" type="@number">
-            <link label="R" src="Ndom.meep/multi_xref1.moo.b0_10"/>
+          <node data="=" id="Ndom.meep/multi_xref1.moo.b0_12" kind="assignop" ref="dom.dood/multi_xref3/.boo" type="@number">
+            <link label="R" src="Ndom.meep/multi_xref1.moo.b0_11"/>
             <ast length="30" start="217" type="7"/>
           </node>
         </scope>
@@ -53,7 +57,7 @@
     </graph>
   </file>
   <file path="tests/multi/dom/meep/multi_xref2.java">
-    <graph ins="Ndom.meep/multi_xref2.foo.b0_3 Ndom.meep/multi_xref2.foo_11 Ndom.meep/multi_xref2.foo_15 Ndom.meep/multi_xref2.foo_2 Ndom.meep/multi_xref2.foo_9" name="dom.meep/multi_xref2/foo" outs="Ndom.meep/multi_xref2.foo.b0_13 Ndom.meep/multi_xref2.foo.b0_3 Ndom.meep/multi_xref2.foo_9">
+    <graph ins="Ndom.meep/multi_xref2.foo.b0_3 Ndom.meep/multi_xref2.foo_10 Ndom.meep/multi_xref2.foo_12 Ndom.meep/multi_xref2.foo_16 Ndom.meep/multi_xref2.foo_2" name="dom.meep/multi_xref2/foo" outs="Ndom.meep/multi_xref2.foo.b0_14 Ndom.meep/multi_xref2.foo.b0_8 Ndom.meep/multi_xref2.foo_10">
       <scope name="dom.meep/multi_xref2.foo">
         <scope name="dom.meep/multi_xref2.foo.b0">
           <node id="Ndom.meep/multi_xref2.foo.b0_1" kind="ref" ref="dom.meep/multi_xref2/#this" type="dom.meep/multi_xref2">
@@ -80,36 +84,40 @@
             <link label="obj" src="Ndom.meep/multi_xref2.foo.b0_6"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_8" kind="ref" ref="dom.meep/multi_xref2.foo.b0/$zzz" type="dom.meep.multi_xref1/baa">
-            <link src="Ndom.meep/multi_xref2.foo_9"/>
+          <node id="Ndom.meep/multi_xref2.foo.b0_8" kind="assign" ref="dom.meep/multi_xref2/.xref1" type="dom.meep/multi_xref1">
+            <link label="obj" src="Ndom.meep/multi_xref2.foo.b0_7"/>
+            <ast length="11" start="129" type="32"/>
+          </node>
+          <node id="Ndom.meep/multi_xref2.foo.b0_9" kind="ref" ref="dom.meep/multi_xref2.foo.b0/$zzz" type="dom.meep.multi_xref1/baa">
+            <link src="Ndom.meep/multi_xref2.foo_10"/>
             <ast length="3" start="187" type="42"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_10" kind="fieldaccess" ref="dom.meep.multi_xref1/baa/.baz" type="@int">
-            <link src="Ndom.meep/multi_xref2.foo_11"/>
-            <link label="obj" src="Ndom.meep/multi_xref2.foo.b0_8"/>
+          <node id="Ndom.meep/multi_xref2.foo.b0_11" kind="fieldaccess" ref="dom.meep.multi_xref1/baa/.baz" type="@int">
+            <link src="Ndom.meep/multi_xref2.foo_12"/>
+            <link label="obj" src="Ndom.meep/multi_xref2.foo.b0_9"/>
             <ast length="7" start="187" type="40"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_12" kind="assign" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
-            <link src="Ndom.meep/multi_xref2.foo.b0_10"/>
+          <node id="Ndom.meep/multi_xref2.foo.b0_13" kind="assign" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
+            <link src="Ndom.meep/multi_xref2.foo.b0_11"/>
             <ast length="11" start="183" type="59"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_13" kind="assign" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
-            <link src="Ndom.meep/multi_xref2.foo.b0_16"/>
+          <node id="Ndom.meep/multi_xref2.foo.b0_14" kind="assign" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
+            <link src="Ndom.meep/multi_xref2.foo.b0_17"/>
             <ast length="1" start="204" type="42"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_14" kind="fieldaccess" ref="dom.dood/multi_xref3/.boo" type="@int">
-            <link src="Ndom.meep/multi_xref2.foo_15"/>
+          <node id="Ndom.meep/multi_xref2.foo.b0_15" kind="fieldaccess" ref="dom.dood/multi_xref3/.boo" type="@int">
+            <link src="Ndom.meep/multi_xref2.foo_16"/>
             <ast length="24" start="208" type="40"/>
           </node>
-          <node data="=" id="Ndom.meep/multi_xref2.foo.b0_16" kind="assignop" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
-            <link label="R" src="Ndom.meep/multi_xref2.foo.b0_14"/>
+          <node data="=" id="Ndom.meep/multi_xref2.foo.b0_17" kind="assignop" ref="dom.meep/multi_xref2.foo.b0/$b" type="@int">
+            <link label="R" src="Ndom.meep/multi_xref2.foo.b0_15"/>
             <ast length="28" start="204" type="7"/>
           </node>
         </scope>
         <node id="Ndom.meep/multi_xref2.foo_2" ref="dom.meep/multi_xref2/#this" type="dom.meep/multi_xref2"/>
-        <node id="Ndom.meep/multi_xref2.foo_9" ref="dom.meep/multi_xref2.foo.b0/$zzz" type="dom.meep.multi_xref1/baa"/>
-        <node id="Ndom.meep/multi_xref2.foo_11" ref="dom.meep.multi_xref1/baa/.baz" type="@int"/>
-        <node id="Ndom.meep/multi_xref2.foo_15" ref="dom.dood/multi_xref3/.boo" type="@int"/>
+        <node id="Ndom.meep/multi_xref2.foo_10" ref="dom.meep/multi_xref2.foo.b0/$zzz" type="dom.meep.multi_xref1/baa"/>
+        <node id="Ndom.meep/multi_xref2.foo_12" ref="dom.meep.multi_xref1/baa/.baz" type="@int"/>
+        <node id="Ndom.meep/multi_xref2.foo_16" ref="dom.dood/multi_xref3/.boo" type="@int"/>
       </scope>
     </graph>
     <graph ins="" name="dom.meep/multi_xref2/bam" outs="Ndom.meep/multi_xref2.bam.b0_2">
@@ -130,7 +138,7 @@
     </graph>
   </file>
   <file path="tests/multi/dom/dood/multi_xref3.java">
-    <graph ins="Ndom.dood/multi_xref3.baa.b0_2" name="dom.dood/multi_xref3/baa" outs="Ndom.dood/multi_xref3.baa.b0_2">
+    <graph ins="Ndom.dood/multi_xref3.baa.b0_2" name="dom.dood/multi_xref3/baa" outs="Ndom.dood/multi_xref3.baa.b0_5">
       <scope name="dom.dood/multi_xref3.baa">
         <scope name="dom.dood/multi_xref3.baa.b0">
           <node data="dom.meep/multi_xref1" id="Ndom.dood/multi_xref3.baa.b0_1" kind="new" type="dom.meep/multi_xref1">
@@ -146,6 +154,10 @@
           </node>
           <node data="dom.meep/multi_xref1/foo?" id="Ndom.dood/multi_xref3.baa.b0_4" kind="call">
             <link label="obj" src="Ndom.dood/multi_xref3.baa.b0_3"/>
+            <ast length="11" start="175" type="32"/>
+          </node>
+          <node id="Ndom.dood/multi_xref3.baa.b0_5" kind="assign" ref="dom.dood/multi_xref3.baa.b0/$xref1" type="dom.meep/multi_xref1">
+            <link label="obj" src="Ndom.dood/multi_xref3.baa.b0_4"/>
             <ast length="11" start="175" type="32"/>
           </node>
         </scope>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_return.java">
-    <graph ins="NROOT/Foo.basic_single.b0_12 NROOT/Foo.basic_single_2 NROOT/Foo.basic_single_4 NROOT/Foo.basic_single_6 NROOT/Foo.basic_single_7" name="ROOT/Foo/basic_single:@int:@int:@int" outs="NROOT/Foo.basic_single.b0_12 NROOT/Foo.basic_single.b0_19">
+    <graph ins="NROOT/Foo.basic_single.b0_13 NROOT/Foo.basic_single_2 NROOT/Foo.basic_single_4 NROOT/Foo.basic_single_6 NROOT/Foo.basic_single_7" name="ROOT/Foo/basic_single:@int:@int:@int" outs="NROOT/Foo.basic_single.b0_13 NROOT/Foo.basic_single.b0_20">
       <scope name="ROOT/Foo.basic_single">
         <scope name="ROOT/Foo.basic_single.b0">
           <node id="NROOT/Foo.basic_single.b0_8" kind="ref" ref="ROOT/Foo.basic_single/$a" type="@int">
@@ -21,38 +21,42 @@
             <link label="obj" src="NROOT/Foo.basic_single_7"/>
             <ast length="8" start="189" type="32"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="ROOT/Foo.basic_single.b0/$d" type="@int">
+          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="ROOT/Foo/#this" type="ROOT/Foo">
+            <link label="obj" src="NROOT/Foo.basic_single.b0_11"/>
+            <ast length="8" start="189" type="32"/>
+          </node>
+          <node id="NROOT/Foo.basic_single.b0_13" kind="assign" ref="ROOT/Foo.basic_single.b0/$d" type="@int">
             <link src="NROOT/Foo.basic_single.b0_11"/>
             <ast length="12" start="185" type="59"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_13" kind="ref" ref="ROOT/Foo.basic_single/$a" type="@int">
+          <node id="NROOT/Foo.basic_single.b0_14" kind="ref" ref="ROOT/Foo.basic_single/$a" type="@int">
             <link src="NROOT/Foo.basic_single_2"/>
             <ast length="1" start="231" type="42"/>
           </node>
-          <node data="-" id="NROOT/Foo.basic_single.b0_14" kind="prefix" type="@int">
-            <link src="NROOT/Foo.basic_single.b0_13"/>
+          <node data="-" id="NROOT/Foo.basic_single.b0_15" kind="prefix" type="@int">
+            <link src="NROOT/Foo.basic_single.b0_14"/>
             <ast length="2" start="230" type="38"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_15" kind="ref" ref="ROOT/Foo.basic_single.b0/$d" type="@int">
-            <link src="NROOT/Foo.basic_single.b0_12"/>
+          <node id="NROOT/Foo.basic_single.b0_16" kind="ref" ref="ROOT/Foo.basic_single.b0/$d" type="@int">
+            <link src="NROOT/Foo.basic_single.b0_13"/>
             <ast length="1" start="236" type="42"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_16" kind="ref" ref="ROOT/Foo.basic_single/$c" type="@int">
+          <node id="NROOT/Foo.basic_single.b0_17" kind="ref" ref="ROOT/Foo.basic_single/$c" type="@int">
             <link src="NROOT/Foo.basic_single_6"/>
             <ast length="1" start="240" type="42"/>
           </node>
-          <node data="*" id="NROOT/Foo.basic_single.b0_17" kind="infix" type="@int">
-            <link label="L" src="NROOT/Foo.basic_single.b0_15"/>
-            <link label="R" src="NROOT/Foo.basic_single.b0_16"/>
+          <node data="*" id="NROOT/Foo.basic_single.b0_18" kind="infix" type="@int">
+            <link label="L" src="NROOT/Foo.basic_single.b0_16"/>
+            <link label="R" src="NROOT/Foo.basic_single.b0_17"/>
             <ast length="5" start="236" type="27"/>
           </node>
-          <node data="+" id="NROOT/Foo.basic_single.b0_18" kind="infix" type="@int">
-            <link label="L" src="NROOT/Foo.basic_single.b0_14"/>
-            <link label="R" src="NROOT/Foo.basic_single.b0_17"/>
+          <node data="+" id="NROOT/Foo.basic_single.b0_19" kind="infix" type="@int">
+            <link label="L" src="NROOT/Foo.basic_single.b0_15"/>
+            <link label="R" src="NROOT/Foo.basic_single.b0_18"/>
             <ast length="12" start="229" type="27"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_19" kind="output" ref="ROOT/Foo.basic_single/#return" type="@int">
-            <link src="NROOT/Foo.basic_single.b0_18"/>
+          <node id="NROOT/Foo.basic_single.b0_20" kind="output" ref="ROOT/Foo.basic_single/#return" type="@int">
+            <link src="NROOT/Foo.basic_single.b0_19"/>
             <ast length="20" start="222" type="41"/>
           </node>
         </scope>
