@@ -857,7 +857,7 @@ public class Java2DF {
                     graph, scope, methods, invoke, obj);
                 call.setArgs(args);
                 ctx.setRValue(call);
-                if (obj != null) {
+                if (obj != null && obj.getRef() != null) {
                     // the object is updated.
                     ctx.set(new ObjectUpdateNode(
                                 graph, scope, obj.getRef(), invoke, call));
@@ -898,7 +898,7 @@ public class Java2DF {
                     graph, scope, methods, sinvoke, obj);
                 call.setArgs(args);
                 ctx.setRValue(call);
-                if (obj != null) {
+                if (obj != null && obj.getRef() != null) {
                     // the object is updated.
                     ctx.set(new ObjectUpdateNode(
                                 graph, scope, obj.getRef(), sinvoke, call));

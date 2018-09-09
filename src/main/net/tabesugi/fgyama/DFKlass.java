@@ -74,7 +74,7 @@ public class DFKlass extends DFType {
     {
         if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFKlass)) return -1;
-        return this.isSubclassOf((DFKlass)type);
+        return ((DFKlass)type).isSubclassOf(this);
     }
 
     public void setParamTypes(DFParamType[] paramTypes) {
