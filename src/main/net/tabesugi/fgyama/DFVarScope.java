@@ -112,8 +112,6 @@ public class DFVarScope implements Comparable<DFVarScope> {
         DFVarRef ref = _id2ref.get(id);
         if (ref != null) {
             return ref;
-        } else if (_parent != null) {
-            return _parent.lookupRef(id);
         } else {
             throw new VariableNotFound(id);
         }
@@ -126,22 +124,42 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFVarRef lookupVar(SimpleName name)
         throws VariableNotFound {
-        return this.lookupRef("$"+name.getIdentifier());
+        try {
+            return this.lookupRef("$"+name.getIdentifier());
+        } catch (VariableNotFound e) {
+            if (_parent == null) throw e;
+            return _parent.lookupVar(name);
+        }
     }
 
     public DFVarRef lookupArgument(int index)
         throws VariableNotFound {
-        return this.lookupRef("#arg"+index);
+        try {
+            return this.lookupRef("#arg"+index);
+        } catch (VariableNotFound e) {
+            if (_parent == null) throw e;
+            return _parent.lookupArgument(index);
+        }
     }
 
     public DFVarRef lookupReturn()
         throws VariableNotFound {
-        return this.lookupRef("#return");
+        try {
+            return this.lookupRef("#return");
+        } catch (VariableNotFound e) {
+            if (_parent == null) throw e;
+            return _parent.lookupReturn();
+        }
     }
 
     public DFVarRef lookupException()
         throws VariableNotFound {
-        return this.lookupRef("#exception");
+        try {
+            return this.lookupRef("#exception");
+        } catch (VariableNotFound e) {
+            if (_parent == null) throw e;
+            return _parent.lookupException();
+        }
     }
 
     public DFVarRef lookupArray(DFType type)

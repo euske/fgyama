@@ -16,6 +16,7 @@ public class DFParamKlass extends DFKlass {
 
     public DFParamKlass(DFKlass genericKlass, DFType[] argTypes) {
         super(genericKlass.getKlassName()+"<>", genericKlass);
+        _genericKlass = genericKlass;
         _argTypes = argTypes;
     }
 
