@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><fgyama>
+  <file path="tests/basic_enum.java">
+    <graph ins="NROOT/basic_enum.foo.b0_3 NROOT/basic_enum.foo_2 NROOT/basic_enum.foo_9" name="ROOT/basic_enum/foo" outs="NROOT/basic_enum.foo.b0_3">
+      <scope name="ROOT/basic_enum.foo">
+        <scope name="ROOT/basic_enum.foo.b0">
+          <scope name="ROOT/basic_enum.foo.b0.switch0">
+            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_5" kind="case" type="ROOT/E">
+              <link src="NROOT/basic_enum.foo.b0_4"/>
+              <link label="match0" src="NROOT/basic_enum.foo.b0_6"/>
+              <ast length="9" start="210" type="49"/>
+            </node>
+            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_7" kind="case" type="ROOT/E">
+              <link src="NROOT/basic_enum.foo.b0_4"/>
+              <link label="match0" src="NROOT/basic_enum.foo.b0_8"/>
+              <ast length="9" start="247" type="49"/>
+            </node>
+          </scope>
+          <node id="NROOT/basic_enum.foo.b0_1" kind="fieldaccess" ref="ROOT/E/.Moo" type="ROOT/E">
+            <link src="NROOT/basic_enum.foo_2"/>
+            <ast length="5" start="174" type="40"/>
+          </node>
+          <node id="NROOT/basic_enum.foo.b0_3" kind="assign" ref="ROOT/basic_enum.foo.b0/$x" type="ROOT/E">
+            <link src="NROOT/basic_enum.foo.b0_1"/>
+            <ast length="9" start="170" type="59"/>
+          </node>
+          <node id="NROOT/basic_enum.foo.b0_4" kind="ref" ref="ROOT/basic_enum.foo.b0/$x" type="ROOT/E">
+            <link src="NROOT/basic_enum.foo.b0_3"/>
+            <ast length="1" start="197" type="42"/>
+          </node>
+          <node id="NROOT/basic_enum.foo.b0_6" kind="fieldaccess" ref="ROOT/E/.Moo" type="ROOT/E">
+            <link src="NROOT/basic_enum.foo_2"/>
+            <ast length="3" start="215" type="42"/>
+          </node>
+          <node id="NROOT/basic_enum.foo.b0_8" kind="fieldaccess" ref="ROOT/E/.Baa" type="ROOT/E">
+            <link src="NROOT/basic_enum.foo_9"/>
+            <ast length="3" start="252" type="42"/>
+          </node>
+        </scope>
+        <node id="NROOT/basic_enum.foo_2" ref="ROOT/E/.Moo" type="ROOT/E"/>
+        <node id="NROOT/basic_enum.foo_9" ref="ROOT/E/.Baa" type="ROOT/E"/>
+      </scope>
+    </graph>
+    <graph ins="" name="ROOT/basic_enum" outs="">
+      <scope name="ROOT/basic_enum"/>
+    </graph>
+  </file>
+</fgyama>
