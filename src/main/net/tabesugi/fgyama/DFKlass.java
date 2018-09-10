@@ -61,8 +61,7 @@ public class DFKlass extends DFType {
         return ("<DFKlass("+this.getFullName()+")>");
     }
 
-    public String getTypeName()
-    {
+    public String getTypeName() {
         return this.getFullName();
     }
 
@@ -95,6 +94,10 @@ public class DFKlass extends DFType {
 
     public DFKlass getBase() {
         return _baseKlass;
+    }
+
+    public boolean isEnum() {
+        return _baseKlass == DFRootTypeSpace.ENUM_KLASS;
     }
 
     public String getFullName() {
@@ -338,6 +341,36 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, EnumDeclaration enumDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
+        // Get superclass.
+        try {
+            finder = new DFTypeFinder(finder, _childSpace);
+            _baseKlass = DFRootTypeSpace.ENUM_KLASS;
+            // Get constants.
+            for (EnumConstantDeclaration econst :
+                     (List<EnumConstantDeclaration>) enumDecl.enumConstants()) {
+                this.build(finder, econst);
+            }
+            // Get interfaces.
+            List<Type> ifaces = enumDecl.superInterfaceTypes();
+            _baseIfaces = new DFKlass[ifaces.size()];
+            for (int i = 0; i < ifaces.size(); i++) {
+                _baseIfaces[i] = finder.resolveKlass(ifaces.get(i));
+            }
+            // Lookup child klasses.
+            for (BodyDeclaration body :
+                     (List<BodyDeclaration>) enumDecl.bodyDeclarations()) {
+                this.build(finder, body);
+            }
+        } catch (TypeNotFound e) {
+            e.setAst(enumDecl);
+            throw e;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, BodyDeclaration body)
         throws UnsupportedSyntax, TypeNotFound {
         if (body instanceof TypeDeclaration) {
@@ -388,6 +421,11 @@ public class DFKlass extends DFType {
             _ast2method.put(Utils.encodeASTNode(decl), method);
 
         } else if (body instanceof Initializer) {
+
+        } else if (body instanceof EnumConstantDeclaration) {
+            EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
+            // XXX ignore AnonymousClassDeclaration
+            this.addField(econst.getName(), false, this);
 
         } else {
             throw new UnsupportedSyntax(body);

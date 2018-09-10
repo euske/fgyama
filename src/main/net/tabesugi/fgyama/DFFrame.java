@@ -426,8 +426,7 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass =
-                finder.resolveKlass(scope.lookupThis().getRefType());
+            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType());
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInputRef(ref);
             return ref.getRefType();
@@ -538,21 +537,33 @@ public class DFFrame {
 
         } else if (stmt instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)stmt;
-            this.build(finder, scope, switchStmt.getExpression());
+            DFType type = this.build(finder, scope, switchStmt.getExpression());
+            DFKlass enumKlass = null;
+            if (type instanceof DFKlass &&
+                ((DFKlass)type).isEnum()) {
+                enumKlass = finder.resolveKlass(type);
+            }
             DFVarScope childScope = scope.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
-                childFrame.build(finder, childScope, cstmt);
+                if (cstmt instanceof SwitchCase) {
+                    SwitchCase switchCase = (SwitchCase)cstmt;
+                    Expression expr = switchCase.getExpression();
+                    if (expr != null) {
+                        if (enumKlass != null && expr instanceof SimpleName) {
+                            // special treatment for enum.
+                            DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
+                            this.addInputRef(ref);
+                        } else {
+                            childFrame.build(finder, childScope, expr);
+                        }
+                    }
+                } else {
+                    childFrame.build(finder, childScope, cstmt);
+                }
             }
             this.expandRefs(childFrame);
-
-        } else if (stmt instanceof SwitchCase) {
-            SwitchCase switchCase = (SwitchCase)stmt;
-            Expression expr = switchCase.getExpression();
-            if (expr != null) {
-                this.build(finder, scope, switchCase.getExpression());
-            }
 
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;

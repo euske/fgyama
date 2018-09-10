@@ -1479,6 +1479,12 @@ public class Java2DF {
             graph, finder, scope,
             frame, ctx, switchStmt.getExpression());
         DFNode switchValue = ctx.getRValue();
+        DFType type = switchValue.getNodeType();
+        DFKlass enumKlass = null;
+        if (type instanceof DFKlass &&
+            ((DFKlass)type).isEnum()) {
+            enumKlass = finder.resolveKlass(type);
+        }
         DFFrame switchFrame = frame.getChildByAST(switchStmt);
 
         SwitchCase switchCase = null;
@@ -1498,9 +1504,17 @@ public class Java2DF {
                 caseCtx = new DFContext(graph, switchScope);
                 Expression expr = switchCase.getExpression();
                 if (expr != null) {
-                    ctx = processExpression(
-                        graph, finder, switchScope, switchFrame, ctx, expr);
-                    caseNode.addMatch(ctx.getRValue());
+                    if (enumKlass != null && expr instanceof SimpleName) {
+                        // special treatment for enum.
+                        DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
+                        DFNode node = new FieldAccessNode(graph, scope, ref, expr, null);
+                        node.accept(ctx.get(ref));
+                        caseNode.addMatch(node);
+                    } else {
+                        ctx = processExpression(
+                            graph, finder, switchScope, switchFrame, ctx, expr);
+                        caseNode.addMatch(ctx.getRValue());
+                    }
                 } else {
                     // "default" case.
                 }
@@ -1908,17 +1922,24 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void buildInlineKlasses(
         DFTypeSpace typeSpace, DFTypeFinder finder,
-        AbstractTypeDeclaration abstDecl)
+        AbstractTypeDeclaration abstTypeDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        if (abstDecl instanceof TypeDeclaration) {
-            TypeDeclaration typeDecl = (TypeDeclaration)abstDecl;
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
             DFKlass klass = typeSpace.getKlass(typeDecl.getName());
             klass.build(finder, typeDecl);
             processBodyDeclarations(
                 finder, klass, typeDecl.bodyDeclarations());
+        } else if (abstTypeDecl instanceof EnumDeclaration) {
+            EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
+            DFKlass klass = typeSpace.getKlass(enumDecl.getName());
+            klass.build(finder, enumDecl);
+            processBodyDeclarations(
+                finder, klass, enumDecl.bodyDeclarations());
+        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+            ;
         } else {
-            // XXX enum not supported.
-            throw new UnsupportedSyntax(abstDecl);
+            throw new UnsupportedSyntax(abstTypeDecl);
         }
     }
 
@@ -2090,6 +2111,10 @@ public class Java2DF {
                         klassGraph, finder, scope,
                         frame, ctx, block);
                     frame.close(ctx);
+                } else if (body instanceof EnumConstantDeclaration) {
+                    EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
+                    // XXX ignore AnonymousClassDeclaration
+                    // XXX ignore Arguments
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
@@ -2154,7 +2179,9 @@ public class Java2DF {
                     DFKlass klass = typeSpace.getKlass(typeDecl.getName());
                     klass.build(finder, typeDecl);
                 } else if (abstTypeDecl instanceof EnumDeclaration) {
-                    // XXX enum not supported.
+                    EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
+                    DFKlass klass = typeSpace.getKlass(enumDecl.getName());
+                    klass.build(finder, enumDecl);
                 }
             }
         } catch (UnsupportedSyntax e) {

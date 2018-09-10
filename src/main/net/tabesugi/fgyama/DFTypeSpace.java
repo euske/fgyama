@@ -165,8 +165,7 @@ public class DFTypeSpace {
         if (abstTypeDecl instanceof TypeDeclaration) {
             this.build(klasses, (TypeDeclaration)abstTypeDecl, parent);
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            // XXX enum not supported.
-            //this.build(klasses, (EnumDeclaration)abstTypeDecl, parent);
+            this.build(klasses, (EnumDeclaration)abstTypeDecl, parent);
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
             ;
         } else {
@@ -197,6 +196,23 @@ public class DFTypeSpace {
         klass.setParamTypes(pts);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
+            child.build(klasses, body, klass.getScope());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void build(
+        List<DFKlass> klasses,
+        EnumDeclaration enumDecl, DFVarScope parent)
+        throws UnsupportedSyntax {
+        //Logger.info("DFTypeSpace.build: "+this+": "+enumDecl.getName());
+        DFKlass klass = this.createKlass(parent, enumDecl.getName());
+        if (klasses != null) {
+            klasses.add(klass);
+        }
+        DFTypeSpace child = klass.getChildSpace();
+        for (BodyDeclaration body :
+                 (List<BodyDeclaration>) enumDecl.bodyDeclarations()) {
             child.build(klasses, body, klass.getScope());
         }
     }
