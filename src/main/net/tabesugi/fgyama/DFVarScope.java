@@ -101,7 +101,8 @@ public class DFVarScope implements Comparable<DFVarScope> {
     protected DFVarRef addRef(String id, DFType type) {
         DFVarRef ref = _id2ref.get(id);
         if (ref == null) {
-            ref = new DFVarRef(this, id, type);
+            DFVarScope scope = (id.startsWith("#"))? null : this;
+            ref = new DFVarRef(scope, id, type);
             _id2ref.put(id, ref);
         }
         return ref;
