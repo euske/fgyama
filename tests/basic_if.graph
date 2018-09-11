@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_if.java">
-    <graph ins="NROOT/Foo.basic_if_2" name="ROOT/Foo/basic_if:@int" outs="NROOT/Foo.basic_if.b0_12">
+    <graph ins="" name="ROOT/Foo/basic_if:@int" outs="">
       <scope name="ROOT/Foo.basic_if">
         <scope name="ROOT/Foo.basic_if.b0">
           <scope name="ROOT/Foo.basic_if.b0.b0">

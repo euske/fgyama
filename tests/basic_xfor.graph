@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_xfor.java">
-    <graph ins="NROOT/Foo.basic_xfor.b0.efor0_8 NROOT/Foo.basic_xfor.b0_4 NROOT/Foo.basic_xfor_2" name="ROOT/Foo/basic_xfor:@int[]" outs="NROOT/Foo.basic_xfor.b0.efor0_16 NROOT/Foo.basic_xfor.b0_18">
+    <graph ins="" name="ROOT/Foo/basic_xfor:@int[]" outs="NROOT/Foo.basic_xfor.b0_18">
       <scope name="ROOT/Foo.basic_xfor">
         <scope name="ROOT/Foo.basic_xfor.b0">
           <scope name="ROOT/Foo.basic_xfor.b0.efor0">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_switch.java">
-    <graph ins="NROOT/Foo.basic_switch_2 NROOT/Foo.basic_switch_8" name="ROOT/Foo/basic_switch:@int" outs="NROOT/Foo.basic_switch.b0.switch0_16 NROOT/Foo.basic_switch.b0_21">
+    <graph ins="" name="ROOT/Foo/basic_switch:@int" outs="NROOT/Foo.basic_switch.b0_21">
       <scope name="ROOT/Foo.basic_switch">
         <scope name="ROOT/Foo.basic_switch.b0">
           <scope name="ROOT/Foo.basic_switch.b0.switch0">

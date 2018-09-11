@@ -57,7 +57,7 @@
     </graph>
   </file>
   <file path="tests/multi/dom/meep/multi_xref2.java">
-    <graph ins="Ndom.meep/multi_xref2.foo.b0_3 Ndom.meep/multi_xref2.foo_10 Ndom.meep/multi_xref2.foo_12 Ndom.meep/multi_xref2.foo_16 Ndom.meep/multi_xref2.foo_2" name="dom.meep/multi_xref2/foo" outs="Ndom.meep/multi_xref2.foo.b0_14 Ndom.meep/multi_xref2.foo.b0_8 Ndom.meep/multi_xref2.foo_10">
+    <graph ins="Ndom.meep/multi_xref2.foo.b0_3 Ndom.meep/multi_xref2.foo_12 Ndom.meep/multi_xref2.foo_16 Ndom.meep/multi_xref2.foo_2" name="dom.meep/multi_xref2/foo" outs="Ndom.meep/multi_xref2.foo.b0_8">
       <scope name="dom.meep/multi_xref2.foo">
         <scope name="dom.meep/multi_xref2.foo.b0">
           <node id="Ndom.meep/multi_xref2.foo.b0_1" kind="ref" ref="dom.meep/multi_xref2/_this" type="dom.meep/multi_xref2">
@@ -138,7 +138,7 @@
     </graph>
   </file>
   <file path="tests/multi/dom/dood/multi_xref3.java">
-    <graph ins="Ndom.dood/multi_xref3.baa.b0_2" name="dom.dood/multi_xref3/baa" outs="Ndom.dood/multi_xref3.baa.b0_5">
+    <graph ins="" name="dom.dood/multi_xref3/baa" outs="">
       <scope name="dom.dood/multi_xref3.baa">
         <scope name="dom.dood/multi_xref3.baa.b0">
           <node data="dom.meep/multi_xref1" id="Ndom.dood/multi_xref3.baa.b0_1" kind="new" type="dom.meep/multi_xref1">

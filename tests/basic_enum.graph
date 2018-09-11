@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_enum.java">
-    <graph ins="NROOT/basic_enum.foo.b0_3 NROOT/basic_enum.foo_2 NROOT/basic_enum.foo_9" name="ROOT/basic_enum/foo" outs="NROOT/basic_enum.foo.b0_3">
+    <graph ins="NROOT/basic_enum.foo_2 NROOT/basic_enum.foo_9" name="ROOT/basic_enum/foo" outs="">
       <scope name="ROOT/basic_enum.foo">
         <scope name="ROOT/basic_enum.foo.b0">
           <scope name="ROOT/basic_enum.foo.b0.switch0">

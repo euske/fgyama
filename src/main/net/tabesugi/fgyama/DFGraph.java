@@ -53,10 +53,15 @@ public class DFGraph {
     }
 
     private static String getNodeIds(DFNode[] nodes) {
-        String[] names = new String[nodes.length];
-        for (int i = 0; i < nodes.length; i++) {
-            names[i] = nodes[i].getNodeId();
+        List<String> nodeIds = new ArrayList<String>();
+        for (DFNode node : nodes) {
+            DFVarRef ref = node.getRef();
+            if (ref != null && !ref.isLocal()) {
+                nodeIds.add(node.getNodeId());
+            }
         }
+        String[] names = new String[nodeIds.size()];
+        nodeIds.toArray(names);
         Arrays.sort(names);
         return Utils.join(" ", names);
     }

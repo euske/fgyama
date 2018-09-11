@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph ins="Nbasic_generics/Moo.Moo_2 Nbasic_generics/Moo.Moo_4" name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T" outs="Nbasic_generics/Moo.Moo.b0_5">
+    <graph ins="Nbasic_generics/Moo.Moo_4" name="basic_generics/Moo/Moo:Tbasic_generics.Moo/T" outs="Nbasic_generics/Moo.Moo.b0_5">
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
           <node id="Nbasic_generics/Moo.Moo.b0_3" kind="ref" ref="basic_generics/Moo/_this" type="basic_generics/Moo">
@@ -68,7 +68,7 @@
     <graph ins="" name="basic_generics/Moo" outs="">
       <scope name="basic_generics/Moo"/>
     </graph>
-    <graph ins="NROOT/basic_generics.test.b0_3" name="ROOT/basic_generics/test" outs="NROOT/basic_generics.test.b0_10 NROOT/basic_generics.test.b0_11 NROOT/basic_generics.test.b0_7">
+    <graph ins="" name="ROOT/basic_generics/test" outs="">
       <scope name="ROOT/basic_generics.test">
         <scope name="ROOT/basic_generics.test.b0">
           <node data="moo" id="NROOT/basic_generics.test.b0_1" kind="const" type="java.lang/String">
@@ -117,7 +117,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="NROOT/basic_generics.foo_2" name="ROOT/basic_generics/foo:TMethodDecl/T" outs="NROOT/basic_generics.foo.b0_4">
+    <graph ins="" name="ROOT/basic_generics/foo:TMethodDecl/T" outs="NROOT/basic_generics.foo.b0_4">
       <scope name="ROOT/basic_generics.foo">
         <scope name="ROOT/basic_generics.foo.b0">
           <node id="NROOT/basic_generics.foo.b0_3" kind="ref" ref="ROOT/basic_generics.foo/$x" type="TMethodDecl/T">
