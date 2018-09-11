@@ -295,6 +295,11 @@ public class DFKlass extends DFType {
         if (_baseKlass != null) {
             finder = _baseKlass.addFinders(finder);
         }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                finder = iface.addFinders(finder);
+            }
+        }
         finder = new DFTypeFinder(finder, _childSpace);
         return finder;
     }
@@ -317,6 +322,7 @@ public class DFKlass extends DFType {
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
                 _baseIfaces[i] = finder.resolveKlass(ifaces.get(i));
+                finder = _baseIfaces[i].addFinders(finder);
             }
             // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
@@ -373,8 +379,15 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, BodyDeclaration body)
         throws UnsupportedSyntax, TypeNotFound {
+        assert body != null;
+
         if (body instanceof TypeDeclaration) {
             TypeDeclaration decl = (TypeDeclaration)body;
+            DFKlass klass = _childSpace.getKlass(decl.getName());
+            klass.build(finder, decl);
+
+        } else if (body instanceof EnumDeclaration) {
+            EnumDeclaration decl = (EnumDeclaration)body;
             DFKlass klass = _childSpace.getKlass(decl.getName());
             klass.build(finder, decl);
 

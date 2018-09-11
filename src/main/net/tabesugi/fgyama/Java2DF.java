@@ -643,6 +643,8 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
+        assert expr != null;
+
         try {
             if (expr instanceof Annotation) {
 
@@ -1077,6 +1079,7 @@ public class Java2DF {
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(scope.getFullName()+"/"+id);
                 DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope);
+                assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
                 } else if (body instanceof Expression) {
@@ -1122,6 +1125,7 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
+        assert expr != null;
 
         if (expr instanceof Name) {
             Name name = (Name)expr;
@@ -1491,6 +1495,7 @@ public class Java2DF {
         CaseNode caseNode = null;
         DFContext caseCtx = null;
         for (Statement stmt : (List<Statement>) switchStmt.statements()) {
+            assert stmt != null;
             if (stmt instanceof SwitchCase) {
                 if (caseCtx != null) {
                     // switchCase, caseNode and caseCtx must be non-null.
@@ -1647,6 +1652,7 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
+        assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
             // XXX Ignore asserts.
@@ -1820,6 +1826,7 @@ public class Java2DF {
     private void buildInlineKlasses(
         DFTypeSpace typeSpace, DFTypeFinder finder, Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
+        assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
 
@@ -1924,6 +1931,7 @@ public class Java2DF {
         DFTypeSpace typeSpace, DFTypeFinder finder,
         AbstractTypeDeclaration abstTypeDecl)
         throws UnsupportedSyntax, EntityNotFound {
+        assert abstTypeDecl != null;
         if (abstTypeDecl instanceof TypeDeclaration) {
             TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
             DFKlass klass = typeSpace.getKlass(typeDecl.getName());
@@ -2118,6 +2126,8 @@ public class Java2DF {
                 } else if (body instanceof AnnotationTypeMemberDeclaration) {
                     AnnotationTypeMemberDeclaration annot = (AnnotationTypeMemberDeclaration)body;
                     // XXX ignore annotations.
+                } else {
+                    throw new UnsupportedSyntax(body);
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
@@ -2185,6 +2195,8 @@ public class Java2DF {
                     EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
                     DFKlass klass = typeSpace.getKlass(enumDecl.getName());
                     klass.build(finder, enumDecl);
+                } else {
+                    throw new UnsupportedSyntax(abstTypeDecl);
                 }
             }
         } catch (UnsupportedSyntax e) {

@@ -198,6 +198,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, Statement ast)
         throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
 
         if (ast instanceof AssertStatement) {
 
@@ -381,6 +382,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, Expression ast)
         throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
 
         if (ast instanceof Annotation) {
 
@@ -548,6 +550,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
     @SuppressWarnings("unchecked")
     public void buildLeft(DFTypeFinder finder, Expression ast)
         throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
 
         if (ast instanceof Name) {
 

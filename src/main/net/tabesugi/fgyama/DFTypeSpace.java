@@ -162,6 +162,7 @@ public class DFTypeSpace {
         List<DFKlass> klasses,
         AbstractTypeDeclaration abstTypeDecl, DFVarScope parent)
         throws UnsupportedSyntax {
+        assert abstTypeDecl != null;
         if (abstTypeDecl instanceof TypeDeclaration) {
             this.build(klasses, (TypeDeclaration)abstTypeDecl, parent);
         } else if (abstTypeDecl instanceof EnumDeclaration) {
@@ -238,6 +239,7 @@ public class DFTypeSpace {
         List<DFKlass> klasses,
         BodyDeclaration body, DFVarScope parent)
         throws UnsupportedSyntax {
+        assert body != null;
         if (body instanceof AbstractTypeDeclaration) {
             this.build(klasses, (AbstractTypeDeclaration)body, parent);
         } else if (body instanceof FieldDeclaration) {
@@ -258,6 +260,7 @@ public class DFTypeSpace {
         List<DFKlass> klasses,
         Statement ast, DFVarScope parent)
         throws UnsupportedSyntax {
+        assert ast != null;
 
         if (ast instanceof AssertStatement) {
 

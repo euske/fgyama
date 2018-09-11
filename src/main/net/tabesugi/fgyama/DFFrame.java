@@ -161,6 +161,8 @@ public class DFFrame {
     private void buildAssignment(
         DFTypeFinder finder, DFVarScope scope, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
+        assert expr != null;
+
         if (expr instanceof Name) {
             Name name = (Name)expr;
             DFVarRef ref;
@@ -220,6 +222,8 @@ public class DFFrame {
     private DFType build(
         DFTypeFinder finder, DFVarScope scope, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
+        assert expr != null;
+
         if (expr instanceof Annotation) {
             return null;
 
@@ -491,6 +495,7 @@ public class DFFrame {
     public void build(
         DFTypeFinder finder, DFVarScope scope, Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
+        assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
 
