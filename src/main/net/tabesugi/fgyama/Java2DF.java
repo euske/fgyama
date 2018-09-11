@@ -2030,7 +2030,7 @@ public class Java2DF {
             finder = new DFTypeFinder(finder, methodSpace);
         }
         DFType[] argTypes = finder.resolveList(methodDecl);
-        DFVarScope scope = new DFVarScope(klass.getScope(), methodDecl.getName());
+        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), methodDecl.getName());
         // add a typespace for inline klasses.
         DFTypeSpace typeSpace = new DFTypeSpace(scope.getFullName()+"/inline");
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2112,11 +2112,12 @@ public class Java2DF {
                     }
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
-                    scope.build(finder, block);
-                    frame.build(finder, scope, block);
-                    DFContext ctx = new DFContext(klassGraph, scope);
+                    DFLocalVarScope local = new DFLocalVarScope(scope, "init");
+                    local.build(finder, block);
+                    frame.build(finder, local, block);
+                    DFContext ctx = new DFContext(klassGraph, local);
                     ctx = processStatement(
-                        klassGraph, finder, scope,
+                        klassGraph, finder, local,
                         frame, ctx, block);
                     frame.close(ctx);
                 } else if (body instanceof EnumConstantDeclaration) {

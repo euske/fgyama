@@ -42,6 +42,10 @@ public class DFVarRef implements Comparable<DFVarRef> {
         return _scope.compareTo(ref._scope);
     }
 
+    public boolean isLocal() {
+        return (_scope instanceof DFLocalVarScope);
+    }
+
     public String getRefName() {
         if (_scope != null) {
             return _scope.getFullName()+"/"+_name;
