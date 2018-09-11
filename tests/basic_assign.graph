@@ -62,21 +62,21 @@
             <ast length="8" start="125" type="7"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_multi_1" kind="input" ref="ROOT/Foo.basic_multi/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_multi_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="54" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_multi_2" kind="assign" ref="ROOT/Foo.basic_multi/$a" type="@int">
           <link src="NROOT/Foo.basic_multi_1"/>
           <ast length="5" start="54" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_multi_3" kind="input" ref="ROOT/Foo.basic_multi/#arg1" type="@int">
+        <node id="NROOT/Foo.basic_multi_3" kind="input" ref="#arg1" type="@int">
           <ast length="5" start="61" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_multi_4" kind="assign" ref="ROOT/Foo.basic_multi/$b" type="@int">
           <link src="NROOT/Foo.basic_multi_3"/>
           <ast length="5" start="61" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_multi_5" kind="input" ref="ROOT/Foo.basic_multi/#arg2" type="@int">
+        <node id="NROOT/Foo.basic_multi_5" kind="input" ref="#arg2" type="@int">
           <ast length="5" start="68" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_multi_6" kind="assign" ref="ROOT/Foo.basic_multi/$c" type="@int">

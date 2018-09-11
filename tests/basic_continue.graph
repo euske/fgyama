@@ -69,7 +69,7 @@
             <ast length="3" start="137" type="37"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_continue_1" kind="input" ref="ROOT/Foo.basic_continue/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_continue_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="57" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_continue_2" kind="assign" ref="ROOT/Foo.basic_continue/$x" type="@int">

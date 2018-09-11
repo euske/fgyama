@@ -21,7 +21,7 @@
             <link label="obj" src="NROOT/Foo.basic_single_7"/>
             <ast length="8" start="189" type="32"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="ROOT/Foo/#this" type="ROOT/Foo">
+          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="ROOT/Foo/_this" type="ROOT/Foo">
             <link label="obj" src="NROOT/Foo.basic_single.b0_11"/>
             <ast length="8" start="189" type="32"/>
           </node>
@@ -55,33 +55,33 @@
             <link label="R" src="NROOT/Foo.basic_single.b0_18"/>
             <ast length="12" start="229" type="27"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_20" kind="output" ref="ROOT/Foo.basic_single/#return" type="@int">
+          <node id="NROOT/Foo.basic_single.b0_20" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.basic_single.b0_19"/>
             <ast length="20" start="222" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_single_1" kind="input" ref="ROOT/Foo.basic_single/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_single_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="125" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_single_2" kind="assign" ref="ROOT/Foo.basic_single/$a" type="@int">
           <link src="NROOT/Foo.basic_single_1"/>
           <ast length="5" start="125" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_single_3" kind="input" ref="ROOT/Foo.basic_single/#arg1" type="@int">
+        <node id="NROOT/Foo.basic_single_3" kind="input" ref="#arg1" type="@int">
           <ast length="5" start="132" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_single_4" kind="assign" ref="ROOT/Foo.basic_single/$b" type="@int">
           <link src="NROOT/Foo.basic_single_3"/>
           <ast length="5" start="132" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_single_5" kind="input" ref="ROOT/Foo.basic_single/#arg2" type="@int">
+        <node id="NROOT/Foo.basic_single_5" kind="input" ref="#arg2" type="@int">
           <ast length="5" start="139" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_single_6" kind="assign" ref="ROOT/Foo.basic_single/$c" type="@int">
           <link src="NROOT/Foo.basic_single_5"/>
           <ast length="5" start="139" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_single_7" ref="ROOT/Foo/#this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.basic_single_7" ref="ROOT/Foo/_this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

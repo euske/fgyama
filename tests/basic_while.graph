@@ -60,7 +60,7 @@
             <ast length="3" start="98" type="37"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_while_1" kind="input" ref="ROOT/Foo.basic_while/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_while_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="54" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_while_2" kind="assign" ref="ROOT/Foo.basic_while/$x" type="@int">

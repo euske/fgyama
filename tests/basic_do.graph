@@ -86,12 +86,12 @@
             <link src="NROOT/Foo.basic_do.b0.do0_21"/>
             <ast length="1" start="126" type="42"/>
           </node>
-          <node id="NROOT/Foo.basic_do.b0_23" kind="output" ref="ROOT/Foo.basic_do/#return" type="@int">
+          <node id="NROOT/Foo.basic_do.b0_23" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.basic_do.b0_22"/>
             <ast length="9" start="119" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_do_1" kind="input" ref="ROOT/Foo.basic_do/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_do_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="50" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_do_2" kind="assign" ref="ROOT/Foo.basic_do/$x" type="@int">

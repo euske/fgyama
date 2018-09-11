@@ -74,12 +74,12 @@
             <link src="NROOT/Foo.basic_switch.b0.switch0_16"/>
             <ast length="1" start="176" type="42"/>
           </node>
-          <node id="NROOT/Foo.basic_switch.b0_21" kind="output" ref="ROOT/Foo.basic_switch/#return" type="@int">
+          <node id="NROOT/Foo.basic_switch.b0_21" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.basic_switch.b0_20"/>
             <ast length="9" start="169" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_switch_1" kind="input" ref="ROOT/Foo.basic_switch/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_switch_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="54" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_switch_2" kind="assign" ref="ROOT/Foo.basic_switch/$n" type="@int">

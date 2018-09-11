@@ -59,12 +59,12 @@
             <link src="NROOT/Foo.basic_xfor.b0.efor0_16"/>
             <ast length="1" start="118" type="42"/>
           </node>
-          <node id="NROOT/Foo.basic_xfor.b0_18" kind="output" ref="ROOT/Foo.basic_xfor/#return" type="@int">
+          <node id="NROOT/Foo.basic_xfor.b0_18" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.basic_xfor.b0_17"/>
             <ast length="9" start="111" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_xfor_1" kind="input" ref="ROOT/Foo.basic_xfor/#arg0" type="@int[]">
+        <node id="NROOT/Foo.basic_xfor_1" kind="input" ref="#arg0" type="@int[]">
           <ast length="7" start="52" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_xfor_2" kind="assign" ref="ROOT/Foo.basic_xfor/$a" type="@int[]">

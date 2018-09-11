@@ -48,7 +48,7 @@
             <link label="obj" src="NROOT/Foo.basic_ops_11"/>
             <ast length="9" start="97" type="32"/>
           </node>
-          <node id="NROOT/Foo.basic_ops.b0_15" kind="assign" ref="ROOT/Foo/#this" type="ROOT/Foo">
+          <node id="NROOT/Foo.basic_ops.b0_15" kind="assign" ref="ROOT/Foo/_this" type="ROOT/Foo">
             <link label="obj" src="NROOT/Foo.basic_ops.b0_14"/>
             <ast length="9" start="97" type="32"/>
           </node>
@@ -124,19 +124,19 @@
             <link src="NROOT/Foo.basic_ops.b0_28"/>
             <ast length="1" start="177" type="42"/>
           </node>
-          <node id="NROOT/Foo.basic_ops.b0_34" kind="output" ref="ROOT/Foo.basic_ops/#return" type="@int">
+          <node id="NROOT/Foo.basic_ops.b0_34" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.basic_ops.b0_33"/>
             <ast length="9" start="170" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_ops_1" kind="input" ref="ROOT/Foo.basic_ops/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_ops_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="51" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_ops_2" kind="assign" ref="ROOT/Foo.basic_ops/$x" type="@int">
           <link src="NROOT/Foo.basic_ops_1"/>
           <ast length="5" start="51" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_ops_11" ref="ROOT/Foo/#this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.basic_ops_11" ref="ROOT/Foo/_this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

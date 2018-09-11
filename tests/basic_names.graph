@@ -46,7 +46,7 @@
             <link label="obj" src="Ndom.meep/Foo.doit.b0_8"/>
             <ast length="5" start="241" type="40"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_10" kind="ref" ref="dom.meep/Foo/#this" type="dom.meep/Foo">
+          <node id="Ndom.meep/Foo.doit.b0_10" kind="ref" ref="dom.meep/Foo/_this" type="dom.meep/Foo">
             <link src="Ndom.meep/Foo.doit_11"/>
             <ast length="4" start="249" type="52"/>
           </node>
@@ -73,7 +73,7 @@
           </node>
         </scope>
         <node id="Ndom.meep/Foo.doit_2" ref="java.lang/System/.out" type="java.io/PrintStream"/>
-        <node id="Ndom.meep/Foo.doit_11" ref="dom.meep/Foo/#this" type="dom.meep/Foo"/>
+        <node id="Ndom.meep/Foo.doit_11" ref="dom.meep/Foo/_this" type="dom.meep/Foo"/>
         <node id="Ndom.meep/Foo.doit_13" ref="dom.meep/Foo/.y" type="@int"/>
       </scope>
     </graph>
@@ -84,12 +84,12 @@
             <link label="obj" src="Ndom.meep/Foo.meh_1"/>
             <ast length="6" start="315" type="32"/>
           </node>
-          <node id="Ndom.meep/Foo.meh.b0_3" kind="assign" ref="dom.meep/Foo/#this" type="dom.meep/Foo">
+          <node id="Ndom.meep/Foo.meh.b0_3" kind="assign" ref="dom.meep/Foo/_this" type="dom.meep/Foo">
             <link label="obj" src="Ndom.meep/Foo.meh.b0_2"/>
             <ast length="6" start="315" type="32"/>
           </node>
         </scope>
-        <node id="Ndom.meep/Foo.meh_1" ref="dom.meep/Foo/#this" type="dom.meep/Foo"/>
+        <node id="Ndom.meep/Foo.meh_1" ref="dom.meep/Foo/_this" type="dom.meep/Foo"/>
       </scope>
     </graph>
     <graph ins="Ndom.meep/Foo.main.b0_4" name="dom.meep/Foo/main:java.lang/String[]" outs="Ndom.meep/Foo.main.b0_7">
@@ -115,7 +115,7 @@
             <ast length="10" start="427" type="32"/>
           </node>
         </scope>
-        <node id="Ndom.meep/Foo.main_1" kind="input" ref="dom.meep/Foo.main/#arg0" type="java.lang/String[]">
+        <node id="Ndom.meep/Foo.main_1" kind="input" ref="#arg0" type="java.lang/String[]">
           <ast length="13" start="373" type="44"/>
         </node>
         <node id="Ndom.meep/Foo.main_2" kind="assign" ref="dom.meep/Foo.main/$args" type="java.lang/String[]">

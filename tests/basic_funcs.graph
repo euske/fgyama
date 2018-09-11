@@ -41,7 +41,7 @@
             <link label="obj" src="NROOT/basic_funcs.main_11"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_14" kind="assign" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs">
+          <node id="NROOT/basic_funcs.main.b0_14" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
             <link label="obj" src="NROOT/basic_funcs.main.b0_13"/>
             <ast length="6" start="154" type="32"/>
           </node>
@@ -67,7 +67,7 @@
             <ast length="21" start="170" type="32"/>
           </node>
         </scope>
-        <node id="NROOT/basic_funcs.main_1" kind="input" ref="ROOT/basic_funcs.main/#arg0" type="java.lang/String[]">
+        <node id="NROOT/basic_funcs.main_1" kind="input" ref="#arg0" type="java.lang/String[]">
           <ast length="13" start="56" type="44"/>
         </node>
         <node id="NROOT/basic_funcs.main_2" kind="assign" ref="ROOT/basic_funcs.main/$args" type="java.lang/String[]">
@@ -75,7 +75,7 @@
           <ast length="13" start="56" type="44"/>
         </node>
         <node id="NROOT/basic_funcs.main_6" ref="%:java.lang/String" type="java.lang/String"/>
-        <node id="NROOT/basic_funcs.main_11" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs"/>
+        <node id="NROOT/basic_funcs.main_11" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs"/>
         <node id="NROOT/basic_funcs.main_17" ref="java.lang/System/.out" type="java.io/PrintStream"/>
       </scope>
     </graph>
@@ -87,11 +87,11 @@
               <link label="obj" src="NROOT/basic_funcs.moo_20"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b0_8" kind="assign" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs">
+            <node id="NROOT/basic_funcs.moo.b0.b0_8" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
               <link label="obj" src="NROOT/basic_funcs.moo.b0.b0_7"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b0_9" kind="output" ref="ROOT/basic_funcs.moo/#return" type="@int">
+            <node id="NROOT/basic_funcs.moo.b0.b0_9" kind="output" ref="#return" type="@int">
               <link src="NROOT/basic_funcs.moo.b0.b0_7"/>
               <ast length="13" start="269" type="41"/>
             </node>
@@ -114,7 +114,7 @@
               <link label="obj" src="NROOT/basic_funcs.moo_20"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b1_16" kind="assign" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs">
+            <node id="NROOT/basic_funcs.moo.b0.b1_16" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
               <link label="obj" src="NROOT/basic_funcs.moo.b0.b1_15"/>
               <ast length="8" start="319" type="32"/>
             </node>
@@ -126,7 +126,7 @@
               <link label="R" src="NROOT/basic_funcs.moo.b0.b1_17"/>
               <ast length="10" start="319" type="27"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b1_19" kind="output" ref="ROOT/basic_funcs.moo/#return" type="@int">
+            <node id="NROOT/basic_funcs.moo.b0.b1_19" kind="output" ref="#return" type="@int">
               <link src="NROOT/basic_funcs.moo.b0.b1_18"/>
               <ast length="18" start="312" type="41"/>
             </node>
@@ -143,31 +143,31 @@
             <link label="R" src="NROOT/basic_funcs.moo.b0_4"/>
             <ast length="6" start="247" type="27"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_21" kind="join" ref="ROOT/basic_funcs.moo/#return">
+          <node id="NROOT/basic_funcs.moo.b0_21" kind="join" ref="#return">
             <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
             <link label="false" src="NROOT/basic_funcs.moo.b0.b1_19"/>
             <link label="true" src="NROOT/basic_funcs.moo.b0.b0_9"/>
             <ast length="97" start="243" type="25"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_22" kind="join" ref="ROOT/basic_funcs.moo/#return">
+          <node id="NROOT/basic_funcs.moo.b0_22" kind="join" ref="#return">
             <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
             <link label="false" src="NROOT/basic_funcs.moo.b0_21"/>
             <link label="true" src="NROOT/basic_funcs.moo.b0.b0_9"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_23" kind="join" ref="ROOT/basic_funcs.moo/#return">
+          <node id="NROOT/basic_funcs.moo.b0_23" kind="join" ref="#return">
             <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
             <link label="false" src="NROOT/basic_funcs.moo.b0.b1_19"/>
             <link label="true" src="NROOT/basic_funcs.moo.b0_22"/>
           </node>
         </scope>
-        <node id="NROOT/basic_funcs.moo_1" kind="input" ref="ROOT/basic_funcs.moo/#arg0" type="@int">
+        <node id="NROOT/basic_funcs.moo_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="226" type="44"/>
         </node>
         <node id="NROOT/basic_funcs.moo_2" kind="assign" ref="ROOT/basic_funcs.moo/$x" type="@int">
           <link src="NROOT/basic_funcs.moo_1"/>
           <ast length="5" start="226" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.moo_20" ref="ROOT/basic_funcs/#this" type="ROOT/basic_funcs"/>
+        <node id="NROOT/basic_funcs.moo_20" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/basic_funcs/foo" outs="NROOT/basic_funcs.foo.b0_2">
@@ -176,7 +176,7 @@
           <node data="3" id="NROOT/basic_funcs.foo.b0_1" kind="const" type="@number">
             <ast length="1" start="393" type="34"/>
           </node>
-          <node id="NROOT/basic_funcs.foo.b0_2" kind="output" ref="ROOT/basic_funcs.foo/#return" type="@int">
+          <node id="NROOT/basic_funcs.foo.b0_2" kind="output" ref="#return" type="@int">
             <link src="NROOT/basic_funcs.foo.b0_1"/>
             <ast length="9" start="386" type="41"/>
           </node>

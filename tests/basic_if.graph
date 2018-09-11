@@ -48,7 +48,7 @@
             <ast length="50" start="69" type="25"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.basic_if_1" kind="input" ref="ROOT/Foo.basic_if/#arg0" type="@int">
+        <node id="NROOT/Foo.basic_if_1" kind="input" ref="#arg0" type="@int">
           <ast length="5" start="51" type="44"/>
         </node>
         <node id="NROOT/Foo.basic_if_2" kind="assign" ref="ROOT/Foo.basic_if/$x" type="@int">

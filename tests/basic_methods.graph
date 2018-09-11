@@ -6,7 +6,7 @@
           <node data="object" id="NROOT/Object.toString.b0_1" kind="const" type="java.lang/String">
             <ast length="8" start="61" type="45"/>
           </node>
-          <node id="NROOT/Object.toString.b0_2" kind="output" ref="ROOT/Object.toString/#return" type="java.lang/String">
+          <node id="NROOT/Object.toString.b0_2" kind="output" ref="#return" type="java.lang/String">
             <link src="NROOT/Object.toString.b0_1"/>
             <ast length="16" start="54" type="41"/>
           </node>
@@ -35,7 +35,7 @@
           <node data="123" id="NROOT/Foo.fb/inline/moo.fc.b0_1" kind="const" type="@number">
             <ast length="3" start="317" type="34"/>
           </node>
-          <node id="NROOT/Foo.fb/inline/moo.fc.b0_2" kind="output" ref="ROOT/Foo.fb/inline/moo.fc/#return" type="@int">
+          <node id="NROOT/Foo.fb/inline/moo.fc.b0_2" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.fb/inline/moo.fc.b0_1"/>
             <ast length="11" start="310" type="41"/>
           </node>
@@ -51,7 +51,7 @@
           <node data="foo" id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" kind="const" type="java.lang/String">
             <ast length="5" start="257" type="45"/>
           </node>
-          <node id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" kind="output" ref="ROOT/Foo.fb.b0/anonymous/anonymous.toString/#return" type="java.lang/String">
+          <node id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" kind="output" ref="#return" type="java.lang/String">
             <link src="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1"/>
             <ast length="13" start="250" type="41"/>
           </node>
@@ -82,7 +82,7 @@
             <link label="obj" src="NROOT/Foo.fb_5"/>
             <ast length="4" start="335" type="32"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="ROOT/Foo/#this" type="ROOT/Foo">
+          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="ROOT/Foo/_this" type="ROOT/Foo">
             <link label="obj" src="NROOT/Foo.fb.b0_6"/>
             <ast length="4" start="335" type="32"/>
           </node>
@@ -106,7 +106,7 @@
             <ast length="13" start="375" type="59"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.fb_5" ref="ROOT/Foo/#this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.fb_5" ref="ROOT/Foo/_this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

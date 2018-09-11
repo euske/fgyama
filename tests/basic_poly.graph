@@ -12,12 +12,12 @@
             <link label="obj" src="NROOT/Foo.moo.b0_3"/>
             <ast length="5" start="72" type="40"/>
           </node>
-          <node id="NROOT/Foo.moo.b0_6" kind="output" ref="ROOT/Foo.moo/#return" type="@int">
+          <node id="NROOT/Foo.moo.b0_6" kind="output" ref="#return" type="@int">
             <link src="NROOT/Foo.moo.b0_4"/>
             <ast length="13" start="65" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.moo_1" kind="input" ref="ROOT/Foo.moo/#arg0" type="ROOT/Foo">
+        <node id="NROOT/Foo.moo_1" kind="input" ref="#arg0" type="ROOT/Foo">
           <ast length="7" start="46" type="44"/>
         </node>
         <node id="NROOT/Foo.moo_2" kind="assign" ref="ROOT/Foo.moo/$obj" type="ROOT/Foo">
@@ -50,7 +50,7 @@
             <link label="obj" src="NROOT/Baa.moo_3"/>
             <ast length="14" start="150" type="48"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="ROOT/Baa/#this" type="ROOT/Baa">
+          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="ROOT/Baa/_this" type="ROOT/Baa">
             <link label="obj" src="NROOT/Baa.moo.b0_5"/>
             <ast length="14" start="150" type="48"/>
           </node>
@@ -71,19 +71,19 @@
             <link label="R" src="NROOT/Baa.moo.b0_10"/>
             <ast length="7" start="181" type="27"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_12" kind="output" ref="ROOT/Baa.moo/#return" type="@int">
+          <node id="NROOT/Baa.moo.b0_12" kind="output" ref="#return" type="@int">
             <link src="NROOT/Baa.moo.b0_11"/>
             <ast length="15" start="174" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Baa.moo_1" kind="input" ref="ROOT/Baa.moo/#arg0" type="ROOT/Foo">
+        <node id="NROOT/Baa.moo_1" kind="input" ref="#arg0" type="ROOT/Foo">
           <ast length="7" start="131" type="44"/>
         </node>
         <node id="NROOT/Baa.moo_2" kind="assign" ref="ROOT/Baa.moo/$obj" type="ROOT/Foo">
           <link src="NROOT/Baa.moo_1"/>
           <ast length="7" start="131" type="44"/>
         </node>
-        <node id="NROOT/Baa.moo_3" ref="ROOT/Baa/#this" type="ROOT/Baa"/>
+        <node id="NROOT/Baa.moo_3" ref="ROOT/Baa/_this" type="ROOT/Baa"/>
         <node id="NROOT/Baa.moo_9" ref="ROOT/Foo/.x" type="@int"/>
       </scope>
     </graph>
