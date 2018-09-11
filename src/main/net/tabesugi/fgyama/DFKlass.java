@@ -420,12 +420,17 @@ public class DFKlass extends DFType {
                 argTypes, returnType);
             _ast2method.put(Utils.encodeASTNode(decl), method);
 
-        } else if (body instanceof Initializer) {
-
         } else if (body instanceof EnumConstantDeclaration) {
-            EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
+            EnumConstantDeclaration decl = (EnumConstantDeclaration)body;
             // XXX ignore AnonymousClassDeclaration
-            this.addField(econst.getName(), false, this);
+            this.addField(decl.getName(), false, this);
+
+        } else if (body instanceof AnnotationTypeMemberDeclaration) {
+            AnnotationTypeMemberDeclaration decl = (AnnotationTypeMemberDeclaration)body;
+            DFType type = finder.resolve(decl.getType());
+            this.addField(decl.getName(), isStatic(decl), type);
+
+        } else if (body instanceof Initializer) {
 
         } else {
             throw new UnsupportedSyntax(body);

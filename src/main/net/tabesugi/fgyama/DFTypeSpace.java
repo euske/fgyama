@@ -167,7 +167,7 @@ public class DFTypeSpace {
         } else if (abstTypeDecl instanceof EnumDeclaration) {
             this.build(klasses, (EnumDeclaration)abstTypeDecl, parent);
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            ;
+            this.build(klasses, (AnnotationTypeDeclaration)abstTypeDecl, parent);
         } else {
             throw new UnsupportedSyntax(abstTypeDecl);
         }
@@ -217,6 +217,23 @@ public class DFTypeSpace {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void build(
+        List<DFKlass> klasses,
+        AnnotationTypeDeclaration annotTypeDecl, DFVarScope parent)
+        throws UnsupportedSyntax {
+        //Logger.info("DFTypeSpace.build: "+this+": "+annotTypeDecl.getName());
+        DFKlass klass = this.createKlass(parent, annotTypeDecl.getName());
+        if (klasses != null) {
+            klasses.add(klass);
+        }
+        DFTypeSpace child = klass.getChildSpace();
+        for (BodyDeclaration body :
+                 (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {
+            child.build(klasses, body, klass.getScope());
+        }
+    }
+
     public void build(
         List<DFKlass> klasses,
         BodyDeclaration body, DFVarScope parent)
@@ -226,6 +243,8 @@ public class DFTypeSpace {
         } else if (body instanceof FieldDeclaration) {
             ;
         } else if (body instanceof MethodDeclaration) {
+            ;
+        } else if (body instanceof AnnotationTypeMemberDeclaration) {
             ;
         } else if (body instanceof Initializer) {
             ;

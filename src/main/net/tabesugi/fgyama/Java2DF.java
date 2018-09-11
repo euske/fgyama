@@ -2115,6 +2115,9 @@ public class Java2DF {
                     EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
                     // XXX ignore AnonymousClassDeclaration
                     // XXX ignore Arguments
+                } else if (body instanceof AnnotationTypeMemberDeclaration) {
+                    AnnotationTypeMemberDeclaration annot = (AnnotationTypeMemberDeclaration)body;
+                    // XXX ignore annotations.
                 }
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
