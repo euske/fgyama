@@ -124,7 +124,7 @@ public class UnitTestDF extends XMLTestCase {
 	compareXml(TESTDATA+"/basic_poly.java", TESTDATA+"/basic_poly.graph");
     }
     @Test
-    public void test_17_basic_poly() throws Exception {
+    public void test_17_basic_enum() throws Exception {
 	compareXml(TESTDATA+"/basic_enum.java", TESTDATA+"/basic_enum.graph");
     }
 
