@@ -16,8 +16,8 @@ public class DFKlass extends DFType {
 
     private String _name;
     private DFTypeSpace _typeSpace;
-    private DFTypeSpace _childSpace;
-    private DFVarScope _scope;
+    private DFTypeSpace _childSpace = null;
+    private DFVarScope _scope = null;
 
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
@@ -31,6 +31,12 @@ public class DFKlass extends DFType {
     private String _jarPath = null;
     private String _filePath = null;
     private boolean _loaded = true;
+
+    protected DFKlass(
+        String name, DFTypeSpace typeSpace) {
+        _name = name;
+        _typeSpace = typeSpace;
+    }
 
     public DFKlass(
         String name, DFTypeSpace typeSpace,
@@ -121,6 +127,9 @@ public class DFKlass extends DFType {
 
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
+        if (_scope == null) {
+            return _baseKlass.lookupField(id);
+        }
         try {
             return _scope.lookupRef("."+id);
         } catch (VariableNotFound e) {
@@ -172,6 +181,7 @@ public class DFKlass extends DFType {
 
     public DFVarRef addField(
         String id, boolean isStatic, DFType type) {
+        assert _scope != null;
         DFVarRef ref = _scope.addRef("."+id, type);
         //Logger.info("DFKlass.addField: "+ref);
         return ref;
@@ -272,6 +282,8 @@ public class DFKlass extends DFType {
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
             _baseKlass = finder.lookupKlass(superClass);
+        } else {
+            _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
         }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
@@ -342,6 +354,30 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, TypeParameter typeParam)
+        throws TypeNotFound {
+        try {
+            List<Type> bounds = typeParam.typeBounds();
+            if (0 < bounds.size()) {
+                _baseIfaces = new DFKlass[bounds.size()-1];
+                for (int i = 0; i < bounds.size(); i++) {
+                    DFKlass klass = finder.resolveKlass(bounds.get(i));
+                    Logger.info("DFKlass.build: "+this+": "+klass);
+                    if (i == 0) {
+                        _baseKlass = klass;
+                    } else {
+                        _baseIfaces[i-1] = klass;
+                    }
+                    finder = klass.addFinders(finder);
+                }
+            }
+        } catch (TypeNotFound e) {
+            e.setAst(typeParam);
+            throw e;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
@@ -405,7 +441,7 @@ public class DFKlass extends DFType {
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DFParamType pt = new DFParamType(methodSpace, i, id);
+                    DFParamType pt = new DFParamType(id, methodSpace, i);
                     methodSpace.addParamType(id, pt);
                     pt.build(finder2, tp);
                 }

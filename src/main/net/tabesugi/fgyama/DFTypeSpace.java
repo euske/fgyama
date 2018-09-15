@@ -190,7 +190,7 @@ public class DFTypeSpace {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFParamType pt = new DFParamType(child, i, id);
+            DFParamType pt = new DFParamType(id, child, i);
             child.addParamType(id, pt);
             pts[i] = pt;
         }

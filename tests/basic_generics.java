@@ -23,5 +23,5 @@ public class basic_generics {
         Moo<String> boo = moo.copy();
     }
 
-    public static <T> T foo(T x) { return x; }
+    public static <T,E extends Moo<T>> T foo(E x) { return x.get(); }
 }
