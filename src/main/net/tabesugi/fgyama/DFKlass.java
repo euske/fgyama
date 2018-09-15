@@ -282,8 +282,6 @@ public class DFKlass extends DFType {
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
             _baseKlass = finder.lookupKlass(superClass);
-        } else {
-            _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
         }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
@@ -328,6 +326,8 @@ public class DFKlass extends DFType {
                 _baseKlass = finder.resolveKlass(superClass);
                 //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
+            } else {
+                _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
             }
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
