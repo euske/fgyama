@@ -165,6 +165,7 @@ def main(argv):
             else:
                 # Connect data paths.
                 for (label,prev) in node.inputs.items():
+                    if label.startswith('_'): continue
                     v0 = vtxs[prev]
                     if prev.kind in ('call', 'new'):
                         # Receive a return value from the callee.
@@ -175,7 +176,8 @@ def main(argv):
                     outputs['SEND'] = v1
                 elif node.kind in ('call', 'new'):
                     # Send a passing value to the callee.
-                    args = { label: vtxs[src] for (label,src) in node.inputs.items() }
+                    args = { label: vtxs[src] for (label,src)
+                             in node.inputs.items() if not label.startswith('_') }
                     calls[node] = args
         print ('#%s inputs=%r' % (ind, inputs), file=sys.stderr)
         for (funcall,args) in calls.items():
