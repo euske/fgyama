@@ -60,4 +60,15 @@ public class DFParamType extends DFType {
     public void setBases(DFKlass[] bases) {
         _bases = bases;
     }
+
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, TypeParameter typeParam)
+        throws TypeNotFound {
+        List<Type> bounds = typeParam.typeBounds();
+        DFKlass[] bases = new DFKlass[bounds.size()];
+        for (int i = 0; i < bases.length; i++) {
+            bases[i] = finder.resolveKlass(bounds.get(i));
+        }
+        _bases = bases;
+    }
 }

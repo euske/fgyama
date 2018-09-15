@@ -328,12 +328,7 @@ public class DFKlass extends DFType {
             List<TypeParameter> tps = typeDecl.typeParameters();
             for (int i = 0; i < _paramTypes.length; i++) {
                 DFParamType pt = _paramTypes[i];
-                List<Type> bounds = tps.get(i).typeBounds();
-                DFKlass[] bases = new DFKlass[bounds.size()];
-                for (int j = 0; j < bases.length; j++) {
-                    bases[j] = finder.resolveKlass(bounds.get(j));
-                }
-                pt.setBases(bases);
+                pt.build(finder, tps.get(i));
             }
             // Lookup child klasses.
             for (BodyDeclaration body :
@@ -411,13 +406,8 @@ public class DFKlass extends DFType {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
                     DFParamType pt = new DFParamType(methodSpace, i, id);
-                    List<Type> bounds = tp.typeBounds();
-                    DFKlass[] bases = new DFKlass[bounds.size()];
-                    for (int j = 0; j < bases.length; j++) {
-                        bases[j] = finder.resolveKlass(bounds.get(j));
-                    }
-                    pt.setBases(bases);
                     methodSpace.addParamType(id, pt);
+                    pt.build(finder2, tp);
                 }
             }
             DFType[] argTypes = finder2.resolveList(decl);
