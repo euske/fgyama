@@ -12,6 +12,12 @@ def ns(x):
     else:
         return 'N'+str(x)
 
+def sp(x):
+    if x:
+        return x.split(' ')
+    else:
+        return []
+
 
 ##  DFGraph
 ##
@@ -24,6 +30,8 @@ class DFGraph:
         self.root = None
         self.scopes = {}
         self.nodes = {}
+        self.ins = []
+        self.outs = []
         return
 
     def __repr__(self):
@@ -116,7 +124,7 @@ class DFNode:
 
     def toxml(self):
         enode = Element('node')
-        enode.set('id', ns(self.nid))
+        enode.set('id', self.name)
         if self.kind is not None:
             enode.set('kind', self.kind)
         if self.data is not None:
@@ -152,8 +160,10 @@ class DFNode:
 def parse_graph(gid, egraph, src=None):
     assert egraph.tag == 'graph'
     gname = egraph.get('name')
+    ins = sp(egraph.get('ins'))
+    outs = sp(egraph.get('outs'))
     graph = DFGraph(gid, gname, src)
-
+    
     def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
         name = enode.get('id')
@@ -194,6 +204,16 @@ def parse_graph(gid, egraph, src=None):
     for escope in egraph.getchildren():
         (_,graph.root) = parse_scope(1, escope)
         break
+    for name in ins:
+        try:
+            graph.ins.append(graph.nodes[name])
+        except KeyError:
+            pass
+    for name in outs:
+        try:
+            graph.outs.append(graph.nodes[name])
+        except KeyError:
+            pass
     return graph.fixate()
 
 
