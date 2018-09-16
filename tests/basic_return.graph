@@ -21,7 +21,7 @@
             <link label="obj" src="NROOT/Foo.basic_single_7"/>
             <ast length="8" start="189" type="32"/>
           </node>
-          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="ROOT/Foo/_this" type="ROOT/Foo">
+          <node id="NROOT/Foo.basic_single.b0_12" kind="assign" ref="#this" type="ROOT/Foo">
             <link label="obj" src="NROOT/Foo.basic_single.b0_11"/>
             <ast length="8" start="189" type="32"/>
           </node>
@@ -81,7 +81,7 @@
           <link src="NROOT/Foo.basic_single_5"/>
           <ast length="5" start="139" type="44"/>
         </node>
-        <node id="NROOT/Foo.basic_single_7" ref="ROOT/Foo/_this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.basic_single_7" ref="#this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

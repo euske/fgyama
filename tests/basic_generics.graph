@@ -3,7 +3,7 @@
     <graph ins="Nbasic_generics/Moo.Moo_1 Nbasic_generics/Moo.Moo_4" name="basic_generics/Moo/Moo:basic_generics.Moo/T" outs="Nbasic_generics/Moo.Moo.b0_5">
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
-          <node id="Nbasic_generics/Moo.Moo.b0_3" kind="ref" ref="basic_generics/Moo/_this" type="basic_generics/Moo">
+          <node id="Nbasic_generics/Moo.Moo.b0_3" kind="ref" ref="#this" type="basic_generics/Moo">
             <link src="Nbasic_generics/Moo.Moo_4"/>
             <ast length="4" start="103" type="52"/>
           </node>
@@ -28,7 +28,7 @@
           <link src="Nbasic_generics/Moo.Moo_1"/>
           <ast length="3" start="84" type="44"/>
         </node>
-        <node id="Nbasic_generics/Moo.Moo_4" ref="basic_generics/Moo/_this" type="basic_generics/Moo"/>
+        <node id="Nbasic_generics/Moo.Moo_4" ref="#this" type="basic_generics/Moo"/>
       </scope>
     </graph>
     <graph ins="Nbasic_generics/Moo.get_2" name="basic_generics/Moo/get" outs="Nbasic_generics/Moo.get.b0_3">

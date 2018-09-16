@@ -485,7 +485,7 @@ public class DFKlass extends DFType {
         public DFKlassScope(DFKlass klass, DFVarScope parent, String id) {
             super(parent, id);
             _klass = klass;
-            _this = this.addRef("_this", klass);
+            _this = this.addRef("#this", klass);
         }
 
         public String getFullName() {

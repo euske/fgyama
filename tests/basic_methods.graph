@@ -82,7 +82,7 @@
             <link label="obj" src="NROOT/Foo.fb_5"/>
             <ast length="4" start="335" type="32"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="ROOT/Foo/_this" type="ROOT/Foo">
+          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="#this" type="ROOT/Foo">
             <link label="obj" src="NROOT/Foo.fb.b0_6"/>
             <ast length="4" start="335" type="32"/>
           </node>
@@ -106,7 +106,7 @@
             <ast length="13" start="375" type="59"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.fb_5" ref="ROOT/Foo/_this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.fb_5" ref="#this" type="ROOT/Foo"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">

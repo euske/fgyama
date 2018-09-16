@@ -50,7 +50,7 @@
             <link label="obj" src="NROOT/Baa.moo_3"/>
             <ast length="14" start="150" type="48"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="ROOT/Baa/_this" type="ROOT/Baa">
+          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="#this" type="ROOT/Baa">
             <link label="obj" src="NROOT/Baa.moo.b0_5"/>
             <ast length="14" start="150" type="48"/>
           </node>
@@ -83,7 +83,7 @@
           <link src="NROOT/Baa.moo_1"/>
           <ast length="7" start="131" type="44"/>
         </node>
-        <node id="NROOT/Baa.moo_3" ref="ROOT/Baa/_this" type="ROOT/Baa"/>
+        <node id="NROOT/Baa.moo_3" ref="#this" type="ROOT/Baa"/>
         <node id="NROOT/Baa.moo_9" ref="ROOT/Foo/.x" type="@int"/>
       </scope>
     </graph>

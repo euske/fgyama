@@ -41,7 +41,7 @@
             <link label="obj" src="NROOT/basic_funcs.main_11"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_14" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
+          <node id="NROOT/basic_funcs.main.b0_14" kind="assign" ref="#this" type="ROOT/basic_funcs">
             <link label="obj" src="NROOT/basic_funcs.main.b0_13"/>
             <ast length="6" start="154" type="32"/>
           </node>
@@ -75,7 +75,7 @@
           <ast length="13" start="56" type="44"/>
         </node>
         <node id="NROOT/basic_funcs.main_6" ref="%:java.lang/String" type="java.lang/String"/>
-        <node id="NROOT/basic_funcs.main_11" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs"/>
+        <node id="NROOT/basic_funcs.main_11" ref="#this" type="ROOT/basic_funcs"/>
         <node id="NROOT/basic_funcs.main_17" ref="java.lang/System/.out" type="java.io/PrintStream"/>
       </scope>
     </graph>
@@ -87,7 +87,7 @@
               <link label="obj" src="NROOT/basic_funcs.moo_20"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b0_8" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
+            <node id="NROOT/basic_funcs.moo.b0.b0_8" kind="assign" ref="#this" type="ROOT/basic_funcs">
               <link label="obj" src="NROOT/basic_funcs.moo.b0.b0_7"/>
               <ast length="5" start="276" type="32"/>
             </node>
@@ -114,7 +114,7 @@
               <link label="obj" src="NROOT/basic_funcs.moo_20"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b1_16" kind="assign" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs">
+            <node id="NROOT/basic_funcs.moo.b0.b1_16" kind="assign" ref="#this" type="ROOT/basic_funcs">
               <link label="obj" src="NROOT/basic_funcs.moo.b0.b1_15"/>
               <ast length="8" start="319" type="32"/>
             </node>
@@ -167,7 +167,7 @@
           <link src="NROOT/basic_funcs.moo_1"/>
           <ast length="5" start="226" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.moo_20" ref="ROOT/basic_funcs/_this" type="ROOT/basic_funcs"/>
+        <node id="NROOT/basic_funcs.moo_20" ref="#this" type="ROOT/basic_funcs"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/basic_funcs/foo" outs="NROOT/basic_funcs.foo.b0_2">
