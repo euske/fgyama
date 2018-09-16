@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_assign.java">
-    <graph ins="" name="ROOT/Foo/basic_multi:@int:@int:@int" outs="">
+    <graph ins="NROOT/Foo.basic_multi_1 NROOT/Foo.basic_multi_3 NROOT/Foo.basic_multi_5" name="ROOT/Foo/basic_multi:@int:@int:@int" outs="">
       <scope name="ROOT/Foo.basic_multi">
         <scope name="ROOT/Foo.basic_multi.b0">
           <node id="NROOT/Foo.basic_multi.b0_7" kind="assign" ref="ROOT/Foo.basic_multi/$a" type="@int">

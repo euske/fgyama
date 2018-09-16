@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_poly.java">
-    <graph ins="NROOT/Foo.moo_5" name="ROOT/Foo/moo:ROOT/Foo" outs="NROOT/Foo.moo.b0_6">
+    <graph ins="NROOT/Foo.moo_1 NROOT/Foo.moo_5" name="ROOT/Foo/moo:ROOT/Foo" outs="NROOT/Foo.moo.b0_6">
       <scope name="ROOT/Foo.moo">
         <scope name="ROOT/Foo.moo.b0">
           <node id="NROOT/Foo.moo.b0_3" kind="ref" ref="ROOT/Foo.moo/$obj" type="ROOT/Foo">
@@ -38,7 +38,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="NROOT/Baa.moo_9" name="ROOT/Baa/moo:ROOT/Foo" outs="NROOT/Baa.moo.b0_12">
+    <graph ins="NROOT/Baa.moo_1 NROOT/Baa.moo_9" name="ROOT/Baa/moo:ROOT/Foo" outs="NROOT/Baa.moo.b0_12">
       <scope name="ROOT/Baa.moo">
         <scope name="ROOT/Baa.moo.b0">
           <node id="NROOT/Baa.moo.b0_4" kind="ref" ref="ROOT/Baa.moo/$obj" type="ROOT/Foo">

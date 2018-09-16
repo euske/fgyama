@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph ins="Nbasic_generics/Moo.Moo_4" name="basic_generics/Moo/Moo:basic_generics.Moo/T" outs="Nbasic_generics/Moo.Moo.b0_5">
+    <graph ins="Nbasic_generics/Moo.Moo_1 Nbasic_generics/Moo.Moo_4" name="basic_generics/Moo/Moo:basic_generics.Moo/T" outs="Nbasic_generics/Moo.Moo.b0_5">
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
           <node id="Nbasic_generics/Moo.Moo.b0_3" kind="ref" ref="basic_generics/Moo/_this" type="basic_generics/Moo">
@@ -117,7 +117,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="ROOT/basic_generics/foo:MethodDecl/E" outs="NROOT/basic_generics.foo.b0_6">
+    <graph ins="NROOT/basic_generics.foo_1" name="ROOT/basic_generics/foo:MethodDecl/E" outs="NROOT/basic_generics.foo.b0_6">
       <scope name="ROOT/basic_generics.foo">
         <scope name="ROOT/basic_generics.foo.b0">
           <node id="NROOT/basic_generics.foo.b0_3" kind="ref" ref="ROOT/basic_generics.foo/$x" type="MethodDecl/E">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_do.java">
-    <graph ins="" name="ROOT/Foo/basic_do:@int" outs="NROOT/Foo.basic_do.b0_23">
+    <graph ins="NROOT/Foo.basic_do_1" name="ROOT/Foo/basic_do:@int" outs="NROOT/Foo.basic_do.b0_23">
       <scope name="ROOT/Foo.basic_do">
         <scope name="ROOT/Foo.basic_do.b0">
           <scope name="ROOT/Foo.basic_do.b0.do0">

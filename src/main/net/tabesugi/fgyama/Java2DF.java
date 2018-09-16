@@ -2057,6 +2057,7 @@ public class Java2DF {
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
                 // XXX Ignore modifiers and dimensions.
                 DFVarRef ref = scope.lookupArgument(i);
+                frame.addInputRef(ref);
                 DFNode input = new InputNode(graph, scope, ref, decl);
                 ctx.set(input);
                 DFNode assign = new SingleAssignNode(

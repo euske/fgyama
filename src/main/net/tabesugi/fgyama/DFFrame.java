@@ -78,11 +78,11 @@ public class DFFrame {
         return frame;
     }
 
-    private void addInputRef(DFVarRef ref) {
+    public void addInputRef(DFVarRef ref) {
         _inputRefs.add(ref);
     }
 
-    private void addOutputRef(DFVarRef ref) {
+    public void addOutputRef(DFVarRef ref) {
         _outputRefs.add(ref);
     }
 

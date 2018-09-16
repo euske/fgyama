@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_break.java">
-    <graph ins="" name="ROOT/Foo/basic_break:@int" outs="">
+    <graph ins="NROOT/Foo.basic_break_1" name="ROOT/Foo/basic_break:@int" outs="">
       <scope name="ROOT/Foo.basic_break">
         <scope name="ROOT/Foo.basic_break.b0">
           <scope name="ROOT/Foo.basic_break.b0.while0">

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_continue.java">
-    <graph ins="" name="ROOT/Foo/basic_continue:@int" outs="">
+    <graph ins="NROOT/Foo.basic_continue_1" name="ROOT/Foo/basic_continue:@int" outs="">
       <scope name="ROOT/Foo.basic_continue">
         <scope name="ROOT/Foo.basic_continue.b0">
           <scope name="ROOT/Foo.basic_continue.b0.while0">

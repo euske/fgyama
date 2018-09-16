@@ -92,7 +92,7 @@
         <node id="Ndom.meep/Foo.meh_1" ref="dom.meep/Foo/_this" type="dom.meep/Foo"/>
       </scope>
     </graph>
-    <graph ins="" name="dom.meep/Foo/main:java.lang/String[]" outs="">
+    <graph ins="Ndom.meep/Foo.main_1" name="dom.meep/Foo/main:java.lang/String[]" outs="">
       <scope name="dom.meep/Foo.main">
         <scope name="dom.meep/Foo.main.b0">
           <node data="dom.meep/Foo" id="Ndom.meep/Foo.main.b0_3" kind="new" type="dom.meep/Foo">

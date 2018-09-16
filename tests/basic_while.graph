@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_while.java">
-    <graph ins="" name="ROOT/Foo/basic_while:@int" outs="">
+    <graph ins="NROOT/Foo.basic_while_1" name="ROOT/Foo/basic_while:@int" outs="">
       <scope name="ROOT/Foo.basic_while">
         <scope name="ROOT/Foo.basic_while.b0">
           <scope name="ROOT/Foo.basic_while.b0.while0">
