@@ -15,9 +15,9 @@ How to Build:
 
 TODOs:
 
-  * Handle consecutive SwitchCases.
-  * Enum support.
   * DFType should be lookup up from DFTypeSpace (not DFTypeFinder).
   * Treat each parametered type differently.
+  * Better handling of GlobalScope.
+  * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.
