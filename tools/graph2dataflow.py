@@ -2,7 +2,16 @@
 import sys
 from graph import get_graphs
 
-MAXLEN = 10
+MAXLEN = 5
+IGNORED = frozenset(['ref','assign','input','output'])
+def getfeat(node):
+    if node.kind is None or node.kind in IGNORED:
+        return None
+    elif node.data is None:
+        return node.kind
+    else:
+        return '%s:%s' % (node.kind, node.data)
+
 
 ##  Chain Link
 ##
@@ -72,10 +81,10 @@ class IPVertex:
         return
 
     def enum(self, name, direction, label, chain=None):
-        if self.node.data is not None:
-            chain = CLink((label, self.node), chain)
-            s = ' '.join( '%s:%s' % (label,node.data) for (label,node) in
-                          reversed(list(chain)) )
+        v = getfeat(self.node)
+        if v is not None:
+            chain = CLink(label+':'+v, chain)
+            s = ' '.join(reversed(list(chain)))
             print('%s %s %s' % (name, direction, s))
         if chain is None or len(chain) < MAXLEN:
             if direction < 0:
