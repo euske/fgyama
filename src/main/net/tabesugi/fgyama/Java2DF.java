@@ -1952,8 +1952,8 @@ public class Java2DF {
     }
 
     private DFTypeFinder prepareTypeFinder(List<ImportDeclaration> imports) {
-        DFTypeFinder finder = new DFTypeFinder(this.rootSpace);
-        finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace("java.lang"));
+        DFTypeFinder finder = new DFTypeFinder(_rootSpace);
+        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
         DFTypeSpace importSpace = new DFTypeSpace("Import");
         int n = 0;
         for (ImportDeclaration importDecl : imports) {
@@ -1963,10 +1963,10 @@ public class Java2DF {
                 Name name = importDecl.getName();
                 if (importDecl.isOnDemand()) {
                     Logger.info("Import: "+name+".*");
-                    finder = new DFTypeFinder(finder, this.rootSpace.lookupSpace(name));
+                    finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
                 } else {
                     assert name.isQualifiedName();
-                    DFKlass klass = this.rootSpace.getKlass(name);
+                    DFKlass klass = _rootSpace.getKlass(name);
                     Logger.info("Import: "+name);
                     importSpace.addKlass(klass);
                     n++;
@@ -1983,14 +1983,17 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    public DFRootTypeSpace rootSpace;
-    public Exporter exporter;
+    private DFRootTypeSpace _rootSpace;
+    private Exporter _exporter;
 
     public Java2DF(
-        DFRootTypeSpace rootSpace,
-        Exporter exporter) {
-        this.rootSpace = rootSpace;
-        this.exporter = exporter;
+        DFRootTypeSpace rootSpace) {
+        _rootSpace = rootSpace;
+    }
+
+    public void setExporter(Exporter exporter)
+    {
+        _exporter = exporter;
     }
 
     /**
@@ -2021,8 +2024,6 @@ public class Java2DF {
         DFTypeFinder finder, DFKlass klass,
         MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        // Ignore method prototypes.
-        if (methodDecl.getBody() == null) return null;
         DFMethod method = klass.getMethodByAST(methodDecl);
         assert method != null;
         DFTypeSpace methodSpace = method.getChildSpace();
@@ -2106,10 +2107,11 @@ public class Java2DF {
                         klassGraph, finder, klass,
                         frame, (FieldDeclaration)body);
                 } else if (body instanceof MethodDeclaration) {
-                    DFGraph methodGraph = processMethodDeclaration(
-                        finder, klass, (MethodDeclaration)body);
-                    if (this.exporter != null && methodGraph != null) {
-                        this.exporter.writeGraph(methodGraph);
+                    // Ignore method prototypes.
+                    if (((MethodDeclaration)body).getBody() != null) {
+                        DFGraph methodGraph = processMethodDeclaration(
+                            finder, klass, (MethodDeclaration)body);
+                        exportGraph(methodGraph);
                     }
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
@@ -2134,14 +2136,12 @@ public class Java2DF {
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
                 Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-                if (this.exporter != null) {
-                    this.exporter.writeError(e.name, astName);
+                if (_exporter != null) {
+                    _exporter.writeError(e.name, astName);
                 }
             }
         }
-        if (this.exporter != null) {
-            this.exporter.writeGraph(klassGraph);
-        }
+        exportGraph(klassGraph);
     }
 
     @SuppressWarnings("unchecked")
@@ -2151,6 +2151,14 @@ public class Java2DF {
         DFKlass klass = typeSpace.getKlass(typeDecl.getName());
         processBodyDeclarations(
             finder, klass, typeDecl.bodyDeclarations());
+    }
+
+    protected void exportGraph(DFGraph graph)
+    {
+        graph.cleanup();
+        if (_exporter != null) {
+            _exporter.writeGraph(graph);
+        }
     }
 
     public CompilationUnit parseFile(String path)
@@ -2170,8 +2178,8 @@ public class Java2DF {
     // pass1
     public void buildTypeSpace(
         List<DFKlass> klasses, CompilationUnit cunit) {
-        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
-        DFGlobalVarScope global = this.rootSpace.getGlobalScope();
+        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFGlobalVarScope global = _rootSpace.getGlobalScope();
         try {
             typeSpace.build(klasses, cunit, global);
         } catch (UnsupportedSyntax e) {
@@ -2183,7 +2191,7 @@ public class Java2DF {
     // pass2
     @SuppressWarnings("unchecked")
     public void buildKlassSpace(CompilationUnit cunit) throws EntityNotFound {
-        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
         try {
@@ -2214,7 +2222,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(CompilationUnit cunit)
         throws EntityNotFound {
-        DFTypeSpace typeSpace = this.rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(cunit.imports());
         finder = new DFTypeFinder(finder, typeSpace);
 	for (AbstractTypeDeclaration abstTypeDecl :
@@ -2267,9 +2275,10 @@ public class Java2DF {
         }
 
         // Process files.
-        XmlExporter exporter = new XmlExporter();
         rootSpace.loadDefaultKlasses();
-        Java2DF converter = new Java2DF(rootSpace, exporter);
+        Java2DF converter = new Java2DF(rootSpace);
+        XmlExporter exporter = new XmlExporter();
+        converter.setExporter(exporter);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (String path : files) {
             Logger.info("Pass1: "+path);

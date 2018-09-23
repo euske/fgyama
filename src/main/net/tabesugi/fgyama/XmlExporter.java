@@ -55,8 +55,6 @@ public class XmlExporter extends Exporter {
 
     @Override
     public void writeGraph(DFGraph graph) {
-        // Remove redundant nodes.
-        graph.cleanup();
         _file.appendChild(graph.toXML(this.document));
     }
 }

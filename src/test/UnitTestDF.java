@@ -24,8 +24,9 @@ public class UnitTestDF extends XMLTestCase {
 	throws Exception {
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
         rootSpace.loadDefaultKlasses();
+	Java2DF converter = new Java2DF(rootSpace);
 	XmlExporter exporter = new XmlExporter();
-	Java2DF converter = new Java2DF(rootSpace, exporter);
+        converter.setExporter(exporter);
         CompilationUnit[] cunits = new CompilationUnit[javaPaths.length];
         for (int i = 0; i < javaPaths.length; i++) {
             System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
