@@ -92,7 +92,7 @@
             <link src="Ndom.meep/multi_xref2.foo_10"/>
             <ast length="3" start="187" type="42"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_11" kind="fieldaccess" ref="dom.meep.multi_xref1/baa/.baz" type="@int">
+          <node id="Ndom.meep/multi_xref2.foo.b0_11" kind="fieldref" ref="dom.meep.multi_xref1/baa/.baz" type="@int">
             <link src="Ndom.meep/multi_xref2.foo_12"/>
             <link label="obj" src="Ndom.meep/multi_xref2.foo.b0_9"/>
             <ast length="7" start="187" type="40"/>
@@ -105,7 +105,7 @@
             <link src="Ndom.meep/multi_xref2.foo.b0_17"/>
             <ast length="1" start="204" type="42"/>
           </node>
-          <node id="Ndom.meep/multi_xref2.foo.b0_15" kind="fieldaccess" ref="dom.dood/multi_xref3/.boo" type="@int">
+          <node id="Ndom.meep/multi_xref2.foo.b0_15" kind="fieldref" ref="dom.dood/multi_xref3/.boo" type="@int">
             <link src="Ndom.meep/multi_xref2.foo_16"/>
             <ast length="24" start="208" type="40"/>
           </node>

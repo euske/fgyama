@@ -62,7 +62,7 @@
           <node data="44" id="NROOT/Foo.basic_ops.b0_18" kind="const" type="@number">
             <ast length="2" start="133" type="34"/>
           </node>
-          <node data="3" id="NROOT/Foo.basic_ops.b0_19" kind="arrayvalue" type="@number">
+          <node data="3" id="NROOT/Foo.basic_ops.b0_19" kind="valueset" type="@number">
             <link label="value0" src="NROOT/Foo.basic_ops.b0_18"/>
             <link label="value1" src="NROOT/Foo.basic_ops.b0_20"/>
             <link label="value2" src="NROOT/Foo.basic_ops.b0_21"/>
@@ -110,7 +110,7 @@
           <node data="2" id="NROOT/Foo.basic_ops.b0_30" kind="const" type="@number">
             <ast length="1" start="165" type="34"/>
           </node>
-          <node id="NROOT/Foo.basic_ops.b0_31" kind="arrayaccess" ref="%:@int" type="@int">
+          <node id="NROOT/Foo.basic_ops.b0_31" kind="arrayref" ref="%:@int" type="@int">
             <link src="NROOT/Foo.basic_ops.b0_25"/>
             <link label="array" src="NROOT/Foo.basic_ops.b0_29"/>
             <link label="index" src="NROOT/Foo.basic_ops.b0_30"/>

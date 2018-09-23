@@ -14,7 +14,7 @@
     <graph ins="Ndom.meep/Foo.doit_11 Ndom.meep/Foo.doit_13 Ndom.meep/Foo.doit_2" name="dom.meep/Foo/doit" outs="Ndom.meep/Foo.doit.b0_9">
       <scope name="dom.meep/Foo.doit">
         <scope name="dom.meep/Foo.doit.b0">
-          <node id="Ndom.meep/Foo.doit.b0_1" kind="fieldaccess" ref="java.lang/System/.out" type="java.io/PrintStream">
+          <node id="Ndom.meep/Foo.doit.b0_1" kind="fieldref" ref="java.lang/System/.out" type="java.io/PrintStream">
             <link src="Ndom.meep/Foo.doit_2"/>
             <ast length="10" start="100" type="40"/>
           </node>
@@ -50,7 +50,7 @@
             <link src="Ndom.meep/Foo.doit_11"/>
             <ast length="4" start="249" type="52"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_12" kind="fieldaccess" ref="dom.meep/Foo/.y" type="@int">
+          <node id="Ndom.meep/Foo.doit.b0_12" kind="fieldref" ref="dom.meep/Foo/.y" type="@int">
             <link src="Ndom.meep/Foo.doit_13"/>
             <link label="obj" src="Ndom.meep/Foo.doit.b0_10"/>
             <ast length="6" start="249" type="22"/>

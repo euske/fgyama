@@ -15,7 +15,7 @@
               <ast length="9" start="247" type="49"/>
             </node>
           </scope>
-          <node id="NROOT/basic_enum.foo.b0_1" kind="fieldaccess" ref="ROOT/E/.Moo" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_1" kind="fieldref" ref="ROOT/E/.Moo" type="ROOT/E">
             <link src="NROOT/basic_enum.foo_2"/>
             <ast length="5" start="174" type="40"/>
           </node>
@@ -27,11 +27,11 @@
             <link src="NROOT/basic_enum.foo.b0_3"/>
             <ast length="1" start="197" type="42"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_6" kind="fieldaccess" ref="ROOT/E/.Moo" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_6" kind="fieldref" ref="ROOT/E/.Moo" type="ROOT/E">
             <link src="NROOT/basic_enum.foo_2"/>
             <ast length="3" start="215" type="42"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_8" kind="fieldaccess" ref="ROOT/E/.Baa" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_8" kind="fieldref" ref="ROOT/E/.Baa" type="ROOT/E">
             <link src="NROOT/basic_enum.foo_9"/>
             <ast length="3" start="252" type="42"/>
           </node>

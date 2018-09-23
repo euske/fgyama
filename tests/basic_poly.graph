@@ -7,7 +7,7 @@
             <link src="NROOT/Foo.moo_2"/>
             <ast length="3" start="72" type="42"/>
           </node>
-          <node id="NROOT/Foo.moo.b0_4" kind="fieldaccess" ref="ROOT/Foo/.x" type="@int">
+          <node id="NROOT/Foo.moo.b0_4" kind="fieldref" ref="ROOT/Foo/.x" type="@int">
             <link src="NROOT/Foo.moo_5"/>
             <link label="obj" src="NROOT/Foo.moo.b0_3"/>
             <ast length="5" start="72" type="40"/>
@@ -58,7 +58,7 @@
             <link src="NROOT/Baa.moo_2"/>
             <ast length="3" start="181" type="42"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_8" kind="fieldaccess" ref="ROOT/Foo/.x" type="@int">
+          <node id="NROOT/Baa.moo.b0_8" kind="fieldref" ref="ROOT/Foo/.x" type="@int">
             <link src="NROOT/Baa.moo_9"/>
             <link label="obj" src="NROOT/Baa.moo.b0_7"/>
             <ast length="5" start="181" type="40"/>

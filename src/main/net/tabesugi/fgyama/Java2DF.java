@@ -103,10 +103,10 @@ class VarRefNode extends ProgNode {
     }
 }
 
-// ArrayAccessNode
-class ArrayAccessNode extends ProgNode {
+// ArrayRefNode
+class ArrayRefNode extends ProgNode {
 
-    public ArrayAccessNode(
+    public ArrayRefNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode array, DFNode index) {
         super(graph, scope, null, ref, ast);
@@ -116,14 +116,14 @@ class ArrayAccessNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "arrayaccess";
+        return "arrayref";
     }
 }
 
-// FieldAccessNode
-class FieldAccessNode extends ProgNode {
+// FieldRefNode
+class FieldRefNode extends ProgNode {
 
-    public FieldAccessNode(
+    public FieldRefNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode obj) {
         super(graph, scope, null, ref, ast);
@@ -134,7 +134,7 @@ class FieldAccessNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "fieldaccess";
+        return "fieldref";
     }
 }
 
@@ -338,12 +338,12 @@ class ConstNode extends ProgNode {
     }
 }
 
-// ArrayValueNode: represents an array.
-class ArrayValueNode extends ProgNode {
+// ValueSetNode: represents an array.
+class ValueSetNode extends ProgNode {
 
     public List<DFNode> values = new ArrayList<DFNode>();
 
-    public ArrayValueNode(
+    public ValueSetNode(
         DFGraph graph, DFVarScope scope, DFType type,
         ASTNode ast) {
         super(graph, scope, type, null, ast);
@@ -351,7 +351,7 @@ class ArrayValueNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "arrayvalue";
+        return "valueset";
     }
 
     @Override
@@ -671,7 +671,7 @@ public class Java2DF {
                     }
                     SimpleName fieldName = qname.getName();
                     DFVarRef ref = klass.lookupField(fieldName);
-                    DFNode node = new FieldAccessNode(graph, scope, ref, qname, obj);
+                    DFNode node = new FieldRefNode(graph, scope, ref, qname, obj);
                     node.accept(ctx.get(ref));
                     ctx.setRValue(node);
                 }
@@ -923,18 +923,18 @@ public class Java2DF {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, init);
                 } else {
-                    ctx.setRValue(new ArrayValueNode(graph, scope, elemType, ac));
+                    ctx.setRValue(new ValueSetNode(graph, scope, elemType, ac));
                 }
 
             } else if (expr instanceof ArrayInitializer) {
                 ArrayInitializer init = (ArrayInitializer)expr;
-                ArrayValueNode arr = null;
+                ValueSetNode arr = null;
                 for (Expression expr1 : (List<Expression>) init.expressions()) {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, expr1);
                     DFNode value = ctx.getRValue();
                     if (arr == null) {
-                        arr = new ArrayValueNode(
+                        arr = new ValueSetNode(
                             graph, scope, value.getNodeType(), init);
                     }
                     arr.addValue(value);
@@ -951,7 +951,7 @@ public class Java2DF {
                     graph, finder, scope, frame, ctx, aa.getIndex());
                 DFVarRef ref = scope.lookupArray(array.getNodeType());
                 DFNode index = ctx.getRValue();
-                DFNode node = new ArrayAccessNode(
+                DFNode node = new ArrayRefNode(
                     graph, scope, ref, aa, array, index);
                 node.accept(ctx.get(ref));
                 ctx.setRValue(node);
@@ -975,7 +975,7 @@ public class Java2DF {
                 }
                 SimpleName fieldName = fa.getName();
                 DFVarRef ref = klass.lookupField(fieldName);
-                DFNode node = new FieldAccessNode(graph, scope, ref, fa, obj);
+                DFNode node = new FieldRefNode(graph, scope, ref, fa, obj);
                 node.accept(ctx.get(ref));
                 ctx.setRValue(node);
 
@@ -985,7 +985,7 @@ public class Java2DF {
                 DFNode obj = ctx.get(scope.lookupThis());
                 DFKlass klass = finder.resolveKlass(obj.getNodeType());
                 DFVarRef ref = klass.lookupField(fieldName);
-                DFNode node = new FieldAccessNode(graph, scope, ref, sfa, obj);
+                DFNode node = new FieldRefNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
                 ctx.setRValue(node);
 
@@ -1512,7 +1512,7 @@ public class Java2DF {
                     if (enumKlass != null && expr instanceof SimpleName) {
                         // special treatment for enum.
                         DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
-                        DFNode node = new FieldAccessNode(graph, scope, ref, expr, null);
+                        DFNode node = new FieldRefNode(graph, scope, ref, expr, null);
                         node.accept(ctx.get(ref));
                         caseNode.addMatch(node);
                     } else {
