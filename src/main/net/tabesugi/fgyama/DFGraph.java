@@ -16,8 +16,8 @@ public class DFGraph {
     private DFFrame _frame;
     private DFMethod _method;
 
-    private Map<Integer, DFNode> _nodes =
-        new HashMap<Integer, DFNode>();
+    private List<DFNode> _nodes =
+        new ArrayList<DFNode>();
 
     // DFGraph for a method.
     public DFGraph(DFVarScope root, DFFrame frame, DFMethod method) {
@@ -46,7 +46,7 @@ public class DFGraph {
         elem.setAttribute("ins", getNodeIds(_frame.getInputNodes()));
         elem.setAttribute("outs", getNodeIds(_frame.getOutputNodes()));
         DFNode[] nodes = new DFNode[_nodes.size()];
-        _nodes.values().toArray(nodes);
+        _nodes.toArray(nodes);
         Arrays.sort(nodes);
         elem.appendChild(_root.toXML(document, nodes));
         return elem;
@@ -67,21 +67,26 @@ public class DFGraph {
     }
 
     public int addNode(DFNode node) {
-        int id = _nodes.size()+1;
-        _nodes.put(id, node);
-        return id;
+        _nodes.add(node);
+        return _nodes.size();
     }
 
     public void cleanup() {
-        ArrayList<Integer> removed = new ArrayList<Integer>();
-        for (Map.Entry<Integer, DFNode> ent : _nodes.entrySet()) {
-            DFNode node = ent.getValue();
+        Set<DFNode> removed = new HashSet<DFNode>();
+        for (DFNode node : _nodes) {
             if (node.getKind() == null && node.purge()) {
-                removed.add(ent.getKey());
+                removed.add(node);
             }
         }
-        for (int id : removed) {
-            _nodes.remove(id);
+        // Do not remove input/output nodes.
+        for (DFNode node : _frame.getInputNodes()) {
+            removed.remove(node);
+        }
+        for (DFNode node : _frame.getOutputNodes()) {
+            removed.remove(node);
+        }
+        for (DFNode node : removed) {
+            _nodes.remove(node);
         }
     }
 }

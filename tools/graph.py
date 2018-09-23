@@ -163,7 +163,7 @@ def parse_graph(gid, egraph, src=None):
     ins = sp(egraph.get('ins'))
     outs = sp(egraph.get('outs'))
     graph = DFGraph(gid, gname, src)
-    
+
     def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
         name = enode.get('id')
@@ -205,15 +205,9 @@ def parse_graph(gid, egraph, src=None):
         (_,graph.root) = parse_scope(1, escope)
         break
     for name in ins:
-        try:
-            graph.ins.append(graph.nodes[name])
-        except KeyError:
-            pass
+        graph.ins.append(graph.nodes[name])
     for name in outs:
-        try:
-            graph.outs.append(graph.nodes[name])
-        except KeyError:
-            pass
+        graph.outs.append(graph.nodes[name])
     return graph.fixate()
 
 

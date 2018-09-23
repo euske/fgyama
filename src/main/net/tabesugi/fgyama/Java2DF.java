@@ -2091,38 +2091,41 @@ public class Java2DF {
         DFTypeFinder finder, DFKlass klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
-        DFFrame frame = new DFFrame(DFFrame.CLASS);
-        DFVarScope scope = klass.getScope();
-        DFTypeSpace typeSpace = klass.getChildSpace();
-        DFGraph klassGraph = new DFGraph(scope, frame);
+        DFTypeSpace childSpace = klass.getChildSpace();
+        DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
+        DFVarScope klassScope = klass.getScope();
+        DFGraph klassGraph = new DFGraph(klassScope, klassFrame);
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
             try {
                 if (body instanceof TypeDeclaration) {
                     TypeDeclaration typeDecl = (TypeDeclaration)body;
-                    processTypeDeclaration(typeSpace, finder, typeDecl);
+                    processTypeDeclaration(childSpace, finder, typeDecl);
                 } else if (body instanceof FieldDeclaration) {
                     processFieldDeclaration(
                         klassGraph, finder, klass,
-                        frame, (FieldDeclaration)body);
+                        klassFrame, (FieldDeclaration)body);
                 } else if (body instanceof MethodDeclaration) {
                     // Ignore method prototypes.
                     if (((MethodDeclaration)body).getBody() != null) {
-                        DFGraph methodGraph = processMethodDeclaration(
+                        DFGraph graph = processMethodDeclaration(
                             finder, klass, (MethodDeclaration)body);
-                        exportGraph(methodGraph);
+                        exportGraph(graph);
                     }
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
-                    DFLocalVarScope local = new DFLocalVarScope(scope, "init");
-                    local.build(finder, block);
-                    frame.build(finder, local, block);
-                    DFContext ctx = new DFContext(klassGraph, local);
+                    DFLocalVarScope scope = new DFLocalVarScope(klassScope, "init");
+                    DFFrame frame = new DFFrame(DFFrame.METHOD);
+                    scope.build(finder, block);
+                    frame.build(finder, scope, block);
+                    DFGraph graph = new DFGraph(scope, frame);
+                    DFContext ctx = new DFContext(graph, scope);
                     ctx = processStatement(
-                        klassGraph, finder, local,
+                        graph, finder, scope,
                         frame, ctx, block);
                     frame.close(ctx);
+                    exportGraph(graph);
                 } else if (body instanceof EnumConstantDeclaration) {
                     EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
                     // XXX ignore AnonymousClassDeclaration
