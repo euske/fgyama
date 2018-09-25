@@ -117,6 +117,20 @@ public class DFTypeFinder {
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
             DFTypeSpace space = klass.getChildSpace();
             return space.getKlass(qtype.getName());
+        } else if (type instanceof UnionType) {
+            // XXX only consider the first type.
+            UnionType utype = (UnionType)type;
+            for (Type type1 : (List<Type>)utype.types()) {
+                return this.resolve(type1);
+            }
+            throw new TypeNotFound(type.toString());
+        } else if (type instanceof IntersectionType) {
+            // XXX only consider the first type.
+            IntersectionType itype = (IntersectionType)type;
+            for (Type type1 : (List<Type>)itype.types()) {
+                return this.resolve(type1);
+            }
+            throw new TypeNotFound(type.toString());
         } else if (type instanceof WildcardType) {
             WildcardType wtype = (WildcardType)type;
             Type bound = wtype.getBound();
@@ -127,10 +141,7 @@ public class DFTypeFinder {
             }
         } else {
             // not supported:
-            //  QualifiedType
             //  NameQualifiedType
-            //  UnionType
-            //  IntersectionType
             throw new TypeNotFound(type.toString());
         }
     }

@@ -302,6 +302,13 @@ public class DFKlass extends DFType {
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
             _baseKlass = finder.lookupKlass(superClass);
         }
+        String[] ifaces = jklass.getInterfaceNames();
+        if (ifaces != null) {
+            _baseIfaces = new DFKlass[ifaces.length];
+            for (int i = 0; i < ifaces.length; i++) {
+                _baseIfaces[i] = finder.lookupKlass(ifaces[i]);
+            }
+        }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
             DFType type = finder.resolve(fld.getType());

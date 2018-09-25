@@ -443,7 +443,7 @@ public class DFFrame {
         } else if (expr instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
-            assert anonDecl == null; // XXX anonymous class unsupported.
+            // XXX ignore AnonymousClassDeclaration
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.build(finder, scope, expr1);
