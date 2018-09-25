@@ -112,6 +112,11 @@ public class DFTypeFinder {
                 argTypes[i] = this.resolve(args.get(i));
             }
             return genericKlass.getParamKlass(argTypes);
+        } else if (type instanceof QualifiedType) {
+            QualifiedType qtype = (QualifiedType)type;
+            DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
+            DFTypeSpace space = klass.getChildSpace();
+            return space.getKlass(qtype.getName());
         } else if (type instanceof WildcardType) {
             WildcardType wtype = (WildcardType)type;
             Type bound = wtype.getBound();
