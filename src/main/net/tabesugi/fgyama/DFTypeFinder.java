@@ -101,14 +101,6 @@ public class DFTypeFinder {
             DFParamType pt = this.lookupParamType(stype.getName());
             if (pt != null) return pt;
             return this.lookupKlass(stype.getName());
-        } else if (type instanceof WildcardType) {
-            WildcardType wtype = (WildcardType)type;
-            Type bound = wtype.getBound();
-            if (bound != null) {
-                return this.resolve(bound);
-            } else {
-                return DFRootTypeSpace.OBJECT_KLASS;
-            }
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
@@ -119,7 +111,15 @@ public class DFTypeFinder {
             for (int i = 0; i < args.size(); i++) {
                 argTypes[i] = this.resolve(args.get(i));
             }
-            return new DFParamKlass(genericKlass, argTypes);
+            return genericKlass.getParamKlass(argTypes);
+        } else if (type instanceof WildcardType) {
+            WildcardType wtype = (WildcardType)type;
+            Type bound = wtype.getBound();
+            if (bound != null) {
+                return this.resolve(bound);
+            } else {
+                return DFRootTypeSpace.OBJECT_KLASS;
+            }
         } else {
             // not supported:
             //  QualifiedType

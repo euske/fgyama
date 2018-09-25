@@ -534,16 +534,14 @@ class MethodCallNode extends CallNode {
 
     @Override
     public String getData() {
-        int n = 0;
-        String data = "";
+        StringBuilder b = new StringBuilder();
         for (DFMethod method : this.methods) {
-            if (0 < n) {
-                data += " ";
+            if (0 < b.length()) {
+                b.append(" ");
             }
-            data += method.getSignature();
-            n++;
+            b.append(method.getSignature());
         }
-        return data;
+        return b.toString();
     }
 }
 

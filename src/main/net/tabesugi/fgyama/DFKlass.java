@@ -22,6 +22,8 @@ public class DFKlass extends DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFParamType[] _paramTypes = null;
+    private Map<String, DFParamKlass> _paramKlass =
+        new HashMap<String, DFParamKlass>();
 
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
@@ -84,6 +86,23 @@ public class DFKlass extends DFType {
 
     public void setParamTypes(DFParamType[] paramTypes) {
         _paramTypes = paramTypes;
+    }
+
+    public DFParamKlass getParamKlass(DFType[] argTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFType type : argTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(type.getTypeName());
+        }
+        String name = this.getTypeName()+"<"+b.toString()+">";
+        DFParamKlass klass = _paramKlass.get(name);
+        if (klass == null) {
+            klass = new DFParamKlass(name, this, argTypes);
+            _paramKlass.put(name, klass);
+        }
+        return klass;
     }
 
     public String getKlassName() {
@@ -376,7 +395,7 @@ public class DFKlass extends DFType {
             throw e;
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {

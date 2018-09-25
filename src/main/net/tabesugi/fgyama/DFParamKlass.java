@@ -14,8 +14,8 @@ public class DFParamKlass extends DFKlass {
     private DFKlass _genericKlass;
     private DFType[] _argTypes;
 
-    public DFParamKlass(DFKlass genericKlass, DFType[] argTypes) {
-        super(genericKlass.getKlassName()+"<>", genericKlass);
+    public DFParamKlass(String name, DFKlass genericKlass, DFType[] argTypes) {
+        super(name, genericKlass);
         _genericKlass = genericKlass;
         _argTypes = argTypes;
     }
@@ -23,11 +23,6 @@ public class DFParamKlass extends DFKlass {
     @Override
     public String toString() {
         return ("<DFParamKlass("+this.getFullName()+")>");
-    }
-
-    @Override
-    public String getFullName() {
-        return _genericKlass.getFullName()+"<>";
     }
 
     @Override
