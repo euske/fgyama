@@ -67,14 +67,15 @@ public class Utils {
     public static String readFile(File file)
         throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(file));
-        String text = "";
+        StringBuilder b = new StringBuilder();
         while (true) {
             String line = reader.readLine();
             if (line == null) break;
-            text += line+"\n";
+            b.append(line);
+            b.append("\n");
         }
         reader.close();
-        return text;
+        return b.toString();
     }
 
     public static void copyFile(File src, File dst)
@@ -137,11 +138,8 @@ public class Utils {
                 name += "[]";
             }
             return name;
-        } else if (type instanceof ParameterizedType) {
-            ParameterizedType ptype = (ParameterizedType)type;
-            // ignore ptype.typeArguments()
-            return getTypeName(ptype.getType());
         } else {
+            // unsupported.
             return null;
         }
     }
