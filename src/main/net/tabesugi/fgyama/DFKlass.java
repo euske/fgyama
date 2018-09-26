@@ -146,15 +146,27 @@ public class DFKlass extends DFType {
 
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
-        if (_scope == null) {
-            return _baseKlass.lookupField(id);
+        if (_scope != null) {
+            try {
+                return _scope.lookupRef("."+id);
+            } catch (VariableNotFound e) {
+            }
         }
-        try {
-            return _scope.lookupRef("."+id);
-        } catch (VariableNotFound e) {
-            if (_baseKlass == null) throw e;
-            return _baseKlass.lookupField(id);
+        if (_baseKlass != null) {
+            try {
+                return _baseKlass.lookupField(id);
+            } catch (VariableNotFound e) {
+            }
         }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                try {
+                    return iface.lookupField(id);
+                } catch (VariableNotFound e) {
+                }
+            }
+        }
+        throw new VariableNotFound("."+id);
     }
 
     public DFVarRef lookupField(SimpleName name)
@@ -336,7 +348,9 @@ public class DFKlass extends DFType {
                 finder = iface.addFinders(finder);
             }
         }
-        finder = new DFTypeFinder(finder, _childSpace);
+        if (_childSpace != null) {
+            finder = new DFTypeFinder(finder, _childSpace);
+        }
         return finder;
     }
 

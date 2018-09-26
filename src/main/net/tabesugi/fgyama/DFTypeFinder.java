@@ -16,10 +16,13 @@ public class DFTypeFinder {
     private DFTypeSpace _space;
 
     public DFTypeFinder(DFTypeSpace space) {
+        assert space != null;
         _space = space;
     }
 
     public DFTypeFinder(DFTypeFinder next, DFTypeSpace space) {
+        assert next != null;
+        assert space != null;
         _next = next;
         _space = space;
     }
