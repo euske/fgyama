@@ -39,6 +39,7 @@ public class DFContext {
     }
 
     public DFNode getFirst(DFVarRef ref) {
+        assert _first.containsKey(ref);
         return _first.get(ref);
     }
 

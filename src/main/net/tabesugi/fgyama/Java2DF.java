@@ -1622,19 +1622,19 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, EnhancedForStatement eForStmt)
         throws UnsupportedSyntax, EntityNotFound {
+        Expression expr = eForStmt.getExpression();
+        ctx = processExpression(
+            graph, finder, scope, frame, ctx, expr);
         DFVarScope loopScope = scope.getChildByAST(eForStmt);
         DFFrame loopFrame = frame.getChildByAST(eForStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
-        Expression expr = eForStmt.getExpression();
-        loopCtx = processExpression(
-            graph, finder, loopScope, loopFrame, loopCtx, expr);
         SingleVariableDeclaration decl = eForStmt.getParameter();
         DFVarRef ref = loopScope.lookupVar(decl.getName());
         DFNode iterValue = new IterNode(graph, loopScope, ref, expr);
-        iterValue.accept(loopCtx.getRValue());
+        iterValue.accept(ctx.getRValue());
         SingleAssignNode assign = new SingleAssignNode(graph, loopScope, ref, expr);
         assign.accept(iterValue);
-        ctx.set(assign);
+        loopCtx.set(assign);
         loopCtx = processStatement(
             graph, finder, loopScope, loopFrame, loopCtx,
             eForStmt.getBody());

@@ -605,13 +605,15 @@ public class DFFrame {
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
+            this.build(finder, scope, eForStmt.getExpression());
             DFVarScope childScope = scope.getChildByAST(stmt);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFVarRef ref = childScope.lookupVar(decl.getName());
-            //this.addOutputRef(ref);
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
-            childFrame.build(finder, childScope, eForStmt.getExpression());
             childFrame.build(finder, childScope, eForStmt.getBody());
+            // the variable disappears from the scope after use.
+            childFrame._outputRefs.remove(ref);
+            childFrame._inputRefs.remove(ref);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {

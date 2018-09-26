@@ -181,15 +181,12 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+            this.build(finder, eForStmt.getExpression());
             DFLocalVarScope childScope = this.addChild("efor", ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
             childScope.addVar(decl.getName(), varType);
-            Expression expr = eForStmt.getExpression();
-            if (expr != null) {
-                childScope.build(finder, expr);
-            }
             Statement stmt = eForStmt.getBody();
             childScope.build(finder, stmt);
 
