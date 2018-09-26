@@ -68,19 +68,23 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public String getSignature() {
-        String name;
+        StringBuilder b = new StringBuilder();
         if (_klass != null) {
-            name = (_klass.getFullName()+"/"+_name);
+            b.append(_klass.getFullName()+"/"+_name);
         } else {
-            name = ("!"+_name);
+            b.append("!"+_name);
         }
         for (DFType type : _argTypes) {
-            name += ":"+type.getTypeName();
+            if (type == null) {
+                b.append(":?");
+            } else {
+                b.append(":"+type.getTypeName());
+            }
         }
         if (_returnType == null) {
-            name += "?";
+            b.append("?");
         }
-        return name;
+        return b.toString();
     }
 
     public DFTypeSpace getChildSpace() {
