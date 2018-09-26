@@ -2117,10 +2117,16 @@ public class Java2DF {
                 if (body instanceof TypeDeclaration) {
                     TypeDeclaration typeDecl = (TypeDeclaration)body;
                     processTypeDeclaration(childSpace, finder, typeDecl);
+
+		} else if (body instanceof EnumDeclaration) {
+                    EnumDeclaration enumDecl = (EnumDeclaration)body;
+                    processEnumDeclaration(childSpace, finder, enumDecl);
+
                 } else if (body instanceof FieldDeclaration) {
                     processFieldDeclaration(
                         klassGraph, finder, klass,
                         klassFrame, (FieldDeclaration)body);
+
                 } else if (body instanceof MethodDeclaration) {
                     // Ignore method prototypes.
                     if (((MethodDeclaration)body).getBody() != null) {
@@ -2128,6 +2134,16 @@ public class Java2DF {
                             finder, klass, (MethodDeclaration)body);
                         exportGraph(graph);
                     }
+
+                } else if (body instanceof EnumConstantDeclaration) {
+                    EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
+                    // XXX ignore AnonymousClassDeclaration
+                    // XXX ignore Arguments
+
+                } else if (body instanceof AnnotationTypeMemberDeclaration) {
+                    AnnotationTypeMemberDeclaration annot = (AnnotationTypeMemberDeclaration)body;
+                    // XXX ignore annotations.
+
                 } else if (body instanceof Initializer) {
                     Block block = ((Initializer)body).getBody();
                     DFLocalVarScope scope = new DFLocalVarScope(klassScope, "init");
@@ -2141,13 +2157,7 @@ public class Java2DF {
                         frame, ctx, block);
                     frame.close(ctx);
                     exportGraph(graph);
-                } else if (body instanceof EnumConstantDeclaration) {
-                    EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
-                    // XXX ignore AnonymousClassDeclaration
-                    // XXX ignore Arguments
-                } else if (body instanceof AnnotationTypeMemberDeclaration) {
-                    AnnotationTypeMemberDeclaration annot = (AnnotationTypeMemberDeclaration)body;
-                    // XXX ignore annotations.
+
                 } else {
                     throw new UnsupportedSyntax(body);
                 }
@@ -2169,6 +2179,15 @@ public class Java2DF {
         DFKlass klass = typeSpace.getKlass(typeDecl.getName());
         processBodyDeclarations(
             finder, klass, typeDecl.bodyDeclarations());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void processEnumDeclaration(
+        DFTypeSpace typeSpace, DFTypeFinder finder, EnumDeclaration enumDecl)
+        throws EntityNotFound {
+        DFKlass klass = typeSpace.getKlass(enumDecl.getName());
+        processBodyDeclarations(
+            finder, klass, enumDecl.bodyDeclarations());
     }
 
     protected void exportGraph(DFGraph graph)
