@@ -2216,6 +2216,11 @@ public class Java2DF {
                     EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
                     DFKlass klass = typeSpace.getKlass(enumDecl.getName());
                     klass.build(finder, enumDecl);
+                } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+                    AnnotationTypeDeclaration annotTypeDecl =
+                        (AnnotationTypeDeclaration)abstTypeDecl;
+                    DFKlass klass = typeSpace.getKlass(annotTypeDecl.getName());
+                    klass.build(finder, annotTypeDecl);
                 } else {
                     throw new UnsupportedSyntax(abstTypeDecl);
                 }

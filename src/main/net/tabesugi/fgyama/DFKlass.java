@@ -434,6 +434,25 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        //Logger.info("DFKlass.build: "+this+": "+annotTypeDecl.getName());
+        // Get superclass.
+        try {
+            finder = new DFTypeFinder(finder, _childSpace);
+            _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
+            // Lookup child klasses.
+            for (BodyDeclaration body :
+                     (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {
+                this.build(finder, body);
+            }
+        } catch (TypeNotFound e) {
+            e.setAst(annotTypeDecl);
+            throw e;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, BodyDeclaration body)
         throws UnsupportedSyntax, TypeNotFound {
         assert body != null;
@@ -445,6 +464,11 @@ public class DFKlass extends DFType {
 
         } else if (body instanceof EnumDeclaration) {
             EnumDeclaration decl = (EnumDeclaration)body;
+            DFKlass klass = _childSpace.getKlass(decl.getName());
+            klass.build(finder, decl);
+
+        } else if (body instanceof AnnotationTypeDeclaration) {
+            AnnotationTypeDeclaration decl = (AnnotationTypeDeclaration)body;
             DFKlass klass = _childSpace.getKlass(decl.getName());
             klass.build(finder, decl);
 

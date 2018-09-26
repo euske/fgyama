@@ -45,8 +45,7 @@ Node types:
 
 TODOs:
 
-  * DFType should be lookup up from DFTypeSpace (not DFTypeFinder).
-  * Treat each parametered type differently.
+  * treat T v[] as T[] v;
   * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
   * Lambdas.
