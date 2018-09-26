@@ -39,8 +39,14 @@ public class DFContext {
     }
 
     public DFNode getFirst(DFVarRef ref) {
-        assert _first.containsKey(ref);
-        return _first.get(ref);
+        DFNode node = _first.get(ref);
+        if (node == null) {
+            assert !_last.containsKey(ref);
+            node = new DFNode(_graph, _scope, ref.getRefType(), ref);
+            _first.put(ref, node);
+            _last.put(ref, node);
+        }
+        return node;
     }
 
     public DFNode getLValue() {
