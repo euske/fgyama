@@ -491,7 +491,9 @@ public class DFKlass extends DFType {
             DFType type = finder.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
-                this.addField(frag.getName(), isStatic(decl), type);
+		int ndims = frag.getExtraDimensions();
+                this.addField(frag.getName(), isStatic(decl),
+                              (ndims != 0)? new DFArrayType(type, ndims) : type);
             }
 
         } else if (body instanceof MethodDeclaration) {
