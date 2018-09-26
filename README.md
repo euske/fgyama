@@ -45,7 +45,6 @@ Node types:
 
 TODOs:
 
-  * treat T v[] as T[] v;
   * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
   * Lambdas.

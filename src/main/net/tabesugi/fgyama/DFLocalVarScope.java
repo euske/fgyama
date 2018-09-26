@@ -70,6 +70,10 @@ public class DFLocalVarScope extends DFVarScope {
             if (decl.isVarargs()) {
                 paramType = new DFArrayType(paramType, 1);
             }
+	    int ndims = decl.getExtraDimensions();
+	    if (ndims != 0) {
+		paramType = new DFArrayType(paramType, ndims);
+	    }
             this.addRef("#arg"+i, paramType);
             this.addVar(decl.getName(), paramType);
             i++;
@@ -101,7 +105,9 @@ public class DFLocalVarScope extends DFVarScope {
             DFType varType = finder.resolve(varStmt.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                this.addVar(frag.getName(), varType);
+		int ndims = frag.getExtraDimensions();
+                this.addVar(frag.getName(),
+			    (ndims != 0)? new DFArrayType(varType, ndims) : varType);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
                     this.build(finder, expr);
@@ -189,7 +195,9 @@ public class DFLocalVarScope extends DFVarScope {
             SingleVariableDeclaration decl = eForStmt.getParameter();
             // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
-            childScope.addVar(decl.getName(), varType);
+	    int ndims = decl.getExtraDimensions();
+            childScope.addVar(decl.getName(),
+			      (ndims != 0)? new DFArrayType(varType, ndims) : varType);
             Statement stmt = eForStmt.getBody();
             childScope.build(finder, stmt);
 
@@ -223,7 +231,9 @@ public class DFLocalVarScope extends DFVarScope {
                 DFLocalVarScope catchScope = this.addChild("catch", cc);
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
-                catchScope.addVar(decl.getName(), varType);
+		int ndims = decl.getExtraDimensions();
+		catchScope.addVar(decl.getName(),
+				  (ndims != 0)? new DFArrayType(varType, ndims) : varType);
                 catchScope.build(finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
@@ -332,7 +342,9 @@ public class DFLocalVarScope extends DFVarScope {
             DFType varType = finder.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
-                this.addVar(frag.getName(), varType);
+		int ndims = frag.getExtraDimensions();
+                this.addVar(frag.getName(),
+			    (ndims != 0)? new DFArrayType(varType, ndims) : varType);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
                     this.build(finder, expr);
