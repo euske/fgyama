@@ -19,6 +19,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public static DFKlass ARRAY_KLASS = null;
     public static DFKlass STRING_KLASS = null;
     public static DFKlass ENUM_KLASS = null;
+    public static DFKlass TYPE_KLASS = null;
 
     private DFGlobalVarScope _global = new DFGlobalVarScope();
 
@@ -69,5 +70,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         STRING_KLASS = this.getKlass("java.lang.String");
         ENUM_KLASS =  new DFKlass(
             "java.lang._Enum", space, null, _global, OBJECT_KLASS);
+        TYPE_KLASS =  new DFKlass(
+            "java.lang._Class", space, null, _global, OBJECT_KLASS);
     }
 }

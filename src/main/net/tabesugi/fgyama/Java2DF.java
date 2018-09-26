@@ -713,7 +713,7 @@ public class Java2DF {
             } else if (expr instanceof TypeLiteral) {
                 Type value = ((TypeLiteral)expr).getType();
                 ctx.setRValue(new ConstNode(
-                                  graph, scope, DFBasicType.TYPE,
+                                  graph, scope, DFRootTypeSpace.TYPE_KLASS,
                                   expr, Utils.getTypeName(value)));
 
             } else if (expr instanceof PrefixExpression) {

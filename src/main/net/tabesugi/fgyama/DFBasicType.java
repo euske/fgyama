@@ -68,8 +68,4 @@ public class DFBasicType extends DFType {
         new DFBasicType(PrimitiveType.SHORT);
     public static final DFBasicType VOID =
         new DFBasicType(PrimitiveType.VOID);
-    public static final DFBasicType TYPE =
-        new DFBasicType("@type");
-    public static final DFBasicType ANONYMOUS =
-        new DFBasicType("@anonymous");
 }

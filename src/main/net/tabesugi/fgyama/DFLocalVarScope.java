@@ -67,6 +67,9 @@ public class DFLocalVarScope extends DFVarScope {
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers.
             DFType paramType = finder.resolve(decl.getType());
+            if (decl.isVarargs()) {
+                paramType = new DFArrayType(paramType, 1);
+            }
             this.addRef("#arg"+i, paramType);
             this.addVar(decl.getName(), paramType);
             i++;
