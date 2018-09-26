@@ -642,17 +642,20 @@ public class DFFrame {
 
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
-            Block block = tryStmt.getBody();
+            DFVarScope childScope = scope.getChildByAST(stmt);
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
-            tryFrame.build(finder, scope, block);
+            tryFrame.build(finder, childScope, tryStmt.getBody());
             this.expandRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFVarScope childScope = scope.getChildByAST(cc);
-                DFVarRef ref = childScope.lookupVar(decl.getName());
+                DFVarScope catchScope = scope.getChildByAST(cc);
+                DFVarRef ref = catchScope.lookupVar(decl.getName());
                 //this.addOutputRef(ref);
-                this.build(finder, childScope, cc.getBody());
+                this.build(finder, catchScope, cc.getBody());
+                // the variable disappears from the scope after use.
+                _outputRefs.remove(ref);
+                _inputRefs.remove(ref);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {

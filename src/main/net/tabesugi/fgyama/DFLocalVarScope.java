@@ -208,16 +208,20 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            Block block = tryStmt.getBody();
-            this.build(finder, block);
+            DFLocalVarScope childScope = this.addChild("try", ast);
+            for (VariableDeclarationExpression decl :
+                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
+                childScope.build(finder, decl);
+            }
+            childScope.build(finder, tryStmt.getBody());
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFLocalVarScope childScope = this.addChild("catch", cc);
+                DFLocalVarScope catchScope = this.addChild("catch", cc);
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
-                childScope.addVar(decl.getName(), varType);
-                childScope.build(finder, cc.getBody());
+                catchScope.addVar(decl.getName(), varType);
+                catchScope.build(finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {

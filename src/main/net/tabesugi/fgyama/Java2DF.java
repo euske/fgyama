@@ -1646,6 +1646,34 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
+    public DFContext processTryStatement(
+        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
+        DFFrame frame, DFContext ctx, TryStatement tryStmt)
+        throws UnsupportedSyntax, EntityNotFound {
+        // XXX Ignore catch statements (for now).
+        DFVarScope tryScope = scope.getChildByAST(tryStmt);
+        DFFrame tryFrame = frame.getChildByAST(tryStmt);
+        ctx = processStatement(
+            graph, finder, tryScope, tryFrame,
+            ctx, tryStmt.getBody());
+        tryFrame.close(ctx);
+        for (CatchClause cc :
+                 (List<CatchClause>) tryStmt.catchClauses()) {
+            SingleVariableDeclaration decl = cc.getException();
+            DFVarScope catchScope = scope.getChildByAST(cc);
+            DFVarRef ref = catchScope.lookupVar(decl.getName());
+            ctx = processStatement(
+                graph, finder, catchScope, frame, ctx, cc.getBody());
+        }
+        Block finBlock = tryStmt.getFinally();
+        if (finBlock != null) {
+            ctx = processStatement(
+                graph, finder, scope, frame, ctx, finBlock);
+        }
+        return ctx;
+    }
+
+    @SuppressWarnings("unchecked")
     public DFContext processStatement(
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, Statement stmt)
@@ -1756,27 +1784,9 @@ public class Java2DF {
                 ctx, syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
-            // XXX Ignore catch statements (for now).
-            TryStatement tryStmt = (TryStatement)stmt;
-            DFFrame tryFrame = frame.getChildByAST(tryStmt);
-            ctx = processStatement(
-                graph, finder, scope, tryFrame,
-                ctx, tryStmt.getBody());
-            tryFrame.close(ctx);
-            for (CatchClause cc :
-                     (List<CatchClause>) tryStmt.catchClauses()) {
-                SingleVariableDeclaration decl = cc.getException();
-                DFVarScope childScope = scope.getChildByAST(cc);
-                DFVarRef ref = childScope.lookupVar(decl.getName());
-                //this.addOutput(ref);
-                ctx = processStatement(
-                    graph, finder, childScope, frame, ctx, cc.getBody());
-            }
-            Block finBlock = tryStmt.getFinally();
-            if (finBlock != null) {
-                ctx = processStatement(
-                    graph, finder, scope, frame, ctx, finBlock);
-            }
+            ctx = processTryStatement(
+                graph, finder, scope, frame, ctx,
+                (TryStatement)stmt);
 
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
