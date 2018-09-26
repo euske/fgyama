@@ -920,7 +920,8 @@ public class Java2DF {
                 if (init != null) {
                     ctx = processExpression(
                         graph, finder, scope, frame, ctx, init);
-                } else {
+                }
+                if (init == null || ctx.getRValue() == null) {
                     ctx.setRValue(new ValueSetNode(graph, scope, elemType, ac));
                 }
 
@@ -2022,7 +2023,13 @@ public class Java2DF {
                 ctx = processExpression(
                     graph, finder, scope, frame, ctx, init);
                 DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
-                assign.accept(ctx.getRValue());
+                DFNode value = ctx.getRValue();
+                if (value == null) {
+                    // uninitialized field: default = null.
+                    value = new ConstNode(
+                        graph, scope, DFNullType.NULL, null, "uninitialized");
+                }
+                assign.accept(value);
             }
         }
     }
