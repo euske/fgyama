@@ -402,7 +402,7 @@ public class DFKlass extends DFType {
                 _baseIfaces = new DFKlass[bounds.size()-1];
                 for (int i = 0; i < bounds.size(); i++) {
                     DFKlass klass = finder.resolveKlass(bounds.get(i));
-                    Logger.info("DFKlass.build: "+this+": "+klass);
+                    //Logger.info("DFKlass.build: "+this+": "+klass);
                     if (i == 0) {
                         _baseKlass = klass;
                     } else {

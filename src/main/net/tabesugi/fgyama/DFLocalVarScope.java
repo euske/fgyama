@@ -39,7 +39,7 @@ public class DFLocalVarScope extends DFVarScope {
 
     private DFLocalVarScope addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
-        Logger.info("DFLocalVarScope.addChild: "+this+": "+id);
+        //Logger.info("DFLocalVarScope.addChild: "+this+": "+id);
         DFLocalVarScope scope = new DFLocalVarScope(this, id);
         _children.add(scope);
         _ast2child.put(Utils.encodeASTNode(ast), scope);
@@ -47,7 +47,7 @@ public class DFLocalVarScope extends DFVarScope {
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {
-        Logger.info("DFLocalVarScope.addVar: "+this+": "+name+" -> "+type);
+        //Logger.info("DFLocalVarScope.addVar: "+this+": "+name+" -> "+type);
         return this.addRef("$"+name.getIdentifier(), type);
     }
 

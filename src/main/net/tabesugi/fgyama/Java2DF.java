@@ -2087,7 +2087,7 @@ public class Java2DF {
             ctx = processStatement(
                 graph, finder, scope, frame, ctx, methodDecl.getBody());
             frame.close(ctx);
-            frame.dump();
+            //frame.dump();
 
             Logger.info("Success: "+method.getSignature());
             return graph;
@@ -2221,7 +2221,12 @@ public class Java2DF {
             typeSpace.build(klasses, cunit, global);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
-            Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+            Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+        }
+        if (klasses != null) {
+            for (DFKlass klass : klasses) {
+                Logger.error("Pass1: created: "+klass);
+            }
         }
     }
 
