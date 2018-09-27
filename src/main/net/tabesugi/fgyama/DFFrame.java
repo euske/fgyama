@@ -213,6 +213,13 @@ public class DFFrame {
             DFVarRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
+        } else if (expr instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
+            SimpleName fieldName = sfa.getName();
+            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType()).getBase();
+            DFVarRef ref = klass.lookupField(fieldName);
+            this.addOutputRef(ref);
+
         } else {
             throw new UnsupportedSyntax(expr);
         }
@@ -430,7 +437,7 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType());
+            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType()).getBase();
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInputRef(ref);
             return ref.getRefType();

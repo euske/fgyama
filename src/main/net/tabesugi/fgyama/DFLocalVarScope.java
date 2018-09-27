@@ -459,6 +459,10 @@ public class DFLocalVarScope extends DFVarScope {
             SimpleName fieldName = fa.getName();
             this.build(finder, fa.getExpression());
 
+        } else if (ast instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)ast;
+            SimpleName fieldName = sfa.getName();
+
         } else {
             throw new UnsupportedSyntax(ast);
 

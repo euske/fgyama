@@ -982,7 +982,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
-                DFKlass klass = finder.resolveKlass(obj.getNodeType());
+                DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBase();
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -1171,6 +1171,14 @@ public class Java2DF {
             DFNode obj = ctx.getRValue();
             DFKlass klass = finder.resolveKlass(obj.getNodeType());
             SimpleName fieldName = fa.getName();
+            DFVarRef ref = klass.lookupField(fieldName);
+            ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
+
+        } else if (expr instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
+            SimpleName fieldName = sfa.getName();
+            DFNode obj = ctx.get(scope.lookupThis());
+            DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBase();
             DFVarRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
