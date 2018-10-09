@@ -2222,20 +2222,21 @@ public class Java2DF {
 
     // pass1
     public void buildTypeSpace(
-        List<DFKlass> klasses, CompilationUnit cunit) {
+        List<DFKlass> allKlasses, CompilationUnit cunit) {
+
         DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFGlobalVarScope global = _rootSpace.getGlobalScope();
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
             typeSpace.build(klasses, cunit, global);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         }
-        if (klasses != null) {
-            for (DFKlass klass : klasses) {
-                Logger.error("Pass1: created: "+klass);
-            }
+        for (DFKlass klass : klasses) {
+            Logger.error("Pass1: created: "+klass);
         }
+        allKlasses.addAll(klasses);
     }
 
     // pass2

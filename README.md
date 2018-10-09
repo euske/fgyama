@@ -45,6 +45,9 @@ Node types:
 
 TODOs:
 
+  * static import.
+  * class file generic support.
+  * class file enum support.
   * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
   * Lambdas.
