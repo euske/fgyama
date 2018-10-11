@@ -2,7 +2,6 @@
 import sys
 from graph import get_graphs
 
-MAXLEN = 5
 IGNORED = frozenset(['ref','assign','input','output'])
 def getfeat(node):
     if node.kind is None or node.kind in IGNORED:
@@ -80,19 +79,19 @@ class IPVertex:
             vtx.follow(direction, label, traversed, indent+1)
         return
 
-    def enum(self, name, direction, label, chain=None):
+    def enum(self, name, direction, label, maxlen, chain=None):
         v = getfeat(self.node)
         if v is not None:
             chain = CLink(label+':'+v, chain)
             s = ' '.join(reversed(list(chain)))
             print('%s %s %s' % (name, direction, s))
-        if chain is None or len(chain) < MAXLEN:
+        if chain is None or len(chain) < maxlen:
             if direction < 0:
                 vtxs = self.inputs
             else:
                 vtxs = self.outputs
             for (label, vtx) in vtxs:
-                vtx.enum(name, direction, label, chain)
+                vtx.enum(name, direction, label, maxlen, chain)
         return chain
 
 # main
@@ -100,15 +99,17 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-m maxlen] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'd')
+        (opts, args) = getopt.getopt(argv[1:], 'dm:')
     except getopt.GetoptError:
         return usage()
     debug = 0
+    maxlen = 5
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-m': maxlen = int(v)
     if not args: return usage()
 
     # Load graphs.
@@ -237,9 +238,9 @@ def main(argv):
     for (name,info) in graph2info.items():
         for (inputs,outputs) in info:
             for (label,vtx) in inputs.items():
-                vtx.enum(name, -1, label)
+                vtx.enum(name, -1, label, maxlen)
             for (label,vtx) in outputs.items():
-                vtx.enum(name, +1, label)
+                vtx.enum(name, +1, label, maxlen)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
