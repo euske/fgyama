@@ -9,7 +9,7 @@ def getfeat(node):
     elif node.data is None:
         return node.kind
     else:
-        return '%s:%s' % (node.kind, node.data)
+        return '%s,%s' % (node.kind, node.data)
 
 
 ##  Chain Link
@@ -58,13 +58,13 @@ class IPVertex:
     def __repr__(self):
         return ('<IPVertex(%d)>' % (self.vid))
 
-    def connect(self, label, vtx):
-        #print('# connect: %r -%s-> %r' % (self, label, vtx))
-        assert vtx is not self
+    def connect(self, label, output):
+        #print('# connect: %r -%s-> %r' % (self, label, outvtx))
+        assert output is not self
         assert isinstance(label, str)
-        assert isinstance(vtx, IPVertex)
-        self.outputs.append((label, vtx))
-        vtx.inputs.append((label, self))
+        assert isinstance(output, IPVertex)
+        self.outputs.append((label, output))
+        output.inputs.append((label, self))
         return
 
     def dump(self, direction, label, traversed, indent=0):
@@ -190,12 +190,11 @@ def main(argv):
             v1 = vtxs[node]
             # Connect data paths.
             for (label,prev) in node.inputs.items():
-                #print('+', node, label, prev)
                 if label.startswith('_'): continue
                 v0 = vtxs[prev]
                 if prev.kind in ('call', 'new'):
                     # Receive a return value from the callee.
-                    rtns[prev] = v0
+                    rtns[prev] = v1
                 v0.connect(label, v1)
             if node.kind in ('call', 'new'):
                 # Send a passing value to the callee.
