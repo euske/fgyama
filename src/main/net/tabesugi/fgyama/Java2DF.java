@@ -2236,7 +2236,9 @@ public class Java2DF {
         for (DFKlass klass : klasses) {
             Logger.error("Pass1: created: "+klass);
         }
-        allKlasses.addAll(klasses);
+        if (allKlasses != null) {
+            allKlasses.addAll(klasses);
+        }
     }
 
     // pass2
