@@ -24,6 +24,11 @@ public class DFParamType extends DFKlass {
         return _index;
     }
 
+    @Override
+    public String getTypeName() {
+        return _name+":"+_baseKlass.getTypeName();
+    }
+
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, TypeParameter typeParam)
         throws TypeNotFound {

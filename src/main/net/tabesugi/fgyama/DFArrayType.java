@@ -28,11 +28,11 @@ public class DFArrayType extends DFType {
 
     public String getTypeName()
     {
-        String name = _elemType.getTypeName();
+        StringBuilder b = new StringBuilder();
         for (int i = 0; i < _ndims; i++) {
-            name += "[]";
+            b.append("[");
         }
-        return name;
+        return b.toString()+_elemType.getTypeName();
     }
 
     public boolean equals(DFType type) {

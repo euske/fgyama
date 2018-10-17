@@ -71,7 +71,11 @@ public class DFKlass extends DFType {
     }
 
     public String getTypeName() {
-        return this.getFullName();
+        String name = "L"+this.getFullName()+";";
+        if (_paramTypes != null && 0 < _paramTypes.length) {
+            name = DFParamKlass.getParamName(_paramTypes)+name;
+        }
+        return name;
     }
 
     public boolean equals(DFType type) {
@@ -90,14 +94,7 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass getParamKlass(DFType[] argTypes) {
-        StringBuilder b = new StringBuilder();
-        for (DFType type : argTypes) {
-            if (0 < b.length()) {
-                b.append(",");
-            }
-            b.append(type.getTypeName());
-        }
-        String name = this.getTypeName()+"<"+b.toString()+">";
+        String name = DFParamKlass.getParamName(argTypes)+_name;
         DFParamKlass klass = _paramKlasses.get(name);
         if (klass == null) {
             klass = new DFParamKlass(name, this, argTypes);

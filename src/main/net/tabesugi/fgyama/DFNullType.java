@@ -7,7 +7,7 @@ package net.tabesugi.fgyama;
 //
 public class DFNullType extends DFType {
 
-    public DFNullType() {
+    private DFNullType() {
     }
 
     @Override

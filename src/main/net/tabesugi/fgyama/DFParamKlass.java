@@ -20,6 +20,17 @@ public class DFParamKlass extends DFKlass {
         _argTypes = argTypes;
     }
 
+    public static String getParamName(DFType[] argTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFType type : argTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(type.getTypeName());
+        }
+        return "<"+b.toString()+">";
+    }
+
     @Override
     public String toString() {
         return ("<DFParamKlass("+this.getFullName()+")>");
