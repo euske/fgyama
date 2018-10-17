@@ -24,7 +24,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     private DFGlobalVarScope _global = new DFGlobalVarScope();
 
     public DFRootTypeSpace() {
-        super("ROOT");
+        super(null, "ROOT");
     }
 
     @Override

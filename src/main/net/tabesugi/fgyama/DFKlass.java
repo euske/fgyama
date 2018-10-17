@@ -71,11 +71,11 @@ public class DFKlass extends DFType {
     }
 
     public String getTypeName() {
-        String name = "L"+this.getFullName()+";";
+        String name = "L"+this.getFullName();
         if (_paramTypes != null && 0 < _paramTypes.length) {
-            name = DFParamKlass.getParamName(_paramTypes)+name;
+            name += DFParamKlass.getParamName(_paramTypes);
         }
-        return name;
+        return name+";";
     }
 
     public boolean equals(DFType type) {
@@ -124,7 +124,7 @@ public class DFKlass extends DFType {
     }
 
     public String getFullName() {
-        return _typeSpace.getFullName()+"/"+_name;
+        return _typeSpace.getFullName()+_name;
     }
 
     public int isSubclassOf(DFKlass klass) {
@@ -476,8 +476,8 @@ public class DFKlass extends DFType {
             DFTypeFinder finder2 = finder;
             DFTypeSpace methodSpace = null;
             if (0 < tps.size()) {
-                String name = this.getFullName()+"."+decl.getName().getIdentifier();
-                methodSpace = new DFTypeSpace(name);
+                String name = decl.getName().getIdentifier();
+                methodSpace = new DFTypeSpace(_childSpace, name);
                 finder2 = new DFTypeFinder(finder, methodSpace);
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);

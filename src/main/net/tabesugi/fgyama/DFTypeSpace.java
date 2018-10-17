@@ -15,8 +15,8 @@ import org.w3c.dom.*;
 //
 public class DFTypeSpace {
 
-    private DFTypeSpace _root;
-    private String _name = null;
+    private DFTypeSpace _parent;
+    private String _name;
 
     private List<DFTypeSpace> _children =
         new ArrayList<DFTypeSpace>();
@@ -27,18 +27,9 @@ public class DFTypeSpace {
     private Map<String, DFParamType> _id2paramtype =
         new HashMap<String, DFParamType>();
 
-    public DFTypeSpace(String name) {
-        _root = this;
-        _name = name;
-    }
-
     public DFTypeSpace(DFTypeSpace parent, String name) {
-        _root = parent._root;
-        if (parent == _root) {
-            _name = name;
-        } else {
-            _name = parent._name + "." + name;
-        }
+        _parent = parent;
+        _name = name;
     }
 
     @Override
@@ -47,7 +38,11 @@ public class DFTypeSpace {
     }
 
     public String getFullName() {
-        return _name;
+        if (_parent == null) {
+            return "";
+        } else {
+            return _parent.getFullName()+_name+"/";
+        }
     }
 
     public String getAnonName() {
@@ -365,7 +360,7 @@ public class DFTypeSpace {
         dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
-        out.println(indent+_name+" {");
+        out.println(indent+this.getFullName()+" {");
         String i2 = indent + "  ";
         for (DFKlass klass : _id2klass.values()) {
             out.println(i2+"defined: "+klass);
