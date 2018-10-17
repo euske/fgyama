@@ -474,7 +474,8 @@ public class DFFrame {
             String id = "lambda";
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = new DFTypeSpace(null, id);
-            DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope);
+            DFKlass anonKlass = new DFAnonKlass(
+                id, anonSpace, scope, DFRootTypeSpace.OBJECT_KLASS);
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {

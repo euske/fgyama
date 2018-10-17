@@ -88,7 +88,7 @@ public class DFTypeSpace {
             return space.createKlass(parent, id.substring(i+1));
         } else {
             DFTypeSpace child = this.lookupSpace(id);
-            DFKlass klass = new DFKlass(id, this, child, parent);
+            DFKlass klass = new DFKlass(id, this, child, parent, null);
             //Logger.info("DFTypeSpace.createKlass: "+klass);
             return this.addKlass(klass);
         }

@@ -1077,7 +1077,8 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
-                DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope);
+                DFKlass anonKlass = new DFAnonKlass(
+                    id, anonSpace, scope, DFRootTypeSpace.OBJECT_KLASS);
                 assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1098,7 +1099,8 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
-                DFKlass anonKlass = new DFAnonKlass("methodref", anonSpace, scope);
+                DFKlass anonKlass = new DFAnonKlass(
+                    "methodref", anonSpace, scope, DFRootTypeSpace.OBJECT_KLASS);
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);

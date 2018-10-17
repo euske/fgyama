@@ -35,34 +35,25 @@ public class DFKlass extends DFType {
     private String _filePath = null;
     private boolean _loaded = true;
 
-    protected DFKlass(
-        String name, DFTypeSpace typeSpace) {
-        _name = name;
-        _typeSpace = typeSpace;
-    }
-
-    public DFKlass(
-        String name, DFTypeSpace typeSpace,
-        DFTypeSpace childSpace, DFVarScope parentScope) {
-        _name = name;
-        _typeSpace = typeSpace;
-        _childSpace = childSpace;
-        _scope = new DFKlassScope(this, parentScope, name);
-    }
-
     public DFKlass(
         String name, DFTypeSpace typeSpace,
         DFTypeSpace childSpace, DFVarScope parentScope,
         DFKlass baseKlass) {
-        this(name, typeSpace, childSpace, parentScope);
+        _name = name;
+        _typeSpace = typeSpace;
+        _childSpace = childSpace;
         _baseKlass = baseKlass;
+        if (parentScope != null) {
+            _scope = new DFKlassScope(this, parentScope, name);
+        }
     }
 
-    public DFKlass(String name, DFKlass klass) {
+    protected DFKlass(String name, DFKlass genericKlass) {
         _name = name;
-        _typeSpace = klass._typeSpace;
-        _childSpace = klass._childSpace;
-        _scope = klass._scope;
+        _typeSpace = genericKlass._typeSpace;
+        _childSpace = genericKlass._childSpace;
+        _scope = genericKlass._scope;
+        _baseKlass = genericKlass._baseKlass;
     }
 
     @Override
