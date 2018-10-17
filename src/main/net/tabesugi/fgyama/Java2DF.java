@@ -848,7 +848,8 @@ public class Java2DF {
                 if (method == null) {
                     String id = invoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        klass, null, id, false, argTypes, null);
+                        klass, null, id, false,
+                        new DFMethodType(argTypes, null));
                     Logger.error("Fallback method: "+klass+": "+fallback);
                     method = fallback;
                 }
@@ -889,7 +890,8 @@ public class Java2DF {
                 if (method == null) {
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        baseKlass, null, id, false, argTypes, null);
+                        baseKlass, null, id, false,
+                        new DFMethodType(argTypes, null));
                     Logger.error("Fallback method: "+baseKlass+": "+fallback);
                     method = fallback;
                 }

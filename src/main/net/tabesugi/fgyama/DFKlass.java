@@ -212,7 +212,8 @@ public class DFKlass extends DFType {
         DFType[] argTypes, DFType returnType) {
         String id = name.getIdentifier();
         DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic, argTypes, returnType);
+            this, methodSpace, id, isStatic,
+            new DFMethodType(argTypes, returnType));
         return this.addMethod(method);
     }
 
@@ -220,7 +221,8 @@ public class DFKlass extends DFType {
         DFTypeSpace methodSpace, String id, boolean isStatic,
         DFType[] argTypes, DFType returnType) {
         DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic, argTypes, returnType);
+            this, methodSpace, id, isStatic,
+            new DFMethodType(argTypes, returnType));
         return this.addMethod(method);
     }
 

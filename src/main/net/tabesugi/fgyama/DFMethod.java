@@ -15,29 +15,26 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFTypeSpace _childSpace;
     private String _name;
     private boolean _static;
-    private DFType[] _argTypes;
-    private DFType _returnType;
+    private DFMethodType _methodType;
 
     private List<DFMethod> _overrides = new ArrayList<DFMethod>();
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
-        String name, boolean isStatic,
-        DFType[] argTypes, DFType returnType) {
+        String name, boolean isStatic, DFMethodType methodType) {
         _klass = klass;
         _childSpace = childSpace;
         _name = name;
         _static = isStatic;
-        _argTypes = argTypes;
-        _returnType = returnType;
+        _methodType = methodType;
         _overrides.add(this);
     }
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
-        String name, boolean isStatic,
-        DFType[] argTypes, DFType returnType, DFMethod[] overrides) {
-        this(klass, childSpace, name, isStatic, argTypes, returnType);
+        String name, boolean isStatic, DFMethodType methodType,
+        DFMethod[] overrides) {
+        this(klass, childSpace, name, isStatic, methodType);
         for (DFMethod method : overrides) {
             _overrides.add(method);
         }
@@ -45,11 +42,7 @@ public class DFMethod implements Comparable<DFMethod> {
 
     @Override
     public String toString() {
-        if (_returnType == null) {
-            return ("<DFMethod("+this.getSignature()+" -> ?)>");
-        } else {
-            return ("<DFMethod("+this.getSignature()+" -> "+_returnType.getTypeName()+">");
-        }
+        return ("<DFMethod("+this.getSignature()+">");
     }
 
     @Override
@@ -59,31 +52,7 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public boolean equals(DFMethod method) {
         if (!_name.equals(method._name)) return false;
-        if (!_returnType.equals(method._returnType)) return false;
-        if (_argTypes.length != method._argTypes.length) return false;
-        for (int i = 0; i < _argTypes.length; i++) {
-            if (!_argTypes[i].equals(method._argTypes[i])) return false;
-        }
-        return true;
-    }
-
-    public String getTypeName() {
-        StringBuilder b = new StringBuilder();
-        b.append("(");
-        for (DFType type : _argTypes) {
-            if (type == null) {
-                b.append("?");
-            } else {
-                b.append(type.getTypeName());
-            }
-        }
-        b.append(")");
-        if (_returnType == null) {
-            b.append("?");
-        } else {
-            b.append(_returnType.getTypeName());
-        }
-        return b.toString();
+        return _methodType.equals(method._methodType);
     }
 
     public String getSignature() {
@@ -93,35 +62,20 @@ public class DFMethod implements Comparable<DFMethod> {
         } else {
             name = "!"+_name;
         }
-        return name+this.getTypeName();
+        return name + _methodType.getTypeName();
     }
 
     public DFTypeSpace getChildSpace() {
         return _childSpace;
     }
 
-    public DFType[] getArgTypes() {
-        return _argTypes;
-    }
-
     public DFType getReturnType() {
-        return _returnType;
+        return _methodType.getReturnType();
     }
 
     public int canAccept(String name, DFType[] argTypes) {
         if (!_name.equals(name)) return -1;
-        if (_argTypes == null || argTypes == null) return 0;
-        if (_argTypes.length != argTypes.length) return -1;
-        int dist = 0;
-        for (int i = 0; i < _argTypes.length; i++) {
-            DFType type0 = _argTypes[i];
-            DFType type1 = argTypes[i];
-            if (type0 == null || type1 == null) continue;
-            int d = type0.canConvertFrom(type1);
-            if (d < 0) return -1;
-            dist += d;
-        }
-        return dist;
+        return _methodType.canAccept(argTypes);
     }
 
     public void addOverride(DFMethod method) {
@@ -135,22 +89,8 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFMethod parameterize(DFType[] types) {
-        boolean changed = false;
-        DFType returnType = _returnType;
-        if (_returnType instanceof DFParamType) {
-            int index = ((DFParamType)_returnType).getIndex();
-            returnType = types[index];
-            changed = true;
-        }
-        DFType[] argTypes = new DFType[_argTypes.length];
-        for (int i = 0; i < _argTypes.length; i++) {
-            argTypes[i] = _argTypes[i];
-            if (argTypes[i] instanceof DFParamType) {
-                int index = ((DFParamType)(argTypes[i])).getIndex();
-                argTypes[i] = types[index];
-                changed = true;
-            }
-        }
+        DFMethodType methodType = _methodType.parameterize(types);
+        boolean changed = (methodType != _methodType);
         DFMethod[] overrides = new DFMethod[_overrides.size()-1];
         for (int i = 1; i < overrides.length; i++) {
             DFMethod method0 = _overrides.get(i);
@@ -163,7 +103,7 @@ public class DFMethod implements Comparable<DFMethod> {
         if (changed) {
             return new DFMethod(
                 _klass, _childSpace, _name, _static,
-                argTypes, returnType, overrides);
+                methodType, overrides);
         }
         return this;
     }
