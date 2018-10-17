@@ -1,190 +1,190 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph ins="NROOT/basic_funcs.main_1 NROOT/basic_funcs.main_11 NROOT/basic_funcs.main_17 NROOT/basic_funcs.main_6" name="ROOT/basic_funcs/main:[Ljava.lang/String;" outs="">
-      <scope name="ROOT/basic_funcs.main">
-        <scope name="ROOT/basic_funcs.main.b0">
-          <node id="NROOT/basic_funcs.main.b0_3" kind="ref" ref="ROOT/basic_funcs.main/$args" type="[Ljava.lang/String;">
-            <link src="NROOT/basic_funcs.main_2"/>
+    <graph ins="Nbasic_funcs.main_1 Nbasic_funcs.main_11 Nbasic_funcs.main_17 Nbasic_funcs.main_6" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="">
+      <scope name="basic_funcs.main">
+        <scope name="basic_funcs.main.b0">
+          <node id="Nbasic_funcs.main.b0_3" kind="ref" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
+            <link src="Nbasic_funcs.main_2"/>
             <ast length="4" start="92" type="42"/>
           </node>
-          <node data="0" id="NROOT/basic_funcs.main.b0_4" kind="const" type="I">
+          <node data="0" id="Nbasic_funcs.main.b0_4" kind="const" type="I">
             <ast length="1" start="97" type="34"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_5" kind="arrayref" ref="%:Ljava.lang/String;" type="Ljava.lang/String;">
-            <link src="NROOT/basic_funcs.main_6"/>
-            <link label="array" src="NROOT/basic_funcs.main.b0_3"/>
-            <link label="index" src="NROOT/basic_funcs.main.b0_4"/>
+          <node id="Nbasic_funcs.main.b0_5" kind="arrayref" ref="%:Ljava/lang/String;" type="Ljava/lang/String;">
+            <link src="Nbasic_funcs.main_6"/>
+            <link label="array" src="Nbasic_funcs.main.b0_3"/>
+            <link label="index" src="Nbasic_funcs.main.b0_4"/>
             <ast length="7" start="92" type="2"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_7" kind="assign" ref="ROOT/basic_funcs.main.b0/$a" type="Ljava.lang/String;">
-            <link src="NROOT/basic_funcs.main.b0_5"/>
+          <node id="Nbasic_funcs.main.b0_7" kind="assign" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+            <link src="Nbasic_funcs.main.b0_5"/>
             <ast length="11" start="88" type="59"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_8" kind="ref" ref="ROOT/basic_funcs.main.b0/$a" type="Ljava.lang/String;">
-            <link src="NROOT/basic_funcs.main.b0_7"/>
+          <node id="Nbasic_funcs.main.b0_8" kind="ref" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+            <link src="Nbasic_funcs.main.b0_7"/>
             <ast length="1" start="134" type="42"/>
           </node>
-          <node data="java.lang/Integer/parseInt:Ljava.lang/String;" id="NROOT/basic_funcs.main.b0_9" kind="call" type="I">
-            <link label="arg0" src="NROOT/basic_funcs.main.b0_8"/>
+          <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nbasic_funcs.main.b0_9" kind="call" type="I">
+            <link label="arg0" src="Nbasic_funcs.main.b0_8"/>
             <ast length="19" start="117" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_10" kind="assign" ref="ROOT/basic_funcs.main.b0/$b" type="I">
-            <link src="NROOT/basic_funcs.main.b0_9"/>
+          <node id="Nbasic_funcs.main.b0_10" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nbasic_funcs.main.b0_9"/>
             <ast length="23" start="113" type="59"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_12" kind="ref" ref="ROOT/basic_funcs.main.b0/$b" type="I">
-            <link src="NROOT/basic_funcs.main.b0_10"/>
+          <node id="Nbasic_funcs.main.b0_12" kind="ref" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nbasic_funcs.main.b0_10"/>
             <ast length="1" start="158" type="42"/>
           </node>
-          <node data="ROOT/basic_funcs/moo:I" id="NROOT/basic_funcs.main.b0_13" kind="call" type="I">
-            <link label="arg0" src="NROOT/basic_funcs.main.b0_12"/>
-            <link label="obj" src="NROOT/basic_funcs.main_11"/>
+          <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.main.b0_13" kind="call" type="I">
+            <link label="arg0" src="Nbasic_funcs.main.b0_12"/>
+            <link label="obj" src="Nbasic_funcs.main_11"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_14" kind="assign" ref="#this" type="LROOT/basic_funcs;">
-            <link label="obj" src="NROOT/basic_funcs.main.b0_13"/>
+          <node id="Nbasic_funcs.main.b0_14" kind="assign" ref="#this" type="Lbasic_funcs;">
+            <link label="obj" src="Nbasic_funcs.main.b0_13"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_15" kind="assign" ref="ROOT/basic_funcs.main.b0/$c" type="I">
-            <link src="NROOT/basic_funcs.main.b0_13"/>
+          <node id="Nbasic_funcs.main.b0_15" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nbasic_funcs.main.b0_13"/>
             <ast length="10" start="150" type="59"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_16" kind="fieldref" ref="java.lang/System/.out" type="Ljava.io/PrintStream;">
-            <link src="NROOT/basic_funcs.main_17"/>
+          <node id="Nbasic_funcs.main.b0_16" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link src="Nbasic_funcs.main_17"/>
             <ast length="10" start="170" type="40"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_18" kind="ref" ref="ROOT/basic_funcs.main.b0/$c" type="I">
-            <link src="NROOT/basic_funcs.main.b0_15"/>
+          <node id="Nbasic_funcs.main.b0_18" kind="ref" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nbasic_funcs.main.b0_15"/>
             <ast length="1" start="189" type="42"/>
           </node>
-          <node data="java.io/PrintStream/println:I" id="NROOT/basic_funcs.main.b0_19" kind="call" type="V">
-            <link label="arg0" src="NROOT/basic_funcs.main.b0_18"/>
-            <link label="obj" src="NROOT/basic_funcs.main.b0_16"/>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="Nbasic_funcs.main.b0_19" kind="call" type="V">
+            <link label="arg0" src="Nbasic_funcs.main.b0_18"/>
+            <link label="obj" src="Nbasic_funcs.main.b0_16"/>
             <ast length="21" start="170" type="32"/>
           </node>
-          <node id="NROOT/basic_funcs.main.b0_20" kind="assign" ref="java.lang/System/.out" type="Ljava.io/PrintStream;">
-            <link label="obj" src="NROOT/basic_funcs.main.b0_19"/>
+          <node id="Nbasic_funcs.main.b0_20" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link label="obj" src="Nbasic_funcs.main.b0_19"/>
             <ast length="21" start="170" type="32"/>
           </node>
         </scope>
-        <node id="NROOT/basic_funcs.main_1" kind="input" ref="#arg0" type="[Ljava.lang/String;">
+        <node id="Nbasic_funcs.main_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast length="13" start="56" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.main_2" kind="assign" ref="ROOT/basic_funcs.main/$args" type="[Ljava.lang/String;">
-          <link src="NROOT/basic_funcs.main_1"/>
+        <node id="Nbasic_funcs.main_2" kind="assign" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
+          <link src="Nbasic_funcs.main_1"/>
           <ast length="13" start="56" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.main_6" ref="%:Ljava.lang/String;" type="Ljava.lang/String;"/>
-        <node id="NROOT/basic_funcs.main_11" ref="#this" type="LROOT/basic_funcs;"/>
-        <node id="NROOT/basic_funcs.main_17" ref="java.lang/System/.out" type="Ljava.io/PrintStream;"/>
+        <node id="Nbasic_funcs.main_6" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="Nbasic_funcs.main_11" ref="#this" type="Lbasic_funcs;"/>
+        <node id="Nbasic_funcs.main_17" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
       </scope>
     </graph>
-    <graph ins="NROOT/basic_funcs.moo_1 NROOT/basic_funcs.moo_20" name="ROOT/basic_funcs/moo:I" outs="NROOT/basic_funcs.moo.b0_23">
-      <scope name="ROOT/basic_funcs.moo">
-        <scope name="ROOT/basic_funcs.moo.b0">
-          <scope name="ROOT/basic_funcs.moo.b0.b0">
-            <node data="ROOT/basic_funcs/foo" id="NROOT/basic_funcs.moo.b0.b0_7" kind="call" type="I">
-              <link label="obj" src="NROOT/basic_funcs.moo_20"/>
+    <graph ins="Nbasic_funcs.moo_1 Nbasic_funcs.moo_20" name="Lbasic_funcs;.moo(I)I" outs="Nbasic_funcs.moo.b0_23">
+      <scope name="basic_funcs.moo">
+        <scope name="basic_funcs.moo.b0">
+          <scope name="basic_funcs.moo.b0.b0">
+            <node data="Lbasic_funcs;.foo()I" id="Nbasic_funcs.moo.b0.b0_7" kind="call" type="I">
+              <link label="obj" src="Nbasic_funcs.moo_20"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b0_8" kind="assign" ref="#this" type="LROOT/basic_funcs;">
-              <link label="obj" src="NROOT/basic_funcs.moo.b0.b0_7"/>
+            <node id="Nbasic_funcs.moo.b0.b0_8" kind="assign" ref="#this" type="Lbasic_funcs;">
+              <link label="obj" src="Nbasic_funcs.moo.b0.b0_7"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b0_9" kind="output" ref="#return" type="I">
-              <link src="NROOT/basic_funcs.moo.b0.b0_7"/>
+            <node id="Nbasic_funcs.moo.b0.b0_9" kind="output" ref="#return" type="I">
+              <link src="Nbasic_funcs.moo.b0.b0_7"/>
               <ast length="13" start="269" type="41"/>
             </node>
           </scope>
-          <scope name="ROOT/basic_funcs.moo.b0.b1">
-            <node id="NROOT/basic_funcs.moo.b0.b1_11" kind="ref" ref="ROOT/basic_funcs.moo/$x" type="I">
-              <link src="NROOT/basic_funcs.moo_2"/>
+          <scope name="basic_funcs.moo.b0.b1">
+            <node id="Nbasic_funcs.moo.b0.b1_11" kind="ref" ref="basic_funcs.moo/$x" type="I">
+              <link src="Nbasic_funcs.moo_2"/>
               <ast length="1" start="323" type="42"/>
             </node>
-            <node data="1" id="NROOT/basic_funcs.moo.b0.b1_13" kind="const" type="I">
+            <node data="1" id="Nbasic_funcs.moo.b0.b1_13" kind="const" type="I">
               <ast length="1" start="325" type="34"/>
             </node>
-            <node data="-" id="NROOT/basic_funcs.moo.b0.b1_14" kind="infix" type="I">
-              <link label="L" src="NROOT/basic_funcs.moo.b0.b1_11"/>
-              <link label="R" src="NROOT/basic_funcs.moo.b0.b1_13"/>
+            <node data="-" id="Nbasic_funcs.moo.b0.b1_14" kind="infix" type="I">
+              <link label="L" src="Nbasic_funcs.moo.b0.b1_11"/>
+              <link label="R" src="Nbasic_funcs.moo.b0.b1_13"/>
               <ast length="3" start="323" type="27"/>
             </node>
-            <node data="ROOT/basic_funcs/moo:I" id="NROOT/basic_funcs.moo.b0.b1_15" kind="call" type="I">
-              <link label="arg0" src="NROOT/basic_funcs.moo.b0.b1_14"/>
-              <link label="obj" src="NROOT/basic_funcs.moo_20"/>
+            <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.moo.b0.b1_15" kind="call" type="I">
+              <link label="arg0" src="Nbasic_funcs.moo.b0.b1_14"/>
+              <link label="obj" src="Nbasic_funcs.moo_20"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b1_16" kind="assign" ref="#this" type="LROOT/basic_funcs;">
-              <link label="obj" src="NROOT/basic_funcs.moo.b0.b1_15"/>
+            <node id="Nbasic_funcs.moo.b0.b1_16" kind="assign" ref="#this" type="Lbasic_funcs;">
+              <link label="obj" src="Nbasic_funcs.moo.b0.b1_15"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node data="2" id="NROOT/basic_funcs.moo.b0.b1_17" kind="const" type="I">
+            <node data="2" id="Nbasic_funcs.moo.b0.b1_17" kind="const" type="I">
               <ast length="1" start="328" type="34"/>
             </node>
-            <node data="+" id="NROOT/basic_funcs.moo.b0.b1_18" kind="infix" type="I">
-              <link label="L" src="NROOT/basic_funcs.moo.b0.b1_15"/>
-              <link label="R" src="NROOT/basic_funcs.moo.b0.b1_17"/>
+            <node data="+" id="Nbasic_funcs.moo.b0.b1_18" kind="infix" type="I">
+              <link label="L" src="Nbasic_funcs.moo.b0.b1_15"/>
+              <link label="R" src="Nbasic_funcs.moo.b0.b1_17"/>
               <ast length="10" start="319" type="27"/>
             </node>
-            <node id="NROOT/basic_funcs.moo.b0.b1_19" kind="output" ref="#return" type="I">
-              <link src="NROOT/basic_funcs.moo.b0.b1_18"/>
+            <node id="Nbasic_funcs.moo.b0.b1_19" kind="output" ref="#return" type="I">
+              <link src="Nbasic_funcs.moo.b0.b1_18"/>
               <ast length="18" start="312" type="41"/>
             </node>
           </scope>
-          <node id="NROOT/basic_funcs.moo.b0_3" kind="ref" ref="ROOT/basic_funcs.moo/$x" type="I">
-            <link src="NROOT/basic_funcs.moo_2"/>
+          <node id="Nbasic_funcs.moo.b0_3" kind="ref" ref="basic_funcs.moo/$x" type="I">
+            <link src="Nbasic_funcs.moo_2"/>
             <ast length="1" start="247" type="42"/>
           </node>
-          <node data="0" id="NROOT/basic_funcs.moo.b0_4" kind="const" type="I">
+          <node data="0" id="Nbasic_funcs.moo.b0_4" kind="const" type="I">
             <ast length="1" start="252" type="34"/>
           </node>
-          <node data="==" id="NROOT/basic_funcs.moo.b0_5" kind="infix" type="I">
-            <link label="L" src="NROOT/basic_funcs.moo.b0_3"/>
-            <link label="R" src="NROOT/basic_funcs.moo.b0_4"/>
+          <node data="==" id="Nbasic_funcs.moo.b0_5" kind="infix" type="I">
+            <link label="L" src="Nbasic_funcs.moo.b0_3"/>
+            <link label="R" src="Nbasic_funcs.moo.b0_4"/>
             <ast length="6" start="247" type="27"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_21" kind="join" ref="#return">
-            <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
-            <link label="false" src="NROOT/basic_funcs.moo.b0.b1_19"/>
-            <link label="true" src="NROOT/basic_funcs.moo.b0.b0_9"/>
+          <node id="Nbasic_funcs.moo.b0_21" kind="join" ref="#return">
+            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
+            <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
+            <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
             <ast length="97" start="243" type="25"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_22" kind="join" ref="#return">
-            <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
-            <link label="false" src="NROOT/basic_funcs.moo.b0_21"/>
-            <link label="true" src="NROOT/basic_funcs.moo.b0.b0_9"/>
+          <node id="Nbasic_funcs.moo.b0_22" kind="join" ref="#return">
+            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
+            <link label="false" src="Nbasic_funcs.moo.b0_21"/>
+            <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
           </node>
-          <node id="NROOT/basic_funcs.moo.b0_23" kind="join" ref="#return">
-            <link label="cond" src="NROOT/basic_funcs.moo.b0_5"/>
-            <link label="false" src="NROOT/basic_funcs.moo.b0.b1_19"/>
-            <link label="true" src="NROOT/basic_funcs.moo.b0_22"/>
+          <node id="Nbasic_funcs.moo.b0_23" kind="join" ref="#return">
+            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
+            <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
+            <link label="true" src="Nbasic_funcs.moo.b0_22"/>
           </node>
         </scope>
-        <node id="NROOT/basic_funcs.moo_1" kind="input" ref="#arg0" type="I">
+        <node id="Nbasic_funcs.moo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="226" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.moo_2" kind="assign" ref="ROOT/basic_funcs.moo/$x" type="I">
-          <link src="NROOT/basic_funcs.moo_1"/>
+        <node id="Nbasic_funcs.moo_2" kind="assign" ref="basic_funcs.moo/$x" type="I">
+          <link src="Nbasic_funcs.moo_1"/>
           <ast length="5" start="226" type="44"/>
         </node>
-        <node id="NROOT/basic_funcs.moo_20" ref="#this" type="LROOT/basic_funcs;"/>
+        <node id="Nbasic_funcs.moo_20" ref="#this" type="Lbasic_funcs;"/>
       </scope>
     </graph>
-    <graph ins="" name="ROOT/basic_funcs/foo" outs="NROOT/basic_funcs.foo.b0_2">
-      <scope name="ROOT/basic_funcs.foo">
-        <scope name="ROOT/basic_funcs.foo.b0">
-          <node data="3" id="NROOT/basic_funcs.foo.b0_1" kind="const" type="I">
+    <graph ins="" name="Lbasic_funcs;.foo()I" outs="Nbasic_funcs.foo.b0_2">
+      <scope name="basic_funcs.foo">
+        <scope name="basic_funcs.foo.b0">
+          <node data="3" id="Nbasic_funcs.foo.b0_1" kind="const" type="I">
             <ast length="1" start="393" type="34"/>
           </node>
-          <node id="NROOT/basic_funcs.foo.b0_2" kind="output" ref="#return" type="I">
-            <link src="NROOT/basic_funcs.foo.b0_1"/>
+          <node id="Nbasic_funcs.foo.b0_2" kind="output" ref="#return" type="I">
+            <link src="Nbasic_funcs.foo.b0_1"/>
             <ast length="9" start="386" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="ROOT/basic_funcs" outs="">
-      <scope name="ROOT/basic_funcs"/>
+    <graph ins="" name="basic_funcs" outs="">
+      <scope name="basic_funcs"/>
     </graph>
   </file>
 </fgyama>

@@ -1,136 +1,136 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph ins="" name="dom.meep.Foo/Bar" outs="">
-      <scope name="dom.meep.Foo/Bar"/>
+    <graph ins="" name="dom/meep/Foo/Bar" outs="">
+      <scope name="dom/meep/Foo/Bar"/>
     </graph>
-    <graph ins="" name="dom.meep/Foo.doit/inline/Baz/moo" outs="">
-      <scope name="dom.meep/Foo.doit/inline/Baz.moo">
-        <scope name="dom.meep/Foo.doit/inline/Baz.moo.b0"/>
+    <graph ins="" name="LBaz;.moo()V" outs="">
+      <scope name="Baz.moo">
+        <scope name="Baz.moo.b0"/>
       </scope>
     </graph>
-    <graph ins="" name="dom.meep/Foo.doit/inline/Baz" outs="">
-      <scope name="dom.meep/Foo.doit/inline/Baz"/>
+    <graph ins="" name="Baz" outs="">
+      <scope name="Baz"/>
     </graph>
-    <graph ins="Ndom.meep/Foo.doit_11 Ndom.meep/Foo.doit_13 Ndom.meep/Foo.doit_2" name="dom.meep/Foo/doit" outs="Ndom.meep/Foo.doit.b0_9">
-      <scope name="dom.meep/Foo.doit">
-        <scope name="dom.meep/Foo.doit.b0">
-          <node id="Ndom.meep/Foo.doit.b0_1" kind="fieldref" ref="java.lang/System/.out" type="Ljava.io/PrintStream;">
-            <link src="Ndom.meep/Foo.doit_2"/>
+    <graph ins="Ndom/meep/Foo.doit_11 Ndom/meep/Foo.doit_13 Ndom/meep/Foo.doit_2" name="Ldom/meep/Foo;.doit()V" outs="Ndom/meep/Foo.doit.b0_9">
+      <scope name="dom/meep/Foo.doit">
+        <scope name="dom/meep/Foo.doit.b0">
+          <node id="Ndom/meep/Foo.doit.b0_1" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link src="Ndom/meep/Foo.doit_2"/>
             <ast length="10" start="100" type="40"/>
           </node>
-          <node data="Foo!" id="Ndom.meep/Foo.doit.b0_3" kind="const" type="Ljava.lang/String;">
+          <node data="Foo!" id="Ndom/meep/Foo.doit.b0_3" kind="const" type="Ljava/lang/String;">
             <ast length="6" start="119" type="45"/>
           </node>
-          <node data="java.io/PrintStream/println:Ljava.lang/String;" id="Ndom.meep/Foo.doit.b0_4" kind="call" type="V">
-            <link label="arg0" src="Ndom.meep/Foo.doit.b0_3"/>
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_1"/>
+          <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="Ndom/meep/Foo.doit.b0_4" kind="call" type="V">
+            <link label="arg0" src="Ndom/meep/Foo.doit.b0_3"/>
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_1"/>
             <ast length="26" start="100" type="32"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_5" kind="assign" ref="java.lang/System/.out" type="Ljava.io/PrintStream;">
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_4"/>
+          <node id="Ndom/meep/Foo.doit.b0_5" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_4"/>
             <ast length="26" start="100" type="32"/>
           </node>
-          <node data="Ldom.meep/Foo.doit/inline/Baz;" id="Ndom.meep/Foo.doit.b0_6" kind="new" type="Ldom.meep/Foo.doit/inline/Baz;">
+          <node data="LBaz;" id="Ndom/meep/Foo.doit.b0_6" kind="new" type="LBaz;">
             <ast length="9" start="222" type="14"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_7" kind="assign" ref="dom.meep/Foo.doit.b0/$baz" type="Ldom.meep/Foo.doit/inline/Baz;">
-            <link src="Ndom.meep/Foo.doit.b0_6"/>
+          <node id="Ndom/meep/Foo.doit.b0_7" kind="assign" ref="dom/meep/Foo.doit.b0/$baz" type="LBaz;">
+            <link src="Ndom/meep/Foo.doit.b0_6"/>
             <ast length="15" start="216" type="59"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_8" kind="ref" ref="dom.meep/Foo.doit.b0/$baz" type="Ldom.meep/Foo.doit/inline/Baz;">
-            <link src="Ndom.meep/Foo.doit.b0_7"/>
+          <node id="Ndom/meep/Foo.doit.b0_8" kind="ref" ref="dom/meep/Foo.doit.b0/$baz" type="LBaz;">
+            <link src="Ndom/meep/Foo.doit.b0_7"/>
             <ast length="3" start="241" type="42"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_9" kind="fieldassign" ref="dom.meep/Foo.doit/inline/Baz/.x" type="I">
-            <link src="Ndom.meep/Foo.doit.b0_14"/>
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_8"/>
+          <node id="Ndom/meep/Foo.doit.b0_9" kind="fieldassign" ref="Baz/.x" type="I">
+            <link src="Ndom/meep/Foo.doit.b0_14"/>
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_8"/>
             <ast length="5" start="241" type="40"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_10" kind="ref" ref="#this" type="Ldom.meep/Foo;">
-            <link src="Ndom.meep/Foo.doit_11"/>
+          <node id="Ndom/meep/Foo.doit.b0_10" kind="ref" ref="#this" type="Ldom/meep/Foo;">
+            <link src="Ndom/meep/Foo.doit_11"/>
             <ast length="4" start="249" type="52"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_12" kind="fieldref" ref="dom.meep/Foo/.y" type="I">
-            <link src="Ndom.meep/Foo.doit_13"/>
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_10"/>
+          <node id="Ndom/meep/Foo.doit.b0_12" kind="fieldref" ref="dom/meep/Foo/.y" type="I">
+            <link src="Ndom/meep/Foo.doit_13"/>
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_10"/>
             <ast length="6" start="249" type="22"/>
           </node>
-          <node data="=" id="Ndom.meep/Foo.doit.b0_14" kind="assignop" ref="dom.meep/Foo.doit/inline/Baz/.x" type="I">
-            <link label="R" src="Ndom.meep/Foo.doit.b0_12"/>
+          <node data="=" id="Ndom/meep/Foo.doit.b0_14" kind="assignop" ref="Baz/.x" type="I">
+            <link label="R" src="Ndom/meep/Foo.doit.b0_12"/>
             <ast length="14" start="241" type="7"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_15" kind="ref" ref="dom.meep/Foo.doit.b0/$baz" type="Ldom.meep/Foo.doit/inline/Baz;">
-            <link src="Ndom.meep/Foo.doit.b0_7"/>
+          <node id="Ndom/meep/Foo.doit.b0_15" kind="ref" ref="dom/meep/Foo.doit.b0/$baz" type="LBaz;">
+            <link src="Ndom/meep/Foo.doit.b0_7"/>
             <ast length="3" start="265" type="42"/>
           </node>
-          <node data="dom.meep/Foo.doit/inline/Baz/moo" id="Ndom.meep/Foo.doit.b0_16" kind="call" type="V">
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_15"/>
+          <node data="LBaz;.moo()V" id="Ndom/meep/Foo.doit.b0_16" kind="call" type="V">
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_15"/>
             <ast length="9" start="265" type="32"/>
           </node>
-          <node id="Ndom.meep/Foo.doit.b0_17" kind="assign" ref="dom.meep/Foo.doit.b0/$baz" type="Ldom.meep/Foo.doit/inline/Baz;">
-            <link label="obj" src="Ndom.meep/Foo.doit.b0_16"/>
+          <node id="Ndom/meep/Foo.doit.b0_17" kind="assign" ref="dom/meep/Foo.doit.b0/$baz" type="LBaz;">
+            <link label="obj" src="Ndom/meep/Foo.doit.b0_16"/>
             <ast length="9" start="265" type="32"/>
           </node>
         </scope>
-        <node id="Ndom.meep/Foo.doit_2" ref="java.lang/System/.out" type="Ljava.io/PrintStream;"/>
-        <node id="Ndom.meep/Foo.doit_11" ref="#this" type="Ldom.meep/Foo;"/>
-        <node id="Ndom.meep/Foo.doit_13" ref="dom.meep/Foo/.y" type="I"/>
+        <node id="Ndom/meep/Foo.doit_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node id="Ndom/meep/Foo.doit_11" ref="#this" type="Ldom/meep/Foo;"/>
+        <node id="Ndom/meep/Foo.doit_13" ref="dom/meep/Foo/.y" type="I"/>
       </scope>
     </graph>
-    <graph ins="Ndom.meep/Foo.meh_1" name="dom.meep/Foo/meh" outs="">
-      <scope name="dom.meep/Foo.meh">
-        <scope name="dom.meep/Foo.meh.b0">
-          <node data="dom.meep/Foo/m33p?" id="Ndom.meep/Foo.meh.b0_2" kind="call">
-            <link label="obj" src="Ndom.meep/Foo.meh_1"/>
+    <graph ins="Ndom/meep/Foo.meh_1" name="Ldom/meep/Foo;.meh()V" outs="">
+      <scope name="dom/meep/Foo.meh">
+        <scope name="dom/meep/Foo.meh.b0">
+          <node data="Ldom/meep/Foo;.m33p()?" id="Ndom/meep/Foo.meh.b0_2" kind="call">
+            <link label="obj" src="Ndom/meep/Foo.meh_1"/>
             <ast length="6" start="315" type="32"/>
           </node>
-          <node id="Ndom.meep/Foo.meh.b0_3" kind="assign" ref="#this" type="Ldom.meep/Foo;">
-            <link label="obj" src="Ndom.meep/Foo.meh.b0_2"/>
+          <node id="Ndom/meep/Foo.meh.b0_3" kind="assign" ref="#this" type="Ldom/meep/Foo;">
+            <link label="obj" src="Ndom/meep/Foo.meh.b0_2"/>
             <ast length="6" start="315" type="32"/>
           </node>
         </scope>
-        <node id="Ndom.meep/Foo.meh_1" ref="#this" type="Ldom.meep/Foo;"/>
+        <node id="Ndom/meep/Foo.meh_1" ref="#this" type="Ldom/meep/Foo;"/>
       </scope>
     </graph>
-    <graph ins="Ndom.meep/Foo.main_1" name="dom.meep/Foo/main:[Ljava.lang/String;" outs="">
-      <scope name="dom.meep/Foo.main">
-        <scope name="dom.meep/Foo.main.b0">
-          <node data="Ldom.meep/Foo;" id="Ndom.meep/Foo.main.b0_3" kind="new" type="Ldom.meep/Foo;">
+    <graph ins="Ndom/meep/Foo.main_1" name="Ldom/meep/Foo;.main([Ljava/lang/String;)V" outs="">
+      <scope name="dom/meep/Foo.main">
+        <scope name="dom/meep/Foo.main.b0">
+          <node data="Ldom/meep/Foo;" id="Ndom/meep/Foo.main.b0_3" kind="new" type="Ldom/meep/Foo;">
             <ast length="9" start="408" type="14"/>
           </node>
-          <node id="Ndom.meep/Foo.main.b0_4" kind="assign" ref="dom.meep/Foo.main.b0/$foo" type="Ldom.meep/Foo;">
-            <link src="Ndom.meep/Foo.main.b0_3"/>
+          <node id="Ndom/meep/Foo.main.b0_4" kind="assign" ref="dom/meep/Foo.main.b0/$foo" type="Ldom/meep/Foo;">
+            <link src="Ndom/meep/Foo.main.b0_3"/>
             <ast length="15" start="402" type="59"/>
           </node>
-          <node id="Ndom.meep/Foo.main.b0_5" kind="ref" ref="dom.meep/Foo.main.b0/$foo" type="Ldom.meep/Foo;">
-            <link src="Ndom.meep/Foo.main.b0_4"/>
+          <node id="Ndom/meep/Foo.main.b0_5" kind="ref" ref="dom/meep/Foo.main.b0/$foo" type="Ldom/meep/Foo;">
+            <link src="Ndom/meep/Foo.main.b0_4"/>
             <ast length="3" start="427" type="42"/>
           </node>
-          <node data="dom.meep/Foo/doit" id="Ndom.meep/Foo.main.b0_6" kind="call" type="V">
-            <link label="obj" src="Ndom.meep/Foo.main.b0_5"/>
+          <node data="Ldom/meep/Foo;.doit()V" id="Ndom/meep/Foo.main.b0_6" kind="call" type="V">
+            <link label="obj" src="Ndom/meep/Foo.main.b0_5"/>
             <ast length="10" start="427" type="32"/>
           </node>
-          <node id="Ndom.meep/Foo.main.b0_7" kind="assign" ref="dom.meep/Foo.main.b0/$foo" type="Ldom.meep/Foo;">
-            <link label="obj" src="Ndom.meep/Foo.main.b0_6"/>
+          <node id="Ndom/meep/Foo.main.b0_7" kind="assign" ref="dom/meep/Foo.main.b0/$foo" type="Ldom/meep/Foo;">
+            <link label="obj" src="Ndom/meep/Foo.main.b0_6"/>
             <ast length="10" start="427" type="32"/>
           </node>
         </scope>
-        <node id="Ndom.meep/Foo.main_1" kind="input" ref="#arg0" type="[Ljava.lang/String;">
+        <node id="Ndom/meep/Foo.main_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast length="13" start="373" type="44"/>
         </node>
-        <node id="Ndom.meep/Foo.main_2" kind="assign" ref="dom.meep/Foo.main/$args" type="[Ljava.lang/String;">
-          <link src="Ndom.meep/Foo.main_1"/>
+        <node id="Ndom/meep/Foo.main_2" kind="assign" ref="dom/meep/Foo.main/$args" type="[Ljava/lang/String;">
+          <link src="Ndom/meep/Foo.main_1"/>
           <ast length="13" start="373" type="44"/>
         </node>
       </scope>
     </graph>
-    <graph ins="" name="dom.meep/Foo" outs="">
-      <scope name="dom.meep/Foo">
-        <node data="123" id="Ndom.meep/Foo_1" kind="const" type="I">
+    <graph ins="" name="dom/meep/Foo" outs="">
+      <scope name="dom/meep/Foo">
+        <node data="123" id="Ndom/meep/Foo_1" kind="const" type="I">
           <ast length="3" start="61" type="34"/>
         </node>
-        <node id="Ndom.meep/Foo_2" kind="assign" ref="dom.meep/Foo/.y" type="I">
-          <link src="Ndom.meep/Foo_1"/>
+        <node id="Ndom/meep/Foo_2" kind="assign" ref="dom/meep/Foo/.y" type="I">
+          <link src="Ndom/meep/Foo_1"/>
           <ast length="7" start="57" type="59"/>
         </node>
       </scope>
