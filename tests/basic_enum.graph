@@ -4,40 +4,40 @@
       <scope name="ROOT/basic_enum.foo">
         <scope name="ROOT/basic_enum.foo.b0">
           <scope name="ROOT/basic_enum.foo.b0.switch0">
-            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_5" kind="case" type="ROOT/E">
+            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_5" kind="case" type="LROOT/E;">
               <link src="NROOT/basic_enum.foo.b0_4"/>
               <link label="match0" src="NROOT/basic_enum.foo.b0_6"/>
               <ast length="9" start="210" type="49"/>
             </node>
-            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_7" kind="case" type="ROOT/E">
+            <node data="case(1)" id="NROOT/basic_enum.foo.b0.switch0_7" kind="case" type="LROOT/E;">
               <link src="NROOT/basic_enum.foo.b0_4"/>
               <link label="match0" src="NROOT/basic_enum.foo.b0_8"/>
               <ast length="9" start="247" type="49"/>
             </node>
           </scope>
-          <node id="NROOT/basic_enum.foo.b0_1" kind="fieldref" ref="ROOT/E/.Moo" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_1" kind="fieldref" ref="ROOT/E/.Moo" type="LROOT/E;">
             <link src="NROOT/basic_enum.foo_2"/>
             <ast length="5" start="174" type="40"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_3" kind="assign" ref="ROOT/basic_enum.foo.b0/$x" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_3" kind="assign" ref="ROOT/basic_enum.foo.b0/$x" type="LROOT/E;">
             <link src="NROOT/basic_enum.foo.b0_1"/>
             <ast length="9" start="170" type="59"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_4" kind="ref" ref="ROOT/basic_enum.foo.b0/$x" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_4" kind="ref" ref="ROOT/basic_enum.foo.b0/$x" type="LROOT/E;">
             <link src="NROOT/basic_enum.foo.b0_3"/>
             <ast length="1" start="197" type="42"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_6" kind="fieldref" ref="ROOT/E/.Moo" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_6" kind="fieldref" ref="ROOT/E/.Moo" type="LROOT/E;">
             <link src="NROOT/basic_enum.foo_2"/>
             <ast length="3" start="215" type="42"/>
           </node>
-          <node id="NROOT/basic_enum.foo.b0_8" kind="fieldref" ref="ROOT/E/.Baa" type="ROOT/E">
+          <node id="NROOT/basic_enum.foo.b0_8" kind="fieldref" ref="ROOT/E/.Baa" type="LROOT/E;">
             <link src="NROOT/basic_enum.foo_9"/>
             <ast length="3" start="252" type="42"/>
           </node>
         </scope>
-        <node id="NROOT/basic_enum.foo_2" ref="ROOT/E/.Moo" type="ROOT/E"/>
-        <node id="NROOT/basic_enum.foo_9" ref="ROOT/E/.Baa" type="ROOT/E"/>
+        <node id="NROOT/basic_enum.foo_2" ref="ROOT/E/.Moo" type="LROOT/E;"/>
+        <node id="NROOT/basic_enum.foo_9" ref="ROOT/E/.Baa" type="LROOT/E;"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/basic_enum" outs="">

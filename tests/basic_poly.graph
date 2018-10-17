@@ -1,234 +1,234 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_poly.java">
-    <graph ins="NROOT/Foo.moo_1 NROOT/Foo.moo_5" name="ROOT/Foo/moo:ROOT/Foo" outs="NROOT/Foo.moo.b0_6">
+    <graph ins="NROOT/Foo.moo_1 NROOT/Foo.moo_5" name="ROOT/Foo/moo:LROOT/Foo;" outs="NROOT/Foo.moo.b0_6">
       <scope name="ROOT/Foo.moo">
         <scope name="ROOT/Foo.moo.b0">
-          <node id="NROOT/Foo.moo.b0_3" kind="ref" ref="ROOT/Foo.moo/$obj" type="ROOT/Foo">
+          <node id="NROOT/Foo.moo.b0_3" kind="ref" ref="ROOT/Foo.moo/$obj" type="LROOT/Foo;">
             <link src="NROOT/Foo.moo_2"/>
             <ast length="3" start="72" type="42"/>
           </node>
-          <node id="NROOT/Foo.moo.b0_4" kind="fieldref" ref="ROOT/Foo/.x" type="@int">
+          <node id="NROOT/Foo.moo.b0_4" kind="fieldref" ref="ROOT/Foo/.x" type="I">
             <link src="NROOT/Foo.moo_5"/>
             <link label="obj" src="NROOT/Foo.moo.b0_3"/>
             <ast length="5" start="72" type="40"/>
           </node>
-          <node id="NROOT/Foo.moo.b0_6" kind="output" ref="#return" type="@int">
+          <node id="NROOT/Foo.moo.b0_6" kind="output" ref="#return" type="I">
             <link src="NROOT/Foo.moo.b0_4"/>
             <ast length="13" start="65" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.moo_1" kind="input" ref="#arg0" type="ROOT/Foo">
+        <node id="NROOT/Foo.moo_1" kind="input" ref="#arg0" type="LROOT/Foo;">
           <ast length="7" start="46" type="44"/>
         </node>
-        <node id="NROOT/Foo.moo_2" kind="assign" ref="ROOT/Foo.moo/$obj" type="ROOT/Foo">
+        <node id="NROOT/Foo.moo_2" kind="assign" ref="ROOT/Foo.moo/$obj" type="LROOT/Foo;">
           <link src="NROOT/Foo.moo_1"/>
           <ast length="7" start="46" type="44"/>
         </node>
-        <node id="NROOT/Foo.moo_5" ref="ROOT/Foo/.x" type="@int"/>
+        <node id="NROOT/Foo.moo_5" ref="ROOT/Foo/.x" type="I"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">
       <scope name="ROOT/Foo">
-        <node data="0" id="NROOT/Foo_1" kind="const" type="@number">
+        <node data="0" id="NROOT/Foo_1" kind="const" type="I">
           <ast length="1" start="24" type="34"/>
         </node>
-        <node id="NROOT/Foo_2" kind="assign" ref="ROOT/Foo/.x" type="@int">
+        <node id="NROOT/Foo_2" kind="assign" ref="ROOT/Foo/.x" type="I">
           <link src="NROOT/Foo_1"/>
           <ast length="5" start="20" type="59"/>
         </node>
       </scope>
     </graph>
-    <graph ins="NROOT/Baa.moo_1 NROOT/Baa.moo_9" name="ROOT/Baa/moo:ROOT/Foo" outs="NROOT/Baa.moo.b0_12">
+    <graph ins="NROOT/Baa.moo_1 NROOT/Baa.moo_9" name="ROOT/Baa/moo:LROOT/Foo;" outs="NROOT/Baa.moo.b0_12">
       <scope name="ROOT/Baa.moo">
         <scope name="ROOT/Baa.moo.b0">
-          <node id="NROOT/Baa.moo.b0_4" kind="ref" ref="ROOT/Baa.moo/$obj" type="ROOT/Foo">
+          <node id="NROOT/Baa.moo.b0_4" kind="ref" ref="ROOT/Baa.moo/$obj" type="LROOT/Foo;">
             <link src="NROOT/Baa.moo_2"/>
             <ast length="3" start="160" type="42"/>
           </node>
-          <node data="ROOT/Foo/moo:ROOT/Foo" id="NROOT/Baa.moo.b0_5" kind="call" type="@int">
+          <node data="ROOT/Foo/moo:LROOT/Foo;" id="NROOT/Baa.moo.b0_5" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.moo.b0_4"/>
             <link label="obj" src="NROOT/Baa.moo_3"/>
             <ast length="14" start="150" type="48"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="#this" type="ROOT/Baa">
+          <node id="NROOT/Baa.moo.b0_6" kind="assign" ref="#this" type="LROOT/Baa;">
             <link label="obj" src="NROOT/Baa.moo.b0_5"/>
             <ast length="14" start="150" type="48"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_7" kind="ref" ref="ROOT/Baa.moo/$obj" type="ROOT/Foo">
+          <node id="NROOT/Baa.moo.b0_7" kind="ref" ref="ROOT/Baa.moo/$obj" type="LROOT/Foo;">
             <link src="NROOT/Baa.moo_2"/>
             <ast length="3" start="181" type="42"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_8" kind="fieldref" ref="ROOT/Foo/.x" type="@int">
+          <node id="NROOT/Baa.moo.b0_8" kind="fieldref" ref="ROOT/Foo/.x" type="I">
             <link src="NROOT/Baa.moo_9"/>
             <link label="obj" src="NROOT/Baa.moo.b0_7"/>
             <ast length="5" start="181" type="40"/>
           </node>
-          <node data="1" id="NROOT/Baa.moo.b0_10" kind="const" type="@number">
+          <node data="1" id="NROOT/Baa.moo.b0_10" kind="const" type="I">
             <ast length="1" start="187" type="34"/>
           </node>
-          <node data="+" id="NROOT/Baa.moo.b0_11" kind="infix" type="@int">
+          <node data="+" id="NROOT/Baa.moo.b0_11" kind="infix" type="I">
             <link label="L" src="NROOT/Baa.moo.b0_8"/>
             <link label="R" src="NROOT/Baa.moo.b0_10"/>
             <ast length="7" start="181" type="27"/>
           </node>
-          <node id="NROOT/Baa.moo.b0_12" kind="output" ref="#return" type="@int">
+          <node id="NROOT/Baa.moo.b0_12" kind="output" ref="#return" type="I">
             <link src="NROOT/Baa.moo.b0_11"/>
             <ast length="15" start="174" type="41"/>
           </node>
         </scope>
-        <node id="NROOT/Baa.moo_1" kind="input" ref="#arg0" type="ROOT/Foo">
+        <node id="NROOT/Baa.moo_1" kind="input" ref="#arg0" type="LROOT/Foo;">
           <ast length="7" start="131" type="44"/>
         </node>
-        <node id="NROOT/Baa.moo_2" kind="assign" ref="ROOT/Baa.moo/$obj" type="ROOT/Foo">
+        <node id="NROOT/Baa.moo_2" kind="assign" ref="ROOT/Baa.moo/$obj" type="LROOT/Foo;">
           <link src="NROOT/Baa.moo_1"/>
           <ast length="7" start="131" type="44"/>
         </node>
-        <node id="NROOT/Baa.moo_3" ref="#this" type="ROOT/Baa"/>
-        <node id="NROOT/Baa.moo_9" ref="ROOT/Foo/.x" type="@int"/>
+        <node id="NROOT/Baa.moo_3" ref="#this" type="LROOT/Baa;"/>
+        <node id="NROOT/Baa.moo_9" ref="ROOT/Foo/.x" type="I"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Baa/main" outs="">
       <scope name="ROOT/Baa.main">
         <scope name="ROOT/Baa.main.b0">
-          <node data="ROOT/Foo" id="NROOT/Baa.main.b0_1" kind="new" type="ROOT/Foo">
+          <node data="LROOT/Foo;" id="NROOT/Baa.main.b0_1" kind="new" type="LROOT/Foo;">
             <ast length="9" start="245" type="14"/>
           </node>
-          <node id="NROOT/Baa.main.b0_2" kind="assign" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_2" kind="assign" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_1"/>
             <ast length="13" start="241" type="59"/>
           </node>
-          <node id="NROOT/Baa.main.b0_3" kind="ref" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_3" kind="ref" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_2"/>
             <ast length="1" start="272" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_4" kind="ref" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_4" kind="ref" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_2"/>
             <ast length="1" start="278" type="42"/>
           </node>
-          <node data="ROOT/Foo/moo:ROOT/Foo" id="NROOT/Baa.main.b0_5" kind="call" type="@int">
+          <node data="ROOT/Foo/moo:LROOT/Foo;" id="NROOT/Baa.main.b0_5" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.main.b0_4"/>
             <link label="obj" src="NROOT/Baa.main.b0_3"/>
             <ast length="8" start="272" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_6" kind="assign" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_6" kind="assign" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link label="obj" src="NROOT/Baa.main.b0_5"/>
             <ast length="8" start="272" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_7" kind="assign" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node id="NROOT/Baa.main.b0_7" kind="assign" ref="ROOT/Baa.main.b0/$x" type="I">
             <link src="NROOT/Baa.main.b0_5"/>
             <ast length="12" start="268" type="59"/>
           </node>
-          <node data="ROOT/Baa" id="NROOT/Baa.main.b0_8" kind="new" type="ROOT/Baa">
+          <node data="LROOT/Baa;" id="NROOT/Baa.main.b0_8" kind="new" type="LROOT/Baa;">
             <ast length="9" start="298" type="14"/>
           </node>
-          <node id="NROOT/Baa.main.b0_9" kind="assign" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_9" kind="assign" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_8"/>
             <ast length="13" start="294" type="59"/>
           </node>
-          <node id="NROOT/Baa.main.b0_10" kind="assign" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node id="NROOT/Baa.main.b0_10" kind="assign" ref="ROOT/Baa.main.b0/$x" type="I">
             <link src="NROOT/Baa.main.b0_15"/>
             <ast length="1" start="317" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_11" kind="ref" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_11" kind="ref" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_9"/>
             <ast length="1" start="321" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_12" kind="ref" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_12" kind="ref" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_6"/>
             <ast length="1" start="327" type="42"/>
           </node>
-          <node data="ROOT/Foo/moo:ROOT/Foo" id="NROOT/Baa.main.b0_13" kind="call" type="@int">
+          <node data="ROOT/Foo/moo:LROOT/Foo;" id="NROOT/Baa.main.b0_13" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.main.b0_12"/>
             <link label="obj" src="NROOT/Baa.main.b0_11"/>
             <ast length="8" start="321" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_14" kind="assign" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_14" kind="assign" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link label="obj" src="NROOT/Baa.main.b0_13"/>
             <ast length="8" start="321" type="32"/>
           </node>
-          <node data="=" id="NROOT/Baa.main.b0_15" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node data="=" id="NROOT/Baa.main.b0_15" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="I">
             <link label="R" src="NROOT/Baa.main.b0_13"/>
             <ast length="12" start="317" type="7"/>
           </node>
-          <node id="NROOT/Baa.main.b0_16" kind="assign" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node id="NROOT/Baa.main.b0_16" kind="assign" ref="ROOT/Baa.main.b0/$x" type="I">
             <link src="NROOT/Baa.main.b0_21"/>
             <ast length="1" start="339" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_17" kind="ref" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_17" kind="ref" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_14"/>
             <ast length="1" start="343" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_18" kind="ref" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_18" kind="ref" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_14"/>
             <ast length="1" start="349" type="42"/>
           </node>
-          <node data="ROOT/Foo/moo:ROOT/Foo" id="NROOT/Baa.main.b0_19" kind="call" type="@int">
+          <node data="ROOT/Foo/moo:LROOT/Foo;" id="NROOT/Baa.main.b0_19" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.main.b0_18"/>
             <link label="obj" src="NROOT/Baa.main.b0_17"/>
             <ast length="8" start="343" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_20" kind="assign" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_20" kind="assign" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link label="obj" src="NROOT/Baa.main.b0_19"/>
             <ast length="8" start="343" type="32"/>
           </node>
-          <node data="=" id="NROOT/Baa.main.b0_21" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node data="=" id="NROOT/Baa.main.b0_21" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="I">
             <link label="R" src="NROOT/Baa.main.b0_19"/>
             <ast length="12" start="339" type="7"/>
           </node>
-          <node data="ROOT/Baa" id="NROOT/Baa.main.b0_22" kind="new" type="ROOT/Baa">
+          <node data="LROOT/Baa;" id="NROOT/Baa.main.b0_22" kind="new" type="LROOT/Baa;">
             <ast length="9" start="369" type="14"/>
           </node>
-          <node id="NROOT/Baa.main.b0_23" kind="assign" ref="ROOT/Baa.main.b0/$c" type="ROOT/Baa">
+          <node id="NROOT/Baa.main.b0_23" kind="assign" ref="ROOT/Baa.main.b0/$c" type="LROOT/Baa;">
             <link src="NROOT/Baa.main.b0_22"/>
             <ast length="13" start="365" type="59"/>
           </node>
-          <node id="NROOT/Baa.main.b0_24" kind="assign" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node id="NROOT/Baa.main.b0_24" kind="assign" ref="ROOT/Baa.main.b0/$x" type="I">
             <link src="NROOT/Baa.main.b0_29"/>
             <ast length="1" start="388" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_25" kind="ref" ref="ROOT/Baa.main.b0/$c" type="ROOT/Baa">
+          <node id="NROOT/Baa.main.b0_25" kind="ref" ref="ROOT/Baa.main.b0/$c" type="LROOT/Baa;">
             <link src="NROOT/Baa.main.b0_23"/>
             <ast length="1" start="392" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_26" kind="ref" ref="ROOT/Baa.main.b0/$a" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_26" kind="ref" ref="ROOT/Baa.main.b0/$a" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_6"/>
             <ast length="1" start="398" type="42"/>
           </node>
-          <node data="ROOT/Baa/moo:ROOT/Foo" id="NROOT/Baa.main.b0_27" kind="call" type="@int">
+          <node data="ROOT/Baa/moo:LROOT/Foo;" id="NROOT/Baa.main.b0_27" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.main.b0_26"/>
             <link label="obj" src="NROOT/Baa.main.b0_25"/>
             <ast length="8" start="392" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_28" kind="assign" ref="ROOT/Baa.main.b0/$c" type="ROOT/Baa">
+          <node id="NROOT/Baa.main.b0_28" kind="assign" ref="ROOT/Baa.main.b0/$c" type="LROOT/Baa;">
             <link label="obj" src="NROOT/Baa.main.b0_27"/>
             <ast length="8" start="392" type="32"/>
           </node>
-          <node data="=" id="NROOT/Baa.main.b0_29" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node data="=" id="NROOT/Baa.main.b0_29" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="I">
             <link label="R" src="NROOT/Baa.main.b0_27"/>
             <ast length="12" start="388" type="7"/>
           </node>
-          <node id="NROOT/Baa.main.b0_30" kind="assign" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node id="NROOT/Baa.main.b0_30" kind="assign" ref="ROOT/Baa.main.b0/$x" type="I">
             <link src="NROOT/Baa.main.b0_35"/>
             <ast length="1" start="410" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_31" kind="ref" ref="ROOT/Baa.main.b0/$c" type="ROOT/Baa">
+          <node id="NROOT/Baa.main.b0_31" kind="ref" ref="ROOT/Baa.main.b0/$c" type="LROOT/Baa;">
             <link src="NROOT/Baa.main.b0_28"/>
             <ast length="1" start="414" type="42"/>
           </node>
-          <node id="NROOT/Baa.main.b0_32" kind="ref" ref="ROOT/Baa.main.b0/$b" type="ROOT/Foo">
+          <node id="NROOT/Baa.main.b0_32" kind="ref" ref="ROOT/Baa.main.b0/$b" type="LROOT/Foo;">
             <link src="NROOT/Baa.main.b0_20"/>
             <ast length="1" start="420" type="42"/>
           </node>
-          <node data="ROOT/Baa/moo:ROOT/Foo" id="NROOT/Baa.main.b0_33" kind="call" type="@int">
+          <node data="ROOT/Baa/moo:LROOT/Foo;" id="NROOT/Baa.main.b0_33" kind="call" type="I">
             <link label="arg0" src="NROOT/Baa.main.b0_32"/>
             <link label="obj" src="NROOT/Baa.main.b0_31"/>
             <ast length="8" start="414" type="32"/>
           </node>
-          <node id="NROOT/Baa.main.b0_34" kind="assign" ref="ROOT/Baa.main.b0/$c" type="ROOT/Baa">
+          <node id="NROOT/Baa.main.b0_34" kind="assign" ref="ROOT/Baa.main.b0/$c" type="LROOT/Baa;">
             <link label="obj" src="NROOT/Baa.main.b0_33"/>
             <ast length="8" start="414" type="32"/>
           </node>
-          <node data="=" id="NROOT/Baa.main.b0_35" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="@int">
+          <node data="=" id="NROOT/Baa.main.b0_35" kind="assignop" ref="ROOT/Baa.main.b0/$x" type="I">
             <link label="R" src="NROOT/Baa.main.b0_33"/>
             <ast length="12" start="410" type="7"/>
           </node>

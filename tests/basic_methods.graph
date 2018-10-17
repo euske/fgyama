@@ -3,10 +3,10 @@
     <graph ins="" name="ROOT/Object/toString" outs="NROOT/Object.toString.b0_2">
       <scope name="ROOT/Object.toString">
         <scope name="ROOT/Object.toString.b0">
-          <node data="object" id="NROOT/Object.toString.b0_1" kind="const" type="java.lang/String">
+          <node data="object" id="NROOT/Object.toString.b0_1" kind="const" type="Ljava.lang/String;">
             <ast length="8" start="61" type="45"/>
           </node>
-          <node id="NROOT/Object.toString.b0_2" kind="output" ref="#return" type="java.lang/String">
+          <node id="NROOT/Object.toString.b0_2" kind="output" ref="#return" type="Ljava.lang/String;">
             <link src="NROOT/Object.toString.b0_1"/>
             <ast length="16" start="54" type="41"/>
           </node>
@@ -19,10 +19,10 @@
     <graph ins="" name="ROOT/Foo/fa" outs="">
       <scope name="ROOT/Foo.fa">
         <scope name="ROOT/Foo.fa.b0">
-          <node data="0" id="NROOT/Foo.fa.b0_1" kind="const" type="@number">
+          <node data="0" id="NROOT/Foo.fa.b0_1" kind="const" type="I">
             <ast length="1" start="138" type="34"/>
           </node>
-          <node id="NROOT/Foo.fa.b0_2" kind="assign" ref="ROOT/Foo.fa.b0/$a" type="@int">
+          <node id="NROOT/Foo.fa.b0_2" kind="assign" ref="ROOT/Foo.fa.b0/$a" type="I">
             <link src="NROOT/Foo.fa.b0_1"/>
             <ast length="5" start="134" type="59"/>
           </node>
@@ -32,10 +32,10 @@
     <graph ins="" name="ROOT/Foo.fb/inline/moo/fc" outs="NROOT/Foo.fb/inline/moo.fc.b0_2">
       <scope name="ROOT/Foo.fb/inline/moo.fc">
         <scope name="ROOT/Foo.fb/inline/moo.fc.b0">
-          <node data="123" id="NROOT/Foo.fb/inline/moo.fc.b0_1" kind="const" type="@number">
+          <node data="123" id="NROOT/Foo.fb/inline/moo.fc.b0_1" kind="const" type="I">
             <ast length="3" start="317" type="34"/>
           </node>
-          <node id="NROOT/Foo.fb/inline/moo.fc.b0_2" kind="output" ref="#return" type="@int">
+          <node id="NROOT/Foo.fb/inline/moo.fc.b0_2" kind="output" ref="#return" type="I">
             <link src="NROOT/Foo.fb/inline/moo.fc.b0_1"/>
             <ast length="11" start="310" type="41"/>
           </node>
@@ -48,10 +48,10 @@
     <graph ins="" name="ROOT/Foo.fb.b0/anonymous/anonymous/toString" outs="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2">
       <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString">
         <scope name="ROOT/Foo.fb.b0/anonymous/anonymous.toString.b0">
-          <node data="foo" id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" kind="const" type="java.lang/String">
+          <node data="foo" id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1" kind="const" type="Ljava.lang/String;">
             <ast length="5" start="257" type="45"/>
           </node>
-          <node id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" kind="output" ref="#return" type="java.lang/String">
+          <node id="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_2" kind="output" ref="#return" type="Ljava.lang/String;">
             <link src="NROOT/Foo.fb.b0/anonymous/anonymous.toString.b0_1"/>
             <ast length="13" start="250" type="41"/>
           </node>
@@ -64,49 +64,49 @@
     <graph ins="NROOT/Foo.fb_5" name="ROOT/Foo/fb" outs="">
       <scope name="ROOT/Foo.fb">
         <scope name="ROOT/Foo.fb.b0">
-          <node data="0" id="NROOT/Foo.fb.b0_1" kind="const" type="@number">
+          <node data="0" id="NROOT/Foo.fb.b0_1" kind="const" type="I">
             <ast length="1" start="186" type="34"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_2" kind="assign" ref="ROOT/Foo.fb.b0/$b" type="@int">
+          <node id="NROOT/Foo.fb.b0_2" kind="assign" ref="ROOT/Foo.fb.b0/$b" type="I">
             <link src="NROOT/Foo.fb.b0_1"/>
             <ast length="5" start="182" type="59"/>
           </node>
-          <node data="ROOT/Foo.fb.b0/anonymous/anonymous" id="NROOT/Foo.fb.b0_3" kind="new" type="ROOT/Foo.fb.b0/anonymous/anonymous">
+          <node data="LROOT/Foo.fb.b0/anonymous/anonymous;" id="NROOT/Foo.fb.b0_3" kind="new" type="LROOT/Foo.fb.b0/anonymous/anonymous;">
             <ast length="71" start="201" type="14"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_4" kind="assign" ref="ROOT/Foo.fb.b0/$a" type="ROOT/Object">
+          <node id="NROOT/Foo.fb.b0_4" kind="assign" ref="ROOT/Foo.fb.b0/$a" type="LROOT/Object;">
             <link src="NROOT/Foo.fb.b0_3"/>
             <ast length="75" start="197" type="59"/>
           </node>
-          <node data="ROOT/Foo/fa" id="NROOT/Foo.fb.b0_6" kind="call" type="@void">
+          <node data="ROOT/Foo/fa" id="NROOT/Foo.fb.b0_6" kind="call" type="V">
             <link label="obj" src="NROOT/Foo.fb_5"/>
             <ast length="4" start="335" type="32"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="#this" type="ROOT/Foo">
+          <node id="NROOT/Foo.fb.b0_7" kind="assign" ref="#this" type="LROOT/Foo;">
             <link label="obj" src="NROOT/Foo.fb.b0_6"/>
             <ast length="4" start="335" type="32"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_8" kind="ref" ref="ROOT/Foo.fb.b0/$a" type="ROOT/Object">
+          <node id="NROOT/Foo.fb.b0_8" kind="ref" ref="ROOT/Foo.fb.b0/$a" type="LROOT/Object;">
             <link src="NROOT/Foo.fb.b0_4"/>
             <ast length="1" start="349" type="42"/>
           </node>
-          <node data="ROOT/Object/toString ROOT/Foo.fb.b0/anonymous/anonymous/toString" id="NROOT/Foo.fb.b0_9" kind="call" type="java.lang/String">
+          <node data="ROOT/Object/toString ROOT/Foo.fb.b0/anonymous/anonymous/toString" id="NROOT/Foo.fb.b0_9" kind="call" type="Ljava.lang/String;">
             <link label="obj" src="NROOT/Foo.fb.b0_8"/>
             <ast length="12" start="349" type="32"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_10" kind="assign" ref="ROOT/Foo.fb.b0/$a" type="ROOT/Object">
+          <node id="NROOT/Foo.fb.b0_10" kind="assign" ref="ROOT/Foo.fb.b0/$a" type="LROOT/Object;">
             <link label="obj" src="NROOT/Foo.fb.b0_9"/>
             <ast length="12" start="349" type="32"/>
           </node>
-          <node data="ROOT/Foo.fb/inline/moo" id="NROOT/Foo.fb.b0_11" kind="new" type="ROOT/Foo.fb/inline/moo">
+          <node data="LROOT/Foo.fb/inline/moo;" id="NROOT/Foo.fb.b0_11" kind="new" type="LROOT/Foo.fb/inline/moo;">
             <ast length="9" start="379" type="14"/>
           </node>
-          <node id="NROOT/Foo.fb.b0_12" kind="assign" ref="ROOT/Foo.fb.b0/$c" type="ROOT/Foo.fb/inline/moo">
+          <node id="NROOT/Foo.fb.b0_12" kind="assign" ref="ROOT/Foo.fb.b0/$c" type="LROOT/Foo.fb/inline/moo;">
             <link src="NROOT/Foo.fb.b0_11"/>
             <ast length="13" start="375" type="59"/>
           </node>
         </scope>
-        <node id="NROOT/Foo.fb_5" ref="#this" type="ROOT/Foo"/>
+        <node id="NROOT/Foo.fb_5" ref="#this" type="LROOT/Foo;"/>
       </scope>
     </graph>
     <graph ins="" name="ROOT/Foo" outs="">
