@@ -11,16 +11,10 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFBasicType extends DFType {
 
-    private boolean _numeric;
-    private String _name;
+    private PrimitiveType.Code _code;
 
     public DFBasicType(PrimitiveType.Code code) {
-        _numeric = (
-            (code == PrimitiveType.BYTE) || (code == PrimitiveType.CHAR) ||
-            (code == PrimitiveType.DOUBLE) || (code == PrimitiveType.FLOAT) ||
-            (code == PrimitiveType.INT) || (code == PrimitiveType.LONG) ||
-            (code == PrimitiveType.SHORT));;
-        _name = "@"+code.toString();
+        _code = code;
     }
 
     @Override
@@ -29,36 +23,64 @@ public class DFBasicType extends DFType {
     }
 
     public String getTypeName() {
-        return _name;
+        if (_code == PrimitiveType.BYTE) {
+            return "B";
+        } else if (_code == PrimitiveType.CHAR) {
+            return "C";
+        } else if (_code == PrimitiveType.SHORT) {
+            return "S";
+        } else if (_code == PrimitiveType.INT) {
+            return "I";
+        } else if (_code == PrimitiveType.LONG) {
+            return "J";
+        } else if (_code == PrimitiveType.FLOAT) {
+            return "F";
+        } else if (_code == PrimitiveType.DOUBLE) {
+            return "D";
+        } else if (_code == PrimitiveType.BOOLEAN) {
+            return "Z";
+        } else {
+            return "V";
+        }
     }
 
     public boolean equals(DFType type) {
         return ((type instanceof DFBasicType) &&
-                _name.equals(((DFBasicType)type)._name));
+                (_code == ((DFBasicType)type)._code));
     }
 
     public int canConvertFrom(DFType type) {
         if (!(type instanceof DFBasicType)) return -1;
         if (this.equals(type)) return 0;
-        return (_numeric && ((DFBasicType)type)._numeric)? 1 : -1;
+        return (this.isNumeric() && ((DFBasicType)type).isNumeric())? 1 : -1;
     }
 
-    public static final DFBasicType BOOLEAN =
-        new DFBasicType(PrimitiveType.BOOLEAN);
+    public boolean isNumeric() {
+        return ((_code == PrimitiveType.BYTE) ||
+                (_code == PrimitiveType.CHAR) ||
+                (_code == PrimitiveType.SHORT) ||
+                (_code == PrimitiveType.INT) ||
+                (_code == PrimitiveType.LONG) ||
+                (_code == PrimitiveType.FLOAT) ||
+                (_code == PrimitiveType.DOUBLE));
+    }
+
     public static final DFBasicType BYTE =
         new DFBasicType(PrimitiveType.BYTE);
     public static final DFBasicType CHAR =
         new DFBasicType(PrimitiveType.CHAR);
-    public static final DFBasicType DOUBLE =
-        new DFBasicType(PrimitiveType.DOUBLE);
-    public static final DFBasicType FLOAT =
-        new DFBasicType(PrimitiveType.FLOAT);
+    public static final DFBasicType SHORT =
+        new DFBasicType(PrimitiveType.SHORT);
     public static final DFBasicType INT =
         new DFBasicType(PrimitiveType.INT);
     public static final DFBasicType LONG =
         new DFBasicType(PrimitiveType.LONG);
-    public static final DFBasicType SHORT =
-        new DFBasicType(PrimitiveType.SHORT);
+    public static final DFBasicType FLOAT =
+        new DFBasicType(PrimitiveType.FLOAT);
+    public static final DFBasicType DOUBLE =
+        new DFBasicType(PrimitiveType.DOUBLE);
+    public static final DFBasicType BOOLEAN =
+        new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFBasicType VOID =
         new DFBasicType(PrimitiveType.VOID);
 }
