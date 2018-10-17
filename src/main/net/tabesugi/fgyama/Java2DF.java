@@ -700,7 +700,7 @@ public class Java2DF {
             } else if (expr instanceof NumberLiteral) {
                 String value = ((NumberLiteral)expr).getToken();
                 ctx.setRValue(new ConstNode(
-                                  graph, scope, DFBasicType.NUMBER,
+                                  graph, scope, DFBasicType.INT,
                                   expr, value));
 
             } else if (expr instanceof StringLiteral) {

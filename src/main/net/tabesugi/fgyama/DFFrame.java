@@ -272,7 +272,7 @@ public class DFFrame {
             return DFNullType.NULL;
 
         } else if (expr instanceof NumberLiteral) {
-            return DFBasicType.NUMBER;
+            return DFBasicType.INT;
 
         } else if (expr instanceof StringLiteral) {
             return DFRootTypeSpace.STRING_KLASS;

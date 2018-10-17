@@ -479,7 +479,8 @@ public class DFKlass extends DFType {
             DFTypeFinder finder2 = finder;
             DFTypeSpace methodSpace = null;
             if (0 < tps.size()) {
-                methodSpace = new DFTypeSpace("MethodDecl");
+                String name = this.getFullName()+"."+decl.getName().getIdentifier();
+                methodSpace = new DFTypeSpace(name);
                 finder2 = new DFTypeFinder(finder, methodSpace);
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);

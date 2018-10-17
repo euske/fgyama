@@ -14,11 +14,6 @@ public class DFBasicType extends DFType {
     private boolean _numeric;
     private String _name;
 
-    public DFBasicType(String name) {
-        _numeric = name.equals("@number");
-        _name = name;
-    }
-
     public DFBasicType(PrimitiveType.Code code) {
         _numeric = (
             (code == PrimitiveType.BYTE) || (code == PrimitiveType.CHAR) ||
@@ -48,8 +43,6 @@ public class DFBasicType extends DFType {
         return (_numeric && ((DFBasicType)type)._numeric)? 1 : -1;
     }
 
-    public static final DFBasicType NUMBER =
-        new DFBasicType("@number");
     public static final DFBasicType BOOLEAN =
         new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFBasicType BYTE =
