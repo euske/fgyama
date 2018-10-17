@@ -14,15 +14,16 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFKlass extends DFType {
 
-    private String _name;
+    protected String _name;
+    protected DFKlass _baseKlass = null;
+    protected DFKlass[] _baseIfaces = null;
+
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _childSpace = null;
     private DFVarScope _scope = null;
 
-    private DFKlass _baseKlass = null;
-    private DFKlass[] _baseIfaces = null;
     private DFParamType[] _paramTypes = null;
-    private Map<String, DFParamKlass> _paramKlass =
+    private Map<String, DFParamKlass> _paramKlasses =
         new HashMap<String, DFParamKlass>();
 
     private List<DFMethod> _methods =
@@ -97,10 +98,10 @@ public class DFKlass extends DFType {
             b.append(type.getTypeName());
         }
         String name = this.getTypeName()+"<"+b.toString()+">";
-        DFParamKlass klass = _paramKlass.get(name);
+        DFParamKlass klass = _paramKlasses.get(name);
         if (klass == null) {
             klass = new DFParamKlass(name, this, argTypes);
-            _paramKlass.put(name, klass);
+            _paramKlasses.put(name, klass);
         }
         return klass;
     }
@@ -389,30 +390,6 @@ public class DFKlass extends DFType {
             }
         } catch (TypeNotFound e) {
             e.setAst(typeDecl);
-            throw e;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, TypeParameter typeParam)
-        throws TypeNotFound {
-        try {
-            List<Type> bounds = typeParam.typeBounds();
-            if (0 < bounds.size()) {
-                _baseIfaces = new DFKlass[bounds.size()-1];
-                for (int i = 0; i < bounds.size(); i++) {
-                    DFKlass klass = finder.resolveKlass(bounds.get(i));
-                    //Logger.info("DFKlass.build: "+this+": "+klass);
-                    if (i == 0) {
-                        _baseKlass = klass;
-                    } else {
-                        _baseIfaces[i-1] = klass;
-                    }
-                    finder = klass.addFinders(finder);
-                }
-            }
-        } catch (TypeNotFound e) {
-            e.setAst(typeParam);
             throw e;
         }
     }
