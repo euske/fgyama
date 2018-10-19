@@ -80,10 +80,6 @@ public class DFKlass extends DFType {
         return ((DFKlass)type).isSubclassOf(this);
     }
 
-    public void setParamTypes(DFParamType[] paramTypes) {
-        _paramTypes = paramTypes;
-    }
-
     public DFParamKlass getParamKlass(DFType[] argTypes) {
         String name = DFParamKlass.getParamName(argTypes)+_name;
         DFParamKlass klass = _paramKlasses.get(name);
@@ -274,6 +270,21 @@ public class DFKlass extends DFType {
         return false;
     }
 
+    public DFTypeFinder addFinders(DFTypeFinder finder) {
+        if (_baseKlass != null) {
+            finder = _baseKlass.addFinders(finder);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                finder = iface.addFinders(finder);
+            }
+        }
+        if (_childSpace != null) {
+            finder = new DFTypeFinder(finder, _childSpace);
+        }
+        return finder;
+    }
+
     public void setJarPath(String jarPath, String filePath) {
         _jarPath = jarPath;
         _filePath = filePath;
@@ -289,7 +300,7 @@ public class DFKlass extends DFType {
                 JarEntry je = jarfile.getJarEntry(_filePath);
                 InputStream strm = jarfile.getInputStream(je);
                 JavaClass jklass = new ClassParser(strm, _filePath).parse();
-                this.load(finder, jklass);
+                this.build(finder, jklass);
             } finally {
                 jarfile.close();
             }
@@ -299,8 +310,15 @@ public class DFKlass extends DFType {
         }
     }
 
-    private void load(DFTypeFinder finder, JavaClass jklass)
+    private void build(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
+        String sig = null;
+        for (Attribute attr : jklass.getAttributes()) {
+            if (attr instanceof org.apache.bcel.classfile.Signature) {
+                sig = ((org.apache.bcel.classfile.Signature)attr).getSignature();
+            }
+        }
+        //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
         String superClass = jklass.getSuperclassName();
         if (superClass != null && !superClass.equals(jklass.getClassName())) {
             _baseKlass = finder.lookupKlass(superClass);
@@ -314,11 +332,13 @@ public class DFKlass extends DFType {
         }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
+            //Logger.info("fld: "+fld.getName()+","+fld.getSignature());
             DFType type = finder.resolve(fld.getType());
             _scope.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
+            //Logger.info("meth: "+meth.getName()+","+meth.getSignature());
             org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {
@@ -328,21 +348,6 @@ public class DFKlass extends DFType {
             this.addMethod(null, meth.getName(), meth.isStatic(),
                            argTypes, returnType);
         }
-    }
-
-    public DFTypeFinder addFinders(DFTypeFinder finder) {
-        if (_baseKlass != null) {
-            finder = _baseKlass.addFinders(finder);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                finder = iface.addFinders(finder);
-            }
-        }
-        if (_childSpace != null) {
-            finder = new DFTypeFinder(finder, _childSpace);
-        }
-        return finder;
     }
 
     @SuppressWarnings("unchecked")
@@ -369,9 +374,14 @@ public class DFKlass extends DFType {
             }
             // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
-            for (int i = 0; i < _paramTypes.length; i++) {
-                DFParamType pt = _paramTypes[i];
-                pt.build(finder, tps.get(i));
+            _paramTypes = new DFParamType[tps.size()];
+            for (int i = 0; i < tps.size(); i++) {
+                TypeParameter tp = tps.get(i);
+                String id = tp.getName().getIdentifier();
+                DFParamType pt = new DFParamType(id, _childSpace, i);
+                pt.build(finder, tp);
+                _childSpace.addParamType(id, pt);
+                _paramTypes[i] = pt;
             }
             // Lookup child klasses.
             for (BodyDeclaration body :

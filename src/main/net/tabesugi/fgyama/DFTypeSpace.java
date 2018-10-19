@@ -180,16 +180,6 @@ public class DFTypeSpace {
             klasses.add(klass);
         }
         DFTypeSpace child = klass.getChildSpace();
-        List<TypeParameter> tps = (List<TypeParameter>) typeDecl.typeParameters();
-        DFParamType[] pts = new DFParamType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            TypeParameter tp = tps.get(i);
-            String id = tp.getName().getIdentifier();
-            DFParamType pt = new DFParamType(id, child, i);
-            child.addParamType(id, pt);
-            pts[i] = pt;
-        }
-        klass.setParamTypes(pts);
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
             child.build(klasses, body, klass.getScope());
