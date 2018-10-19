@@ -278,7 +278,7 @@ public class DFFrame {
             return DFRootTypeSpace.STRING_KLASS;
 
         } else if (expr instanceof TypeLiteral) {
-            return DFRootTypeSpace.TYPE_KLASS;
+            return DFRootTypeSpace.CLASS_KLASS;
 
         } else if (expr instanceof PrefixExpression) {
             PrefixExpression prefix = (PrefixExpression)expr;
