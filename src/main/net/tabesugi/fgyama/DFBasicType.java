@@ -44,32 +44,6 @@ public class DFBasicType extends DFType {
         }
     }
 
-    public static DFBasicType getType(char c)
-        throws TypeNotFound {
-        switch (c) {
-        case 'B':
-            return DFBasicType.BYTE;
-        case 'C':
-            return DFBasicType.CHAR;
-        case 'S':
-            return DFBasicType.SHORT;
-        case 'I':
-            return DFBasicType.INT;
-        case 'J':
-            return DFBasicType.LONG;
-        case 'F':
-            return DFBasicType.FLOAT;
-        case 'D':
-            return DFBasicType.DOUBLE;
-        case 'Z':
-            return DFBasicType.BOOLEAN;
-        case 'V':
-            return DFBasicType.VOID;
-        default:
-            throw new TypeNotFound("unknown: "+c);
-        }
-    }
-
     public boolean equals(DFType type) {
         return ((type instanceof DFBasicType) &&
                 (_code == ((DFBasicType)type)._code));
