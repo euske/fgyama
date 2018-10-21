@@ -22,8 +22,7 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
-        rootSpace.loadDefaultKlasses();
+        DFRootTypeSpace rootSpace = DFRootTypeSpace.getSingleton();
 	Java2DF converter = new Java2DF(rootSpace);
 	XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);

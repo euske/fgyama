@@ -2310,7 +2310,7 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
-        DFRootTypeSpace rootSpace = DFRootTypeSpace.DEFAULT;
+        DFRootTypeSpace rootSpace = DFRootTypeSpace.getSingleton();
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--")) {
@@ -2338,7 +2338,6 @@ public class Java2DF {
         }
 
         // Process files.
-        rootSpace.loadDefaultKlasses();
         Java2DF converter = new Java2DF(rootSpace);
         XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);

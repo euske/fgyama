@@ -56,7 +56,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         }
     }
 
-    public void loadDefaultKlasses()
+    private void loadDefaultKlasses()
         throws IOException, TypeNotFound {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
@@ -72,21 +72,31 @@ public class DFRootTypeSpace extends DFTypeSpace {
         _array.addField("length", false, DFBasicType.INT);
     }
 
-    public static DFRootTypeSpace DEFAULT = new DFRootTypeSpace();
+    public static DFRootTypeSpace getSingleton()
+        throws IOException, TypeNotFound {
+        if (_default == null) {
+            _default = new DFRootTypeSpace();
+            _default.loadDefaultKlasses();
+        }
+        return _default;
+    }
+
+    private static DFRootTypeSpace _default = null;
+
     public static DFKlass getObjectKlass() {
-        return DEFAULT._object;
+        return _default._object;
     }
     public static DFKlass getClassKlass() {
-        return DEFAULT._class;
+        return _default._class;
     }
     public static DFKlass getEnumKlass() {
-        return DEFAULT._enum;
+        return _default._enum;
     }
     public static DFKlass getStringKlass() {
-        return DEFAULT._string;
+        return _default._string;
     }
     public static DFKlass getArrayKlass() {
-        return DEFAULT._array;
+        return _default._array;
     }
 
 }
