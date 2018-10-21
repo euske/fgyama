@@ -24,45 +24,45 @@ public class JNITypeParser {
 
     public DFType getType()
         throws TypeNotFound {
-        char c = _text.charAt(_pos);
-        _pos++;
-
-        switch (c) {
+        switch (_text.charAt(_pos)) {
         case 'B':
+            _pos++;
             return DFBasicType.BYTE;
         case 'C':
+            _pos++;
             return DFBasicType.CHAR;
         case 'S':
+            _pos++;
             return DFBasicType.SHORT;
         case 'I':
+            _pos++;
             return DFBasicType.INT;
         case 'J':
+            _pos++;
             return DFBasicType.LONG;
         case 'F':
+            _pos++;
             return DFBasicType.FLOAT;
         case 'D':
+            _pos++;
             return DFBasicType.DOUBLE;
         case 'Z':
+            _pos++;
             return DFBasicType.BOOLEAN;
         case 'V':
+            _pos++;
             return DFBasicType.VOID;
         case 'L':
-            for (int i = _pos; i < _text.length(); i++) {
+            for (int i = _pos+1; i < _text.length(); i++) {
                 char c2 =  _text.charAt(i);
                 if (c2 == '<' || c2 == ';') {
-                    String name = _text.substring(_pos, i);
-                    _pos = i+1;
+                    String name = _text.substring(_pos+1, i);
                     DFKlass klass = this.finder.lookupKlass(name.replace('/','.'));
                     if (c2 == ';') {
+                        _pos = i+1;
                         return klass;
                     }
-                    List<DFType> types = new ArrayList<DFType>();
-                    while (_text.charAt(_pos) != '>') {
-                        types.add(this.getType());
-                    }
-                    _pos++;
-                    DFType[] argTypes = new DFType[types.size()];
-                    types.toArray(argTypes);
+                    DFType[] argTypes = this.getArgTypes('<', '>');
                     return klass.getParamKlass(argTypes);
                 }
             }
@@ -70,7 +70,7 @@ public class JNITypeParser {
         case 'T':
             for (int i = _pos; i < _text.length(); i++) {
                 if (_text.charAt(i) == ';') {
-                    String name = _text.substring(_pos, i);
+                    String name = _text.substring(_pos+1, i);
                     _pos = i+1;
                     return this.finder.lookupParamType(name);
                 }
@@ -79,7 +79,7 @@ public class JNITypeParser {
         case '[':
             for (int i = _pos; i < _text.length(); i++) {
                 if (_text.charAt(i) != '[') {
-                    int ndims = 1+_pos-i;
+                    int ndims = _pos-i;
                     _pos = i;
                     DFType elemType = this.getType();
                     return new DFArrayType(elemType, ndims);
@@ -90,20 +90,27 @@ public class JNITypeParser {
             return this.getType();
         case '-':
         case '*':
-            return DFRootTypeSpace.OBJECT_KLASS;
+            return DFRootTypeSpace.getObjectKlass();
         case '(':
-            List<DFType> types = new ArrayList<DFType>();
-            while (_text.charAt(_pos) != '>') {
-                types.add(this.getType());
-            }
-            _pos++;
-            DFType[] argTypes = new DFType[types.size()];
-            types.toArray(argTypes);
+            DFType[] argTypes = this.getArgTypes('(', ')');
             DFType returnType = this.getType();
             return new DFMethodType(argTypes, returnType);
         default:
             break;
         }
         throw new TypeNotFound(_text.substring(_pos));
+    }
+
+    public DFType[] getArgTypes(char start, char end)
+        throws TypeNotFound {
+        if (_text.charAt(_pos) != start) return null;
+        List<DFType> types = new ArrayList<DFType>();
+        while (_text.charAt(_pos) != end) {
+            types.add(this.getType());
+        }
+        _pos++;
+        DFType[] argTypes = new DFType[types.size()];
+        types.toArray(argTypes);
+        return argTypes;
     }
 }

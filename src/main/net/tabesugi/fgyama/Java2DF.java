@@ -707,14 +707,14 @@ public class Java2DF {
                 String value = ((StringLiteral)expr).getLiteralValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
-                                  DFRootTypeSpace.STRING_KLASS,
+                                  DFRootTypeSpace.getStringKlass(),
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
                 Type value = ((TypeLiteral)expr).getType();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
-                                  DFRootTypeSpace.CLASS_KLASS,
+                                  DFRootTypeSpace.getClassKlass(),
                                   expr, Utils.getTypeName(value)));
 
             } else if (expr instanceof PrefixExpression) {
@@ -1081,7 +1081,7 @@ public class Java2DF {
                 ASTNode body = lambda.getBody();
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
                 DFKlass anonKlass = new DFAnonKlass(
-                    id, anonSpace, scope, DFRootTypeSpace.OBJECT_KLASS);
+                    id, anonSpace, scope, DFRootTypeSpace.getObjectKlass());
                 assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1103,7 +1103,7 @@ public class Java2DF {
                 MethodReference mref = (MethodReference)expr;
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFAnonKlass(
-                    "methodref", anonSpace, scope, DFRootTypeSpace.OBJECT_KLASS);
+                    "methodref", anonSpace, scope, DFRootTypeSpace.getObjectKlass());
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -2310,7 +2310,7 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
+        DFRootTypeSpace rootSpace = DFRootTypeSpace.DEFAULT;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--")) {

@@ -15,11 +15,11 @@ import org.w3c.dom.*;
 //
 public class DFRootTypeSpace extends DFTypeSpace {
 
-    public static DFKlass OBJECT_KLASS = null;
-    public static DFKlass CLASS_KLASS = null;
-    public static DFKlass ENUM_KLASS = null;
-    public static DFKlass STRING_KLASS = null;
-    public static DFKlass ARRAY_KLASS = null;
+    private DFKlass _object = null;
+    private DFKlass _class = null;
+    private DFKlass _enum = null;
+    private DFKlass _string = null;
+    private DFKlass _array = null;
 
     private DFGlobalVarScope _global = new DFGlobalVarScope();
 
@@ -63,12 +63,30 @@ public class DFRootTypeSpace extends DFTypeSpace {
         File rtFile = new File(libDir, "rt.jar");
         this.loadJarFile(rtFile.getAbsolutePath());
         DFTypeSpace space = this.lookupSpace("java.lang");
-        OBJECT_KLASS = this.getKlass("java.lang.Object");
-        CLASS_KLASS = this.getKlass("java.lang.Class");
-        ENUM_KLASS = this.getKlass("java.lang.Enum");
-        STRING_KLASS = this.getKlass("java.lang.String");
-        ARRAY_KLASS = new DFKlass(
-            "java.lang._Array", space, null, _global, OBJECT_KLASS);
-        ARRAY_KLASS.addField("length", false, DFBasicType.INT);
+        _object = this.getKlass("java.lang.Object");
+        _class = this.getKlass("java.lang.Class");
+        _enum = this.getKlass("java.lang.Enum");
+        _string = this.getKlass("java.lang.String");
+        _array = new DFKlass(
+            "java.lang._Array", space, null, _global, _object);
+        _array.addField("length", false, DFBasicType.INT);
     }
+
+    public static DFRootTypeSpace DEFAULT = new DFRootTypeSpace();
+    public static DFKlass getObjectKlass() {
+        return DEFAULT._object;
+    }
+    public static DFKlass getClassKlass() {
+        return DEFAULT._class;
+    }
+    public static DFKlass getEnumKlass() {
+        return DEFAULT._enum;
+    }
+    public static DFKlass getStringKlass() {
+        return DEFAULT._string;
+    }
+    public static DFKlass getArrayKlass() {
+        return DEFAULT._array;
+    }
+
 }

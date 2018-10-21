@@ -107,7 +107,7 @@ public class DFKlass extends DFType {
     }
 
     public boolean isEnum() {
-        return _baseKlass == DFRootTypeSpace.ENUM_KLASS;
+        return _baseKlass == DFRootTypeSpace.getEnumKlass();
     }
 
     public String getFullName() {
@@ -363,7 +363,7 @@ public class DFKlass extends DFType {
                 //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
             } else {
-                _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
+                _baseKlass = DFRootTypeSpace.getObjectKlass();
             }
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
@@ -401,7 +401,7 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);
-            _baseKlass = DFRootTypeSpace.ENUM_KLASS;
+            _baseKlass = DFRootTypeSpace.getEnumKlass();
             // Get constants.
             for (EnumConstantDeclaration econst :
                      (List<EnumConstantDeclaration>) enumDecl.enumConstants()) {
@@ -431,7 +431,7 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);
-            _baseKlass = DFRootTypeSpace.OBJECT_KLASS;
+            _baseKlass = DFRootTypeSpace.getObjectKlass();
             // Lookup child klasses.
             for (BodyDeclaration body :
                      (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {

@@ -15,7 +15,7 @@ public class DFParamType extends DFKlass {
 
     public DFParamType(
         String name, DFTypeSpace typeSpace, int index) {
-        super(name, typeSpace, null, null, DFRootTypeSpace.OBJECT_KLASS);
+        super(name, typeSpace, null, null, DFRootTypeSpace.getObjectKlass());
         assert typeSpace != null;
         _index = index;
     }
