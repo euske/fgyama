@@ -274,7 +274,9 @@ public class DFKlass extends DFType {
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                finder = iface.addFinders(finder);
+                if (iface != null) {
+                    finder = iface.addFinders(finder);
+                }
             }
         }
         if (_childSpace != null) {
@@ -308,18 +310,26 @@ public class DFKlass extends DFType {
         }
     }
 
-    private void build(DFTypeFinder finder, JavaClass jklass)
-        throws TypeNotFound {
-        String sig = null;
-        for (Attribute attr : jklass.getAttributes()) {
+    private static String getSignature(Attribute[] attrs) {
+        for (Attribute attr : attrs) {
             if (attr instanceof org.apache.bcel.classfile.Signature) {
-                sig = ((org.apache.bcel.classfile.Signature)attr).getSignature();
+                return ((org.apache.bcel.classfile.Signature)attr).getSignature();
             }
         }
+        return null;
+    }
+
+    private void build(DFTypeFinder finder, JavaClass jklass)
+        throws TypeNotFound {
+        String sig = getSignature(jklass.getAttributes());
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
 	    JNITypeParser parser = new JNITypeParser(finder, sig);
-	    DFParamType[] paramTypes = parser.getParamTypes(_childSpace);
+	    _paramTypes = parser.getParamTypes(_childSpace);
+            if (_paramTypes != null) {
+                Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
+                finder = parser.getFinder();
+            }
 	    _baseKlass = (DFKlass)parser.getType();
 	    finder = _baseKlass.addFinders(finder);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
@@ -349,26 +359,31 @@ public class DFKlass extends DFType {
 	}
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
-	    sig = fld.getSignature();
+            sig = getSignature(fld.getAttributes());
 	    DFType type;
 	    if (sig != null) {
+                Logger.info("fld: "+fld.getName()+","+sig);
 		JNITypeParser parser = new JNITypeParser(finder, sig);
 		type = parser.getType();
 	    } else {
 		type = finder.resolve(fld.getType());
 	    }
-            //Logger.info("fld: "+fld.getName()+","+fld.getSignature());
             _scope.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
-            //Logger.info("meth: "+meth.getName()+","+meth.getSignature());
-	    sig = meth.getSignature();
+            sig = getSignature(meth.getAttributes());
 	    DFMethodType methodType;
+            DFTypeSpace methodSpace = null;
 	    if (sig != null) {
+                Logger.info("meth: "+meth.getName()+","+sig);
 		JNITypeParser parser = new JNITypeParser(finder, sig);
+                methodSpace = new DFTypeSpace(_childSpace, meth.getName());
+                DFParamType[] paramTypes = parser.getParamTypes(methodSpace);
+                if (paramTypes != null) {
+                    finder = parser.getFinder();
+                }
 		methodType = (DFMethodType)parser.getType();
-		Logger.info("meth: "+meth.getName()+","+methodType);
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
 		DFType[] argTypes = new DFType[args.length];
@@ -378,7 +393,7 @@ public class DFKlass extends DFType {
 		DFType returnType = finder.resolve(meth.getReturnType());
 		methodType = new DFMethodType(argTypes, returnType);
 	    }
-	    this.addMethod(null, meth.getName(), meth.isStatic(), methodType);
+	    this.addMethod(methodSpace, meth.getName(), meth.isStatic(), methodType);
         }
     }
 

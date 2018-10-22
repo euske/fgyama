@@ -21,10 +21,14 @@ public class JNITypeParser {
         _pos = 0;
     }
 
+    public DFTypeFinder getFinder() {
+        return _finder;
+    }
+
     public DFType getType()
         throws TypeNotFound {
 	if (_text.length() <= _pos) return null;
-	//Logger.info("getType: "+_text.substring(_pos));
+	//Logger.info("  getType: "+_text.substring(_pos)+", finder="+_finder);
         switch (_text.charAt(_pos)) {
         case 'B':
             _pos++;
@@ -93,9 +97,9 @@ public class JNITypeParser {
             }
             break;
         case '+':
+        case '-':
             _pos++;
             return this.getType();
-        case '-':
         case '*':
             _pos++;
             return DFRootTypeSpace.getObjectKlass();
@@ -138,7 +142,7 @@ public class JNITypeParser {
 	    if (_text.charAt(_pos) == ':') {
 		_pos++;		// ???
 	    }
-	    pt.build(_finder, this);
+	    pt.build(_finder, (DFKlass)this.getType());
 	    _finder = pt.addFinders(_finder);
             params.add(pt);
         }
