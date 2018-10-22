@@ -52,4 +52,10 @@ public class DFParamType extends DFKlass {
             throw e;
         }
     }
+
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, JNITypeParser parser)
+        throws TypeNotFound {
+	_baseKlass = (DFKlass)parser.getType();
+    }
 }

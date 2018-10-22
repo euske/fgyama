@@ -205,20 +205,18 @@ public class DFKlass extends DFType {
 
     private DFMethod addMethod(
         DFTypeSpace methodSpace, SimpleName name, boolean isStatic,
-        DFType[] argTypes, DFType returnType) {
+        DFMethodType methodType) {
         String id = name.getIdentifier();
         DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic,
-            new DFMethodType(argTypes, returnType));
+            this, methodSpace, id, isStatic, methodType);
         return this.addMethod(method);
     }
 
     private DFMethod addMethod(
         DFTypeSpace methodSpace, String id, boolean isStatic,
-        DFType[] argTypes, DFType returnType) {
+        DFMethodType methodType) {
         DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic,
-            new DFMethodType(argTypes, returnType));
+            this, methodSpace, id, isStatic, methodType);
         return this.addMethod(method);
     }
 
@@ -318,35 +316,69 @@ public class DFKlass extends DFType {
                 sig = ((org.apache.bcel.classfile.Signature)attr).getSignature();
             }
         }
-        //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
-        String superClass = jklass.getSuperclassName();
-        if (superClass != null && !superClass.equals(jklass.getClassName())) {
-            _baseKlass = finder.lookupKlass(superClass);
-        }
-        String[] ifaces = jklass.getInterfaceNames();
-        if (ifaces != null) {
-            _baseIfaces = new DFKlass[ifaces.length];
-            for (int i = 0; i < ifaces.length; i++) {
-                _baseIfaces[i] = finder.lookupKlass(ifaces[i]);
-            }
-        }
+        if (sig != null) {
+            //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
+	    JNITypeParser parser = new JNITypeParser(finder, sig);
+	    DFParamType[] paramTypes = parser.getParamTypes(_childSpace);
+	    _baseKlass = (DFKlass)parser.getType();
+	    finder = _baseKlass.addFinders(finder);
+	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
+	    for (;;) {
+		DFKlass iface = (DFKlass)parser.getType();
+		if (iface == null) break;
+		finder = iface.addFinders(finder);
+		ifaces.add(iface);
+	    }
+	    _baseIfaces = new DFKlass[ifaces.size()];
+	    ifaces.toArray(_baseIfaces);
+        } else {
+	    String superClass = jklass.getSuperclassName();
+	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
+		_baseKlass = finder.lookupKlass(superClass);
+		finder = _baseKlass.addFinders(finder);
+	    }
+	    String[] ifaces = jklass.getInterfaceNames();
+	    if (ifaces != null) {
+		_baseIfaces = new DFKlass[ifaces.length];
+		for (int i = 0; i < ifaces.length; i++) {
+		    DFKlass iface = finder.lookupKlass(ifaces[i]);
+		    _baseIfaces[i] = iface;
+		    finder = iface.addFinders(finder);
+		}
+	    }
+	}
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
+	    sig = fld.getSignature();
+	    DFType type;
+	    if (sig != null) {
+		JNITypeParser parser = new JNITypeParser(finder, sig);
+		type = parser.getType();
+	    } else {
+		type = finder.resolve(fld.getType());
+	    }
             //Logger.info("fld: "+fld.getName()+","+fld.getSignature());
-            DFType type = finder.resolve(fld.getType());
             _scope.addRef("."+fld.getName(), type);
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
             //Logger.info("meth: "+meth.getName()+","+meth.getSignature());
-            org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
-            DFType[] argTypes = new DFType[args.length];
-            for (int i = 0; i < args.length; i++) {
-                argTypes[i] = finder.resolve(args[i]);
-            }
-            DFType returnType = finder.resolve(meth.getReturnType());
-            this.addMethod(null, meth.getName(), meth.isStatic(),
-                           argTypes, returnType);
+	    sig = meth.getSignature();
+	    DFMethodType methodType;
+	    if (sig != null) {
+		JNITypeParser parser = new JNITypeParser(finder, sig);
+		methodType = (DFMethodType)parser.getType();
+		Logger.info("meth: "+meth.getName()+","+methodType);
+	    } else {
+		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
+		DFType[] argTypes = new DFType[args.length];
+		for (int i = 0; i < args.length; i++) {
+		    argTypes[i] = finder.resolve(args[i]);
+		}
+		DFType returnType = finder.resolve(meth.getReturnType());
+		methodType = new DFMethodType(argTypes, returnType);
+	    }
+	    this.addMethod(null, meth.getName(), meth.isStatic(), methodType);
         }
     }
 
@@ -369,8 +401,9 @@ public class DFKlass extends DFType {
             List<Type> ifaces = typeDecl.superInterfaceTypes();
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-                _baseIfaces[i] = finder.resolveKlass(ifaces.get(i));
-                finder = _baseIfaces[i].addFinders(finder);
+		DFKlass iface = finder.resolveKlass(ifaces.get(i));
+                _baseIfaces[i] = iface;
+                finder = iface.addFinders(finder);
             }
             // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
@@ -379,8 +412,8 @@ public class DFKlass extends DFType {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
                 DFParamType pt = new DFParamType(id, _childSpace, i);
-                pt.build(finder, tp);
                 _childSpace.addParamType(id, pt);
+                pt.build(finder, tp);
                 _paramTypes[i] = pt;
             }
             // Lookup child klasses.
@@ -500,7 +533,7 @@ public class DFKlass extends DFType {
             }
             DFMethod method = this.addMethod(
                 methodSpace, decl.getName(), isStatic(decl),
-                argTypes, returnType);
+                new DFMethodType(argTypes, returnType));
             _ast2method.put(Utils.encodeASTNode(decl), method);
 
         } else if (body instanceof EnumConstantDeclaration) {

@@ -11,19 +11,20 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class JNITypeParser {
 
-    public DFTypeFinder finder;
-
+    private DFTypeFinder _finder;
     private String _text;
     private int _pos;
 
     public JNITypeParser(DFTypeFinder finder, String text) {
-        this.finder = finder;
+	_finder = finder;
         _text = text;
         _pos = 0;
     }
 
     public DFType getType()
         throws TypeNotFound {
+	if (_text.length() <= _pos) return null;
+	//Logger.info("getType: "+_text.substring(_pos));
         switch (_text.charAt(_pos)) {
         case 'B':
             _pos++;
@@ -53,33 +54,38 @@ public class JNITypeParser {
             _pos++;
             return DFBasicType.VOID;
         case 'L':
-            for (int i = _pos+1; i < _text.length(); i++) {
+	    _pos++;
+            for (int i = _pos; i < _text.length(); i++) {
                 char c2 =  _text.charAt(i);
-                if (c2 == '<' || c2 == ';') {
-                    String name = _text.substring(_pos+1, i);
-                    DFKlass klass = this.finder.lookupKlass(name.replace('/','.'));
-                    if (c2 == ';') {
-                        _pos = i+1;
-                        return klass;
-                    }
+                if (c2 == ';') {
+                    String name = _text.substring(_pos, i);
+		    _pos = i+1;
+                    return _finder.lookupKlass(name.replace('/','.'));
+		} else if (c2 == '<') {
+                    String name = _text.substring(_pos, i);
+		    _pos = i;
+		    DFKlass klass = _finder.lookupKlass(name.replace('/','.'));
                     DFType[] argTypes = this.getArgTypes('<', '>');
+		    assert _text.charAt(_pos) == ';';
+		    _pos++;
                     return klass.getParamKlass(argTypes);
                 }
             }
             break;
         case 'T':
+	    _pos++;
             for (int i = _pos; i < _text.length(); i++) {
                 if (_text.charAt(i) == ';') {
-                    String name = _text.substring(_pos+1, i);
+                    String name = _text.substring(_pos, i);
                     _pos = i+1;
-                    return this.finder.lookupParamType(name);
+                    return _finder.lookupParamType(name);
                 }
             }
             break;
         case '[':
             for (int i = _pos; i < _text.length(); i++) {
                 if (_text.charAt(i) != '[') {
-                    int ndims = _pos-i;
+                    int ndims = i-_pos;
                     _pos = i;
                     DFType elemType = this.getType();
                     return new DFArrayType(elemType, ndims);
@@ -87,9 +93,11 @@ public class JNITypeParser {
             }
             break;
         case '+':
+            _pos++;
             return this.getType();
         case '-':
         case '*':
+            _pos++;
             return DFRootTypeSpace.getObjectKlass();
         case '(':
             DFType[] argTypes = this.getArgTypes('(', ')');
@@ -101,9 +109,10 @@ public class JNITypeParser {
         throw new TypeNotFound(_text.substring(_pos));
     }
 
-    public DFType[] getArgTypes(char start, char end)
+    private DFType[] getArgTypes(char start, char end)
         throws TypeNotFound {
-        if (_text.charAt(_pos) != start) return null;
+	assert _text.charAt(_pos) == start;
+        _pos++;
         List<DFType> types = new ArrayList<DFType>();
         while (_text.charAt(_pos) != end) {
             types.add(this.getType());
@@ -112,5 +121,30 @@ public class JNITypeParser {
         DFType[] argTypes = new DFType[types.size()];
         types.toArray(argTypes);
         return argTypes;
+    }
+
+    public DFParamType[] getParamTypes(DFTypeSpace childSpace)
+        throws TypeNotFound {
+        if (_text.charAt(_pos) != '<') return null;
+        _pos++;
+        List<DFParamType> params = new ArrayList<DFParamType>();
+	_finder = new DFTypeFinder(_finder, childSpace);
+        while (_text.charAt(_pos) != '>') {
+	    int i = _text.indexOf(':', _pos);
+	    String id = _text.substring(_pos, i);
+	    _pos = i+1;
+            DFParamType pt = new DFParamType(id, childSpace, params.size());
+	    childSpace.addParamType(id, pt);
+	    if (_text.charAt(_pos) == ':') {
+		_pos++;		// ???
+	    }
+	    pt.build(_finder, this);
+	    _finder = pt.addFinders(_finder);
+            params.add(pt);
+        }
+        _pos++;
+        DFParamType[] paramTypes = new DFParamType[params.size()];
+        params.toArray(paramTypes);
+        return paramTypes;
     }
 }
