@@ -179,6 +179,7 @@ public class DFTypeSpace {
         if (klasses != null) {
             klasses.add(klass);
         }
+        klass.addParamTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getChildSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {

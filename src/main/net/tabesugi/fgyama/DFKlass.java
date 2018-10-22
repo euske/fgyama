@@ -90,6 +90,18 @@ public class DFKlass extends DFType {
         return klass;
     }
 
+    public void addParamTypes(List<TypeParameter> tps) {
+        // Get type parameters.
+        _paramTypes = new DFParamType[tps.size()];
+        for (int i = 0; i < tps.size(); i++) {
+            TypeParameter tp = tps.get(i);
+            String id = tp.getName().getIdentifier();
+            DFParamType pt = new DFParamType(id, _childSpace, i);
+            _childSpace.addParamType(id, pt);
+            _paramTypes[i] = pt;
+        }
+    }
+
     public String getKlassName() {
         return _name;
     }
@@ -420,16 +432,10 @@ public class DFKlass extends DFType {
                 _baseIfaces[i] = iface;
                 finder = iface.addFinders(finder);
             }
-            // Get type parameters.
             List<TypeParameter> tps = typeDecl.typeParameters();
-            _paramTypes = new DFParamType[tps.size()];
             for (int i = 0; i < tps.size(); i++) {
                 TypeParameter tp = tps.get(i);
-                String id = tp.getName().getIdentifier();
-                DFParamType pt = new DFParamType(id, _childSpace, i);
-                _childSpace.addParamType(id, pt);
-                pt.build(finder, tp);
-                _paramTypes[i] = pt;
+                _paramTypes[i].build(finder, tp);
             }
             // Lookup child klasses.
             for (BodyDeclaration body :
