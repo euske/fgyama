@@ -21,7 +21,7 @@ public class basic_generics {
 
     public static void test() {
         Moo<String> moo = new Moo<String>("moo");
-        String b = moo.get();
+        String b = moo.get().toLowerCase();
         Moo<String> boo = moo.copy();
         Moo<Integer>.Baa mi;
     }

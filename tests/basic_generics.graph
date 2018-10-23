@@ -97,28 +97,32 @@
             <link label="obj" src="Nbasic_generics.test.b0_5"/>
             <ast length="9" start="376" type="32"/>
           </node>
-          <node id="Nbasic_generics.test.b0_7" kind="assign" ref="basic_generics.test.b0/$b" type="Ljava/lang/String;">
-            <link src="Nbasic_generics.test.b0_5"/>
-            <ast length="13" start="372" type="59"/>
+          <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="Nbasic_generics.test.b0_7" kind="call" type="Ljava/lang/String;">
+            <link label="obj" src="Nbasic_generics.test.b0_5"/>
+            <ast length="23" start="376" type="32"/>
           </node>
-          <node id="Nbasic_generics.test.b0_8" kind="ref" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
+          <node id="Nbasic_generics.test.b0_8" kind="assign" ref="basic_generics.test.b0/$b" type="Ljava/lang/String;">
+            <link src="Nbasic_generics.test.b0_7"/>
+            <ast length="27" start="372" type="59"/>
+          </node>
+          <node id="Nbasic_generics.test.b0_9" kind="ref" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
             <link src="Nbasic_generics.test.b0_6"/>
-            <ast length="3" start="413" type="42"/>
+            <ast length="3" start="427" type="42"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;" id="Nbasic_generics.test.b0_9" kind="call" type="Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
-            <link label="obj" src="Nbasic_generics.test.b0_8"/>
-            <ast length="10" start="413" type="32"/>
-          </node>
-          <node id="Nbasic_generics.test.b0_10" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
+          <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;" id="Nbasic_generics.test.b0_10" kind="call" type="Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
             <link label="obj" src="Nbasic_generics.test.b0_9"/>
-            <ast length="10" start="413" type="32"/>
+            <ast length="10" start="427" type="32"/>
           </node>
-          <node id="Nbasic_generics.test.b0_11" kind="assign" ref="basic_generics.test.b0/$boo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
-            <link src="Nbasic_generics.test.b0_9"/>
-            <ast length="16" start="407" type="59"/>
+          <node id="Nbasic_generics.test.b0_11" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
+            <link label="obj" src="Nbasic_generics.test.b0_10"/>
+            <ast length="10" start="427" type="32"/>
+          </node>
+          <node id="Nbasic_generics.test.b0_12" kind="assign" ref="basic_generics.test.b0/$boo" type="Lbasic_generics/&lt;Ljava/lang/String;&gt;Moo;">
+            <link src="Nbasic_generics.test.b0_10"/>
+            <ast length="16" start="421" type="59"/>
           </node>
         </scope>
-        <node id="Nbasic_generics.test_12" ref="basic_generics.test.b0/$mi" type="Lbasic_generics/Moo/Baa;"/>
+        <node id="Nbasic_generics.test_13" ref="basic_generics.test.b0/$mi" type="Lbasic_generics/Moo/Baa;"/>
       </scope>
     </graph>
     <graph ins="Nbasic_generics.foo_1" name="Lbasic_generics;.foo(E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;)T:Ljava/lang/Object;" outs="Nbasic_generics.foo.b0_6">
@@ -126,27 +130,27 @@
         <scope name="basic_generics.foo.b0">
           <node id="Nbasic_generics.foo.b0_3" kind="ref" ref="basic_generics.foo/$x" type="E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
             <link src="Nbasic_generics.foo_2"/>
-            <ast length="1" start="520" type="42"/>
+            <ast length="1" start="534" type="42"/>
           </node>
-          <node data="E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;.get()?" id="Nbasic_generics.foo.b0_4" kind="call">
+          <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" id="Nbasic_generics.foo.b0_4" kind="call" type="T:Ljava/lang/Object;">
             <link label="obj" src="Nbasic_generics.foo.b0_3"/>
-            <ast length="7" start="520" type="32"/>
+            <ast length="7" start="534" type="32"/>
           </node>
           <node id="Nbasic_generics.foo.b0_5" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
             <link label="obj" src="Nbasic_generics.foo.b0_4"/>
-            <ast length="7" start="520" type="32"/>
+            <ast length="7" start="534" type="32"/>
           </node>
           <node id="Nbasic_generics.foo.b0_6" kind="output" ref="#return" type="T:Ljava/lang/Object;">
             <link src="Nbasic_generics.foo.b0_4"/>
-            <ast length="15" start="513" type="41"/>
+            <ast length="15" start="527" type="41"/>
           </node>
         </scope>
         <node id="Nbasic_generics.foo_1" kind="input" ref="#arg0" type="E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
-          <ast length="3" start="506" type="44"/>
+          <ast length="3" start="520" type="44"/>
         </node>
         <node id="Nbasic_generics.foo_2" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/&lt;T:Ljava/lang/Object;&gt;Moo;">
           <link src="Nbasic_generics.foo_1"/>
-          <ast length="3" start="506" type="44"/>
+          <ast length="3" start="520" type="44"/>
         </node>
       </scope>
     </graph>
