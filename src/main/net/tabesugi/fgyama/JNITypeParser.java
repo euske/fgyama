@@ -76,7 +76,7 @@ public class JNITypeParser {
                 if (_text.charAt(i) == ';') {
                     String name = _text.substring(_pos, i);
                     _pos = i+1;
-		    DFType paramType = finder.lookupParamType(name);
+		    DFType paramType = finder.lookupKlass(name);
 		    if (paramType == null) throw new TypeNotFound(name);
 		    return paramType;
                 }
@@ -154,10 +154,9 @@ public class JNITypeParser {
 	    if (text.charAt(pos) == ':') {
 		pos++;	 // ???
 	    }
-            DFParamType pt = new DFParamType(id, childSpace, params.size());
-	    childSpace.addParamType(id, pt);
-	    pos = skipType(text, pos);
+            DFParamType pt = childSpace.createParamType(id, params.size());
             params.add(pt);
+	    pos = skipType(text, pos);
         }
         pos++;
         DFParamType[] paramTypes = new DFParamType[params.size()];

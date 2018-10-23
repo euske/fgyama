@@ -96,8 +96,7 @@ public class DFKlass extends DFType {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFParamType pt = new DFParamType(id, _childSpace, i);
-            _childSpace.addParamType(id, pt);
+            DFParamType pt = _childSpace.createParamType(id, i);
             _paramTypes[i] = pt;
         }
     }
@@ -543,8 +542,7 @@ public class DFKlass extends DFType {
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DFParamType pt = new DFParamType(id, methodSpace, i);
-                    methodSpace.addParamType(id, pt);
+                    DFParamType pt = methodSpace.createParamType(id, i);
                     pt.build(finder2, tp);
                 }
             }

@@ -24,8 +24,6 @@ public class DFTypeSpace {
         new HashMap<String, DFTypeSpace>();
     private Map<String, DFKlass> _id2klass =
         new HashMap<String, DFKlass>();
-    private Map<String, DFParamType> _id2paramtype =
-        new HashMap<String, DFParamType>();
 
     public DFTypeSpace(DFTypeSpace parent, String name) {
         _parent = parent;
@@ -94,6 +92,12 @@ public class DFTypeSpace {
         }
     }
 
+    public DFParamType createParamType(String id, int i) {
+        DFParamType pt = new DFParamType(id, this, i);
+        this.addKlass(pt);
+        return pt;
+    }
+
     public DFKlass addKlass(DFKlass klass) {
         String id = klass.getKlassName();
         assert id.indexOf('.') < 0;
@@ -132,14 +136,6 @@ public class DFTypeSpace {
             id = id.substring(i+1);
         }
         throw new TypeNotFound(id);
-    }
-
-    public void addParamType(String id, DFParamType pt) {
-        _id2paramtype.put(id, pt);
-    }
-
-    public DFParamType getParamType(String id) {
-        return _id2paramtype.get(id);
     }
 
     @SuppressWarnings("unchecked")
