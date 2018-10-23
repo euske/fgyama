@@ -14,6 +14,10 @@ public class DFParamKlass extends DFKlass {
     private DFKlass _genericKlass;
     private DFType[] _argTypes;
 
+    private Map<DFVarRef, DFVarRef> _paramFields =
+        new HashMap<DFVarRef, DFVarRef>();
+    private List<DFMethod> _paramMethods = null;
+
     public DFParamKlass(String name, DFKlass genericKlass, DFType[] argTypes) {
         super(name, genericKlass);
         _genericKlass = genericKlass;
@@ -39,24 +43,25 @@ public class DFParamKlass extends DFKlass {
     @Override
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
-        DFVarRef ref = _genericKlass.lookupField(id);
-        return ref.parameterize(_argTypes);
+        DFVarRef ref0 = _genericKlass.lookupField(id);
+	DFVarRef ref1 = _paramFields.get(ref0);
+	if (ref1 == null) {
+	    ref1 = ref0.parameterize(_argTypes);
+	    _paramFields.put(ref0, ref1);
+	}
+	return ref1;
     }
 
     @Override
-    public DFVarRef lookupField(SimpleName name)
-        throws VariableNotFound {
-        DFVarRef ref = _genericKlass.lookupField(name);
-        return ref.parameterize(_argTypes);
-    }
-
-    @Override
-    public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
-        DFMethod method = _genericKlass.lookupMethod(name, argTypes);
-        if (method != null) {
-            method = method.parameterize(_argTypes);
-        }
-        return method;
+    protected List<DFMethod> getMethods() {
+	if (_paramMethods == null) {
+	    _paramMethods = new ArrayList<DFMethod>();
+	    for (DFMethod method : _genericKlass.getMethods()) {
+		method = method.parameterize(_argTypes);
+		_paramMethods.add(method);
+	    }
+	}
+	return _paramMethods;
     }
 
     @Override

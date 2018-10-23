@@ -171,11 +171,15 @@ public class DFKlass extends DFType {
         return this.lookupField(name.getIdentifier());
     }
 
+    protected List<DFMethod> getMethods() {
+	return _methods;
+    }
+
     private DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
         String id = name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
-        for (DFMethod method : _methods) {
+        for (DFMethod method : this.getMethods()) {
             int dist = method.canAccept(id, argTypes);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
