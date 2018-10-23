@@ -335,16 +335,17 @@ public class DFKlass extends DFType {
         String sig = getSignature(jklass.getAttributes());
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
-	    JNITypeParser parser = new JNITypeParser(finder, sig);
-	    _paramTypes = parser.getParamTypes(_childSpace);
-            if (_paramTypes != null) {
-                finder = parser.getFinder();
-            }
-	    _baseKlass = (DFKlass)parser.getType();
+	    JNITypeParser parser = new JNITypeParser(sig);
+	    _paramTypes = JNITypeParser.getParamTypes(sig, _childSpace);
+	    if (_paramTypes != null) {
+		finder = new DFTypeFinder(finder, _childSpace);
+		parser.buildParamTypes(finder, _paramTypes);
+	    }
+	    _baseKlass = (DFKlass)parser.getType(finder);
 	    finder = _baseKlass.addFinders(finder);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
-		DFKlass iface = (DFKlass)parser.getType();
+		DFKlass iface = (DFKlass)parser.getType(finder);
 		if (iface == null) break;
 		finder = iface.addFinders(finder);
 		ifaces.add(iface);
@@ -373,8 +374,8 @@ public class DFKlass extends DFType {
 	    DFType type;
 	    if (sig != null) {
                 //Logger.info("fld: "+fld.getName()+","+sig);
-		JNITypeParser parser = new JNITypeParser(finder, sig);
-		type = parser.getType();
+		JNITypeParser parser = new JNITypeParser(sig);
+		type = parser.getType(finder);
 	    } else {
 		type = finder.resolve(fld.getType());
 	    }
@@ -386,14 +387,15 @@ public class DFKlass extends DFType {
 	    DFMethodType methodType;
             DFTypeSpace methodSpace = null;
 	    if (sig != null) {
-                Logger.info("meth: "+meth.getName()+","+sig);
-		JNITypeParser parser = new JNITypeParser(finder, sig);
+                //Logger.info("meth: "+meth.getName()+","+sig);
                 methodSpace = new DFTypeSpace(_childSpace, meth.getName());
-                DFParamType[] paramTypes = parser.getParamTypes(methodSpace);
-                if (paramTypes != null) {
-                    finder = parser.getFinder();
-                }
-		methodType = (DFMethodType)parser.getType();
+		JNITypeParser parser = new JNITypeParser(sig);
+                DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
+		if (paramTypes != null) {
+		    finder = new DFTypeFinder(finder, methodSpace);
+		    parser.buildParamTypes(finder, paramTypes);
+		}
+		methodType = (DFMethodType)parser.getType(finder);
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
 		DFType[] argTypes = new DFType[args.length];
