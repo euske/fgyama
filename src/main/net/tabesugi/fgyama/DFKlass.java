@@ -336,13 +336,13 @@ public class DFKlass extends DFType {
 
     private void build(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
+	finder = new DFTypeFinder(finder, _childSpace);
         String sig = getSignature(jklass.getAttributes());
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _paramTypes = JNITypeParser.getParamTypes(sig, _childSpace);
 	    if (_paramTypes != null) {
-		finder = new DFTypeFinder(finder, _childSpace);
 		parser.buildParamTypes(finder, _paramTypes);
 	    }
 	    _baseKlass = (DFKlass)parser.getType(finder);
@@ -393,10 +393,10 @@ public class DFKlass extends DFType {
 	    if (sig != null) {
                 //Logger.info("meth: "+meth.getName()+","+sig);
                 methodSpace = new DFTypeSpace(_childSpace, meth.getName());
+		finder = new DFTypeFinder(finder, methodSpace);
 		JNITypeParser parser = new JNITypeParser(sig);
                 DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
 		if (paramTypes != null) {
-		    finder = new DFTypeFinder(finder, methodSpace);
 		    parser.buildParamTypes(finder, paramTypes);
 		}
 		methodType = (DFMethodType)parser.getType(finder);
