@@ -33,7 +33,7 @@ public class DFParamKlass extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFParamKlass("+this.getFullName()+")>");
+        return ("<DFParamKlass("+this.getFullName()+", "+getParamName(_argTypes)+")>");
     }
 
     @Override

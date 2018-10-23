@@ -187,13 +187,12 @@ public class DFKlass extends DFType {
     }
 
     public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
-        DFKlass klass = this;
-        while (klass != null) {
-            DFMethod method = klass.lookupMethod1(name, argTypes);
-            if (method != null) {
-                return method;
-            }
-            klass = klass._baseKlass;
+        DFMethod method = this.lookupMethod1(name, argTypes);
+        if (method != null) {
+            return method;
+        }
+        if (_baseKlass != null) {
+            return _baseKlass.lookupMethod(name, argTypes);
         }
         return null;
     }
@@ -339,7 +338,6 @@ public class DFKlass extends DFType {
 	    JNITypeParser parser = new JNITypeParser(finder, sig);
 	    _paramTypes = parser.getParamTypes(_childSpace);
             if (_paramTypes != null) {
-                Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
                 finder = parser.getFinder();
             }
 	    _baseKlass = (DFKlass)parser.getType();
@@ -374,7 +372,7 @@ public class DFKlass extends DFType {
             sig = getSignature(fld.getAttributes());
 	    DFType type;
 	    if (sig != null) {
-                Logger.info("fld: "+fld.getName()+","+sig);
+                //Logger.info("fld: "+fld.getName()+","+sig);
 		JNITypeParser parser = new JNITypeParser(finder, sig);
 		type = parser.getType();
 	    } else {
