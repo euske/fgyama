@@ -44,18 +44,30 @@ public class DFRootTypeSpace extends DFTypeSpace {
             for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
                 JarEntry je = es.nextElement();
                 String filePath = je.getName();
-                if (filePath.endsWith(".class")) {
-                    String name = filePath.substring(0, filePath.length()-6);
-                    name = name.replace('/', '.').replace('$', '.');
-                    int i = name.lastIndexOf('.');
-                    DFTypeSpace space = this.lookupSpace(name.substring(0, i));
-                    DFKlass klass = space.createKlass(_global, name.substring(i+1));
-                    klass.setJarPath(jarPath, filePath);
-                }
+                addFile(jarPath, filePath);
             }
         } finally {
             jarfile.close();
         }
+    }
+
+    private void addFile(String jarPath, String filePath) {
+        if (!filePath.endsWith(".class")) return;
+        String name = filePath.substring(0, filePath.length()-6);
+        String fullName = name.replace('/', '.').replace('$', '.');
+        int i = fullName.lastIndexOf('.');
+        List<DFTypeSpace> a = new ArrayList<DFTypeSpace>();
+        int j = name.indexOf('$');
+        while (0 <= j) {
+            String x = name.substring(0, j);
+            a.add(this.lookupSpace(x.replace('/', '.').replace('$', '.')));
+            j = name.indexOf('$', j+1);
+        }
+        DFTypeSpace space = this.lookupSpace(fullName.substring(0, i));
+        DFKlass klass = space.createKlass(_global, fullName.substring(i+1));
+        DFTypeSpace[] extra = new DFTypeSpace[a.size()];
+        a.toArray(extra);
+        klass.setJarPath(jarPath, filePath, extra);
     }
 
     private void loadDefaultKlasses()

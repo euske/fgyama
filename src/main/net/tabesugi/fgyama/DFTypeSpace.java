@@ -32,7 +32,7 @@ public class DFTypeSpace {
 
     @Override
     public String toString() {
-        return ("<DFTypeSpace("+_name+")>");
+        return ("<DFTypeSpace("+this.getFullName()+")>");
     }
 
     public String getFullName() {

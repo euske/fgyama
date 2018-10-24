@@ -40,13 +40,11 @@ public class DFTypeFinder {
     public DFKlass lookupKlass(String name)
         throws TypeNotFound {
         DFKlass klass;
-        //Logger.info("lookupKlass: "+_space+": "+name);
-        name = name.replace('$', '.');
         try {
-            klass = _space.getKlass(name);
+            klass = _space.getKlass(name.replace('$', '.'));
         } catch (TypeNotFound e) {
             if (_next != null) {
-                klass = _next.lookupKlass(name);
+                return _next.lookupKlass(name);
             } else {
                 throw new TypeNotFound(name);
             }

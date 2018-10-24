@@ -33,6 +33,7 @@ public class DFKlass extends DFType {
 
     private String _jarPath = null;
     private String _filePath = null;
+    private DFTypeSpace[] _extraSpaces = null;
     private boolean _loaded = true;
 
     public DFKlass(
@@ -283,6 +284,9 @@ public class DFKlass extends DFType {
     }
 
     public DFTypeFinder addFinders(DFTypeFinder finder) {
+        if (_childSpace != null) {
+            finder = new DFTypeFinder(finder, _childSpace);
+        }
         if (_baseKlass != null) {
             finder = _baseKlass.addFinders(finder);
         }
@@ -293,15 +297,13 @@ public class DFKlass extends DFType {
                 }
             }
         }
-        if (_childSpace != null) {
-            finder = new DFTypeFinder(finder, _childSpace);
-        }
         return finder;
     }
 
-    public void setJarPath(String jarPath, String filePath) {
+    public void setJarPath(String jarPath, String filePath, DFTypeSpace[] extras) {
         _jarPath = jarPath;
         _filePath = filePath;
+        _extraSpaces = extras;
         _loaded = false;
     }
 
@@ -314,6 +316,9 @@ public class DFKlass extends DFType {
                 JarEntry je = jarfile.getJarEntry(_filePath);
                 InputStream strm = jarfile.getInputStream(je);
                 JavaClass jklass = new ClassParser(strm, _filePath).parse();
+                for (DFTypeSpace space : _extraSpaces) {
+                    finder = new DFTypeFinder(finder, space);
+                }
                 this.build(finder, jklass);
             } finally {
                 jarfile.close();
