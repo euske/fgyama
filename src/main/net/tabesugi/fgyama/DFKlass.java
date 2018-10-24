@@ -26,6 +26,7 @@ public class DFKlass extends DFType {
     private Map<String, DFParamKlass> _paramKlasses =
         new HashMap<String, DFParamKlass>();
 
+    private DFMethod _initializer;
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _ast2method =
@@ -47,6 +48,9 @@ public class DFKlass extends DFType {
         if (parentScope != null) {
             _scope = new DFKlassScope(this, parentScope, name);
         }
+        _initializer = this.addMethod(
+            null, "<init>", true,
+            new DFMethodType(new DFType[] {}, DFBasicType.VOID));
     }
 
     protected DFKlass(String name, DFKlass genericKlass) {
@@ -124,6 +128,10 @@ public class DFKlass extends DFType {
 
     public String getFullName() {
         return _typeSpace.getFullName()+_name;
+    }
+
+    public DFMethod getInitializer() {
+        return _initializer;
     }
 
     public int isSubclassOf(DFKlass klass) {
@@ -575,10 +583,6 @@ public class DFKlass extends DFType {
             this.addField(decl.getName(), isStatic(decl), type);
 
         } else if (body instanceof Initializer) {
-            Initializer initializer = (Initializer)body;
-            DFMethod method = this.addMethod(
-                null, "<init>", true, new DFMethodType(new DFType[] {}, null));
-            _ast2method.put(Utils.encodeASTNode(initializer), method);
 
         } else {
             throw new UnsupportedSyntax(body);

@@ -109,7 +109,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="">
+    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
       <scope name="Foo"/>
     </graph>
   </file>

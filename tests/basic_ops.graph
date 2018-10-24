@@ -139,7 +139,7 @@
         <node id="NFoo.basic_ops_11" ref="#this" type="LFoo;"/>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="">
+    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
       <scope name="Foo"/>
     </graph>
   </file>

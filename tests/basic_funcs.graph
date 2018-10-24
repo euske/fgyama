@@ -183,7 +183,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="basic_funcs" outs="">
+    <graph ins="" name="Lbasic_funcs;.&lt;init&gt;()V" outs="">
       <scope name="basic_funcs"/>
     </graph>
   </file>

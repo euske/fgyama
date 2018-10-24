@@ -2026,24 +2026,25 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFKlass klass,
         DFFrame frame, FieldDeclaration fieldDecl)
         throws UnsupportedSyntax, EntityNotFound {
+        DFVarScope scope = klass.getScope();
+        DFContext ctx = new DFContext(graph, scope);
         for (VariableDeclarationFragment frag :
                  (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
             DFVarRef ref = klass.lookupField(frag.getName());
+            DFNode value = null;
             Expression init = frag.getInitializer();
             if (init != null) {
-                DFVarScope scope = klass.getScope();
-                DFContext ctx = new DFContext(graph, scope);
                 ctx = processExpression(
                     graph, finder, scope, frame, ctx, init);
-                DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
-                DFNode value = ctx.getRValue();
-                if (value == null) {
-                    // uninitialized field: default = null.
-                    value = new ConstNode(
-                        graph, scope, DFNullType.NULL, null, "uninitialized");
-                }
-                assign.accept(value);
+                value = ctx.getRValue();
             }
+            if (value == null) {
+                // uninitialized field: default = null.
+                value = new ConstNode(
+                    graph, scope, DFNullType.NULL, null, "uninitialized");
+            }
+            DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
+            assign.accept(value);
         }
     }
 
@@ -2114,35 +2115,16 @@ public class Java2DF {
         }
     }
 
-    public DFGraph processInitializer(
-        DFTypeFinder finder, DFKlass klass,
-        Initializer initializer)
-        throws UnsupportedSyntax, EntityNotFound {
-        DFMethod method = klass.getMethodByAST(initializer);
-        assert method != null;
-        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<init>");
-        DFFrame frame = new DFFrame(DFFrame.METHOD);
-        scope.build(finder, initializer);
-        frame.build(finder, scope, initializer.getBody());
-        DFGraph graph = new DFGraph(scope, frame, method);
-        DFContext ctx = new DFContext(graph, scope);
-        ctx = processStatement(
-            graph, finder, scope,
-            frame, ctx, initializer.getBody());
-        frame.close(ctx);
-        Logger.info("Success: "+method.getSignature());
-        return graph;
-    }
-
     @SuppressWarnings("unchecked")
     public void processBodyDeclarations(
         DFTypeFinder finder, DFKlass klass,
         List<BodyDeclaration> decls)
         throws EntityNotFound {
+        DFMethod method = klass.getInitializer();
         DFTypeSpace childSpace = klass.getChildSpace();
         DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
         DFVarScope klassScope = klass.getScope();
-        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null);
+        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, method);
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
@@ -2178,9 +2160,16 @@ public class Java2DF {
                     // XXX ignore annotations.
 
                 } else if (body instanceof Initializer) {
-                    DFGraph graph = processInitializer(
-                        finder, klass, (Initializer)body);
-                    exportGraph(graph);
+                    Initializer initializer = (Initializer)body;
+                    DFFrame frame = new DFFrame(DFFrame.METHOD);
+                    DFLocalVarScope scope = new DFLocalVarScope(klassScope, "<init>");
+                    scope.build(finder, initializer);
+                    frame.build(finder, scope, initializer.getBody());
+                    DFContext ctx = new DFContext(klassGraph, scope);
+                    ctx = processStatement(
+                        klassGraph, finder, scope,
+                        frame, ctx, initializer.getBody());
+                    frame.close(ctx);
 
                 } else {
                     throw new UnsupportedSyntax(body);

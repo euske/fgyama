@@ -40,7 +40,7 @@
         <node id="Nbasic_enum.foo_9" ref="E/.Baa" type="LE;"/>
       </scope>
     </graph>
-    <graph ins="" name="basic_enum" outs="">
+    <graph ins="" name="Lbasic_enum;.&lt;init&gt;()V" outs="">
       <scope name="basic_enum"/>
     </graph>
   </file>

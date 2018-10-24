@@ -89,7 +89,7 @@
         <node id="NFoo.basic_switch_8" ref="Foo.basic_switch.b0/$x" type="I"/>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="">
+    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
       <scope name="Foo"/>
     </graph>
   </file>

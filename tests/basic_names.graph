@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph ins="" name="dom/meep/Foo/Bar" outs="">
+    <graph ins="" name="Ldom/meep/Foo/Bar;.&lt;init&gt;()V" outs="">
       <scope name="dom/meep/Foo/Bar"/>
     </graph>
     <graph ins="" name="LBaz;.moo()V" outs="">
@@ -8,8 +8,14 @@
         <scope name="Baz.moo.b0"/>
       </scope>
     </graph>
-    <graph ins="" name="Baz" outs="">
-      <scope name="Baz"/>
+    <graph ins="" name="LBaz;.&lt;init&gt;()V" outs="">
+      <scope name="Baz">
+        <node data="uninitialized" id="NBaz_1" kind="const" type="@null"/>
+        <node id="NBaz_2" kind="assign" ref="Baz/.x" type="I">
+          <link src="NBaz_1"/>
+          <ast length="1" start="164" type="59"/>
+        </node>
+      </scope>
     </graph>
     <graph ins="Ndom/meep/Foo.doit_11 Ndom/meep/Foo.doit_13 Ndom/meep/Foo.doit_2" name="Ldom/meep/Foo;.doit()V" outs="Ndom/meep/Foo.doit.b0_9">
       <scope name="dom/meep/Foo.doit">
@@ -124,7 +130,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="dom/meep/Foo" outs="">
+    <graph ins="" name="Ldom/meep/Foo;.&lt;init&gt;()V" outs="">
       <scope name="dom/meep/Foo">
         <node data="123" id="Ndom/meep/Foo_1" kind="const" type="I">
           <ast length="3" start="61" type="34"/>

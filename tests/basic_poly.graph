@@ -27,7 +27,7 @@
         <node id="NFoo.moo_5" ref="Foo/.x" type="I"/>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="">
+    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
       <scope name="Foo">
         <node data="0" id="NFoo_1" kind="const" type="I">
           <ast length="1" start="24" type="34"/>
@@ -235,7 +235,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Baa" outs="">
+    <graph ins="" name="LBaa;.&lt;init&gt;()V" outs="">
       <scope name="Baa"/>
     </graph>
   </file>

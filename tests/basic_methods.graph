@@ -13,7 +13,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Object" outs="">
+    <graph ins="" name="LObject;.&lt;init&gt;()V" outs="">
       <scope name="Object"/>
     </graph>
     <graph ins="" name="LFoo;.fa()V" outs="">
@@ -42,7 +42,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="moo" outs="">
+    <graph ins="" name="Lmoo;.&lt;init&gt;()V" outs="">
       <scope name="moo"/>
     </graph>
     <graph ins="" name="LObject/anonymous/anonymous;.toString()Ljava/lang/String;" outs="NObject/anonymous/anonymous.toString.b0_2">
@@ -58,7 +58,7 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Object/anonymous/anonymous" outs="">
+    <graph ins="" name="LObject/anonymous/anonymous;.&lt;init&gt;()V" outs="">
       <scope name="Object/anonymous/anonymous"/>
     </graph>
     <graph ins="NFoo.fb_5" name="LFoo;.fb()V" outs="">
@@ -109,7 +109,7 @@
         <node id="NFoo.fb_5" ref="#this" type="LFoo;"/>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="">
+    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
       <scope name="Foo"/>
     </graph>
   </file>
