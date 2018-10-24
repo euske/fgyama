@@ -27,7 +27,7 @@ public class DFMethodType extends DFType {
     public boolean equals(DFType type) {
         if (!(type instanceof DFMethodType)) return false;
         DFMethodType mtype = (DFMethodType)type;
-        if (!_returnType.equals(mtype._returnType)) return false;
+        if (_returnType != null && !_returnType.equals(mtype._returnType)) return false;
         if (_argTypes.length != mtype._argTypes.length) return false;
         for (int i = 0; i < _argTypes.length; i++) {
             if (!_argTypes[i].equals(mtype._argTypes[i])) return false;
@@ -91,8 +91,8 @@ public class DFMethodType extends DFType {
     public DFMethodType parameterize(DFType[] types) {
         boolean changed = false;
         DFType returnType = _returnType;
-        if (_returnType instanceof DFParamType) {
-            int index = ((DFParamType)_returnType).getIndex();
+        if (returnType instanceof DFParamType) {
+            int index = ((DFParamType)returnType).getIndex();
             returnType = types[index];
             changed = true;
         }

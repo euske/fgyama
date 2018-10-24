@@ -575,6 +575,10 @@ public class DFKlass extends DFType {
             this.addField(decl.getName(), isStatic(decl), type);
 
         } else if (body instanceof Initializer) {
+            Initializer initializer = (Initializer)body;
+            DFMethod method = this.addMethod(
+                null, "<init>", true, new DFMethodType(new DFType[] {}, null));
+            _ast2method.put(Utils.encodeASTNode(initializer), method);
 
         } else {
             throw new UnsupportedSyntax(body);

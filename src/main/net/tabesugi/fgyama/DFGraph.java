@@ -26,11 +26,6 @@ public class DFGraph {
         _method = method;
     }
 
-    // DFGraph for a class static block.
-    public DFGraph(DFVarScope root, DFFrame frame) {
-        this(root, frame, null);
-    }
-
     @Override
     public String toString() {
         return ("<DFGraph("+_root.getFullName()+")>");

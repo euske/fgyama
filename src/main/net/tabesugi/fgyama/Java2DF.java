@@ -2114,6 +2114,26 @@ public class Java2DF {
         }
     }
 
+    public DFGraph processInitializer(
+        DFTypeFinder finder, DFKlass klass,
+        Initializer initializer)
+        throws UnsupportedSyntax, EntityNotFound {
+        DFMethod method = klass.getMethodByAST(initializer);
+        assert method != null;
+        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<init>");
+        DFFrame frame = new DFFrame(DFFrame.METHOD);
+        scope.build(finder, initializer);
+        frame.build(finder, scope, initializer.getBody());
+        DFGraph graph = new DFGraph(scope, frame, method);
+        DFContext ctx = new DFContext(graph, scope);
+        ctx = processStatement(
+            graph, finder, scope,
+            frame, ctx, initializer.getBody());
+        frame.close(ctx);
+        Logger.info("Success: "+method.getSignature());
+        return graph;
+    }
+
     @SuppressWarnings("unchecked")
     public void processBodyDeclarations(
         DFTypeFinder finder, DFKlass klass,
@@ -2122,7 +2142,7 @@ public class Java2DF {
         DFTypeSpace childSpace = klass.getChildSpace();
         DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
         DFVarScope klassScope = klass.getScope();
-        DFGraph klassGraph = new DFGraph(klassScope, klassFrame);
+        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null);
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
@@ -2158,17 +2178,8 @@ public class Java2DF {
                     // XXX ignore annotations.
 
                 } else if (body instanceof Initializer) {
-                    Block block = ((Initializer)body).getBody();
-                    DFLocalVarScope scope = new DFLocalVarScope(klassScope, "init");
-                    DFFrame frame = new DFFrame(DFFrame.METHOD);
-                    scope.build(finder, block);
-                    frame.build(finder, scope, block);
-                    DFGraph graph = new DFGraph(scope, frame);
-                    DFContext ctx = new DFContext(graph, scope);
-                    ctx = processStatement(
-                        graph, finder, scope,
-                        frame, ctx, block);
-                    frame.close(ctx);
+                    DFGraph graph = processInitializer(
+                        finder, klass, (Initializer)body);
                     exportGraph(graph);
 
                 } else {

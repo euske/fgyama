@@ -81,6 +81,12 @@ public class DFLocalVarScope extends DFVarScope {
         this.build(finder, methodDecl.getBody());
     }
 
+    public void build(DFTypeFinder finder, Initializer initializer)
+        throws UnsupportedSyntax, TypeNotFound {
+        this.addRef("#exception", null);
+        this.build(finder, initializer.getBody());
+    }
+
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, Statement ast)
         throws UnsupportedSyntax, TypeNotFound {
