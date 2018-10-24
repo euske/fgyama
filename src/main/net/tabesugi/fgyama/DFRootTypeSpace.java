@@ -47,7 +47,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
                 if (filePath.endsWith(".class")) {
                     String name = filePath.substring(0, filePath.length()-6);
                     name = name.replace('/', '.').replace('$', '.');
-                    DFKlass klass = this.createKlass(_global, name);
+                    int i = name.lastIndexOf('.');
+                    DFTypeSpace space = this.lookupSpace(name.substring(0, i));
+                    DFKlass klass = space.createKlass(_global, name.substring(i+1));
                     klass.setJarPath(jarPath, filePath);
                 }
             }
@@ -62,13 +64,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
         this.loadJarFile(rtFile.getAbsolutePath());
-        DFTypeSpace space = this.lookupSpace("java.lang");
+        DFTypeSpace java_lang = this.lookupSpace("java.lang");
         _object = this.getKlass("java.lang.Object");
         _class = this.getKlass("java.lang.Class");
         _enum = this.getKlass("java.lang.Enum");
         _string = this.getKlass("java.lang.String");
-        _array = new DFKlass(
-            "java.lang._Array", space, null, _global, _object);
+        _array = java_lang.createKlass(_global, "_Array");
         _array.addField("length", false, DFBasicType.INT);
     }
 

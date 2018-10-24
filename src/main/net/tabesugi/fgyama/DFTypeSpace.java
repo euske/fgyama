@@ -60,36 +60,36 @@ public class DFTypeSpace {
     }
 
     public DFTypeSpace lookupSpace(String id) {
-        int i = id.indexOf('.');
+        int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
             return space.lookupSpace(id.substring(i+1));
-        } else {
-            DFTypeSpace space = _id2space.get(id);
-            if (space == null) {
-                space = new DFTypeSpace(this, id);
-                _children.add(space);
-                _id2space.put(id, space);
-                //Logger.info("DFTypeSpace.addChild: "+this+": "+id);
-            }
-            return space;
         }
+        DFKlass klass = _id2klass.get(id);
+        if (klass != null) {
+            return klass.getChildSpace();
+        }
+        DFTypeSpace space = _id2space.get(id);
+        if (space == null) {
+            space = new DFTypeSpace(this, id);
+            _children.add(space);
+            _id2space.put(id, space);
+            //Logger.info("DFTypeSpace.addChild: "+this+": "+id);
+        }
+        return space;
     }
 
     public DFKlass createKlass(DFVarScope parent, SimpleName name) {
         return this.createKlass(parent, name.getIdentifier());
     }
+
     public DFKlass createKlass(DFVarScope parent, String id) {
-        int i = id.indexOf('.');
-        if (0 <= i) {
-            DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-            return space.createKlass(parent, id.substring(i+1));
-        } else {
-            DFTypeSpace child = this.lookupSpace(id);
-            DFKlass klass = new DFKlass(id, this, child, parent, null);
-            //Logger.info("DFTypeSpace.createKlass: "+klass);
-            return this.addKlass(klass);
-        }
+        assert id.indexOf('.') < 0;
+        DFTypeSpace child = this.lookupSpace(id);
+        DFKlass klass = new DFKlass(
+            id, this, child, parent, DFRootTypeSpace.getObjectKlass());
+        //Logger.info("DFTypeSpace.createKlass: "+klass);
+        return this.addKlass(klass);
     }
 
     public DFParamType createParamType(String id, int i) {
@@ -114,28 +114,16 @@ public class DFTypeSpace {
     public DFKlass getKlass(String id)
         throws TypeNotFound {
         //Logger.info("DFTypeSpace.getKlass: "+this+": "+id);
-        DFKlass klass = null;
-        DFTypeSpace space = this;
-        while (space != null) {
-            int i = id.indexOf('.');
-            if (i < 0) {
-                klass = space._id2klass.get(id);
-                if (klass == null) {
-                    throw new TypeNotFound(id);
-                }
-                return klass;
-            }
-            String key = id.substring(0, i);
-            klass = space._id2klass.get(key);
-            if (klass != null) {
-                // Search inner klasses from now...
-                space = klass.getChildSpace();
-            } else {
-                space = space._id2space.get(key);
-            }
-            id = id.substring(i+1);
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = this.lookupSpace(id.substring(0, i));
+            return space.getKlass(id.substring(i+1));
         }
-        throw new TypeNotFound(id);
+        DFKlass klass = _id2klass.get(id);
+        if (klass == null) {
+            throw new TypeNotFound(this.getFullName()+id);
+        }
+        return klass;
     }
 
     @SuppressWarnings("unchecked")
