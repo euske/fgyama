@@ -63,10 +63,10 @@ public class JNITypeParser {
                     String name = _text.substring(_pos, i);
 		    _pos = i;
 		    DFKlass klass = finder.lookupKlass(name.replace('/','.'));
-                    DFType[] argTypes = this.getArgTypes(finder, '<', '>');
+                    DFType[] mapTypes = this.getTypes(finder, '<', '>');
 		    assert _text.charAt(_pos) == ';';
 		    _pos++;
-                    return klass.getParamKlass(argTypes);
+                    return klass.getParamKlass(mapTypes);
                 }
             }
             break;
@@ -100,7 +100,7 @@ public class JNITypeParser {
             _pos++;
             return DFRootTypeSpace.getObjectKlass();
         case '(':
-            DFType[] argTypes = this.getArgTypes(finder, '(', ')');
+            DFType[] argTypes = this.getTypes(finder, '(', ')');
             DFType returnType = this.getType(finder);
             return new DFMethodType(argTypes, returnType);
         default:
@@ -109,7 +109,7 @@ public class JNITypeParser {
         throw new TypeNotFound(_text.substring(_pos));
     }
 
-    private DFType[] getArgTypes(DFTypeFinder finder, char start, char end)
+    private DFType[] getTypes(DFTypeFinder finder, char start, char end)
         throws TypeNotFound {
 	assert _text.charAt(_pos) == start;
         _pos++;
@@ -118,9 +118,9 @@ public class JNITypeParser {
             types.add(this.getType(finder));
         }
         _pos++;
-        DFType[] argTypes = new DFType[types.size()];
-        types.toArray(argTypes);
-        return argTypes;
+        DFType[] a = new DFType[types.size()];
+        types.toArray(a);
+        return a;
     }
 
     public void buildParamTypes(DFTypeFinder finder, DFParamType[] paramTypes)
@@ -154,7 +154,7 @@ public class JNITypeParser {
 	    if (text.charAt(pos) == ':') {
 		pos++;	 // ???
 	    }
-            DFParamType pt = childSpace.createParamType(id, params.size());
+            DFParamType pt = childSpace.createParamType(id);
             params.add(pt);
 	    pos = skipType(text, pos);
         }
@@ -189,7 +189,7 @@ public class JNITypeParser {
                     break;
 		} else if (c2 == '<') {
                     String name = text.substring(pos, i);
-                    pos = skipArgTypes(text, i, '<', '>');
+                    pos = skipTypes(text, i, '<', '>');
 		    assert text.charAt(pos) == ';';
 		    pos++;
                     break;
@@ -223,7 +223,7 @@ public class JNITypeParser {
             pos++;
             break;
         case '(':
-            pos = skipArgTypes(text, pos, '(', ')');
+            pos = skipTypes(text, pos, '(', ')');
             pos = skipType(text, pos);
 	    break;
         default:
@@ -232,7 +232,7 @@ public class JNITypeParser {
 	return pos;
     }
 
-    private static int skipArgTypes(String text, int pos, char start, char end) {
+    private static int skipTypes(String text, int pos, char start, char end) {
 	assert text.charAt(pos) == start;
         pos++;
         while (text.charAt(pos) != end) {

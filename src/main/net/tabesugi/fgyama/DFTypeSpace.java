@@ -92,8 +92,8 @@ public class DFTypeSpace {
         return this.addKlass(klass);
     }
 
-    public DFParamType createParamType(String id, int i) {
-        DFParamType pt = new DFParamType(id, this, i);
+    public DFParamType createParamType(String id) {
+        DFParamType pt = new DFParamType(id, this);
         this.addKlass(pt);
         return pt;
     }

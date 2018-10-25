@@ -11,17 +11,28 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFParamType extends DFKlass {
 
-    private int _index;
-
     public DFParamType(
-        String name, DFTypeSpace typeSpace, int index) {
+        String name, DFTypeSpace typeSpace) {
         super(name, typeSpace, null, null, DFRootTypeSpace.getObjectKlass());
         assert typeSpace != null;
-        _index = index;
     }
 
-    public int getIndex() {
-        return _index;
+    @Override
+    public String toString() {
+        return ("<DFParamType("+this.getFullName()+")>");
+    }
+
+    public int canConvertFrom(DFType type)
+    {
+        return _baseKlass.canConvertFrom(type);
+    }
+
+    public DFType parameterize(Map<DFParamType, DFType> typeMap) {
+        if (typeMap.containsKey(this)) {
+            return typeMap.get(this);
+        } else {
+            return this;
+        }
     }
 
     @Override

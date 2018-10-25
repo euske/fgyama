@@ -82,14 +82,15 @@ public class DFKlass extends DFType {
     {
         if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFKlass)) return -1;
+        // type is-a this.
         return ((DFKlass)type).isSubclassOf(this);
     }
 
-    public DFParamKlass getParamKlass(DFType[] argTypes) {
-        String name = DFParamKlass.getParamName(argTypes)+_name;
+    public DFParamKlass getParamKlass(DFType[] mapTypes) {
+        String name = _name+DFParamKlass.getParamName(mapTypes);
         DFParamKlass klass = _paramKlasses.get(name);
         if (klass == null) {
-            klass = new DFParamKlass(name, this, argTypes);
+            klass = new DFParamKlass(name, this, _paramTypes, mapTypes);
             _paramKlasses.put(name, klass);
         }
         return klass;
@@ -101,7 +102,7 @@ public class DFKlass extends DFType {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFParamType pt = _childSpace.createParamType(id, i);
+            DFParamType pt = _childSpace.createParamType(id);
             _paramTypes[i] = pt;
         }
     }
@@ -555,11 +556,11 @@ public class DFKlass extends DFType {
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DFParamType pt = methodSpace.createParamType(id, i);
+                    DFParamType pt = methodSpace.createParamType(id);
                     pt.build(finder2, tp);
                 }
             }
-            DFType[] argTypes = finder2.resolveList(decl);
+            DFType[] argTypes = finder2.resolveArgs(decl);
             DFType returnType;
             if (decl.isConstructor()) {
                 returnType = this;

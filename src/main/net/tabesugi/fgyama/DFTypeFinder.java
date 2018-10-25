@@ -92,11 +92,11 @@ public class DFTypeFinder {
             DFType genericType = this.resolve(ptype.getType());
             assert genericType instanceof DFKlass;
             DFKlass genericKlass = (DFKlass)genericType;
-            DFType[] argTypes = new DFType[args.size()];
+            DFType[] mapTypes = new DFType[args.size()];
             for (int i = 0; i < args.size(); i++) {
-                argTypes[i] = this.resolve(args.get(i));
+                mapTypes[i] = this.resolve(args.get(i));
             }
-            return genericKlass.getParamKlass(argTypes);
+            return genericKlass.getParamKlass(mapTypes);
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
@@ -169,7 +169,7 @@ public class DFTypeFinder {
     }
 
     @SuppressWarnings("unchecked")
-    public DFType[] resolveList(MethodDeclaration decl)
+    public DFType[] resolveArgs(MethodDeclaration decl)
         throws TypeNotFound {
         List<DFType> types = new ArrayList<DFType>();
         for (SingleVariableDeclaration varDecl :

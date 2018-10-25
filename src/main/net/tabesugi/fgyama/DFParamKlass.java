@@ -12,21 +12,27 @@ import org.eclipse.jdt.core.dom.*;
 public class DFParamKlass extends DFKlass {
 
     private DFKlass _genericKlass;
-    private DFType[] _argTypes;
+    private DFType[] _mapTypes;
+    private Map<DFParamType, DFType> _typeMap;
 
     private Map<DFVarRef, DFVarRef> _paramFields =
         new HashMap<DFVarRef, DFVarRef>();
     private List<DFMethod> _paramMethods = null;
 
-    public DFParamKlass(String name, DFKlass genericKlass, DFType[] argTypes) {
+    public DFParamKlass(String name, DFKlass genericKlass,
+                        DFParamType[] paramTypes, DFType[] mapTypes) {
         super(name, genericKlass);
         _genericKlass = genericKlass;
-        _argTypes = argTypes;
+        _mapTypes = mapTypes;
+        _typeMap = new HashMap<DFParamType, DFType>();
+        for (int i = 0; i < mapTypes.length; i++) {
+            _typeMap.put(paramTypes[i], mapTypes[i]);
+        }
     }
 
-    public static String getParamName(DFType[] argTypes) {
+    public static String getParamName(DFType[] mapTypes) {
         StringBuilder b = new StringBuilder();
-        for (DFType type : argTypes) {
+        for (DFType type : mapTypes) {
             if (0 < b.length()) {
                 b.append(",");
             }
@@ -37,7 +43,7 @@ public class DFParamKlass extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFParamKlass("+this.getFullName()+", "+getParamName(_argTypes)+")>");
+        return ("<DFParamKlass("+this.getFullName()+", "+getParamName(_mapTypes)+")>");
     }
 
     @Override
@@ -46,7 +52,7 @@ public class DFParamKlass extends DFKlass {
         DFVarRef ref0 = _genericKlass.lookupField(id);
 	DFVarRef ref1 = _paramFields.get(ref0);
 	if (ref1 == null) {
-	    ref1 = ref0.parameterize(_argTypes);
+	    ref1 = ref0.parameterize(_typeMap);
 	    _paramFields.put(ref0, ref1);
 	}
 	return ref1;
@@ -56,9 +62,9 @@ public class DFParamKlass extends DFKlass {
     protected List<DFMethod> getMethods() {
 	if (_paramMethods == null) {
 	    _paramMethods = new ArrayList<DFMethod>();
-	    for (DFMethod method : _genericKlass.getMethods()) {
-		method = method.parameterize(_argTypes);
-		_paramMethods.add(method);
+	    for (DFMethod method0 : _genericKlass.getMethods()) {
+		DFMethod method1 = method0.parameterize(_typeMap);
+		_paramMethods.add(method1);
 	    }
 	}
 	return _paramMethods;
@@ -72,11 +78,11 @@ public class DFParamKlass extends DFKlass {
     public int isSubclassOf(DFKlass klass) {
         if (!(klass instanceof DFParamKlass)) return -1;
         DFParamKlass pklass = (DFParamKlass)klass;
-        if (_argTypes.length != pklass._argTypes.length) return -1;
+        if (_mapTypes.length != pklass._mapTypes.length) return -1;
         int dist = pklass._genericKlass.isSubclassOf(_genericKlass);
         if (dist < 0) return dist;
-        for (int i = 0; i < _argTypes.length; i++) {
-            int d = _argTypes[i].canConvertFrom(pklass._argTypes[i]);
+        for (int i = 0; i < _mapTypes.length; i++) {
+            int d = _mapTypes[i].canConvertFrom(pklass._mapTypes[i]);
             if (d < 0) return d;
             dist += d;
         }

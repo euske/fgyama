@@ -15,4 +15,7 @@ public abstract class DFType {
     public abstract boolean equals(DFType type);
     public abstract int canConvertFrom(DFType type);
 
+    public DFType parameterize(Map<DFParamType, DFType> typeMap) {
+        return this;
+    }
 }

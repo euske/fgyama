@@ -2059,7 +2059,7 @@ public class Java2DF {
         if (methodSpace != null) {
             finder = new DFTypeFinder(finder, methodSpace);
         }
-        DFType[] argTypes = finder.resolveList(methodDecl);
+        DFType[] argTypes = finder.resolveArgs(methodDecl);
         DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), methodDecl.getName());
         // add a typespace for inline klasses.
         DFTypeSpace typeSpace = new DFTypeSpace(methodSpace, "inline");
