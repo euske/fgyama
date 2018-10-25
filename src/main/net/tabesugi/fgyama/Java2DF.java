@@ -913,7 +913,7 @@ public class Java2DF {
 
             } else if (expr instanceof ArrayCreation) {
                 ArrayCreation ac = (ArrayCreation)expr;
-                DFType elemType = finder.resolve(ac.getType().getElementType());
+                DFType arrayType = finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
                     // XXX ctx.getRValue() is not used (for now).
                     ctx = processExpression(
@@ -925,7 +925,7 @@ public class Java2DF {
                         graph, finder, scope, frame, ctx, init);
                 }
                 if (init == null || ctx.getRValue() == null) {
-                    ctx.setRValue(new ValueSetNode(graph, scope, elemType, ac));
+                    ctx.setRValue(new ValueSetNode(graph, scope, arrayType, ac));
                 }
 
             } else if (expr instanceof ArrayInitializer) {
