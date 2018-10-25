@@ -288,7 +288,7 @@ class CaseNode extends ProgNode {
 }
 
 // AssignOpNode
-class AssignOpNode extends ProgNode {
+class AssignOpNode extends SingleAssignNode {
 
     public Assignment.Operator op;
 
@@ -296,7 +296,7 @@ class AssignOpNode extends ProgNode {
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, Assignment.Operator op,
         DFNode lvalue, DFNode rvalue) {
-        super(graph, scope, rvalue.getNodeType(), ref, ast);
+        super(graph, scope, ref, ast);
         this.op = op;
         if (lvalue != null) {
             this.accept(lvalue, "L");
