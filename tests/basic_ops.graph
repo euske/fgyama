@@ -52,7 +52,7 @@
             <link label="obj" src="NFoo.basic_ops.b0_14"/>
             <ast length="9" start="97" type="32"/>
           </node>
-          <node data="=" id="NFoo.basic_ops.b0_16" kind="assignop" ref="Foo.basic_ops.b0/$z">
+          <node data="=" id="NFoo.basic_ops.b0_16" kind="assignop" ref="Foo.basic_ops.b0/$z" type="I">
             <link label="R" src="NFoo.basic_ops.b0_14"/>
             <ast length="13" start="93" type="7"/>
           </node>
