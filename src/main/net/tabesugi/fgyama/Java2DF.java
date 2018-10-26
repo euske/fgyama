@@ -2307,6 +2307,7 @@ public class Java2DF {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
+        Set<String> processed = null;
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
@@ -2325,6 +2326,11 @@ public class Java2DF {
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
                 }
+            } else if (arg.equals("-p")) {
+                if (processed == null) {
+                    processed = new HashSet<String>();
+                }
+                processed.add(args[++i]);
             } else if (arg.equals("-C")) {
                 for (String path : args[++i].split(sep)) {
                     rootSpace.loadJarFile(path);
@@ -2368,6 +2374,7 @@ public class Java2DF {
             klass.addOverrides();
         }
         for (String path : files) {
+            if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
