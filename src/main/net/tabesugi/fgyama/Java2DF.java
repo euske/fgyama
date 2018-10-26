@@ -1015,10 +1015,7 @@ public class Java2DF {
                         anonSpace.build(null, body, scope);
                     }
                     try {
-                        for (BodyDeclaration body :
-                                 (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                            anonKlass.build(finder, body);
-                        }
+                        anonKlass.build(finder, anonDecl.bodyDeclarations());
                         anonKlass.addOverrides();
                         processBodyDeclarations(
                             finder, anonKlass, anonDecl.bodyDeclarations());
@@ -2121,7 +2118,6 @@ public class Java2DF {
         List<BodyDeclaration> decls)
         throws EntityNotFound {
         DFMethod method = klass.getInitializer();
-        DFTypeSpace childSpace = klass.getChildSpace();
         DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
         DFVarScope klassScope = klass.getScope();
         DFGraph klassGraph = new DFGraph(klassScope, klassFrame, method);
@@ -2129,13 +2125,12 @@ public class Java2DF {
         finder = klass.addFinders(finder);
         for (BodyDeclaration body : decls) {
             try {
-                if (body instanceof TypeDeclaration) {
-                    TypeDeclaration typeDecl = (TypeDeclaration)body;
-                    processTypeDeclaration(childSpace, finder, typeDecl);
-
-		} else if (body instanceof EnumDeclaration) {
-                    EnumDeclaration enumDecl = (EnumDeclaration)body;
-                    processEnumDeclaration(childSpace, finder, enumDecl);
+                if (body instanceof AbstractTypeDeclaration) {
+                    AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
+                    DFTypeSpace childSpace = klass.getChildSpace();
+                    DFKlass childKlass = childSpace.getKlass(abstTypeDecl.getName());
+                    processBodyDeclarations(
+                        finder, childKlass, abstTypeDecl.bodyDeclarations());
 
                 } else if (body instanceof FieldDeclaration) {
                     processFieldDeclaration(
@@ -2183,24 +2178,6 @@ public class Java2DF {
             }
         }
         exportGraph(klassGraph);
-    }
-
-    @SuppressWarnings("unchecked")
-    public void processTypeDeclaration(
-        DFTypeSpace typeSpace, DFTypeFinder finder, TypeDeclaration typeDecl)
-        throws EntityNotFound {
-        DFKlass klass = typeSpace.getKlass(typeDecl.getName());
-        processBodyDeclarations(
-            finder, klass, typeDecl.bodyDeclarations());
-    }
-
-    @SuppressWarnings("unchecked")
-    public void processEnumDeclaration(
-        DFTypeSpace typeSpace, DFTypeFinder finder, EnumDeclaration enumDecl)
-        throws EntityNotFound {
-        DFKlass klass = typeSpace.getKlass(enumDecl.getName());
-        processBodyDeclarations(
-            finder, klass, enumDecl.bodyDeclarations());
     }
 
     protected void exportGraph(DFGraph graph)
@@ -2255,22 +2232,8 @@ public class Java2DF {
         try {
             for (AbstractTypeDeclaration abstTypeDecl :
                      (List<AbstractTypeDeclaration>) cunit.types()) {
-                if (abstTypeDecl instanceof TypeDeclaration) {
-                    TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-                    DFKlass klass = typeSpace.getKlass(typeDecl.getName());
-                    klass.build(finder, typeDecl);
-                } else if (abstTypeDecl instanceof EnumDeclaration) {
-                    EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
-                    DFKlass klass = typeSpace.getKlass(enumDecl.getName());
-                    klass.build(finder, enumDecl);
-                } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-                    AnnotationTypeDeclaration annotTypeDecl =
-                        (AnnotationTypeDeclaration)abstTypeDecl;
-                    DFKlass klass = typeSpace.getKlass(annotTypeDecl.getName());
-                    klass.build(finder, annotTypeDecl);
-                } else {
-                    throw new UnsupportedSyntax(abstTypeDecl);
-                }
+                DFKlass klass = typeSpace.getKlass(abstTypeDecl.getName());
+                klass.build(finder, abstTypeDecl);
             }
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
@@ -2290,10 +2253,9 @@ public class Java2DF {
         finder = new DFTypeFinder(finder, typeSpace);
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
-            if (abstTypeDecl instanceof TypeDeclaration) {
-                TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-                processTypeDeclaration(typeSpace, finder, typeDecl);
-            }
+            DFKlass klass = typeSpace.getKlass(abstTypeDecl.getName());
+            processBodyDeclarations(
+                finder, klass, abstTypeDecl.bodyDeclarations());
 	}
     }
 

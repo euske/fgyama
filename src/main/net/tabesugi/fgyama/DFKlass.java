@@ -455,10 +455,7 @@ public class DFKlass extends DFType {
                 _paramTypes[i].build(finder, tp);
             }
             // Lookup child klasses.
-            for (BodyDeclaration body :
-                     (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-                this.build(finder, body);
-            }
+            this.build(finder, typeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(typeDecl);
             throw e;
@@ -473,22 +470,22 @@ public class DFKlass extends DFType {
         try {
             finder = new DFTypeFinder(finder, _childSpace);
             _baseKlass = DFRootTypeSpace.getEnumKlass();
-            // Get constants.
-            for (EnumConstantDeclaration econst :
-                     (List<EnumConstantDeclaration>) enumDecl.enumConstants()) {
-                this.build(finder, econst);
-            }
+            finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-                _baseIfaces[i] = finder.resolveKlass(ifaces.get(i));
+		DFKlass iface = finder.resolveKlass(ifaces.get(i));
+                _baseIfaces[i] = iface;
+                finder = iface.addFinders(finder);
+            }
+            // Get constants.
+            for (EnumConstantDeclaration econst :
+                     (List<EnumConstantDeclaration>) enumDecl.enumConstants()) {
+                this.addField(econst.getName(), true, this);
             }
             // Lookup child klasses.
-            for (BodyDeclaration body :
-                     (List<BodyDeclaration>) enumDecl.bodyDeclarations()) {
-                this.build(finder, body);
-            }
+            this.build(finder, enumDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(enumDecl);
             throw e;
@@ -503,90 +500,88 @@ public class DFKlass extends DFType {
         try {
             finder = new DFTypeFinder(finder, _childSpace);
             _baseKlass = DFRootTypeSpace.getObjectKlass();
+            finder = _baseKlass.addFinders(finder);
             // Lookup child klasses.
-            for (BodyDeclaration body :
-                     (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {
-                this.build(finder, body);
-            }
+            this.build(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
             throw e;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, BodyDeclaration body)
+    public void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        assert body != null;
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            this.build(finder, (TypeDeclaration)abstTypeDecl);
 
-        if (body instanceof TypeDeclaration) {
-            TypeDeclaration decl = (TypeDeclaration)body;
-            DFKlass klass = _childSpace.getKlass(decl.getName());
-            klass.build(finder, decl);
+        } else if (abstTypeDecl instanceof EnumDeclaration) {
+            this.build(finder, (EnumDeclaration)abstTypeDecl);
 
-        } else if (body instanceof EnumDeclaration) {
-            EnumDeclaration decl = (EnumDeclaration)body;
-            DFKlass klass = _childSpace.getKlass(decl.getName());
-            klass.build(finder, decl);
+        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+            this.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+        }
+    }
 
-        } else if (body instanceof AnnotationTypeDeclaration) {
-            AnnotationTypeDeclaration decl = (AnnotationTypeDeclaration)body;
-            DFKlass klass = _childSpace.getKlass(decl.getName());
-            klass.build(finder, decl);
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, List<BodyDeclaration> decls)
+        throws UnsupportedSyntax, TypeNotFound {
+        for (BodyDeclaration body : decls) {
+            if (body instanceof AbstractTypeDeclaration) {
+                AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
+                DFKlass klass = _childSpace.getKlass(decl.getName());
+                klass.build(finder, decl);
 
-        } else if (body instanceof FieldDeclaration) {
-            FieldDeclaration decl = (FieldDeclaration)body;
-            DFType type = finder.resolve(decl.getType());
-            for (VariableDeclarationFragment frag :
-                     (List<VariableDeclarationFragment>) decl.fragments()) {
-		int ndims = frag.getExtraDimensions();
-                this.addField(frag.getName(), isStatic(decl),
-                              (ndims != 0)? new DFArrayType(type, ndims) : type);
-            }
-
-        } else if (body instanceof MethodDeclaration) {
-            MethodDeclaration decl = (MethodDeclaration)body;
-            List<TypeParameter> tps = decl.typeParameters();
-            DFTypeFinder finder2 = finder;
-            DFTypeSpace methodSpace = null;
-            if (0 < tps.size()) {
-                String name = decl.getName().getIdentifier();
-                methodSpace = new DFTypeSpace(_childSpace, name);
-                finder2 = new DFTypeFinder(finder, methodSpace);
-                for (int i = 0; i < tps.size(); i++) {
-                    TypeParameter tp = tps.get(i);
-                    String id = tp.getName().getIdentifier();
-                    DFParamType pt = methodSpace.createParamType(id);
-                    pt.build(finder2, tp);
+            } else if (body instanceof FieldDeclaration) {
+                FieldDeclaration decl = (FieldDeclaration)body;
+                DFType type = finder.resolve(decl.getType());
+                for (VariableDeclarationFragment frag :
+                         (List<VariableDeclarationFragment>) decl.fragments()) {
+                    int ndims = frag.getExtraDimensions();
+                    this.addField(frag.getName(), isStatic(decl),
+                                  (ndims != 0)? new DFArrayType(type, ndims) : type);
                 }
-            }
-            DFType[] argTypes = finder2.resolveArgs(decl);
-            DFType returnType;
-            if (decl.isConstructor()) {
-                returnType = this;
-                // XXX treat method name specially.
+
+            } else if (body instanceof MethodDeclaration) {
+                MethodDeclaration decl = (MethodDeclaration)body;
+                List<TypeParameter> tps = decl.typeParameters();
+                DFTypeFinder finder2 = finder;
+                DFTypeSpace methodSpace = null;
+                if (0 < tps.size()) {
+                    String name = decl.getName().getIdentifier();
+                    methodSpace = new DFTypeSpace(_childSpace, name);
+                    finder2 = new DFTypeFinder(finder, methodSpace);
+                    for (int i = 0; i < tps.size(); i++) {
+                        TypeParameter tp = tps.get(i);
+                        String id = tp.getName().getIdentifier();
+                        DFParamType pt = methodSpace.createParamType(id);
+                        pt.build(finder2, tp);
+                    }
+                }
+                DFType[] argTypes = finder2.resolveArgs(decl);
+                DFType returnType;
+                if (decl.isConstructor()) {
+                    returnType = this;
+                    // XXX treat method name specially.
+                } else {
+                    returnType = finder2.resolve(decl.getReturnType2());
+                }
+                DFMethod method = this.addMethod(
+                    methodSpace, decl.getName(), isStatic(decl),
+                    new DFMethodType(argTypes, returnType));
+                _ast2method.put(Utils.encodeASTNode(decl), method);
+
+            } else if (body instanceof EnumConstantDeclaration) {
+
+            } else if (body instanceof AnnotationTypeMemberDeclaration) {
+                AnnotationTypeMemberDeclaration decl = (AnnotationTypeMemberDeclaration)body;
+                DFType type = finder.resolve(decl.getType());
+                this.addField(decl.getName(), isStatic(decl), type);
+
+            } else if (body instanceof Initializer) {
+
             } else {
-                returnType = finder2.resolve(decl.getReturnType2());
+                throw new UnsupportedSyntax(body);
             }
-            DFMethod method = this.addMethod(
-                methodSpace, decl.getName(), isStatic(decl),
-                new DFMethodType(argTypes, returnType));
-            _ast2method.put(Utils.encodeASTNode(decl), method);
-
-        } else if (body instanceof EnumConstantDeclaration) {
-            EnumConstantDeclaration decl = (EnumConstantDeclaration)body;
-            // XXX ignore AnonymousClassDeclaration
-            this.addField(decl.getName(), false, this);
-
-        } else if (body instanceof AnnotationTypeMemberDeclaration) {
-            AnnotationTypeMemberDeclaration decl = (AnnotationTypeMemberDeclaration)body;
-            DFType type = finder.resolve(decl.getType());
-            this.addField(decl.getName(), isStatic(decl), type);
-
-        } else if (body instanceof Initializer) {
-
-        } else {
-            throw new UnsupportedSyntax(body);
         }
     }
 
