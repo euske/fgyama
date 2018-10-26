@@ -205,7 +205,14 @@ public class DFKlass extends DFType {
             return method;
         }
         if (_baseKlass != null) {
-            return _baseKlass.lookupMethod(name, argTypes);
+            method = _baseKlass.lookupMethod(name, argTypes);
+            if (method != null) return method;
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                method = iface.lookupMethod(name, argTypes);
+                if (method != null) return method;
+            }
         }
         return null;
     }
@@ -446,6 +453,7 @@ public class DFKlass extends DFType {
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
 		DFKlass iface = finder.resolveKlass(ifaces.get(i));
+                //Logger.info("DFKlass.build: "+this+" implements "+iface);
                 _baseIfaces[i] = iface;
                 finder = iface.addFinders(finder);
             }
