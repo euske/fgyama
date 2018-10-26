@@ -13,7 +13,6 @@ import org.w3c.dom.*;
 //
 public class DFVarScope implements Comparable<DFVarScope> {
 
-    private DFVarScope _global;
     private DFVarScope _parent;
     private String _name;
 
@@ -21,12 +20,11 @@ public class DFVarScope implements Comparable<DFVarScope> {
         new HashMap<String, DFVarRef>();
 
     protected DFVarScope(String name) {
-        _global = this;
+        _parent = null;
         _name = name;
     }
 
     protected DFVarScope(DFVarScope parent, String name) {
-        _global = parent._global;
         _parent = parent;
         _name = name;
     }
@@ -140,7 +138,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFVarRef lookupArray(DFType type)
     {
-        return _global.lookupArray(type);
+        return _parent.lookupArray(type);
     }
 
     public DFLocalVarScope getChildByAST(ASTNode ast) {
