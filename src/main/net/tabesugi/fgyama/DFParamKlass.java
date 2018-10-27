@@ -41,6 +41,14 @@ public class DFParamKlass extends DFKlass {
         return "<"+b.toString()+">";
     }
 
+    public DFKlass getGeneric() {
+        return _genericKlass;
+    }
+
+    public DFType[] getMapTypes() {
+        return _mapTypes;
+    }
+
     @Override
     public String toString() {
         return ("<DFParamKlass("+this.getFullName()+", "+getParamName(_mapTypes)+")>");

@@ -83,6 +83,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
         _string = this.getKlass("java.lang.String");
         _array = java_lang.createKlass(_global, "_Array");
         _array.addField("length", false, DFBasicType.INT);
+        DFTypeFinder finder = new DFTypeFinder(this);
+        _object.load(finder);
+        _class.load(finder);
+        _enum.load(finder);
+        _string.load(finder);
+        _array.load(finder);
     }
 
     public static DFRootTypeSpace getSingleton()

@@ -43,12 +43,21 @@ Node types:
   * repeat
   * case
 
+Coding style:
+  (c-add-style "me"
+             '("Java"
+               (c-offsets-alist . (
+				   (arglist-cont . c-lineup-argcont)
+				   (arglist-intro . +)
+                                   ))
+               ))
+
 TODOs:
 
   * Interprocedural field watch.
   * static import.
-  * class file enum support.
   * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.
+  * Moar unittests.

@@ -59,6 +59,7 @@ public class DFKlass extends DFType {
         _childSpace = genericKlass._childSpace;
         _scope = genericKlass._scope;
         _baseKlass = genericKlass._baseKlass;
+        _initializer = genericKlass._initializer;
     }
 
     @Override
@@ -124,7 +125,9 @@ public class DFKlass extends DFType {
     }
 
     public boolean isEnum() {
-        return _baseKlass == DFRootTypeSpace.getEnumKlass();
+        return (_baseKlass instanceof DFParamKlass &&
+                ((DFParamKlass)_baseKlass).getGeneric() ==
+                DFRootTypeSpace.getEnumKlass());
     }
 
     public String getFullName() {
@@ -477,7 +480,8 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _childSpace);
-            _baseKlass = DFRootTypeSpace.getEnumKlass();
+            DFKlass enumKlass = DFRootTypeSpace.getEnumKlass();
+            _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
             finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
