@@ -2,14 +2,19 @@
 import sys
 from graph import get_graphs
 
-IGNORED = frozenset(['ref','assign','input','output'])
+IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output'])
 def getfeat(node):
-    if node.kind is None or node.kind in IGNORED:
+    if node.kind in IGNORED:
+        return None
+    elif node.kind == 'assignop' and node.data == '=':
         return None
     elif node.data is None:
         return node.kind
+    elif node.kind == 'call':
+        (data,_,_) = node.data.partition(' ')
+        return '%s:%s' % (node.kind, data)
     else:
-        return '%s,%s' % (node.kind, node.data)
+        return '%s:%s' % (node.kind, node.data)
 
 
 ##  Chain Link
@@ -46,6 +51,23 @@ class CLink:
 class IPVertex:
 
     vid_base = 0
+    srcmap = {}
+    feats = {}
+
+    @classmethod
+    def register(klass, name):
+        if name not in klass.srcmap:
+            fid = len(klass.srcmap)
+            klass.srcmap[name] = fid
+        return
+
+    @classmethod
+    def dumpsrcs(klass):
+        return klass.srcmap.items()
+
+    @classmethod
+    def dumpfeats(klass):
+        return sorted(klass.feats.items(), key=lambda x:x[1], reverse=True)
 
     def __init__(self, node):
         IPVertex.vid_base += 1
@@ -80,11 +102,19 @@ class IPVertex:
         return
 
     def enum(self, name, direction, label, maxlen, chain=None):
-        v = getfeat(self.node)
-        if v is not None:
-            chain = CLink(label+':'+v, chain)
+        feat = getfeat(self.node)
+        if feat is not None:
+            v = ('%s,%s' % (label, feat))
+            if v not in self.feats:
+                self.feats[v] = 0
+            self.feats[v] += 1
+            if self.node.ast is not None:
+                (_,s,e) = self.node.ast
+                fid = self.srcmap[self.node.graph.src]
+                v = ('%s,%s,%s,%s' % (v, s, e, fid))
+            chain = CLink(v, chain)
             s = ' '.join(reversed(list(chain)))
-            print('%s %s %s' % (name, direction, s))
+            print('+PATH %s %s %s' % (name, direction, s))
         if chain is None or len(chain) < maxlen:
             if direction < 0:
                 vtxs = self.inputs
@@ -116,6 +146,7 @@ def main(argv):
     graphs = {}
     for path in args:
         for graph in get_graphs(path):
+            IPVertex.register(graph.src)
             graphs[graph.name] = graph
     print('# graphs: %r' % len(graphs), file=sys.stderr)
 
@@ -240,6 +271,12 @@ def main(argv):
                 vtx.enum(name, -1, label, maxlen)
             for (label,vtx) in outputs.items():
                 vtx.enum(name, +1, label, maxlen)
+
+    for (name,fid) in IPVertex.dumpsrcs():
+        print('+SOURCE %d %s' % (fid, name))
+    for (feat,n) in IPVertex.dumpfeats():
+        print('+FEAT %d %s' % (n, feat))
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

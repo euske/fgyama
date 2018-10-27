@@ -66,7 +66,8 @@ class DFGraph:
 ##
 class DFScope:
 
-    def __init__(self, sid, name, parent=None):
+    def __init__(self, graph, sid, name, parent=None):
+        self.graph = graph
         self.sid = sid
         self.name = name
         self.nodes = []
@@ -105,7 +106,8 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, nid, name, scope, kind, ref, data, ntype):
+    def __init__(self, graph, nid, name, scope, kind, ref, data, ntype):
+        self.graph = graph
         self.nid = nid
         self.name = name
         self.scope = scope
@@ -171,7 +173,7 @@ def parse_graph(gid, egraph, src=None):
         ref = enode.get('ref')
         data = enode.get('data')
         ntype = enode.get('type')
-        node = DFNode(nid, name, scope, kind, ref, data, ntype)
+        node = DFNode(graph, nid, name, scope, kind, ref, data, ntype)
         for e in enode.getchildren():
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -188,7 +190,7 @@ def parse_graph(gid, egraph, src=None):
     def parse_scope(sid, escope, parent=None):
         assert escope.tag == 'scope'
         sname = escope.get('name')
-        scope = DFScope(sid, sname, parent)
+        scope = DFScope(graph, sid, sname, parent)
         sid += 1
         graph.scopes[sname] = scope
         for elem in escope.getchildren():
@@ -367,7 +369,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
         pids = {}
         scopes = graph.scopes
         for (sid,parent,name) in rows:
-            scope = DFScope(sid, name)
+            scope = DFScope(graph, sid, name)
             scopes[sid] = scope
             pids[sid] = parent
             if parent == 0:
@@ -380,7 +382,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             (gid,))
         for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(nid, nid, scope, kind, ref, data, ntype)
+            node = DFNode(graph, nid, nid, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))
