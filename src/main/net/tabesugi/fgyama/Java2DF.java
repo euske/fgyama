@@ -1970,9 +1970,11 @@ public class Java2DF {
         }
     }
 
-    private DFTypeFinder prepareTypeFinder(List<ImportDeclaration> imports) {
+    private DFTypeFinder prepareTypeFinder(
+        DFTypeSpace packageSpace, List<ImportDeclaration> imports) {
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
+        finder = new DFTypeFinder(finder, packageSpace);
         DFTypeSpace importSpace = new DFTypeSpace(null, "Import");
         int n = 0;
         for (ImportDeclaration importDecl : imports) {
@@ -2226,13 +2228,12 @@ public class Java2DF {
     // pass2
     @SuppressWarnings("unchecked")
     public void buildKlassSpace(CompilationUnit cunit) throws EntityNotFound {
-        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeFinder finder = prepareTypeFinder(cunit.imports());
-        finder = new DFTypeFinder(finder, typeSpace);
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
         try {
             for (AbstractTypeDeclaration abstTypeDecl :
                      (List<AbstractTypeDeclaration>) cunit.types()) {
-                DFKlass klass = typeSpace.getKlass(abstTypeDecl.getName());
+                DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
                 klass.build(finder, abstTypeDecl);
             }
         } catch (UnsupportedSyntax e) {
@@ -2248,12 +2249,11 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(CompilationUnit cunit)
         throws EntityNotFound {
-        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeFinder finder = prepareTypeFinder(cunit.imports());
-        finder = new DFTypeFinder(finder, typeSpace);
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
-            DFKlass klass = typeSpace.getKlass(abstTypeDecl.getName());
+            DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
             processBodyDeclarations(
                 finder, klass, abstTypeDecl.bodyDeclarations());
 	}
