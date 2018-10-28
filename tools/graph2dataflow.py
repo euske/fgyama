@@ -101,7 +101,7 @@ class IPVertex:
             vtx.follow(direction, label, traversed, indent+1)
         return
 
-    def enum(self, name, direction, label, maxlen, chain=None):
+    def enum(self, direction, label, maxlen, chain=None):
         feat = getfeat(self.node)
         if feat is not None:
             v = ('%s,%s' % (label, feat))
@@ -113,16 +113,16 @@ class IPVertex:
                 fid = self.srcmap[self.node.graph.src]
                 v = ('%s,%s,%s,%s' % (v, s, e, fid))
             chain = CLink(v, chain)
-            s = ' '.join(reversed(list(chain)))
-            print('+PATH %s %s %s' % (name, direction, s))
+            yield ' '.join(reversed(list(chain)))
         if chain is None or len(chain) < maxlen:
             if direction < 0:
                 vtxs = self.inputs
             else:
                 vtxs = self.outputs
             for (label, vtx) in vtxs:
-                vtx.enum(name, direction, label, maxlen, chain)
-        return chain
+                for z in vtx.enum(direction, label, maxlen, chain):
+                    yield z
+        return
 
 # main
 def main(argv):
@@ -239,10 +239,10 @@ def main(argv):
             print ('#%s rtn(%r, %r)' % (ind, funcall.data, v0),
                    file=sys.stderr)
         # Store the input/output info.
-        if graph.name in graph2info:
-            info = graph2info[graph.name]
+        if graph in graph2info:
+            info = graph2info[graph]
         else:
-            info = graph2info[graph.name] = []
+            info = graph2info[graph] = []
         info.append((inputs, outputs))
         # Embed inter-procedural graphs.
         if chain is None or graph not in chain:
@@ -265,12 +265,20 @@ def main(argv):
             inputs = { node.ref: IPVertex(node) for node in graph.ins }
             enum_dataflow(graph, inputs)
 
-    for (name,info) in graph2info.items():
+    for (graph,info) in graph2info.items():
+        if graph.ast is not None:
+            (_,s,e) = graph.ast
+            fid = IPVertex.srcmap[graph.src]
+            name = ('%s,%s,%s,%s' % (graph.name, s, e, fid))
+        else:
+            name = graph.name
         for (inputs,outputs) in info:
             for (label,vtx) in inputs.items():
-                vtx.enum(name, -1, label, maxlen)
+                for feats in vtx.enum(-1, label, maxlen):
+                    print('+PATH %s -1 %s' % (name, feats))
             for (label,vtx) in outputs.items():
-                vtx.enum(name, +1, label, maxlen)
+                for feats in vtx.enum(+1, label, maxlen):
+                    print('+PATH %s +1 %s' % (name, feats))
 
     for (name,fid) in IPVertex.dumpsrcs():
         print('+SOURCE %d %s' % (fid, name))

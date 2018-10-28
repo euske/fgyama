@@ -32,7 +32,7 @@ h3 { border-bottom: 1px solid black; }
 ''')
     return
 
-def show_html(src, url, ranges):
+def show_html(src, url, ranges, ncontext=3):
     def astart(nid):
         return '<span class="p%s">' % nid
     def aend(anno):
@@ -41,7 +41,8 @@ def show_html(src, url, ranges):
         return q(s.replace('\n',''))
     print('<div class=src><a href="%s">%s</a></div>' % (q(url), src.name))
     print('<pre>')
-    for (lineno,s) in src.show(ranges, astart=astart, aend=aend, abody=abody, ncontext=3):
+    for (lineno,s) in src.show(
+            ranges, astart=astart, aend=aend, abody=abody, ncontext=ncontext):
         if lineno is None:
             print ('     '+s)
         else:
@@ -51,9 +52,9 @@ def show_html(src, url, ranges):
     print('</pre>')
     return
 
-def show_text(src, ranges):
+def show_text(src, ranges, ncontext=3):
     print('#', src.name)
-    for (lineno,line) in src.show(ranges, ncontext=3):
+    for (lineno,line) in src.show(ranges, ncontext=ncontext):
         if lineno is None:
             print(line.rstrip())
         else:
@@ -80,7 +81,7 @@ def main(argv):
         elif k == '-H': html = True
     if not args: return usage()
 
-    def st(v):
+    def sast(v):  # strip ast
         (v1,_,v) = v.partition(',')
         (v2,_,v) = v.partition(',')
         return (v1+','+v2)
@@ -94,9 +95,9 @@ def main(argv):
         if not line.startswith('+'): continue
         f = line.split(' ')
         if f[0] == '+PATH':
-            if f[2] != '1': continue
+            if f[2] != '+1': continue
             func = (f[1],f[2])
-            feats = tuple(map(st, f[3:]))
+            feats = tuple(map(sast, f[3:]))
             if len(feats) < 2: continue
             if feats in count:
                 d = count[feats]
@@ -119,30 +120,43 @@ def main(argv):
 
     if html:
         show_html_headers()
-    for (kid,k) in enumerate(keys):
-        if len(count[k]) < 2: continue
+    for feats in keys:
+        n = len(count[feats])
+        if n < 2: continue
         if html:
-            print('<h2><code>%s</code> (%d)</h2>' % (q(' '.join(k)), len(count[k])))
+            print('<h2><code>%s</code> (%d)</h2>' % (q(' '.join(feats)), n))
         else:
-            print ('!', k, len(count[k]))
-        for (func,feats) in count[k].items():
+            print('!', feats, n)
+        for ((func,_),data) in count[feats].items():
+            f = func.split(',')
             if html:
-                print('<h3><code>%s</code></h3>' % q(func[0]))
+                print('<h3><code>%s</code></h3>' % q(f[0]))
             else:
-                print ('+', func)
+                print ('+', f[0])
+            if srcdb is None: continue
+            if len(f) != 4: continue
+            start = int(f[1])
+            length = int(f[2])
+            fid = int(f[3])
+            src = srcdb.get(srcmap[fid])
+            ranges = [(start, start+min(100, length), None)]
+            if html:
+                show_html(src, src.name, ranges, ncontext=1)
+            else:
+                show_text(src, ranges, ncontext=1)
             nodes = {}
-            for (i,x) in enumerate(feats):
+            for (i,x) in enumerate(data):
                 f = x.split(',')
-                if len(f) == 5:
-                    start = int(f[2])
-                    length = int(f[3])
-                    fid = int(f[4])
-                    src = srcdb.get(srcmap[fid])
-                    if src in nodes:
-                        a = nodes[src]
-                    else:
-                        a = nodes[src] = []
-                    a.append((start,start+length,i))
+                if len(f) != 5: continue
+                start = int(f[2])
+                length = int(f[3])
+                fid = int(f[4])
+                src = srcdb.get(srcmap[fid])
+                if src in nodes:
+                    a = nodes[src]
+                else:
+                    a = nodes[src] = []
+                a.append((start,start+length,i))
             for (src,ranges) in nodes.items():
                 if html:
                     show_html(src, src.name, ranges)

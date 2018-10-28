@@ -32,6 +32,7 @@ class DFGraph:
         self.nodes = {}
         self.ins = []
         self.outs = []
+        self.ast = None
         return
 
     def __repr__(self):
@@ -56,6 +57,13 @@ class DFGraph:
     def toxml(self):
         egraph = Element('graph')
         egraph.set('name', self.name)
+        if self.ast is not None:
+            east = Element('ast')
+            (astype,astart,alength) = self.ast
+            east.set('type', str(astype))
+            east.set('start', str(astart))
+            east.set('length', str(alength))
+            egraph.append(east)
         if self.src is not None:
             egraph.set('src', self.src)
         egraph.append(self.root.toxml())
@@ -203,9 +211,14 @@ def parse_graph(gid, egraph, src=None):
                 scope.nodes.append(node)
         return (sid,scope)
 
-    for escope in egraph.getchildren():
-        (_,graph.root) = parse_scope(1, escope)
-        break
+    for e in egraph.getchildren():
+        if e.tag == 'ast':
+            graph.ast = (
+                int(e.get('type')),
+                int(e.get('start')),
+                int(e.get('length')))
+        elif e.tag == 'scope':
+            (_,graph.root) = parse_scope(1, e)
     for name in ins:
         graph.ins.append(graph.nodes[name])
     for name in outs:
