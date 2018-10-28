@@ -201,7 +201,7 @@ def main(argv):
             ind = '  '*len(chain)
         print ('#%s trace(%r)' % (ind, graph.name), file=sys.stderr)
         ind += ' '
-        # Convert all nodes to IPVertex.
+        # Copy all nodes as IPVertex.
         vtxs = {}
         for node in graph:
             vtxs[node] = IPVertex(node)
@@ -219,25 +219,30 @@ def main(argv):
         # rtns: {funcall: {key:value}}
         rtns = {}
         for node in graph:
-            v1 = vtxs[node]
+            vnode = vtxs[node]
             # Connect data paths.
             for (label,prev) in node.inputs.items():
                 if label.startswith('_'): continue
-                v0 = vtxs[prev]
+                vprev = vtxs[prev]
+                vprev.connect(label, vnode)
                 if prev.kind in ('call', 'new'):
                     # Receive a return value from the callee.
-                    rtns[prev] = v1
-                v0.connect(label, v1)
+                    if prev in rtns:
+                        a = rtns[prev]
+                    else:
+                        a = rtns[prev] = []
+                    a.append(vnode)
             if node.kind in ('call', 'new'):
                 # Send a passing value to the callee.
+                assert node not in calls
                 args = { getarg(label): vtxs[src] for (label,src)
                          in node.inputs.items() if not label.startswith('_') }
                 calls[node] = args
         for (funcall,args) in calls.items():
             print ('#%s %s(%r, %r)' % (ind, funcall.kind, funcall.data, args),
                    file=sys.stderr)
-        for (funcall,v0) in rtns.items():
-            print ('#%s rtn(%r, %r)' % (ind, funcall.data, v0),
+        for (funcall,vprevs) in rtns.items():
+            print ('#%s rtn(%r, %r)' % (ind, funcall.data, vprevs),
                    file=sys.stderr)
         # Store the input/output info.
         if graph in graph2info:
@@ -248,14 +253,15 @@ def main(argv):
         # Embed inter-procedural graphs.
         if chain is None or graph not in chain:
             chain = CLink(graph, chain)
-            for (funcall,rcver) in rtns.items():
+            for (funcall,rcvers) in rtns.items():
                 assert funcall in calls
                 args = calls[funcall]
                 for name in funcall.data.split(' '):
                     if name in graphs:
                         vals = trace(graphs[name], args, chain)
                         for (label,sender) in vals.items():
-                            sender.connect(label, rcver)
+                            for rcver in rcvers:
+                                sender.connect(label, rcver)
                         break
         return outputs
 
