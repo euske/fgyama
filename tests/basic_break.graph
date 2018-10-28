@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_break.java">
-    <graph ins="NFoo.basic_break_1" name="LFoo;.basic_break(I)V" outs="">
+    <graph init="false" ins="NFoo.basic_break_1" name="LFoo;.basic_break(I)V" outs="">
+      <ast length="111" start="23" type="31"/>
       <scope name="Foo.basic_break">
         <scope name="Foo.basic_break.b0">
           <scope name="Foo.basic_break.b0.while0">
@@ -78,7 +79,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="136" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

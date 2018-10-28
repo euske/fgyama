@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph ins="" name="Ldom/meep/Foo/Bar;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="dom/meep/Foo/Bar" outs="">
+      <ast length="12" start="36" type="55"/>
       <scope name="dom/meep/Foo/Bar"/>
     </graph>
-    <graph ins="" name="LBaz;.moo()V" outs="">
+    <graph init="false" ins="" name="LBaz;.moo()V" outs="">
+      <ast length="14" start="179" type="31"/>
       <scope name="Baz.moo">
         <scope name="Baz.moo.b0"/>
       </scope>
     </graph>
-    <graph ins="" name="LBaz;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Baz" outs="">
+      <ast length="67" start="136" type="55"/>
       <scope name="Baz">
         <node data="uninitialized" id="NBaz_1" kind="const" type="@null"/>
         <node id="NBaz_2" kind="assign" ref="Baz/.x" type="I">
@@ -17,7 +20,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/Foo.doit_11 Ndom/meep/Foo.doit_13 Ndom/meep/Foo.doit_2" name="Ldom/meep/Foo;.doit()V" outs="Ndom/meep/Foo.doit.b0_9">
+    <graph init="false" ins="Ndom/meep/Foo.doit_11 Ndom/meep/Foo.doit_13 Ndom/meep/Foo.doit_2" name="Ldom/meep/Foo;.doit()V" outs="Ndom/meep/Foo.doit.b0_9">
+      <ast length="210" start="71" type="31"/>
       <scope name="dom/meep/Foo.doit">
         <scope name="dom/meep/Foo.doit.b0">
           <node id="Ndom/meep/Foo.doit.b0_1" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
@@ -83,7 +87,8 @@
         <node id="Ndom/meep/Foo.doit_13" ref="dom/meep/Foo/.y" type="I"/>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/Foo.meh_1" name="Ldom/meep/Foo;.meh()V" outs="">
+    <graph init="false" ins="Ndom/meep/Foo.meh_1" name="Ldom/meep/Foo;.meh()V" outs="">
+      <ast length="56" start="287" type="31"/>
       <scope name="dom/meep/Foo.meh">
         <scope name="dom/meep/Foo.meh.b0">
           <node data="Ldom/meep/Foo;.m33p()?" id="Ndom/meep/Foo.meh.b0_2" kind="call">
@@ -98,7 +103,8 @@
         <node id="Ndom/meep/Foo.meh_1" ref="#this" type="Ldom/meep/Foo;"/>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/Foo.main_1" name="Ldom/meep/Foo;.main([Ljava/lang/String;)V" outs="">
+    <graph init="false" ins="Ndom/meep/Foo.main_1" name="Ldom/meep/Foo;.main([Ljava/lang/String;)V" outs="">
+      <ast length="95" start="349" type="31"/>
       <scope name="dom/meep/Foo.main">
         <scope name="dom/meep/Foo.main.b0">
           <node data="Ldom/meep/Foo;" id="Ndom/meep/Foo.main.b0_3" kind="new" type="Ldom/meep/Foo;">
@@ -130,7 +136,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Ldom/meep/Foo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="dom/meep/Foo" outs="">
+      <ast length="427" start="19" type="55"/>
       <scope name="dom/meep/Foo">
         <node data="123" id="Ndom/meep/Foo_1" kind="const" type="I">
           <ast length="3" start="61" type="34"/>

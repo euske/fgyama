@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_for.java">
-    <graph ins="NFoo.basic_for_1" name="LFoo;.basic_for(I)I" outs="NFoo.basic_for.b0_26">
+    <graph init="false" ins="NFoo.basic_for_1" name="LFoo;.basic_for(I)I" outs="NFoo.basic_for.b0_26">
+      <ast length="115" start="23" type="31"/>
       <scope name="Foo.basic_for">
         <scope name="Foo.basic_for.b0">
           <scope name="Foo.basic_for.b0.for0">
@@ -109,7 +110,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="140" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

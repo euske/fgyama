@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_return.java">
-    <graph ins="NFoo.basic_single_1 NFoo.basic_single_3 NFoo.basic_single_5 NFoo.basic_single_7" name="LFoo;.basic_single(III)I" outs="NFoo.basic_single.b0_20">
+    <graph init="false" ins="NFoo.basic_single_1 NFoo.basic_single_3 NFoo.basic_single_5 NFoo.basic_single_7" name="LFoo;.basic_single(III)I" outs="NFoo.basic_single.b0_20">
+      <ast length="154" start="94" type="31"/>
       <scope name="Foo.basic_single">
         <scope name="Foo.basic_single.b0">
           <node id="NFoo.basic_single.b0_8" kind="ref" ref="Foo.basic_single/$a" type="I">
@@ -84,7 +85,8 @@
         <node id="NFoo.basic_single_7" ref="#this" type="LFoo;"/>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="204" start="46" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_assign.java">
-    <graph ins="NFoo.basic_multi_1 NFoo.basic_multi_3 NFoo.basic_multi_5" name="LFoo;.basic_multi(III)V" outs="">
+    <graph init="false" ins="NFoo.basic_multi_1 NFoo.basic_multi_3 NFoo.basic_multi_5" name="LFoo;.basic_multi(III)V" outs="">
+      <ast length="117" start="23" type="31"/>
       <scope name="Foo.basic_multi">
         <scope name="Foo.basic_multi.b0">
           <node id="NFoo.basic_multi.b0_7" kind="assign" ref="Foo.basic_multi/$a" type="I">
@@ -85,7 +86,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="142" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

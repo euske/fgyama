@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph ins="Nbasic_funcs.main_1 Nbasic_funcs.main_11 Nbasic_funcs.main_17 Nbasic_funcs.main_6" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="">
+    <graph init="false" ins="Nbasic_funcs.main_1 Nbasic_funcs.main_11 Nbasic_funcs.main_17 Nbasic_funcs.main_6" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="">
+      <ast length="166" start="32" type="31"/>
       <scope name="basic_funcs.main">
         <scope name="basic_funcs.main.b0">
           <node id="Nbasic_funcs.main.b0_3" kind="ref" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
@@ -79,7 +80,8 @@
         <node id="Nbasic_funcs.main_17" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
       </scope>
     </graph>
-    <graph ins="Nbasic_funcs.moo_1 Nbasic_funcs.moo_20" name="Lbasic_funcs;.moo(I)I" outs="Nbasic_funcs.moo.b0_23">
+    <graph init="false" ins="Nbasic_funcs.moo_1 Nbasic_funcs.moo_20" name="Lbasic_funcs;.moo(I)I" outs="Nbasic_funcs.moo.b0_23">
+      <ast length="142" start="204" type="31"/>
       <scope name="basic_funcs.moo">
         <scope name="basic_funcs.moo.b0">
           <scope name="basic_funcs.moo.b0.b0">
@@ -170,7 +172,8 @@
         <node id="Nbasic_funcs.moo_20" ref="#this" type="Lbasic_funcs;"/>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_funcs;.foo()I" outs="Nbasic_funcs.foo.b0_2">
+    <graph init="false" ins="" name="Lbasic_funcs;.foo()I" outs="Nbasic_funcs.foo.b0_2">
+      <ast length="49" start="352" type="31"/>
       <scope name="basic_funcs.foo">
         <scope name="basic_funcs.foo.b0">
           <node data="3" id="Nbasic_funcs.foo.b0_1" kind="const" type="I">
@@ -183,7 +186,8 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_funcs;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="basic_funcs" outs="">
+      <ast length="403" start="0" type="55"/>
       <scope name="basic_funcs"/>
     </graph>
   </file>

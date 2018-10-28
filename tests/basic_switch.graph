@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_switch.java">
-    <graph ins="NFoo.basic_switch_1" name="LFoo;.basic_switch(I)I" outs="NFoo.basic_switch.b0_21">
+    <graph init="false" ins="NFoo.basic_switch_1" name="LFoo;.basic_switch(I)I" outs="NFoo.basic_switch.b0_21">
+      <ast length="161" start="23" type="31"/>
       <scope name="Foo.basic_switch">
         <scope name="Foo.basic_switch.b0">
           <scope name="Foo.basic_switch.b0.switch0">
@@ -89,7 +90,8 @@
         <node id="NFoo.basic_switch_8" ref="Foo.basic_switch.b0/$x" type="I"/>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="186" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

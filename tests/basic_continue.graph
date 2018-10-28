@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_continue.java">
-    <graph ins="NFoo.basic_continue_1" name="LFoo;.basic_continue(I)V" outs="">
+    <graph init="false" ins="NFoo.basic_continue_1" name="LFoo;.basic_continue(I)V" outs="">
+      <ast length="124" start="23" type="31"/>
       <scope name="Foo.basic_continue">
         <scope name="Foo.basic_continue.b0">
           <scope name="Foo.basic_continue.b0.while0">
@@ -78,7 +79,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="149" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

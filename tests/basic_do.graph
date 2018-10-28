@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_do.java">
-    <graph ins="NFoo.basic_do_1" name="LFoo;.basic_do(I)I" outs="NFoo.basic_do.b0_23">
+    <graph init="false" ins="NFoo.basic_do_1" name="LFoo;.basic_do(I)I" outs="NFoo.basic_do.b0_23">
+      <ast length="111" start="23" type="31"/>
       <scope name="Foo.basic_do">
         <scope name="Foo.basic_do.b0">
           <scope name="Foo.basic_do.b0.do0">
@@ -100,7 +101,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="136" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

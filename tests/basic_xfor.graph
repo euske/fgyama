@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_xfor.java">
-    <graph ins="NFoo.basic_xfor_1" name="LFoo;.basic_xfor([I)I" outs="NFoo.basic_xfor.b0_16">
+    <graph init="false" ins="NFoo.basic_xfor_1" name="LFoo;.basic_xfor([I)I" outs="NFoo.basic_xfor.b0_16">
+      <ast length="103" start="23" type="31"/>
       <scope name="Foo.basic_xfor">
         <scope name="Foo.basic_xfor.b0">
           <scope name="Foo.basic_xfor.b0.efor0">
@@ -73,7 +74,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="LFoo;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="Foo" outs="">
+      <ast length="128" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
   </file>

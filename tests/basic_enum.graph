@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_enum.java">
-    <graph ins="NE.E_1 NE.E_4" name="LE;.E(I)LE;" outs="NE.E.b0_5">
+    <graph init="false" ins="NE.E_1 NE.E_4" name="LE;.E(I)LE;" outs="NE.E.b0_5">
+      <ast length="44" start="56" type="31"/>
       <scope name="E.E">
         <scope name="E.E.b0">
           <node id="NE.E.b0_3" kind="ref" ref="#this" type="LE;">
@@ -31,7 +32,8 @@
         <node id="NE.E_4" ref="#this" type="LE;"/>
       </scope>
     </graph>
-    <graph ins="" name="LE;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="E" outs="">
+      <ast length="102" start="0" type="71"/>
       <scope name="E">
         <node data="uninitialized" id="NE_1" kind="const" type="@null"/>
         <node id="NE_2" kind="assign" ref="E/.x" type="I">
@@ -40,7 +42,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="Nbasic_enum.foo_2 Nbasic_enum.foo_9" name="Lbasic_enum;.foo()V" outs="">
+    <graph init="false" ins="Nbasic_enum.foo_2 Nbasic_enum.foo_9" name="Lbasic_enum;.foo()V" outs="">
+      <ast length="158" start="133" type="31"/>
       <scope name="basic_enum.foo">
         <scope name="basic_enum.foo.b0">
           <scope name="basic_enum.foo.b0.switch0">
@@ -80,7 +83,8 @@
         <node id="Nbasic_enum.foo_9" ref="E/.Baa" type="LE;"/>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_enum;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="basic_enum" outs="">
+      <ast length="190" start="103" type="55"/>
       <scope name="basic_enum"/>
     </graph>
   </file>

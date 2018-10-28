@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph ins="Nbasic_generics/Moo.Moo_1 Nbasic_generics/Moo.Moo_4" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.Moo(T:Ljava/lang/Object;)Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" outs="Nbasic_generics/Moo.Moo.b0_5">
+    <graph init="false" ins="Nbasic_generics/Moo.Moo_1 Nbasic_generics/Moo.Moo_4" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.Moo(T:Ljava/lang/Object;)Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" outs="Nbasic_generics/Moo.Moo.b0_5">
+      <ast length="44" start="80" type="31"/>
       <scope name="basic_generics/Moo.Moo">
         <scope name="basic_generics/Moo.Moo.b0">
           <node id="Nbasic_generics/Moo.Moo.b0_3" kind="ref" ref="#this" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
@@ -31,7 +32,8 @@
         <node id="Nbasic_generics/Moo.Moo_4" ref="#this" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;"/>
       </scope>
     </graph>
-    <graph ins="Nbasic_generics/Moo.get_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" outs="Nbasic_generics/Moo.get.b0_3">
+    <graph init="false" ins="Nbasic_generics/Moo.get_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" outs="Nbasic_generics/Moo.get.b0_3">
+      <ast length="41" start="134" type="31"/>
       <scope name="basic_generics/Moo.get">
         <scope name="basic_generics/Moo.get.b0">
           <node id="Nbasic_generics/Moo.get.b0_1" kind="ref" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
@@ -46,7 +48,8 @@
         <node id="Nbasic_generics/Moo.get_2" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </graph>
-    <graph ins="Nbasic_generics/Moo.copy_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" outs="Nbasic_generics/Moo.copy.b0_4">
+    <graph init="false" ins="Nbasic_generics/Moo.copy_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" outs="Nbasic_generics/Moo.copy.b0_4">
+      <ast length="59" start="185" type="31"/>
       <scope name="basic_generics/Moo.copy">
         <scope name="basic_generics/Moo.copy.b0">
           <node id="Nbasic_generics/Moo.copy.b0_1" kind="ref" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
@@ -65,10 +68,12 @@
         <node id="Nbasic_generics/Moo.copy_2" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_generics/Moo/Baa;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="basic_generics/Moo/Baa" outs="">
+      <ast length="13" start="254" type="55"/>
       <scope name="basic_generics/Moo/Baa"/>
     </graph>
-    <graph ins="" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="basic_generics/Moo" outs="">
+      <ast length="238" start="35" type="55"/>
       <scope name="basic_generics/Moo">
         <node data="uninitialized" id="Nbasic_generics/Moo_1" kind="const" type="@null"/>
         <node id="Nbasic_generics/Moo_2" kind="assign" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
@@ -77,7 +82,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_generics;.test()V" outs="">
+    <graph init="false" ins="" name="Lbasic_generics;.test()V" outs="">
+      <ast length="194" start="279" type="31"/>
       <scope name="basic_generics.test">
         <scope name="basic_generics.test.b0">
           <node data="moo" id="Nbasic_generics.test.b0_1" kind="const" type="Ljava/lang/String;">
@@ -131,7 +137,8 @@
         <node id="Nbasic_generics.test_13" ref="basic_generics.test.b0/$mi" type="Lbasic_generics/Moo/Baa;"/>
       </scope>
     </graph>
-    <graph ins="Nbasic_generics.foo_1" name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;" outs="Nbasic_generics.foo.b0_6">
+    <graph init="false" ins="Nbasic_generics.foo_1" name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;" outs="Nbasic_generics.foo.b0_6">
+      <ast length="65" start="479" type="31"/>
       <scope name="basic_generics.foo">
         <scope name="basic_generics.foo.b0">
           <node id="Nbasic_generics.foo.b0_3" kind="ref" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
@@ -160,7 +167,8 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_generics;.&lt;init&gt;()V" outs="">
+    <graph init="true" ins="" name="basic_generics" outs="">
+      <ast length="546" start="0" type="55"/>
       <scope name="basic_generics"/>
     </graph>
   </file>
