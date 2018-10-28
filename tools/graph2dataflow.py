@@ -233,7 +233,7 @@ def main(argv):
                          in node.inputs.items() if not label.startswith('_') }
                 calls[node] = args
         for (funcall,args) in calls.items():
-            print ('#%s call(%r, %r)' % (ind, funcall.data, args),
+            print ('#%s %s(%r, %r)' % (ind, funcall.kind, funcall.data, args),
                    file=sys.stderr)
         for (funcall,v0) in rtns.items():
             print ('#%s rtn(%r, %r)' % (ind, funcall.data, v0),

@@ -15,23 +15,23 @@ import org.w3c.dom.*;
 // ProgNode: a DFNode that corresponds to an actual program point.
 abstract class ProgNode extends DFNode {
 
-    public ASTNode ast;
+    private ASTNode _ast;
 
     public ProgNode(
         DFGraph graph, DFVarScope scope, DFType type, DFVarRef ref,
         ASTNode ast) {
         super(graph, scope, type, ref);
-        this.ast = ast;
+        _ast = ast;
     }
 
     @Override
     public Element toXML(Document document) {
         Element elem = super.toXML(document);
-        if (this.ast != null) {
+        if (_ast != null) {
             Element east = document.createElement("ast");
-            east.setAttribute("type", Integer.toString(this.ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(this.ast.getStartPosition()));
-            east.setAttribute("length", Integer.toString(this.ast.getLength()));
+            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
+            east.setAttribute("start", Integer.toString(_ast.getStartPosition()));
+            east.setAttribute("length", Integer.toString(_ast.getLength()));
             elem.appendChild(east);
         }
         return elem;
@@ -1018,7 +1018,8 @@ public class Java2DF {
                         anonKlass.build(finder, anonDecl.bodyDeclarations());
                         anonKlass.addOverrides();
                         processBodyDeclarations(
-                            finder, anonKlass, anonDecl.bodyDeclarations());
+                            finder, anonKlass, anonDecl,
+                            anonDecl.bodyDeclarations());
                         instType = anonKlass;
                     } catch (EntityNotFound e) {
                         instType = null; // XXX what happened?
@@ -1956,13 +1957,15 @@ public class Java2DF {
             DFKlass klass = typeSpace.getKlass(typeDecl.getName());
             klass.build(finder, typeDecl);
             processBodyDeclarations(
-                finder, klass, typeDecl.bodyDeclarations());
+                finder, klass, typeDecl,
+                typeDecl.bodyDeclarations());
         } else if (abstTypeDecl instanceof EnumDeclaration) {
             EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
             DFKlass klass = typeSpace.getKlass(enumDecl.getName());
             klass.build(finder, enumDecl);
             processBodyDeclarations(
-                finder, klass, enumDecl.bodyDeclarations());
+                finder, klass, enumDecl,
+                enumDecl.bodyDeclarations());
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
             ;
         } else {
@@ -2002,53 +2005,11 @@ public class Java2DF {
         return finder;
     }
 
-    /// Top-level functions.
-
-    private DFRootTypeSpace _rootSpace;
-    private Exporter _exporter;
-
-    public Java2DF(
-        DFRootTypeSpace rootSpace) {
-        _rootSpace = rootSpace;
-    }
-
-    public void setExporter(Exporter exporter)
-    {
-        _exporter = exporter;
-    }
-
     /**
      * Performs dataflow analysis for a given method.
      */
     @SuppressWarnings("unchecked")
-    public void processFieldDeclaration(
-        DFGraph graph, DFTypeFinder finder, DFKlass klass,
-        DFFrame frame, FieldDeclaration fieldDecl)
-        throws UnsupportedSyntax, EntityNotFound {
-        DFVarScope scope = klass.getScope();
-        DFContext ctx = new DFContext(graph, scope);
-        for (VariableDeclarationFragment frag :
-                 (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-            DFVarRef ref = klass.lookupField(frag.getName());
-            DFNode value = null;
-            Expression init = frag.getInitializer();
-            if (init != null) {
-                ctx = processExpression(
-                    graph, finder, scope, frame, ctx, init);
-                value = ctx.getRValue();
-            }
-            if (value == null) {
-                // uninitialized field: default = null.
-                value = new ConstNode(
-                    graph, scope, DFNullType.NULL, null, "uninitialized");
-            }
-            DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
-            assign.accept(value);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public DFGraph processMethodDeclaration(
+    private DFGraph processMethodDeclaration(
         DFTypeFinder finder, DFKlass klass,
         MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
@@ -2077,7 +2038,7 @@ public class Java2DF {
             DFFrame frame = new DFFrame(DFFrame.METHOD);
             frame.build(finder, scope, methodDecl.getBody());
 
-            DFGraph graph = new DFGraph(scope, frame, method);
+            DFGraph graph = new DFGraph(scope, frame, method, false, methodDecl);
             DFContext ctx = new DFContext(graph, scope);
             // XXX Ignore isContructor().
             // XXX Ignore isVarargs().
@@ -2115,16 +2076,34 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public void processBodyDeclarations(
+    private DFGraph processInitializer(
         DFTypeFinder finder, DFKlass klass,
-        List<BodyDeclaration> decls)
-        throws EntityNotFound {
+        Initializer initializer)
+        throws UnsupportedSyntax, EntityNotFound {
         DFMethod method = klass.getInitializer();
-        DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
-        DFVarScope klassScope = klass.getScope();
-        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, method);
+        DFFrame frame = new DFFrame(DFFrame.METHOD);
+        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<init>");
+        DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
+        scope.build(finder, initializer);
+        frame.build(finder, scope, initializer.getBody());
+        DFContext ctx = new DFContext(graph, scope);
+        ctx = processStatement(
+            graph, finder, scope,
+            frame, ctx, initializer.getBody());
+        frame.close(ctx);
+        return graph;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processBodyDeclarations(
+        DFTypeFinder finder, DFKlass klass,
+        ASTNode ast, List<BodyDeclaration> decls)
+        throws EntityNotFound {
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
+        DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
+        DFVarScope klassScope = klass.getScope();
+        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
         for (BodyDeclaration body : decls) {
             try {
                 if (body instanceof AbstractTypeDeclaration) {
@@ -2132,12 +2111,31 @@ public class Java2DF {
                     DFTypeSpace childSpace = klass.getChildSpace();
                     DFKlass childKlass = childSpace.getKlass(abstTypeDecl.getName());
                     processBodyDeclarations(
-                        finder, childKlass, abstTypeDecl.bodyDeclarations());
+                        finder, childKlass, abstTypeDecl,
+                        abstTypeDecl.bodyDeclarations());
 
                 } else if (body instanceof FieldDeclaration) {
-                    processFieldDeclaration(
-                        klassGraph, finder, klass,
-                        klassFrame, (FieldDeclaration)body);
+                    FieldDeclaration fieldDecl = (FieldDeclaration)body;
+                    DFContext ctx = new DFContext(klassGraph, klassScope);
+                    for (VariableDeclarationFragment frag :
+                             (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
+                        DFVarRef ref = klass.lookupField(frag.getName());
+                        DFNode value = null;
+                        Expression init = frag.getInitializer();
+                        if (init != null) {
+                            ctx = processExpression(
+                                klassGraph, finder, klassScope, klassFrame, ctx, init);
+                            value = ctx.getRValue();
+                        }
+                        if (value == null) {
+                            // uninitialized field: default = null.
+                            value = new ConstNode(
+                                klassGraph, klassScope,
+                                DFNullType.NULL, null, "uninitialized");
+                        }
+                        DFNode assign = new SingleAssignNode(klassGraph, klassScope, ref, frag);
+                        assign.accept(value);
+                    }
 
                 } else if (body instanceof MethodDeclaration) {
                     // Ignore method prototypes.
@@ -2157,16 +2155,9 @@ public class Java2DF {
                     // XXX ignore annotations.
 
                 } else if (body instanceof Initializer) {
-                    Initializer initializer = (Initializer)body;
-                    DFFrame frame = new DFFrame(DFFrame.METHOD);
-                    DFLocalVarScope scope = new DFLocalVarScope(klassScope, "<init>");
-                    scope.build(finder, initializer);
-                    frame.build(finder, scope, initializer.getBody());
-                    DFContext ctx = new DFContext(klassGraph, scope);
-                    ctx = processStatement(
-                        klassGraph, finder, scope,
-                        frame, ctx, initializer.getBody());
-                    frame.close(ctx);
+                    DFGraph graph = processInitializer(
+                        finder, klass, (Initializer)body);
+                    exportGraph(graph);
 
                 } else {
                     throw new UnsupportedSyntax(body);
@@ -2180,6 +2171,21 @@ public class Java2DF {
             }
         }
         exportGraph(klassGraph);
+    }
+
+    /// Top-level functions.
+
+    private DFRootTypeSpace _rootSpace;
+    private Exporter _exporter;
+
+    public Java2DF(
+        DFRootTypeSpace rootSpace) {
+        _rootSpace = rootSpace;
+    }
+
+    public void setExporter(Exporter exporter)
+    {
+        _exporter = exporter;
     }
 
     protected void exportGraph(DFGraph graph)
@@ -2255,7 +2261,8 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
             processBodyDeclarations(
-                finder, klass, abstTypeDecl.bodyDeclarations());
+                finder, klass, abstTypeDecl,
+                abstTypeDecl.bodyDeclarations());
 	}
     }
 

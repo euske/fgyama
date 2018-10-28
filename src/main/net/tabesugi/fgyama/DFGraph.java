@@ -15,15 +15,21 @@ public class DFGraph {
     private DFVarScope _root;
     private DFFrame _frame;
     private DFMethod _method;
+    private boolean _init;
+    private ASTNode _ast;
 
     private List<DFNode> _nodes =
         new ArrayList<DFNode>();
 
     // DFGraph for a method.
-    public DFGraph(DFVarScope root, DFFrame frame, DFMethod method) {
+    public DFGraph(
+        DFVarScope root, DFFrame frame, DFMethod method,
+        boolean init, ASTNode ast) {
         _root = root;
         _frame = frame;
         _method = method;
+        _init = init;
+        _ast = ast;
     }
 
     @Override
@@ -38,6 +44,14 @@ public class DFGraph {
         } else {
             elem.setAttribute("name", _root.getFullName());
         }
+        if (_ast != null) {
+            Element east = document.createElement("ast");
+            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
+            east.setAttribute("start", Integer.toString(_ast.getStartPosition()));
+            east.setAttribute("length", Integer.toString(_ast.getLength()));
+            elem.appendChild(east);
+        }
+        elem.setAttribute("init", Boolean.toString(_init));
         elem.setAttribute("ins", getNodeIds(_frame.getInputNodes()));
         elem.setAttribute("outs", getNodeIds(_frame.getOutputNodes()));
         DFNode[] nodes = new DFNode[_nodes.size()];
