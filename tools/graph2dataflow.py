@@ -16,6 +16,14 @@ def getfeat(node):
     else:
         return '%s:%s' % (node.kind, node.data)
 
+def getarg(label):
+    if label == 'obj':
+        return '#this'
+    elif label.startswith('arg'):
+        return '#'+label
+    else:
+        return label
+
 
 ##  Chain Link
 ##
@@ -184,21 +192,14 @@ def main(argv):
                 name = node.data
                 link(src.name, name)
 
-    # enum_dataflow
+    # trace dataflow
     graph2info = {}
-    def ff(x):
-        if x == 'obj':
-            return '#this'
-        elif x.startswith('arg'):
-            return '#'+x
-        else:
-            return x
-    def enum_dataflow(graph, inputs, chain=None):
+    def trace(graph, inputs, chain=None):
         if chain is None:
             ind = ''
         else:
             ind = '  '*len(chain)
-        print ('#%s enum_dataflow(%r)' % (ind, graph.name), file=sys.stderr)
+        print ('#%s trace(%r)' % (ind, graph.name), file=sys.stderr)
         ind += ' '
         # Convert all nodes to IPVertex.
         vtxs = {}
@@ -229,7 +230,7 @@ def main(argv):
                 v0.connect(label, v1)
             if node.kind in ('call', 'new'):
                 # Send a passing value to the callee.
-                args = { ff(label): vtxs[src] for (label,src)
+                args = { getarg(label): vtxs[src] for (label,src)
                          in node.inputs.items() if not label.startswith('_') }
                 calls[node] = args
         for (funcall,args) in calls.items():
@@ -252,7 +253,7 @@ def main(argv):
                 args = calls[funcall]
                 for name in funcall.data.split(' '):
                     if name in graphs:
-                        vals = enum_dataflow(graphs[name], args, chain)
+                        vals = trace(graphs[name], args, chain)
                         for (label,sender) in vals.items():
                             sender.connect(label, rcver)
                         break
@@ -263,7 +264,7 @@ def main(argv):
         if graph.name not in linkfrom:
             print('# start: %r' % graph.name, file=sys.stderr)
             inputs = { node.ref: IPVertex(node) for node in graph.ins }
-            enum_dataflow(graph, inputs)
+            trace(graph, inputs)
 
     for (graph,info) in graph2info.items():
         if graph.ast is not None:
