@@ -17,7 +17,32 @@ public class DFMethod implements Comparable<DFMethod> {
     private boolean _static;
     private DFMethodType _methodType;
 
-    private List<DFMethod> _overrides = new ArrayList<DFMethod>();
+    private List<DFOverride> _overrides = new ArrayList<DFOverride>();
+
+    private class DFOverride implements Comparable<DFOverride> {
+
+	public DFMethod method;
+	public int level;
+
+	public DFOverride(DFMethod method, int level) {
+	    this.method = method;
+	    this.level = level;
+	}
+
+	@Override
+	public String toString() {
+	    return ("<DFOverride: "+this.method+" ("+this.level+")>");
+	}
+
+	@Override
+	public int compareTo(DFOverride override) {
+	    if (this.level != override.level) {
+		return override.level - this.level;
+	    } else {
+		return this.method.compareTo(override.method);
+	    }
+	}
+    }
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
@@ -27,17 +52,20 @@ public class DFMethod implements Comparable<DFMethod> {
         _name = name;
         _static = isStatic;
         _methodType = methodType;
-        _overrides.add(this);
     }
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
         String name, boolean isStatic, DFMethodType methodType,
-        DFMethod[] overrides) {
-        this(klass, childSpace, name, isStatic, methodType);
-        for (DFMethod method : overrides) {
-            _overrides.add(method);
-        }
+        DFOverride[] overrides) {
+        _klass = klass;
+        _childSpace = childSpace;
+        _name = name;
+        _static = isStatic;
+        _methodType = methodType;
+	for (DFOverride override : overrides) {
+	    _overrides.add(override);
+	}
     }
 
     @Override
@@ -78,25 +106,34 @@ public class DFMethod implements Comparable<DFMethod> {
         return _methodType.canAccept(argTypes);
     }
 
-    public void addOverride(DFMethod method) {
-        _overrides.add(method);
+    public void addOverride(DFMethod method, int level) {
+	DFOverride override = new DFOverride(method, level);
+	//Logger.info("DFMethod.addOverride: "+this+" <- "+override);
+        _overrides.add(override);
     }
 
     public DFMethod[] getOverrides() {
-        DFMethod[] methods = new DFMethod[_overrides.size()];
-        _overrides.toArray(methods);
+        DFOverride[] overrides = new DFOverride[_overrides.size()];
+        _overrides.toArray(overrides);
+        Arrays.sort(overrides);
+        DFMethod[] methods = new DFMethod[overrides.length+1];
+	for (int i = 0; i < overrides.length; i++) {
+	    methods[i] = overrides[i].method;
+	}
+	methods[overrides.length] = this;
         return methods;
     }
 
     public DFMethod parameterize(Map<DFParamType, DFType> typeMap) {
         DFMethodType methodType = _methodType.parameterize(typeMap);
         boolean changed = (_methodType != methodType);
-        DFMethod[] overrides = new DFMethod[_overrides.size()-1];
-        for (int i = 1; i < overrides.length; i++) {
-            DFMethod method0 = _overrides.get(i);
+        DFOverride[] overrides = new DFOverride[_overrides.size()];
+        for (int i = 0; i < overrides.length; i++) {
+            DFOverride override = _overrides.get(i);
+	    DFMethod method0 = override.method;
             DFMethod method1 = method0.parameterize(typeMap);
             changed = changed || (method0 != method1);
-            overrides[i-1] = method1;
+            overrides[i] = new DFOverride(method1, override.level);
         }
         if (changed) {
             return new DFMethod(

@@ -180,7 +180,7 @@ def main(argv):
             if node.kind == 'call':
                 for name in node.data.split(' '):
                     # In order to stop the number of possible contexts grow
-                    # exponentially, the only first function is used.
+                    # exponentially, the most specific method is used.
                     if name in graphs:
                         link(src.name, name)
                         break
@@ -257,6 +257,7 @@ def main(argv):
                 assert funcall in calls
                 args = calls[funcall]
                 for name in funcall.data.split(' '):
+                    # the most specific method is used.
                     if name in graphs:
                         vals = trace(graphs[name], args, chain)
                         for (label,sender) in vals.items():

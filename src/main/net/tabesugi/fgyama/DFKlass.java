@@ -263,30 +263,30 @@ public class DFKlass extends DFType {
     public void addOverrides() {
         for (DFMethod method : _methods) {
             if (_baseKlass != null) {
-                _baseKlass.overrideMethod(method);
+                _baseKlass.overrideMethod(method, 0);
             }
             if (_baseIfaces != null) {
                 for (DFKlass iface : _baseIfaces) {
-                    iface.overrideMethod(method);
+                    iface.overrideMethod(method, 0);
                 }
             }
         }
     }
 
-    private void overrideMethod(DFMethod method1) {
+    private void overrideMethod(DFMethod method1, int level) {
+	level++;
         for (DFMethod method0 : _methods) {
             if (method0.equals(method1)) {
-                method0.addOverride(method1);
-                //Logger.info("DFKlass.overrideMethod: "+method0+" : "+method1);
+                method0.addOverride(method1, level);
                 break;
             }
         }
         if (_baseKlass != null) {
-            _baseKlass.overrideMethod(method1);
+            _baseKlass.overrideMethod(method1, level);
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                iface.overrideMethod(method1);
+                iface.overrideMethod(method1, level);
             }
         }
     }
