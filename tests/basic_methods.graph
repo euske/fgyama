@@ -98,7 +98,7 @@
             <link src="NFoo.fb.b0_4"/>
             <ast length="1" start="349" type="42"/>
           </node>
-          <node data="LObject;.toString()Ljava/lang/String; LObject/anonymous/anonymous;.toString()Ljava/lang/String;" id="NFoo.fb.b0_9" kind="call" type="Ljava/lang/String;">
+          <node data="LObject/anonymous/anonymous;.toString()Ljava/lang/String; LObject;.toString()Ljava/lang/String;" id="NFoo.fb.b0_9" kind="call" type="Ljava/lang/String;">
             <link label="obj" src="NFoo.fb.b0_8"/>
             <ast length="12" start="349" type="32"/>
           </node>
