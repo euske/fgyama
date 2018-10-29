@@ -15,13 +15,17 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
-    public static String join(String delim, String[] a) {
+    public static String join(String delim, Object[] a) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < a.length; i++) {
             if (0 < i) {
                 b.append(delim);
             }
-            b.append(a[i]);
+            if (a[i] != null) {
+                b.append(a[i].toString());
+            } else {
+                b.append("null");
+            }
         }
 	return b.toString();
     }

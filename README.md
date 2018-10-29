@@ -55,6 +55,8 @@ Coding style:
 TODOs:
 
   * Interprocedural field watch.
+  * Autoboxing/unboxing generic.
+  * Generic type inference <>.
   * static import.
   * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
