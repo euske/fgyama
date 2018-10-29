@@ -193,7 +193,6 @@ def main(argv):
                 link(src.name, name)
 
     # trace dataflow
-    graph2info = {}
     def trace(graph, inputs, chain=None):
         if chain is None:
             ind = ''
@@ -223,8 +222,6 @@ def main(argv):
             # Connect data paths.
             for (label,prev) in node.inputs.items():
                 if label.startswith('_'): continue
-                vprev = vtxs[prev]
-                vprev.connect(label, vnode)
                 if prev.kind in ('call', 'new'):
                     # Receive a return value from the callee.
                     if prev in rtns:
@@ -232,6 +229,9 @@ def main(argv):
                     else:
                         a = rtns[prev] = []
                     a.append(vnode)
+                else:
+                    vprev = vtxs[prev]
+                    vprev.connect(label, vnode)
             if node.kind in ('call', 'new'):
                 # Send a passing value to the callee.
                 assert node not in calls
@@ -267,25 +267,25 @@ def main(argv):
 
     # Find start nodes.
     for graph in graphs.values():
-        if graph.name not in linkfrom:
-            print('# start: %r' % graph.name, file=sys.stderr)
-            inputs = { node.ref: IPVertex(node) for node in graph.ins }
-            trace(graph, inputs)
-
-    for (graph,info) in graph2info.items():
-        if graph.ast is not None:
-            (_,s,e) = graph.ast
-            fid = IPVertex.srcmap[graph.src]
-            name = ('%s,%s,%s,%s' % (graph.name, s, e, fid))
-        else:
-            name = graph.name
-        for (inputs,outputs) in info:
-            for (label,vtx) in inputs.items():
-                for feats in vtx.enum(-1, label, maxlen):
-                    print('+PATH %s -1 %s' % (name, feats))
-            for (label,vtx) in outputs.items():
-                for feats in vtx.enum(+1, label, maxlen):
-                    print('+PATH %s +1 %s' % (name, feats))
+        if graph.name in linkfrom: continue
+        print('# start: %r' % graph.name, file=sys.stderr)
+        inputs = { node.ref: IPVertex(node) for node in graph.ins }
+        graph2info = {}
+        trace(graph, inputs)
+        for (graph,info) in graph2info.items():
+            if graph.ast is not None:
+                (_,s,e) = graph.ast
+                fid = IPVertex.srcmap[graph.src]
+                name = ('%s,%s,%s,%s' % (graph.name, s, e, fid))
+            else:
+                name = graph.name
+            for (inputs,outputs) in info:
+                for (label,vtx) in inputs.items():
+                    for feats in vtx.enum(-1, label, maxlen):
+                        print('+PATH %s -1 %s' % (name, feats))
+                for (label,vtx) in outputs.items():
+                    for feats in vtx.enum(+1, label, maxlen):
+                        print('+PATH %s +1 %s' % (name, feats))
 
     for (name,fid) in IPVertex.dumpsrcs():
         print('+SOURCE %d %s' % (fid, name))
