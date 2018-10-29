@@ -67,7 +67,7 @@ def main(argv):
     import getopt
     def usage():
         print('usage: %s [-B basedir] [-H] '
-              'out.dataflow' %
+              'out.idf' %
               argv[0])
         return 100
     try:

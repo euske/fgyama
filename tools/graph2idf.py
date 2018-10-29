@@ -220,24 +220,25 @@ def main(argv):
         for node in graph:
             vnode = vtxs[node]
             # Connect data paths.
-            for (label,prev) in node.inputs.items():
-                if label.startswith('_'): continue
-                if prev.kind in ('call', 'new'):
-                    # Receive a return value from the callee.
-                    if prev in rtns:
-                        a = rtns[prev]
-                    else:
-                        a = rtns[prev] = []
-                    a.append(vnode)
-                else:
-                    vprev = vtxs[prev]
-                    vprev.connect(label, vnode)
             if node.kind in ('call', 'new'):
                 # Send a passing value to the callee.
                 assert node not in calls
                 args = { getarg(label): vtxs[src] for (label,src)
                          in node.inputs.items() if not label.startswith('_') }
                 calls[node] = args
+            else:
+                for (label,prev) in node.inputs.items():
+                    if label.startswith('_'): continue
+                    if prev.kind in ('call', 'new'):
+                        # Receive a return value from the callee.
+                        if prev in rtns:
+                            rcvers = rtns[prev]
+                        else:
+                            rcvers = rtns[prev] = []
+                        rcvers.append((label, vnode))
+                    else:
+                        vprev = vtxs[prev]
+                        vprev.connect(label, vnode)
         for (funcall,args) in calls.items():
             print ('#%s %s(%r, %r)' % (ind, funcall.kind, funcall.data, args),
                    file=sys.stderr)
@@ -260,8 +261,8 @@ def main(argv):
                     # the most specific method is used.
                     if name in graphs:
                         vals = trace(graphs[name], args, chain)
-                        for (label,sender) in vals.items():
-                            for rcver in rcvers:
+                        for (_,sender) in vals.items():
+                            for (label,rcver) in rcvers:
                                 sender.connect(label, rcver)
                         break
         return outputs
