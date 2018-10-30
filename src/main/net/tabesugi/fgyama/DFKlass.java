@@ -82,6 +82,25 @@ public class DFKlass extends DFType {
     public int canConvertFrom(DFType type)
     {
         if (type instanceof DFNullType) return 0;
+	if (type instanceof DFArrayType) {
+	    type = DFRootTypeSpace.getObjectKlass();
+	} else if (type == DFBasicType.BYTE) {
+	    type = DFRootTypeSpace.getByteKlass();
+	} else if (type == DFBasicType.CHAR) {
+	    type = DFRootTypeSpace.getCharacterKlass();
+	} else if (type == DFBasicType.SHORT) {
+	    type = DFRootTypeSpace.getShortKlass();
+	} else if (type == DFBasicType.INT) {
+	    type = DFRootTypeSpace.getIntegerKlass();
+	} else if (type == DFBasicType.LONG) {
+	    type = DFRootTypeSpace.getLongKlass();
+	} else if (type == DFBasicType.FLOAT) {
+	    type = DFRootTypeSpace.getFloatKlass();
+	} else if (type == DFBasicType.DOUBLE) {
+	    type = DFRootTypeSpace.getDoubleKlass();
+	} else if (type == DFBasicType.BOOLEAN) {
+	    type = DFRootTypeSpace.getBooleanKlass();
+	}
         if (!(type instanceof DFKlass)) return -1;
         // type is-a this.
         return ((DFKlass)type).isSubclassOf(this);

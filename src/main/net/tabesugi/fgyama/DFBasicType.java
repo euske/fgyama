@@ -13,7 +13,7 @@ public class DFBasicType extends DFType {
 
     private PrimitiveType.Code _code;
 
-    public DFBasicType(PrimitiveType.Code code) {
+    private DFBasicType(PrimitiveType.Code code) {
         _code = code;
     }
 
@@ -50,6 +50,25 @@ public class DFBasicType extends DFType {
     }
 
     public int canConvertFrom(DFType type) {
+	// Auto-unboxing.
+	if ((_code == PrimitiveType.BYTE &&
+	     type == DFRootTypeSpace.getByteKlass()) ||
+	    (_code == PrimitiveType.CHAR &&
+	     type == DFRootTypeSpace.getCharacterKlass()) ||
+	    (_code == PrimitiveType.SHORT &&
+	     type == DFRootTypeSpace.getShortKlass()) ||
+	    (_code == PrimitiveType.INT &&
+	     type == DFRootTypeSpace.getIntegerKlass()) ||
+	    (_code == PrimitiveType.LONG &&
+	     type == DFRootTypeSpace.getLongKlass()) ||
+	    (_code == PrimitiveType.FLOAT &&
+	     type == DFRootTypeSpace.getFloatKlass()) ||
+	    (_code == PrimitiveType.DOUBLE &&
+	     type == DFRootTypeSpace.getDoubleKlass()) ||
+	    (_code == PrimitiveType.BOOLEAN &&
+	     type == DFRootTypeSpace.getBooleanKlass())) {
+	    return 0;
+	}
         if (!(type instanceof DFBasicType)) return -1;
         if (this.equals(type)) return 0;
         return (this.isNumeric() && ((DFBasicType)type).isNumeric())? 1 : -1;
@@ -83,4 +102,29 @@ public class DFBasicType extends DFType {
         new DFBasicType(PrimitiveType.BOOLEAN);
     public static final DFBasicType VOID =
         new DFBasicType(PrimitiveType.VOID);
+
+    public static DFBasicType getType(PrimitiveType.Code code)
+        throws TypeNotFound {
+	if (code == PrimitiveType.BYTE) {
+	    return BYTE;
+	} else if (code == PrimitiveType.CHAR) {
+	    return CHAR;
+	} else if (code == PrimitiveType.SHORT) {
+	    return SHORT;
+	} else if (code == PrimitiveType.INT) {
+	    return INT;
+	} else if (code == PrimitiveType.LONG) {
+	    return LONG;
+	} else if (code == PrimitiveType.FLOAT) {
+	    return FLOAT;
+	} else if (code == PrimitiveType.DOUBLE) {
+	    return DOUBLE;
+	} else if (code == PrimitiveType.BOOLEAN) {
+	    return BOOLEAN;
+	} else if (code == PrimitiveType.VOID) {
+	    return VOID;
+	} else {
+	    throw new TypeNotFound(code.toString());
+	}
+    }
 }

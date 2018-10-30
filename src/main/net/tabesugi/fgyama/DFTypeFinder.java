@@ -77,7 +77,7 @@ public class DFTypeFinder {
         throws TypeNotFound {
         if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
-            return new DFBasicType(ptype.getPrimitiveTypeCode());
+            return DFBasicType.getType(ptype.getPrimitiveTypeCode());
         } else if (type instanceof ArrayType) {
             ArrayType atype = (ArrayType)type;
             DFType elemType = this.resolve(atype.getElementType());
