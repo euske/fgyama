@@ -133,7 +133,7 @@ def main(argv):
     if html:
         show_html_headers()
     mid = 0
-    for (rid,(score,feats,matches)) in enumerate(results):
+    for (score,feats,matches) in results:
         if html:
             print('<h2>[%.3f] <code>%s</code> (%d)</h2>' %
                   (score, q(' '.join(feats)), len(matches)))
@@ -143,7 +143,7 @@ def main(argv):
             f = func.split(',')
             if html:
                 mid += 1
-                print('<h3><a href="#R%d" onclick="toggle(\'M%d\');">[+]</a> <code>%s</code></h3>' % (rid, mid, q(f[0])))
+                print('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> <code>%s</code></h3>' % (mid, mid, q(f[0])))
                 print('<div class=result hidden id=M%d>' % mid)
             else:
                 print('+ %s' % f[0])
