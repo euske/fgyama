@@ -112,7 +112,6 @@
             <ast length="1" start="165" type="34"/>
           </node>
           <node id="NFoo.basic_ops.b0_31" kind="arrayref" ref="%:I" type="I">
-            <link src="NFoo.basic_ops.b0_25"/>
             <link label="array" src="NFoo.basic_ops.b0_29"/>
             <link label="index" src="NFoo.basic_ops.b0_30"/>
             <ast length="4" start="163" type="2"/>

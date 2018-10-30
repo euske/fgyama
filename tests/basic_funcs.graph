@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph init="false" ins="Nbasic_funcs.main_1 Nbasic_funcs.main_11 Nbasic_funcs.main_17 Nbasic_funcs.main_6" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="">
+    <graph init="false" ins="Nbasic_funcs.main_1 Nbasic_funcs.main_10 Nbasic_funcs.main_16 Nbasic_funcs.main_20" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="">
       <ast length="166" start="32" type="31"/>
       <scope name="basic_funcs.main">
         <scope name="basic_funcs.main.b0">
@@ -12,59 +12,58 @@
             <ast length="1" start="97" type="34"/>
           </node>
           <node id="Nbasic_funcs.main.b0_5" kind="arrayref" ref="%:Ljava/lang/String;" type="Ljava/lang/String;">
-            <link src="Nbasic_funcs.main_6"/>
             <link label="array" src="Nbasic_funcs.main.b0_3"/>
             <link label="index" src="Nbasic_funcs.main.b0_4"/>
             <ast length="7" start="92" type="2"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_7" kind="assign" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+          <node id="Nbasic_funcs.main.b0_6" kind="assign" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
             <link src="Nbasic_funcs.main.b0_5"/>
             <ast length="11" start="88" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_8" kind="ref" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
-            <link src="Nbasic_funcs.main.b0_7"/>
+          <node id="Nbasic_funcs.main.b0_7" kind="ref" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+            <link src="Nbasic_funcs.main.b0_6"/>
             <ast length="1" start="134" type="42"/>
           </node>
-          <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nbasic_funcs.main.b0_9" kind="call" type="I">
-            <link label="arg0" src="Nbasic_funcs.main.b0_8"/>
+          <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nbasic_funcs.main.b0_8" kind="call" type="I">
+            <link label="arg0" src="Nbasic_funcs.main.b0_7"/>
             <ast length="19" start="117" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_10" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
-            <link src="Nbasic_funcs.main.b0_9"/>
+          <node id="Nbasic_funcs.main.b0_9" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nbasic_funcs.main.b0_8"/>
             <ast length="23" start="113" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_12" kind="ref" ref="basic_funcs.main.b0/$b" type="I">
-            <link src="Nbasic_funcs.main.b0_10"/>
+          <node id="Nbasic_funcs.main.b0_11" kind="ref" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nbasic_funcs.main.b0_9"/>
             <ast length="1" start="158" type="42"/>
           </node>
-          <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.main.b0_13" kind="call" type="I">
-            <link label="arg0" src="Nbasic_funcs.main.b0_12"/>
-            <link label="obj" src="Nbasic_funcs.main_11"/>
+          <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.main.b0_12" kind="call" type="I">
+            <link label="arg0" src="Nbasic_funcs.main.b0_11"/>
+            <link label="obj" src="Nbasic_funcs.main_10"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_14" kind="assign" ref="#this" type="Lbasic_funcs;">
-            <link label="obj" src="Nbasic_funcs.main.b0_13"/>
+          <node id="Nbasic_funcs.main.b0_13" kind="assign" ref="#this" type="Lbasic_funcs;">
+            <link label="obj" src="Nbasic_funcs.main.b0_12"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_15" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
-            <link src="Nbasic_funcs.main.b0_13"/>
+          <node id="Nbasic_funcs.main.b0_14" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nbasic_funcs.main.b0_12"/>
             <ast length="10" start="150" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_16" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link src="Nbasic_funcs.main_17"/>
+          <node id="Nbasic_funcs.main.b0_15" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link src="Nbasic_funcs.main_16"/>
             <ast length="10" start="170" type="40"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_18" kind="ref" ref="basic_funcs.main.b0/$c" type="I">
-            <link src="Nbasic_funcs.main.b0_15"/>
+          <node id="Nbasic_funcs.main.b0_17" kind="ref" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nbasic_funcs.main.b0_14"/>
             <ast length="1" start="189" type="42"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(I)V" id="Nbasic_funcs.main.b0_19" kind="call" type="V">
-            <link label="arg0" src="Nbasic_funcs.main.b0_18"/>
-            <link label="obj" src="Nbasic_funcs.main.b0_16"/>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="Nbasic_funcs.main.b0_18" kind="call" type="V">
+            <link label="arg0" src="Nbasic_funcs.main.b0_17"/>
+            <link label="obj" src="Nbasic_funcs.main.b0_15"/>
             <ast length="21" start="170" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_20" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="obj" src="Nbasic_funcs.main.b0_19"/>
+          <node id="Nbasic_funcs.main.b0_19" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link label="obj" src="Nbasic_funcs.main.b0_18"/>
             <ast length="21" start="170" type="32"/>
           </node>
         </scope>
@@ -75,9 +74,9 @@
           <link src="Nbasic_funcs.main_1"/>
           <ast length="13" start="56" type="44"/>
         </node>
-        <node id="Nbasic_funcs.main_6" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
-        <node id="Nbasic_funcs.main_11" ref="#this" type="Lbasic_funcs;"/>
-        <node id="Nbasic_funcs.main_17" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node id="Nbasic_funcs.main_10" ref="#this" type="Lbasic_funcs;"/>
+        <node id="Nbasic_funcs.main_16" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node id="Nbasic_funcs.main_20" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
       </scope>
     </graph>
     <graph init="false" ins="Nbasic_funcs.moo_1 Nbasic_funcs.moo_20" name="Lbasic_funcs;.moo(I)I" outs="Nbasic_funcs.moo.b0_23">
