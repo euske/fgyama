@@ -27,6 +27,12 @@ h3 { border-bottom: 1px solid black; }
 .p8 { background:#004488; color:white; }
 .p9 { background:#884400; color:white; }
 </style>
+<script>
+function toggle(id) {
+  let e = document.getElementById(id);
+  e.hidden = !e.hidden;
+}
+</script>
 <body>
 <h1>Results</h1>
 ''')
@@ -66,19 +72,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] [-H] '
+        print('usage: %s [-B basedir] [-H] [-m maxresults] '
               'out.idf' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:H')
+        (opts, args) = getopt.getopt(argv[1:], 'B:Hm:')
     except getopt.GetoptError:
         return usage()
     srcdb = None
     html = False
+    maxresults = 100
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
         elif k == '-H': html = True
+        elif k == '-m': maxresults = int(v)
     if not args: return usage()
 
     def sast(v):  # strip ast
@@ -95,7 +103,7 @@ def main(argv):
         if not line.startswith('+'): continue
         f = line.split(' ')
         if f[0] == '+PATH':
-            if f[2] != '+1': continue
+            if f[2] != 'forw': continue
             func = (f[1],f[2])
             feats = tuple(map(sast, f[3:]))
             if len(feats) < 2: continue
@@ -115,24 +123,30 @@ def main(argv):
         p = log(total/featmap[k])
         featmap[k] = p
     def featsscore(feats):
-        return sum( featmap[k] for k in feats )*log(len(count[feats]))
-    keys = sorted(count.keys(), key=featsscore, reverse=True)
+        return sum( featmap[k] for k in feats )
+    results = [ (featsscore(feats), feats, matches) for
+                (feats, matches) in count.items() if 2 <= len(matches) ]
+    results.sort(reverse=True)
+    if 0 < maxresults:
+        results = results[:maxresults]
 
     if html:
         show_html_headers()
-    for feats in keys:
-        n = len(count[feats])
-        if n < 2: continue
+    mid = 0
+    for (rid,(score,feats,matches)) in enumerate(results):
         if html:
-            print('<h2><code>%s</code> (%d)</h2>' % (q(' '.join(feats)), n))
+            print('<h2>[%.3f] <code>%s</code> (%d)</h2>' %
+                  (score, q(' '.join(feats)), len(matches)))
         else:
-            print('!', feats, n)
-        for ((func,_),data) in count[feats].items():
+            print('! %.3f %r %d' % (score, feats, len(matches)))
+        for ((func,_),data) in matches.items():
             f = func.split(',')
             if html:
-                print('<h3><code>%s</code></h3>' % q(f[0]))
+                mid += 1
+                print('<h3><a href="#R%d" onclick="toggle(\'M%d\');">[+]</a> <code>%s</code></h3>' % (rid, mid, q(f[0])))
+                print('<div class=result hidden id=M%d>' % mid)
             else:
-                print ('+', f[0])
+                print('+ %s' % f[0])
             if srcdb is None: continue
             if len(f) != 4: continue
             start = int(f[1])
@@ -162,9 +176,12 @@ def main(argv):
                     show_html(src, src.name, ranges)
                 else:
                     show_text(src, ranges)
-
+            if html:
+                print('</div>')
         if html:
             print('<hr>')
+        else:
+            print()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

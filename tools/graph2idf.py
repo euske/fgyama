@@ -106,29 +106,45 @@ class IPVertex:
         else:
             vtxs = self.outputs
         for (label, vtx) in vtxs:
-            vtx.follow(direction, label, traversed, indent+1)
+            vtx.dump(direction, label, traversed, indent+1)
         return
 
-    def enum(self, direction, label, maxlen, chain=None):
+    def getchain(self, label, chain):
         feat = getfeat(self.node)
-        if feat is not None:
-            v = ('%s,%s' % (label, feat))
-            if v not in self.feats:
-                self.feats[v] = 0
-            self.feats[v] += 1
-            if self.node.ast is not None:
-                (_,s,e) = self.node.ast
-                fid = self.srcmap[self.node.graph.src]
-                v = ('%s,%s,%s,%s' % (v, s, e, fid))
-            chain = CLink(v, chain)
-            yield ' '.join(reversed(list(chain)))
-        if chain is None or len(chain) < maxlen:
-            if direction < 0:
-                vtxs = self.inputs
-            else:
-                vtxs = self.outputs
-            for (label, vtx) in vtxs:
-                for z in vtx.enum(direction, label, maxlen, chain):
+        if feat is None: return chain
+        v = ('%s,%s' % (label, feat))
+        if v not in self.feats:
+            self.feats[v] = 0
+        self.feats[v] += 1
+        if self.node.ast is not None:
+            (_,s,e) = self.node.ast
+            src = self.node.graph.src
+            fid = self.srcmap[src]
+            v = ('%s,%s,%s,%s' % (v, s, e, fid))
+        return CLink(v, chain)
+
+    def enum_forw(self, label, maxlen, chain0=None):
+        chain1 = self.getchain(label, chain0)
+        if chain1 is not chain0:
+            yield ' '.join(reversed(list(chain1)))
+        if chain1 is not None and  maxlen <= len(chain1): return
+        for (label, vtx) in self.outputs:
+            for z in vtx.enum_forw(label, maxlen, chain1):
+                yield z
+        return
+
+    def enum_back(self, label, maxlen, chain0=None):
+        chain1 = self.getchain(label, chain0)
+        if chain1 is not chain0:
+            yield ' '.join(reversed(list(chain1)))
+        if chain1 is not None and  maxlen <= len(chain1): return
+        if chain1 is not chain0:
+            for (label, vtx) in self.inputs:
+                for z in vtx.enum_back(label, maxlen, chain1):
+                    yield z
+        else:
+            for (_, vtx) in self.inputs:
+                for z in vtx.enum_back(label, maxlen, chain1):
                     yield z
         return
 
@@ -283,11 +299,11 @@ def main(argv):
                 name = graph.name
             for (inputs,outputs) in info:
                 for (label,vtx) in inputs.items():
-                    for feats in vtx.enum(-1, label, maxlen):
-                        print('+PATH %s -1 %s' % (name, feats))
+                    for feats in vtx.enum_back(label, maxlen):
+                        print('+PATH %s back %s' % (name, feats))
                 for (label,vtx) in outputs.items():
-                    for feats in vtx.enum(+1, label, maxlen):
-                        print('+PATH %s +1 %s' % (name, feats))
+                    for feats in vtx.enum_forw(label, maxlen):
+                        print('+PATH %s forw %s' % (name, feats))
 
     for (name,fid) in IPVertex.dumpsrcs():
         print('+SOURCE %d %s' % (fid, name))
