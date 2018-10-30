@@ -109,7 +109,7 @@ class ArrayRefNode extends ProgNode {
     public ArrayRefNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode array, DFNode index) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         this.accept(array, "array");
         this.accept(index, "index");
     }
@@ -955,7 +955,6 @@ public class Java2DF {
                 DFNode index = ctx.getRValue();
                 DFNode node = new ArrayRefNode(
                     graph, scope, ref, aa, array, index);
-                node.accept(ctx.get(ref));
                 ctx.setRValue(node);
 
             } else if (expr instanceof FieldAccess) {
