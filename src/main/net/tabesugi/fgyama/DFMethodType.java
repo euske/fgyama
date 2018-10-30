@@ -38,12 +38,14 @@ public class DFMethodType extends DFType {
     public int canConvertFrom(DFType type) {
         if (!(type instanceof DFMethodType)) return -1;
         DFMethodType mtype = (DFMethodType)type;
-        int dist = 0;
+        int dist = this.canAccept(mtype._argTypes);
+	if (dist < 0) return -1;
         if (_returnType != null && mtype._returnType != null) {
-            dist = _returnType.canConvertFrom(mtype._returnType);
-            if (dist < 0) return -1;
+            int d = _returnType.canConvertFrom(mtype._returnType);
+            if (d < 0) return -1;
+	    dist += d;
         }
-        return dist + this.canAccept(mtype._argTypes);
+        return dist;
     }
 
     public int canAccept(DFType[] argTypes) {

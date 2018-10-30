@@ -84,14 +84,20 @@ public class DFParamKlass extends DFKlass {
     }
 
     public int isSubclassOf(DFKlass klass) {
-        if (!(klass instanceof DFParamKlass)) return -1;
+        if (!(klass instanceof DFParamKlass)) {
+	    // A<T> isSubclassOf B -> A isSubclassOf B.
+	    return _genericKlass.isSubclassOf(klass);
+	}
+	// A<T> isSubclassOf B<S>?
         DFParamKlass pklass = (DFParamKlass)klass;
         if (_mapTypes.length != pklass._mapTypes.length) return -1;
-        int dist = pklass._genericKlass.isSubclassOf(_genericKlass);
-        if (dist < 0) return dist;
+	// A isSubclassOf B?
+        int dist = _genericKlass.isSubclassOf(pklass._genericKlass);
+        if (dist < 0) return -1;
         for (int i = 0; i < _mapTypes.length; i++) {
-            int d = _mapTypes[i].canConvertFrom(pklass._mapTypes[i]);
-            if (d < 0) return d;
+	    // T isSubclassOf S? -> S canConvertFrom T?
+            int d = pklass._mapTypes[i].canConvertFrom(_mapTypes[i]);
+            if (d < 0) return -1;
             dist += d;
         }
         return dist;

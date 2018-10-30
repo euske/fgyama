@@ -51,6 +51,7 @@ public class DFArrayType extends DFType {
 
     public int canConvertFrom(DFType type)
     {
+	if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) return -1;
         DFArrayType atype = (DFArrayType)type;
         if (_ndims != atype._ndims) return -1;

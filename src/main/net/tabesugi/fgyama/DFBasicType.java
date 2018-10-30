@@ -45,8 +45,7 @@ public class DFBasicType extends DFType {
     }
 
     public boolean equals(DFType type) {
-        return ((type instanceof DFBasicType) &&
-                (_code == ((DFBasicType)type)._code));
+        return (this == type);
     }
 
     public int canConvertFrom(DFType type) {
@@ -70,7 +69,7 @@ public class DFBasicType extends DFType {
 	    return 0;
 	}
         if (!(type instanceof DFBasicType)) return -1;
-        if (this.equals(type)) return 0;
+        if (this == type) return 0;
         return (this.isNumeric() && ((DFBasicType)type).isNumeric())? 1 : -1;
     }
 
