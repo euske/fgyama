@@ -51,7 +51,7 @@ public class DFParamKlass extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFParamKlass("+this.getFullName()+", "+getParamName(_mapTypes)+")>");
+        return ("<DFParamKlass("+this.getFullName()+")");
     }
 
     @Override

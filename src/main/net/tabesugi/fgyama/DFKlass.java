@@ -322,9 +322,6 @@ public class DFKlass extends DFType {
     }
 
     public DFTypeFinder addFinders(DFTypeFinder finder) {
-        if (_childSpace != null) {
-            finder = new DFTypeFinder(finder, _childSpace);
-        }
         if (_baseKlass != null) {
             finder = _baseKlass.addFinders(finder);
         }
@@ -334,6 +331,9 @@ public class DFKlass extends DFType {
                     finder = iface.addFinders(finder);
                 }
             }
+        }
+        if (_childSpace != null) {
+            finder = new DFTypeFinder(finder, _childSpace);
         }
         return finder;
     }
@@ -378,22 +378,23 @@ public class DFKlass extends DFType {
 
     private void build(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
-	finder = new DFTypeFinder(finder, _childSpace);
         String sig = getSignature(jklass.getAttributes());
+        DFTypeFinder finder2 = finder;
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
+            finder2 = new DFTypeFinder(finder2, _childSpace);
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _paramTypes = JNITypeParser.getParamTypes(sig, _childSpace);
 	    if (_paramTypes != null) {
-		parser.buildParamTypes(finder, _paramTypes);
+		parser.buildParamTypes(finder2, _paramTypes);
 	    }
-	    _baseKlass = (DFKlass)parser.getType(finder);
-	    finder = _baseKlass.addFinders(finder);
+	    _baseKlass = (DFKlass)parser.getType(finder2);
+	    finder2 = _baseKlass.addFinders(finder2);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
-		DFKlass iface = (DFKlass)parser.getType(finder);
+		DFKlass iface = (DFKlass)parser.getType(finder2);
 		if (iface == null) break;
-		finder = iface.addFinders(finder);
+		finder2 = iface.addFinders(finder2);
 		ifaces.add(iface);
 	    }
 	    _baseIfaces = new DFKlass[ifaces.size()];
@@ -401,19 +402,20 @@ public class DFKlass extends DFType {
         } else {
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
-		_baseKlass = finder.lookupKlass(superClass);
-		finder = _baseKlass.addFinders(finder);
+		_baseKlass = finder2.lookupKlass(superClass);
+		finder2 = _baseKlass.addFinders(finder2);
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
 	    if (ifaces != null) {
 		_baseIfaces = new DFKlass[ifaces.length];
 		for (int i = 0; i < ifaces.length; i++) {
-		    DFKlass iface = finder.lookupKlass(ifaces[i]);
+		    DFKlass iface = finder2.lookupKlass(ifaces[i]);
 		    _baseIfaces[i] = iface;
-		    finder = iface.addFinders(finder);
+		    finder2 = iface.addFinders(finder2);
 		}
 	    }
 	}
+	finder = this.addFinders(finder);
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
             sig = getSignature(fld.getAttributes());
