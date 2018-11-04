@@ -157,6 +157,21 @@ public class DFKlass extends DFType {
         return _initializer;
     }
 
+    // Special treatment of circular classes. (e.g. java.lang.Enum)
+    protected boolean isCircular() {
+        if (_paramTypes != null) {
+            for (DFParamType pt : _paramTypes) {
+                DFKlass klass = pt.getBase();
+                if (klass instanceof DFParamKlass) {
+                    if (((DFParamKlass)klass).getGeneric() == this) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public int isSubclassOf(DFKlass klass) {
         if (this == klass) return 0;
         if (_baseKlass != null) {

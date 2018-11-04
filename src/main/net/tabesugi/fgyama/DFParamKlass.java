@@ -91,6 +91,11 @@ public class DFParamKlass extends DFKlass {
 	// A<T> isSubclassOf B<S>?
         DFParamKlass pklass = (DFParamKlass)klass;
         if (_mapTypes.length != pklass._mapTypes.length) return -1;
+        // Special treatment of circular classes. (e.g. java.lang.Enum)
+        if (_genericKlass == pklass._genericKlass &&
+            _genericKlass.isCircular()) {
+            return 0;
+        }
 	// A isSubclassOf B?
         int dist = _genericKlass.isSubclassOf(pklass._genericKlass);
         if (dist < 0) return -1;
