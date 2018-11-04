@@ -93,9 +93,12 @@ public class JNITypeParser {
             }
             break;
         case '+':
-        case '-':
             _pos++;
             return this.getType(finder);
+        case '-':
+            _pos++;
+            this.getType(finder); // XXX super ignored.
+            return DFRootTypeSpace.getObjectKlass();
         case '*':
             _pos++;
             return DFRootTypeSpace.getObjectKlass();

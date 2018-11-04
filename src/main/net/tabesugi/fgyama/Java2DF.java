@@ -2356,7 +2356,6 @@ public class Java2DF {
 		throw e;
             }
         }
-        //converter.rootSpace.dump();
         exporter.close();
 
         Utils.printXml(output, exporter.document);
