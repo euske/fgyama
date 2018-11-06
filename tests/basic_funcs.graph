@@ -42,7 +42,7 @@
             <ast length="6" start="154" type="32"/>
           </node>
           <node id="Nbasic_funcs.main.b0_13" kind="assign" ref="#this" type="Lbasic_funcs;">
-            <link label="obj" src="Nbasic_funcs.main.b0_12"/>
+            <link label="update" src="Nbasic_funcs.main.b0_12"/>
             <ast length="6" start="154" type="32"/>
           </node>
           <node id="Nbasic_funcs.main.b0_14" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
@@ -63,7 +63,7 @@
             <ast length="21" start="170" type="32"/>
           </node>
           <node id="Nbasic_funcs.main.b0_19" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="obj" src="Nbasic_funcs.main.b0_18"/>
+            <link label="update" src="Nbasic_funcs.main.b0_18"/>
             <ast length="21" start="170" type="32"/>
           </node>
         </scope>
@@ -89,7 +89,7 @@
               <ast length="5" start="276" type="32"/>
             </node>
             <node id="Nbasic_funcs.moo.b0.b0_8" kind="assign" ref="#this" type="Lbasic_funcs;">
-              <link label="obj" src="Nbasic_funcs.moo.b0.b0_7"/>
+              <link label="update" src="Nbasic_funcs.moo.b0.b0_7"/>
               <ast length="5" start="276" type="32"/>
             </node>
             <node id="Nbasic_funcs.moo.b0.b0_9" kind="output" ref="#return" type="I">
@@ -116,7 +116,7 @@
               <ast length="8" start="319" type="32"/>
             </node>
             <node id="Nbasic_funcs.moo.b0.b1_16" kind="assign" ref="#this" type="Lbasic_funcs;">
-              <link label="obj" src="Nbasic_funcs.moo.b0.b1_15"/>
+              <link label="update" src="Nbasic_funcs.moo.b0.b1_15"/>
               <ast length="8" start="319" type="32"/>
             </node>
             <node data="2" id="Nbasic_funcs.moo.b0.b1_17" kind="const" type="I">

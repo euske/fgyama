@@ -17,7 +17,7 @@
             <ast length="6" start="147" type="32"/>
           </node>
           <node id="Nbasic_staticimport.foo.b0_6" kind="assign" ref="#this" type="Lbasic_staticimport;">
-            <link label="obj" src="Nbasic_staticimport.foo.b0_5"/>
+            <link label="update" src="Nbasic_staticimport.foo.b0_5"/>
             <ast length="6" start="147" type="32"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="Nbasic_staticimport.foo.b0_7" kind="call" type="V">
@@ -26,7 +26,7 @@
             <ast length="19" start="135" type="32"/>
           </node>
           <node id="Nbasic_staticimport.foo.b0_8" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="obj" src="Nbasic_staticimport.foo.b0_7"/>
+            <link label="update" src="Nbasic_staticimport.foo.b0_7"/>
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>

@@ -39,7 +39,7 @@
             <ast length="11" start="169" type="32"/>
           </node>
           <node id="Ndom/meep/multi_xref1.moo.b0_8" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
-            <link label="obj" src="Ndom/meep/multi_xref1.moo.b0_7"/>
+            <link label="update" src="Ndom/meep/multi_xref1.moo.b0_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.bam()I" id="Ndom/meep/multi_xref1.moo.b0_9" kind="call" type="I">
@@ -101,7 +101,7 @@
             <ast length="11" start="129" type="32"/>
           </node>
           <node id="Ndom/meep/multi_xref2.foo.b0_8" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
-            <link label="obj" src="Ndom/meep/multi_xref2.foo.b0_7"/>
+            <link label="update" src="Ndom/meep/multi_xref2.foo.b0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
           <node id="Ndom/meep/multi_xref2.foo.b0_9" kind="ref" ref="dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;">
@@ -182,7 +182,7 @@
             <ast length="11" start="175" type="32"/>
           </node>
           <node id="Ndom/dood/multi_xref3.baa.b0_5" kind="assign" ref="dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
-            <link label="obj" src="Ndom/dood/multi_xref3.baa.b0_4"/>
+            <link label="update" src="Ndom/dood/multi_xref3.baa.b0_4"/>
             <ast length="11" start="175" type="32"/>
           </node>
         </scope>

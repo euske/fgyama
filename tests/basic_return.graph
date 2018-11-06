@@ -23,7 +23,7 @@
             <ast length="8" start="189" type="32"/>
           </node>
           <node id="NFoo.basic_single.b0_12" kind="assign" ref="#this" type="LFoo;">
-            <link label="obj" src="NFoo.basic_single.b0_11"/>
+            <link label="update" src="NFoo.basic_single.b0_11"/>
             <ast length="8" start="189" type="32"/>
           </node>
           <node id="NFoo.basic_single.b0_13" kind="assign" ref="Foo.basic_single.b0/$d" type="I">

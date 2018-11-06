@@ -91,7 +91,7 @@
             <ast length="4" start="335" type="32"/>
           </node>
           <node id="NFoo.fb.b0_7" kind="assign" ref="#this" type="LFoo;">
-            <link label="obj" src="NFoo.fb.b0_6"/>
+            <link label="update" src="NFoo.fb.b0_6"/>
             <ast length="4" start="335" type="32"/>
           </node>
           <node id="NFoo.fb.b0_8" kind="ref" ref="Foo.fb.b0/$a" type="LObject;">
@@ -103,7 +103,7 @@
             <ast length="12" start="349" type="32"/>
           </node>
           <node id="NFoo.fb.b0_10" kind="assign" ref="Foo.fb.b0/$a" type="LObject;">
-            <link label="obj" src="NFoo.fb.b0_9"/>
+            <link label="update" src="NFoo.fb.b0_9"/>
             <ast length="12" start="349" type="32"/>
           </node>
           <node data="Lmoo;" id="NFoo.fb.b0_11" kind="new" type="Lmoo;">

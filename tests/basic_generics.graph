@@ -106,7 +106,7 @@
             <ast length="9" start="376" type="32"/>
           </node>
           <node id="Nbasic_generics.test.b0_6" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <link label="obj" src="Nbasic_generics.test.b0_5"/>
+            <link label="update" src="Nbasic_generics.test.b0_5"/>
             <ast length="9" start="376" type="32"/>
           </node>
           <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="Nbasic_generics.test.b0_7" kind="call" type="Ljava/lang/String;">
@@ -126,7 +126,7 @@
             <ast length="10" start="427" type="32"/>
           </node>
           <node id="Nbasic_generics.test.b0_11" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <link label="obj" src="Nbasic_generics.test.b0_10"/>
+            <link label="update" src="Nbasic_generics.test.b0_10"/>
             <ast length="10" start="427" type="32"/>
           </node>
           <node id="Nbasic_generics.test.b0_12" kind="assign" ref="basic_generics.test.b0/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -150,7 +150,7 @@
             <ast length="7" start="534" type="32"/>
           </node>
           <node id="Nbasic_generics.foo.b0_5" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
-            <link label="obj" src="Nbasic_generics.foo.b0_4"/>
+            <link label="update" src="Nbasic_generics.foo.b0_4"/>
             <ast length="7" start="534" type="32"/>
           </node>
           <node id="Nbasic_generics.foo.b0_6" kind="output" ref="#return" type="T:Ljava/lang/Object;">

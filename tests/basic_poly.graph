@@ -54,7 +54,7 @@
             <ast length="14" start="150" type="48"/>
           </node>
           <node id="NBaa.moo.b0_6" kind="assign" ref="#this" type="LBaa;">
-            <link label="obj" src="NBaa.moo.b0_5"/>
+            <link label="update" src="NBaa.moo.b0_5"/>
             <ast length="14" start="150" type="48"/>
           </node>
           <node id="NBaa.moo.b0_7" kind="ref" ref="Baa.moo/$obj" type="LFoo;">
@@ -115,7 +115,7 @@
             <ast length="8" start="272" type="32"/>
           </node>
           <node id="NBaa.main.b0_6" kind="assign" ref="Baa.main.b0/$a" type="LFoo;">
-            <link label="obj" src="NBaa.main.b0_5"/>
+            <link label="update" src="NBaa.main.b0_5"/>
             <ast length="8" start="272" type="32"/>
           </node>
           <node id="NBaa.main.b0_7" kind="assign" ref="Baa.main.b0/$x" type="I">
@@ -147,7 +147,7 @@
             <ast length="8" start="321" type="32"/>
           </node>
           <node id="NBaa.main.b0_14" kind="assign" ref="Baa.main.b0/$b" type="LFoo;">
-            <link label="obj" src="NBaa.main.b0_13"/>
+            <link label="update" src="NBaa.main.b0_13"/>
             <ast length="8" start="321" type="32"/>
           </node>
           <node data="=" id="NBaa.main.b0_15" kind="assignop" ref="Baa.main.b0/$x" type="I">
@@ -172,7 +172,7 @@
             <ast length="8" start="343" type="32"/>
           </node>
           <node id="NBaa.main.b0_20" kind="assign" ref="Baa.main.b0/$b" type="LFoo;">
-            <link label="obj" src="NBaa.main.b0_19"/>
+            <link label="update" src="NBaa.main.b0_19"/>
             <ast length="8" start="343" type="32"/>
           </node>
           <node data="=" id="NBaa.main.b0_21" kind="assignop" ref="Baa.main.b0/$x" type="I">
@@ -204,7 +204,7 @@
             <ast length="8" start="392" type="32"/>
           </node>
           <node id="NBaa.main.b0_28" kind="assign" ref="Baa.main.b0/$c" type="LBaa;">
-            <link label="obj" src="NBaa.main.b0_27"/>
+            <link label="update" src="NBaa.main.b0_27"/>
             <ast length="8" start="392" type="32"/>
           </node>
           <node data="=" id="NBaa.main.b0_29" kind="assignop" ref="Baa.main.b0/$x" type="I">
@@ -229,7 +229,7 @@
             <ast length="8" start="414" type="32"/>
           </node>
           <node id="NBaa.main.b0_34" kind="assign" ref="Baa.main.b0/$c" type="LBaa;">
-            <link label="obj" src="NBaa.main.b0_33"/>
+            <link label="update" src="NBaa.main.b0_33"/>
             <ast length="8" start="414" type="32"/>
           </node>
           <node data="=" id="NBaa.main.b0_35" kind="assignop" ref="Baa.main.b0/$x" type="I">

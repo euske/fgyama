@@ -50,7 +50,7 @@
             <ast length="9" start="97" type="32"/>
           </node>
           <node id="NFoo.basic_ops.b0_15" kind="assign" ref="#this" type="LFoo;">
-            <link label="obj" src="NFoo.basic_ops.b0_14"/>
+            <link label="update" src="NFoo.basic_ops.b0_14"/>
             <ast length="9" start="97" type="32"/>
           </node>
           <node data="=" id="NFoo.basic_ops.b0_16" kind="assignop" ref="Foo.basic_ops.b0/$z" type="I">

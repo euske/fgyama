@@ -37,7 +37,7 @@
             <ast length="26" start="100" type="32"/>
           </node>
           <node id="Ndom/meep/Foo.doit.b0_5" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="obj" src="Ndom/meep/Foo.doit.b0_4"/>
+            <link label="update" src="Ndom/meep/Foo.doit.b0_4"/>
             <ast length="26" start="100" type="32"/>
           </node>
           <node data="LBaz;" id="Ndom/meep/Foo.doit.b0_6" kind="new" type="LBaz;">
@@ -78,7 +78,7 @@
             <ast length="9" start="265" type="32"/>
           </node>
           <node id="Ndom/meep/Foo.doit.b0_17" kind="assign" ref="dom/meep/Foo.doit.b0/$baz" type="LBaz;">
-            <link label="obj" src="Ndom/meep/Foo.doit.b0_16"/>
+            <link label="update" src="Ndom/meep/Foo.doit.b0_16"/>
             <ast length="9" start="265" type="32"/>
           </node>
         </scope>
@@ -96,7 +96,7 @@
             <ast length="6" start="315" type="32"/>
           </node>
           <node id="Ndom/meep/Foo.meh.b0_3" kind="assign" ref="#this" type="Ldom/meep/Foo;">
-            <link label="obj" src="Ndom/meep/Foo.meh.b0_2"/>
+            <link label="update" src="Ndom/meep/Foo.meh.b0_2"/>
             <ast length="6" start="315" type="32"/>
           </node>
         </scope>
@@ -123,7 +123,7 @@
             <ast length="10" start="427" type="32"/>
           </node>
           <node id="Ndom/meep/Foo.main.b0_7" kind="assign" ref="dom/meep/Foo.main.b0/$foo" type="Ldom/meep/Foo;">
-            <link label="obj" src="Ndom/meep/Foo.main.b0_6"/>
+            <link label="update" src="Ndom/meep/Foo.main.b0_6"/>
             <ast length="10" start="427" type="32"/>
           </node>
         </scope>
