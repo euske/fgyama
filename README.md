@@ -56,8 +56,6 @@ TODOs:
 
   * Interprocedural field watch.
   * Generic type inference <>.
-  * static import.
-  * Better handling of GlobalScope.
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.
