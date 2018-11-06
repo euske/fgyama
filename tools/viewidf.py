@@ -123,7 +123,7 @@ def main(argv):
         p = log(total/featmap[k])
         featmap[k] = p
     def featsscore(feats):
-        return sum( featmap[k] for k in feats )
+        return sum( featmap.get(k,1) for k in feats )
     results = [ (featsscore(feats), feats, matches) for
                 (feats, matches) in count.items() if 2 <= len(matches) ]
     results.sort(reverse=True)
@@ -144,11 +144,12 @@ def main(argv):
             if html:
                 mid += 1
                 print('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> <code>%s</code></h3>' % (mid, mid, q(f[0])))
-                print('<div class=result hidden id=M%d>' % mid)
             else:
                 print('+ %s' % f[0])
             if srcdb is None: continue
             if len(f) != 4: continue
+            if html:
+                print('<div class=result hidden id="M%d">' % mid)
             start = int(f[1])
             length = int(f[2])
             fid = int(f[3])
