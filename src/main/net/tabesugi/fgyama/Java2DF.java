@@ -552,7 +552,7 @@ class ObjectUpdateNode extends SingleAssignNode {
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, MethodCallNode call) {
         super(graph, scope, ref, ast);
-        this.accept(call, "obj");
+        this.accept(call, "update");
     }
 }
 

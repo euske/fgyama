@@ -257,7 +257,7 @@ def main(argv):
                 calls[node] = args
             else:
                 for (label,prev) in node.inputs.items():
-                    if label.startswith('_'): continue
+                    if label == 'update' or label.startswith('_'): continue
                     if prev.kind in ('call', 'new'):
                         # Receive a return value from the callee.
                         if prev in rtns:
