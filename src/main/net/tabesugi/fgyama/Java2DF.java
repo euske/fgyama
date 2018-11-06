@@ -626,6 +626,68 @@ class ExceptionNode extends ProgNode {
     }
 }
 
+// DFModuleScope
+class DFModuleScope extends DFVarScope {
+
+    private Map<String, DFVarRef> _refs =
+	new HashMap<String, DFVarRef>();
+    private List<DFMethod> _methods =
+	new ArrayList<DFMethod>();
+
+    public DFModuleScope(DFVarScope parent, String path) {
+	super(parent, "["+path+"]");
+    }
+
+    public DFVarRef lookupVar(SimpleName name)
+	throws VariableNotFound {
+	String id = name.getIdentifier();
+	DFVarRef ref = _refs.get("."+id);
+	if (ref != null) {
+	    return ref;
+	} else {
+	    return super.lookupVar(name);
+	}
+    }
+
+    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes) {
+	String id = name.getIdentifier();
+	int bestDist = -1;
+	DFMethod bestMethod = null;
+	for (DFMethod method : _methods) {
+	    int dist = method.canAccept(id, argTypes);
+	    if (dist < 0) continue;
+	    if (bestDist < 0 || dist < bestDist) {
+		bestDist = dist;
+		bestMethod = method;
+	    }
+	}
+	return bestMethod;
+    }
+
+    public void importStatic(DFKlass klass) {
+	Logger.info("ImportStatic: "+klass+".*");
+	for (DFVarRef ref : klass.getFields()) {
+	    _refs.put(ref.getName(), ref);
+	}
+	for (DFMethod method : klass.getMethods()) {
+	    _methods.add(method);
+	}
+    }
+
+    public void importStatic(DFKlass klass, SimpleName name) {
+	Logger.info("ImportStatic: "+klass+"."+name);
+	String id = name.getIdentifier();
+	try {
+	    DFVarRef ref = klass.lookupField(name);
+	    _refs.put(ref.getName(), ref);
+	} catch (VariableNotFound e) {
+	    DFMethod method = klass.lookupMethod(name, null);
+	    _methods.add(method);
+	}
+
+    }
+}
+
 
 //  Java2DF
 //
@@ -846,6 +908,10 @@ public class Java2DF {
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
                 DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
+		if (method == null) {
+		    // try static imports.
+		    method = scope.lookupStaticMethod(invoke.getName(), argTypes);
+		}
                 if (method == null) {
                     String id = invoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
@@ -1980,22 +2046,21 @@ public class Java2DF {
         DFTypeSpace importSpace = new DFTypeSpace(null, "Import");
         int n = 0;
         for (ImportDeclaration importDecl : imports) {
-            try {
-                // XXX support static import
-                assert !importDecl.isStatic();
-                Name name = importDecl.getName();
-                if (importDecl.isOnDemand()) {
-                    Logger.info("Import: "+name+".*");
-                    finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
-                } else {
+            if (importDecl.isStatic()) continue;
+            Name name = importDecl.getName();
+            if (importDecl.isOnDemand()) {
+                Logger.info("Import: "+name+".*");
+                finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
+            } else {
+                try {
                     assert name.isQualifiedName();
                     DFKlass klass = _rootSpace.getKlass(name);
                     Logger.info("Import: "+name);
                     importSpace.addKlass(klass);
                     n++;
+                } catch (TypeNotFound e) {
+                    Logger.error("Import: class not found: "+e.name);
                 }
-            } catch (TypeNotFound e) {
-                Logger.error("Import: class not found: "+e.name);
             }
         }
         if (0 < n) {
@@ -2176,6 +2241,8 @@ public class Java2DF {
 
     private DFRootTypeSpace _rootSpace;
     private Exporter _exporter;
+    private Map<String, DFModuleScope> _moduleScope =
+        new HashMap<String, DFModuleScope>();
 
     public Java2DF(
         DFRootTypeSpace rootSpace) {
@@ -2211,13 +2278,15 @@ public class Java2DF {
 
     // pass1
     public void buildTypeSpace(
-        List<DFKlass> allKlasses, CompilationUnit cunit) {
+        List<DFKlass> allKlasses, String path, CompilationUnit cunit) {
 
         DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFGlobalVarScope global = _rootSpace.getGlobalScope();
+        DFModuleScope module = new DFModuleScope(global, path);
+        _moduleScope.put(path, module);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
-            typeSpace.build(klasses, cunit, global);
+            typeSpace.build(klasses, cunit, module);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -2252,10 +2321,27 @@ public class Java2DF {
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(CompilationUnit cunit)
+    public void buildGraphs(String path, CompilationUnit cunit)
         throws EntityNotFound {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
+        DFModuleScope module = _moduleScope.get(path);
+        // Handle static imports.
+        for (ImportDeclaration importDecl :
+                 (List<ImportDeclaration>) cunit.imports()) {
+            if (!importDecl.isStatic()) continue;
+            Name name = importDecl.getName();
+            if (importDecl.isOnDemand()) {
+                DFKlass klass = _rootSpace.getKlass(name);
+		klass.load(finder);
+                module.importStatic(klass);
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
+		klass.load(finder);
+                module.importStatic(klass, qname.getName());
+            }
+        }
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
@@ -2320,7 +2406,7 @@ public class Java2DF {
             Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = converter.parseFile(path);
-                converter.buildTypeSpace(klasses, cunit);
+                converter.buildTypeSpace(klasses, path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
 	    }
@@ -2347,7 +2433,7 @@ public class Java2DF {
             try {
                 CompilationUnit cunit = converter.parseFile(path);
                 exporter.startFile(path);
-                converter.buildGraphs(cunit);
+                converter.buildGraphs(path, cunit);
                 exporter.endFile();
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);

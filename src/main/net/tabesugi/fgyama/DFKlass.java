@@ -27,6 +27,8 @@ public class DFKlass extends DFType {
         new HashMap<String, DFParamKlass>();
 
     private DFMethod _initializer;
+    private List<DFVarRef> _fields =
+        new ArrayList<DFVarRef>();
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _ast2method =
@@ -217,6 +219,10 @@ public class DFKlass extends DFType {
         return this.lookupField(name.getIdentifier());
     }
 
+    protected List<DFVarRef> getFields() {
+	return _fields;
+    }
+
     protected List<DFMethod> getMethods() {
 	return _methods;
     }
@@ -268,6 +274,7 @@ public class DFKlass extends DFType {
         assert _scope != null;
         DFVarRef ref = _scope.addRef("."+id, type);
         //Logger.info("DFKlass.addField: "+ref);
+	_fields.add(ref);
         return ref;
     }
 
@@ -442,7 +449,7 @@ public class DFKlass extends DFType {
 	    } else {
 		type = finder.resolve(fld.getType());
 	    }
-            _scope.addRef("."+fld.getName(), type);
+	    this.addField(fld.getName(), fld.isStatic(), type);
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
