@@ -55,7 +55,7 @@ public class DFNode implements Comparable<DFNode> {
             elem.setAttribute("type", _type.getTypeName());
         }
         if (_ref != null) {
-            elem.setAttribute("ref", _ref.getRefName());
+            elem.setAttribute("ref", _ref.getFullName());
         }
         for (DFLink link : this.getLinks()) {
             elem.appendChild(link.toXML(document));

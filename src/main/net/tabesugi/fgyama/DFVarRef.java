@@ -26,9 +26,9 @@ public class DFVarRef implements Comparable<DFVarRef> {
     @Override
     public String toString() {
         if (_type == null) {
-            return ("<DFVarRef("+this.getRefName()+")>");
+            return ("<DFVarRef("+this.getFullName()+")>");
         } else {
-            return ("<DFVarRef("+this.getRefName()+": "+_type.toString()+">");
+            return ("<DFVarRef("+this.getFullName()+": "+_type.toString()+">");
         }
     }
 
@@ -46,7 +46,11 @@ public class DFVarRef implements Comparable<DFVarRef> {
         return (_scope instanceof DFLocalVarScope);
     }
 
-    public String getRefName() {
+    public String getName() {
+	return _name;
+    }
+
+    public String getFullName() {
         if (_scope != null) {
             return _scope.getFullName()+"/"+_name;
         } else {
