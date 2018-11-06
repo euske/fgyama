@@ -94,6 +94,7 @@ def main(argv):
         (v2,_,v) = v.partition(',')
         return (v1+','+v2)
 
+    paths = 0
     count = {}
     srcmap = {}
     featmap = {}
@@ -112,6 +113,7 @@ def main(argv):
             else:
                 d = count[feats] = {}
             d[func] = f[3:]
+            paths += 1
         elif f[0] == '+SOURCE':
             srcmap[int(f[1])] = f[2]
         elif f[0] == '+FEAT':
@@ -119,6 +121,8 @@ def main(argv):
             featmap[f[2]] = n
             total += n
     #
+    print('read: %d paths, %d sources, %d feats (total: %r)' %
+          (paths, len(srcmap), len(featmap), total), file=sys.stderr)
     for k in featmap:
         p = log(total/featmap[k])
         featmap[k] = p
@@ -126,6 +130,7 @@ def main(argv):
         return sum( featmap.get(k,1) for k in feats )
     results = [ (featsscore(feats), feats, matches) for
                 (feats, matches) in count.items() if 2 <= len(matches) ]
+    print('results: %d' % len(results), file=sys.stderr)
     results.sort(reverse=True)
     if 0 < maxresults:
         results = results[:maxresults]
