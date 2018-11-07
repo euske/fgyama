@@ -106,8 +106,9 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes) {
-	if (_parent == null) return null;
+    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
+        throws MethodNotFound {
+	if (_parent == null) throw new MethodNotFound(name.getIdentifier());
 	return _parent.lookupStaticMethod(name, argTypes);
     }
 

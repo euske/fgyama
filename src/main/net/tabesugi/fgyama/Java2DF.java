@@ -649,7 +649,8 @@ class DFModuleScope extends DFVarScope {
 	}
     }
 
-    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
+        throws MethodNotFound {
 	String id = name.getIdentifier();
 	int bestDist = -1;
 	DFMethod bestMethod = null;
@@ -661,6 +662,7 @@ class DFModuleScope extends DFVarScope {
 		bestMethod = method;
 	    }
 	}
+        if (bestMethod == null) throw new MethodNotFound(id);
 	return bestMethod;
     }
 
@@ -681,10 +683,12 @@ class DFModuleScope extends DFVarScope {
 	    DFVarRef ref = klass.lookupField(name);
 	    _refs.put(ref.getName(), ref);
 	} catch (VariableNotFound e) {
-	    DFMethod method = klass.lookupMethod(name, null);
-	    _methods.add(method);
+            try {
+                DFMethod method = klass.lookupMethod(name, null);
+                _methods.add(method);
+            } catch (MethodNotFound ee) {
+            }
 	}
-
     }
 }
 
@@ -907,18 +911,22 @@ public class Java2DF {
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
-		if (method == null) {
+                DFMethod method;
+                try {
+                    method = klass.lookupMethod(invoke.getName(), argTypes);
+                } catch (MethodNotFound e) {
 		    // try static imports.
-		    method = scope.lookupStaticMethod(invoke.getName(), argTypes);
-		}
-                if (method == null) {
-                    String id = invoke.getName().getIdentifier();
-                    DFMethod fallback = new DFMethod(
-                        klass, null, id, false,
-                        new DFMethodType(argTypes, null));
-                    Logger.error("Fallback method: "+klass+": "+fallback);
-                    method = fallback;
+                    try {
+                        method = scope.lookupStaticMethod(invoke.getName(), argTypes);
+                    } catch (MethodNotFound ee) {
+                        // fallback method.
+                        String id = invoke.getName().getIdentifier();
+                        DFMethod fallback = new DFMethod(
+                            klass, null, id, false,
+                            new DFMethodType(argTypes, null));
+                        Logger.error("Fallback method: "+klass+": "+fallback);
+                        method = fallback;
+                    }
                 }
                 DFMethod methods[] = method.getOverrides();
                 MethodCallNode call = new MethodCallNode(
@@ -953,8 +961,11 @@ public class Java2DF {
                 typeList.toArray(argTypes);
                 DFKlass klass = finder.resolveKlass(obj.getNodeType());
                 DFKlass baseKlass = klass.getBase();
-                DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
-                if (method == null) {
+                DFMethod method;
+                try {
+                    method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
+                } catch (MethodNotFound e) {
+                    // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, false,

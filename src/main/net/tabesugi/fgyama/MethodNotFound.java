@@ -3,13 +3,13 @@
 package net.tabesugi.fgyama;
 
 
-//  VariableNotFound
+//  MethodNotFound
 //
-public class VariableNotFound extends EntityNotFound {
+public class MethodNotFound extends EntityNotFound {
 
     private static final long serialVersionUID = 1L;
 
-    public VariableNotFound(String name) {
+    public MethodNotFound(String name) {
         super(name);
     }
 }

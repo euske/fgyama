@@ -242,22 +242,27 @@ public class DFKlass extends DFType {
         return bestMethod;
     }
 
-    public DFMethod lookupMethod(SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupMethod(SimpleName name, DFType[] argTypes)
+        throws MethodNotFound {
         DFMethod method = this.lookupMethod1(name, argTypes);
         if (method != null) {
             return method;
         }
         if (_baseKlass != null) {
-            method = _baseKlass.lookupMethod(name, argTypes);
-            if (method != null) return method;
+            try {
+                return _baseKlass.lookupMethod(name, argTypes);
+            } catch (MethodNotFound e) {
+            }
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                method = iface.lookupMethod(name, argTypes);
-                if (method != null) return method;
+                try {
+                    return iface.lookupMethod(name, argTypes);
+                } catch (MethodNotFound e) {
+                }
             }
         }
-        return null;
+        throw new MethodNotFound(name.getIdentifier());
     }
 
     public DFMethod getMethodByAST(ASTNode ast) {

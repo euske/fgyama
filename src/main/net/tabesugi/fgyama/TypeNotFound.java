@@ -1,8 +1,6 @@
 //  Java2DF
 //
 package net.tabesugi.fgyama;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.dom.*;
 
 
 //  TypeNotFound

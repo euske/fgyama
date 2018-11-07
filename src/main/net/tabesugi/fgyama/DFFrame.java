@@ -363,9 +363,12 @@ public class DFFrame {
             }
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
-            if (method == null) return null;
-            return method.getReturnType();
+            try {
+                DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
+                return method.getReturnType();
+            } catch (MethodNotFound e) {
+                return null;
+            }
 
         } else if (expr instanceof SuperMethodInvocation) {
             SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
@@ -380,9 +383,12 @@ public class DFFrame {
             DFKlass klass =
                 finder.resolveKlass(scope.lookupThis().getRefType());
             DFKlass baseKlass = klass.getBase();
-            DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
-            if (method == null) return null;
-            return method.getReturnType();
+            try {
+                DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
+                return method.getReturnType();
+            } catch (MethodNotFound e) {
+                return null;
+            }
 
         } else if (expr instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)expr;
