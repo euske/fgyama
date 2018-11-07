@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <graph init="false" ins="" name="LObject;.toString()Ljava/lang/String;" outs="NObject.toString.b0_2">
+    <graph ins="" name="LObject;.toString()Ljava/lang/String;" outs="NObject.toString.b0_2" style="instance">
       <ast length="57" start="19" type="31"/>
       <scope name="Object.toString">
         <scope name="Object.toString.b0">
@@ -14,11 +14,11 @@
         </scope>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Object" outs="">
+    <graph ins="" name="Object" outs="" style="initializer">
       <ast length="78" start="0" type="55"/>
       <scope name="Object"/>
     </graph>
-    <graph init="false" ins="" name="LFoo;.fa()V" outs="">
+    <graph ins="" name="LFoo;.fa()V" outs="" style="static">
       <ast length="43" start="103" type="31"/>
       <scope name="Foo.fa">
         <scope name="Foo.fa.b0">
@@ -32,7 +32,7 @@
         </scope>
       </scope>
     </graph>
-    <graph init="false" ins="" name="Lmoo;.fc()I" outs="Nmoo.fc.b0_2">
+    <graph ins="" name="Lmoo;.fc()I" outs="Nmoo.fc.b0_2" style="instance">
       <ast length="31" start="292" type="31"/>
       <scope name="moo.fc">
         <scope name="moo.fc.b0">
@@ -46,11 +46,11 @@
         </scope>
       </scope>
     </graph>
-    <graph init="true" ins="" name="moo" outs="">
+    <graph ins="" name="moo" outs="" style="initializer">
       <ast length="51" start="275" type="55"/>
       <scope name="moo"/>
     </graph>
-    <graph init="false" ins="" name="LObject/anonymous/anonymous;.toString()Ljava/lang/String;" outs="NObject/anonymous/anonymous.toString.b0_2">
+    <graph ins="" name="LObject/anonymous/anonymous;.toString()Ljava/lang/String;" outs="NObject/anonymous/anonymous.toString.b0_2" style="instance">
       <ast length="42" start="223" type="31"/>
       <scope name="Object/anonymous/anonymous.toString">
         <scope name="Object/anonymous/anonymous.toString.b0">
@@ -64,11 +64,11 @@
         </scope>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Object/anonymous/anonymous" outs="">
+    <graph ins="" name="Object/anonymous/anonymous" outs="" style="initializer">
       <ast length="53" start="219" type="1"/>
       <scope name="Object/anonymous/anonymous"/>
     </graph>
-    <graph init="false" ins="NFoo.fb_5" name="LFoo;.fb()V" outs="">
+    <graph ins="NFoo.fb_5" name="LFoo;.fb()V" outs="" style="static">
       <ast length="244" start="151" type="31"/>
       <scope name="Foo.fb">
         <scope name="Foo.fb.b0">
@@ -117,7 +117,7 @@
         <node id="NFoo.fb_5" ref="#this" type="LFoo;"/>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Foo" outs="">
+    <graph ins="" name="Foo" outs="" style="initializer">
       <ast length="317" start="80" type="55"/>
       <scope name="Foo"/>
     </graph>

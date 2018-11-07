@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_if.java">
-    <graph init="false" ins="NFoo.basic_if_1" name="LFoo;.basic_if(I)V" outs="">
+    <graph ins="NFoo.basic_if_1" name="LFoo;.basic_if(I)V" outs="" style="static">
       <ast length="102" start="23" type="31"/>
       <scope name="Foo.basic_if">
         <scope name="Foo.basic_if.b0">
@@ -58,7 +58,7 @@
         </node>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Foo" outs="">
+    <graph ins="" name="Foo" outs="" style="initializer">
       <ast length="127" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>

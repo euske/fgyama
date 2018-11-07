@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_while.java">
-    <graph init="false" ins="NFoo.basic_while_1" name="LFoo;.basic_while(I)V" outs="">
+    <graph ins="NFoo.basic_while_1" name="LFoo;.basic_while(I)V" outs="" style="static">
       <ast length="85" start="23" type="31"/>
       <scope name="Foo.basic_while">
         <scope name="Foo.basic_while.b0">
@@ -70,7 +70,7 @@
         </node>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Foo" outs="">
+    <graph ins="" name="Foo" outs="" style="initializer">
       <ast length="110" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>

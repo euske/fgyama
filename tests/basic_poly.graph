@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_poly.java">
-    <graph init="false" ins="NFoo.moo_1 NFoo.moo_5" name="LFoo;.moo(LFoo;)I" outs="NFoo.moo.b0_6">
+    <graph ins="NFoo.moo_1 NFoo.moo_5" name="LFoo;.moo(LFoo;)I" outs="NFoo.moo.b0_6" style="instance">
       <ast length="53" start="31" type="31"/>
       <scope name="Foo.moo">
         <scope name="Foo.moo.b0">
@@ -28,7 +28,7 @@
         <node id="NFoo.moo_5" ref="Foo/.x" type="I"/>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Foo" outs="">
+    <graph ins="" name="Foo" outs="" style="initializer">
       <ast length="86" start="0" type="55"/>
       <scope name="Foo">
         <node data="0" id="NFoo_1" kind="const" type="I">
@@ -40,7 +40,7 @@
         </node>
       </scope>
     </graph>
-    <graph init="false" ins="NBaa.moo_1 NBaa.moo_9" name="LBaa;.moo(LFoo;)I" outs="NBaa.moo.b0_12">
+    <graph ins="NBaa.moo_1 NBaa.moo_9" name="LBaa;.moo(LFoo;)I" outs="NBaa.moo.b0_12" style="instance">
       <ast length="79" start="116" type="31"/>
       <scope name="Baa.moo">
         <scope name="Baa.moo.b0">
@@ -90,7 +90,7 @@
         <node id="NBaa.moo_9" ref="Foo/.x" type="I"/>
       </scope>
     </graph>
-    <graph init="false" ins="" name="LBaa;.main()V" outs="">
+    <graph ins="" name="LBaa;.main()V" outs="" style="static">
       <ast length="228" start="201" type="31"/>
       <scope name="Baa.main">
         <scope name="Baa.main.b0">
@@ -239,7 +239,7 @@
         </scope>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Baa" outs="">
+    <graph ins="" name="Baa" outs="" style="initializer">
       <ast length="343" start="88" type="55"/>
       <scope name="Baa"/>
     </graph>

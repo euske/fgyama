@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_ops.java">
-    <graph init="false" ins="NFoo.basic_ops.b0_25 NFoo.basic_ops_1 NFoo.basic_ops_11" name="LFoo;.basic_ops(I)I" outs="NFoo.basic_ops.b0_25 NFoo.basic_ops.b0_34">
+    <graph ins="NFoo.basic_ops.b0_25 NFoo.basic_ops_1 NFoo.basic_ops_11" name="LFoo;.basic_ops(I)I" outs="NFoo.basic_ops.b0_25 NFoo.basic_ops.b0_34" style="static">
       <ast length="162" start="23" type="31"/>
       <scope name="Foo.basic_ops">
         <scope name="Foo.basic_ops.b0">
@@ -139,7 +139,7 @@
         <node id="NFoo.basic_ops_11" ref="#this" type="LFoo;"/>
       </scope>
     </graph>
-    <graph init="true" ins="" name="Foo" outs="">
+    <graph ins="" name="Foo" outs="" style="initializer">
       <ast length="187" start="0" type="55"/>
       <scope name="Foo"/>
     </graph>
