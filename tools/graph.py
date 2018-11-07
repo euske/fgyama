@@ -23,9 +23,10 @@ def sp(x):
 ##
 class DFGraph:
 
-    def __init__(self, gid, name, src=None):
+    def __init__(self, gid, name, style, src=None):
         self.gid = gid
         self.name = name
+        self.style = style
         self.src = src
         self.root = None
         self.scopes = {}
@@ -170,9 +171,10 @@ class DFNode:
 def parse_graph(gid, egraph, src=None):
     assert egraph.tag == 'graph'
     gname = egraph.get('name')
+    style = egraph.get('style')
     ins = sp(egraph.get('ins'))
     outs = sp(egraph.get('outs'))
-    graph = DFGraph(gid, gname, src)
+    graph = DFGraph(gid, gname, style, src)
 
     def parse_node(nid, scope, enode):
         assert enode.tag == 'node'
@@ -265,7 +267,8 @@ CREATE TABLE ASTNode (
 CREATE TABLE DFGraph (
     Gid INTEGER PRIMARY KEY,
     Cid INTEGER,
-    Name TEXT
+    Name TEXT,
+    Style TEXT
 );
 
 CREATE TABLE DFScope (
@@ -321,8 +324,8 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
     def add(self, cid, graph):
         cur = self._cur
         cur.execute(
-            'INSERT INTO DFGraph VALUES (NULL,?,?);',
-            (cid, graph.name))
+            'INSERT INTO DFGraph VALUES (NULL,?,?,?);',
+            (cid, graph.name, graph.style))
         gid = cur.lastrowid
         graph.gid = gid
 
@@ -368,14 +371,14 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
     def get(self, gid):
         cur = self._cur
         cur.execute(
-            'SELECT Cid,Name FROM DFGraph WHERE Gid=?;',
+            'SELECT Cid,Name,Style FROM DFGraph WHERE Gid=?;',
             (gid,))
-        (cid,name) = cur.fetchone()
+        (cid,name,style) = cur.fetchone()
         cur.execute(
             'SELECT FileName FROM SourceFile WHERE Cid=?;',
             (cid,))
         (src,) = cur.fetchone()
-        graph = DFGraph(gid, name, src)
+        graph = DFGraph(gid, name, style, src)
         rows = cur.execute(
             'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
             (gid,))

@@ -2157,7 +2157,7 @@ public class Java2DF {
         throws UnsupportedSyntax, EntityNotFound {
         DFMethod method = klass.getInitializer();
         DFFrame frame = new DFFrame(DFFrame.METHOD);
-        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<init>");
+        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<clinit>");
         DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
         scope.build(finder, initializer);
         frame.build(finder, scope, initializer.getBody());
