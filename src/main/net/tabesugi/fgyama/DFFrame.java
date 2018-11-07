@@ -258,7 +258,15 @@ public class DFFrame {
             return ref.getRefType();
 
         } else if (expr instanceof ThisExpression) {
-            DFVarRef ref = scope.lookupThis();
+            ThisExpression thisExpr = (ThisExpression)expr;
+            Name name = thisExpr.getQualifier();
+            DFVarRef ref;
+            if (name != null) {
+                DFKlass klass = finder.lookupKlass(name);
+                ref = klass.getScope().lookupThis();
+            } else {
+                ref = scope.lookupThis();
+            }
             this.addInputRef(ref);
             return ref.getRefType();
 

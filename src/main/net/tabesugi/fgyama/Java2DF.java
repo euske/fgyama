@@ -741,7 +741,15 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof ThisExpression) {
-                DFVarRef ref = scope.lookupThis();
+                ThisExpression thisExpr = (ThisExpression)expr;
+                Name name = thisExpr.getQualifier();
+                DFVarRef ref;
+                if (name != null) {
+                    DFKlass klass = finder.lookupKlass(name);
+                    ref = klass.getScope().lookupThis();
+                } else {
+                    ref = scope.lookupThis();
+                }
                 DFNode node = new VarRefNode(graph, scope, ref, expr);
                 node.accept(ctx.get(ref));
                 ctx.setRValue(node);
