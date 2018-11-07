@@ -125,9 +125,9 @@ class IPVertex:
 
     def enum_forw(self, label, maxlen, chain0=None):
         chain1 = self.getchain(label, chain0)
-        if chain1 is not chain0:
+        if chain1 is not None and maxlen <= len(chain1):
             yield ' '.join(reversed(list(chain1)))
-        if chain1 is not None and  maxlen <= len(chain1): return
+            return
         for (label, vtx) in self.outputs:
             for z in vtx.enum_forw(label, maxlen, chain1):
                 yield z
@@ -135,9 +135,9 @@ class IPVertex:
 
     def enum_back(self, label, maxlen, chain0=None):
         chain1 = self.getchain(label, chain0)
-        if chain1 is not chain0:
+        if chain1 is not None and maxlen <= len(chain1):
             yield ' '.join(reversed(list(chain1)))
-        if chain1 is not None and  maxlen <= len(chain1): return
+            return
         if chain1 is not chain0:
             for (label, vtx) in self.inputs:
                 for z in vtx.enum_back(label, maxlen, chain1):
@@ -162,6 +162,7 @@ def main(argv):
     debug = 0
     maxlen = 5
     maxcall = 100
+    maxoverrides = 1
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-m': maxlen = int(v)
@@ -199,18 +200,13 @@ def main(argv):
         for node in src:
             if node.kind == 'call':
                 for name in node.data.split(' '):
-                    # In order to stop the number of possible contexts grow
-                    # exponentially, the most specific method is used.
-                    if name in gid2graph:
-                        link(src.name, name)
-                        break
-                else:
-                    # This function is not defined within the source code.
-                    for name in node.data.split(' '):
-                        link(src.name, name)
+                    link(src.name, name)
             elif node.kind == 'new':
                 name = node.data
                 link(src.name, name)
+    gid2called = { gid: len(a) for (gid,a) in linkfrom.items() }
+    starts = [ graph.name for graph in graphs
+               if graph.name in linkto and graph.name not in linkfrom ]
 
     # trace dataflow
     def trace(gid, inputs, chain=None):
@@ -239,7 +235,6 @@ def main(argv):
             info = gid2info[gid]
         else:
             info = gid2info[gid] = []
-        if maxcall <= len(info): return outputs
         if chain is not None and graph in chain: return outputs
         info.append((inputs, outputs))
         # calls: {funcall: {key:value}}
@@ -265,9 +260,8 @@ def main(argv):
                         else:
                             rcvers = rtns[prev] = []
                         rcvers.append((label, vnode))
-                    else:
-                        vprev = vtxs[prev]
-                        vprev.connect(label, vnode)
+                    vprev = vtxs[prev]
+                    vprev.connect(label, vnode)
         for (funcall,args) in calls.items():
             print ('#%s %s(%r, %r)' % (ind, funcall.kind, funcall.data, args),
                    file=sys.stderr)
@@ -279,26 +273,28 @@ def main(argv):
         for (funcall,rcvers) in rtns.items():
             assert funcall in calls
             args = calls[funcall]
-            for name in funcall.data.split(' '):
-                # the most specific method is used.
-                if name in gid2graph:
-                    vals = trace(name, args, chain)
-                    for (_,sender) in vals.items():
-                        for (label,rcver) in rcvers:
-                            sender.connect(label, rcver)
-                    break
+            funcs = funcall.data.split(' ')
+            # Limit the number of possible overrides to
+            # only a few most specific methods for
+            # preventing the exponential growth of contexts.
+            for name in funcs[:maxoverrides]:
+                if name not in gid2graph: continue
+                if maxcall <= gid2called.get(gid, 0): continue
+                vals = trace(name, args, chain)
+                for (_,sender) in vals.items():
+                    for (label,rcver) in rcvers:
+                        sender.connect(label, rcver)
         return outputs
 
     # Find start nodes.
-    graphs = [ graph for graph in graphs
-               if graph.name in linkto and graph.name not in linkfrom ]
-    print('# graphs (filtered): %r' % len(graphs), file=sys.stderr)
-    for graph in graphs:
-        print('# start: %r' % graph.name, file=sys.stderr)
+    print('# starts: %r' % len(starts), file=sys.stderr)
+    for gid0 in starts:
+        print('# start: %r' % gid0, file=sys.stderr)
         IPVertex.vid_base = 0
+        graph = gid2graph[gid0]
         inputs = { node.ref: IPVertex(node) for node in graph.ins }
         gid2info = {}
-        trace(graph.name, inputs)
+        trace(gid0, inputs)
         for (gid,info) in gid2info.items():
             graph = gid2graph[gid]
             if graph.ast is not None:
@@ -314,7 +310,7 @@ def main(argv):
                 for (label,vtx) in outputs.items():
                     for feats in vtx.enum_forw(label, maxlen):
                         print('+PATH %s forw %s' % (name, feats))
-        print('# end: %r (%d)' % (graph.name, IPVertex.vid_base), file=sys.stderr)
+        print('# end: %r (%d)' % (gid0, IPVertex.vid_base), file=sys.stderr)
 
     for (name,fid) in IPVertex.dumpsrcs():
         print('+SOURCE %d %s' % (fid, name))
