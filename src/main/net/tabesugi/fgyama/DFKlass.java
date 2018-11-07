@@ -669,14 +669,15 @@ public class DFKlass extends DFType {
             return _this;
         }
 
-        public DFVarRef lookupVar(SimpleName name)
+        @Override
+        protected DFVarRef lookupVar1(String id)
             throws VariableNotFound {
             // try local variables first.
             try {
-                return super.lookupVar(name);
+                return super.lookupVar1(id);
             } catch (VariableNotFound e) {
                 // try field names.
-                return _klass.lookupField(name.getIdentifier());
+                return _klass.lookupField(id);
             }
         }
 

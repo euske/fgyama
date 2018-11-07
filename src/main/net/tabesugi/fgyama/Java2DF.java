@@ -638,14 +638,14 @@ class DFModuleScope extends DFVarScope {
 	super(parent, "["+path+"]");
     }
 
-    public DFVarRef lookupVar(SimpleName name)
+    @Override
+    protected DFVarRef lookupVar1(String id)
 	throws VariableNotFound {
-	String id = name.getIdentifier();
 	DFVarRef ref = _refs.get("."+id);
 	if (ref != null) {
 	    return ref;
 	} else {
-	    return super.lookupVar(name);
+	    return super.lookupVar1(id);
 	}
     }
 

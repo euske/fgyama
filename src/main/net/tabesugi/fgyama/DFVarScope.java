@@ -96,10 +96,15 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return _parent.lookupThis();
     }
 
+    protected DFVarRef lookupVar1(String id)
+        throws VariableNotFound {
+        return this.lookupRef("$"+id);
+    }
+
     public DFVarRef lookupVar(SimpleName name)
         throws VariableNotFound {
         try {
-            return this.lookupRef("$"+name.getIdentifier());
+            return this.lookupVar1(name.getIdentifier());
         } catch (VariableNotFound e) {
             if (_parent == null) throw e;
             return _parent.lookupVar(name);
