@@ -14,7 +14,7 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFKlass _klass;
     private DFTypeSpace _childSpace;
     private String _name;
-    private boolean _static;
+    private DFCallStyle _callStyle;
     private DFMethodType _methodType;
 
     private List<DFOverride> _overrides = new ArrayList<DFOverride>();
@@ -46,22 +46,22 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
-        String name, boolean isStatic, DFMethodType methodType) {
+        String name, DFCallStyle callStyle, DFMethodType methodType) {
         _klass = klass;
         _childSpace = childSpace;
         _name = name;
-        _static = isStatic;
+        _callStyle = callStyle;
         _methodType = methodType;
     }
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
-        String name, boolean isStatic, DFMethodType methodType,
+        String name, DFCallStyle callStyle, DFMethodType methodType,
         DFOverride[] overrides) {
         _klass = klass;
         _childSpace = childSpace;
         _name = name;
-        _static = isStatic;
+        _callStyle = callStyle;
         _methodType = methodType;
 	for (DFOverride override : overrides) {
 	    _overrides.add(override);
@@ -91,6 +91,10 @@ public class DFMethod implements Comparable<DFMethod> {
             name = "!"+_name;
         }
         return name + _methodType.getTypeName();
+    }
+
+    public DFCallStyle getCallStyle() {
+        return _callStyle;
     }
 
     public DFTypeSpace getChildSpace() {
@@ -137,7 +141,7 @@ public class DFMethod implements Comparable<DFMethod> {
         }
         if (changed) {
             return new DFMethod(
-                _klass, _childSpace, _name, _static,
+                _klass, _childSpace, _name, _callStyle,
                 methodType, overrides);
         }
         return this;

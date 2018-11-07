@@ -41,8 +41,10 @@ public class DFGraph {
         Element elem = document.createElement("graph");
         if (_method != null) {
             elem.setAttribute("name", _method.getSignature());
+            elem.setAttribute("style", _method.getCallStyle().toString());
         } else {
             elem.setAttribute("name", _root.getFullName());
+            elem.setAttribute("style", DFCallStyle.Initializer.toString());
         }
         if (_ast != null) {
             Element east = document.createElement("ast");
@@ -51,7 +53,6 @@ public class DFGraph {
             east.setAttribute("length", Integer.toString(_ast.getLength()));
             elem.appendChild(east);
         }
-        elem.setAttribute("init", Boolean.toString(_init));
         elem.setAttribute("ins", getNodeIds(_frame.getInputNodes()));
         elem.setAttribute("outs", getNodeIds(_frame.getOutputNodes()));
         DFNode[] nodes = new DFNode[_nodes.size()];

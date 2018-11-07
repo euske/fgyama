@@ -51,7 +51,7 @@ public class DFKlass extends DFType {
             _scope = new DFKlassScope(this, parentScope, name);
         }
         _initializer = this.addMethod(
-            null, "<init>", true,
+            null, "<init>", DFCallStyle.Initializer,
             new DFMethodType(new DFType[] {}, DFBasicType.VOID));
     }
 
@@ -284,20 +284,10 @@ public class DFKlass extends DFType {
     }
 
     private DFMethod addMethod(
-        DFTypeSpace methodSpace, SimpleName name, boolean isStatic,
+        DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
         DFMethodType methodType) {
-        String id = name.getIdentifier();
-        DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic, methodType);
-        return this.addMethod(method);
-    }
-
-    private DFMethod addMethod(
-        DFTypeSpace methodSpace, String id, boolean isStatic,
-        DFMethodType methodType) {
-        DFMethod method = new DFMethod(
-            this, methodSpace, id, isStatic, methodType);
-        return this.addMethod(method);
+        return this.addMethod(
+            new DFMethod(this, methodSpace, id, callStyle, methodType));
     }
 
     private DFMethod addMethod(DFMethod method) {
@@ -480,7 +470,15 @@ public class DFKlass extends DFType {
 		DFType returnType = finder.resolve(meth.getReturnType());
 		methodType = new DFMethodType(argTypes, returnType);
 	    }
-	    this.addMethod(methodSpace, meth.getName(), meth.isStatic(), methodType);
+            DFCallStyle callStyle;
+            if (meth.getName().equals("<init>")) {
+                callStyle = DFCallStyle.Constructor;
+            } else {
+                callStyle = (meth.isStatic())?
+                    DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
+            }
+	    this.addMethod(
+                methodSpace, meth.getName(), callStyle, methodType);
         }
     }
 
@@ -619,14 +617,20 @@ public class DFKlass extends DFType {
                 }
                 DFType[] argTypes = finder2.resolveArgs(decl);
                 DFType returnType;
+                String name;
+                DFCallStyle callStyle;
                 if (decl.isConstructor()) {
                     returnType = this;
-                    // XXX treat method name specially.
+                    name = "<init>";
+                    callStyle = DFCallStyle.Constructor;
                 } else {
                     returnType = finder2.resolve(decl.getReturnType2());
+                    name = decl.getName().getIdentifier();
+                    callStyle = (isStatic(decl))?
+                        DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 }
                 DFMethod method = this.addMethod(
-                    methodSpace, decl.getName(), isStatic(decl),
+                    methodSpace, name, callStyle,
                     new DFMethodType(argTypes, returnType));
                 _ast2method.put(Utils.encodeASTNode(decl), method);
 
