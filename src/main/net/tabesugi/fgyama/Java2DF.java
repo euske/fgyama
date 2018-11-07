@@ -1089,10 +1089,11 @@ public class Java2DF {
                 AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
                 DFType instType;
                 if (anonDecl != null) {
-                    String id = "anonymous";
+                    String id = Utils.encodeASTNode(expr);
                     DFKlass baseKlass = finder.resolveKlass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(baseKlass.getChildSpace(), id);
-                    DFKlass anonKlass = new DFAnonKlass(id, anonSpace, scope, baseKlass);
+                    DFKlass anonKlass = new DFAnonKlass(
+                        "<anonymous>", anonSpace, scope, baseKlass);
                     anonSpace.addKlass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {

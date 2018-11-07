@@ -1,125 +1,162 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <graph ins="" name="LObject;.toString()Ljava/lang/String;" outs="NObject.toString.b0_2" style="instance">
-      <ast length="57" start="19" type="31"/>
-      <scope name="Object.toString">
-        <scope name="Object.toString.b0">
-          <node data="object" id="NObject.toString.b0_1" kind="const" type="Ljava/lang/String;">
-            <ast length="8" start="61" type="45"/>
+    <graph ins="" name="LA;.toString()Ljava/lang/String;" outs="NA.toString.b0_2" style="instance">
+      <ast length="52" start="14" type="31"/>
+      <scope name="A.toString">
+        <scope name="A.toString.b0">
+          <node data="A" id="NA.toString.b0_1" kind="const" type="Ljava/lang/String;">
+            <ast length="3" start="56" type="45"/>
           </node>
-          <node id="NObject.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="NObject.toString.b0_1"/>
-            <ast length="16" start="54" type="41"/>
-          </node>
-        </scope>
-      </scope>
-    </graph>
-    <graph ins="" name="Object" outs="" style="initializer">
-      <ast length="78" start="0" type="55"/>
-      <scope name="Object"/>
-    </graph>
-    <graph ins="" name="LFoo;.fa()V" outs="" style="static">
-      <ast length="43" start="103" type="31"/>
-      <scope name="Foo.fa">
-        <scope name="Foo.fa.b0">
-          <node data="0" id="NFoo.fa.b0_1" kind="const" type="I">
-            <ast length="1" start="138" type="34"/>
-          </node>
-          <node id="NFoo.fa.b0_2" kind="assign" ref="Foo.fa.b0/$a" type="I">
-            <link src="NFoo.fa.b0_1"/>
-            <ast length="5" start="134" type="59"/>
+          <node id="NA.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="NA.toString.b0_1"/>
+            <ast length="11" start="49" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Lmoo;.fc()I" outs="Nmoo.fc.b0_2" style="instance">
-      <ast length="31" start="292" type="31"/>
+    <graph ins="" name="A" outs="" style="initializer">
+      <ast length="68" start="0" type="55"/>
+      <scope name="A"/>
+    </graph>
+    <graph ins="Nmoo.fc_2 Nmoo.fc_4" name="Lmoo;.fc()I" outs="Nmoo.fc.b0_5" style="instance">
+      <ast length="48" start="224" type="31"/>
       <scope name="moo.fc">
         <scope name="moo.fc.b0">
-          <node data="123" id="Nmoo.fc.b0_1" kind="const" type="I">
-            <ast length="3" start="317" type="34"/>
+          <node id="Nmoo.fc.b0_1" kind="ref" ref="#this" type="Lbasic_methods;">
+            <link src="Nmoo.fc_2"/>
+            <ast length="18" start="249" type="52"/>
           </node>
-          <node id="Nmoo.fc.b0_2" kind="output" ref="#return" type="I">
-            <link src="Nmoo.fc.b0_1"/>
-            <ast length="11" start="310" type="41"/>
+          <node id="Nmoo.fc.b0_3" kind="fieldref" ref="basic_methods/.x" type="I">
+            <link src="Nmoo.fc_4"/>
+            <link label="obj" src="Nmoo.fc.b0_1"/>
+            <ast length="20" start="249" type="22"/>
+          </node>
+          <node id="Nmoo.fc.b0_5" kind="output" ref="#return" type="I">
+            <link src="Nmoo.fc.b0_3"/>
+            <ast length="28" start="242" type="41"/>
           </node>
         </scope>
+        <node id="Nmoo.fc_2" ref="#this" type="Lbasic_methods;"/>
+        <node id="Nmoo.fc_4" ref="basic_methods/.x" type="I"/>
       </scope>
     </graph>
     <graph ins="" name="moo" outs="" style="initializer">
-      <ast length="51" start="275" type="55"/>
+      <ast length="68" start="207" type="55"/>
       <scope name="moo"/>
     </graph>
-    <graph ins="" name="LObject/anonymous/anonymous;.toString()Ljava/lang/String;" outs="NObject/anonymous/anonymous.toString.b0_2" style="instance">
-      <ast length="42" start="223" type="31"/>
-      <scope name="Object/anonymous/anonymous.toString">
-        <scope name="Object/anonymous/anonymous.toString.b0">
-          <node data="foo" id="NObject/anonymous/anonymous.toString.b0_1" kind="const" type="Ljava/lang/String;">
-            <ast length="5" start="257" type="45"/>
+    <graph ins="" name="LA/AST14:144,60/&lt;anonymous&gt;;.toString()Ljava/lang/String;" outs="NA/AST14:144,60/&lt;anonymous&gt;.toString.b0_2" style="instance">
+      <ast length="42" start="159" type="31"/>
+      <scope name="A/AST14:144,60/&lt;anonymous&gt;.toString">
+        <scope name="A/AST14:144,60/&lt;anonymous&gt;.toString.b0">
+          <node data="AAA" id="NA/AST14:144,60/&lt;anonymous&gt;.toString.b0_1" kind="const" type="Ljava/lang/String;">
+            <ast length="5" start="193" type="45"/>
           </node>
-          <node id="NObject/anonymous/anonymous.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="NObject/anonymous/anonymous.toString.b0_1"/>
-            <ast length="13" start="250" type="41"/>
+          <node id="NA/AST14:144,60/&lt;anonymous&gt;.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="NA/AST14:144,60/&lt;anonymous&gt;.toString.b0_1"/>
+            <ast length="13" start="186" type="41"/>
           </node>
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="Object/anonymous/anonymous" outs="" style="initializer">
-      <ast length="53" start="219" type="1"/>
-      <scope name="Object/anonymous/anonymous"/>
+    <graph ins="" name="A/AST14:144,60/&lt;anonymous&gt;" outs="" style="initializer">
+      <ast length="52" start="152" type="1"/>
+      <scope name="A/AST14:144,60/&lt;anonymous&gt;"/>
     </graph>
-    <graph ins="NFoo.fb_5" name="LFoo;.fb()V" outs="" style="static">
-      <ast length="244" start="151" type="31"/>
-      <scope name="Foo.fb">
-        <scope name="Foo.fb.b0">
-          <node data="0" id="NFoo.fb.b0_1" kind="const" type="I">
-            <ast length="1" start="186" type="34"/>
+    <graph ins="Nbasic_methods.fa_4" name="Lbasic_methods;.fa()V" outs="Nbasic_methods.fa.b0_3" style="instance">
+      <ast length="246" start="118" type="31"/>
+      <scope name="basic_methods.fa">
+        <scope name="basic_methods.fa.b0">
+          <node data="LA/AST14:144,60/&lt;anonymous&gt;;" id="Nbasic_methods.fa.b0_1" kind="new" type="LA/AST14:144,60/&lt;anonymous&gt;;">
+            <ast length="60" start="144" type="14"/>
           </node>
-          <node id="NFoo.fb.b0_2" kind="assign" ref="Foo.fb.b0/$b" type="I">
-            <link src="NFoo.fb.b0_1"/>
-            <ast length="5" start="182" type="59"/>
+          <node id="Nbasic_methods.fa.b0_2" kind="assign" ref="basic_methods.fa.b0/$a" type="LA;">
+            <link src="Nbasic_methods.fa.b0_1"/>
+            <ast length="64" start="140" type="59"/>
           </node>
-          <node data="LObject/anonymous/anonymous;" id="NFoo.fb.b0_3" kind="new" type="LObject/anonymous/anonymous;">
-            <ast length="71" start="201" type="14"/>
+          <node id="Nbasic_methods.fa.b0_3" kind="assign" ref="basic_methods/.x" type="I">
+            <link src="Nbasic_methods.fa.b0_7"/>
+            <ast length="1" start="284" type="42"/>
           </node>
-          <node id="NFoo.fb.b0_4" kind="assign" ref="Foo.fb.b0/$a" type="LObject;">
-            <link src="NFoo.fb.b0_3"/>
-            <ast length="75" start="197" type="59"/>
+          <node data="Lbasic_methods;.fb()I" id="Nbasic_methods.fa.b0_5" kind="call" type="I">
+            <link label="obj" src="Nbasic_methods.fa_4"/>
+            <ast length="4" start="288" type="32"/>
           </node>
-          <node data="LFoo;.fa()V" id="NFoo.fb.b0_6" kind="call" type="V">
-            <link label="obj" src="NFoo.fb_5"/>
-            <ast length="4" start="335" type="32"/>
+          <node id="Nbasic_methods.fa.b0_6" kind="assign" ref="#this" type="Lbasic_methods;">
+            <link label="update" src="Nbasic_methods.fa.b0_5"/>
+            <ast length="4" start="288" type="32"/>
           </node>
-          <node id="NFoo.fb.b0_7" kind="assign" ref="#this" type="LFoo;">
-            <link label="update" src="NFoo.fb.b0_6"/>
-            <ast length="4" start="335" type="32"/>
+          <node data="=" id="Nbasic_methods.fa.b0_7" kind="assignop" ref="basic_methods/.x" type="I">
+            <link label="R" src="Nbasic_methods.fa.b0_5"/>
+            <ast length="8" start="284" type="7"/>
           </node>
-          <node id="NFoo.fb.b0_8" kind="ref" ref="Foo.fb.b0/$a" type="LObject;">
-            <link src="NFoo.fb.b0_4"/>
-            <ast length="1" start="349" type="42"/>
+          <node id="Nbasic_methods.fa.b0_8" kind="ref" ref="basic_methods.fa.b0/$a" type="LA;">
+            <link src="Nbasic_methods.fa.b0_2"/>
+            <ast length="1" start="302" type="42"/>
           </node>
-          <node data="LObject/anonymous/anonymous;.toString()Ljava/lang/String; LObject;.toString()Ljava/lang/String;" id="NFoo.fb.b0_9" kind="call" type="Ljava/lang/String;">
-            <link label="obj" src="NFoo.fb.b0_8"/>
-            <ast length="12" start="349" type="32"/>
+          <node data="LA/AST14:144,60/&lt;anonymous&gt;;.toString()Ljava/lang/String; LA;.toString()Ljava/lang/String;" id="Nbasic_methods.fa.b0_9" kind="call" type="Ljava/lang/String;">
+            <link label="obj" src="Nbasic_methods.fa.b0_8"/>
+            <ast length="12" start="302" type="32"/>
           </node>
-          <node id="NFoo.fb.b0_10" kind="assign" ref="Foo.fb.b0/$a" type="LObject;">
-            <link label="update" src="NFoo.fb.b0_9"/>
-            <ast length="12" start="349" type="32"/>
+          <node id="Nbasic_methods.fa.b0_10" kind="assign" ref="basic_methods.fa.b0/$a" type="LA;">
+            <link label="update" src="Nbasic_methods.fa.b0_9"/>
+            <ast length="12" start="302" type="32"/>
           </node>
-          <node data="Lmoo;" id="NFoo.fb.b0_11" kind="new" type="Lmoo;">
-            <ast length="9" start="379" type="14"/>
+          <node data="Lmoo;" id="Nbasic_methods.fa.b0_11" kind="new" type="Lmoo;">
+            <ast length="9" start="332" type="14"/>
           </node>
-          <node id="NFoo.fb.b0_12" kind="assign" ref="Foo.fb.b0/$c" type="Lmoo;">
-            <link src="NFoo.fb.b0_11"/>
-            <ast length="13" start="375" type="59"/>
+          <node id="Nbasic_methods.fa.b0_12" kind="assign" ref="basic_methods.fa.b0/$c" type="Lmoo;">
+            <link src="Nbasic_methods.fa.b0_11"/>
+            <ast length="13" start="328" type="59"/>
+          </node>
+          <node id="Nbasic_methods.fa.b0_13" kind="ref" ref="basic_methods.fa.b0/$c" type="Lmoo;">
+            <link src="Nbasic_methods.fa.b0_12"/>
+            <ast length="1" start="351" type="42"/>
+          </node>
+          <node data="Lmoo;.fc()I" id="Nbasic_methods.fa.b0_14" kind="call" type="I">
+            <link label="obj" src="Nbasic_methods.fa.b0_13"/>
+            <ast length="6" start="351" type="32"/>
+          </node>
+          <node id="Nbasic_methods.fa.b0_15" kind="assign" ref="basic_methods.fa.b0/$c" type="Lmoo;">
+            <link label="update" src="Nbasic_methods.fa.b0_14"/>
+            <ast length="6" start="351" type="32"/>
           </node>
         </scope>
-        <node id="NFoo.fb_5" ref="#this" type="LFoo;"/>
+        <node id="Nbasic_methods.fa_4" ref="#this" type="Lbasic_methods;"/>
       </scope>
     </graph>
-    <graph ins="" name="Foo" outs="" style="initializer">
-      <ast length="317" start="80" type="55"/>
-      <scope name="Foo"/>
+    <graph ins="" name="Lbasic_methods;.fb()I" outs="Nbasic_methods.fb.b0_4" style="static">
+      <ast length="60" start="369" type="31"/>
+      <scope name="basic_methods.fb">
+        <scope name="basic_methods.fb.b0">
+          <node data="0" id="Nbasic_methods.fb.b0_1" kind="const" type="I">
+            <ast length="1" start="403" type="34"/>
+          </node>
+          <node id="Nbasic_methods.fb.b0_2" kind="assign" ref="basic_methods.fb.b0/$a" type="I">
+            <link src="Nbasic_methods.fb.b0_1"/>
+            <ast length="5" start="399" type="59"/>
+          </node>
+          <node id="Nbasic_methods.fb.b0_3" kind="ref" ref="basic_methods.fb.b0/$a" type="I">
+            <link src="Nbasic_methods.fb.b0_2"/>
+            <ast length="1" start="421" type="42"/>
+          </node>
+          <node id="Nbasic_methods.fb.b0_4" kind="output" ref="#return" type="I">
+            <link src="Nbasic_methods.fb.b0_3"/>
+            <ast length="9" start="414" type="41"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph ins="" name="basic_methods" outs="" style="initializer">
+      <ast length="361" start="70" type="55"/>
+      <scope name="basic_methods">
+        <node data="0" id="Nbasic_methods_1" kind="const" type="I">
+          <ast length="1" start="111" type="34"/>
+        </node>
+        <node id="Nbasic_methods_2" kind="assign" ref="basic_methods/.x" type="I">
+          <link src="Nbasic_methods_1"/>
+          <ast length="5" start="107" type="59"/>
+        </node>
+      </scope>
     </graph>
   </file>
 </fgyama>
