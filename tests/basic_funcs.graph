@@ -139,7 +139,7 @@
           <node data="0" id="Nbasic_funcs.moo.b0_4" kind="const" type="I">
             <ast length="1" start="252" type="34"/>
           </node>
-          <node data="==" id="Nbasic_funcs.moo.b0_5" kind="infix" type="I">
+          <node data="==" id="Nbasic_funcs.moo.b0_5" kind="infix" type="Z">
             <link label="L" src="Nbasic_funcs.moo.b0_3"/>
             <link label="R" src="Nbasic_funcs.moo.b0_4"/>
             <ast length="6" start="247" type="27"/>

@@ -43,7 +43,7 @@
           <node data="0" id="NFoo.basic_while.b0_5" kind="const" type="I">
             <ast length="1" start="76" type="34"/>
           </node>
-          <node data="!=" id="NFoo.basic_while.b0_6" kind="infix" type="I">
+          <node data="!=" id="NFoo.basic_while.b0_6" kind="infix" type="Z">
             <link label="L" src="NFoo.basic_while.b0_3"/>
             <link label="R" src="NFoo.basic_while.b0_5"/>
             <ast length="6" start="71" type="27"/>

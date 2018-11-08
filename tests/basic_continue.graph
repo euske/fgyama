@@ -14,7 +14,7 @@
               <node data="0" id="NFoo.basic_continue.b0.while0.b0_6" kind="const" type="I">
                 <ast length="1" start="96" type="34"/>
               </node>
-              <node data="!=" id="NFoo.basic_continue.b0.while0.b0_7" kind="infix" type="I">
+              <node data="!=" id="NFoo.basic_continue.b0.while0.b0_7" kind="infix" type="Z">
                 <link label="L" src="NFoo.basic_continue.b0.while0.b0_4"/>
                 <link label="R" src="NFoo.basic_continue.b0.while0.b0_6"/>
                 <ast length="6" start="91" type="27"/>

@@ -38,7 +38,7 @@
               <link src="NFoo.basic_do.b0.do0.b0_5"/>
               <ast length="1" start="114" type="42"/>
             </node>
-            <node data="&lt;" id="NFoo.basic_do.b0.do0_15" kind="infix" type="I">
+            <node data="&lt;" id="NFoo.basic_do.b0.do0_15" kind="infix" type="Z">
               <link label="L" src="NFoo.basic_do.b0.do0_13"/>
               <link label="R" src="NFoo.basic_do.b0.do0_14"/>
               <ast length="5" start="110" type="27"/>
