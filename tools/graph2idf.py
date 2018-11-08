@@ -60,7 +60,6 @@ class IPVertex:
 
     vid_base = 0
     srcmap = {}
-    feats = {}
 
     @classmethod
     def register(klass, name):
@@ -72,10 +71,6 @@ class IPVertex:
     @classmethod
     def dumpsrcs(klass):
         return klass.srcmap.items()
-
-    @classmethod
-    def dumpfeats(klass):
-        return sorted(klass.feats.items(), key=lambda x:x[1], reverse=True)
 
     def __init__(self, node):
         IPVertex.vid_base += 1
@@ -113,14 +108,11 @@ class IPVertex:
         feat = getfeat(self.node)
         if feat is None: return chain
         v = ('%s,%s' % (label, feat))
-        if v not in self.feats:
-            self.feats[v] = 0
-        self.feats[v] += 1
         if self.node.ast is not None:
-            (_,s,e) = self.node.ast
             src = self.node.graph.src
             fid = self.srcmap[src]
-            v = ('%s,%s,%s,%s' % (v, s, e, fid))
+            (_,s,e) = self.node.ast
+            v += (',%s,%s,%s' % (fid, s, e))
         return CLink(v, chain)
 
     def enum_forw(self, label, maxlen, chain0=None):
@@ -161,7 +153,7 @@ def main(argv):
         return usage()
     debug = 0
     maxlen = 5
-    maxcall = 100
+    maxcall = 1000
     maxoverrides = 1
     for (k, v) in opts:
         if k == '-d': debug += 1
@@ -177,6 +169,9 @@ def main(argv):
             IPVertex.register(graph.src)
             graphs.append(graph)
             gid2graph[graph.name] = graph
+    for (name,fid) in IPVertex.dumpsrcs():
+        print('+SOURCE %d %s' % (fid, name))
+
     print('# graphs: %r' % len(graphs), file=sys.stderr)
 
     # Enumerate caller/callee relationships.
@@ -199,12 +194,28 @@ def main(argv):
     for src in graphs:
         for node in src:
             if node.kind == 'call':
-                for name in node.data.split(' '):
+                funcs = node.data.split(' ')
+                for name in funcs[:maxoverrides]:
                     link(src.name, name)
             elif node.kind == 'new':
                 name = node.data
                 link(src.name, name)
-    gid2called = { gid: len(a) for (gid,a) in linkfrom.items() }
+    gid2calls = {}
+    def count(gid):
+        if gid in gid2calls:
+            return gid2calls[gid]
+        if gid in linkfrom:
+            gid2calls[gid] = 1
+            n = sum( count(g) for g in linkfrom[gid] )
+        else:
+            n = 1
+        gid2calls[gid] = n
+        return n
+    for graph in graphs:
+        count(graph.name)
+    print ('# total: %d' % sum(gid2calls.values()), file=sys.stderr)
+    print ('# skipped: %d' % sum( n for n in gid2calls.values() if maxcall <= n ),
+           file=sys.stderr)
     starts = [ graph.name for graph in graphs
                if graph.name in linkto and graph.name not in linkfrom ]
 
@@ -279,7 +290,7 @@ def main(argv):
             # preventing the exponential growth of contexts.
             for name in funcs[:maxoverrides]:
                 if name not in gid2graph: continue
-                if maxcall <= gid2called.get(gid, 0): continue
+                if maxcall <= gid2calls.get(gid, 0): continue
                 vals = trace(name, args, chain)
                 for (_,sender) in vals.items():
                     for (label,rcver) in rcvers:
@@ -298,9 +309,9 @@ def main(argv):
         for (gid,info) in gid2info.items():
             graph = gid2graph[gid]
             if graph.ast is not None:
-                (_,s,e) = graph.ast
                 fid = IPVertex.srcmap[graph.src]
-                name = ('%s,%s,%s,%s' % (gid, s, e, fid))
+                (_,s,e) = graph.ast
+                name = ('%s,%s,%s,%s' % (gid, fid, s, e))
             else:
                 name = gid
             for (inputs,outputs) in info:
@@ -311,11 +322,6 @@ def main(argv):
                     for feats in vtx.enum_forw(label, maxlen):
                         print('+PATH %s forw %s' % (name, feats))
         print('# end: %r (%d)' % (gid0, IPVertex.vid_base), file=sys.stderr)
-
-    for (name,fid) in IPVertex.dumpsrcs():
-        print('+SOURCE %d %s' % (fid, name))
-    for (feat,n) in IPVertex.dumpfeats():
-        print('+FEAT %d %s' % (n, feat))
 
     return 0
 

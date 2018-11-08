@@ -68,115 +68,160 @@ def show_text(src, ranges, ncontext=3):
     print()
     return
 
+class FeatTree:
+
+    def __init__(self, parent=None, feat=None):
+        if parent is None:
+            self.level = 0
+        else:
+            self.level = parent.level+1
+        self.parent = parent
+        self.feat = feat
+        self.matches = {}
+        self._d = {}
+        return
+
+    def feats(self):
+        a = []
+        while self.feat is not None:
+            a.append(self.feat)
+            self = self.parent
+        a.reverse()
+        return a
+
+    def children(self):
+        return self._d.items()
+
+    def add(self, feat, func, locs):
+        if feat in self._d:
+            t = self._d[feat]
+        else:
+            t = self._d[feat] = FeatTree(self, feat)
+        t.matches[func] = locs
+        return t
+
+
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] [-H] [-m maxresults] '
+        print('usage: %s [-B basedir] [-H] [-t threshold] [-m maxresults] '
               'out.idf' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:Hm:')
+        (opts, args) = getopt.getopt(argv[1:], 'B:Ht:m:')
     except getopt.GetoptError:
         return usage()
     srcdb = None
     html = False
+    threshold = 10
     maxresults = 100
     for (k, v) in opts:
         if k == '-B': srcdb = SourceDB(v)
         elif k == '-H': html = True
+        elif k == '-t': threshold = float(v)
         elif k == '-m': maxresults = int(v)
     if not args: return usage()
 
-    def sast(v):  # strip ast
+    def splitfeat(v):
+        (v,_,v4) = v.rpartition(',')
+        (v,_,v3) = v.rpartition(',')
+        (v1,_,v2) = v.rpartition(',')
+        return (v1, (srcmap[v2],int(v3),int(v4)))
+    def getfeat(v):
+        # strip ast
         (v1,_,v) = v.partition(',')
         (v2,_,v) = v.partition(',')
-        return (v1+','+v2)
+        return (v1,v2)
+    def getloc(v):
+        (v,_,v3) = v.rpartition(',')
+        (v,_,v2) = v.rpartition(',')
+        (v,_,v1) = v.rpartition(',')
+        if not v1: return None
+        return (srcmap[v1],int(v2),int(v3))
 
     paths = 0
-    count = {}
     srcmap = {}
     featmap = {}
-    total = 0
+    root = FeatTree()
     for line in fileinput.input(args):
         line = line.strip()
         if not line.startswith('+'): continue
         f = line.split(' ')
-        if f[0] == '+PATH':
-            if f[2] != 'forw': continue
-            func = (f[1],f[2])
-            feats = tuple(map(sast, f[3:]))
-            if len(feats) < 2: continue
-            if feats in count:
-                d = count[feats]
-            else:
-                d = count[feats] = {}
-            d[func] = f[3:]
+        if f[0] == '+SOURCE':
+            srcmap[f[1]] = f[2]
+        elif f[0] == '+PATH' and f[2] == 'forw':
             paths += 1
-        elif f[0] == '+SOURCE':
-            srcmap[int(f[1])] = f[2]
-        elif f[0] == '+FEAT':
-            n = int(f[1])
-            featmap[f[2]] = n
-            total += n
+            (func,loc0) = splitfeat(f[1])
+            feats = [ getfeat(x) for x in f[3:] ]
+            locs = [loc0] + [ getloc(x) for x in f[3:] ]
+            tree = root
+            for (i,feat) in enumerate(feats):
+                if feat not in featmap:
+                    featmap[feat] = 0
+                featmap[feat] += 1
+                tree = tree.add(feat, func, locs[:i+2])
     #
-    print('read: %d paths, %d sources, %d feats (total: %r)' %
-          (paths, len(srcmap), len(featmap), total), file=sys.stderr)
-    for k in featmap:
-        p = log(total/featmap[k])
-        featmap[k] = p
-    def featsscore(feats):
-        return sum( featmap.get(k,1) for k in feats )
-    results = [ (featsscore(feats), feats, matches) for
-                (feats, matches) in count.items() if 2 <= len(matches) ]
-    print('results: %d' % len(results), file=sys.stderr)
-    results.sort(reverse=True)
+    featall = sum(featmap.values())
+    for k in featmap.keys():
+        featmap[k] = log(featall/featmap[k])
+    print('read: %d paths, %d sources, %d feats (all: %d)' %
+          (paths, len(srcmap), len(featmap), featall), file=sys.stderr)
+    #
+    results = {}
+    def traverse(tree, score0=0):
+        for (feat,st) in tree.children():
+            score1 = score0 + featmap.get(feat, 0)
+            if threshold <= score1 and 2 <= len(st.matches):
+                funcs = tuple(sorted(st.matches.keys()))
+                if funcs in results:
+                    (maxscore,maxlocs) = results[funcs]
+                    if maxscore < score1:
+                        results[funcs] = (score1, st)
+                else:
+                    results[funcs] = (score1, st)
+            traverse(st, score1)
+        return
+    traverse(root)
+
+    results = sorted(results.values(), key=lambda x:x[0], reverse=True)
     if 0 < maxresults:
         results = results[:maxresults]
+    print('results: %d' % len(results), file=sys.stderr)
 
     if html:
         show_html_headers()
     mid = 0
-    for (score,feats,matches) in results:
+    for (score,tree) in results:
+        feats = tree.feats()
         if html:
             print('<h2>[%.3f] <code>%s</code> (%d)</h2>' %
-                  (score, q(' '.join(feats)), len(matches)))
+                  (score, q(repr(feats)), len(tree.matches)))
         else:
-            print('! %.3f %r %d' % (score, feats, len(matches)))
-        for ((func,_),data) in matches.items():
-            f = func.split(',')
+            print('! %.3f %r %d' % (score, feats, len(tree.matches)))
+        for (func,locs) in tree.matches.items():
             if html:
                 mid += 1
-                print('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> <code>%s</code></h3>' % (mid, mid, q(f[0])))
+                print('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
+                      '<code>%s</code></h3>' % (mid, mid, q(func)))
             else:
-                print('+ %s' % f[0])
+                print('+ %s' % func)
             if srcdb is None: continue
-            if len(f) != 4: continue
             if html:
                 print('<div class=result hidden id="M%d">' % mid)
-            start = int(f[1])
-            length = int(f[2])
-            fid = int(f[3])
-            src = srcdb.get(srcmap[fid])
-            ranges = [(start, start+min(100, length), None)]
-            if html:
-                show_html(src, src.name, ranges, ncontext=1)
-            else:
-                show_text(src, ranges, ncontext=1)
             nodes = {}
-            for (i,x) in enumerate(data):
-                f = x.split(',')
-                if len(f) != 5: continue
-                start = int(f[2])
-                length = int(f[3])
-                fid = int(f[4])
-                src = srcdb.get(srcmap[fid])
+            for (i,loc) in enumerate(locs):
+                if loc is None: continue
+                (name,start,length) = loc
+                if i == 0:
+                    length = max(length, 200)
+                src = srcdb.get(name)
                 if src in nodes:
                     a = nodes[src]
                 else:
                     a = nodes[src] = []
-                a.append((start,start+length,i))
+                a.append((start, start+length, i))
             for (src,ranges) in nodes.items():
                 if html:
                     show_html(src, src.name, ranges)
