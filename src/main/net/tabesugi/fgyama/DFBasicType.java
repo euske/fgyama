@@ -12,9 +12,11 @@ import org.eclipse.jdt.core.dom.*;
 public class DFBasicType extends DFType {
 
     private PrimitiveType.Code _code;
+    private int _rank;
 
-    private DFBasicType(PrimitiveType.Code code) {
+    private DFBasicType(PrimitiveType.Code code, int rank) {
         _code = code;
+        _rank = rank;
     }
 
     @Override
@@ -68,39 +70,35 @@ public class DFBasicType extends DFType {
 	     type == DFRootTypeSpace.getBooleanKlass())) {
 	    return 0;
 	}
-        if (!(type instanceof DFBasicType)) return -1;
         if (this == type) return 0;
-        return (this.isNumeric() && ((DFBasicType)type).isNumeric())? 1 : -1;
+        if (!(type instanceof DFBasicType)) return -1;
+        int rank = ((DFBasicType)type)._rank;
+        if (this._rank == 0 || rank == 0) return -1;
+        return (this._rank - rank);
     }
 
     public boolean isNumeric() {
-        return ((_code == PrimitiveType.BYTE) ||
-                (_code == PrimitiveType.CHAR) ||
-                (_code == PrimitiveType.SHORT) ||
-                (_code == PrimitiveType.INT) ||
-                (_code == PrimitiveType.LONG) ||
-                (_code == PrimitiveType.FLOAT) ||
-                (_code == PrimitiveType.DOUBLE));
+        return (_rank != 0);
     }
 
     public static final DFBasicType BYTE =
-        new DFBasicType(PrimitiveType.BYTE);
+        new DFBasicType(PrimitiveType.BYTE, 1);
     public static final DFBasicType CHAR =
-        new DFBasicType(PrimitiveType.CHAR);
+        new DFBasicType(PrimitiveType.CHAR, 1);
     public static final DFBasicType SHORT =
-        new DFBasicType(PrimitiveType.SHORT);
+        new DFBasicType(PrimitiveType.SHORT, 2);
     public static final DFBasicType INT =
-        new DFBasicType(PrimitiveType.INT);
+        new DFBasicType(PrimitiveType.INT, 3);
     public static final DFBasicType LONG =
-        new DFBasicType(PrimitiveType.LONG);
+        new DFBasicType(PrimitiveType.LONG, 4);
     public static final DFBasicType FLOAT =
-        new DFBasicType(PrimitiveType.FLOAT);
+        new DFBasicType(PrimitiveType.FLOAT, 5);
     public static final DFBasicType DOUBLE =
-        new DFBasicType(PrimitiveType.DOUBLE);
+        new DFBasicType(PrimitiveType.DOUBLE, 6);
     public static final DFBasicType BOOLEAN =
-        new DFBasicType(PrimitiveType.BOOLEAN);
+        new DFBasicType(PrimitiveType.BOOLEAN, 0);
     public static final DFBasicType VOID =
-        new DFBasicType(PrimitiveType.VOID);
+        new DFBasicType(PrimitiveType.VOID, 0);
 
     public static DFBasicType getType(PrimitiveType.Code code)
         throws TypeNotFound {

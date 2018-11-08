@@ -846,7 +846,8 @@ public class Java2DF {
                     graph, finder, scope, frame, ctx,
                     infix.getRightOperand());
                 DFNode rvalue = ctx.getRValue();
-                DFType type = lvalue.getNodeType(); // XXX Todo: implicit type coersion.
+                DFType type = DFType.inferInfixType(
+                    lvalue.getNodeType(), op, rvalue.getNodeType());
                 ctx.setRValue(new InfixNode(
                                   graph, scope, type, expr, op, lvalue, rvalue));
 

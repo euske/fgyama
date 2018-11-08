@@ -311,9 +311,9 @@ public class DFFrame {
         } else if (expr instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)expr;
             InfixExpression.Operator op = infix.getOperator();
-            this.build(finder, scope, infix.getLeftOperand());
-            // XXX Todo: implicit type coersion.
-            return this.build(finder, scope, infix.getRightOperand());
+            DFType left = this.build(finder, scope, infix.getLeftOperand());
+            DFType right = this.build(finder, scope, infix.getRightOperand());
+            return DFType.inferInfixType(left, op, right);
 
         } else if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;

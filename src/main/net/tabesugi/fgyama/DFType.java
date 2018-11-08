@@ -18,4 +18,28 @@ public abstract class DFType {
     public DFType parameterize(Map<DFParamType, DFType> typeMap) {
         return this;
     }
+
+    public static DFType inferInfixType(
+        DFType left, InfixExpression.Operator op, DFType right) {
+        if (op == InfixExpression.Operator.EQUALS ||
+            op == InfixExpression.Operator.NOT_EQUALS ||
+            op == InfixExpression.Operator.LESS ||
+            op == InfixExpression.Operator.GREATER ||
+            op == InfixExpression.Operator.LESS_EQUALS ||
+            op == InfixExpression.Operator.GREATER_EQUALS ||
+            op == InfixExpression.Operator.CONDITIONAL_AND ||
+            op == InfixExpression.Operator.CONDITIONAL_OR) {
+            return DFBasicType.BOOLEAN;
+        } else if (op == InfixExpression.Operator.PLUS &&
+                   (left == DFRootTypeSpace.getStringKlass() ||
+                    right == DFRootTypeSpace.getStringKlass())) {
+            return DFRootTypeSpace.getStringKlass();
+        } else if (left == null || right == null) {
+            return (left == null)? right : left;
+        } else if (0 <= left.canConvertFrom(right)) {
+            return left;
+        } else {
+            return right;
+        }
+    }
 }
