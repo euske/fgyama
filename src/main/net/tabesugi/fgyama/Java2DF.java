@@ -1027,7 +1027,9 @@ public class Java2DF {
                     }
                     arr.addValue(value);
                 }
-                ctx.setRValue(arr);
+                if (arr != null) {
+                    ctx.setRValue(arr);
+                }
                 // XXX array ref is not used.
 
             } else if (expr instanceof ArrayAccess) {
@@ -1292,9 +1294,12 @@ public class Java2DF {
             if (init != null) {
                 ctx = processExpression(
                     graph, finder, scope, frame, ctx, init);
-                DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
-                assign.accept(ctx.getRValue());
-                ctx.set(assign);
+                DFNode value = ctx.getRValue();
+                if (value != null) {
+                    DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
+                    assign.accept(value);
+                    ctx.set(assign);
+                }
             }
         }
         return ctx;
