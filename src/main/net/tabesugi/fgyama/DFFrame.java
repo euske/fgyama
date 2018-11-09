@@ -16,10 +16,10 @@ public class DFFrame {
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
-    private Set<DFVarRef> _inputRefs =
-        new HashSet<DFVarRef>();
-    private Set<DFVarRef> _outputRefs =
-        new HashSet<DFVarRef>();
+    private SortedSet<DFVarRef> _inputRefs =
+        new TreeSet<DFVarRef>();
+    private SortedSet<DFVarRef> _outputRefs =
+        new TreeSet<DFVarRef>();
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
@@ -31,6 +31,7 @@ public class DFFrame {
     public static final String COND = "@COND";
     public static final String LOOP = "@LOOP";
     public static final String TRY = "@TRY";
+    public static final String CATCH = "@CATCH";
     public static final String METHOD = "@METHOD";
     public static final String CLASS = "@CLASS";
 
@@ -94,23 +95,20 @@ public class DFFrame {
     public DFVarRef[] getInputRefs() {
         DFVarRef[] refs = new DFVarRef[_inputRefs.size()];
         _inputRefs.toArray(refs);
-        Arrays.sort(refs);
         return refs;
     }
 
     public DFVarRef[] getOutputRefs() {
         DFVarRef[] refs = new DFVarRef[_outputRefs.size()];
         _outputRefs.toArray(refs);
-        Arrays.sort(refs);
         return refs;
     }
 
     public DFVarRef[] getInsAndOuts() {
-        Set<DFVarRef> inouts = new HashSet<DFVarRef>(_inputRefs);
+        SortedSet<DFVarRef> inouts = new TreeSet<DFVarRef>(_inputRefs);
         inouts.retainAll(_outputRefs);
         DFVarRef[] refs = new DFVarRef[inouts.size()];
         inouts.toArray(refs);
-        Arrays.sort(refs);
         return refs;
     }
 
@@ -672,20 +670,17 @@ public class DFFrame {
 
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFVarScope tryScope = scope.getChildByAST(stmt);
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
-            tryFrame.build(finder, childScope, tryStmt.getBody());
+            tryFrame.build(finder, tryScope, tryStmt.getBody());
             this.expandRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
                 DFVarScope catchScope = scope.getChildByAST(cc);
-                DFVarRef ref = catchScope.lookupVar(decl.getName());
-                //this.addOutputRef(ref);
-                this.build(finder, catchScope, cc.getBody());
-                // the variable disappears from the scope after use.
-                _outputRefs.remove(ref);
-                _inputRefs.remove(ref);
+                DFFrame catchFrame = this.addChild(DFFrame.CATCH, cc);
+                catchFrame.build(finder, catchScope, cc.getBody());
+                this.expandRefs(catchFrame);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {

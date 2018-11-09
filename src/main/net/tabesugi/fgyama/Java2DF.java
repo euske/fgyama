@@ -610,10 +610,10 @@ class OutputNode extends SingleAssignNode {
     }
 }
 
-// ExceptionNode
-class ExceptionNode extends ProgNode {
+// ThrowNode
+class ThrowNode extends ProgNode {
 
-    public ExceptionNode(
+    public ThrowNode(
         DFGraph graph, DFVarScope scope,
         ASTNode ast, DFNode value) throws VariableNotFound {
         super(graph, scope, null, scope.lookupException(), ast);
@@ -622,7 +622,7 @@ class ExceptionNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "exception";
+        return "throw";
     }
 }
 
@@ -1496,7 +1496,7 @@ public class Java2DF {
         // A JoinNode is added to each variable.
 
         // outRefs: all the references from both contexts.
-        List<DFVarRef> outRefs = new ArrayList<DFVarRef>();
+        SortedSet<DFVarRef> outRefs = new TreeSet<DFVarRef>();
         if (thenFrame != null && thenCtx != null) {
             for (DFNode src : thenCtx.getFirsts()) {
                 if (src.hasInput()) continue;
@@ -1513,10 +1513,7 @@ public class Java2DF {
         }
 
         // Attach a JoinNode to each variable.
-        Set<DFVarRef> used = new HashSet<DFVarRef>();
         for (DFVarRef ref : outRefs) {
-            if (used.contains(ref)) continue;
-            used.add(ref);
             JoinNode join = new JoinNode(graph, scope, ref, ifStmt, condValue);
             if (thenCtx != null) {
                 DFNode dst = thenCtx.get(ref);
@@ -1774,9 +1771,12 @@ public class Java2DF {
                  (List<CatchClause>) tryStmt.catchClauses()) {
             SingleVariableDeclaration decl = cc.getException();
             DFVarScope catchScope = scope.getChildByAST(cc);
+            DFFrame catchFrame = frame.getChildByAST(cc);
             DFVarRef ref = catchScope.lookupVar(decl.getName());
             ctx = processStatement(
-                graph, finder, catchScope, frame, ctx, cc.getBody());
+                graph, finder, catchScope, catchFrame,
+                ctx, cc.getBody());
+            catchFrame.close(ctx);
         }
         Block finBlock = tryStmt.getFinally();
         if (finBlock != null) {
@@ -1906,7 +1906,7 @@ public class Java2DF {
             ctx = processExpression(
                 graph, finder, scope, frame,
                 ctx, throwStmt.getExpression());
-            ExceptionNode exception = new ExceptionNode(
+            ThrowNode exception = new ThrowNode(
                 graph, scope, stmt, ctx.getRValue());
             DFFrame dstFrame = frame.find(DFFrame.TRY);
             if (dstFrame != null) {

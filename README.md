@@ -35,7 +35,7 @@ Node types:
   * output
   * call
   * new
-  * exception
+  * throw
 
   * join
   * begin

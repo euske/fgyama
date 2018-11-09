@@ -19,8 +19,8 @@ public class DFNode implements Comparable<DFNode> {
     private DFVarRef _ref;
 
     private DFNode _input = null;
-    private Map<String, DFNode> _inputs =
-        new HashMap<String, DFNode>();
+    private SortedMap<String, DFNode> _inputs =
+        new TreeMap<String, DFNode>();
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
@@ -95,7 +95,6 @@ public class DFNode implements Comparable<DFNode> {
         }
         String[] labels = new String[_inputs.size()];
         _inputs.keySet().toArray(labels);
-        Arrays.sort(labels);
         for (int i = 0; i < labels.length; i++) {
             String label = labels[i];
             DFNode node = _inputs.get(label);
