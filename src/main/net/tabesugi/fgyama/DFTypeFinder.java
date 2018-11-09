@@ -180,4 +180,15 @@ public class DFTypeFinder {
         types.toArray(argTypes);
         return argTypes;
     }
+
+    // dump: for debugging.
+    public void dump() {
+        dump(System.err, 0);
+    }
+    public void dump(PrintStream out, int index) {
+        out.println("  "+index+": "+_space);
+        if (_next != null) {
+            _next.dump(out, index+1);
+        }
+    }
 }

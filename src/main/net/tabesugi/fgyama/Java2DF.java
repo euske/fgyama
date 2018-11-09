@@ -2357,16 +2357,18 @@ public class Java2DF {
                  (List<ImportDeclaration>) cunit.imports()) {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
+            DFKlass klass;
             if (importDecl.isOnDemand()) {
-                DFKlass klass = _rootSpace.getKlass(name);
+                klass = _rootSpace.getKlass(name);
 		klass.load(finder);
                 module.importStatic(klass);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
+                klass = _rootSpace.getKlass(qname.getQualifier());
 		klass.load(finder);
                 module.importStatic(klass, qname.getName());
             }
+            finder = klass.addFinders(finder);
         }
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
