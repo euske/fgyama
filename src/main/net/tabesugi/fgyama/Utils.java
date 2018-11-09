@@ -51,7 +51,11 @@ public class Utils {
 	case '\\':
 	    return "\\\\";
 	default:
-	    return Character.toString(c);
+            if (Character.isISOControl(c)) {
+                return String.format("\\u%04x", (int)c);
+            } else {
+                return Character.toString(c);
+            }
 	}
     }
 
