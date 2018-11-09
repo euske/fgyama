@@ -100,7 +100,7 @@ public class DFTypeFinder {
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
-            DFTypeSpace space = klass.getChildSpace();
+            DFTypeSpace space = klass.getKlassSpace();
             return space.getKlass(qtype.getName());
         } else if (type instanceof UnionType) {
             // XXX only consider the first type.

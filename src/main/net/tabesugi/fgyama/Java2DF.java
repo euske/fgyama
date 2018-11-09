@@ -746,7 +746,7 @@ public class Java2DF {
                 DFVarRef ref;
                 if (name != null) {
                     DFKlass klass = finder.lookupKlass(name);
-                    ref = klass.getScope().lookupThis();
+                    ref = klass.getKlassScope().lookupThis();
                 } else {
                     ref = scope.lookupThis();
                 }
@@ -969,7 +969,7 @@ public class Java2DF {
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
                 DFKlass klass = finder.resolveKlass(obj.getNodeType());
-                DFKlass baseKlass = klass.getBase();
+                DFKlass baseKlass = klass.getBaseKlass();
                 DFMethod method;
                 try {
                     method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
@@ -1072,7 +1072,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
-                DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBase();
+                DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBaseKlass();
                 DFVarRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -1098,7 +1098,7 @@ public class Java2DF {
                     String id = Utils.encodeASTNode(expr);
                     DFKlass baseKlass = finder.resolveKlass(cstr.getType());
                     DFTypeSpace anonSpace = new DFTypeSpace(
-                        baseKlass.getChildSpace(), id);
+                        baseKlass.getKlassSpace(), id);
                     DFKlass anonKlass = new DFAnonKlass(
                         "<anonymous>", anonSpace, klass, scope, baseKlass);
                     anonSpace.addKlass(anonKlass);
@@ -1279,7 +1279,7 @@ public class Java2DF {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFNode obj = ctx.get(scope.lookupThis());
-            DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBase();
+            DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBaseKlass();
             DFVarRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
@@ -2120,7 +2120,8 @@ public class Java2DF {
             finder = new DFTypeFinder(finder, methodSpace);
         }
         DFType[] argTypes = finder.resolveArgs(methodDecl);
-        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), methodDecl.getName());
+        DFLocalVarScope scope = new DFLocalVarScope(
+            klass.getKlassScope(), methodDecl.getName());
         // add a typespace for inline klasses.
         DFTypeSpace typeSpace = new DFTypeSpace(methodSpace, "inline");
         finder = new DFTypeFinder(finder, typeSpace);
@@ -2182,7 +2183,8 @@ public class Java2DF {
         throws UnsupportedSyntax, EntityNotFound {
         DFMethod method = klass.getInitializer();
         DFFrame frame = new DFFrame(DFFrame.METHOD);
-        DFLocalVarScope scope = new DFLocalVarScope(klass.getScope(), "<clinit>");
+        DFLocalVarScope scope = new DFLocalVarScope(
+            klass.getKlassScope(), "<clinit>");
         DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
         scope.build(finder, initializer);
         frame.build(finder, scope, initializer.getBody());
@@ -2202,13 +2204,13 @@ public class Java2DF {
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
         DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
-        DFVarScope klassScope = klass.getScope();
+        DFVarScope klassScope = klass.getKlassScope();
         DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
         for (BodyDeclaration body : decls) {
             try {
                 if (body instanceof AbstractTypeDeclaration) {
                     AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
-                    DFTypeSpace childSpace = klass.getChildSpace();
+                    DFTypeSpace childSpace = klass.getKlassSpace();
                     DFKlass childKlass = childSpace.getKlass(abstTypeDecl.getName());
                     processBodyDeclarations(
                         finder, childKlass, abstTypeDecl,
@@ -2233,7 +2235,8 @@ public class Java2DF {
                                 klassGraph, klassScope,
                                 DFNullType.NULL, null, "uninitialized");
                         }
-                        DFNode assign = new SingleAssignNode(klassGraph, klassScope, ref, frag);
+                        DFNode assign = new SingleAssignNode(
+                            klassGraph, klassScope, ref, frag);
                         assign.accept(value);
                     }
 
@@ -2251,7 +2254,8 @@ public class Java2DF {
                     // XXX ignore Arguments
 
                 } else if (body instanceof AnnotationTypeMemberDeclaration) {
-                    AnnotationTypeMemberDeclaration annot = (AnnotationTypeMemberDeclaration)body;
+                    AnnotationTypeMemberDeclaration annot =
+                        (AnnotationTypeMemberDeclaration)body;
                     // XXX ignore annotations.
 
                 } else if (body instanceof Initializer) {

@@ -21,7 +21,7 @@ public class DFKlass extends DFType {
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
-    private DFVarScope _scope = null;
+    private DFVarScope _klassScope = null;
 
     private DFParamType[] _paramTypes = null;
     private Map<String, DFParamKlass> _paramKlasses =
@@ -50,7 +50,7 @@ public class DFKlass extends DFType {
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
         if (parentScope != null) {
-            _scope = new DFKlassScope(this, parentScope, name);
+            _klassScope = new DFKlassScope(this, parentScope, name);
         }
         _initializer = this.addMethod(
             null, "<init>", DFCallStyle.Initializer,
@@ -62,7 +62,7 @@ public class DFKlass extends DFType {
         _typeSpace = genericKlass._typeSpace;
         _klassSpace = genericKlass._klassSpace;
         _parentKlass = genericKlass._parentKlass;
-        _scope = genericKlass._scope;
+        _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
         _initializer = genericKlass._initializer;
     }
@@ -140,15 +140,15 @@ public class DFKlass extends DFType {
         return _parentKlass;
     }
 
-    public DFTypeSpace getChildSpace() {
+    public DFTypeSpace getKlassSpace() {
         return _klassSpace;
     }
 
-    public DFVarScope getScope() {
-        return _scope;
+    public DFVarScope getKlassScope() {
+        return _klassScope;
     }
 
-    public DFKlass getBase() {
+    public DFKlass getBaseKlass() {
         return _baseKlass;
     }
 
@@ -170,7 +170,7 @@ public class DFKlass extends DFType {
     protected boolean isCircular() {
         if (_paramTypes != null) {
             for (DFParamType pt : _paramTypes) {
-                DFKlass klass = pt.getBase();
+                DFKlass klass = pt.getBaseKlass();
                 if (klass instanceof DFParamKlass) {
                     if (((DFParamKlass)klass).getGeneric() == this) {
                         return true;
@@ -198,9 +198,9 @@ public class DFKlass extends DFType {
 
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
-        if (_scope != null) {
+        if (_klassScope != null) {
             try {
-                return _scope.lookupRef("."+id);
+                return _klassScope.lookupRef("."+id);
             } catch (VariableNotFound e) {
             }
         }
@@ -289,8 +289,8 @@ public class DFKlass extends DFType {
 
     public DFVarRef addField(
         String id, boolean isStatic, DFType type) {
-        assert _scope != null;
-        DFVarRef ref = _scope.addRef("."+id, type);
+        assert _klassScope != null;
+        DFVarRef ref = _klassScope.addRef("."+id, type);
         //Logger.info("DFKlass.addField: "+ref);
 	_fields.add(ref);
         return ref;

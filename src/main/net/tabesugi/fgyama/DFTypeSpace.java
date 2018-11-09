@@ -67,7 +67,7 @@ public class DFTypeSpace {
         }
         DFKlass klass = _id2klass.get(id);
         if (klass != null) {
-            return klass.getChildSpace();
+            return klass.getKlassSpace();
         }
         DFTypeSpace space = _id2space.get(id);
         if (space == null) {
@@ -176,10 +176,10 @@ public class DFTypeSpace {
             klasses.add(klass);
         }
         klass.addParamTypes(typeDecl.typeParameters());
-        DFTypeSpace child = klass.getChildSpace();
+        DFTypeSpace child = klass.getKlassSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getScope());
+            child.build(klasses, body, klass, klass.getKlassScope());
         }
     }
 
@@ -194,10 +194,10 @@ public class DFTypeSpace {
         if (klasses != null) {
             klasses.add(klass);
         }
-        DFTypeSpace child = klass.getChildSpace();
+        DFTypeSpace child = klass.getKlassSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) enumDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getScope());
+            child.build(klasses, body, klass, klass.getKlassScope());
         }
     }
 
@@ -212,10 +212,10 @@ public class DFTypeSpace {
         if (klasses != null) {
             klasses.add(klass);
         }
-        DFTypeSpace child = klass.getChildSpace();
+        DFTypeSpace child = klass.getKlassSpace();
         for (BodyDeclaration body :
                  (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getScope());
+            child.build(klasses, body, klass, klass.getKlassScope());
         }
     }
 

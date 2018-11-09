@@ -217,7 +217,7 @@ public class DFFrame {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFKlass klass = finder.resolveKlass(
-                scope.lookupThis().getRefType()).getBase();
+                scope.lookupThis().getRefType()).getBaseKlass();
             DFVarRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
@@ -264,7 +264,7 @@ public class DFFrame {
             DFVarRef ref;
             if (name != null) {
                 DFKlass klass = finder.lookupKlass(name);
-                ref = klass.getScope().lookupThis();
+                ref = klass.getKlassScope().lookupThis();
             } else {
                 ref = scope.lookupThis();
             }
@@ -373,7 +373,8 @@ public class DFFrame {
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
             try {
-                DFMethod method = klass.lookupMethod(invoke.getName(), argTypes);
+                DFMethod method = klass.lookupMethod(
+                    invoke.getName(), argTypes);
                 return method.getReturnType();
             } catch (MethodNotFound e) {
                 return null;
@@ -391,9 +392,10 @@ public class DFFrame {
             typeList.toArray(argTypes);
             DFKlass klass =
                 finder.resolveKlass(scope.lookupThis().getRefType());
-            DFKlass baseKlass = klass.getBase();
+            DFKlass baseKlass = klass.getBaseKlass();
             try {
-                DFMethod method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
+                DFMethod method = baseKlass.lookupMethod(
+                    sinvoke.getName(), argTypes);
                 return method.getReturnType();
             } catch (MethodNotFound e) {
                 return null;
@@ -452,7 +454,8 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType()).getBase();
+            DFKlass klass = finder.resolveKlass(
+                scope.lookupThis().getRefType()).getBaseKlass();
             DFVarRef ref = klass.lookupField(fieldName);
             this.addInputRef(ref);
             return ref.getRefType();
@@ -464,7 +467,8 @@ public class DFFrame {
 
         } else if (expr instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
+            AnonymousClassDeclaration anonDecl =
+                cstr.getAnonymousClassDeclaration();
             // XXX ignore AnonymousClassDeclaration
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
