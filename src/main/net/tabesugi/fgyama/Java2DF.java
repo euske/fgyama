@@ -1089,18 +1089,22 @@ public class Java2DF {
 
             } else if (expr instanceof ClassInstanceCreation) {
                 ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-                AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
+                AnonymousClassDeclaration anonDecl =
+                    cstr.getAnonymousClassDeclaration();
                 DFType instType;
                 if (anonDecl != null) {
+                    DFKlass klass = finder.resolveKlass(
+                        scope.lookupThis().getRefType());
                     String id = Utils.encodeASTNode(expr);
                     DFKlass baseKlass = finder.resolveKlass(cstr.getType());
-                    DFTypeSpace anonSpace = new DFTypeSpace(baseKlass.getChildSpace(), id);
+                    DFTypeSpace anonSpace = new DFTypeSpace(
+                        baseKlass.getChildSpace(), id);
                     DFKlass anonKlass = new DFAnonKlass(
-                        "<anonymous>", anonSpace, scope, baseKlass);
+                        "<anonymous>", anonSpace, klass, scope, baseKlass);
                     anonSpace.addKlass(anonKlass);
                     for (BodyDeclaration body :
                              (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonSpace.build(null, body, scope);
+                        anonSpace.build(null, body, klass, scope);
                     }
                     try {
                         anonKlass.build(finder, anonDecl.bodyDeclarations());
@@ -1165,9 +1169,12 @@ public class Java2DF {
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
+                DFKlass klass = finder.resolveKlass(
+                    scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
                 DFKlass anonKlass = new DFAnonKlass(
-                    id, anonSpace, scope, DFRootTypeSpace.getObjectKlass());
+                    id, anonSpace, klass, scope,
+                    DFRootTypeSpace.getObjectKlass());
                 assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1187,9 +1194,12 @@ public class Java2DF {
                 //  SuperMethodReference
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
+                DFKlass klass = finder.resolveKlass(
+                    scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFAnonKlass(
-                    "methodref", anonSpace, scope, DFRootTypeSpace.getObjectKlass());
+                    "methodref", anonSpace, klass, scope,
+                    DFRootTypeSpace.getObjectKlass());
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -2117,7 +2127,7 @@ public class Java2DF {
         try {
             // Setup an initial space.
             List<DFKlass> klasses = new ArrayList<DFKlass>();
-            typeSpace.build(klasses, methodDecl.getBody(), scope);
+            typeSpace.build(klasses, methodDecl.getBody(), klass, scope);
             this.buildInlineKlasses(typeSpace, finder, methodDecl.getBody());
             // Add overrides.
             for (DFKlass klass1 : klasses) {

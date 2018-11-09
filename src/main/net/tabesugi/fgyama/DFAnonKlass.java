@@ -14,9 +14,10 @@ public class DFAnonKlass extends DFKlass {
     public DFAnonKlass(
 	String name,
         DFTypeSpace typeSpace,
+	DFKlass parentKlass,
 	DFVarScope parentScope,
         DFKlass baseKlass) {
-        super(name, typeSpace, typeSpace, parentScope, baseKlass);
+        super(name, typeSpace, parentKlass, parentScope, baseKlass);
     }
 
     @Override

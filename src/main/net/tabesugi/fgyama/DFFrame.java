@@ -216,7 +216,8 @@ public class DFFrame {
         } else if (expr instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = finder.resolveKlass(scope.lookupThis().getRefType()).getBase();
+            DFKlass klass = finder.resolveKlass(
+                scope.lookupThis().getRefType()).getBase();
             DFVarRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
@@ -488,8 +489,11 @@ public class DFFrame {
             String id = "lambda";
             ASTNode body = lambda.getBody();
             DFTypeSpace anonSpace = new DFTypeSpace(null, id);
+            DFKlass klass = finder.resolveKlass(
+                scope.lookupThis().getRefType());
             DFKlass anonKlass = new DFAnonKlass(
-                id, anonSpace, scope, DFRootTypeSpace.getObjectKlass());
+                id, anonSpace, klass, scope,
+                DFRootTypeSpace.getObjectKlass());
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {

@@ -19,7 +19,8 @@ public class DFKlass extends DFType {
     protected DFKlass[] _baseIfaces = null;
 
     private DFTypeSpace _typeSpace;
-    private DFTypeSpace _childSpace = null;
+    private DFTypeSpace _klassSpace;
+    private DFKlass _parentKlass;
     private DFVarScope _scope = null;
 
     private DFParamType[] _paramTypes = null;
@@ -41,11 +42,12 @@ public class DFKlass extends DFType {
 
     public DFKlass(
         String name, DFTypeSpace typeSpace,
-        DFTypeSpace childSpace, DFVarScope parentScope,
+        DFKlass parentKlass, DFVarScope parentScope,
         DFKlass baseKlass) {
         _name = name;
         _typeSpace = typeSpace;
-        _childSpace = childSpace;
+        _klassSpace = typeSpace.lookupSpace(name);
+        _parentKlass = parentKlass;
         _baseKlass = baseKlass;
         if (parentScope != null) {
             _scope = new DFKlassScope(this, parentScope, name);
@@ -58,7 +60,8 @@ public class DFKlass extends DFType {
     protected DFKlass(String name, DFKlass genericKlass) {
         _name = name;
         _typeSpace = genericKlass._typeSpace;
-        _childSpace = genericKlass._childSpace;
+        _klassSpace = genericKlass._klassSpace;
+        _parentKlass = genericKlass._parentKlass;
         _scope = genericKlass._scope;
         _baseKlass = genericKlass._baseKlass;
         _initializer = genericKlass._initializer;
@@ -124,7 +127,7 @@ public class DFKlass extends DFType {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFParamType pt = _childSpace.createParamType(id);
+            DFParamType pt = _klassSpace.createParamType(id);
             _paramTypes[i] = pt;
         }
     }
@@ -133,8 +136,12 @@ public class DFKlass extends DFType {
         return _name;
     }
 
+    public DFKlass getParentKlass() {
+        return _parentKlass;
+    }
+
     public DFTypeSpace getChildSpace() {
-        return _childSpace;
+        return _klassSpace;
     }
 
     public DFVarScope getScope() {
@@ -248,6 +255,12 @@ public class DFKlass extends DFType {
         if (method != null) {
             return method;
         }
+        if (_parentKlass != null) {
+            try {
+                return _parentKlass.lookupMethod(name, argTypes);
+            } catch (MethodNotFound e) {
+            }
+        }
         if (_baseKlass != null) {
             try {
                 return _baseKlass.lookupMethod(name, argTypes);
@@ -349,8 +362,8 @@ public class DFKlass extends DFType {
                 }
             }
         }
-        if (_childSpace != null) {
-            finder = new DFTypeFinder(finder, _childSpace);
+        if (_klassSpace != null) {
+            finder = new DFTypeFinder(finder, _klassSpace);
         }
         return finder;
     }
@@ -399,9 +412,9 @@ public class DFKlass extends DFType {
         DFTypeFinder finder2 = finder;
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
-            finder2 = new DFTypeFinder(finder2, _childSpace);
+            finder2 = new DFTypeFinder(finder2, _klassSpace);
 	    JNITypeParser parser = new JNITypeParser(sig);
-	    _paramTypes = JNITypeParser.getParamTypes(sig, _childSpace);
+	    _paramTypes = JNITypeParser.getParamTypes(sig, _klassSpace);
 	    if (_paramTypes != null) {
 		parser.buildParamTypes(finder2, _paramTypes);
 	    }
@@ -453,7 +466,7 @@ public class DFKlass extends DFType {
             DFTypeSpace methodSpace = null;
 	    if (sig != null) {
                 //Logger.info("meth: "+meth.getName()+","+sig);
-                methodSpace = new DFTypeSpace(_childSpace, meth.getName());
+                methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
 		finder = new DFTypeFinder(finder, methodSpace);
 		JNITypeParser parser = new JNITypeParser(sig);
                 DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
@@ -488,7 +501,7 @@ public class DFKlass extends DFType {
         //Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
-            finder = new DFTypeFinder(finder, _childSpace);
+            finder = new DFTypeFinder(finder, _klassSpace);
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
                 _baseKlass = finder.resolveKlass(superClass);
@@ -525,7 +538,7 @@ public class DFKlass extends DFType {
         //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
         // Get superclass.
         try {
-            finder = new DFTypeFinder(finder, _childSpace);
+            finder = new DFTypeFinder(finder, _klassSpace);
             DFKlass enumKlass = DFRootTypeSpace.getEnumKlass();
             _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
             finder = _baseKlass.addFinders(finder);
@@ -556,7 +569,7 @@ public class DFKlass extends DFType {
         //Logger.info("DFKlass.build: "+this+": "+annotTypeDecl.getName());
         // Get superclass.
         try {
-            finder = new DFTypeFinder(finder, _childSpace);
+            finder = new DFTypeFinder(finder, _klassSpace);
             _baseKlass = DFRootTypeSpace.getObjectKlass();
             finder = _baseKlass.addFinders(finder);
             // Lookup child klasses.
@@ -586,7 +599,7 @@ public class DFKlass extends DFType {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-                DFKlass klass = _childSpace.getKlass(decl.getName());
+                DFKlass klass = _klassSpace.getKlass(decl.getName());
                 klass.build(finder, decl);
 
             } else if (body instanceof FieldDeclaration) {
@@ -606,7 +619,7 @@ public class DFKlass extends DFType {
                 DFTypeSpace methodSpace = null;
                 if (0 < tps.size()) {
                     String name = decl.getName().getIdentifier();
-                    methodSpace = new DFTypeSpace(_childSpace, name);
+                    methodSpace = new DFTypeSpace(_klassSpace, name);
                     finder2 = new DFTypeFinder(finder, methodSpace);
                     for (int i = 0; i < tps.size(); i++) {
                         TypeParameter tp = tps.get(i);
