@@ -1107,7 +1107,7 @@ public class Java2DF {
                         anonSpace.build(null, body, klass, scope);
                     }
                     try {
-                        anonKlass.build(finder, anonDecl.bodyDeclarations());
+                        anonKlass.build(finder, anonDecl);
                         anonKlass.addOverrides();
                         processBodyDeclarations(
                             finder, anonKlass, anonDecl,
@@ -2348,7 +2348,13 @@ public class Java2DF {
             for (AbstractTypeDeclaration abstTypeDecl :
                      (List<AbstractTypeDeclaration>) cunit.types()) {
                 DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-                klass.build(finder, abstTypeDecl);
+                if (abstTypeDecl instanceof TypeDeclaration) {
+                    klass.build(finder, (TypeDeclaration)abstTypeDecl);
+                } else if (abstTypeDecl instanceof EnumDeclaration) {
+                    klass.build(finder, (EnumDeclaration)abstTypeDecl);
+                } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+                    klass.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+                }
             }
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();

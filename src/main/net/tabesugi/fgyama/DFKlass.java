@@ -580,7 +580,21 @@ public class DFKlass extends DFType {
         }
     }
 
-    public void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        //Logger.info("DFKlass.build: "+this+": "+anonDecl.getName());
+        try {
+            finder = new DFTypeFinder(finder, _klassSpace);
+            finder = _baseKlass.addFinders(finder);
+            this.build(finder, anonDecl.bodyDeclarations());
+        } catch (TypeNotFound e) {
+            e.setAst(anonDecl);
+            throw e;
+        }
+    }
+
+    private void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
         if (abstTypeDecl instanceof TypeDeclaration) {
             this.build(finder, (TypeDeclaration)abstTypeDecl);
@@ -594,7 +608,7 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, List<BodyDeclaration> decls)
+    private void build(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
