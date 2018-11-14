@@ -86,14 +86,11 @@ public class DFTypeSpace {
     }
 
     protected DFKlass createKlass(
-        DFVarScope parentScope, String id) {
-        return this.createKlass(null, parentScope, id);
-    }
-
-    private DFKlass createKlass(
         DFKlass parentKlass, DFVarScope parentScope, String id) {
         assert id.indexOf('.') < 0;
-        DFKlass klass = new DFKlass(
+        DFKlass klass = _id2klass.get(id);
+        if (klass != null) return klass;
+        klass = new DFKlass(
             id, this, parentKlass, parentScope,
             DFRootTypeSpace.getObjectKlass());
         //Logger.info("DFTypeSpace.createKlass: "+klass);

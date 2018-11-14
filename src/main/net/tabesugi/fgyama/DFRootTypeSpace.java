@@ -61,21 +61,20 @@ public class DFRootTypeSpace extends DFTypeSpace {
 
     private void addFile(String jarPath, String filePath) {
         if (!filePath.endsWith(".class")) return;
-        String name = filePath.substring(0, filePath.length()-6);
-        String fullName = name.replace('/', '.').replace('$', '.');
-        int i = fullName.lastIndexOf('.');
-        List<DFTypeSpace> a = new ArrayList<DFTypeSpace>();
-        int j = name.indexOf('$');
-        while (0 <= j) {
-            String x = name.substring(0, j);
-            a.add(this.lookupSpace(x.replace('/', '.').replace('$', '.')));
-            j = name.indexOf('$', j+1);
+        String s = filePath.substring(0, filePath.length()-6);
+        int i = s.indexOf('$');
+        String fullName = s.substring(0, (0 <= i)? i : s.length());
+        int j = fullName.lastIndexOf('/');
+        DFTypeSpace space = this.lookupSpace(fullName.substring(0, j).replace('/', '.'));
+        DFKlass klass = space.createKlass(null, _global, fullName.substring(j+1));
+        while (0 <= i) {
+            int i0 = i+1;
+            i = s.indexOf('$', i0);
+            String name = s.substring(i0, (0 <= i)? i : s.length());
+            space = klass.getKlassSpace();
+            klass = space.createKlass(klass, klass.getKlassScope(), name);
         }
-        DFTypeSpace space = this.lookupSpace(fullName.substring(0, i));
-        DFKlass klass = space.createKlass(_global, fullName.substring(i+1));
-        DFTypeSpace[] extra = new DFTypeSpace[a.size()];
-        a.toArray(extra);
-        klass.setJarPath(jarPath, filePath, extra);
+        klass.setJarPath(jarPath, filePath);
     }
 
     private void loadDefaultKlasses()
@@ -97,7 +96,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         _float = this.getKlass("java.lang.Float");
         _double = this.getKlass("java.lang.Double");
         _boolean = this.getKlass("java.lang.Boolean");
-        _array = java_lang.createKlass(_global, "_Array");
+        _array = java_lang.createKlass(null, _global, "_Array");
         _array.addField("length", false, DFBasicType.INT);
         DFTypeFinder finder = new DFTypeFinder(this);
         _object.load(finder);
