@@ -1102,10 +1102,7 @@ public class Java2DF {
                     DFKlass anonKlass = new DFAnonKlass(
                         "<anonymous>", anonSpace, klass, scope, baseKlass);
                     anonSpace.addKlass(anonKlass);
-                    for (BodyDeclaration body :
-                             (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-                        anonSpace.build(null, body, klass, scope);
-                    }
+                    anonSpace.build(null, anonDecl, klass, scope);
                     try {
                         anonKlass.build(finder, anonDecl);
                         anonKlass.addOverrides();
@@ -2128,7 +2125,7 @@ public class Java2DF {
         try {
             // Setup an initial space.
             List<DFKlass> klasses = new ArrayList<DFKlass>();
-            typeSpace.build(klasses, methodDecl.getBody(), klass, scope);
+            typeSpace.build(klasses, methodDecl, klass, scope);
             this.buildInlineKlasses(typeSpace, finder, methodDecl.getBody());
             // Add overrides.
             for (DFKlass klass1 : klasses) {

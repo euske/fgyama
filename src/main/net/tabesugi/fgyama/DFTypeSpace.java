@@ -142,7 +142,26 @@ public class DFTypeSpace {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void build(
+        List<DFKlass> klasses, AnonymousClassDeclaration anonDecl,
+        DFKlass parentKlass, DFVarScope parentScope)
+        throws UnsupportedSyntax {
+        for (BodyDeclaration body :
+                 (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
+            this.build(klasses, body, parentKlass, parentScope);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void build(
+        List<DFKlass> klasses, MethodDeclaration methodDecl,
+        DFKlass parentKlass, DFVarScope parentScope)
+        throws UnsupportedSyntax {
+        this.build(klasses, methodDecl.getBody(), parentKlass, parentScope);
+    }
+
+    private void build(
         List<DFKlass> klasses, AbstractTypeDeclaration abstTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -162,7 +181,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
+    private void build(
         List<DFKlass> klasses, TypeDeclaration typeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -181,7 +200,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
+    private void build(
         List<DFKlass> klasses, EnumDeclaration enumDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -199,7 +218,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
+    private void build(
         List<DFKlass> klasses, AnnotationTypeDeclaration annotTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -216,7 +235,7 @@ public class DFTypeSpace {
         }
     }
 
-    public void build(
+    private void build(
         List<DFKlass> klasses, BodyDeclaration body,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -238,7 +257,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
+    private void build(
         List<DFKlass> klasses, Statement ast,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
