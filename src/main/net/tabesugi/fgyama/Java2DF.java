@@ -988,7 +988,7 @@ public class Java2DF {
                                 graph, scope, obj.getRef(), invoke, call));
                 }
                 if (call.exception != null) {
-                    DFFrame dstFrame = frame.find(DFFrame.TRY);
+                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
                     frame.addExit(new DFExit(dstFrame, call.exception));
                 }
 
@@ -1033,7 +1033,7 @@ public class Java2DF {
                                 graph, scope, obj.getRef(), sinvoke, call));
                 }
                 if (call.exception != null) {
-                    DFFrame dstFrame = frame.find(DFFrame.TRY);
+                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
                     frame.addExit(new DFExit(dstFrame, call.exception));
                 }
 
@@ -1947,7 +1947,7 @@ public class Java2DF {
 
         } else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
-            DFFrame dstFrame = frame.find(DFFrame.METHOD);
+            DFFrame dstFrame = frame.find(DFFrame.RETURNABLE);
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 ctx = processExpression(
@@ -1965,7 +1965,7 @@ public class Java2DF {
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
             String dstLabel = (labelName != null)?
-                labelName.getIdentifier() : DFFrame.LOOP;
+                labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : dstFrame.getOutputRefs()) {
                 frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
@@ -1975,7 +1975,7 @@ public class Java2DF {
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
             String dstLabel = (labelName != null)?
-                labelName.getIdentifier() : DFFrame.LOOP;
+                labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFVarRef ref : dstFrame.getOutputRefs()) {
                 frame.addExit(new DFExit(dstFrame, ctx.get(ref), true));
@@ -2007,7 +2007,7 @@ public class Java2DF {
                 ctx, throwStmt.getExpression());
             ThrowNode exception = new ThrowNode(
                 graph, scope, stmt, ctx.getRValue());
-            DFFrame dstFrame = frame.find(DFFrame.TRY);
+            DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
             if (dstFrame != null) {
                 frame.addExit(new DFExit(dstFrame, exception));
                 for (DFVarRef ref : dstFrame.getOutputRefs()) {
@@ -2235,7 +2235,7 @@ public class Java2DF {
             }
             scope.build(finder, methodDecl);
             //scope.dump();
-            DFFrame frame = new DFFrame(DFFrame.METHOD);
+            DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
             frame.build(finder, scope, methodDecl.getBody());
 
             DFGraph graph = new DFGraph(scope, frame, method, false, methodDecl);
@@ -2281,7 +2281,7 @@ public class Java2DF {
         Initializer initializer)
         throws UnsupportedSyntax, EntityNotFound {
         DFMethod method = klass.getInitializer();
-        DFFrame frame = new DFFrame(DFFrame.METHOD);
+        DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
         DFLocalVarScope scope = new DFLocalVarScope(
             klass.getKlassScope(), "<clinit>");
         DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
@@ -2302,7 +2302,7 @@ public class Java2DF {
         throws EntityNotFound {
         // lookup base/child klasses.
         finder = klass.addFinders(finder);
-        DFFrame klassFrame = new DFFrame(DFFrame.CLASS);
+        DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
         DFVarScope klassScope = klass.getKlassScope();
         DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
         for (BodyDeclaration body : decls) {

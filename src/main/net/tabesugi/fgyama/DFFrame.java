@@ -28,12 +28,10 @@ public class DFFrame {
     private List<DFNode> _outputNodes =
         new ArrayList<DFNode>();
 
-    public static final String COND = "@COND";
-    public static final String LOOP = "@LOOP";
-    public static final String TRY = "@TRY";
-    public static final String CATCH = "@CATCH";
-    public static final String METHOD = "@METHOD";
-    public static final String CLASS = "@CLASS";
+    public static final String ANONYMOUS = "@ANONYMOUS";
+    public static final String BREAKABLE = "@BREAKABLE";
+    public static final String CATCHABLE = "@CATCHABLE";
+    public static final String RETURNABLE = "@RETURNABLE";
 
     public DFFrame(String label) {
         this(label, null);
@@ -566,12 +564,12 @@ public class DFFrame {
             IfStatement ifStmt = (IfStatement)stmt;
             this.build(finder, scope, ifStmt.getExpression());
             Statement thenStmt = ifStmt.getThenStatement();
-            DFFrame thenFrame = this.addChild(DFFrame.COND, thenStmt);
+            DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
             thenFrame.build(finder, scope, thenStmt);
             this.expandRefs(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                DFFrame elseFrame = this.addChild(DFFrame.COND, elseStmt);
+                DFFrame elseFrame = this.addChild(DFFrame.ANONYMOUS, elseStmt);
                 elseFrame.build(finder, scope, elseStmt);
                 this.expandRefs(elseFrame);
             }
@@ -585,7 +583,7 @@ public class DFFrame {
                 enumKlass = finder.resolveKlass(type);
             }
             DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
@@ -610,7 +608,7 @@ public class DFFrame {
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;
             DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             childFrame.build(finder, scope, whileStmt.getExpression());
             childFrame.build(finder, childScope, whileStmt.getBody());
             childFrame.removeRefs(childScope);
@@ -619,7 +617,7 @@ public class DFFrame {
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
             DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             childFrame.build(finder, childScope, doStmt.getBody());
             childFrame.build(finder, scope, doStmt.getExpression());
             childFrame.removeRefs(childScope);
@@ -631,7 +629,7 @@ public class DFFrame {
             for (Expression init : (List<Expression>) forStmt.initializers()) {
                 this.build(finder, childScope, init);
             }
-            DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             Expression expr = forStmt.getExpression();
             if (expr != null) {
                 childFrame.build(finder, childScope, expr);
@@ -647,7 +645,7 @@ public class DFFrame {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.build(finder, scope, eForStmt.getExpression());
             DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             childFrame.build(finder, childScope, eForStmt.getBody());
             childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
@@ -679,14 +677,14 @@ public class DFFrame {
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
             DFVarScope tryScope = scope.getChildByAST(stmt);
-            DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
+            DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
             tryFrame.build(finder, tryScope, tryStmt.getBody());
             tryFrame.removeRefs(tryScope);
             this.expandRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 DFVarScope catchScope = scope.getChildByAST(cc);
-                DFFrame catchFrame = this.addChild(DFFrame.CATCH, cc);
+                DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
                 catchFrame.build(finder, catchScope, cc.getBody());
                 catchFrame.removeRefs(catchScope);
                 this.expandRefs(catchFrame);
