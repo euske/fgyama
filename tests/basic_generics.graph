@@ -134,7 +134,6 @@
             <ast length="16" start="421" type="59"/>
           </node>
         </scope>
-        <node id="Nbasic_generics.test_13" ref="basic_generics.test.b0/$mi" type="Lbasic_generics/Moo/Baa;"/>
       </scope>
     </graph>
     <graph ins="Nbasic_generics.foo_1" name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;" outs="Nbasic_generics.foo.b0_6" style="static">

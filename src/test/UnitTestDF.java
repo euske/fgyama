@@ -131,6 +131,10 @@ public class UnitTestDF extends XMLTestCase {
     public void test_18_basic_staticimport() throws Exception {
 	compareXml(TESTDATA+"/basic_staticimport.java", TESTDATA+"/basic_staticimport.graph");
     }
+    @Test
+    public void test_19_basic_exception() throws Exception {
+	compareXml(TESTDATA+"/basic_exception.java", TESTDATA+"/basic_exception.graph");
+    }
 
     @Test
     public void test_19_multi_xref() throws Exception {
