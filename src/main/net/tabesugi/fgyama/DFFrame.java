@@ -92,6 +92,13 @@ public class DFFrame {
         _outputRefs.addAll(childFrame._outputRefs);
     }
 
+    private void removeRefs(DFVarScope childScope) {
+        for (DFVarRef ref : childScope.getRefs()) {
+            _inputRefs.remove(ref);
+            _outputRefs.remove(ref);
+        }
+    }
+
     public DFVarRef[] getInputRefs() {
         DFVarRef[] refs = new DFVarRef[_inputRefs.size()];
         _inputRefs.toArray(refs);
@@ -534,6 +541,7 @@ public class DFFrame {
                      (List<Statement>) block.statements()) {
                 this.build(finder, childScope, cstmt);
             }
+            this.removeRefs(childScope);
 
         } else if (stmt instanceof EmptyStatement) {
 
@@ -596,6 +604,7 @@ public class DFFrame {
                     childFrame.build(finder, childScope, cstmt);
                 }
             }
+            childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof WhileStatement) {
@@ -604,6 +613,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, scope, whileStmt.getExpression());
             childFrame.build(finder, childScope, whileStmt.getBody());
+            childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof DoStatement) {
@@ -612,6 +622,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childScope, doStmt.getBody());
             childFrame.build(finder, scope, doStmt.getExpression());
+            childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof ForStatement) {
@@ -629,19 +640,16 @@ public class DFFrame {
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 childFrame.build(finder, childScope, update);
             }
+            childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.build(finder, scope, eForStmt.getExpression());
             DFVarScope childScope = scope.getChildByAST(stmt);
-            SingleVariableDeclaration decl = eForStmt.getParameter();
-            DFVarRef ref = childScope.lookupVar(decl.getName());
             DFFrame childFrame = this.addChild(DFFrame.LOOP, stmt);
             childFrame.build(finder, childScope, eForStmt.getBody());
-            // the variable disappears from the scope after use.
-            childFrame._outputRefs.remove(ref);
-            childFrame._inputRefs.remove(ref);
+            childFrame.removeRefs(childScope);
             this.expandRefs(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {
@@ -673,13 +681,14 @@ public class DFFrame {
             DFVarScope tryScope = scope.getChildByAST(stmt);
             DFFrame tryFrame = this.addChild(DFFrame.TRY, stmt);
             tryFrame.build(finder, tryScope, tryStmt.getBody());
+            tryFrame.removeRefs(tryScope);
             this.expandRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                SingleVariableDeclaration decl = cc.getException();
                 DFVarScope catchScope = scope.getChildByAST(cc);
                 DFFrame catchFrame = this.addChild(DFFrame.CATCH, cc);
                 catchFrame.build(finder, catchScope, cc.getBody());
+                catchFrame.removeRefs(catchScope);
                 this.expandRefs(catchFrame);
             }
             Block finBlock = tryStmt.getFinally();

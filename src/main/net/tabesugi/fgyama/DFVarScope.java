@@ -147,9 +147,14 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFVarRef lookupArray(DFType type)
-    {
+    public DFVarRef lookupArray(DFType type) {
         return _parent.lookupArray(type);
+    }
+
+    public DFVarRef[] getRefs() {
+        DFVarRef[] refs = new DFVarRef[_id2ref.size()];
+        _id2ref.values().toArray(refs);
+        return refs;
     }
 
     public DFLocalVarScope getChildByAST(ASTNode ast) {
