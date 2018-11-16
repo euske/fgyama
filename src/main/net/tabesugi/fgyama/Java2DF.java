@@ -626,6 +626,46 @@ class ThrowNode extends ProgNode {
     }
 }
 
+// CatchNode
+class CatchNode extends SingleAssignNode {
+
+    public CatchNode(
+        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        ASTNode ast, DFNode value) {
+        super(graph, scope, ref, ast);
+        this.accept(value);
+    }
+
+    @Override
+    public String getKind() {
+        return "catch";
+    }
+}
+
+// CatchJoin
+class CatchJoin extends SingleAssignNode {
+
+    public CatchJoin(
+        DFGraph graph, DFVarScope scope, DFVarRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "join";
+    }
+
+    public void recv(DFType type, DFNode node) {
+        if (type != null) {
+            this.accept(node, type.getTypeName());
+        } else {
+            this.accept(node);
+        }
+    }
+
+}
+
 // DFModuleScope
 class DFModuleScope extends DFVarScope {
 
@@ -1539,7 +1579,7 @@ public class Java2DF {
                 join.recv(true, node);
                 frame.addExit(exit.wrap(join));
             }
-            thenFrame.close(thenCtx);
+            thenFrame.close(ctx);
         }
         if (elseFrame != null) {
             for (DFExit exit : elseFrame.getExits()) {
@@ -1549,7 +1589,7 @@ public class Java2DF {
                 join.recv(false, node);
                 frame.addExit(exit.wrap(join));
             }
-            elseFrame.close(elseCtx);
+            elseFrame.close(ctx);
         }
 
         return ctx;
@@ -1757,24 +1797,86 @@ public class Java2DF {
         DFGraph graph, DFTypeFinder finder, DFVarScope scope,
         DFFrame frame, DFContext ctx, TryStatement tryStmt)
         throws UnsupportedSyntax, EntityNotFound {
-        // XXX Ignore catch statements (for now).
+        SortedSet<DFVarRef> outRefs = new TreeSet<DFVarRef>();
+
         DFVarScope tryScope = scope.getChildByAST(tryStmt);
         DFFrame tryFrame = frame.getChildByAST(tryStmt);
-        ctx = processStatement(
+        DFContext tryCtx = new DFContext(graph, tryScope);
+        tryCtx = processStatement(
             graph, finder, tryScope, tryFrame,
-            ctx, tryStmt.getBody());
-        tryFrame.close(ctx);
-        for (CatchClause cc :
-                 (List<CatchClause>) tryStmt.catchClauses()) {
+            tryCtx, tryStmt.getBody());
+        for (DFNode src : tryCtx.getFirsts()) {
+            if (src.hasInput()) continue;
+            src.accept(ctx.get(src.getRef()));
+        }
+        DFNode exc = tryCtx.get(tryScope.lookupException());
+        outRefs.addAll(Arrays.asList(tryFrame.getOutputRefs()));
+
+        List<CatchClause> catches = tryStmt.catchClauses();
+        int ncats = catches.size();
+        DFType[] excs = new DFType[ncats];
+        DFFrame[] frames = new DFFrame[ncats];
+        DFContext[] ctxs = new DFContext[ncats];
+        for (int i = 0; i < ncats; i++) {
+            CatchClause cc = catches.get(i);
             SingleVariableDeclaration decl = cc.getException();
+            excs[i] = finder.resolve(decl.getType());
             DFVarScope catchScope = scope.getChildByAST(cc);
             DFFrame catchFrame = frame.getChildByAST(cc);
+            DFContext catchCtx = new DFContext(graph, catchScope);
             DFVarRef ref = catchScope.lookupVar(decl.getName());
-            ctx = processStatement(
+            CatchNode cat = new CatchNode(graph, catchScope, ref, decl, exc);
+            catchCtx.set(cat);
+            catchCtx = processStatement(
                 graph, finder, catchScope, catchFrame,
-                ctx, cc.getBody());
-            catchFrame.close(ctx);
+                catchCtx, cc.getBody());
+            for (DFNode src : catchCtx.getFirsts()) {
+                if (src.hasInput()) continue;
+                src.accept(ctx.get(src.getRef()));
+            }
+            outRefs.addAll(Arrays.asList(catchFrame.getOutputRefs()));
+            frames[i] = catchFrame;
+            ctxs[i] = catchCtx;
         }
+
+        // Attach a CatchNode to each variable.
+        for (DFVarRef ref : outRefs) {
+            CatchJoin join = new CatchJoin(graph, scope, ref, tryStmt);
+            {
+                DFNode dst = tryCtx.get(ref);
+                if (dst != null) {
+                    join.recv(null, dst);
+                }
+            }
+            for (int i = 0; i < ncats; i++) {
+                DFNode dst = ctxs[i].get(ref);
+                if (dst != null) {
+                    join.recv(excs[i], dst);
+                }
+            }
+            ctx.set(join);
+        }
+
+        // Take care of exits.
+        for (DFExit exit : tryFrame.getExits()) {
+            DFNode node = exit.getNode();
+            CatchJoin join = new CatchJoin(
+                graph, scope, node.getRef(), tryStmt);
+            join.recv(null, node);
+            frame.addExit(exit.wrap(join));
+        }
+        tryFrame.close(ctx);
+        for (int i = 0; i < ncats; i++) {
+            for (DFExit exit : frames[i].getExits()) {
+                DFNode node = exit.getNode();
+                CatchJoin join = new CatchJoin(
+                    graph, scope, node.getRef(), tryStmt);
+                join.recv(excs[i], node);
+                frame.addExit(exit.wrap(join));
+            }
+            frames[i].close(ctx);
+        }
+
         Block finBlock = tryStmt.getFinally();
         if (finBlock != null) {
             ctx = processStatement(
