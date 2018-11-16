@@ -1369,7 +1369,7 @@ public class Java2DF {
             new HashMap<DFVarRef, LoopRepeatNode>();
         Map<DFVarRef, DFNode> ends =
             new HashMap<DFVarRef, DFNode>();
-        DFVarRef[] loopRefs = loopFrame.getInsAndOuts();
+        DFVarRef[] loopRefs = loopCtx.getChanged();
         for (DFVarRef ref : loopRefs) {
             DFNode src = ctx.get(ref);
             LoopBeginNode begin = new LoopBeginNode(graph, scope, ref, ast, src);
@@ -1394,7 +1394,7 @@ public class Java2DF {
                 input.accept(src);
             }
             // Connect the loop outputs to the begins.
-            for (DFVarRef ref : loopFrame.getOutputRefs()) {
+            for (DFVarRef ref : loopRefs) {
                 DFNode output = loopCtx.get(ref);
                 if (output != null) {
                     LoopBeginNode begin = begins.get(ref);
@@ -1425,7 +1425,7 @@ public class Java2DF {
                 input.accept(src);
             }
             // Connect the loop outputs to the ends.
-            for (DFVarRef ref : loopFrame.getOutputRefs()) {
+            for (DFVarRef ref : loopRefs) {
                 DFNode output = loopCtx.get(ref);
                 if (output != null) {
                     DFNode dst = ends.get(ref);
