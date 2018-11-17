@@ -1,6 +1,6 @@
 package dom.meep;
 
-class Foo {
+class basic_names {
 
     class Bar {}
     int y = 123;
@@ -21,7 +21,7 @@ class Foo {
     }
 
     public static void main(String[] args) {
-        Foo foo = new Foo();
+        basic_names foo = new basic_names();
         foo.doit();
     }
 }

@@ -2,9 +2,10 @@
  */
 
 // This is a class.
-public class Foo {
+public class basic_return {
+
     // This is a method.
-    public static int basic_single(int a, int b, int c) {
+    public static int foo(int a, int b, int c) {
 	// This is a statement.
         int d = f(a + b); // Variable.
 	// Yes.

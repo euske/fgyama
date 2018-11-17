@@ -1,5 +1,6 @@
-public class Foo {
-    public static int basic_do(int x) {
+public class basic_do {
+
+    public static int foo(int x) {
 	int n = 0;
 	do {
 	    x /= 2;

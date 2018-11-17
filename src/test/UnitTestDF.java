@@ -84,8 +84,8 @@ public class UnitTestDF extends XMLTestCase {
 	compareXml(TESTDATA+"/basic_for.java", TESTDATA+"/basic_for.graph");
     }
     @Test
-    public void test_07_basic_xfor() throws Exception {
-	compareXml(TESTDATA+"/basic_xfor.java", TESTDATA+"/basic_xfor.graph");
+    public void test_07_basic_efor() throws Exception {
+	compareXml(TESTDATA+"/basic_efor.java", TESTDATA+"/basic_efor.graph");
     }
     @Test
     public void test_08_basic_break() throws Exception {

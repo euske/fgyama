@@ -6,6 +6,7 @@ enum E {
         this.x = x;
     }
 }
+
 public class basic_enum {
     public static void foo() {
         E x = E.Moo;

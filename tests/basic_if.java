@@ -1,5 +1,6 @@
-public class Foo {
-    public static void basic_if(int x) {
+public class basic_if {
+
+    public static void foo(int x) {
 	int y;
 	if (x == 0) {
 	    y = 1;

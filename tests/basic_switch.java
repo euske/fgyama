@@ -1,5 +1,6 @@
-public class Foo {
-    public static int basic_switch(int n) {
+public class basic_switch {
+
+    public static int foo(int n) {
 	int x;
 	switch (n) {
 	case 1:

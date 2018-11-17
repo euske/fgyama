@@ -1,5 +1,6 @@
-public class Foo {
-    public static int basic_ops(int x) {
+public class basic_ops {
+
+    public static int foo(int x) {
 	int z = x + 1;
         z *= 2;
 	z = moo(z, 3);

@@ -1,5 +1,6 @@
-public class Foo {
-    public static void basic_multi(int a, int b, int c) {
+public class basic_assign {
+
+    public static void foo(int a, int b, int c) {
 	a = a + b;
 	int x = b * c;
 	int y = c;
