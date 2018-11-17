@@ -18,6 +18,7 @@ public class DFKlass extends DFType {
     protected DFKlass _baseKlass = null;
     protected DFKlass[] _baseIfaces = null;
 
+    private boolean _loaded;
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
@@ -37,7 +38,7 @@ public class DFKlass extends DFType {
 
     private String _jarPath = null;
     private String _filePath = null;
-    private boolean _loaded = true;
+    private ASTNode _ast = null;
 
     public DFKlass(
         String name, DFTypeSpace typeSpace,
@@ -48,6 +49,7 @@ public class DFKlass extends DFType {
         _klassSpace = typeSpace.lookupSpace(name);
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
+        _loaded = false;
         if (parentScope != null) {
             _klassScope = new DFKlassScope(this, parentScope, name);
         }
@@ -64,6 +66,7 @@ public class DFKlass extends DFType {
         _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
         _initializer = genericKlass._initializer;
+        _loaded = true;
     }
 
     @Override
@@ -127,6 +130,7 @@ public class DFKlass extends DFType {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
             DFParamType pt = _klassSpace.createParamType(id);
+            pt.setAST(tp);
             _paramTypes[i] = pt;
         }
     }
@@ -367,28 +371,62 @@ public class DFKlass extends DFType {
         return finder;
     }
 
+    public void setAST(ASTNode ast) {
+        _ast = ast;
+    }
+
     public void setJarPath(String jarPath, String filePath) {
         _jarPath = jarPath;
         _filePath = filePath;
-        _loaded = false;
     }
 
-    public void load(DFTypeFinder finder) throws TypeNotFound {
-        if (_loaded) return;
+    public void setLoaded() {
         _loaded = true;
-        try {
-            JarFile jarfile = new JarFile(_jarPath);
+    }
+
+    public void load(DFTypeFinder finder)
+        throws TypeNotFound {
+        if (_loaded) return;
+        this.setLoaded();
+        assert _ast != null || _jarPath != null;
+        if (_ast != null) {
             try {
-                JarEntry je = jarfile.getJarEntry(_filePath);
-                InputStream strm = jarfile.getInputStream(je);
-                JavaClass jklass = new ClassParser(strm, _filePath).parse();
-                this.build(finder, jklass);
-            } finally {
-                jarfile.close();
+                this.buildFromTree(finder, _ast);
+            } catch (UnsupportedSyntax e) {
+                String astName = e.ast.getClass().getName();
+                Logger.error("Error: Unsupported syntax: "+e.name+" ("+astName+")");
+                throw new TypeNotFound(this.getFullName());
             }
-        } catch (IOException e) {
-            Logger.error("Error: Not found: "+_jarPath+"/"+_filePath);
-            throw new TypeNotFound(this.getFullName());
+        } else if (_jarPath != null) {
+            try {
+                JarFile jarfile = new JarFile(_jarPath);
+                try {
+                    JarEntry je = jarfile.getJarEntry(_filePath);
+                    InputStream strm = jarfile.getInputStream(je);
+                    JavaClass jklass = new ClassParser(strm, _filePath).parse();
+                    this.buildFromJKlass(finder, jklass);
+                } finally {
+                    jarfile.close();
+                }
+            } catch (IOException e) {
+                Logger.error("Error: Not found: "+_jarPath+"/"+_filePath);
+                throw new TypeNotFound(this.getFullName());
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void build(DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        //Logger.info("DFKlass.build: "+this+": "+anonDecl.getName());
+        this.setLoaded();
+        try {
+            finder = new DFTypeFinder(finder, _klassSpace);
+            finder = _baseKlass.addFinders(finder);
+            this.build(finder, anonDecl.bodyDeclarations());
+        } catch (TypeNotFound e) {
+            e.setAst(anonDecl);
+            throw e;
         }
     }
 
@@ -401,7 +439,7 @@ public class DFKlass extends DFType {
         return null;
     }
 
-    private void build(DFTypeFinder finder, JavaClass jklass)
+    private void buildFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
         String sig = getSignature(jklass.getAttributes());
         DFTypeFinder finder2 = finder;
@@ -490,10 +528,31 @@ public class DFKlass extends DFType {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, TypeDeclaration typeDecl)
+    protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
+        if (ast instanceof AbstractTypeDeclaration) {
+            this.build(finder, (AbstractTypeDeclaration)ast);
+        }
+    }
+
+    private void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        Logger.error("build: "+this);
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            this.build(finder, (TypeDeclaration)abstTypeDecl);
+
+        } else if (abstTypeDecl instanceof EnumDeclaration) {
+            this.build(finder, (EnumDeclaration)abstTypeDecl);
+
+        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+            this.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void build(DFTypeFinder finder, TypeDeclaration typeDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _klassSpace);
@@ -514,11 +573,6 @@ public class DFKlass extends DFType {
                 _baseIfaces[i] = iface;
                 finder = iface.addFinders(finder);
             }
-            List<TypeParameter> tps = typeDecl.typeParameters();
-            for (int i = 0; i < tps.size(); i++) {
-                TypeParameter tp = tps.get(i);
-                _paramTypes[i].build(finder, tp);
-            }
             // Lookup child klasses.
             this.build(finder, typeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
@@ -528,7 +582,7 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, EnumDeclaration enumDecl)
+    private void build(DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
         // Get superclass.
@@ -559,7 +613,7 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
+    private void build(DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+annotTypeDecl.getName());
         // Get superclass.
@@ -572,33 +626,6 @@ public class DFKlass extends DFType {
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
             throw e;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
-        throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+anonDecl.getName());
-        try {
-            finder = new DFTypeFinder(finder, _klassSpace);
-            finder = _baseKlass.addFinders(finder);
-            this.build(finder, anonDecl.bodyDeclarations());
-        } catch (TypeNotFound e) {
-            e.setAst(anonDecl);
-            throw e;
-        }
-    }
-
-    private void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
-        throws UnsupportedSyntax, TypeNotFound {
-        if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build(finder, (TypeDeclaration)abstTypeDecl);
-
-        } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.build(finder, (EnumDeclaration)abstTypeDecl);
-
-        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
         }
     }
 
@@ -634,7 +661,7 @@ public class DFKlass extends DFType {
                         TypeParameter tp = tps.get(i);
                         String id = tp.getName().getIdentifier();
                         DFParamType pt = methodSpace.createParamType(id);
-                        pt.build(finder2, tp);
+                        pt.setAST(tp);
                     }
                 }
                 DFType[] argTypes = finder2.resolveArgs(decl);

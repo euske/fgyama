@@ -2155,14 +2155,14 @@ public class Java2DF {
         if (abstTypeDecl instanceof TypeDeclaration) {
             TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
             DFKlass klass = typeSpace.getKlass(typeDecl.getName());
-            klass.build(finder, typeDecl);
+            //klass.build(finder, typeDecl);
             processBodyDeclarations(
                 finder, klass, typeDecl,
                 typeDecl.bodyDeclarations());
         } else if (abstTypeDecl instanceof EnumDeclaration) {
             EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
             DFKlass klass = typeSpace.getKlass(enumDecl.getName());
-            klass.build(finder, enumDecl);
+            //klass.build(finder, enumDecl);
             processBodyDeclarations(
                 finder, klass, enumDecl,
                 enumDecl.bodyDeclarations());
@@ -2447,17 +2447,16 @@ public class Java2DF {
             for (AbstractTypeDeclaration abstTypeDecl :
                      (List<AbstractTypeDeclaration>) cunit.types()) {
                 DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-                if (abstTypeDecl instanceof TypeDeclaration) {
-                    klass.build(finder, (TypeDeclaration)abstTypeDecl);
-                } else if (abstTypeDecl instanceof EnumDeclaration) {
-                    klass.build(finder, (EnumDeclaration)abstTypeDecl);
-                } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-                    klass.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
-                }
+                Logger.error("Pass2: loading: "+klass);
+                klass.load(finder);
+                // if (abstTypeDecl instanceof TypeDeclaration) {
+                //     klass.build(finder, (TypeDeclaration)abstTypeDecl);
+                // } else if (abstTypeDecl instanceof EnumDeclaration) {
+                //     klass.build(finder, (EnumDeclaration)abstTypeDecl);
+                // } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
+                //     klass.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+                // }
             }
-        } catch (UnsupportedSyntax e) {
-            String astName = e.ast.getClass().getName();
-            Logger.error("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         } catch (TypeNotFound e) {
             Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
             throw e;

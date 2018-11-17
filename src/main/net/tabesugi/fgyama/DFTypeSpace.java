@@ -80,9 +80,13 @@ public class DFTypeSpace {
     }
 
     protected DFKlass createKlass(
-        DFKlass parentKlass, DFVarScope parentScope, SimpleName name) {
-        return this.createKlass(
+        DFKlass parentKlass, DFVarScope parentScope,
+        AbstractTypeDeclaration abstDecl) {
+        SimpleName name = abstDecl.getName();
+        DFKlass klass = this.createKlass(
             parentKlass, parentScope, name.getIdentifier());
+        klass.setAST(abstDecl);
+        return klass;
     }
 
     protected DFKlass createKlass(
@@ -187,7 +191,7 @@ public class DFTypeSpace {
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFKlass klass = this.createKlass(
-            parentKlass, parentScope, typeDecl.getName());
+            parentKlass, parentScope, typeDecl);
         if (klasses != null) {
             klasses.add(klass);
         }
@@ -206,7 +210,7 @@ public class DFTypeSpace {
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+enumDecl.getName());
         DFKlass klass = this.createKlass(
-            parentKlass, parentScope, enumDecl.getName());
+            parentKlass, parentScope, enumDecl);
         if (klasses != null) {
             klasses.add(klass);
         }
@@ -224,7 +228,7 @@ public class DFTypeSpace {
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+annotTypeDecl.getName());
         DFKlass klass = this.createKlass(
-            parentKlass, parentScope, annotTypeDecl.getName());
+            parentKlass, parentScope, annotTypeDecl);
         if (klasses != null) {
             klasses.add(klass);
         }

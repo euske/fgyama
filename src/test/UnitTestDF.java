@@ -31,11 +31,15 @@ public class UnitTestDF extends XMLTestCase {
             System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
             cunits[i] = converter.parseFile(javaPaths[i]);
         }
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (int i = 0; i < cunits.length; i++) {
-            converter.buildTypeSpace(null, javaPaths[i], cunits[i]);
+            converter.buildTypeSpace(klasses, javaPaths[i], cunits[i]);
         }
         for (int i = 0; i < cunits.length; i++) {
             converter.buildKlassSpace(cunits[i]);
+        }
+        for (DFKlass klass : klasses) {
+            klass.addOverrides();
         }
         for (int i = 0; i < cunits.length; i++) {
             exporter.startFile(javaPaths[i]);

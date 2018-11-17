@@ -98,6 +98,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         _boolean = this.getKlass("java.lang.Boolean");
         _array = java_lang.createKlass(null, _global, "_Array");
         _array.addField("length", false, DFBasicType.INT);
+        _array.setLoaded();
         DFTypeFinder finder = new DFTypeFinder(this);
         _object.load(finder);
         _class.load(finder);

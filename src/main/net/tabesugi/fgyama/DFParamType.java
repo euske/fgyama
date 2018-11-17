@@ -40,7 +40,20 @@ public class DFParamType extends DFKlass {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, TypeParameter typeParam)
+    public void setKlass(DFKlass klass) {
+	_baseKlass = klass;
+        this.setLoaded();
+    }
+
+    protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
+        throws UnsupportedSyntax, TypeNotFound {
+        if (ast instanceof TypeParameter) {
+            this.build(finder, (TypeParameter)ast);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void build(DFTypeFinder finder, TypeParameter typeParam)
         throws TypeNotFound {
         try {
             List<Type> bounds = typeParam.typeBounds();
@@ -61,11 +74,5 @@ public class DFParamType extends DFKlass {
             e.setAst(typeParam);
             throw e;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, DFKlass klass)
-        throws TypeNotFound {
-	_baseKlass = klass;
     }
 }
