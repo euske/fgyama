@@ -744,8 +744,8 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFContext processExpression(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, Expression expr)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
         assert expr != null;
 
@@ -766,7 +766,8 @@ public class Java2DF {
                     try {
                         // Try assuming it's a variable access.
                         ctx = processExpression(
-                            graph, finder, scope, frame, ctx, qname.getQualifier());
+			    typeSpace, graph, finder, scope,
+			    frame, ctx, qname.getQualifier());
                         obj = ctx.getRValue();
                         klass = finder.resolveKlass(obj.getNodeType());
                     } catch (EntityNotFound e) {
@@ -836,11 +837,11 @@ public class Java2DF {
                 PrefixExpression.Operator op = prefix.getOperator();
                 Expression operand = prefix.getOperand();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, operand);
+                    typeSpace, graph, finder, scope, frame, ctx, operand);
                 if (op == PrefixExpression.Operator.INCREMENT ||
                     op == PrefixExpression.Operator.DECREMENT) {
                     ctx = processAssignment(
-                        graph, finder, scope, frame, ctx, operand);
+                        typeSpace, graph, finder, scope, frame, ctx, operand);
                     DFNode assign = ctx.getLValue();
                     DFNode value = new PrefixNode(
                         graph, scope, assign.getRef(),
@@ -862,12 +863,12 @@ public class Java2DF {
                 PostfixExpression.Operator op = postfix.getOperator();
                 Expression operand = postfix.getOperand();
                 ctx = processAssignment(
-                    graph, finder, scope, frame, ctx, operand);
+                    typeSpace, graph, finder, scope, frame, ctx, operand);
                 if (op == PostfixExpression.Operator.INCREMENT ||
                     op == PostfixExpression.Operator.DECREMENT) {
                     DFNode assign = ctx.getLValue();
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, operand);
+                        typeSpace, graph, finder, scope, frame, ctx, operand);
                     DFNode node = new PostfixNode(
                         graph, scope, assign.getRef(), expr, op);
                     node.accept(ctx.getRValue());
@@ -879,11 +880,11 @@ public class Java2DF {
                 InfixExpression infix = (InfixExpression)expr;
                 InfixExpression.Operator op = infix.getOperator();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     infix.getLeftOperand());
                 DFNode lvalue = ctx.getRValue();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     infix.getRightOperand());
                 DFNode rvalue = ctx.getRValue();
                 DFType type = DFType.inferInfixType(
@@ -894,18 +895,18 @@ public class Java2DF {
             } else if (expr instanceof ParenthesizedExpression) {
                 ParenthesizedExpression paren = (ParenthesizedExpression)expr;
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     paren.getExpression());
 
             } else if (expr instanceof Assignment) {
                 Assignment assn = (Assignment)expr;
                 Assignment.Operator op = assn.getOperator();
                 ctx = processAssignment(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     assn.getLeftHandSide());
                 DFNode assign = ctx.getLValue();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     assn.getRightHandSide());
                 DFNode rvalue = ctx.getRValue();
                 DFNode lvalue = null;
@@ -921,7 +922,7 @@ public class Java2DF {
             } else if (expr instanceof VariableDeclarationExpression) {
                 VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
                 ctx = processVariableDeclaration(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     decl.fragments());
 
             } else if (expr instanceof MethodInvocation) {
@@ -940,7 +941,7 @@ public class Java2DF {
                     }
                     if (klass == null) {
                         ctx = processExpression(
-                            graph, finder, scope, frame, ctx, expr1);
+                            typeSpace, graph, finder, scope, frame, ctx, expr1);
                         obj = ctx.getRValue();
                     }
                 }
@@ -951,7 +952,7 @@ public class Java2DF {
                 List<DFType> typeList = new ArrayList<DFType>();
                 for (Expression arg : (List<Expression>) invoke.arguments()) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, arg);
+                        typeSpace, graph, finder, scope, frame, ctx, arg);
                     DFNode node = ctx.getRValue();
                     argList.add(node);
                     typeList.add(node.getNodeType());
@@ -999,7 +1000,7 @@ public class Java2DF {
                 List<DFType> typeList = new ArrayList<DFType>();
                 for (Expression arg : (List<Expression>) sinvoke.arguments()) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, arg);
+                        typeSpace, graph, finder, scope, frame, ctx, arg);
                     DFNode node = ctx.getRValue();
                     argList.add(node);
                     typeList.add(node.getNodeType());
@@ -1043,12 +1044,12 @@ public class Java2DF {
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
                     // XXX ctx.getRValue() is not used (for now).
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, dim);
+                        typeSpace, graph, finder, scope, frame, ctx, dim);
                 }
                 ArrayInitializer init = ac.getInitializer();
                 if (init != null) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, init);
+                        typeSpace, graph, finder, scope, frame, ctx, init);
                 }
                 if (init == null || ctx.getRValue() == null) {
                     ctx.setRValue(new ValueSetNode(graph, scope, arrayType, ac));
@@ -1059,7 +1060,7 @@ public class Java2DF {
                 ValueSetNode arr = null;
                 for (Expression expr1 : (List<Expression>) init.expressions()) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, expr1);
+                        typeSpace, graph, finder, scope, frame, ctx, expr1);
                     DFNode value = ctx.getRValue();
                     if (arr == null) {
                         arr = new ValueSetNode(
@@ -1075,10 +1076,12 @@ public class Java2DF {
             } else if (expr instanceof ArrayAccess) {
                 ArrayAccess aa = (ArrayAccess)expr;
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, aa.getArray());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    aa.getArray());
                 DFNode array = ctx.getRValue();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, aa.getIndex());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    aa.getIndex());
                 DFVarRef ref = scope.lookupArray(array.getNodeType());
                 DFNode index = ctx.getRValue();
                 DFNode node = new ArrayRefNode(
@@ -1098,7 +1101,7 @@ public class Java2DF {
                 }
                 if (klass == null) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, expr1);
+                        typeSpace, graph, finder, scope, frame, ctx, expr1);
                     obj = ctx.getRValue();
                     klass = finder.resolveKlass(obj.getNodeType());
                 }
@@ -1122,7 +1125,8 @@ public class Java2DF {
                 CastExpression cast = (CastExpression)expr;
                 DFType type = finder.resolve(cast.getType());
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, cast.getExpression());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    cast.getExpression());
                 DFNode node = new TypeCastNode(graph, scope, type, cast);
                 node.accept(ctx.getRValue());
                 ctx.setRValue(node);
@@ -1137,22 +1141,14 @@ public class Java2DF {
                         scope.lookupThis().getRefType());
                     String id = Utils.encodeASTNode(expr);
                     DFKlass baseKlass = finder.resolveKlass(cstr.getType());
-                    DFTypeSpace anonSpace = new DFTypeSpace(
-                        baseKlass.getKlassSpace(), id);
-                    DFKlass anonKlass = new DFAnonKlass(
-                        "<anonymous>", anonSpace, klass, scope, baseKlass);
-                    anonSpace.addKlass(anonKlass);
-                    anonSpace.build(null, anonDecl, klass, scope);
-                    try {
-                        anonKlass.build(finder, anonDecl);
-                        anonKlass.addOverrides();
-                        processBodyDeclarations(
-                            finder, anonKlass, anonDecl,
-                            anonDecl.bodyDeclarations());
-                        instType = anonKlass;
-                    } catch (EntityNotFound e) {
-                        instType = null; // XXX what happened?
-                    }
+		    DFKlass anonKlass = typeSpace.buildAnonymousKlass(
+			klass, scope, baseKlass, id, anonDecl);
+		    anonKlass.load(finder);
+		    anonKlass.addOverrides();
+		    processBodyDeclarations(
+			finder, anonKlass, anonDecl,
+			anonDecl.bodyDeclarations());
+		    instType = anonKlass;
                 } else {
                     instType = finder.resolve(cstr.getType());
                 }
@@ -1160,13 +1156,13 @@ public class Java2DF {
                 DFNode obj = null;
                 if (expr1 != null) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, expr1);
+                        typeSpace, graph, finder, scope, frame, ctx, expr1);
                     obj = ctx.getRValue();
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
                 for (Expression arg : (List<Expression>) cstr.arguments()) {
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, arg);
+                        typeSpace, graph, finder, scope, frame, ctx, arg);
                     argList.add(ctx.getRValue());
                 }
                 DFNode[] args = new DFNode[argList.size()];
@@ -1179,13 +1175,16 @@ public class Java2DF {
             } else if (expr instanceof ConditionalExpression) {
                 ConditionalExpression cond = (ConditionalExpression)expr;
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, cond.getExpression());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    cond.getExpression());
                 DFNode condValue = ctx.getRValue();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, cond.getThenExpression());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    cond.getThenExpression());
                 DFNode trueValue = ctx.getRValue();
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, cond.getElseExpression());
+                    typeSpace, graph, finder, scope, frame, ctx,
+		    cond.getElseExpression());
                 DFNode falseValue = ctx.getRValue();
                 JoinNode join = new JoinNode(graph, scope, null, expr, condValue);
                 join.recv(true, trueValue);
@@ -1196,7 +1195,7 @@ public class Java2DF {
                 InstanceofExpression instof = (InstanceofExpression)expr;
                 DFType type = finder.resolve(instof.getRightOperand());
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx,
+                    typeSpace, graph, finder, scope, frame, ctx,
                     instof.getLeftOperand());
                 DFNode node = new InstanceofNode(graph, scope, instof, type);
                 node.accept(ctx.getRValue());
@@ -1259,8 +1258,8 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     public DFContext processAssignment(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, Expression expr)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
         assert expr != null;
 
@@ -1276,7 +1275,8 @@ public class Java2DF {
                 try {
                     // Try assuming it's a variable access.
                     ctx = processExpression(
-                        graph, finder, scope, frame, ctx, qname.getQualifier());
+                        typeSpace, graph, finder, scope, frame, ctx,
+			qname.getQualifier());
                     obj = ctx.getRValue();
                     klass = finder.resolveKlass(obj.getNodeType());
                 } catch (EntityNotFound e) {
@@ -1291,10 +1291,12 @@ public class Java2DF {
         } else if (expr instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)expr;
             ctx = processExpression(
-                graph, finder, scope, frame, ctx, aa.getArray());
+                typeSpace, graph, finder, scope, frame, ctx,
+		aa.getArray());
             DFNode array = ctx.getRValue();
             ctx = processExpression(
-                graph, finder, scope, frame, ctx, aa.getIndex());
+                typeSpace, graph, finder, scope, frame, ctx,
+		aa.getIndex());
             DFVarRef ref = scope.lookupArray(array.getNodeType());
             DFNode index = ctx.getRValue();
             DFNode node = new ArrayAssignNode(
@@ -1305,7 +1307,7 @@ public class Java2DF {
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
             ctx = processExpression(
-                graph, finder, scope, frame, ctx, expr1);
+                typeSpace, graph, finder, scope, frame, ctx, expr1);
             DFNode obj = ctx.getRValue();
             DFKlass klass = finder.resolveKlass(obj.getNodeType());
             SimpleName fieldName = fa.getName();
@@ -1331,8 +1333,9 @@ public class Java2DF {
      * Creates a new variable node.
      */
     public DFContext processVariableDeclaration(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, List<VariableDeclarationFragment> frags)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	List<VariableDeclarationFragment> frags)
         throws UnsupportedSyntax, EntityNotFound {
 
         for (VariableDeclarationFragment frag : frags) {
@@ -1340,7 +1343,7 @@ public class Java2DF {
             Expression init = frag.getInitializer();
             if (init != null) {
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, init);
+                    typeSpace, graph, finder, scope, frame, ctx, init);
                 DFNode value = ctx.getRValue();
                 if (value != null) {
                     DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
@@ -1476,48 +1479,53 @@ public class Java2DF {
     /// Statement processors.
     @SuppressWarnings("unchecked")
     public DFContext processBlock(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, Block block)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	Block block)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope childScope = scope.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
             ctx = processStatement(
-                graph, finder, childScope, frame, ctx, cstmt);
+                typeSpace, graph, finder, childScope, frame, ctx, cstmt);
         }
         return ctx;
     }
 
     @SuppressWarnings("unchecked")
     public DFContext processVariableDeclarationStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, VariableDeclarationStatement varStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	VariableDeclarationStatement varStmt)
         throws UnsupportedSyntax, EntityNotFound {
         return processVariableDeclaration(
-            graph, finder, scope, frame, ctx, varStmt.fragments());
+            typeSpace, graph, finder, scope, frame, ctx, varStmt.fragments());
     }
 
     public DFContext processExpressionStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, ExpressionStatement exprStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	ExpressionStatement exprStmt)
         throws UnsupportedSyntax, EntityNotFound {
         Expression expr = exprStmt.getExpression();
         return processExpression(
-            graph, finder, scope, frame, ctx, expr);
+            typeSpace, graph, finder, scope, frame, ctx, expr);
     }
 
     public DFContext processIfStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, IfStatement ifStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	IfStatement ifStmt)
         throws UnsupportedSyntax, EntityNotFound {
         Expression expr = ifStmt.getExpression();
-        ctx = processExpression(graph, finder, scope, frame, ctx, expr);
+        ctx = processExpression(
+	    typeSpace, graph, finder, scope, frame, ctx, expr);
         DFNode condValue = ctx.getRValue();
 
         Statement thenStmt = ifStmt.getThenStatement();
         DFContext thenCtx = new DFContext(graph, scope);
         DFFrame thenFrame = frame.getChildByAST(thenStmt);
         thenCtx = processStatement(
-            graph, finder, scope, thenFrame, thenCtx, thenStmt);
+            typeSpace, graph, finder, scope, thenFrame, thenCtx, thenStmt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFContext elseCtx = null;
@@ -1526,7 +1534,7 @@ public class Java2DF {
             elseFrame = frame.getChildByAST(elseStmt);
             elseCtx = new DFContext(graph, scope);
             elseCtx = processStatement(
-                graph, finder, scope, elseFrame, elseCtx, elseStmt);
+                typeSpace, graph, finder, scope, elseFrame, elseCtx, elseStmt);
         }
 
         // Combines two contexts into one.
@@ -1620,12 +1628,13 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFContext processSwitchStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, SwitchStatement switchStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	SwitchStatement switchStmt)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope switchScope = scope.getChildByAST(switchStmt);
         ctx = processExpression(
-            graph, finder, scope,
+            typeSpace, graph, finder, scope,
             frame, ctx, switchStmt.getExpression());
         DFNode switchValue = ctx.getRValue();
         DFType type = switchValue.getNodeType();
@@ -1662,7 +1671,8 @@ public class Java2DF {
                         caseNode.addMatch(node);
                     } else {
                         ctx = processExpression(
-                            graph, finder, switchScope, switchFrame, ctx, expr);
+                            typeSpace, graph, finder, switchScope, switchFrame, ctx,
+			    expr);
                         caseNode.addMatch(ctx.getRValue());
                     }
                 } else {
@@ -1674,7 +1684,7 @@ public class Java2DF {
                     throw new UnsupportedSyntax(stmt);
                 }
                 caseCtx = processStatement(
-                    graph, finder, switchScope,
+                    typeSpace, graph, finder, switchScope,
                     switchFrame, caseCtx, stmt);
             }
         }
@@ -1688,18 +1698,19 @@ public class Java2DF {
     }
 
     public DFContext processWhileStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, WhileStatement whileStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	WhileStatement whileStmt)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(whileStmt);
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         loopCtx = processExpression(
-            graph, finder, scope, loopFrame, loopCtx,
+            typeSpace, graph, finder, scope, loopFrame, loopCtx,
             whileStmt.getExpression());
         DFNode condValue = loopCtx.getRValue();
         loopCtx = processStatement(
-            graph, finder, loopScope, loopFrame, loopCtx,
+            typeSpace, graph, finder, loopScope, loopFrame, loopCtx,
             whileStmt.getBody());
         ctx = processLoop(
             graph, loopScope, frame, ctx, whileStmt,
@@ -1709,17 +1720,18 @@ public class Java2DF {
     }
 
     public DFContext processDoStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, DoStatement doStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	DoStatement doStmt)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(doStmt);
         DFFrame loopFrame = frame.getChildByAST(doStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         loopCtx = processStatement(
-            graph, finder, loopScope, loopFrame, loopCtx,
+            typeSpace, graph, finder, loopScope, loopFrame, loopCtx,
             doStmt.getBody());
         loopCtx = processExpression(
-            graph, finder, loopScope, loopFrame, loopCtx,
+            typeSpace, graph, finder, loopScope, loopFrame, loopCtx,
             doStmt.getExpression());
         DFNode condValue = loopCtx.getRValue();
         ctx = processLoop(
@@ -1731,31 +1743,32 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFContext processForStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, ForStatement forStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	ForStatement forStmt)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(forStmt);
         DFFrame loopFrame = frame.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         for (Expression init : (List<Expression>) forStmt.initializers()) {
             ctx = processExpression(
-                graph, finder, loopScope, frame, ctx, init);
+                typeSpace, graph, finder, loopScope, frame, ctx, init);
         }
         Expression expr = forStmt.getExpression();
         DFNode condValue;
         if (expr != null) {
             loopCtx = processExpression(
-                graph, finder, loopScope, loopFrame, loopCtx, expr);
+                typeSpace, graph, finder, loopScope, loopFrame, loopCtx, expr);
             condValue = loopCtx.getRValue();
         } else {
             condValue = new ConstNode(graph, loopScope, DFBasicType.BOOLEAN, null, "true");
         }
         loopCtx = processStatement(
-            graph, finder, loopScope, loopFrame, loopCtx,
+            typeSpace, graph, finder, loopScope, loopFrame, loopCtx,
             forStmt.getBody());
         for (Expression update : (List<Expression>) forStmt.updaters()) {
             loopCtx = processExpression(
-                graph, finder, loopScope, loopFrame, loopCtx, update);
+                typeSpace, graph, finder, loopScope, loopFrame, loopCtx, update);
         }
         ctx = processLoop(
             graph, loopScope, frame, ctx, forStmt,
@@ -1766,12 +1779,13 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFContext processEnhancedForStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, EnhancedForStatement eForStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+	DFVarScope scope, DFFrame frame, DFContext ctx,
+	EnhancedForStatement eForStmt)
         throws UnsupportedSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
         ctx = processExpression(
-            graph, finder, scope, frame, ctx, expr);
+            typeSpace, graph, finder, scope, frame, ctx, expr);
         DFVarScope loopScope = scope.getChildByAST(eForStmt);
         DFFrame loopFrame = frame.getChildByAST(eForStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
@@ -1783,7 +1797,7 @@ public class Java2DF {
         assign.accept(iterValue);
         loopCtx.set(assign);
         loopCtx = processStatement(
-            graph, finder, loopScope, loopFrame, loopCtx,
+            typeSpace, graph, finder, loopScope, loopFrame, loopCtx,
             eForStmt.getBody());
         ctx = processLoop(
             graph, loopScope, frame, ctx, eForStmt,
@@ -1794,8 +1808,9 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     public DFContext processTryStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, TryStatement tryStmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	TryStatement tryStmt)
         throws UnsupportedSyntax, EntityNotFound {
         SortedSet<DFVarRef> outRefs = new TreeSet<DFVarRef>();
 
@@ -1803,8 +1818,8 @@ public class Java2DF {
         DFFrame tryFrame = frame.getChildByAST(tryStmt);
         DFContext tryCtx = new DFContext(graph, tryScope);
         tryCtx = processStatement(
-            graph, finder, tryScope, tryFrame,
-            tryCtx, tryStmt.getBody());
+            typeSpace, graph, finder, tryScope, tryFrame, tryCtx,
+            tryStmt.getBody());
         for (DFNode src : tryCtx.getFirsts()) {
             if (src.hasInput()) continue;
             src.accept(ctx.get(src.getRef()));
@@ -1828,8 +1843,8 @@ public class Java2DF {
             CatchNode cat = new CatchNode(graph, catchScope, ref, decl, exc);
             catchCtx.set(cat);
             catchCtx = processStatement(
-                graph, finder, catchScope, catchFrame,
-                catchCtx, cc.getBody());
+                typeSpace, graph, finder, catchScope, catchFrame, catchCtx,
+                cc.getBody());
             for (DFNode src : catchCtx.getFirsts()) {
                 if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
@@ -1880,15 +1895,16 @@ public class Java2DF {
         Block finBlock = tryStmt.getFinally();
         if (finBlock != null) {
             ctx = processStatement(
-                graph, finder, scope, frame, ctx, finBlock);
+                typeSpace, graph, finder, scope, frame, ctx, finBlock);
         }
         return ctx;
     }
 
     @SuppressWarnings("unchecked")
     public DFContext processStatement(
-        DFGraph graph, DFTypeFinder finder, DFVarScope scope,
-        DFFrame frame, DFContext ctx, Statement stmt)
+        DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
+        DFVarScope scope, DFFrame frame, DFContext ctx,
+	Statement stmt)
         throws UnsupportedSyntax, EntityNotFound {
         assert stmt != null;
 
@@ -1897,28 +1913,29 @@ public class Java2DF {
 
         } else if (stmt instanceof Block) {
             ctx = processBlock(
-                graph, finder, scope, frame, ctx, (Block)stmt);
+                typeSpace, graph, finder, scope, frame, ctx,
+		(Block)stmt);
 
         } else if (stmt instanceof EmptyStatement) {
 
         } else if (stmt instanceof VariableDeclarationStatement) {
             ctx = processVariableDeclarationStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (VariableDeclarationStatement)stmt);
 
         } else if (stmt instanceof ExpressionStatement) {
             ctx = processExpressionStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (ExpressionStatement)stmt);
 
         } else if (stmt instanceof IfStatement) {
             ctx = processIfStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (IfStatement)stmt);
 
         } else if (stmt instanceof SwitchStatement) {
             ctx = processSwitchStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (SwitchStatement)stmt);
 
         } else if (stmt instanceof SwitchCase) {
@@ -1927,22 +1944,22 @@ public class Java2DF {
 
         } else if (stmt instanceof WhileStatement) {
             ctx = processWhileStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (WhileStatement)stmt);
 
         } else if (stmt instanceof DoStatement) {
             ctx = processDoStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (DoStatement)stmt);
 
         } else if (stmt instanceof ForStatement) {
             ctx = processForStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (ForStatement)stmt);
 
         } else if (stmt instanceof EnhancedForStatement) {
             ctx = processEnhancedForStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (EnhancedForStatement)stmt);
 
         } else if (stmt instanceof ReturnStatement) {
@@ -1951,7 +1968,7 @@ public class Java2DF {
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, expr);
+                    typeSpace, graph, finder, scope, frame, ctx, expr);
                 DFVarRef ref = scope.lookupReturn();
                 OutputNode output = new OutputNode(graph, scope, ref, rtrnStmt);
                 output.accept(ctx.getRValue());
@@ -1985,25 +2002,25 @@ public class Java2DF {
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
             ctx = processStatement(
-                graph, finder, scope, labeledFrame,
-                ctx, labeledStmt.getBody());
+                typeSpace, graph, finder, scope, labeledFrame, ctx,
+                labeledStmt.getBody());
             labeledFrame.close(ctx);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             ctx = processStatement(
-                graph, finder, scope, frame,
-                ctx, syncStmt.getBody());
+                typeSpace, graph, finder, scope, frame, ctx,
+                syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
             ctx = processTryStatement(
-                graph, finder, scope, frame, ctx,
+                typeSpace, graph, finder, scope, frame, ctx,
                 (TryStatement)stmt);
 
         } else if (stmt instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             ctx = processExpression(
-                graph, finder, scope, frame,
+                typeSpace, graph, finder, scope, frame,
                 ctx, throwStmt.getExpression());
             ThrowNode exception = new ThrowNode(
                 graph, scope, stmt, ctx.getRValue());
@@ -2020,7 +2037,7 @@ public class Java2DF {
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) ci.arguments()) {
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, arg);
+                    typeSpace, graph, finder, scope, frame, ctx, arg);
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -2028,149 +2045,35 @@ public class Java2DF {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) sci.arguments()) {
                 ctx = processExpression(
-                    graph, finder, scope, frame, ctx, arg);
+                    typeSpace, graph, finder, scope, frame, ctx, arg);
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
-            // Ignore TypeDeclarationStatement because
-            // it was eventually picked up as MethodDeclaration.
+            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
+	    AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
+	    if (abstTypeDecl instanceof TypeDeclaration) {
+		TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
+		DFKlass klass = typeSpace.getKlass(typeDecl.getName());
+		klass.load(finder);
+		klass.addOverrides();
+		processBodyDeclarations(
+		    finder, klass, typeDecl,
+		    typeDecl.bodyDeclarations());
+	    } else if (abstTypeDecl instanceof EnumDeclaration) {
+		EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
+		DFKlass klass = typeSpace.getKlass(enumDecl.getName());
+		klass.load(finder);
+		klass.addOverrides();
+		processBodyDeclarations(
+		    finder, klass, enumDecl,
+		    enumDecl.bodyDeclarations());
+	    }
 
         } else {
             throw new UnsupportedSyntax(stmt);
         }
 
         return ctx;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void buildInlineKlasses(
-        DFTypeSpace typeSpace, DFTypeFinder finder, Statement stmt)
-        throws UnsupportedSyntax, EntityNotFound {
-        assert stmt != null;
-
-        if (stmt instanceof AssertStatement) {
-
-        } else if (stmt instanceof Block) {
-            Block block = (Block)stmt;
-            for (Statement cstmt :
-                     (List<Statement>) block.statements()) {
-                this.buildInlineKlasses(typeSpace, finder, cstmt);
-            }
-
-        } else if (stmt instanceof EmptyStatement) {
-
-        } else if (stmt instanceof VariableDeclarationStatement) {
-
-        } else if (stmt instanceof ExpressionStatement) {
-
-        } else if (stmt instanceof ReturnStatement) {
-
-        } else if (stmt instanceof IfStatement) {
-            IfStatement ifStmt = (IfStatement)stmt;
-            Statement thenStmt = ifStmt.getThenStatement();
-            this.buildInlineKlasses(typeSpace, finder, thenStmt);
-            Statement elseStmt = ifStmt.getElseStatement();
-            if (elseStmt != null) {
-                this.buildInlineKlasses(typeSpace, finder, elseStmt);
-            }
-
-        } else if (stmt instanceof SwitchStatement) {
-            SwitchStatement switchStmt = (SwitchStatement)stmt;
-            for (Statement cstmt :
-                     (List<Statement>) switchStmt.statements()) {
-                this.buildInlineKlasses(typeSpace, finder, cstmt);
-            }
-
-        } else if (stmt instanceof SwitchCase) {
-
-        } else if (stmt instanceof WhileStatement) {
-            WhileStatement whileStmt = (WhileStatement)stmt;
-            Statement body = whileStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, body);
-
-        } else if (stmt instanceof DoStatement) {
-            DoStatement doStmt = (DoStatement)stmt;
-            Statement body = doStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, body);
-
-        } else if (stmt instanceof ForStatement) {
-            ForStatement forStmt = (ForStatement)stmt;
-            Statement body = forStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, body);
-
-        } else if (stmt instanceof EnhancedForStatement) {
-            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
-            Statement body = eForStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, body);
-
-        } else if (stmt instanceof BreakStatement) {
-
-        } else if (stmt instanceof ContinueStatement) {
-
-        } else if (stmt instanceof LabeledStatement) {
-            LabeledStatement labeledStmt = (LabeledStatement)stmt;
-            Statement body = labeledStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, body);
-
-        } else if (stmt instanceof SynchronizedStatement) {
-            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-            Block block = syncStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, block);
-
-        } else if (stmt instanceof TryStatement) {
-            TryStatement tryStmt = (TryStatement)stmt;
-            Block block = tryStmt.getBody();
-            this.buildInlineKlasses(typeSpace, finder, block);
-            for (CatchClause cc :
-                     (List<CatchClause>) tryStmt.catchClauses()) {
-                this.buildInlineKlasses(typeSpace, finder, cc.getBody());
-            }
-            Block finBlock = tryStmt.getFinally();
-            if (finBlock != null) {
-                this.buildInlineKlasses(typeSpace, finder, finBlock);
-            }
-
-        } else if (stmt instanceof ThrowStatement) {
-
-        } else if (stmt instanceof ConstructorInvocation) {
-
-        } else if (stmt instanceof SuperConstructorInvocation) {
-
-        } else if (stmt instanceof TypeDeclarationStatement) {
-            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
-            this.buildInlineKlasses(typeSpace, finder, typeDeclStmt.getDeclaration());
-
-        } else {
-            throw new UnsupportedSyntax(stmt);
-
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void buildInlineKlasses(
-        DFTypeSpace typeSpace, DFTypeFinder finder,
-        AbstractTypeDeclaration abstTypeDecl)
-        throws UnsupportedSyntax, EntityNotFound {
-        assert abstTypeDecl != null;
-        if (abstTypeDecl instanceof TypeDeclaration) {
-            TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-            DFKlass klass = typeSpace.getKlass(typeDecl.getName());
-            //klass.build(finder, typeDecl);
-            processBodyDeclarations(
-                finder, klass, typeDecl,
-                typeDecl.bodyDeclarations());
-        } else if (abstTypeDecl instanceof EnumDeclaration) {
-            EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
-            DFKlass klass = typeSpace.getKlass(enumDecl.getName());
-            //klass.build(finder, enumDecl);
-            processBodyDeclarations(
-                finder, klass, enumDecl,
-                enumDecl.bodyDeclarations());
-        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            ;
-        } else {
-            throw new UnsupportedSyntax(abstTypeDecl);
-        }
     }
 
     private DFTypeFinder prepareTypeFinder(
@@ -2227,8 +2130,7 @@ public class Java2DF {
         try {
             // Setup an initial space.
             List<DFKlass> klasses = new ArrayList<DFKlass>();
-            typeSpace.build(klasses, methodDecl, klass, scope);
-            this.buildInlineKlasses(typeSpace, finder, methodDecl.getBody());
+            typeSpace.buildMethodSpace(klasses, methodDecl, klass, scope);
             // Add overrides.
             for (DFKlass klass1 : klasses) {
                 klass1.addOverrides();
@@ -2259,7 +2161,8 @@ public class Java2DF {
 
             // Process the function body.
             ctx = processStatement(
-                graph, finder, scope, frame, ctx, methodDecl.getBody());
+                typeSpace, graph, finder, scope, frame, ctx,
+		methodDecl.getBody());
             frame.close(ctx);
             //frame.dump();
 
@@ -2277,7 +2180,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private DFGraph processInitializer(
-        DFTypeFinder finder, DFKlass klass,
+        DFTypeSpace typeSpace, DFTypeFinder finder, DFKlass klass,
         Initializer initializer)
         throws UnsupportedSyntax, EntityNotFound {
         DFMethod method = klass.getInitializer();
@@ -2289,8 +2192,8 @@ public class Java2DF {
         frame.build(finder, scope, initializer.getBody());
         DFContext ctx = new DFContext(graph, scope);
         ctx = processStatement(
-            graph, finder, scope,
-            frame, ctx, initializer.getBody());
+            typeSpace, graph, finder, scope, frame, ctx,
+            initializer.getBody());
         frame.close(ctx);
         return graph;
     }
@@ -2304,13 +2207,13 @@ public class Java2DF {
         finder = klass.addFinders(finder);
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
         DFVarScope klassScope = klass.getKlassScope();
+	DFTypeSpace klassSpace = klass.getKlassSpace();
         DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
         for (BodyDeclaration body : decls) {
             try {
                 if (body instanceof AbstractTypeDeclaration) {
                     AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
-                    DFTypeSpace childSpace = klass.getKlassSpace();
-                    DFKlass childKlass = childSpace.getKlass(abstTypeDecl.getName());
+                    DFKlass childKlass = klassSpace.getKlass(abstTypeDecl.getName());
                     processBodyDeclarations(
                         finder, childKlass, abstTypeDecl,
                         abstTypeDecl.bodyDeclarations());
@@ -2325,7 +2228,8 @@ public class Java2DF {
                         Expression init = frag.getInitializer();
                         if (init != null) {
                             ctx = processExpression(
-                                klassGraph, finder, klassScope, klassFrame, ctx, init);
+                                klassSpace, klassGraph, finder, klassScope, klassFrame, ctx,
+				init);
                             value = ctx.getRValue();
                         }
                         if (value == null) {
@@ -2359,7 +2263,7 @@ public class Java2DF {
 
                 } else if (body instanceof Initializer) {
                     DFGraph graph = processInitializer(
-                        finder, klass, (Initializer)body);
+                        klassSpace, finder, klass, (Initializer)body);
                     exportGraph(graph);
 
                 } else {
@@ -2418,14 +2322,13 @@ public class Java2DF {
     // pass1
     public void buildTypeSpace(
         List<DFKlass> allKlasses, String path, CompilationUnit cunit) {
-
         DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFGlobalVarScope global = _rootSpace.getGlobalScope();
         DFModuleScope module = new DFModuleScope(global, path);
         _moduleScope.put(path, module);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
-            typeSpace.build(klasses, cunit, module);
+            typeSpace.buildModuleSpace(klasses, cunit, module);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -2449,13 +2352,6 @@ public class Java2DF {
                 DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
                 Logger.error("Pass2: loading: "+klass);
                 klass.load(finder);
-                // if (abstTypeDecl instanceof TypeDeclaration) {
-                //     klass.build(finder, (TypeDeclaration)abstTypeDecl);
-                // } else if (abstTypeDecl instanceof EnumDeclaration) {
-                //     klass.build(finder, (EnumDeclaration)abstTypeDecl);
-                // } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-                //     klass.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
-                // }
             }
         } catch (TypeNotFound e) {
             Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
@@ -2491,6 +2387,7 @@ public class Java2DF {
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+	    klass.load(finder);
             processBodyDeclarations(
                 finder, klass, abstTypeDecl,
                 abstTypeDecl.bodyDeclarations());
@@ -2557,18 +2454,18 @@ public class Java2DF {
                 System.err.println("Cannot open input file: "+path);
 	    }
         }
-        for (String path : files) {
-            Logger.info("Pass2: "+path);
-            try {
-                CompilationUnit cunit = converter.parseFile(path);
-                converter.buildKlassSpace(cunit);
-            } catch (IOException e) {
-                System.err.println("Cannot open input file: "+path);
-            } catch (EntityNotFound e) {
-                System.err.println("Pass2: Error at "+path+" ("+e.name+")");
+	for (String path : files) {
+	    Logger.info("Pass2: "+path);
+	    try {
+		CompilationUnit cunit = converter.parseFile(path);
+		converter.buildKlassSpace(cunit);
+	    } catch (IOException e) {
+		System.err.println("Cannot open input file: "+path);
+	    } catch (EntityNotFound e) {
+		System.err.println("Pass2: Error at "+path+" ("+e.name+")");
 		throw e;
 	    }
-        }
+	}
         // Add overrides.
         for (DFKlass klass : klasses) {
             klass.addOverrides();

@@ -136,7 +136,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
+    public void buildModuleSpace(
         List<DFKlass> klasses,
         CompilationUnit cunit, DFVarScope scope)
         throws UnsupportedSyntax {
@@ -147,22 +147,49 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void build(
-        List<DFKlass> klasses, AnonymousClassDeclaration anonDecl,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) anonDecl.bodyDeclarations()) {
-            this.build(klasses, body, parentKlass, parentScope);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void build(
+    public void buildMethodSpace(
         List<DFKlass> klasses, MethodDeclaration methodDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         this.build(klasses, methodDecl.getBody(), parentKlass, parentScope);
+    }
+
+    @SuppressWarnings("unchecked")
+    public DFKlass buildAnonymousKlass(
+        DFKlass parentKlass, DFVarScope parentScope,
+	DFKlass baseKlass, String id,
+	AnonymousClassDeclaration anonDecl)
+        throws UnsupportedSyntax {
+	DFTypeSpace anonSpace = new DFTypeSpace(this, id);
+	DFKlass anonKlass = new DFAnonKlass(
+	    "<anonymous>", anonSpace, parentKlass, parentScope, baseKlass);
+	anonKlass.setAST(anonDecl);
+	anonSpace.addKlass(anonKlass);
+	anonSpace.build(null, parentKlass, parentScope,
+			anonDecl.bodyDeclarations());
+	return anonKlass;
+    }
+
+    private void build(
+        List<DFKlass> klasses, DFKlass parentKlass, DFVarScope parentScope,
+	List<BodyDeclaration> decls)
+        throws UnsupportedSyntax {
+        for (BodyDeclaration body : decls) {
+	    if (body instanceof AbstractTypeDeclaration) {
+		this.build(klasses, (AbstractTypeDeclaration)body,
+			   parentKlass, parentScope);
+	    } else if (body instanceof FieldDeclaration) {
+		;
+	    } else if (body instanceof MethodDeclaration) {
+		;
+	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
+		;
+	    } else if (body instanceof Initializer) {
+		;
+	    } else {
+		throw new UnsupportedSyntax(body);
+	    }
+	}
     }
 
     private void build(
@@ -197,10 +224,8 @@ public class DFTypeSpace {
         }
         klass.addParamTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getKlassSpace();
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) typeDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getKlassScope());
-        }
+	child.build(klasses, klass, klass.getKlassScope(),
+		    typeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
@@ -215,10 +240,8 @@ public class DFTypeSpace {
             klasses.add(klass);
         }
         DFTypeSpace child = klass.getKlassSpace();
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) enumDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getKlassScope());
-        }
+	child.build(klasses, klass, klass.getKlassScope(),
+		    enumDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
@@ -233,31 +256,8 @@ public class DFTypeSpace {
             klasses.add(klass);
         }
         DFTypeSpace child = klass.getKlassSpace();
-        for (BodyDeclaration body :
-                 (List<BodyDeclaration>) annotTypeDecl.bodyDeclarations()) {
-            child.build(klasses, body, klass, klass.getKlassScope());
-        }
-    }
-
-    private void build(
-        List<DFKlass> klasses, BodyDeclaration body,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        assert body != null;
-        if (body instanceof AbstractTypeDeclaration) {
-            this.build(klasses, (AbstractTypeDeclaration)body,
-                       parentKlass, parentScope);
-        } else if (body instanceof FieldDeclaration) {
-            ;
-        } else if (body instanceof MethodDeclaration) {
-            ;
-        } else if (body instanceof AnnotationTypeMemberDeclaration) {
-            ;
-        } else if (body instanceof Initializer) {
-            ;
-        } else {
-            throw new UnsupportedSyntax(body);
-        }
+	child.build(klasses, klass, klass.getKlassScope(),
+		    annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")

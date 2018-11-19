@@ -415,21 +415,6 @@ public class DFKlass extends DFType {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
-        throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+anonDecl.getName());
-        this.setLoaded();
-        try {
-            finder = new DFTypeFinder(finder, _klassSpace);
-            finder = _baseKlass.addFinders(finder);
-            this.build(finder, anonDecl.bodyDeclarations());
-        } catch (TypeNotFound e) {
-            e.setAst(anonDecl);
-            throw e;
-        }
-    }
-
     private static String getSignature(Attribute[] attrs) {
         for (Attribute attr : attrs) {
             if (attr instanceof org.apache.bcel.classfile.Signature) {
