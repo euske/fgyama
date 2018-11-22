@@ -2350,7 +2350,6 @@ public class Java2DF {
             for (AbstractTypeDeclaration abstTypeDecl :
                      (List<AbstractTypeDeclaration>) cunit.types()) {
                 DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-                Logger.error("Pass2: loading: "+klass);
                 klass.load(finder);
             }
         } catch (TypeNotFound e) {
