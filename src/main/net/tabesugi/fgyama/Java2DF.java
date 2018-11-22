@@ -2283,16 +2283,20 @@ public class Java2DF {
     /// Top-level functions.
 
     private DFRootTypeSpace _rootSpace;
-    private DFGlobalVarScope _globalScope;
     private Exporter _exporter;
+    private DFGlobalVarScope _globalScope =
+        new DFGlobalVarScope();
+    private Map<String, CompilationUnit> _parseTree =
+        new HashMap<String, CompilationUnit>();
     private Map<String, DFModuleScope> _moduleScope =
         new HashMap<String, DFModuleScope>();
+    private Map<String, DFKlass[]> _klassList =
+        new HashMap<String, DFKlass[]>();
 
     public Java2DF(
         DFRootTypeSpace rootSpace)
         throws IOException, EntityNotFound {
         _rootSpace = rootSpace;
-        _globalScope = new DFGlobalVarScope();
         DFBuiltinTypes.initialize(rootSpace);
     }
 
@@ -2308,11 +2312,11 @@ public class Java2DF {
     }
 
     // pass1
-    public void buildTypeSpace(
-        List<DFKlass> allKlasses, String path, CompilationUnit cunit) {
+    public void buildTypeSpace(String key, CompilationUnit cunit) {
+        _parseTree.put(key, cunit);
         DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFModuleScope module = new DFModuleScope(_globalScope, path);
-        _moduleScope.put(path, module);
+        DFModuleScope module = new DFModuleScope(_globalScope, key);
+        _moduleScope.put(key, module);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
             typeSpace.buildModuleSpace(klasses, cunit, module);
@@ -2323,36 +2327,47 @@ public class Java2DF {
         for (DFKlass klass : klasses) {
             Logger.error("Pass1: created: "+klass);
         }
-        if (allKlasses != null) {
-            allKlasses.addAll(klasses);
-        }
+        DFKlass[] list = new DFKlass[klasses.size()];
+        klasses.toArray(list);
+        _klassList.put(key, list);
     }
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void buildKlassSpace(CompilationUnit cunit)
+    public void prepare()
         throws EntityNotFound {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
-        try {
-            for (AbstractTypeDeclaration abstTypeDecl :
-                     (List<AbstractTypeDeclaration>) cunit.types()) {
-                DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-                klass.load(finder);
+        for (Map.Entry<String, DFKlass[]> ent : _klassList.entrySet()) {
+            String key = ent.getKey();
+            DFKlass[] klasses = ent.getValue();
+            CompilationUnit cunit = _parseTree.get(key);
+            assert cunit != null;
+            DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+            DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
+            for (DFKlass klass : klasses) {
+                try {
+                    klass.load(finder);
+                } catch (TypeNotFound e) {
+                    Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
+                    throw e;
+                }
             }
-        } catch (TypeNotFound e) {
-            Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
-            throw e;
+        }
+        for (DFKlass[] klasses : _klassList.values()) {
+            for (DFKlass klass : klasses) {
+                klass.addOverrides();
+            }
         }
     }
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(String path, CompilationUnit cunit)
+    public void buildGraphs(String key)
         throws EntityNotFound {
+        CompilationUnit cunit = _parseTree.get(key);
+        assert cunit != null;
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
-        DFModuleScope module = _moduleScope.get(path);
+        DFModuleScope module = _moduleScope.get(key);
         // Handle static imports.
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
@@ -2431,42 +2446,23 @@ public class Java2DF {
         Java2DF converter = new Java2DF(rootSpace);
         XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);
-        List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = Utils.parseFile(path);
-                converter.buildTypeSpace(klasses, path, cunit);
+                converter.buildTypeSpace(path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
 	    }
         }
-	for (String path : files) {
-	    Logger.info("Pass2: "+path);
-	    try {
-		CompilationUnit cunit = Utils.parseFile(path);
-		converter.buildKlassSpace(cunit);
-	    } catch (IOException e) {
-		System.err.println("Cannot open input file: "+path);
-	    } catch (EntityNotFound e) {
-		System.err.println("Pass2: Error at "+path+" ("+e.name+")");
-		throw e;
-	    }
-	}
-        // Add overrides.
-        for (DFKlass klass : klasses) {
-            klass.addOverrides();
-        }
+        converter.prepare();
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
             try {
-                CompilationUnit cunit = Utils.parseFile(path);
                 exporter.startFile(path);
-                converter.buildGraphs(path, cunit);
+                converter.buildGraphs(path);
                 exporter.endFile();
-            } catch (IOException e) {
-                System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
                 System.err.println("Pass3: Error at "+path+" ("+e.name+")");
 		throw e;
