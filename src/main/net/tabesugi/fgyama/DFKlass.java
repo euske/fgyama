@@ -50,9 +50,7 @@ public class DFKlass extends DFType {
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
         _loaded = false;
-        if (parentScope != null) {
-            _klassScope = new DFKlassScope(this, parentScope, name);
-        }
+        _klassScope = new DFKlassScope(this, parentScope, name);
         _initializer = this.addMethod(
             null, "<init>", DFCallStyle.Initializer,
             new DFMethodType(new DFType[] {}, DFBasicType.VOID));
@@ -90,23 +88,23 @@ public class DFKlass extends DFType {
     {
         if (type instanceof DFNullType) return 0;
 	if (type instanceof DFArrayType) {
-	    type = DFRootTypeSpace.getObjectKlass();
+	    type = DFBuiltinTypes.getObjectKlass();
 	} else if (type == DFBasicType.BYTE) {
-	    type = DFRootTypeSpace.getByteKlass();
+	    type = DFBuiltinTypes.getByteKlass();
 	} else if (type == DFBasicType.CHAR) {
-	    type = DFRootTypeSpace.getCharacterKlass();
+	    type = DFBuiltinTypes.getCharacterKlass();
 	} else if (type == DFBasicType.SHORT) {
-	    type = DFRootTypeSpace.getShortKlass();
+	    type = DFBuiltinTypes.getShortKlass();
 	} else if (type == DFBasicType.INT) {
-	    type = DFRootTypeSpace.getIntegerKlass();
+	    type = DFBuiltinTypes.getIntegerKlass();
 	} else if (type == DFBasicType.LONG) {
-	    type = DFRootTypeSpace.getLongKlass();
+	    type = DFBuiltinTypes.getLongKlass();
 	} else if (type == DFBasicType.FLOAT) {
-	    type = DFRootTypeSpace.getFloatKlass();
+	    type = DFBuiltinTypes.getFloatKlass();
 	} else if (type == DFBasicType.DOUBLE) {
-	    type = DFRootTypeSpace.getDoubleKlass();
+	    type = DFBuiltinTypes.getDoubleKlass();
 	} else if (type == DFBasicType.BOOLEAN) {
-	    type = DFRootTypeSpace.getBooleanKlass();
+	    type = DFBuiltinTypes.getBooleanKlass();
 	}
         if (!(type instanceof DFKlass)) return -1;
         // type is-a this.
@@ -158,7 +156,7 @@ public class DFKlass extends DFType {
     public boolean isEnum() {
         return (_baseKlass instanceof DFParamKlass &&
                 ((DFParamKlass)_baseKlass).getGeneric() ==
-                DFRootTypeSpace.getEnumKlass());
+                DFBuiltinTypes.getEnumKlass());
     }
 
     public String getFullName() {
@@ -551,7 +549,7 @@ public class DFKlass extends DFType {
                 //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
                 finder = _baseKlass.addFinders(finder);
             } else {
-                _baseKlass = DFRootTypeSpace.getObjectKlass();
+                _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
@@ -577,7 +575,7 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _klassSpace);
-            DFKlass enumKlass = DFRootTypeSpace.getEnumKlass();
+            DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
             finder = _baseKlass.addFinders(finder);
             // Get interfaces.
@@ -608,7 +606,7 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _klassSpace);
-            _baseKlass = DFRootTypeSpace.getObjectKlass();
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
             finder = _baseKlass.addFinders(finder);
             // Lookup child klasses.
             this.build(finder, annotTypeDecl.bodyDeclarations());

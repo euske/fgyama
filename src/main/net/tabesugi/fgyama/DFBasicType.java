@@ -53,21 +53,21 @@ public class DFBasicType extends DFType {
     public int canConvertFrom(DFType type) {
 	// Auto-unboxing.
 	if ((_code == PrimitiveType.BYTE &&
-	     type == DFRootTypeSpace.getByteKlass()) ||
+	     type == DFBuiltinTypes.getByteKlass()) ||
 	    (_code == PrimitiveType.CHAR &&
-	     type == DFRootTypeSpace.getCharacterKlass()) ||
+	     type == DFBuiltinTypes.getCharacterKlass()) ||
 	    (_code == PrimitiveType.SHORT &&
-	     type == DFRootTypeSpace.getShortKlass()) ||
+	     type == DFBuiltinTypes.getShortKlass()) ||
 	    (_code == PrimitiveType.INT &&
-	     type == DFRootTypeSpace.getIntegerKlass()) ||
+	     type == DFBuiltinTypes.getIntegerKlass()) ||
 	    (_code == PrimitiveType.LONG &&
-	     type == DFRootTypeSpace.getLongKlass()) ||
+	     type == DFBuiltinTypes.getLongKlass()) ||
 	    (_code == PrimitiveType.FLOAT &&
-	     type == DFRootTypeSpace.getFloatKlass()) ||
+	     type == DFBuiltinTypes.getFloatKlass()) ||
 	    (_code == PrimitiveType.DOUBLE &&
-	     type == DFRootTypeSpace.getDoubleKlass()) ||
+	     type == DFBuiltinTypes.getDoubleKlass()) ||
 	    (_code == PrimitiveType.BOOLEAN &&
-	     type == DFRootTypeSpace.getBooleanKlass())) {
+	     type == DFBuiltinTypes.getBooleanKlass())) {
 	    return 0;
 	}
         if (this == type) return 0;

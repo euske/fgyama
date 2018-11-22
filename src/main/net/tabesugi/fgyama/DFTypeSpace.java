@@ -96,7 +96,7 @@ public class DFTypeSpace {
         if (klass != null) return klass;
         klass = new DFKlass(
             id, this, parentKlass, parentScope,
-            DFRootTypeSpace.getObjectKlass());
+            DFBuiltinTypes.getObjectKlass());
         //Logger.info("DFTypeSpace.createKlass: "+klass);
         return this.addKlass(klass);
     }

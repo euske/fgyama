@@ -31,9 +31,9 @@ public abstract class DFType {
             op == InfixExpression.Operator.CONDITIONAL_OR) {
             return DFBasicType.BOOLEAN;
         } else if (op == InfixExpression.Operator.PLUS &&
-                   (left == DFRootTypeSpace.getStringKlass() ||
-                    right == DFRootTypeSpace.getStringKlass())) {
-            return DFRootTypeSpace.getStringKlass();
+                   (left == DFBuiltinTypes.getStringKlass() ||
+                    right == DFBuiltinTypes.getStringKlass())) {
+            return DFBuiltinTypes.getStringKlass();
         } else if (left == null || right == null) {
             return (left == null)? right : left;
         } else if (0 <= left.canConvertFrom(right)) {

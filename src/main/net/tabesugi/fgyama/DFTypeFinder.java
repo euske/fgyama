@@ -62,9 +62,9 @@ public class DFTypeFinder {
         throws TypeNotFound {
         if (type == null) {
             // treat unknown class as Object.
-            return DFRootTypeSpace.getObjectKlass();
+            return DFBuiltinTypes.getObjectKlass();
         } else if (type instanceof DFArrayType) {
-            return DFRootTypeSpace.getArrayKlass();
+            return DFBuiltinTypes.getArrayKlass();
         } else if (type instanceof DFKlass) {
             return (DFKlass)type;
         } else {
@@ -122,7 +122,7 @@ public class DFTypeFinder {
             if (bound != null) {
                 return this.resolve(bound);
             } else {
-                return DFRootTypeSpace.getObjectKlass();
+                return DFBuiltinTypes.getObjectKlass();
             }
         } else {
             // not supported:

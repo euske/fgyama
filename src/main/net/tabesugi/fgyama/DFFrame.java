@@ -287,10 +287,10 @@ public class DFFrame {
             return DFBasicType.INT;
 
         } else if (expr instanceof StringLiteral) {
-            return DFRootTypeSpace.getStringKlass();
+            return DFBuiltinTypes.getStringKlass();
 
         } else if (expr instanceof TypeLiteral) {
-            return DFRootTypeSpace.getClassKlass();
+            return DFBuiltinTypes.getClassKlass();
 
         } else if (expr instanceof PrefixExpression) {
             PrefixExpression prefix = (PrefixExpression)expr;
@@ -500,7 +500,7 @@ public class DFFrame {
                 scope.lookupThis().getRefType());
             DFKlass anonKlass = new DFAnonKlass(
                 id, anonSpace, klass, scope,
-                DFRootTypeSpace.getObjectKlass());
+                DFBuiltinTypes.getObjectKlass());
             if (body instanceof Statement) {
                 // XXX TODO Statement lambda
             } else if (body instanceof Expression) {

@@ -22,7 +22,7 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
-        DFRootTypeSpace rootSpace = DFRootTypeSpace.getSingleton();
+        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
 	Java2DF converter = new Java2DF(rootSpace);
 	XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);
@@ -69,43 +69,43 @@ public class UnitTestDF extends XMLTestCase {
     }
     @Test
     public void test_02_basic_assign() throws Exception {
-	compareXml(TESTDATA+"/basic_assign.java", TESTDATA+"/basic_assign.graph");
+        compareXml(TESTDATA+"/basic_assign.java", TESTDATA+"/basic_assign.graph");
     }
     @Test
     public void test_03_basic_if() throws Exception {
-	compareXml(TESTDATA+"/basic_if.java", TESTDATA+"/basic_if.graph");
+        compareXml(TESTDATA+"/basic_if.java", TESTDATA+"/basic_if.graph");
     }
     @Test
     public void test_04_basic_while() throws Exception {
-	compareXml(TESTDATA+"/basic_while.java", TESTDATA+"/basic_while.graph");
+        compareXml(TESTDATA+"/basic_while.java", TESTDATA+"/basic_while.graph");
     }
     @Test
     public void test_05_basic_do() throws Exception {
-	compareXml(TESTDATA+"/basic_do.java", TESTDATA+"/basic_do.graph");
+        compareXml(TESTDATA+"/basic_do.java", TESTDATA+"/basic_do.graph");
     }
     @Test
     public void test_06_basic_for() throws Exception {
-	compareXml(TESTDATA+"/basic_for.java", TESTDATA+"/basic_for.graph");
+        compareXml(TESTDATA+"/basic_for.java", TESTDATA+"/basic_for.graph");
     }
     @Test
     public void test_07_basic_efor() throws Exception {
-	compareXml(TESTDATA+"/basic_efor.java", TESTDATA+"/basic_efor.graph");
+        compareXml(TESTDATA+"/basic_efor.java", TESTDATA+"/basic_efor.graph");
     }
     @Test
     public void test_08_basic_break() throws Exception {
-	compareXml(TESTDATA+"/basic_break.java", TESTDATA+"/basic_break.graph");
+        compareXml(TESTDATA+"/basic_break.java", TESTDATA+"/basic_break.graph");
     }
     @Test
     public void test_09_basic_continue() throws Exception {
-	compareXml(TESTDATA+"/basic_continue.java", TESTDATA+"/basic_continue.graph");
+        compareXml(TESTDATA+"/basic_continue.java", TESTDATA+"/basic_continue.graph");
     }
     @Test
     public void test_10_basic_switch() throws Exception {
-	compareXml(TESTDATA+"/basic_switch.java", TESTDATA+"/basic_switch.graph");
+        compareXml(TESTDATA+"/basic_switch.java", TESTDATA+"/basic_switch.graph");
     }
     @Test
     public void test_11_basic_methods() throws Exception {
-	compareXml(TESTDATA+"/basic_methods.java", TESTDATA+"/basic_methods.graph");
+        compareXml(TESTDATA+"/basic_methods.java", TESTDATA+"/basic_methods.graph");
     }
     @Test
     public void test_12_basic_ops() throws Exception {
@@ -113,31 +113,31 @@ public class UnitTestDF extends XMLTestCase {
     }
     @Test
     public void test_13_basic_names() throws Exception {
-	compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph");
+        compareXml(TESTDATA+"/basic_names.java", TESTDATA+"/basic_names.graph");
     }
     @Test
     public void test_14_basic_funcs() throws Exception {
-	compareXml(TESTDATA+"/basic_funcs.java", TESTDATA+"/basic_funcs.graph");
+        compareXml(TESTDATA+"/basic_funcs.java", TESTDATA+"/basic_funcs.graph");
     }
     @Test
     public void test_15_basic_generics() throws Exception {
-	compareXml(TESTDATA+"/basic_generics.java", TESTDATA+"/basic_generics.graph");
+        compareXml(TESTDATA+"/basic_generics.java", TESTDATA+"/basic_generics.graph");
     }
     @Test
     public void test_16_basic_poly() throws Exception {
-	compareXml(TESTDATA+"/basic_poly.java", TESTDATA+"/basic_poly.graph");
+        compareXml(TESTDATA+"/basic_poly.java", TESTDATA+"/basic_poly.graph");
     }
     @Test
     public void test_17_basic_enum() throws Exception {
-	compareXml(TESTDATA+"/basic_enum.java", TESTDATA+"/basic_enum.graph");
+        compareXml(TESTDATA+"/basic_enum.java", TESTDATA+"/basic_enum.graph");
     }
     @Test
     public void test_18_basic_staticimport() throws Exception {
-	compareXml(TESTDATA+"/basic_staticimport.java", TESTDATA+"/basic_staticimport.graph");
+        compareXml(TESTDATA+"/basic_staticimport.java", TESTDATA+"/basic_staticimport.graph");
     }
     @Test
     public void test_19_basic_exception() throws Exception {
-	compareXml(TESTDATA+"/basic_exception.java", TESTDATA+"/basic_exception.graph");
+        compareXml(TESTDATA+"/basic_exception.java", TESTDATA+"/basic_exception.graph");
     }
 
     @Test

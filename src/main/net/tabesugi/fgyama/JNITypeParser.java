@@ -98,10 +98,10 @@ public class JNITypeParser {
         case '-':
             _pos++;
             this.getType(finder); // XXX super ignored.
-            return DFRootTypeSpace.getObjectKlass();
+            return DFBuiltinTypes.getObjectKlass();
         case '*':
             _pos++;
-            return DFRootTypeSpace.getObjectKlass();
+            return DFBuiltinTypes.getObjectKlass();
         case '(':
             DFType[] argTypes = this.getTypes(finder, '(', ')');
             DFType returnType = this.getType(finder);

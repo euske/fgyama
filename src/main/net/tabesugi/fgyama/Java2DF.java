@@ -822,14 +822,14 @@ public class Java2DF {
                 String value = ((StringLiteral)expr).getLiteralValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
-                                  DFRootTypeSpace.getStringKlass(),
+                                  DFBuiltinTypes.getStringKlass(),
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
                 Type value = ((TypeLiteral)expr).getType();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
-                                  DFRootTypeSpace.getClassKlass(),
+                                  DFBuiltinTypes.getClassKlass(),
                                   expr, Utils.getTypeName(value)));
 
             } else if (expr instanceof PrefixExpression) {
@@ -1210,7 +1210,7 @@ public class Java2DF {
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
                 DFKlass anonKlass = new DFAnonKlass(
                     id, anonSpace, klass, scope,
-                    DFRootTypeSpace.getObjectKlass());
+                    DFBuiltinTypes.getObjectKlass());
                 assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1235,7 +1235,7 @@ public class Java2DF {
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFAnonKlass(
                     "methodref", anonSpace, klass, scope,
-                    DFRootTypeSpace.getObjectKlass());
+                    DFBuiltinTypes.getObjectKlass());
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -2283,13 +2283,17 @@ public class Java2DF {
     /// Top-level functions.
 
     private DFRootTypeSpace _rootSpace;
+    private DFGlobalVarScope _globalScope;
     private Exporter _exporter;
     private Map<String, DFModuleScope> _moduleScope =
         new HashMap<String, DFModuleScope>();
 
     public Java2DF(
-        DFRootTypeSpace rootSpace) {
+        DFRootTypeSpace rootSpace)
+        throws IOException, EntityNotFound {
         _rootSpace = rootSpace;
+        _globalScope = new DFGlobalVarScope();
+        DFBuiltinTypes.initialize(rootSpace);
     }
 
     public void setExporter(Exporter exporter)
@@ -2323,8 +2327,7 @@ public class Java2DF {
     public void buildTypeSpace(
         List<DFKlass> allKlasses, String path, CompilationUnit cunit) {
         DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFGlobalVarScope global = _rootSpace.getGlobalScope();
-        DFModuleScope module = new DFModuleScope(global, path);
+        DFModuleScope module = new DFModuleScope(_globalScope, path);
         _moduleScope.put(path, module);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
@@ -2343,7 +2346,8 @@ public class Java2DF {
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void buildKlassSpace(CompilationUnit cunit) throws EntityNotFound {
+    public void buildKlassSpace(CompilationUnit cunit)
+        throws EntityNotFound {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
         try {
@@ -2407,7 +2411,7 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
 
-        DFRootTypeSpace rootSpace = DFRootTypeSpace.getSingleton();
+        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--")) {
