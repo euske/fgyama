@@ -39,10 +39,10 @@ public class DFParamType extends DFKlass {
         return _name+":"+_baseKlass.getTypeName();
     }
 
-    @SuppressWarnings("unchecked")
-    public void setKlass(DFKlass klass) {
-	_baseKlass = klass;
+    public void load(DFTypeFinder finder, JNITypeParser parser)
+        throws TypeNotFound {
         this.setLoaded();
+	_baseKlass = (DFKlass)parser.getType(finder);
     }
 
     protected void buildFromTree(DFTypeFinder finder, ASTNode ast)

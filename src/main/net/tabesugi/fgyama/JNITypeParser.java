@@ -139,8 +139,7 @@ public class JNITypeParser {
 		_pos++;	 // ???
 	    }
             DFParamType pt = paramTypes[n++];
-	    DFKlass klass = (DFKlass)this.getType(finder);
-	    pt.setKlass(klass);
+            pt.load(finder, this);
         }
         _pos++;
     }
