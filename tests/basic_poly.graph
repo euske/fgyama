@@ -109,7 +109,7 @@
             <link src="Nbasic_poly_Baa.main.b0_2"/>
             <ast length="1" start="355" type="42"/>
           </node>
-          <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_5" kind="call" type="I">
+          <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_5" kind="call" type="I">
             <link label="arg0" src="Nbasic_poly_Baa.main.b0_4"/>
             <link label="obj" src="Nbasic_poly_Baa.main.b0_3"/>
             <ast length="8" start="349" type="32"/>
@@ -141,7 +141,7 @@
             <link src="Nbasic_poly_Baa.main.b0_6"/>
             <ast length="1" start="426" type="42"/>
           </node>
-          <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_13" kind="call" type="I">
+          <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_13" kind="call" type="I">
             <link label="arg0" src="Nbasic_poly_Baa.main.b0_12"/>
             <link label="obj" src="Nbasic_poly_Baa.main.b0_11"/>
             <ast length="8" start="420" type="32"/>
@@ -166,7 +166,7 @@
             <link src="Nbasic_poly_Baa.main.b0_14"/>
             <ast length="1" start="448" type="42"/>
           </node>
-          <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_19" kind="call" type="I">
+          <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Nbasic_poly_Baa.main.b0_19" kind="call" type="I">
             <link label="arg0" src="Nbasic_poly_Baa.main.b0_18"/>
             <link label="obj" src="Nbasic_poly_Baa.main.b0_17"/>
             <ast length="8" start="442" type="32"/>

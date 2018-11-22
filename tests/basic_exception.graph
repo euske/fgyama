@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_exception.java">
-    <graph ins="" name="A" outs="" style="initializer">
-      <ast length="53" start="0" type="55"/>
-      <scope name="A">
-        <node data="uninitialized" id="NA_1" kind="const" type="@null"/>
-        <node id="NA_2" kind="assign" ref="A/.text" type="Ljava/lang/String;">
-          <link src="NA_1"/>
-          <ast length="4" start="46" type="59"/>
+    <graph ins="" name="basic_exception/A" outs="" style="initializer">
+      <ast length="61" start="36" type="55"/>
+      <scope name="basic_exception/A">
+        <node data="uninitialized" id="Nbasic_exception/A_1" kind="const" type="@null"/>
+        <node id="Nbasic_exception/A_2" kind="assign" ref="basic_exception/A/.text" type="Ljava/lang/String;">
+          <link src="Nbasic_exception/A_1"/>
+          <ast length="4" start="86" type="59"/>
         </node>
       </scope>
     </graph>
     <graph ins="Nbasic_exception.foo_11 Nbasic_exception.foo_19 Nbasic_exception.foo_26" name="Lbasic_exception;.foo()V" outs="" style="instance">
-      <ast length="233" start="91" type="31"/>
+      <ast length="233" start="103" type="31"/>
       <scope name="basic_exception.foo">
         <scope name="basic_exception.foo.b0">
           <scope name="basic_exception.foo.b0.try0">
             <scope name="basic_exception.foo.b0.try0.b0">
               <node id="Nbasic_exception.foo.b0.try0.b0_3" kind="assign" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link src="Nbasic_exception.foo.b0.try0.b0_7"/>
-                <ast length="1" start="162" type="42"/>
+                <ast length="1" start="174" type="42"/>
               </node>
               <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="Nbasic_exception.foo.b0.try0.b0_5" kind="call" type="Ljava/lang/String;">
                 <link label="obj" src="Nbasic_exception.foo_11"/>
-                <ast length="5" start="166" type="32"/>
+                <ast length="5" start="178" type="32"/>
               </node>
               <node id="Nbasic_exception.foo.b0.try0.b0_6" kind="assign" ref="#this" type="Lbasic_exception;">
                 <link label="update" src="Nbasic_exception.foo.b0.try0.b0_5"/>
-                <ast length="5" start="166" type="32"/>
+                <ast length="5" start="178" type="32"/>
               </node>
               <node data="=" id="Nbasic_exception.foo.b0.try0.b0_7" kind="assignop" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link label="R" src="Nbasic_exception.foo.b0.try0.b0_5"/>
-                <ast length="9" start="162" type="7"/>
+                <ast length="9" start="174" type="7"/>
               </node>
               <node id="Nbasic_exception.foo.b0.try0.b0_8" kind="assign" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link src="Nbasic_exception.foo.b0.try0.b0_10"/>
-                <ast length="1" start="185" type="42"/>
+                <ast length="1" start="197" type="42"/>
               </node>
               <node data="b" id="Nbasic_exception.foo.b0.try0.b0_9" kind="const" type="Ljava/lang/String;">
-                <ast length="3" start="189" type="45"/>
+                <ast length="3" start="201" type="45"/>
               </node>
               <node data="=" id="Nbasic_exception.foo.b0.try0.b0_10" kind="assignop" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link label="R" src="Nbasic_exception.foo.b0.try0.b0_9"/>
-                <ast length="7" start="185" type="7"/>
+                <ast length="7" start="197" type="7"/>
               </node>
             </scope>
             <node id="Nbasic_exception.foo.b0.try0_12" ref="#exception"/>
@@ -50,106 +50,106 @@
             <scope name="basic_exception.foo.b0.catch1.b0">
               <node id="Nbasic_exception.foo.b0.catch1.b0_14" kind="assign" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link src="Nbasic_exception.foo.b0.catch1.b0_18"/>
-                <ast length="1" start="230" type="42"/>
+                <ast length="1" start="242" type="42"/>
               </node>
-              <node id="Nbasic_exception.foo.b0.catch1.b0_15" kind="ref" ref="basic_exception.foo.b0.catch1/$e" type="LA;">
+              <node id="Nbasic_exception.foo.b0.catch1.b0_15" kind="ref" ref="basic_exception.foo.b0.catch1/$e" type="Lbasic_exception/A;">
                 <link src="Nbasic_exception.foo.b0.catch1_13"/>
-                <ast length="1" start="234" type="42"/>
+                <ast length="1" start="246" type="42"/>
               </node>
-              <node id="Nbasic_exception.foo.b0.catch1.b0_16" kind="fieldref" ref="A/.text" type="Ljava/lang/String;">
+              <node id="Nbasic_exception.foo.b0.catch1.b0_16" kind="fieldref" ref="basic_exception/A/.text" type="Ljava/lang/String;">
                 <link src="Nbasic_exception.foo_19"/>
                 <link label="obj" src="Nbasic_exception.foo.b0.catch1.b0_15"/>
-                <ast length="6" start="234" type="40"/>
+                <ast length="6" start="246" type="40"/>
               </node>
               <node data="=" id="Nbasic_exception.foo.b0.catch1.b0_18" kind="assignop" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
                 <link label="R" src="Nbasic_exception.foo.b0.catch1.b0_16"/>
-                <ast length="10" start="230" type="7"/>
+                <ast length="10" start="242" type="7"/>
               </node>
             </scope>
-            <node id="Nbasic_exception.foo.b0.catch1_13" kind="catch" ref="basic_exception.foo.b0.catch1/$e" type="LA;">
+            <node id="Nbasic_exception.foo.b0.catch1_13" kind="catch" ref="basic_exception.foo.b0.catch1/$e" type="Lbasic_exception/A;">
               <link src="Nbasic_exception.foo.b0.try0_12"/>
-              <ast length="3" start="211" type="44"/>
+              <ast length="3" start="223" type="44"/>
             </node>
           </scope>
           <scope name="basic_exception.foo.b0.catch2">
             <scope name="basic_exception.foo.b0.catch2.b0">
               <node id="Nbasic_exception.foo.b0.catch2.b0_21" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
                 <link src="Nbasic_exception.foo_26"/>
-                <ast length="10" start="286" type="40"/>
+                <ast length="10" start="298" type="40"/>
               </node>
               <node id="Nbasic_exception.foo.b0.catch2.b0_23" kind="ref" ref="basic_exception.foo.b0.catch2/$e" type="Ljava/lang/Exception;">
                 <link src="Nbasic_exception.foo.b0.catch2_20"/>
-                <ast length="1" start="305" type="42"/>
+                <ast length="1" start="317" type="42"/>
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="Nbasic_exception.foo.b0.catch2.b0_24" kind="call" type="V">
                 <link label="arg0" src="Nbasic_exception.foo.b0.catch2.b0_23"/>
                 <link label="obj" src="Nbasic_exception.foo.b0.catch2.b0_21"/>
-                <ast length="21" start="286" type="32"/>
+                <ast length="21" start="298" type="32"/>
               </node>
               <node id="Nbasic_exception.foo.b0.catch2.b0_25" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
                 <link label="update" src="Nbasic_exception.foo.b0.catch2.b0_24"/>
-                <ast length="21" start="286" type="32"/>
+                <ast length="21" start="298" type="32"/>
               </node>
             </scope>
             <node id="Nbasic_exception.foo.b0.catch2_20" kind="catch" ref="basic_exception.foo.b0.catch2/$e" type="Ljava/lang/Exception;">
               <link src="Nbasic_exception.foo.b0.try0_12"/>
-              <ast length="11" start="259" type="44"/>
+              <ast length="11" start="271" type="44"/>
             </node>
             <node id="Nbasic_exception.foo.b0.catch2_28" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;"/>
           </scope>
           <node data="null" id="Nbasic_exception.foo.b0_1" kind="const" type="@null">
-            <ast length="4" start="130" type="33"/>
+            <ast length="4" start="142" type="33"/>
           </node>
           <node id="Nbasic_exception.foo.b0_2" kind="assign" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
             <link src="Nbasic_exception.foo.b0_1"/>
-            <ast length="8" start="126" type="59"/>
+            <ast length="8" start="138" type="59"/>
           </node>
           <node id="Nbasic_exception.foo.b0_27" kind="join" ref="basic_exception.foo.b0/$x" type="Ljava/lang/String;">
             <link src="Nbasic_exception.foo.b0.try0.b0_8"/>
-            <link label="LA;" src="Nbasic_exception.foo.b0.catch1.b0_14"/>
+            <link label="Lbasic_exception/A;" src="Nbasic_exception.foo.b0.catch1.b0_14"/>
             <link label="Ljava/lang/Exception;" src="Nbasic_exception.foo.b0.catch2_28"/>
-            <ast length="174" start="144" type="54"/>
+            <ast length="174" start="156" type="54"/>
           </node>
         </scope>
         <node id="Nbasic_exception.foo_11" ref="#this" type="Lbasic_exception;"/>
-        <node id="Nbasic_exception.foo_19" ref="A/.text" type="Ljava/lang/String;"/>
+        <node id="Nbasic_exception.foo_19" ref="basic_exception/A/.text" type="Ljava/lang/String;"/>
         <node id="Nbasic_exception.foo_26" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
       </scope>
     </graph>
     <graph ins="" name="Lbasic_exception;.moo()Ljava/lang/String;" outs="Nbasic_exception.moo.b0_4 Nbasic_exception.moo.b0_8" style="instance">
-      <ast length="89" start="330" type="31"/>
+      <ast length="89" start="342" type="31"/>
       <scope name="basic_exception.moo">
         <scope name="basic_exception.moo.b0">
           <node data="true" id="Nbasic_exception.moo.b0_1" kind="const" type="Z">
-            <ast length="4" start="373" type="9"/>
+            <ast length="4" start="385" type="9"/>
           </node>
-          <node data="LA;" id="Nbasic_exception.moo.b0_2" kind="new" type="LA;">
-            <ast length="7" start="385" type="14"/>
+          <node data="Lbasic_exception/A;" id="Nbasic_exception.moo.b0_2" kind="new" type="Lbasic_exception/A;">
+            <ast length="7" start="397" type="14"/>
           </node>
-          <node id="Nbasic_exception.moo.b0_3" kind="throw" ref="#exception" type="LA;">
+          <node id="Nbasic_exception.moo.b0_3" kind="throw" ref="#exception" type="Lbasic_exception/A;">
             <link src="Nbasic_exception.moo.b0_2"/>
-            <ast length="14" start="379" type="53"/>
+            <ast length="14" start="391" type="53"/>
           </node>
           <node id="Nbasic_exception.moo.b0_4" kind="join" ref="#exception">
             <link label="cond" src="Nbasic_exception.moo.b0_1"/>
             <link label="false" src="Nbasic_exception.moo_6"/>
             <link label="true" src="Nbasic_exception.moo.b0_5"/>
-            <ast length="24" start="369" type="25"/>
+            <ast length="24" start="381" type="25"/>
           </node>
           <node id="Nbasic_exception.moo.b0_5" ref="#exception"/>
           <node data="a" id="Nbasic_exception.moo.b0_7" kind="const" type="Ljava/lang/String;">
-            <ast length="3" start="409" type="45"/>
+            <ast length="3" start="421" type="45"/>
           </node>
           <node id="Nbasic_exception.moo.b0_8" kind="output" ref="#return" type="Ljava/lang/String;">
             <link src="Nbasic_exception.moo.b0_7"/>
-            <ast length="11" start="402" type="41"/>
+            <ast length="11" start="414" type="41"/>
           </node>
         </scope>
         <node id="Nbasic_exception.moo_6" ref="#exception"/>
       </scope>
     </graph>
     <graph ins="" name="basic_exception" outs="" style="initializer">
-      <ast length="366" start="55" type="55"/>
+      <ast length="433" start="0" type="55"/>
       <scope name="basic_exception"/>
     </graph>
   </file>

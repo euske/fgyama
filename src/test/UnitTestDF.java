@@ -13,37 +13,45 @@ public class UnitTestDF extends XMLTestCase {
 
     public static final String TESTDATA = "tests";
 
-    public UnitTestDF(String name) {
+    private static DFRootTypeSpace _rootSpace = null;
+    private static Java2DF _converter = null;
+
+    public UnitTestDF(String name)
+        throws Exception {
 	super(name);
 	XMLUnit.setIgnoreComments(true);
 	XMLUnit.setIgnoreWhitespace(true);
 	XMLUnit.setNormalize(true);
+        if (_rootSpace == null) {
+            _rootSpace = new DFRootTypeSpace();
+        }
+        if (_converter == null) {
+            _converter = new Java2DF(_rootSpace);
+        }
     }
 
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
-	Java2DF converter = new Java2DF(rootSpace);
 	XmlExporter exporter = new XmlExporter();
-        converter.setExporter(exporter);
+        _converter.setExporter(exporter);
         CompilationUnit[] cunits = new CompilationUnit[javaPaths.length];
         for (int i = 0; i < javaPaths.length; i++) {
             System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
-            cunits[i] = converter.parseFile(javaPaths[i]);
+            cunits[i] = _converter.parseFile(javaPaths[i]);
         }
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (int i = 0; i < cunits.length; i++) {
-            converter.buildTypeSpace(klasses, javaPaths[i], cunits[i]);
+            _converter.buildTypeSpace(klasses, javaPaths[i], cunits[i]);
         }
         for (int i = 0; i < cunits.length; i++) {
-            converter.buildKlassSpace(cunits[i]);
+            _converter.buildKlassSpace(cunits[i]);
         }
         for (DFKlass klass : klasses) {
             klass.addOverrides();
         }
         for (int i = 0; i < cunits.length; i++) {
             exporter.startFile(javaPaths[i]);
-            converter.buildGraphs(javaPaths[i], cunits[i]);
+            _converter.buildGraphs(javaPaths[i], cunits[i]);
             exporter.endFile();
         }
 	exporter.close();

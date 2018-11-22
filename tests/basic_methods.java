@@ -1,10 +1,11 @@
-class A {
-    public String toString() {
-        return "A";
-    }
-}
-
 public class basic_methods {
+
+    class A {
+        public String toString() {
+            return "A";
+        }
+    }
+
     int x = 0;
     public void fa() {
 	A a = new A() {

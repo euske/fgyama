@@ -1,8 +1,8 @@
-class A extends Exception {
-    public String text;
-}
-
 public class basic_exception {
+
+    class A extends Exception {
+        public String text;
+    }
 
     public void foo() {
         String x = null;
