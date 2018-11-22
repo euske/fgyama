@@ -37,7 +37,7 @@ public class UnitTestDF extends XMLTestCase {
         CompilationUnit[] cunits = new CompilationUnit[javaPaths.length];
         for (int i = 0; i < javaPaths.length; i++) {
             System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
-            cunits[i] = _converter.parseFile(javaPaths[i]);
+            cunits[i] = Utils.parseFile(javaPaths[i]);
         }
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (int i = 0; i < cunits.length; i++) {

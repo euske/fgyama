@@ -2,12 +2,14 @@
 //
 package net.tabesugi.fgyama;
 import java.io.*;
+import java.util.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
@@ -98,6 +100,25 @@ public class Utils {
         }
         output.close();
         input.close();
+    }
+
+    public static CompilationUnit parseFile(String path)
+        throws IOException {
+        return parseFile(new File(path));
+    }
+
+    public static CompilationUnit parseFile(File file)
+        throws IOException {
+        String src = Utils.readFile(file);
+        Map<String, String> options = JavaCore.getOptions();
+        JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
+        ASTParser parser = ASTParser.newParser(AST.JLS8);
+        parser.setSource(src.toCharArray());
+        parser.setKind(ASTParser.K_COMPILATION_UNIT);
+        parser.setResolveBindings(false);
+        parser.setEnvironment(null, null, null, false);
+        parser.setCompilerOptions(options);
+        return (CompilationUnit)parser.createAST(null);
     }
 
     public static Document createXml()

@@ -2307,20 +2307,6 @@ public class Java2DF {
         }
     }
 
-    public CompilationUnit parseFile(String path)
-        throws IOException {
-        String src = Utils.readFile(path);
-        Map<String, String> options = JavaCore.getOptions();
-        JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-        ASTParser parser = ASTParser.newParser(AST.JLS8);
-        parser.setSource(src.toCharArray());
-        parser.setKind(ASTParser.K_COMPILATION_UNIT);
-        parser.setResolveBindings(false);
-        parser.setEnvironment(null, null, null, false);
-        parser.setCompilerOptions(options);
-        return (CompilationUnit)parser.createAST(null);
-    }
-
     // pass1
     public void buildTypeSpace(
         List<DFKlass> allKlasses, String path, CompilationUnit cunit) {
@@ -2449,7 +2435,7 @@ public class Java2DF {
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
-                CompilationUnit cunit = converter.parseFile(path);
+                CompilationUnit cunit = Utils.parseFile(path);
                 converter.buildTypeSpace(klasses, path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
@@ -2458,7 +2444,7 @@ public class Java2DF {
 	for (String path : files) {
 	    Logger.info("Pass2: "+path);
 	    try {
-		CompilationUnit cunit = converter.parseFile(path);
+		CompilationUnit cunit = Utils.parseFile(path);
 		converter.buildKlassSpace(cunit);
 	    } catch (IOException e) {
 		System.err.println("Cannot open input file: "+path);
@@ -2475,7 +2461,7 @@ public class Java2DF {
             if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
             try {
-                CompilationUnit cunit = converter.parseFile(path);
+                CompilationUnit cunit = Utils.parseFile(path);
                 exporter.startFile(path);
                 converter.buildGraphs(path, cunit);
                 exporter.endFile();
