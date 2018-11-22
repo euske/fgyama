@@ -2296,13 +2296,11 @@ public class Java2DF {
         DFBuiltinTypes.initialize(rootSpace);
     }
 
-    public void setExporter(Exporter exporter)
-    {
+    public void setExporter(Exporter exporter) {
         _exporter = exporter;
     }
 
-    protected void exportGraph(DFGraph graph)
-    {
+    protected void exportGraph(DFGraph graph) {
         graph.cleanup();
         if (_exporter != null) {
             _exporter.writeGraph(graph);

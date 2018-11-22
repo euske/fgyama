@@ -21,8 +21,7 @@ public class DFParamType extends DFKlass {
         return ("<DFParamType("+this.getFullName()+":"+_baseKlass+")>");
     }
 
-    public int canConvertFrom(DFType type)
-    {
+    public int canConvertFrom(DFType type) {
         return _baseKlass.canConvertFrom(type);
     }
 

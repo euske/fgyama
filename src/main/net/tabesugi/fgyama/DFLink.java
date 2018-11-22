@@ -16,8 +16,7 @@ class DFLink {
     private DFNode _src;
     private String _label;
 
-    public DFLink(DFNode dst, DFNode src, String label)
-    {
+    public DFLink(DFNode dst, DFNode src, String label) {
         _dst = dst;
         _src = src;
         _label = label;

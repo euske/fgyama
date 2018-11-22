@@ -84,8 +84,7 @@ public class DFKlass extends DFType {
         return (this == type);
     }
 
-    public int canConvertFrom(DFType type)
-    {
+    public int canConvertFrom(DFType type) {
         if (type instanceof DFNullType) return 0;
 	if (type instanceof DFArrayType) {
 	    type = DFBuiltinTypes.getObjectKlass();

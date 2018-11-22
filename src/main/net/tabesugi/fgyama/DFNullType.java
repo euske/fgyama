@@ -15,8 +15,7 @@ public class DFNullType extends DFType {
         return ("<DFNullType>");
     }
 
-    public String getTypeName()
-    {
+    public String getTypeName() {
         return "@null";
     }
 
@@ -24,8 +23,7 @@ public class DFNullType extends DFType {
         return (type instanceof DFNullType);
     }
 
-    public int canConvertFrom(DFType type)
-    {
+    public int canConvertFrom(DFType type) {
         if (type instanceof DFNullType) return 0;
         return -1;
     }
