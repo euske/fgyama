@@ -18,7 +18,6 @@ public class DFKlass extends DFType {
     protected DFKlass _baseKlass = null;
     protected DFKlass[] _baseIfaces = null;
 
-    private boolean _loaded;
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
@@ -36,6 +35,8 @@ public class DFKlass extends DFType {
     private Map<String, DFMethod> _ast2method =
         new HashMap<String, DFMethod>();
 
+    private DFTypeFinder _finder = null;
+    private boolean _loaded = false;
     private String _jarPath = null;
     private String _filePath = null;
     private ASTNode _ast = null;
@@ -49,7 +50,6 @@ public class DFKlass extends DFType {
         _klassSpace = typeSpace.lookupSpace(name);
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
-        _loaded = false;
         _klassScope = new DFKlassScope(this, parentScope, name);
         _initializer = this.addMethod(
             null, "<init>", DFCallStyle.Initializer,
@@ -64,7 +64,6 @@ public class DFKlass extends DFType {
         _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
         _initializer = genericKlass._initializer;
-        _loaded = true;
     }
 
     @Override
@@ -368,23 +367,29 @@ public class DFKlass extends DFType {
         return finder;
     }
 
+    public DFTypeFinder getFinder() {
+        return _finder;
+    }
+    public void setFinder(DFTypeFinder finder) {
+        _finder = finder;
+    }
     public void setAST(ASTNode ast) {
         _ast = ast;
     }
-
     public void setJarPath(String jarPath, String filePath) {
         _jarPath = jarPath;
         _filePath = filePath;
     }
 
-    public void setLoaded() {
+    public void load()
+        throws TypeNotFound {
+        if (_finder == null) return;
+        if (_loaded) return;
         _loaded = true;
+        this.load(_finder);
     }
-
     public void load(DFTypeFinder finder)
         throws TypeNotFound {
-        if (_loaded) return;
-        this.setLoaded();
         assert _ast != null || _jarPath != null;
         if (_ast != null) {
             try {

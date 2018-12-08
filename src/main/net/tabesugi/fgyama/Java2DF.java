@@ -1146,8 +1146,7 @@ public class Java2DF {
 		    anonKlass.load(finder);
 		    anonKlass.addOverrides();
 		    processBodyDeclarations(
-			finder, anonKlass, anonDecl,
-			anonDecl.bodyDeclarations());
+			anonKlass, anonDecl, anonDecl.bodyDeclarations());
 		    instType = anonKlass;
                 } else {
                     instType = finder.resolve(cstr.getType());
@@ -2057,16 +2056,14 @@ public class Java2DF {
 		klass.load(finder);
 		klass.addOverrides();
 		processBodyDeclarations(
-		    finder, klass, typeDecl,
-		    typeDecl.bodyDeclarations());
+		    klass, typeDecl, typeDecl.bodyDeclarations());
 	    } else if (abstTypeDecl instanceof EnumDeclaration) {
 		EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
 		DFKlass klass = typeSpace.getKlass(enumDecl.getName());
 		klass.load(finder);
 		klass.addOverrides();
 		processBodyDeclarations(
-		    finder, klass, enumDecl,
-		    enumDecl.bodyDeclarations());
+		    klass, enumDecl, enumDecl.bodyDeclarations());
 	    }
 
         } else {
@@ -2200,11 +2197,10 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void processBodyDeclarations(
-        DFTypeFinder finder, DFKlass klass,
-        ASTNode ast, List<BodyDeclaration> decls)
+        DFKlass klass, ASTNode ast, List<BodyDeclaration> decls)
         throws EntityNotFound {
         // lookup base/child klasses.
-        finder = klass.addFinders(finder);
+        DFTypeFinder finder = klass.addFinders(klass.getFinder());
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
         DFVarScope klassScope = klass.getKlassScope();
 	DFTypeSpace klassSpace = klass.getKlassSpace();
@@ -2215,8 +2211,7 @@ public class Java2DF {
                     AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                     DFKlass childKlass = klassSpace.getKlass(abstTypeDecl.getName());
                     processBodyDeclarations(
-                        finder, childKlass, abstTypeDecl,
-                        abstTypeDecl.bodyDeclarations());
+                        childKlass, abstTypeDecl, abstTypeDecl.bodyDeclarations());
 
                 } else if (body instanceof FieldDeclaration) {
                     FieldDeclaration fieldDecl = (FieldDeclaration)body;
@@ -2286,8 +2281,6 @@ public class Java2DF {
     private Exporter _exporter;
     private DFGlobalVarScope _globalScope =
         new DFGlobalVarScope();
-    private Map<String, CompilationUnit> _parseTree =
-        new HashMap<String, CompilationUnit>();
     private Map<String, DFModuleScope> _moduleScope =
         new HashMap<String, DFModuleScope>();
     private Map<String, DFKlass[]> _klassList =
@@ -2313,13 +2306,12 @@ public class Java2DF {
 
     // pass1
     public void buildTypeSpace(String key, CompilationUnit cunit) {
-        _parseTree.put(key, cunit);
-        DFTypeSpace typeSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFModuleScope module = new DFModuleScope(_globalScope, key);
         _moduleScope.put(key, module);
         List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
-            typeSpace.buildModuleSpace(klasses, cunit, module);
+            packageSpace.buildModuleSpace(klasses, cunit, module);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
@@ -2334,26 +2326,26 @@ public class Java2DF {
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void prepare()
+    public void buildTypeFinder(String key, CompilationUnit cunit)
         throws EntityNotFound {
-        for (Map.Entry<String, DFKlass[]> ent : _klassList.entrySet()) {
-            String key = ent.getKey();
-            DFKlass[] klasses = ent.getValue();
-            CompilationUnit cunit = _parseTree.get(key);
-            assert cunit != null;
-            DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-            DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
-            for (DFKlass klass : klasses) {
-                try {
-                    klass.load(finder);
-                } catch (TypeNotFound e) {
-                    Logger.error("Pass2: type not found: "+e.name+" ast="+e.ast);
-                    throw e;
-                }
-            }
+        DFKlass[] klasses = _klassList.get(key);
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
+        for (DFKlass klass : klasses) {
+            klass.setFinder(finder);
         }
+    }
+
+    public void loadAll()
+        throws EntityNotFound {
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
+                try {
+                    klass.load();
+                } catch (TypeNotFound e) {
+                    Logger.error("loadAll: type not found: "+e.name+" ast="+e.ast);
+                    throw e;
+                }
                 klass.addOverrides();
             }
         }
@@ -2361,12 +2353,8 @@ public class Java2DF {
 
     // pass3
     @SuppressWarnings("unchecked")
-    public void buildGraphs(String key)
+    public void buildGraphs(String key, CompilationUnit cunit)
         throws EntityNotFound {
-        CompilationUnit cunit = _parseTree.get(key);
-        assert cunit != null;
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
         DFModuleScope module = _moduleScope.get(key);
         // Handle static imports.
         for (ImportDeclaration importDecl :
@@ -2376,23 +2364,21 @@ public class Java2DF {
             DFKlass klass;
             if (importDecl.isOnDemand()) {
                 klass = _rootSpace.getKlass(name);
-		klass.load(finder);
+		klass.load();
                 module.importStatic(klass);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 klass = _rootSpace.getKlass(qname.getQualifier());
-		klass.load(finder);
+		klass.load();
                 module.importStatic(klass, qname.getName());
             }
-            finder = klass.addFinders(finder);
         }
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-	    klass.load(finder);
             processBodyDeclarations(
-                finder, klass, abstTypeDecl,
-                abstTypeDecl.bodyDeclarations());
+                klass, abstTypeDecl, abstTypeDecl.bodyDeclarations());
 	}
     }
 
@@ -2455,14 +2441,26 @@ public class Java2DF {
                 System.err.println("Cannot open input file: "+path);
 	    }
         }
-        converter.prepare();
+        for (String path : files) {
+            Logger.info("Pass2: "+path);
+            try {
+                CompilationUnit cunit = Utils.parseFile(path);
+                converter.buildTypeFinder(path, cunit);
+            } catch (IOException e) {
+                System.err.println("Cannot open input file: "+path);
+	    }
+        }
+        converter.loadAll();
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
             try {
+                CompilationUnit cunit = Utils.parseFile(path);
                 exporter.startFile(path);
-                converter.buildGraphs(path);
+                converter.buildGraphs(path, cunit);
                 exporter.endFile();
+            } catch (IOException e) {
+                System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
                 System.err.println("Pass3: Error at "+path+" ("+e.name+")");
 		throw e;

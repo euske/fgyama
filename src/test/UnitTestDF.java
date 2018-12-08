@@ -39,10 +39,15 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             _converter.buildTypeSpace(javaPaths[i], cunit);
         }
-        _converter.prepare();
         for (int i = 0; i < javaPaths.length; i++) {
+            CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
+            _converter.buildTypeFinder(javaPaths[i], cunit);
+        }
+        _converter.loadAll();
+        for (int i = 0; i < javaPaths.length; i++) {
+            CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             exporter.startFile(javaPaths[i]);
-            _converter.buildGraphs(javaPaths[i]);
+            _converter.buildGraphs(javaPaths[i], cunit);
             exporter.endFile();
         }
 	exporter.close();

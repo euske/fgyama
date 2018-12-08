@@ -49,7 +49,7 @@ public class DFTypeFinder {
                 throw new TypeNotFound(name);
             }
         }
-        klass.load(this);
+        klass.load();
         return klass;
     }
 

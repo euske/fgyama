@@ -15,8 +15,11 @@ import org.w3c.dom.*;
 //
 public class DFRootTypeSpace extends DFTypeSpace {
 
+    private DFTypeFinder _finder;
+
     public DFRootTypeSpace() {
         super(null, "ROOT");
+        _finder = new DFTypeFinder(this);
     }
 
     @Override
@@ -54,6 +57,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
             space = klass.getKlassSpace();
             klass = space.createKlass(klass, klass.getKlassScope(), name);
         }
+        klass.setFinder(_finder);
         klass.setJarPath(jarPath, filePath);
     }
 
