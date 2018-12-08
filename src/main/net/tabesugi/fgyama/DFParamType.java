@@ -65,7 +65,7 @@ public class DFParamType extends DFKlass {
                     } else {
                         _baseIfaces[i-1] = klass;
                     }
-                    finder = klass.addFinders(finder);
+                    finder = finder.extend(klass);
                 }
             }
         } catch (TypeNotFound e) {

@@ -32,6 +32,30 @@ public class DFTypeFinder {
         return ("<DFTypeFinder: "+_space+" "+_next+">");
     }
 
+    public DFTypeFinder extend(DFKlass klass) {
+        DFTypeFinder finder = this;
+        if (klass instanceof DFParamKlass) {
+            DFKlass genericKlass = ((DFParamKlass)klass).getGeneric();
+            finder = finder.extend(genericKlass);
+        } else {
+            DFKlass baseKlass = klass.getBaseKlass();
+            if (baseKlass != null) {
+                finder = finder.extend(baseKlass);
+            }
+            DFKlass[] baseIfaces = klass.getBaseIfaces();
+            if (baseIfaces != null) {
+                for (DFKlass iface : baseIfaces) {
+                    finder = finder.extend(iface);
+                }
+            }
+            DFTypeSpace klassSpace = klass.getKlassSpace();
+            if (klassSpace != null) {
+                finder = new DFTypeFinder(finder, klassSpace);
+            }
+        }
+        return finder;
+    }
+
     public DFKlass lookupKlass(Name name)
         throws TypeNotFound {
         return this.lookupKlass(name.getFullyQualifiedName());

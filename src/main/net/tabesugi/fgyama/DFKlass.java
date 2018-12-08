@@ -151,6 +151,10 @@ public class DFKlass extends DFType {
         return _baseKlass;
     }
 
+    public DFKlass[] getBaseIfaces() {
+        return _baseIfaces;
+    }
+
     public boolean isEnum() {
         return (_baseKlass instanceof DFParamKlass &&
                 ((DFParamKlass)_baseKlass).getGeneric() ==
@@ -350,23 +354,6 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public DFTypeFinder addFinders(DFTypeFinder finder) {
-        if (_baseKlass != null) {
-            finder = _baseKlass.addFinders(finder);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    finder = iface.addFinders(finder);
-                }
-            }
-        }
-        if (_klassSpace != null) {
-            finder = new DFTypeFinder(finder, _klassSpace);
-        }
-        return finder;
-    }
-
     public DFTypeFinder getFinder() {
         return _finder;
     }
@@ -439,12 +426,12 @@ public class DFKlass extends DFType {
 		parser.buildParamTypes(finder2, _paramTypes);
 	    }
 	    _baseKlass = (DFKlass)parser.getType(finder2);
-	    finder2 = _baseKlass.addFinders(finder2);
+	    finder2 = finder2.extend(_baseKlass);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
 		DFKlass iface = (DFKlass)parser.getType(finder2);
 		if (iface == null) break;
-		finder2 = iface.addFinders(finder2);
+		finder2 = finder2.extend(iface);
 		ifaces.add(iface);
 	    }
 	    _baseIfaces = new DFKlass[ifaces.size()];
@@ -453,7 +440,7 @@ public class DFKlass extends DFType {
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
 		_baseKlass = finder2.lookupKlass(superClass);
-		finder2 = _baseKlass.addFinders(finder2);
+		finder2 = finder2.extend(_baseKlass);
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
 	    if (ifaces != null) {
@@ -461,11 +448,11 @@ public class DFKlass extends DFType {
 		for (int i = 0; i < ifaces.length; i++) {
 		    DFKlass iface = finder2.lookupKlass(ifaces[i]);
 		    _baseIfaces[i] = iface;
-		    finder2 = iface.addFinders(finder2);
+		    finder2 = finder2.extend(iface);
 		}
 	    }
 	}
-	finder = this.addFinders(finder);
+	finder = finder.extend(this);
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
             sig = getSignature(fld.getAttributes());
@@ -551,7 +538,7 @@ public class DFKlass extends DFType {
             if (superClass != null) {
                 _baseKlass = finder.resolveKlass(superClass);
                 //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
-                finder = _baseKlass.addFinders(finder);
+                finder = finder.extend(_baseKlass);
             } else {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
@@ -562,7 +549,7 @@ public class DFKlass extends DFType {
 		DFKlass iface = finder.resolveKlass(ifaces.get(i));
                 //Logger.info("DFKlass.build: "+this+" implements "+iface);
                 _baseIfaces[i] = iface;
-                finder = iface.addFinders(finder);
+                finder = finder.extend(iface);
             }
             // Lookup child klasses.
             this.build(finder, typeDecl.bodyDeclarations());
@@ -581,14 +568,14 @@ public class DFKlass extends DFType {
             finder = new DFTypeFinder(finder, _klassSpace);
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
-            finder = _baseKlass.addFinders(finder);
+            finder = finder.extend(_baseKlass);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
 		DFKlass iface = finder.resolveKlass(ifaces.get(i));
                 _baseIfaces[i] = iface;
-                finder = iface.addFinders(finder);
+                finder = finder.extend(iface);
             }
             // Get constants.
             for (EnumConstantDeclaration econst :
@@ -611,7 +598,7 @@ public class DFKlass extends DFType {
         try {
             finder = new DFTypeFinder(finder, _klassSpace);
             _baseKlass = DFBuiltinTypes.getObjectKlass();
-            finder = _baseKlass.addFinders(finder);
+            finder = finder.extend(_baseKlass);
             // Lookup child klasses.
             this.build(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {

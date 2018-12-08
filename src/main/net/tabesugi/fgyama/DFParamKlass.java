@@ -78,11 +78,6 @@ public class DFParamKlass extends DFKlass {
 	return _paramMethods;
     }
 
-    @Override
-    public DFTypeFinder addFinders(DFTypeFinder finder) {
-        return _genericKlass.addFinders(finder);
-    }
-
     public int isSubclassOf(DFKlass klass) {
         if (!(klass instanceof DFParamKlass)) {
 	    // A<T> isSubclassOf B -> A isSubclassOf B.

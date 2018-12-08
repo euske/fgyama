@@ -2200,7 +2200,7 @@ public class Java2DF {
         DFKlass klass, ASTNode ast, List<BodyDeclaration> decls)
         throws EntityNotFound {
         // lookup base/child klasses.
-        DFTypeFinder finder = klass.addFinders(klass.getFinder());
+        DFTypeFinder finder = klass.getFinder().extend(klass);
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
         DFVarScope klassScope = klass.getKlassScope();
 	DFTypeSpace klassSpace = klass.getKlassSpace();
