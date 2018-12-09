@@ -29,7 +29,13 @@ public class DFTypeFinder {
 
     @Override
     public String toString() {
-        return ("<DFTypeFinder: "+_space+" "+_next+">");
+        List<DFTypeSpace> path = new ArrayList<DFTypeSpace>();
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            path.add(finder._space);
+            finder = finder._next;
+        }
+        return ("<DFTypeFinder: "+Utils.join(", ", path)+">");
     }
 
     public DFTypeFinder extend(DFKlass klass) {

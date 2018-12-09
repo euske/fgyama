@@ -17,17 +17,26 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
-    public static String join(String delim, Object[] a) {
+    public static <T> String join(String delim, T[] a) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < a.length; i++) {
             if (0 < i) {
                 b.append(delim);
             }
-            if (a[i] != null) {
-                b.append(a[i].toString());
-            } else {
-                b.append("null");
+            T v = a[i];
+            b.append((v == null)? "null" : v.toString());
+        }
+	return b.toString();
+    }
+
+    public static <T> String join(String delim, List<T> a) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < a.size(); i++) {
+            if (0 < i) {
+                b.append(delim);
             }
+            T v = a.get(i);
+            b.append((v == null)? "null" : v.toString());
         }
 	return b.toString();
     }
