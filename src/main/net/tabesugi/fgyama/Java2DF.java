@@ -743,7 +743,7 @@ public class Java2DF {
      * Creates a value node.
      */
     @SuppressWarnings("unchecked")
-    public DFContext processExpression(
+    private DFContext processExpression(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
@@ -1256,7 +1256,7 @@ public class Java2DF {
      * Creates an assignment node.
      */
     @SuppressWarnings("unchecked")
-    public DFContext processAssignment(
+    private DFContext processAssignment(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx, Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
@@ -1331,7 +1331,7 @@ public class Java2DF {
     /**
      * Creates a new variable node.
      */
-    public DFContext processVariableDeclaration(
+    private DFContext processVariableDeclaration(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	List<VariableDeclarationFragment> frags)
@@ -1357,7 +1357,7 @@ public class Java2DF {
     /**
      * Expands the graph for the loop variables.
      */
-    public DFContext processLoop(
+    private DFContext processLoop(
         DFGraph graph, DFVarScope scope,
         DFFrame frame, DFContext ctx,
         ASTNode ast, DFNode condValue,
@@ -1477,7 +1477,7 @@ public class Java2DF {
 
     /// Statement processors.
     @SuppressWarnings("unchecked")
-    public DFContext processBlock(
+    private DFContext processBlock(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	Block block)
@@ -1491,7 +1491,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processVariableDeclarationStatement(
+    private DFContext processVariableDeclarationStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	VariableDeclarationStatement varStmt)
@@ -1500,7 +1500,7 @@ public class Java2DF {
             typeSpace, graph, finder, scope, frame, ctx, varStmt.fragments());
     }
 
-    public DFContext processExpressionStatement(
+    private DFContext processExpressionStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	ExpressionStatement exprStmt)
@@ -1510,7 +1510,7 @@ public class Java2DF {
             typeSpace, graph, finder, scope, frame, ctx, expr);
     }
 
-    public DFContext processIfStatement(
+    private DFContext processIfStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	IfStatement ifStmt)
@@ -1626,7 +1626,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processSwitchStatement(
+    private DFContext processSwitchStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	SwitchStatement switchStmt)
@@ -1696,7 +1696,7 @@ public class Java2DF {
         return ctx;
     }
 
-    public DFContext processWhileStatement(
+    private DFContext processWhileStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	WhileStatement whileStmt)
@@ -1718,7 +1718,7 @@ public class Java2DF {
         return ctx;
     }
 
-    public DFContext processDoStatement(
+    private DFContext processDoStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	DoStatement doStmt)
@@ -1741,7 +1741,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processForStatement(
+    private DFContext processForStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	ForStatement forStmt)
@@ -1777,7 +1777,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processEnhancedForStatement(
+    private DFContext processEnhancedForStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
 	DFVarScope scope, DFFrame frame, DFContext ctx,
 	EnhancedForStatement eForStmt)
@@ -1806,7 +1806,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processTryStatement(
+    private DFContext processTryStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	TryStatement tryStmt)
@@ -1900,7 +1900,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    public DFContext processStatement(
+    private DFContext processStatement(
         DFTypeSpace typeSpace, DFGraph graph, DFTypeFinder finder,
         DFVarScope scope, DFFrame frame, DFContext ctx,
 	Statement stmt)
