@@ -136,22 +136,29 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public void buildModuleSpace(
-        List<DFKlass> klasses,
+    public DFKlass[] buildModuleSpace(
         CompilationUnit cunit, DFVarScope scope)
         throws UnsupportedSyntax {
+        List<DFKlass> list = new ArrayList<DFKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) cunit.types()) {
-            this.build(klasses, abstTypeDecl, null, scope);
+            this.build(list, abstTypeDecl, null, scope);
         }
+        DFKlass[] klasses = new DFKlass[list.size()];
+        list.toArray(klasses);
+        return klasses;
     }
 
     @SuppressWarnings("unchecked")
-    public void buildMethodSpace(
-        List<DFKlass> klasses, MethodDeclaration methodDecl,
+    public DFKlass[] buildMethodSpace(
+        MethodDeclaration methodDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
-        this.build(klasses, methodDecl.getBody(), parentKlass, parentScope);
+        List<DFKlass> list = new ArrayList<DFKlass>();
+        this.build(list, methodDecl.getBody(), parentKlass, parentScope);
+        DFKlass[] klasses = new DFKlass[list.size()];
+        list.toArray(klasses);
+        return klasses;
     }
 
     @SuppressWarnings("unchecked")
@@ -171,12 +178,12 @@ public class DFTypeSpace {
     }
 
     private void build(
-        List<DFKlass> klasses, DFKlass parentKlass, DFVarScope parentScope,
+        List<DFKlass> list, DFKlass parentKlass, DFVarScope parentScope,
 	List<BodyDeclaration> decls)
         throws UnsupportedSyntax {
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
-		this.build(klasses, (AbstractTypeDeclaration)body,
+		this.build(list, (AbstractTypeDeclaration)body,
 			   parentKlass, parentScope);
 	    } else if (body instanceof FieldDeclaration) {
 		;
@@ -193,18 +200,18 @@ public class DFTypeSpace {
     }
 
     private void build(
-        List<DFKlass> klasses, AbstractTypeDeclaration abstTypeDecl,
+        List<DFKlass> list, AbstractTypeDeclaration abstTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         assert abstTypeDecl != null;
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build(klasses, (TypeDeclaration)abstTypeDecl,
+            this.build(list, (TypeDeclaration)abstTypeDecl,
                        parentKlass, parentScope);
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.build(klasses, (EnumDeclaration)abstTypeDecl,
+            this.build(list, (EnumDeclaration)abstTypeDecl,
                        parentKlass, parentScope);
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.build(klasses, (AnnotationTypeDeclaration)abstTypeDecl,
+            this.build(list, (AnnotationTypeDeclaration)abstTypeDecl,
                        parentKlass, parentScope);
         } else {
             throw new UnsupportedSyntax(abstTypeDecl);
@@ -213,56 +220,50 @@ public class DFTypeSpace {
 
     @SuppressWarnings("unchecked")
     private void build(
-        List<DFKlass> klasses, TypeDeclaration typeDecl,
+        List<DFKlass> list, TypeDeclaration typeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, typeDecl);
-        if (klasses != null) {
-            klasses.add(klass);
-        }
+        list.add(klass);
         klass.addParamTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(klasses, klass, klass.getKlassScope(),
+	child.build(list, klass, klass.getKlassScope(),
 		    typeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
     private void build(
-        List<DFKlass> klasses, EnumDeclaration enumDecl,
+        List<DFKlass> list, EnumDeclaration enumDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+enumDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, enumDecl);
-        if (klasses != null) {
-            klasses.add(klass);
-        }
+        list.add(klass);
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(klasses, klass, klass.getKlassScope(),
+	child.build(list, klass, klass.getKlassScope(),
 		    enumDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
     private void build(
-        List<DFKlass> klasses, AnnotationTypeDeclaration annotTypeDecl,
+        List<DFKlass> list, AnnotationTypeDeclaration annotTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         //Logger.info("DFTypeSpace.build: "+this+": "+annotTypeDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, annotTypeDecl);
-        if (klasses != null) {
-            klasses.add(klass);
-        }
+        list.add(klass);
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(klasses, klass, klass.getKlassScope(),
+	child.build(list, klass, klass.getKlassScope(),
 		    annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
     private void build(
-        List<DFKlass> klasses, Statement ast,
+        List<DFKlass> list, Statement ast,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         assert ast != null;
@@ -273,7 +274,7 @@ public class DFTypeSpace {
             Block block = (Block)ast;
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                this.build(klasses, stmt, parentKlass, parentScope);
+                this.build(list, stmt, parentKlass, parentScope);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -287,17 +288,17 @@ public class DFTypeSpace {
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Statement thenStmt = ifStmt.getThenStatement();
-            this.build(klasses, thenStmt, parentKlass, parentScope);
+            this.build(list, thenStmt, parentKlass, parentScope);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.build(klasses, elseStmt, parentKlass, parentScope);
+                this.build(list, elseStmt, parentKlass, parentScope);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.build(klasses, stmt, parentKlass, parentScope);
+                this.build(list, stmt, parentKlass, parentScope);
             }
 
         } else if (ast instanceof SwitchCase) {
@@ -305,22 +306,22 @@ public class DFTypeSpace {
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             Statement stmt = whileStmt.getBody();
-            this.build(klasses, stmt, parentKlass, parentScope);
+            this.build(list, stmt, parentKlass, parentScope);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             Statement stmt = doStmt.getBody();
-            this.build(klasses, stmt, parentKlass, parentScope);
+            this.build(list, stmt, parentKlass, parentScope);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             Statement stmt = forStmt.getBody();
-            this.build(klasses, stmt, parentKlass, parentScope);
+            this.build(list, stmt, parentKlass, parentScope);
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             Statement stmt = eForStmt.getBody();
-            this.build(klasses, stmt, parentKlass, parentScope);
+            this.build(list, stmt, parentKlass, parentScope);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -329,24 +330,24 @@ public class DFTypeSpace {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.build(klasses, stmt, parentKlass, parentScope);
+            this.build(list, stmt, parentKlass, parentScope);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
             Block block = syncStmt.getBody();
-            this.build(klasses, block, parentKlass, parentScope);
+            this.build(list, block, parentKlass, parentScope);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             Block block = tryStmt.getBody();
-            this.build(klasses, block, parentKlass, parentScope);
+            this.build(list, block, parentKlass, parentScope);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                this.build(klasses, cc.getBody(), parentKlass, parentScope);
+                this.build(list, cc.getBody(), parentKlass, parentScope);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.build(klasses, finBlock, parentKlass, parentScope);
+                this.build(list, finBlock, parentKlass, parentScope);
             }
 
         } else if (ast instanceof ThrowStatement) {
@@ -357,7 +358,7 @@ public class DFTypeSpace {
 
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
-            this.build(klasses, typeDeclStmt.getDeclaration(),
+            this.build(list, typeDeclStmt.getDeclaration(),
                        parentKlass, parentScope);
 
         } else {

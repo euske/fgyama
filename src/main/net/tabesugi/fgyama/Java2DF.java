@@ -1146,7 +1146,7 @@ public class Java2DF {
 		    anonKlass.load(finder);
 		    anonKlass.addOverrides();
 		    processBodyDeclarations(
-			anonKlass, anonDecl, anonDecl.bodyDeclarations());
+			finder, anonKlass, anonDecl, anonDecl.bodyDeclarations());
 		    instType = anonKlass;
                 } else {
                     instType = finder.resolve(cstr.getType());
@@ -2056,14 +2056,14 @@ public class Java2DF {
 		klass.load(finder);
 		klass.addOverrides();
 		processBodyDeclarations(
-		    klass, typeDecl, typeDecl.bodyDeclarations());
+		    finder, klass, typeDecl, typeDecl.bodyDeclarations());
 	    } else if (abstTypeDecl instanceof EnumDeclaration) {
 		EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
 		DFKlass klass = typeSpace.getKlass(enumDecl.getName());
 		klass.load(finder);
 		klass.addOverrides();
 		processBodyDeclarations(
-		    klass, enumDecl, enumDecl.bodyDeclarations());
+		    finder, klass, enumDecl, enumDecl.bodyDeclarations());
 	    }
 
         } else {
@@ -2126,8 +2126,7 @@ public class Java2DF {
         finder = new DFTypeFinder(finder, typeSpace);
         try {
             // Setup an initial space.
-            List<DFKlass> klasses = new ArrayList<DFKlass>();
-            typeSpace.buildMethodSpace(klasses, methodDecl, klass, scope);
+            DFKlass[] klasses = typeSpace.buildMethodSpace(methodDecl, klass, scope);
             // Add overrides.
             for (DFKlass klass1 : klasses) {
                 klass1.addOverrides();
@@ -2197,10 +2196,11 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void processBodyDeclarations(
-        DFKlass klass, ASTNode ast, List<BodyDeclaration> decls)
+        DFTypeFinder finder, DFKlass klass, ASTNode ast,
+        List<BodyDeclaration> decls)
         throws EntityNotFound {
         // lookup base/child klasses.
-        DFTypeFinder finder = klass.getFinder().extend(klass);
+        finder = finder.extend(klass);
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
         DFVarScope klassScope = klass.getKlassScope();
 	DFTypeSpace klassSpace = klass.getKlassSpace();
@@ -2211,7 +2211,8 @@ public class Java2DF {
                     AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                     DFKlass childKlass = klassSpace.getKlass(abstTypeDecl.getName());
                     processBodyDeclarations(
-                        childKlass, abstTypeDecl, abstTypeDecl.bodyDeclarations());
+                        finder, childKlass, abstTypeDecl,
+                        abstTypeDecl.bodyDeclarations());
 
                 } else if (body instanceof FieldDeclaration) {
                     FieldDeclaration fieldDecl = (FieldDeclaration)body;
@@ -2309,19 +2310,16 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFModuleScope module = new DFModuleScope(_globalScope, key);
         _moduleScope.put(key, module);
-        List<DFKlass> klasses = new ArrayList<DFKlass>();
         try {
-            packageSpace.buildModuleSpace(klasses, cunit, module);
+            DFKlass[] klasses = packageSpace.buildModuleSpace(cunit, module);
+            for (DFKlass klass : klasses) {
+                Logger.error("Pass1: created: "+klass);
+            }
+            _klassList.put(key, klasses);
         } catch (UnsupportedSyntax e) {
             String astName = e.ast.getClass().getName();
             Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         }
-        for (DFKlass klass : klasses) {
-            Logger.error("Pass1: created: "+klass);
-        }
-        DFKlass[] list = new DFKlass[klasses.size()];
-        klasses.toArray(list);
-        _klassList.put(key, list);
     }
 
     // pass2
@@ -2378,7 +2376,8 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
             processBodyDeclarations(
-                klass, abstTypeDecl, abstTypeDecl.bodyDeclarations());
+                klass.getFinder(), klass, abstTypeDecl,
+                abstTypeDecl.bodyDeclarations());
 	}
     }
 
