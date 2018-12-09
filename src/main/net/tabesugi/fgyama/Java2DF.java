@@ -2053,15 +2053,11 @@ public class Java2DF {
 	    if (abstTypeDecl instanceof TypeDeclaration) {
 		TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
 		DFKlass klass = typeSpace.getKlass(typeDecl.getName());
-		klass.load(finder);
-		klass.addOverrides();
 		processBodyDeclarations(
 		    finder, klass, typeDecl, typeDecl.bodyDeclarations());
 	    } else if (abstTypeDecl instanceof EnumDeclaration) {
 		EnumDeclaration enumDecl = (EnumDeclaration)abstTypeDecl;
 		DFKlass klass = typeSpace.getKlass(enumDecl.getName());
-		klass.load(finder);
-		klass.addOverrides();
 		processBodyDeclarations(
 		    finder, klass, enumDecl, enumDecl.bodyDeclarations());
 	    }
@@ -2129,6 +2125,7 @@ public class Java2DF {
             DFKlass[] klasses = typeSpace.buildMethodSpace(methodDecl, klass, scope);
             // Add overrides.
             for (DFKlass klass1 : klasses) {
+		klass1.load(finder);
                 klass1.addOverrides();
             }
             scope.build(finder, methodDecl);
