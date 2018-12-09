@@ -367,6 +367,47 @@ public class DFTypeSpace {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void buildTypeFinder(
+        CompilationUnit cunit, DFTypeFinder finder)
+        throws UnsupportedSyntax, TypeNotFound {
+        for (AbstractTypeDeclaration abstTypeDecl :
+                 (List<AbstractTypeDeclaration>) cunit.types()) {
+            this.build(finder, abstTypeDecl);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void build(
+        DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        DFKlass klass = this.getKlass(abstTypeDecl.getName());
+        klass.setFinder(finder);
+        finder = finder.extend(klass);
+        DFTypeSpace child = klass.getKlassSpace();
+        child.build(finder, abstTypeDecl.bodyDeclarations());
+    }
+
+    private void build(
+        DFTypeFinder finder, List<BodyDeclaration> decls)
+        throws UnsupportedSyntax, TypeNotFound {
+        for (BodyDeclaration body : decls) {
+	    if (body instanceof AbstractTypeDeclaration) {
+		this.build(finder, (AbstractTypeDeclaration)body);
+	    } else if (body instanceof FieldDeclaration) {
+		;
+	    } else if (body instanceof MethodDeclaration) {
+		;
+	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
+		;
+	    } else if (body instanceof Initializer) {
+		;
+	    } else {
+		throw new UnsupportedSyntax(body);
+	    }
+        }
+    }
+
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");

@@ -2329,8 +2329,11 @@ public class Java2DF {
         DFKlass[] klasses = _klassList.get(key);
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
-        for (DFKlass klass : klasses) {
-            klass.setFinder(finder);
+        try {
+            packageSpace.buildTypeFinder(cunit, finder);
+        } catch (UnsupportedSyntax e) {
+            String astName = e.ast.getClass().getName();
+            Logger.error("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
         }
     }
 
