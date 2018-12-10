@@ -2135,7 +2135,7 @@ public class Java2DF {
 
             DFGraph graph = new DFGraph(scope, frame, method, false, methodDecl);
             DFContext ctx = new DFContext(graph, scope);
-            // XXX Ignore isContructor().
+            // XXX Ignore isConstructor().
             // XXX Ignore isVarargs().
             int i = 0;
             for (SingleVariableDeclaration decl :

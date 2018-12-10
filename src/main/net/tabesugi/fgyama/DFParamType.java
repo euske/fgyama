@@ -53,6 +53,7 @@ public class DFParamType extends DFKlass {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, TypeParameter typeParam)
         throws TypeNotFound {
+        //Logger.info("DFParamType.build: "+this+": "+typeParam);
         try {
             List<Type> bounds = typeParam.typeBounds();
             if (0 < bounds.size()) {

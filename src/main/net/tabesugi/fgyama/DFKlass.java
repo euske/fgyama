@@ -473,13 +473,13 @@ public class DFKlass extends DFType {
 	    if (sig != null) {
                 //Logger.info("meth: "+meth.getName()+","+sig);
                 methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
-		DFTypeFinder finder2 = new DFTypeFinder(finder, methodSpace);
+		finder = new DFTypeFinder(finder, methodSpace);
 		JNITypeParser parser = new JNITypeParser(sig);
                 DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
 		if (paramTypes != null) {
-		    parser.buildParamTypes(finder2, paramTypes);
+		    parser.buildParamTypes(finder, paramTypes);
 		}
-		methodType = (DFMethodType)parser.getType(finder2);
+		methodType = (DFMethodType)parser.getType(finder);
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
 		DFType[] argTypes = new DFType[args.length];
@@ -533,6 +533,11 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             finder = new DFTypeFinder(finder, _klassSpace);
+	    if (_paramTypes != null) {
+                for (DFParamType pt : _paramTypes) {
+                    pt.load(finder);
+                }
+	    }
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
                 _baseKlass = finder.resolveKlass(superClass);
@@ -630,20 +635,20 @@ public class DFKlass extends DFType {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 List<TypeParameter> tps = decl.typeParameters();
-                DFTypeFinder finder2 = finder;
                 DFTypeSpace methodSpace = null;
                 if (0 < tps.size()) {
                     String name = decl.getName().getIdentifier();
                     methodSpace = new DFTypeSpace(_klassSpace, name);
-                    finder2 = new DFTypeFinder(finder, methodSpace);
+                    finder = new DFTypeFinder(finder, methodSpace);
                     for (int i = 0; i < tps.size(); i++) {
                         TypeParameter tp = tps.get(i);
                         String id = tp.getName().getIdentifier();
                         DFParamType pt = methodSpace.createParamType(id);
                         pt.setAST(tp);
+                        pt.load(finder);
                     }
                 }
-                DFType[] argTypes = finder2.resolveArgs(decl);
+                DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
                 String name;
                 DFCallStyle callStyle;
@@ -652,7 +657,7 @@ public class DFKlass extends DFType {
                     name = "<init>";
                     callStyle = DFCallStyle.Constructor;
                 } else {
-                    returnType = finder2.resolve(decl.getReturnType2());
+                    returnType = finder.resolve(decl.getReturnType2());
                     name = decl.getName().getIdentifier();
                     callStyle = (isStatic(decl))?
                         DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
