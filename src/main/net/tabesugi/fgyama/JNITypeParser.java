@@ -76,9 +76,7 @@ public class JNITypeParser {
                 if (_text.charAt(i) == ';') {
                     String name = _text.substring(_pos, i);
                     _pos = i+1;
-		    DFType paramType = finder.lookupKlass(name);
-		    if (paramType == null) throw new TypeNotFound(name);
-		    return paramType;
+		    return finder.lookupKlass(name);
                 }
             }
             break;
