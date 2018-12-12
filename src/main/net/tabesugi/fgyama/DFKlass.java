@@ -415,6 +415,9 @@ public class DFKlass extends DFType {
 
     private void buildFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
+        if (_parentKlass != null) {
+            finder = finder.extend(_parentKlass);
+        }
         finder = new DFTypeFinder(finder, _klassSpace);
         String sig = getSignature(jklass.getAttributes());
         if (sig != null) {
@@ -531,8 +534,11 @@ public class DFKlass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
         // Get superclass.
+        if (_parentKlass != null) {
+            finder = finder.extend(_parentKlass);
+        }
+        finder = new DFTypeFinder(finder, _klassSpace);
         try {
-            finder = new DFTypeFinder(finder, _klassSpace);
 	    if (_paramTypes != null) {
                 for (DFParamType pt : _paramTypes) {
                     pt.load(finder);
