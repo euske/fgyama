@@ -596,6 +596,10 @@ public class DFKlass extends DFType {
             }
             // Lookup child klasses.
             this.build(finder, enumDecl.bodyDeclarations());
+            // Enum has a special method "values()".
+            this.addMethod(
+                null, "values", DFCallStyle.InstanceMethod,
+                new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
         } catch (TypeNotFound e) {
             e.setAst(enumDecl);
             throw e;
