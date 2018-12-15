@@ -59,7 +59,7 @@ class ArrayAssignNode extends ProgNode {
     public ArrayAssignNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode array, DFNode index) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         this.accept(array, "array");
         this.accept(index, "index");
     }
@@ -76,7 +76,7 @@ class FieldAssignNode extends ProgNode {
     public FieldAssignNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode obj) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         if (obj != null) {
             this.accept(obj, "obj");
         }
@@ -126,7 +126,7 @@ class FieldRefNode extends ProgNode {
     public FieldRefNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode obj) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         if (obj != null) {
             this.accept(obj, "obj");
         }
@@ -146,7 +146,7 @@ class PrefixNode extends ProgNode {
     public PrefixNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, PrefixExpression.Operator op) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, (ref != null)? ref.getRefType() : null, ref, ast);
         this.op = op;
     }
 
@@ -169,7 +169,7 @@ class PostfixNode extends ProgNode {
     public PostfixNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, PostfixExpression.Operator op) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         this.op = op;
     }
 
@@ -375,7 +375,7 @@ class JoinNode extends ProgNode {
     public JoinNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode cond) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, (ref != null)? ref.getRefType() : null, ref, ast);
         this.accept(cond, "cond");
     }
 
@@ -417,7 +417,7 @@ class LoopBeginNode extends ProgNode {
     public LoopBeginNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode enter) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         this.accept(enter, "enter");
     }
 
@@ -441,7 +441,7 @@ class LoopEndNode extends ProgNode {
     public LoopEndNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast, DFNode cond) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
         this.accept(cond, "cond");
     }
 
@@ -461,7 +461,7 @@ class LoopRepeatNode extends ProgNode {
     public LoopRepeatNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
     }
 
     @Override
@@ -480,7 +480,7 @@ class IterNode extends ProgNode {
     public IterNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
         ASTNode ast) {
-        super(graph, scope, null, ref, ast);
+        super(graph, scope, ref.getRefType(), ref, ast);
     }
 
     @Override
@@ -616,7 +616,8 @@ class ThrowNode extends ProgNode {
     public ThrowNode(
         DFGraph graph, DFVarScope scope,
         ASTNode ast, DFNode value) throws VariableNotFound {
-        super(graph, scope, null, scope.lookupException(), ast);
+        super(graph, scope, DFBuiltinTypes.getExceptionKlass(),
+              scope.lookupException(), ast);
         this.accept(value);
     }
 
@@ -1011,6 +1012,7 @@ public class Java2DF {
                 typeList.toArray(argTypes);
                 DFKlass klass = finder.resolveKlass(obj.getNodeType());
                 DFKlass baseKlass = klass.getBaseKlass();
+                assert baseKlass != null;
                 DFMethod method;
                 try {
                     method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
