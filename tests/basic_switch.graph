@@ -14,7 +14,7 @@
               <ast length="1" start="92" type="34"/>
             </node>
             <node id="Nbasic_switch.foo.b0.switch0_6" ref="basic_switch.foo.b0/$x" type="I"/>
-            <node id="Nbasic_switch.foo.b0.switch0_7" kind="join" ref="basic_switch.foo.b0/$x">
+            <node id="Nbasic_switch.foo.b0.switch0_7" kind="join" ref="basic_switch.foo.b0/$x" type="I">
               <link label="cond" src="Nbasic_switch.foo.b0.switch0_4"/>
               <link label="false" src="Nbasic_switch.foo_8"/>
               <link label="true" src="Nbasic_switch.foo.b0.switch0_6"/>
@@ -39,7 +39,7 @@
               <link label="R" src="Nbasic_switch.foo.b0.switch0_12"/>
               <ast length="7" start="109" type="7"/>
             </node>
-            <node id="Nbasic_switch.foo.b0.switch0_14" kind="join" ref="basic_switch.foo.b0/$x">
+            <node id="Nbasic_switch.foo.b0.switch0_14" kind="join" ref="basic_switch.foo.b0/$x" type="I">
               <link label="cond" src="Nbasic_switch.foo.b0.switch0_9"/>
               <link label="false" src="Nbasic_switch.foo.b0.switch0_7"/>
               <link label="true" src="Nbasic_switch.foo.b0.switch0_11"/>
@@ -60,7 +60,7 @@
               <link label="R" src="Nbasic_switch.foo.b0.switch0_17"/>
               <ast length="7" start="145" type="7"/>
             </node>
-            <node id="Nbasic_switch.foo.b0.switch0_19" kind="join" ref="basic_switch.foo.b0/$x">
+            <node id="Nbasic_switch.foo.b0.switch0_19" kind="join" ref="basic_switch.foo.b0/$x" type="I">
               <link label="cond" src="Nbasic_switch.foo.b0.switch0_15"/>
               <link label="false" src="Nbasic_switch.foo.b0.switch0_14"/>
               <link label="true" src="Nbasic_switch.foo.b0.switch0_16"/>

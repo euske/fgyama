@@ -101,7 +101,7 @@
   </target>
 
   <target name="test" depends="build">
-    <junit>
+    <junit fork="yes">
       <jvmarg value="-ea" />
       <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />

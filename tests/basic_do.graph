@@ -43,13 +43,13 @@
               <link label="R" src="Nbasic_do.foo.b0.do0_14"/>
               <ast length="5" start="111" type="27"/>
             </node>
-            <node id="Nbasic_do.foo.b0.do0_16" kind="begin" ref="basic_do.foo/$x">
+            <node id="Nbasic_do.foo.b0.do0_16" kind="begin" ref="basic_do.foo/$x" type="I">
               <link label="_end" src="Nbasic_do.foo.b0.do0_18"/>
               <link label="enter" src="Nbasic_do.foo_2"/>
               <link label="repeat" src="Nbasic_do.foo.b0.do0_17"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="Nbasic_do.foo.b0.do0_17" kind="repeat" ref="basic_do.foo/$x">
+            <node id="Nbasic_do.foo.b0.do0_17" kind="repeat" ref="basic_do.foo/$x" type="I">
               <link label="_loop" src="Nbasic_do.foo.b0.do0_18"/>
               <ast length="45" start="73" type="19"/>
             </node>
@@ -59,13 +59,13 @@
               <link label="cond" src="Nbasic_do.foo.b0.do0_15"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="Nbasic_do.foo.b0.do0_19" kind="begin" ref="basic_do.foo.b0/$n">
+            <node id="Nbasic_do.foo.b0.do0_19" kind="begin" ref="basic_do.foo.b0/$n" type="I">
               <link label="_end" src="Nbasic_do.foo.b0.do0_21"/>
               <link label="enter" src="Nbasic_do.foo.b0_4"/>
               <link label="repeat" src="Nbasic_do.foo.b0.do0_20"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="Nbasic_do.foo.b0.do0_20" kind="repeat" ref="basic_do.foo.b0/$n">
+            <node id="Nbasic_do.foo.b0.do0_20" kind="repeat" ref="basic_do.foo.b0/$n" type="I">
               <link label="_loop" src="Nbasic_do.foo.b0.do0_21"/>
               <ast length="45" start="73" type="19"/>
             </node>

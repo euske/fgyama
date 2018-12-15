@@ -144,18 +144,18 @@
             <link label="R" src="Nbasic_funcs.moo.b0_4"/>
             <ast length="6" start="247" type="27"/>
           </node>
-          <node id="Nbasic_funcs.moo.b0_21" kind="join" ref="#return">
+          <node id="Nbasic_funcs.moo.b0_21" kind="join" ref="#return" type="I">
             <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
             <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
             <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
             <ast length="97" start="243" type="25"/>
           </node>
-          <node id="Nbasic_funcs.moo.b0_22" kind="join" ref="#return">
+          <node id="Nbasic_funcs.moo.b0_22" kind="join" ref="#return" type="I">
             <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
             <link label="false" src="Nbasic_funcs.moo.b0_21"/>
             <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
           </node>
-          <node id="Nbasic_funcs.moo.b0_23" kind="join" ref="#return">
+          <node id="Nbasic_funcs.moo.b0_23" kind="join" ref="#return" type="I">
             <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
             <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
             <link label="true" src="Nbasic_funcs.moo.b0_22"/>

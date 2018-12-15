@@ -42,7 +42,7 @@
             <link label="R" src="Nbasic_if.foo.b0_4"/>
             <ast length="6" start="74" type="27"/>
           </node>
-          <node id="Nbasic_if.foo.b0_12" kind="join" ref="basic_if.foo.b0/$y">
+          <node id="Nbasic_if.foo.b0_12" kind="join" ref="basic_if.foo.b0/$y" type="I">
             <link label="cond" src="Nbasic_if.foo.b0_5"/>
             <link label="false" src="Nbasic_if.foo.b0.b1_9"/>
             <link label="true" src="Nbasic_if.foo.b0.b0_6"/>
