@@ -40,6 +40,8 @@ public class DFBuiltinTypes {
         _double.load();
         _boolean = java_lang.getKlass("Boolean");
         _boolean.load();
+        _exception = java_lang.getKlass("Exception");
+        _exception.load();
         _array = java_lang.createKlass(null, null, "_Array");
         _array.addField("length", false, DFBasicType.INT);
     }
@@ -102,6 +104,11 @@ public class DFBuiltinTypes {
     private static DFKlass _boolean = null;
     public static DFKlass getBooleanKlass() {
         return _boolean;
+    }
+
+    private static DFKlass _exception = null;
+    public static DFKlass getExceptionKlass() {
+        return _exception;
     }
 
     private static DFKlass _array = null;
