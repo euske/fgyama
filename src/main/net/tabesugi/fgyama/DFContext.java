@@ -99,21 +99,19 @@ public class DFContext {
     }
     public void dump(PrintStream out) {
         out.println("DFContext");
-        StringBuilder firsts = new StringBuilder();
-        for (DFVarRef ref : _first.keySet()) {
-            firsts.append(" "+ref);
+        out.println("  firsts:");
+        for (Map.Entry<DFVarRef, DFNode> ent : _first.entrySet()) {
+            out.println("    "+ent.getKey()+" = "+ent.getValue());
         }
-        out.println("  firsts:"+firsts);
-        StringBuilder lasts = new StringBuilder();
-        for (DFVarRef ref : _last.keySet()) {
-            lasts.append(" "+ref);
-        }
-        out.println("  lasts:"+lasts);
-        if (_rval != null) {
-            out.println("  rval: "+_rval);
+        out.println("  lasts:");
+        for (Map.Entry<DFVarRef, DFNode> ent : _last.entrySet()) {
+            out.println("    "+ent.getKey()+" = "+ent.getValue());
         }
         if (_lval != null) {
             out.println("  lval: "+_lval);
+        }
+        if (_rval != null) {
+            out.println("  rval: "+_rval);
         }
     }
 }
