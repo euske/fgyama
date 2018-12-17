@@ -43,7 +43,7 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             _converter.buildTypeFinder(javaPaths[i], cunit);
         }
-        _converter.loadAll();
+        _converter.loadAll(false);
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             exporter.startFile(javaPaths[i]);
