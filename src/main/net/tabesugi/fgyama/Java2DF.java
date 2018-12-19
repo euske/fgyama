@@ -2092,7 +2092,9 @@ public class Java2DF {
 		    importSpace.addKlass(klass);
 		    n++;
 		} catch (TypeNotFound e) {
-		    Logger.error("Import: class not found: "+e.name);
+		    if (!importDecl.isStatic()) {
+			Logger.error("Import: class not found: "+e.name);
+		    }
 		}
 	    }
         }
@@ -2312,7 +2314,7 @@ public class Java2DF {
         try {
             DFKlass[] klasses = packageSpace.buildModuleSpace(cunit, module);
             for (DFKlass klass : klasses) {
-                Logger.error("Pass1: created: "+klass);
+                Logger.info("Pass1: created: "+klass);
             }
             _klassList.put(key, klasses);
         } catch (UnsupportedSyntax e) {
@@ -2405,6 +2407,8 @@ public class Java2DF {
                 for (; i < args.length; i++) {
                     files.add(args[i]);
                 }
+            } else if (arg.equals("-v")) {
+		Logger.LogLevel++;
             } else if (arg.equals("-o")) {
                 String path = args[++i];
                 try {

@@ -8,10 +8,10 @@ Prerequisites:
   * Eclipse JDT (automatically downloaded)
   * Graphviz http://graphviz.org/
 
-How to Build:
+How to Build/Run:
 
     $ ant get-deps
-    $ ant graph -Dinput=samples/f1.java -Dout_svg=out.svg
+    $ ant graph -Dinput=tests/basic_assignd.java
 
 Node types:
 
@@ -55,7 +55,6 @@ Coding style:
 TODOs:
 
   * Interprocedural field watch.
-  * Generic type inference <>.
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.

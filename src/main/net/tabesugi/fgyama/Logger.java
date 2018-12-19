@@ -10,11 +10,17 @@ public class Logger {
 
     public static PrintStream out = System.err;
 
+    public static int LogLevel = 0;
+
     public static void info(String s) {
-        out.println(s);
+	if (1 <= LogLevel) {
+	    out.println(s);
+	}
     }
 
     public static void error(String s) {
-        out.println(s);
+	if (0 <= LogLevel) {
+	    out.println(s);
+	}
     }
 }
