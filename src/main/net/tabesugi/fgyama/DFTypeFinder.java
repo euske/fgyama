@@ -149,7 +149,7 @@ public class DFTypeFinder {
         } else if (type instanceof WildcardType) {
             WildcardType wtype = (WildcardType)type;
             Type bound = wtype.getBound();
-            if (bound != null) {
+            if (wtype.isUpperBound() && bound != null) {
                 return this.resolve(bound);
             } else {
                 return DFBuiltinTypes.getObjectKlass();
