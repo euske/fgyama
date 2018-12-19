@@ -2404,9 +2404,27 @@ public class Java2DF {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--")) {
-                for (; i < args.length; i++) {
-                    files.add(args[i]);
+                while (i < args.length) {
+                    files.add(args[++i]);
                 }
+	    } else if (arg.equals("-i")) {
+		String path = args[++i];
+		InputStream input = System.in;
+		try {
+		    if (!path.equals("-")) {
+			input = new FileInputStream(path);
+		    }
+		    Logger.info("Input file: "+path);
+		    BufferedReader reader = new BufferedReader(
+			new InputStreamReader(input));
+		    while (true) {
+			String line = reader.readLine();
+			if (line == null) break;
+			files.add(line);
+		    }
+		} catch (IOException e) {
+		    System.err.println("Cannot open input file: "+path);
+		}
             } else if (arg.equals("-v")) {
 		Logger.LogLevel++;
             } else if (arg.equals("-o")) {
