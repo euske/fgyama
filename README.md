@@ -1,23 +1,27 @@
 # FGyama
 
-FGyama, or Flow Graph yama is a dataflow extractor for program analysis.
+FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
 Prerequisites:
+--------------
 
   * Java/Ant
   * Eclipse JDT (automatically downloaded)
   * Graphviz http://graphviz.org/
 
 How to Build:
+-------------
 
     $ ant get-deps clean build
 
 How to Run:
+-----------
 
     $ ./run.sh net.tabesugi.fgyama.Java2DF Class1.java Class2.java ... > out.xml
     $ python tools/graph2gv.py out.xml > out.gv
 
 Output XML format:
+------------------
 
     <fgyama>
       <file path="HelloWorld.java">
@@ -46,6 +50,7 @@ Output XML format:
     </fgyama>
 
 Node types (kinds):
+-------------------
 
   * const
   * valueset
@@ -76,7 +81,7 @@ Node types (kinds):
   * case
 
 Coding style:
-
+-------------
     (c-add-style "me"
              '("Java"
                (c-offsets-alist . (
@@ -86,7 +91,7 @@ Coding style:
                ))
 
 TODOs:
-
+------
   * Interprocedural field watch.
   * Handle consecutive SwitchCases.
   * Lambdas.
