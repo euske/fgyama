@@ -2110,10 +2110,8 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private DFGraph processMethodDeclaration(
         DFTypeFinder finder, DFKlass klass,
-        MethodDeclaration methodDecl)
+        DFMethod method, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        DFMethod method = klass.getMethodByAST(methodDecl);
-        assert method != null;
         DFTypeSpace methodSpace = method.getChildSpace();
         if (methodSpace != null) {
             finder = new DFTypeFinder(finder, methodSpace);
@@ -2241,10 +2239,12 @@ public class Java2DF {
                     }
 
                 } else if (body instanceof MethodDeclaration) {
-                    // Ignore method prototypes.
-                    if (((MethodDeclaration)body).getBody() != null) {
+		    MethodDeclaration methodDecl = (MethodDeclaration)body;
+		    DFMethod method = klass.getMethodByAST(methodDecl);
+		    if (method != null && methodDecl.getBody() != null) {
+			// Ignore method prototypes.
                         DFGraph graph = processMethodDeclaration(
-                            finder, klass, (MethodDeclaration)body);
+                            finder, klass, method, (MethodDeclaration)body);
                         exportGraph(graph);
                     }
 
