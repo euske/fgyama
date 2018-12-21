@@ -50,7 +50,7 @@ public class DFBasicType extends DFType {
         return (this == type);
     }
 
-    public int canConvertFrom(DFType type) {
+    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
 	// Auto-unboxing.
 	if ((_code == PrimitiveType.BYTE &&
 	     type == DFBuiltinTypes.getByteKlass()) ||

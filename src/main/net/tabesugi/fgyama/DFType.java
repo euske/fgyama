@@ -13,7 +13,7 @@ public abstract class DFType {
 
     public abstract String getTypeName();
     public abstract boolean equals(DFType type);
-    public abstract int canConvertFrom(DFType type);
+    public abstract int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap);
 
     public DFType parameterize(Map<DFParamType, DFType> typeMap) {
         return this;
@@ -36,7 +36,7 @@ public abstract class DFType {
             return DFBuiltinTypes.getStringKlass();
         } else if (left == null || right == null) {
             return (left == null)? right : left;
-        } else if (0 <= left.canConvertFrom(right)) {
+        } else if (0 <= left.canConvertFrom(right, null)) {
             return left;
         } else {
             return right;

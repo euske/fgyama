@@ -83,7 +83,7 @@ public class DFKlass extends DFType {
         return (this == type);
     }
 
-    public int canConvertFrom(DFType type) {
+    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
 	if (type instanceof DFArrayType) {
 	    type = DFBuiltinTypes.getObjectKlass();
@@ -106,7 +106,7 @@ public class DFKlass extends DFType {
 	}
         if (!(type instanceof DFKlass)) return -1;
         // type is-a this.
-        return ((DFKlass)type).isSubclassOf(this);
+        return ((DFKlass)type).isSubclassOf(this, typeMap);
     }
 
     public DFParamKlass getParamKlass(DFType[] mapTypes) {
@@ -184,15 +184,15 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public int isSubclassOf(DFKlass klass) {
+    public int isSubclassOf(DFKlass klass, Map<DFParamType, DFType> typeMap) {
         if (this == klass) return 0;
         if (_baseKlass != null) {
-            int dist = _baseKlass.isSubclassOf(klass);
+            int dist = _baseKlass.isSubclassOf(klass, typeMap);
             if (0 <= dist) return dist+1;
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                int dist = iface.isSubclassOf(klass);
+                int dist = iface.isSubclassOf(klass, typeMap);
                 if (0 <= dist) return dist+1;
             }
         }

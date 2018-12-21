@@ -1,6 +1,7 @@
 //  Java2DF
 //
 package net.tabesugi.fgyama;
+import java.util.*;
 
 
 //  DFNullType
@@ -23,7 +24,7 @@ public class DFNullType extends DFType {
         return (type instanceof DFNullType);
     }
 
-    public int canConvertFrom(DFType type) {
+    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         return -1;
     }

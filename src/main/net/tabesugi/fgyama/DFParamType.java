@@ -21,8 +21,21 @@ public class DFParamType extends DFKlass {
         return ("<DFParamType("+this.getFullName()+":"+_baseKlass+")>");
     }
 
-    public int canConvertFrom(DFType type) {
-        return _baseKlass.canConvertFrom(type);
+    @Override
+    public String getTypeName() {
+        return _name+":"+_baseKlass.getTypeName();
+    }
+
+    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+        if (typeMap == null) {
+            typeMap = new HashMap<DFParamType, DFType>();
+        }
+        DFType type2 = typeMap.get(this);
+        if (type2 != null) {
+            return type2.canConvertFrom(type, typeMap);
+        }
+        typeMap.put(this, type);
+        return _baseKlass.canConvertFrom(type, typeMap);
     }
 
     public DFType parameterize(Map<DFParamType, DFType> typeMap) {
@@ -31,11 +44,6 @@ public class DFParamType extends DFKlass {
         } else {
             return this;
         }
-    }
-
-    @Override
-    public String getTypeName() {
-        return _name+":"+_baseKlass.getTypeName();
     }
 
     public void load(DFTypeFinder finder, JNITypeParser parser)
