@@ -708,7 +708,7 @@ class DFModuleScope extends DFVarScope {
     }
 
     public void importStatic(DFKlass klass) {
-	Logger.info("ImportStatic: "+klass+".*");
+	Logger.debug("ImportStatic: "+klass+".*");
 	for (DFVarRef ref : klass.getFields()) {
 	    _refs.put(ref.getName(), ref);
 	}
@@ -718,7 +718,7 @@ class DFModuleScope extends DFVarScope {
     }
 
     public void importStatic(DFKlass klass, SimpleName name) {
-	Logger.info("ImportStatic: "+klass+"."+name);
+	Logger.debug("ImportStatic: "+klass+"."+name);
 	String id = name.getIdentifier();
 	try {
 	    DFVarRef ref = klass.lookupField(name);
@@ -970,6 +970,10 @@ public class Java2DF {
                     try {
                         method = scope.lookupStaticMethod(invoke.getName(), argTypes);
                     } catch (MethodNotFound ee) {
+                        if (0 < _strict) {
+                            e.ast = expr;
+                            throw ee;
+                        }
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
@@ -1017,6 +1021,10 @@ public class Java2DF {
                 try {
                     method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
                 } catch (MethodNotFound e) {
+                    if (0 < _strict) {
+                        e.ast = expr;
+                        throw e;
+                    }
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
@@ -2082,18 +2090,18 @@ public class Java2DF {
         for (ImportDeclaration importDecl : imports) {
             Name name = importDecl.getName();
 	    if (importDecl.isOnDemand()) {
-		Logger.info("Import: "+name+".*");
+		Logger.debug("Import: "+name+".*");
 		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
 	    } else {
 		assert name.isQualifiedName();
 		try {
 		    DFKlass klass = _rootSpace.getKlass(name);
-		    Logger.info("Import: "+name);
+		    Logger.debug("Import: "+name);
 		    importSpace.addKlass(klass);
 		    n++;
 		} catch (TypeNotFound e) {
 		    if (!importDecl.isStatic()) {
-			Logger.error("Import: class not found: "+e.name);
+			Logger.error("Import: Class not found: "+e.name);
 		    }
 		}
 	    }
@@ -2161,7 +2169,7 @@ public class Java2DF {
             frame.close(ctx);
             //frame.dump();
 
-            Logger.info("Success: "+method.getSignature());
+            Logger.debug("Success: "+method.getSignature());
             return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
@@ -2182,9 +2190,9 @@ public class Java2DF {
         DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
         DFLocalVarScope scope = new DFLocalVarScope(
             klass.getKlassScope(), "<clinit>");
-        DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
         scope.build(finder, initializer);
         frame.build(finder, scope, initializer.getBody());
+        DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
         DFContext ctx = new DFContext(graph, scope);
         ctx = processStatement(
             typeSpace, graph, finder, scope, frame, ctx,
@@ -2280,6 +2288,7 @@ public class Java2DF {
     /// Top-level functions.
 
     private DFRootTypeSpace _rootSpace;
+    private int _strict;
     private Exporter _exporter;
     private DFGlobalVarScope _globalScope =
         new DFGlobalVarScope();
@@ -2289,9 +2298,10 @@ public class Java2DF {
         new HashMap<String, DFKlass[]>();
 
     public Java2DF(
-        DFRootTypeSpace rootSpace)
-        throws IOException, EntityNotFound {
+        DFRootTypeSpace rootSpace, int strict)
+        throws IOException, TypeNotFound {
         _rootSpace = rootSpace;
+        _strict = strict;
         DFBuiltinTypes.initialize(rootSpace);
     }
 
@@ -2314,7 +2324,7 @@ public class Java2DF {
         try {
             DFKlass[] klasses = packageSpace.buildModuleSpace(cunit, module);
             for (DFKlass klass : klasses) {
-                Logger.info("Pass1: created: "+klass);
+                Logger.debug("Pass1: created: "+klass);
             }
             _klassList.put(key, klasses);
         } catch (UnsupportedSyntax e) {
@@ -2326,7 +2336,7 @@ public class Java2DF {
     // pass2
     @SuppressWarnings("unchecked")
     public void buildTypeFinder(String key, CompilationUnit cunit)
-        throws EntityNotFound {
+        throws TypeNotFound {
         DFKlass[] klasses = _klassList.get(key);
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
@@ -2338,15 +2348,15 @@ public class Java2DF {
         }
     }
 
-    public void loadAll(boolean strict)
-        throws EntityNotFound {
+    public void loadAll()
+        throws TypeNotFound {
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
                 try {
                     klass.load();
                 } catch (TypeNotFound e) {
-                    Logger.error("loadAll: type not found: "+e.name+" ast="+e.ast);
-                    if (strict) throw e;
+                    Logger.error("loadAll: Class not found: "+e.name+" ast="+e.ast);
+                    if (0 < _strict) throw e;
                 }
                 klass.addOverrides();
             }
@@ -2391,14 +2401,15 @@ public class Java2DF {
      * Usage: java Java2DF [-o output] input.java ...
      */
     public static void main(String[] args)
-        throws IOException, EntityNotFound {
+        throws IOException {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
         Set<String> processed = null;
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
-        boolean strict = false;
+        int strict = 0;
+        Logger.LogLevel = 0;
 
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
         for (int i = 0; i < args.length; i++) {
@@ -2445,17 +2456,27 @@ public class Java2DF {
                     rootSpace.loadJarFile(path);
                 }
             } else if (arg.equals("-S")) {
-                strict = true;
+                strict++;
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
+                System.err.println("usage: Java2DF [-v] [-S] [-i input] [-o output] [-C jar] [-p path] [path ...]");
                 System.exit(1);
+                return;
             } else {
                 files.add(arg);
             }
         }
 
         // Process files.
-        Java2DF converter = new Java2DF(rootSpace);
+        Java2DF converter;
+        try {
+            converter = new Java2DF(rootSpace, strict);
+        } catch (TypeNotFound e) {
+            Logger.error("Class not found: "+e.name);
+            System.err.println("Fatal error at initialization.");
+            System.exit(1);
+            return;
+        }
         XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);
         for (String path : files) {
@@ -2474,9 +2495,15 @@ public class Java2DF {
                 converter.buildTypeFinder(path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
+            } catch (TypeNotFound e) {
+                System.err.println("Pass2: Class not found: "+e.name);
 	    }
         }
-        converter.loadAll(strict);
+        try {
+            converter.loadAll();
+        } catch (TypeNotFound e) {
+            System.err.println("Pass2: Class not found: "+e.name);
+        }
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
@@ -2489,7 +2516,6 @@ public class Java2DF {
                 System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
                 System.err.println("Pass3: Error at "+path+" ("+e.name+")");
-                if (strict) throw e;
             }
         }
         exporter.close();

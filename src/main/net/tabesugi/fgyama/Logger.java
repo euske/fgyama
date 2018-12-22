@@ -10,7 +10,13 @@ public class Logger {
 
     public static PrintStream out = System.err;
 
-    public static int LogLevel = 0;
+    public static int LogLevel = 1;
+
+    public static void debug(String s) {
+	if (2 <= LogLevel) {
+	    out.println(s);
+	}
+    }
 
     public static void info(String s) {
 	if (1 <= LogLevel) {

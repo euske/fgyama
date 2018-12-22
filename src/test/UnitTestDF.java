@@ -26,7 +26,7 @@ public class UnitTestDF extends XMLTestCase {
             _rootSpace = new DFRootTypeSpace();
         }
         if (_converter == null) {
-            _converter = new Java2DF(_rootSpace);
+            _converter = new Java2DF(_rootSpace, 0);
         }
     }
 
@@ -43,7 +43,7 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             _converter.buildTypeFinder(javaPaths[i], cunit);
         }
-        _converter.loadAll(false);
+        _converter.loadAll();
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
             exporter.startFile(javaPaths[i]);
