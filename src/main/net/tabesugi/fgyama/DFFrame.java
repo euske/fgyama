@@ -204,7 +204,7 @@ public class DFFrame {
             if (expr1 instanceof Name) {
                 try {
                     klass = finder.lookupKlass((Name)expr1);
-                } catch (EntityNotFound e) {
+                } catch (TypeNotFound e) {
                 }
             }
             if (klass == null) {
@@ -358,7 +358,7 @@ public class DFFrame {
                 if (expr1 instanceof Name) {
                     try {
                         klass = finder.lookupKlass((Name)expr1);
-                    } catch (EntityNotFound e) {
+                    } catch (TypeNotFound e) {
                     }
                 }
                 if (klass == null) {
@@ -441,7 +441,7 @@ public class DFFrame {
             if (expr1 instanceof Name) {
                 try {
                     klass = finder.lookupKlass((Name)expr1);
-                } catch (EntityNotFound e) {
+                } catch (TypeNotFound e) {
                 }
             }
             if (klass == null) {

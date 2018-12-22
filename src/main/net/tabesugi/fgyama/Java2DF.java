@@ -703,7 +703,7 @@ class DFModuleScope extends DFVarScope {
 		bestMethod = method;
 	    }
 	}
-        if (bestMethod == null) throw new MethodNotFound(id);
+        if (bestMethod == null) throw new MethodNotFound(id, argTypes);
 	return bestMethod;
     }
 
@@ -971,7 +971,7 @@ public class Java2DF {
                         method = scope.lookupStaticMethod(invoke.getName(), argTypes);
                     } catch (MethodNotFound ee) {
                         if (0 < _strict) {
-                            e.ast = expr;
+                            e.setAst(expr);
                             throw ee;
                         }
                         // fallback method.
@@ -1022,7 +1022,7 @@ public class Java2DF {
                     method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
                 } catch (MethodNotFound e) {
                     if (0 < _strict) {
-                        e.ast = expr;
+                        e.setAst(expr);
                         throw e;
                     }
                     // fallback method.
@@ -2174,6 +2174,10 @@ public class Java2DF {
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
             e.name = method.getSignature();
+            throw e;
+        } catch (MethodNotFound e) {
+            Logger.error("Method not found: "+e.name+"("+Utils.join(", ", e.argTypes)+
+                         ") ast="+e.ast+" method="+method);
             throw e;
         } catch (EntityNotFound e) {
             Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+method);

@@ -9,7 +9,10 @@ public class MethodNotFound extends EntityNotFound {
 
     private static final long serialVersionUID = 1L;
 
-    public MethodNotFound(String name) {
+    public DFType[] argTypes;
+
+    public MethodNotFound(String name, DFType[] argTypes) {
         super(name);
+        this.argTypes = argTypes;
     }
 }

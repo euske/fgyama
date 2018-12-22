@@ -263,7 +263,7 @@ public class DFKlass extends DFType {
                 }
             }
         }
-        throw new MethodNotFound(name.getIdentifier());
+        throw new MethodNotFound(name.getIdentifier(), argTypes);
     }
 
     public DFMethod getMethodByAST(ASTNode ast) {
