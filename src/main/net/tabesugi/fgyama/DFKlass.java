@@ -126,7 +126,7 @@ public class DFKlass extends DFType {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
             DFParamType pt = _klassSpace.createParamType(id);
-            pt.setAST(tp);
+            pt.setTree(tp);
             _paramTypes[i] = pt;
         }
     }
@@ -344,8 +344,9 @@ public class DFKlass extends DFType {
     }
     public void setFinder(DFTypeFinder finder) {
         _finder = finder;
+        _klassSpace.setFinder(finder.extend(this));
     }
-    public void setAST(ASTNode ast) {
+    public void setTree(ASTNode ast) {
         _ast = ast;
     }
     public void setJarPath(String jarPath, String filePath) {
@@ -356,12 +357,12 @@ public class DFKlass extends DFType {
     public void load()
         throws TypeNotFound {
         if (_finder == null) return;
-        if (_loaded) return;
-        _loaded = true;
         this.load(_finder);
     }
     public void load(DFTypeFinder finder)
         throws TypeNotFound {
+        if (_loaded) return;
+        _loaded = true;
         assert _ast != null || _jarPath != null;
         if (_ast != null) {
             try {
@@ -630,18 +631,15 @@ public class DFKlass extends DFType {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 List<TypeParameter> tps = decl.typeParameters();
-                DFTypeSpace methodSpace = null;
-                if (0 < tps.size()) {
-                    String name = decl.getName().getIdentifier();
-                    methodSpace = new DFTypeSpace(_klassSpace, name);
-                    finder = new DFTypeFinder(finder, methodSpace);
-                    for (int i = 0; i < tps.size(); i++) {
-                        TypeParameter tp = tps.get(i);
-                        String id = tp.getName().getIdentifier();
-                        DFParamType pt = methodSpace.createParamType(id);
-                        pt.setAST(tp);
-                        pt.load(finder);
-                    }
+                String id = Utils.encodeASTNode(decl);
+                DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
+                finder = new DFTypeFinder(finder, methodSpace);
+                for (int i = 0; i < tps.size(); i++) {
+                    TypeParameter tp = tps.get(i);
+                    String id2 = tp.getName().getIdentifier();
+                    DFParamType pt = methodSpace.createParamType(id2);
+                    pt.setTree(tp);
+                    pt.load(finder);
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;

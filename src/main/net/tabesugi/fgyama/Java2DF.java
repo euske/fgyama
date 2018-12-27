@@ -1152,8 +1152,8 @@ public class Java2DF {
                     String id = Utils.encodeASTNode(expr);
                     DFKlass baseKlass = finder.resolveKlass(cstr.getType());
 		    DFTypeFinder finder2 = finder.extend(baseKlass);
-		    DFKlass anonKlass = typeSpace.buildAnonymousKlass(
-			klass, scope, baseKlass, id, anonDecl);
+                    DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
+		    DFKlass anonKlass = anonSpace.getKlass(id);
 		    anonKlass.load(finder2);
 		    anonKlass.addOverrides();
 		    processBodyDeclarations(
@@ -2121,23 +2121,11 @@ public class Java2DF {
         DFMethod method, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
         DFTypeSpace methodSpace = method.getChildSpace();
-        if (methodSpace != null) {
-            finder = new DFTypeFinder(finder, methodSpace);
-        }
+        finder = new DFTypeFinder(finder, methodSpace);
         DFType[] argTypes = finder.resolveArgs(methodDecl);
         DFLocalVarScope scope = new DFLocalVarScope(
             klass.getKlassScope(), methodDecl.getName());
-        // add a typespace for inline klasses.
-        DFTypeSpace typeSpace = new DFTypeSpace(methodSpace, "inline");
-        finder = new DFTypeFinder(finder, typeSpace);
         try {
-            // Setup an initial space.
-            DFKlass[] klasses = typeSpace.buildMethodSpace(methodDecl, klass, scope);
-            // Add overrides.
-            for (DFKlass klass1 : klasses) {
-		klass1.load(finder);
-                klass1.addOverrides();
-            }
             scope.build(finder, methodDecl);
             //scope.dump();
             DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
@@ -2164,7 +2152,7 @@ public class Java2DF {
 
             // Process the function body.
             ctx = processStatement(
-                typeSpace, graph, finder, scope, frame, ctx,
+                methodSpace, graph, finder, scope, frame, ctx,
 		methodDecl.getBody());
             frame.close(ctx);
             //frame.dump();
@@ -2344,11 +2332,8 @@ public class Java2DF {
         DFKlass[] klasses = _klassList.get(key);
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
-        try {
-            packageSpace.buildTypeFinder(cunit, finder);
-        } catch (UnsupportedSyntax e) {
-            String astName = e.ast.getClass().getName();
-            Logger.error("Pass2: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+        for (DFKlass klass : klasses) {
+            klass.setFinder(finder);
         }
     }
 
@@ -2362,6 +2347,10 @@ public class Java2DF {
                     Logger.error("loadAll: Class not found: "+e.name+" ast="+e.ast);
                     if (0 < _strict) throw e;
                 }
+            }
+        }
+        for (DFKlass[] klasses : _klassList.values()) {
+            for (DFKlass klass : klasses) {
                 klass.addOverrides();
             }
         }
