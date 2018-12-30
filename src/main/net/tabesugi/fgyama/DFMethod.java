@@ -17,6 +17,12 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFCallStyle _callStyle;
     private DFMethodType _methodType;
 
+    private Set<DFMethod> _callers =
+        new HashSet<DFMethod>();
+
+    private DFVarScope _scope = null;
+    private DFFrame _frame = null;
+
     private List<DFOverride> _overrides = new ArrayList<DFOverride>();
 
     private class DFOverride implements Comparable<DFOverride> {
@@ -145,5 +151,52 @@ public class DFMethod implements Comparable<DFMethod> {
                 methodType, overrides);
         }
         return this;
+    }
+
+    public void addCaller(DFMethod method) {
+        _callers.add(method);
+    }
+
+    public DFMethod[] getCallers() {
+        DFMethod[] callers = new DFMethod[_callers.size()];
+        _callers.toArray(callers);
+        return callers;
+    }
+
+    public DFVarScope getScope() {
+        return _scope;
+    }
+
+    public DFFrame getFrame() {
+        return _frame;
+    }
+
+    public void build(
+        DFTypeFinder finder, DFLocalVarScope scope,
+        MethodDeclaration decl)
+        throws UnsupportedSyntax, TypeNotFound {
+        scope.build(finder, decl);
+        _scope = scope;
+        //_scope.dump();
+        _frame = new DFFrame(DFFrame.RETURNABLE);
+        try {
+            _frame.build(finder, this, _scope, decl.getBody());
+        } catch (EntityNotFound e) {
+            // XXX ignore EntityNotFound for now
+        }
+    }
+
+    public void build(
+        DFTypeFinder finder, DFLocalVarScope scope,
+        Initializer initializer)
+        throws UnsupportedSyntax, TypeNotFound {
+        scope.build(finder, initializer);
+        _scope = scope;
+        _frame = new DFFrame(DFFrame.RETURNABLE);
+        try {
+            _frame.build(finder, this, _scope, initializer.getBody());
+        } catch (EntityNotFound e) {
+            // XXX ignore EntityNotFound for now
+        }
     }
 }

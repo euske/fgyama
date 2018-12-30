@@ -1147,17 +1147,11 @@ public class Java2DF {
                     cstr.getAnonymousClassDeclaration();
                 DFType instType;
                 if (anonDecl != null) {
-                    DFKlass klass = finder.resolveKlass(
-                        scope.lookupThis().getRefType());
-                    String id = Utils.encodeASTNode(expr);
-                    DFKlass baseKlass = finder.resolveKlass(cstr.getType());
-		    DFTypeFinder finder2 = finder.extend(baseKlass);
+                    String id = Utils.encodeASTNode(anonDecl);
                     DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
 		    DFKlass anonKlass = anonSpace.getKlass(id);
-		    anonKlass.load(finder2);
-		    anonKlass.addOverrides();
 		    processBodyDeclarations(
-			finder2, anonKlass, anonDecl, anonDecl.bodyDeclarations());
+			finder, anonKlass, anonDecl, anonDecl.bodyDeclarations());
 		    instType = anonKlass;
                 } else {
                     instType = finder.resolve(cstr.getType());
@@ -2098,20 +2092,16 @@ public class Java2DF {
      */
     @SuppressWarnings("unchecked")
     private DFGraph processMethodDeclaration(
-        DFTypeFinder finder, DFKlass klass,
-        DFMethod method, MethodDeclaration methodDecl)
+        DFTypeFinder finder, DFMethod method,
+        MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
         DFTypeSpace methodSpace = method.getChildSpace();
         finder = new DFTypeFinder(finder, methodSpace);
-        DFType[] argTypes = finder.resolveArgs(methodDecl);
-        DFLocalVarScope scope = new DFLocalVarScope(
-            klass.getKlassScope(), methodDecl.getName());
         try {
-            scope.build(finder, methodDecl);
-            //scope.dump();
-            DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
-            frame.build(finder, scope, methodDecl.getBody());
-
+            DFVarScope scope = method.getScope();
+            assert scope != null;
+            DFFrame frame = method.getFrame();
+            assert frame != null;
             DFGraph graph = new DFGraph(scope, frame, method, false, methodDecl);
             DFContext ctx = new DFContext(graph, scope);
             // XXX Ignore isConstructor().
@@ -2156,15 +2146,15 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private DFGraph processInitializer(
-        DFTypeSpace typeSpace, DFTypeFinder finder, DFKlass klass,
+        DFTypeFinder finder, DFKlass klass,
         Initializer initializer)
         throws UnsupportedSyntax, EntityNotFound {
+        DFTypeSpace typeSpace = klass.getKlassSpace();
         DFMethod method = klass.getInitializer();
-        DFFrame frame = new DFFrame(DFFrame.RETURNABLE);
-        DFLocalVarScope scope = new DFLocalVarScope(
-            klass.getKlassScope(), "<clinit>");
-        scope.build(finder, initializer);
-        frame.build(finder, scope, initializer.getBody());
+        DFVarScope scope = method.getScope();
+        assert scope != null;
+        DFFrame frame = method.getFrame();
+        assert frame != null;
         DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
         DFContext ctx = new DFContext(graph, scope);
         processStatement(
@@ -2225,7 +2215,7 @@ public class Java2DF {
 		    if (method != null && methodDecl.getBody() != null) {
 			// Ignore method prototypes.
                         DFGraph graph = processMethodDeclaration(
-                            finder, klass, method, (MethodDeclaration)body);
+                            finder, method, (MethodDeclaration)body);
                         exportGraph(graph);
                     }
 
@@ -2241,7 +2231,7 @@ public class Java2DF {
 
                 } else if (body instanceof Initializer) {
                     DFGraph graph = processInitializer(
-                        klassSpace, finder, klass, (Initializer)body);
+                        finder, klass, (Initializer)body);
                     exportGraph(graph);
 
                 } else {
@@ -2316,6 +2306,24 @@ public class Java2DF {
         for (DFKlass klass : klasses) {
             klass.setFinder(finder);
         }
+        // Process static imports.
+        DFModuleScope module = _moduleScope.get(key);
+        for (ImportDeclaration importDecl :
+                 (List<ImportDeclaration>) cunit.imports()) {
+            if (!importDecl.isStatic()) continue;
+            Name name = importDecl.getName();
+            DFKlass klass;
+            if (importDecl.isOnDemand()) {
+                klass = _rootSpace.getKlass(name);
+		klass.load();
+                module.importStatic(klass);
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                klass = _rootSpace.getKlass(qname.getQualifier());
+		klass.load();
+                module.importStatic(klass, qname.getName());
+            }
+        }
     }
 
     public void loadAll()
@@ -2335,30 +2343,18 @@ public class Java2DF {
                 klass.addOverrides();
             }
         }
+        Set<DFMethod> methods = new HashSet<DFMethod>();
+        for (DFKlass[] klasses : _klassList.values()) {
+            for (DFKlass klass : klasses) {
+                methods.addAll(klass.getMethods());
+            }
+        }
     }
 
     // pass3
     @SuppressWarnings("unchecked")
     public void buildGraphs(String key, CompilationUnit cunit)
         throws EntityNotFound {
-        DFModuleScope module = _moduleScope.get(key);
-        // Handle static imports.
-        for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
-            if (!importDecl.isStatic()) continue;
-            Name name = importDecl.getName();
-            DFKlass klass;
-            if (importDecl.isOnDemand()) {
-                klass = _rootSpace.getKlass(name);
-		klass.load();
-                module.importStatic(klass);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                klass = _rootSpace.getKlass(qname.getQualifier());
-		klass.load();
-                module.importStatic(klass, qname.getName());
-            }
-        }
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {

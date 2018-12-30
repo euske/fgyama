@@ -67,7 +67,7 @@ public class DFParamKlass extends DFKlass {
     }
 
     @Override
-    protected List<DFMethod> getMethods() {
+    public List<DFMethod> getMethods() {
 	if (_paramMethods == null) {
 	    _paramMethods = new ArrayList<DFMethod>();
 	    for (DFMethod method0 : _genericKlass.getMethods()) {

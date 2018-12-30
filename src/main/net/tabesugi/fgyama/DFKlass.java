@@ -34,6 +34,8 @@ public class DFKlass extends DFType {
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _ast2method =
         new HashMap<String, DFMethod>();
+    private Map<String, DFLocalVarScope> _ast2scope =
+        new HashMap<String, DFLocalVarScope>();
 
     private DFTypeFinder _finder = null;
     private boolean _loaded = false;
@@ -218,7 +220,7 @@ public class DFKlass extends DFType {
 	return _fields;
     }
 
-    protected List<DFMethod> getMethods() {
+    public List<DFMethod> getMethods() {
 	return _methods;
     }
 
@@ -295,6 +297,14 @@ public class DFKlass extends DFType {
         //Logger.info("DFKlass.addMethod: "+method);
         _methods.add(method);
         return method;
+    }
+
+    public void addMethodScope(ASTNode ast, DFLocalVarScope scope) {
+        _ast2scope.put(Utils.encodeASTNode(ast), scope);
+    }
+
+    public DFLocalVarScope getMethodScope(ASTNode ast) {
+        return _ast2scope.get(Utils.encodeASTNode(ast));
     }
 
     public void addOverrides() {
@@ -658,6 +668,8 @@ public class DFKlass extends DFType {
                 DFMethod method = this.addMethod(
                     methodSpace, name, callStyle,
                     new DFMethodType(argTypes, returnType));
+                DFLocalVarScope scope = this.getMethodScope(decl);
+                method.build(finder, scope, decl);
                 _ast2method.put(Utils.encodeASTNode(decl), method);
 
             } else if (body instanceof EnumConstantDeclaration) {
@@ -668,6 +680,9 @@ public class DFKlass extends DFType {
                 this.addField(decl.getName(), isStatic(decl), type);
 
             } else if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                DFLocalVarScope scope = this.getMethodScope(initializer);
+                _initializer.build(finder, scope, initializer);
 
             } else {
                 throw new UnsupportedSyntax(body);

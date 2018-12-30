@@ -37,7 +37,7 @@ public class DFLocalVarScope extends DFVarScope {
         return scopes;
     }
 
-    private DFLocalVarScope addChild(String basename, ASTNode ast) {
+    protected DFLocalVarScope addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
         //Logger.info("DFLocalVarScope.addChild: "+this+": "+id);
         DFLocalVarScope scope = new DFLocalVarScope(this, id);
@@ -96,7 +96,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFLocalVarScope childScope = this.addChild("b", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
                 childScope.build(finder, stmt);
@@ -145,7 +145,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalVarScope childScope = this.addChild("switch", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             Expression expr = switchStmt.getExpression();
             childScope.build(finder, expr);
             for (Statement stmt :
@@ -164,13 +164,13 @@ public class DFLocalVarScope extends DFVarScope {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
             this.build(finder, expr);
-            DFLocalVarScope childScope = this.addChild("while", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             Statement stmt = whileStmt.getBody();
             childScope.build(finder, stmt);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFLocalVarScope childScope = this.addChild("do", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             Statement stmt = doStmt.getBody();
             childScope.build(finder, stmt);
             Expression expr = doStmt.getExpression();
@@ -178,7 +178,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFLocalVarScope childScope = this.addChild("for", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 childScope.build(finder, init);
@@ -197,7 +197,7 @@ public class DFLocalVarScope extends DFVarScope {
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             this.build(finder, eForStmt.getExpression());
-            DFLocalVarScope childScope = this.addChild("efor", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
@@ -225,7 +225,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            DFLocalVarScope childScope = this.addChild("try", ast);
+            DFLocalVarScope childScope = this.getChildByAST(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 childScope.build(finder, decl);
@@ -234,7 +234,7 @@ public class DFLocalVarScope extends DFVarScope {
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFLocalVarScope catchScope = this.addChild("catch", cc);
+                DFLocalVarScope catchScope = this.getChildByAST(cc);
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
 		int ndims = decl.getExtraDimensions();
