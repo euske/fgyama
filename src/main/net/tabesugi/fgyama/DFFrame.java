@@ -173,72 +173,222 @@ public class DFFrame {
         return nodes;
     }
 
-    private void buildAssignment(
+    @SuppressWarnings("unchecked")
+    public void build(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
-        Expression expr)
+        MethodDeclaration methodDecl)
         throws UnsupportedSyntax, EntityNotFound {
-        assert expr != null;
+        int i = 0;
+        for (SingleVariableDeclaration decl :
+                 (List<SingleVariableDeclaration>) methodDecl.parameters()) {
+            // XXX Ignore modifiers and dimensions.
+            DFVarRef ref = scope.lookupArgument(i);
+            this.addInputRef(ref);
+            i++;
+        }
+        this.build(finder, method, scope, methodDecl.getBody());
+    }
+    
+    public void build(
+        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        Initializer initializer)
+        throws UnsupportedSyntax, EntityNotFound {
+        this.build(finder, method, scope, initializer.getBody());
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void build(
+        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        Statement stmt)
+        throws UnsupportedSyntax, EntityNotFound {
+        assert stmt != null;
 
-        if (expr instanceof Name) {
-            Name name = (Name)expr;
-            DFVarRef ref;
-            if (name.isSimpleName()) {
-                ref = scope.lookupVar((SimpleName)name);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                DFKlass klass;
-                try {
-                    // Try assuming it's a variable access.
-                    DFType type = this.build(finder, method, scope, qname.getQualifier());
-                    if (type == null) return;
-                    klass = finder.resolveKlass(type);
-                } catch (EntityNotFound e) {
-                    // Turned out it's a class variable.
-                    klass = finder.lookupKlass(qname.getQualifier());
-                }
-                SimpleName fieldName = qname.getName();
-                ref = klass.lookupField(fieldName);
+        if (stmt instanceof AssertStatement) {
+
+        } else if (stmt instanceof Block) {
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            Block block = (Block)stmt;
+            for (Statement cstmt :
+                     (List<Statement>) block.statements()) {
+                this.build(finder, method, childScope, cstmt);
             }
-            this.addOutputRef(ref);
+            this.removeRefs(childScope);
 
-        } else if (expr instanceof ArrayAccess) {
-            ArrayAccess aa = (ArrayAccess)expr;
-            DFType type = this.build(finder, method, scope, aa.getArray());
-            this.build(finder, method, scope, aa.getIndex());
-            if (type instanceof DFArrayType) {
-                DFVarRef ref = scope.lookupArray(type);
+        } else if (stmt instanceof EmptyStatement) {
+
+        } else if (stmt instanceof VariableDeclarationStatement) {
+            VariableDeclarationStatement varStmt =
+                (VariableDeclarationStatement)stmt;
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) varStmt.fragments()) {
+                DFVarRef ref = scope.lookupVar(frag.getName());
                 this.addOutputRef(ref);
-            }
-
-        } else if (expr instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess)expr;
-            Expression expr1 = fa.getExpression();
-            DFKlass klass = null;
-            if (expr1 instanceof Name) {
-                try {
-                    klass = finder.lookupKlass((Name)expr1);
-                } catch (TypeNotFound e) {
+                Expression init = frag.getInitializer();
+                if (init != null) {
+                    this.build(finder, method, scope, init);
                 }
             }
-            if (klass == null) {
-                DFType type = this.build(finder, method, scope, expr1);
-                if (type == null) return;
-                klass = finder.resolveKlass(type);
-            }
-            SimpleName fieldName = fa.getName();
-            DFVarRef ref = klass.lookupField(fieldName);
-            this.addOutputRef(ref);
 
-        } else if (expr instanceof SuperFieldAccess) {
-            SuperFieldAccess sfa = (SuperFieldAccess)expr;
-            SimpleName fieldName = sfa.getName();
-            DFKlass klass = finder.resolveKlass(
-                scope.lookupThis().getRefType()).getBaseKlass();
-            DFVarRef ref = klass.lookupField(fieldName);
-            this.addOutputRef(ref);
+        } else if (stmt instanceof ExpressionStatement) {
+            ExpressionStatement exprStmt = (ExpressionStatement)stmt;
+            this.build(finder, method, scope, exprStmt.getExpression());
+
+        } else if (stmt instanceof IfStatement) {
+            IfStatement ifStmt = (IfStatement)stmt;
+            this.build(finder, method, scope, ifStmt.getExpression());
+            Statement thenStmt = ifStmt.getThenStatement();
+            DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
+            thenFrame.build(finder, method, scope, thenStmt);
+            this.expandRefs(thenFrame);
+            Statement elseStmt = ifStmt.getElseStatement();
+            if (elseStmt != null) {
+                DFFrame elseFrame = this.addChild(DFFrame.ANONYMOUS, elseStmt);
+                elseFrame.build(finder, method, scope, elseStmt);
+                this.expandRefs(elseFrame);
+            }
+
+        } else if (stmt instanceof SwitchStatement) {
+            SwitchStatement switchStmt = (SwitchStatement)stmt;
+            DFType type = this.build(finder, method, scope, switchStmt.getExpression());
+            DFKlass enumKlass = null;
+            if (type instanceof DFKlass &&
+                ((DFKlass)type).isEnum()) {
+                enumKlass = finder.resolveKlass(type);
+            }
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            for (Statement cstmt :
+                     (List<Statement>) switchStmt.statements()) {
+                if (cstmt instanceof SwitchCase) {
+                    SwitchCase switchCase = (SwitchCase)cstmt;
+                    Expression expr = switchCase.getExpression();
+                    if (expr != null) {
+                        if (enumKlass != null && expr instanceof SimpleName) {
+                            // special treatment for enum.
+                            DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
+                            this.addInputRef(ref);
+                        } else {
+                            childFrame.build(finder, method, childScope, expr);
+                        }
+                    }
+                } else {
+                    childFrame.build(finder, method, childScope, cstmt);
+                }
+            }
+            childFrame.removeRefs(childScope);
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof WhileStatement) {
+            WhileStatement whileStmt = (WhileStatement)stmt;
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            childFrame.build(finder, method, scope, whileStmt.getExpression());
+            childFrame.build(finder, method, childScope, whileStmt.getBody());
+            childFrame.removeRefs(childScope);
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof DoStatement) {
+            DoStatement doStmt = (DoStatement)stmt;
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            childFrame.build(finder, method, childScope, doStmt.getBody());
+            childFrame.build(finder, method, scope, doStmt.getExpression());
+            childFrame.removeRefs(childScope);
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof ForStatement) {
+            ForStatement forStmt = (ForStatement)stmt;
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            for (Expression init : (List<Expression>) forStmt.initializers()) {
+                this.build(finder, method, childScope, init);
+            }
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            Expression expr = forStmt.getExpression();
+            if (expr != null) {
+                childFrame.build(finder, method, childScope, expr);
+            }
+            childFrame.build(finder, method, childScope, forStmt.getBody());
+            for (Expression update : (List<Expression>) forStmt.updaters()) {
+                childFrame.build(finder, method, childScope, update);
+            }
+            childFrame.removeRefs(childScope);
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof EnhancedForStatement) {
+            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
+            this.build(finder, method, scope, eForStmt.getExpression());
+            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            childFrame.build(finder, method, childScope, eForStmt.getBody());
+            childFrame.removeRefs(childScope);
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof ReturnStatement) {
+            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+            Expression expr = rtrnStmt.getExpression();
+            if (expr != null) {
+                this.build(finder, method, scope, expr);
+            }
+            this.addOutputRef(scope.lookupReturn());
+
+        } else if (stmt instanceof BreakStatement) {
+
+        } else if (stmt instanceof ContinueStatement) {
+
+        } else if (stmt instanceof LabeledStatement) {
+            LabeledStatement labeledStmt = (LabeledStatement)stmt;
+            SimpleName labelName = labeledStmt.getLabel();
+            String label = labelName.getIdentifier();
+            DFFrame childFrame = this.addChild(label, stmt);
+            childFrame.build(finder, method, scope, labeledStmt.getBody());
+            this.expandRefs(childFrame);
+
+        } else if (stmt instanceof SynchronizedStatement) {
+            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+            this.build(finder, method, scope, syncStmt.getBody());
+
+        } else if (stmt instanceof TryStatement) {
+            TryStatement tryStmt = (TryStatement)stmt;
+            DFVarScope tryScope = scope.getChildByAST(stmt);
+            DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
+            tryFrame.build(finder, method, tryScope, tryStmt.getBody());
+            tryFrame.removeRefs(tryScope);
+            this.expandRefs(tryFrame);
+            for (CatchClause cc :
+                     (List<CatchClause>) tryStmt.catchClauses()) {
+                DFVarScope catchScope = scope.getChildByAST(cc);
+                DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
+                catchFrame.build(finder, method, catchScope, cc.getBody());
+                catchFrame.removeRefs(catchScope);
+                this.expandRefs(catchFrame);
+            }
+            Block finBlock = tryStmt.getFinally();
+            if (finBlock != null) {
+                this.build(finder, method, scope, finBlock);
+            }
+
+        } else if (stmt instanceof ThrowStatement) {
+            ThrowStatement throwStmt = (ThrowStatement)stmt;
+            this.build(finder, method, scope, throwStmt.getExpression());
+            this.addOutputRef(scope.lookupException());
+
+        } else if (stmt instanceof ConstructorInvocation) {
+            ConstructorInvocation ci = (ConstructorInvocation)stmt;
+            for (Expression arg : (List<Expression>) ci.arguments()) {
+                this.build(finder, method, scope, arg);
+            }
+
+        } else if (stmt instanceof SuperConstructorInvocation) {
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
+            for (Expression arg : (List<Expression>) sci.arguments()) {
+                this.build(finder, method, scope, arg);
+            }
+
+        } else if (stmt instanceof TypeDeclarationStatement) {
 
         } else {
-            throw new UnsupportedSyntax(expr);
+            throw new UnsupportedSyntax(stmt);
+
         }
     }
 
@@ -547,199 +697,72 @@ public class DFFrame {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void build(
+    private void buildAssignment(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
-        Statement stmt)
+        Expression expr)
         throws UnsupportedSyntax, EntityNotFound {
-        assert stmt != null;
+        assert expr != null;
 
-        if (stmt instanceof AssertStatement) {
-
-        } else if (stmt instanceof Block) {
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            Block block = (Block)stmt;
-            for (Statement cstmt :
-                     (List<Statement>) block.statements()) {
-                this.build(finder, method, childScope, cstmt);
+        if (expr instanceof Name) {
+            Name name = (Name)expr;
+            DFVarRef ref;
+            if (name.isSimpleName()) {
+                ref = scope.lookupVar((SimpleName)name);
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                DFKlass klass;
+                try {
+                    // Try assuming it's a variable access.
+                    DFType type = this.build(finder, method, scope, qname.getQualifier());
+                    if (type == null) return;
+                    klass = finder.resolveKlass(type);
+                } catch (EntityNotFound e) {
+                    // Turned out it's a class variable.
+                    klass = finder.lookupKlass(qname.getQualifier());
+                }
+                SimpleName fieldName = qname.getName();
+                ref = klass.lookupField(fieldName);
             }
-            this.removeRefs(childScope);
+            this.addOutputRef(ref);
 
-        } else if (stmt instanceof EmptyStatement) {
-
-        } else if (stmt instanceof VariableDeclarationStatement) {
-            VariableDeclarationStatement varStmt =
-                (VariableDeclarationStatement)stmt;
-            for (VariableDeclarationFragment frag :
-                     (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                DFVarRef ref = scope.lookupVar(frag.getName());
+        } else if (expr instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess)expr;
+            DFType type = this.build(finder, method, scope, aa.getArray());
+            this.build(finder, method, scope, aa.getIndex());
+            if (type instanceof DFArrayType) {
+                DFVarRef ref = scope.lookupArray(type);
                 this.addOutputRef(ref);
-                Expression init = frag.getInitializer();
-                if (init != null) {
-                    this.build(finder, method, scope, init);
+            }
+
+        } else if (expr instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess)expr;
+            Expression expr1 = fa.getExpression();
+            DFKlass klass = null;
+            if (expr1 instanceof Name) {
+                try {
+                    klass = finder.lookupKlass((Name)expr1);
+                } catch (TypeNotFound e) {
                 }
             }
-
-        } else if (stmt instanceof ExpressionStatement) {
-            ExpressionStatement exprStmt = (ExpressionStatement)stmt;
-            this.build(finder, method, scope, exprStmt.getExpression());
-
-        } else if (stmt instanceof IfStatement) {
-            IfStatement ifStmt = (IfStatement)stmt;
-            this.build(finder, method, scope, ifStmt.getExpression());
-            Statement thenStmt = ifStmt.getThenStatement();
-            DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
-            thenFrame.build(finder, method, scope, thenStmt);
-            this.expandRefs(thenFrame);
-            Statement elseStmt = ifStmt.getElseStatement();
-            if (elseStmt != null) {
-                DFFrame elseFrame = this.addChild(DFFrame.ANONYMOUS, elseStmt);
-                elseFrame.build(finder, method, scope, elseStmt);
-                this.expandRefs(elseFrame);
+            if (klass == null) {
+                DFType type = this.build(finder, method, scope, expr1);
+                if (type == null) return;
+                klass = finder.resolveKlass(type);
             }
+            SimpleName fieldName = fa.getName();
+            DFVarRef ref = klass.lookupField(fieldName);
+            this.addOutputRef(ref);
 
-        } else if (stmt instanceof SwitchStatement) {
-            SwitchStatement switchStmt = (SwitchStatement)stmt;
-            DFType type = this.build(finder, method, scope, switchStmt.getExpression());
-            DFKlass enumKlass = null;
-            if (type instanceof DFKlass &&
-                ((DFKlass)type).isEnum()) {
-                enumKlass = finder.resolveKlass(type);
-            }
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            for (Statement cstmt :
-                     (List<Statement>) switchStmt.statements()) {
-                if (cstmt instanceof SwitchCase) {
-                    SwitchCase switchCase = (SwitchCase)cstmt;
-                    Expression expr = switchCase.getExpression();
-                    if (expr != null) {
-                        if (enumKlass != null && expr instanceof SimpleName) {
-                            // special treatment for enum.
-                            DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
-                            this.addInputRef(ref);
-                        } else {
-                            childFrame.build(finder, method, childScope, expr);
-                        }
-                    }
-                } else {
-                    childFrame.build(finder, method, childScope, cstmt);
-                }
-            }
-            childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof WhileStatement) {
-            WhileStatement whileStmt = (WhileStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.build(finder, method, scope, whileStmt.getExpression());
-            childFrame.build(finder, method, childScope, whileStmt.getBody());
-            childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof DoStatement) {
-            DoStatement doStmt = (DoStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.build(finder, method, childScope, doStmt.getBody());
-            childFrame.build(finder, method, scope, doStmt.getExpression());
-            childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof ForStatement) {
-            ForStatement forStmt = (ForStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            for (Expression init : (List<Expression>) forStmt.initializers()) {
-                this.build(finder, method, childScope, init);
-            }
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            Expression expr = forStmt.getExpression();
-            if (expr != null) {
-                childFrame.build(finder, method, childScope, expr);
-            }
-            childFrame.build(finder, method, childScope, forStmt.getBody());
-            for (Expression update : (List<Expression>) forStmt.updaters()) {
-                childFrame.build(finder, method, childScope, update);
-            }
-            childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof EnhancedForStatement) {
-            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
-            this.build(finder, method, scope, eForStmt.getExpression());
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.build(finder, method, childScope, eForStmt.getBody());
-            childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof ReturnStatement) {
-            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
-            Expression expr = rtrnStmt.getExpression();
-            if (expr != null) {
-                this.build(finder, method, scope, expr);
-            }
-            this.addOutputRef(scope.lookupReturn());
-
-        } else if (stmt instanceof BreakStatement) {
-
-        } else if (stmt instanceof ContinueStatement) {
-
-        } else if (stmt instanceof LabeledStatement) {
-            LabeledStatement labeledStmt = (LabeledStatement)stmt;
-            SimpleName labelName = labeledStmt.getLabel();
-            String label = labelName.getIdentifier();
-            DFFrame childFrame = this.addChild(label, stmt);
-            childFrame.build(finder, method, scope, labeledStmt.getBody());
-            this.expandRefs(childFrame);
-
-        } else if (stmt instanceof SynchronizedStatement) {
-            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-            this.build(finder, method, scope, syncStmt.getBody());
-
-        } else if (stmt instanceof TryStatement) {
-            TryStatement tryStmt = (TryStatement)stmt;
-            DFVarScope tryScope = scope.getChildByAST(stmt);
-            DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
-            tryFrame.build(finder, method, tryScope, tryStmt.getBody());
-            tryFrame.removeRefs(tryScope);
-            this.expandRefs(tryFrame);
-            for (CatchClause cc :
-                     (List<CatchClause>) tryStmt.catchClauses()) {
-                DFVarScope catchScope = scope.getChildByAST(cc);
-                DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
-                catchFrame.build(finder, method, catchScope, cc.getBody());
-                catchFrame.removeRefs(catchScope);
-                this.expandRefs(catchFrame);
-            }
-            Block finBlock = tryStmt.getFinally();
-            if (finBlock != null) {
-                this.build(finder, method, scope, finBlock);
-            }
-
-        } else if (stmt instanceof ThrowStatement) {
-            ThrowStatement throwStmt = (ThrowStatement)stmt;
-            this.build(finder, method, scope, throwStmt.getExpression());
-            this.addOutputRef(scope.lookupException());
-
-        } else if (stmt instanceof ConstructorInvocation) {
-            ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            for (Expression arg : (List<Expression>) ci.arguments()) {
-                this.build(finder, method, scope, arg);
-            }
-
-        } else if (stmt instanceof SuperConstructorInvocation) {
-            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            for (Expression arg : (List<Expression>) sci.arguments()) {
-                this.build(finder, method, scope, arg);
-            }
-
-        } else if (stmt instanceof TypeDeclarationStatement) {
+        } else if (expr instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
+            SimpleName fieldName = sfa.getName();
+            DFKlass klass = finder.resolveKlass(
+                scope.lookupThis().getRefType()).getBaseKlass();
+            DFVarRef ref = klass.lookupField(fieldName);
+            this.addOutputRef(ref);
 
         } else {
-            throw new UnsupportedSyntax(stmt);
-
+            throw new UnsupportedSyntax(expr);
         }
     }
 

@@ -96,4 +96,5 @@ TODOs:
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.
+  * Java language spec.: https://docs.oracle.com/javase/specs/
   * Moar unittests.
