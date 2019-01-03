@@ -180,7 +180,7 @@ public class DFMethod implements Comparable<DFMethod> {
         //_scope.dump();
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
-            _frame.build(finder, this, _scope, decl.getBody());
+            _frame.build(finder, this, _scope, decl);
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
         }
@@ -194,7 +194,7 @@ public class DFMethod implements Comparable<DFMethod> {
         _scope = scope;
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
-            _frame.build(finder, this, _scope, initializer.getBody());
+            _frame.build(finder, this, _scope, initializer);
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
         }

@@ -2449,10 +2449,13 @@ public class Java2DF {
         }
         XmlExporter exporter = new XmlExporter();
         converter.setExporter(exporter);
+        Map<String, CompilationUnit> srcs =
+            new HashMap<String, CompilationUnit>();
         for (String path : files) {
             Logger.info("Pass1: "+path);
             try {
                 CompilationUnit cunit = Utils.parseFile(path);
+                srcs.put(path, cunit);
                 converter.buildTypeSpace(path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
@@ -2461,10 +2464,8 @@ public class Java2DF {
         for (String path : files) {
             Logger.info("Pass2: "+path);
             try {
-                CompilationUnit cunit = Utils.parseFile(path);
+                CompilationUnit cunit = srcs.get(path);
                 converter.buildTypeFinder(path, cunit);
-            } catch (IOException e) {
-                System.err.println("Cannot open input file: "+path);
             } catch (TypeNotFound e) {
                 System.err.println("Pass2: Class not found: "+e.name);
 	    }
@@ -2478,12 +2479,10 @@ public class Java2DF {
             if (processed != null && !processed.contains(path)) continue;
             Logger.info("Pass3: "+path);
             try {
-                CompilationUnit cunit = Utils.parseFile(path);
+                CompilationUnit cunit = srcs.get(path);
                 exporter.startFile(path);
                 converter.buildGraphs(path, cunit);
                 exporter.endFile();
-            } catch (IOException e) {
-                System.err.println("Cannot open input file: "+path);
             } catch (EntityNotFound e) {
                 System.err.println("Pass3: Error at "+path+" ("+e.name+")");
             }
