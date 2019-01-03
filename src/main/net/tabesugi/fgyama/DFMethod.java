@@ -22,6 +22,7 @@ public class DFMethod implements Comparable<DFMethod> {
 
     private DFVarScope _scope = null;
     private DFFrame _frame = null;
+    private ASTNode _ast = null;
 
     private List<DFOverride> _overrides = new ArrayList<DFOverride>();
 
@@ -171,6 +172,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return _frame;
     }
 
+    public ASTNode getTree() {
+        return _ast;
+    }
+
     public void build(
         DFTypeFinder finder, DFLocalVarScope scope,
         MethodDeclaration decl)
@@ -184,6 +189,7 @@ public class DFMethod implements Comparable<DFMethod> {
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
         }
+        _ast = decl;
     }
 
     public void build(
@@ -198,5 +204,6 @@ public class DFMethod implements Comparable<DFMethod> {
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
         }
+        _ast = initializer;
     }
 }

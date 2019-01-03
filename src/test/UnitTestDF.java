@@ -34,18 +34,25 @@ public class UnitTestDF extends XMLTestCase {
 	throws Exception {
 	XmlExporter exporter = new XmlExporter();
         _converter.setExporter(exporter);
+        Map<String, CompilationUnit> srcs =
+            new HashMap<String, CompilationUnit>();
         for (int i = 0; i < javaPaths.length; i++) {
             System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
             CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
+            srcs.put(javaPaths[i], cunit);
             _converter.buildTypeSpace(javaPaths[i], cunit);
         }
         for (int i = 0; i < javaPaths.length; i++) {
-            CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
+            CompilationUnit cunit = srcs.get(javaPaths[i]);
             _converter.buildTypeFinder(javaPaths[i], cunit);
         }
-        _converter.loadAll();
         for (int i = 0; i < javaPaths.length; i++) {
-            CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
+            CompilationUnit cunit = srcs.get(javaPaths[i]);
+            _converter.loadKlasses(javaPaths[i], cunit);
+        }
+        _converter.listRelationships();
+        for (int i = 0; i < javaPaths.length; i++) {
+            CompilationUnit cunit = srcs.get(javaPaths[i]);
             exporter.startFile(javaPaths[i]);
             _converter.buildGraphs(javaPaths[i], cunit);
             exporter.endFile();

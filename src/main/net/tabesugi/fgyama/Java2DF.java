@@ -2211,13 +2211,6 @@ public class Java2DF {
 
                 } else if (body instanceof MethodDeclaration) {
 		    MethodDeclaration methodDecl = (MethodDeclaration)body;
-		    DFMethod method = klass.getMethodByAST(methodDecl);
-		    if (method != null && methodDecl.getBody() != null) {
-			// Ignore method prototypes.
-                        DFGraph graph = processMethodDeclaration(
-                            finder, method, (MethodDeclaration)body);
-                        exportGraph(graph);
-                    }
 
                 } else if (body instanceof EnumConstantDeclaration) {
                     EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
@@ -2230,9 +2223,6 @@ public class Java2DF {
                     // XXX ignore annotations.
 
                 } else if (body instanceof Initializer) {
-                    DFGraph graph = processInitializer(
-                        finder, klass, (Initializer)body);
-                    exportGraph(graph);
 
                 } else {
                     throw new UnsupportedSyntax(body);
@@ -2306,6 +2296,12 @@ public class Java2DF {
         for (DFKlass klass : klasses) {
             klass.setFinder(finder);
         }
+    }
+
+    // pass3
+    @SuppressWarnings("unchecked")
+    public void loadKlasses(String key, CompilationUnit cunit)
+        throws TypeNotFound {
         // Process static imports.
         DFModuleScope module = _moduleScope.get(key);
         for (ImportDeclaration importDecl :
@@ -2324,20 +2320,14 @@ public class Java2DF {
                 module.importStatic(klass, qname.getName());
             }
         }
+        DFKlass[] klasses = _klassList.get(key);
+        for (DFKlass klass : klasses) {
+            klass.load();
+        }
     }
 
-    public void loadAll()
-        throws TypeNotFound {
-        for (DFKlass[] klasses : _klassList.values()) {
-            for (DFKlass klass : klasses) {
-                try {
-                    klass.load();
-                } catch (TypeNotFound e) {
-                    Logger.error("loadAll: Class not found: "+e.name+" ast="+e.ast);
-                    if (0 < _strict) throw e;
-                }
-            }
-        }
+    // List interprocedural relationships.
+    public void listRelationships() {
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
                 klass.addOverrides();
@@ -2351,18 +2341,44 @@ public class Java2DF {
         }
     }
 
-    // pass3
+    // pass4
     @SuppressWarnings("unchecked")
     public void buildGraphs(String key, CompilationUnit cunit)
         throws EntityNotFound {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
             processBodyDeclarations(
-                klass.getFinder(), klass, abstTypeDecl,
+                finder, klass, abstTypeDecl,
                 abstTypeDecl.bodyDeclarations());
-	}
+        }
+        DFKlass[] klasses = _klassList.get(key);
+        for (DFKlass klass : klasses) {
+            DFTypeFinder finder2 = finder.extend(klass);
+            for (DFMethod method : klass.getMethods()) {
+                ASTNode ast = method.getTree();
+                try {
+                    if (ast instanceof MethodDeclaration) {
+                        MethodDeclaration methodDecl = (MethodDeclaration)ast;
+                        if (methodDecl.getBody() != null) {
+                            DFGraph graph = processMethodDeclaration(
+                                finder2, method, methodDecl);
+                            exportGraph(graph);
+                        }
+                    } else if (ast instanceof Initializer) {
+                        Initializer initializer = (Initializer)ast;
+                        DFGraph graph = processInitializer(
+                            finder2, klass, initializer);
+                        exportGraph(graph);
+                    }
+                } catch (UnsupportedSyntax e) {
+                    String astName = e.ast.getClass().getName();
+                    Logger.error("Pass4: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                }
+            }
+        }
     }
 
     /**
@@ -2470,21 +2486,26 @@ public class Java2DF {
                 System.err.println("Pass2: Class not found: "+e.name);
 	    }
         }
-        try {
-            converter.loadAll();
-        } catch (TypeNotFound e) {
-            System.err.println("Pass2: Class not found: "+e.name);
+        for (String path : files) {
+            Logger.info("Pass3: "+path);
+            try {
+                CompilationUnit cunit = srcs.get(path);
+                converter.loadKlasses(path, cunit);
+            } catch (TypeNotFound e) {
+                System.err.println("Pass3: Class not found: "+e.name);
+	    }
         }
+        converter.listRelationships();
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
-            Logger.info("Pass3: "+path);
+            Logger.info("Pass4: "+path);
             try {
                 CompilationUnit cunit = srcs.get(path);
                 exporter.startFile(path);
                 converter.buildGraphs(path, cunit);
                 exporter.endFile();
             } catch (EntityNotFound e) {
-                System.err.println("Pass3: Error at "+path+" ("+e.name+")");
+                System.err.println("Pass4: Error at "+path+" ("+e.name+")");
             }
         }
         exporter.close();
