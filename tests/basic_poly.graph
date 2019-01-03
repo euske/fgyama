@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_poly.java">
+    <graph ins="" name="basic_poly_Foo" outs="" style="initializer">
+      <ast length="108" start="0" type="55"/>
+      <scope name="basic_poly_Foo">
+        <node data="0" id="Nbasic_poly_Foo_1" kind="const" type="I">
+          <ast length="1" start="35" type="34"/>
+        </node>
+        <node id="Nbasic_poly_Foo_2" kind="assign" ref="basic_poly_Foo/.x" type="I">
+          <link src="Nbasic_poly_Foo_1"/>
+          <ast length="5" start="31" type="59"/>
+        </node>
+      </scope>
+    </graph>
+    <graph ins="" name="basic_poly_Baa" outs="" style="initializer">
+      <ast length="442" start="110" type="55"/>
+      <scope name="basic_poly_Baa"/>
+    </graph>
     <graph ins="Nbasic_poly_Foo.moo_1 Nbasic_poly_Foo.moo_5" name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Foo.moo.b0_6" style="instance">
       <ast length="64" start="42" type="31"/>
       <scope name="basic_poly_Foo.moo">
@@ -26,18 +42,6 @@
           <ast length="18" start="57" type="44"/>
         </node>
         <node id="Nbasic_poly_Foo.moo_5" ref="basic_poly_Foo/.x" type="I"/>
-      </scope>
-    </graph>
-    <graph ins="" name="basic_poly_Foo" outs="" style="initializer">
-      <ast length="108" start="0" type="55"/>
-      <scope name="basic_poly_Foo">
-        <node data="0" id="Nbasic_poly_Foo_1" kind="const" type="I">
-          <ast length="1" start="35" type="34"/>
-        </node>
-        <node id="Nbasic_poly_Foo_2" kind="assign" ref="basic_poly_Foo/.x" type="I">
-          <link src="Nbasic_poly_Foo_1"/>
-          <ast length="5" start="31" type="59"/>
-        </node>
       </scope>
     </graph>
     <graph ins="Nbasic_poly_Baa.moo_1 Nbasic_poly_Baa.moo_9" name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Baa.moo.b0_12" style="instance">
@@ -238,10 +242,6 @@
           </node>
         </scope>
       </scope>
-    </graph>
-    <graph ins="" name="basic_poly_Baa" outs="" style="initializer">
-      <ast length="442" start="110" type="55"/>
-      <scope name="basic_poly_Baa"/>
     </graph>
   </file>
 </fgyama>

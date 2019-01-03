@@ -10,6 +10,10 @@
         </node>
       </scope>
     </graph>
+    <graph ins="" name="basic_exception" outs="" style="initializer">
+      <ast length="433" start="0" type="55"/>
+      <scope name="basic_exception"/>
+    </graph>
     <graph ins="Nbasic_exception.foo_11 Nbasic_exception.foo_19 Nbasic_exception.foo_26" name="Lbasic_exception;.foo()V" outs="" style="instance">
       <ast length="233" start="103" type="31"/>
       <scope name="basic_exception.foo">
@@ -147,10 +151,6 @@
         </scope>
         <node id="Nbasic_exception.moo_6" ref="#exception" type="Ljava/lang/Exception;"/>
       </scope>
-    </graph>
-    <graph ins="" name="basic_exception" outs="" style="initializer">
-      <ast length="433" start="0" type="55"/>
-      <scope name="basic_exception"/>
     </graph>
   </file>
 </fgyama>

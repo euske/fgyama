@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_staticimport.java">
+    <graph ins="" name="basic_staticimport" outs="" style="initializer">
+      <ast length="94" start="69" type="55"/>
+      <scope name="basic_staticimport"/>
+    </graph>
     <graph ins="Nbasic_staticimport.foo_2 Nbasic_staticimport.foo_3" name="Lbasic_staticimport;.foo()V" outs="" style="static">
       <ast length="54" start="107" type="31"/>
       <scope name="basic_staticimport.foo">
@@ -33,10 +37,6 @@
         <node id="Nbasic_staticimport.foo_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
         <node id="Nbasic_staticimport.foo_3" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
-    </graph>
-    <graph ins="" name="basic_staticimport" outs="" style="initializer">
-      <ast length="94" start="69" type="55"/>
-      <scope name="basic_staticimport"/>
     </graph>
   </file>
 </fgyama>

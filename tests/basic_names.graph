@@ -4,10 +4,16 @@
       <ast length="12" start="44" type="55"/>
       <scope name="dom/meep/basic_names/Bar"/>
     </graph>
-    <graph ins="" name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" outs="" style="instance">
-      <ast length="14" start="187" type="31"/>
-      <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo">
-        <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo.b0"/>
+    <graph ins="" name="dom/meep/basic_names" outs="" style="initializer">
+      <ast length="451" start="19" type="55"/>
+      <scope name="dom/meep/basic_names">
+        <node data="123" id="Ndom/meep/basic_names_1" kind="const" type="I">
+          <ast length="3" start="69" type="34"/>
+        </node>
+        <node id="Ndom/meep/basic_names_2" kind="assign" ref="dom/meep/basic_names/.y" type="I">
+          <link src="Ndom/meep/basic_names_1"/>
+          <ast length="7" start="65" type="59"/>
+        </node>
       </scope>
     </graph>
     <graph ins="" name="dom/meep/basic_names/:AST:31:79:210/Baz" outs="" style="initializer">
@@ -136,16 +142,10 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="dom/meep/basic_names" outs="" style="initializer">
-      <ast length="451" start="19" type="55"/>
-      <scope name="dom/meep/basic_names">
-        <node data="123" id="Ndom/meep/basic_names_1" kind="const" type="I">
-          <ast length="3" start="69" type="34"/>
-        </node>
-        <node id="Ndom/meep/basic_names_2" kind="assign" ref="dom/meep/basic_names/.y" type="I">
-          <link src="Ndom/meep/basic_names_1"/>
-          <ast length="7" start="65" type="59"/>
-        </node>
+    <graph ins="" name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" outs="" style="instance">
+      <ast length="14" start="187" type="31"/>
+      <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo">
+        <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo.b0"/>
       </scope>
     </graph>
   </file>

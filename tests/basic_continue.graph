@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_continue.java">
+    <graph ins="" name="basic_continue" outs="" style="initializer">
+      <ast length="150" start="0" type="55"/>
+      <scope name="basic_continue"/>
+    </graph>
     <graph ins="Nbasic_continue.foo_1" name="Lbasic_continue;.foo(I)V" outs="" style="static">
       <ast length="113" start="35" type="31"/>
       <scope name="basic_continue.foo">
@@ -78,10 +82,6 @@
           <ast length="5" start="58" type="44"/>
         </node>
       </scope>
-    </graph>
-    <graph ins="" name="basic_continue" outs="" style="initializer">
-      <ast length="150" start="0" type="55"/>
-      <scope name="basic_continue"/>
     </graph>
   </file>
 </fgyama>

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_ops.java">
+    <graph ins="" name="basic_ops" outs="" style="initializer">
+      <ast length="188" start="0" type="55"/>
+      <scope name="basic_ops"/>
+    </graph>
     <graph ins="Nbasic_ops.foo.b0_25 Nbasic_ops.foo_1 Nbasic_ops.foo_11" name="Lbasic_ops;.foo(I)I" outs="Nbasic_ops.foo.b0_25 Nbasic_ops.foo.b0_34" style="static">
       <ast length="156" start="30" type="31"/>
       <scope name="basic_ops.foo">
@@ -138,10 +142,6 @@
         </node>
         <node id="Nbasic_ops.foo_11" ref="#this" type="Lbasic_ops;"/>
       </scope>
-    </graph>
-    <graph ins="" name="basic_ops" outs="" style="initializer">
-      <ast length="188" start="0" type="55"/>
-      <scope name="basic_ops"/>
     </graph>
   </file>
 </fgyama>

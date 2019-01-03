@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_return.java">
+    <graph ins="" name="basic_return" outs="" style="initializer">
+      <ast length="205" start="46" type="55"/>
+      <scope name="basic_return"/>
+    </graph>
     <graph ins="Nbasic_return.foo_1 Nbasic_return.foo_3 Nbasic_return.foo_5 Nbasic_return.foo_7" name="Lbasic_return;.foo(III)I" outs="Nbasic_return.foo.b0_20" style="static">
       <ast length="145" start="104" type="31"/>
       <scope name="basic_return.foo">
@@ -84,10 +88,6 @@
         </node>
         <node id="Nbasic_return.foo_7" ref="#this" type="Lbasic_return;"/>
       </scope>
-    </graph>
-    <graph ins="" name="basic_return" outs="" style="initializer">
-      <ast length="205" start="46" type="55"/>
-      <scope name="basic_return"/>
     </graph>
   </file>
 </fgyama>

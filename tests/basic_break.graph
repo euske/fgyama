@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_break.java">
+    <graph ins="" name="basic_break" outs="" style="initializer">
+      <ast length="137" start="0" type="55"/>
+      <scope name="basic_break"/>
+    </graph>
     <graph ins="Nbasic_break.foo_1" name="Lbasic_break;.foo(I)V" outs="" style="static">
       <ast length="103" start="32" type="31"/>
       <scope name="basic_break.foo">
@@ -78,10 +82,6 @@
           <ast length="5" start="55" type="44"/>
         </node>
       </scope>
-    </graph>
-    <graph ins="" name="basic_break" outs="" style="initializer">
-      <ast length="137" start="0" type="55"/>
-      <scope name="basic_break"/>
     </graph>
   </file>
 </fgyama>

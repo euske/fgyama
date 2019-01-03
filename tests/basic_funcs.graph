@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
+    <graph ins="" name="basic_funcs" outs="" style="initializer">
+      <ast length="403" start="0" type="55"/>
+      <scope name="basic_funcs"/>
+    </graph>
     <graph ins="Nbasic_funcs.main_1 Nbasic_funcs.main_10 Nbasic_funcs.main_16 Nbasic_funcs.main_20" name="Lbasic_funcs;.main([Ljava/lang/String;)V" outs="" style="static">
       <ast length="166" start="32" type="31"/>
       <scope name="basic_funcs.main">
@@ -184,10 +188,6 @@
           </node>
         </scope>
       </scope>
-    </graph>
-    <graph ins="" name="basic_funcs" outs="" style="initializer">
-      <ast length="403" start="0" type="55"/>
-      <scope name="basic_funcs"/>
     </graph>
   </file>
 </fgyama>

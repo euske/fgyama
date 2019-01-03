@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_switch.java">
+    <graph ins="" name="basic_switch" outs="" style="initializer">
+      <ast length="187" start="0" type="55"/>
+      <scope name="basic_switch"/>
+    </graph>
     <graph ins="Nbasic_switch.foo_1" name="Lbasic_switch;.foo(I)I" outs="Nbasic_switch.foo.b0_21" style="static">
       <ast length="152" start="33" type="31"/>
       <scope name="basic_switch.foo">
@@ -89,10 +93,6 @@
         </node>
         <node id="Nbasic_switch.foo_8" ref="basic_switch.foo.b0/$x" type="I"/>
       </scope>
-    </graph>
-    <graph ins="" name="basic_switch" outs="" style="initializer">
-      <ast length="187" start="0" type="55"/>
-      <scope name="basic_switch"/>
     </graph>
   </file>
 </fgyama>

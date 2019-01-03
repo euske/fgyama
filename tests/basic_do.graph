@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_do.java">
+    <graph ins="" name="basic_do" outs="" style="initializer">
+      <ast length="137" start="0" type="55"/>
+      <scope name="basic_do"/>
+    </graph>
     <graph ins="Nbasic_do.foo_1" name="Lbasic_do;.foo(I)I" outs="Nbasic_do.foo.b0_23" style="static">
       <ast length="106" start="29" type="31"/>
       <scope name="basic_do.foo">
@@ -100,10 +104,6 @@
           <ast length="5" start="51" type="44"/>
         </node>
       </scope>
-    </graph>
-    <graph ins="" name="basic_do" outs="" style="initializer">
-      <ast length="137" start="0" type="55"/>
-      <scope name="basic_do"/>
     </graph>
   </file>
 </fgyama>

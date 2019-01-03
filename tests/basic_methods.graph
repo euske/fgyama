@@ -1,62 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <graph ins="" name="Lbasic_methods/A;.toString()Ljava/lang/String;" outs="Nbasic_methods/A.toString.b0_2" style="instance">
-      <ast length="60" start="52" type="31"/>
-      <scope name="basic_methods/A.toString">
-        <scope name="basic_methods/A.toString.b0">
-          <node data="A" id="Nbasic_methods/A.toString.b0_1" kind="const" type="Ljava/lang/String;">
-            <ast length="3" start="98" type="45"/>
-          </node>
-          <node id="Nbasic_methods/A.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="Nbasic_methods/A.toString.b0_1"/>
-            <ast length="11" start="91" type="41"/>
-          </node>
-        </scope>
-      </scope>
-    </graph>
     <graph ins="" name="basic_methods/A" outs="" style="initializer">
       <ast length="84" start="34" type="55"/>
       <scope name="basic_methods/A"/>
     </graph>
-    <graph ins="" name="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;.toString()Ljava/lang/String;" outs="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_2" style="instance">
-      <ast length="42" start="180" type="31"/>
-      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString">
-        <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0">
-          <node data="AAA" id="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_1" kind="const" type="Ljava/lang/String;">
-            <ast length="5" start="214" type="45"/>
-          </node>
-          <node id="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_1"/>
-            <ast length="13" start="207" type="41"/>
-          </node>
-        </scope>
+    <graph ins="" name="basic_methods" outs="" style="initializer">
+      <ast length="452" start="0" type="55"/>
+      <scope name="basic_methods">
+        <node data="0" id="Nbasic_methods_1" kind="const" type="I">
+          <ast length="1" start="132" type="34"/>
+        </node>
+        <node id="Nbasic_methods_2" kind="assign" ref="basic_methods/.x" type="I">
+          <link src="Nbasic_methods_1"/>
+          <ast length="5" start="128" type="59"/>
+        </node>
       </scope>
     </graph>
     <graph ins="" name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52" outs="" style="initializer">
       <ast length="52" start="173" type="1"/>
       <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52"/>
-    </graph>
-    <graph ins="Nbasic_methods/:AST:31:139:246/moo.fc_2 Nbasic_methods/:AST:31:139:246/moo.fc_4" name="Lbasic_methods/:AST:31:139:246/moo;.fc()I" outs="Nbasic_methods/:AST:31:139:246/moo.fc.b0_5" style="instance">
-      <ast length="48" start="245" type="31"/>
-      <scope name="basic_methods/:AST:31:139:246/moo.fc">
-        <scope name="basic_methods/:AST:31:139:246/moo.fc.b0">
-          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_1" kind="ref" ref="#this" type="Lbasic_methods;">
-            <link src="Nbasic_methods/:AST:31:139:246/moo.fc_2"/>
-            <ast length="18" start="270" type="52"/>
-          </node>
-          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_3" kind="fieldref" ref="basic_methods/.x" type="I">
-            <link src="Nbasic_methods/:AST:31:139:246/moo.fc_4"/>
-            <link label="obj" src="Nbasic_methods/:AST:31:139:246/moo.fc.b0_1"/>
-            <ast length="20" start="270" type="22"/>
-          </node>
-          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_5" kind="output" ref="#return" type="I">
-            <link src="Nbasic_methods/:AST:31:139:246/moo.fc.b0_3"/>
-            <ast length="28" start="263" type="41"/>
-          </node>
-        </scope>
-        <node id="Nbasic_methods/:AST:31:139:246/moo.fc_2" ref="#this" type="Lbasic_methods;"/>
-        <node id="Nbasic_methods/:AST:31:139:246/moo.fc_4" ref="basic_methods/.x" type="I"/>
-      </scope>
     </graph>
     <graph ins="" name="basic_methods/:AST:31:139:246/moo" outs="" style="initializer">
       <ast length="68" start="228" type="55"/>
@@ -146,16 +108,68 @@
         </scope>
       </scope>
     </graph>
-    <graph ins="" name="basic_methods" outs="" style="initializer">
-      <ast length="452" start="0" type="55"/>
-      <scope name="basic_methods">
-        <node data="0" id="Nbasic_methods_1" kind="const" type="I">
-          <ast length="1" start="132" type="34"/>
-        </node>
-        <node id="Nbasic_methods_2" kind="assign" ref="basic_methods/.x" type="I">
-          <link src="Nbasic_methods_1"/>
-          <ast length="5" start="128" type="59"/>
-        </node>
+    <graph ins="" name="Lbasic_methods/A;.toString()Ljava/lang/String;" outs="Nbasic_methods/A.toString.b0_2" style="instance">
+      <ast length="60" start="52" type="31"/>
+      <scope name="basic_methods/A.toString">
+        <scope name="basic_methods/A.toString.b0">
+          <node data="A" id="Nbasic_methods/A.toString.b0_1" kind="const" type="Ljava/lang/String;">
+            <ast length="3" start="98" type="45"/>
+          </node>
+          <node id="Nbasic_methods/A.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="Nbasic_methods/A.toString.b0_1"/>
+            <ast length="11" start="91" type="41"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph ins="" name="Lbasic_methods/A;.toString()Ljava/lang/String;" outs="Nbasic_methods/A.toString.b0_2" style="instance">
+      <ast length="60" start="52" type="31"/>
+      <scope name="basic_methods/A.toString">
+        <scope name="basic_methods/A.toString.b0">
+          <node data="A" id="Nbasic_methods/A.toString.b0_1" kind="const" type="Ljava/lang/String;">
+            <ast length="3" start="98" type="45"/>
+          </node>
+          <node id="Nbasic_methods/A.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="Nbasic_methods/A.toString.b0_1"/>
+            <ast length="11" start="91" type="41"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph ins="" name="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;.toString()Ljava/lang/String;" outs="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_2" style="instance">
+      <ast length="42" start="180" type="31"/>
+      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString">
+        <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0">
+          <node data="AAA" id="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_1" kind="const" type="Ljava/lang/String;">
+            <ast length="5" start="214" type="45"/>
+          </node>
+          <node id="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="Nbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0_1"/>
+            <ast length="13" start="207" type="41"/>
+          </node>
+        </scope>
+      </scope>
+    </graph>
+    <graph ins="Nbasic_methods/:AST:31:139:246/moo.fc_2 Nbasic_methods/:AST:31:139:246/moo.fc_4" name="Lbasic_methods/:AST:31:139:246/moo;.fc()I" outs="Nbasic_methods/:AST:31:139:246/moo.fc.b0_5" style="instance">
+      <ast length="48" start="245" type="31"/>
+      <scope name="basic_methods/:AST:31:139:246/moo.fc">
+        <scope name="basic_methods/:AST:31:139:246/moo.fc.b0">
+          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_1" kind="ref" ref="#this" type="Lbasic_methods;">
+            <link src="Nbasic_methods/:AST:31:139:246/moo.fc_2"/>
+            <ast length="18" start="270" type="52"/>
+          </node>
+          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_3" kind="fieldref" ref="basic_methods/.x" type="I">
+            <link src="Nbasic_methods/:AST:31:139:246/moo.fc_4"/>
+            <link label="obj" src="Nbasic_methods/:AST:31:139:246/moo.fc.b0_1"/>
+            <ast length="20" start="270" type="22"/>
+          </node>
+          <node id="Nbasic_methods/:AST:31:139:246/moo.fc.b0_5" kind="output" ref="#return" type="I">
+            <link src="Nbasic_methods/:AST:31:139:246/moo.fc.b0_3"/>
+            <ast length="28" start="263" type="41"/>
+          </node>
+        </scope>
+        <node id="Nbasic_methods/:AST:31:139:246/moo.fc_2" ref="#this" type="Lbasic_methods;"/>
+        <node id="Nbasic_methods/:AST:31:139:246/moo.fc_4" ref="basic_methods/.x" type="I"/>
       </scope>
     </graph>
   </file>
