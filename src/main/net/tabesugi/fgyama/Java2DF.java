@@ -1212,7 +1212,7 @@ public class Java2DF {
                 DFKlass klass = finder.resolveKlass(
                     scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
-                DFKlass anonKlass = new DFAnonKlass(
+                DFKlass anonKlass = new DFKlass(
                     id, anonSpace, klass, scope,
                     DFBuiltinTypes.getObjectKlass());
                 assert body != null;
@@ -1237,7 +1237,7 @@ public class Java2DF {
                 DFKlass klass = finder.resolveKlass(
                     scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
-                DFKlass anonKlass = new DFAnonKlass(
+                DFKlass anonKlass = new DFKlass(
                     "methodref", anonSpace, klass, scope,
                     DFBuiltinTypes.getObjectKlass());
                 // XXX TODO method ref
@@ -2091,24 +2091,22 @@ public class Java2DF {
      * Performs dataflow analysis for a given method.
      */
     @SuppressWarnings("unchecked")
-    private DFGraph processMethodDeclaration(
-        DFTypeFinder finder, DFMethod method,
-        MethodDeclaration methodDecl)
+    private DFGraph processMethod(
+        DFTypeFinder finder, DFMethod method, ASTNode ast,
+        Statement body, List<SingleVariableDeclaration> parameters)
         throws UnsupportedSyntax, EntityNotFound {
+        DFVarScope scope = method.getScope();
+        assert scope != null;
+        DFFrame frame = method.getFrame();
+        assert frame != null;
         DFTypeSpace methodSpace = method.getChildSpace();
         finder = new DFTypeFinder(finder, methodSpace);
-        try {
-            DFVarScope scope = method.getScope();
-            assert scope != null;
-            DFFrame frame = method.getFrame();
-            assert frame != null;
-            DFGraph graph = new DFGraph(scope, frame, method, false, methodDecl);
-            DFContext ctx = new DFContext(graph, scope);
-            // XXX Ignore isConstructor().
-            // XXX Ignore isVarargs().
+
+        DFGraph graph = new DFGraph(scope, frame, method, false, ast);
+        DFContext ctx = new DFContext(graph, scope);
+        if (parameters != null) {
             int i = 0;
-            for (SingleVariableDeclaration decl :
-                     (List<SingleVariableDeclaration>) methodDecl.parameters()) {
+            for (SingleVariableDeclaration decl : parameters) {
                 // XXX Ignore modifiers and dimensions.
                 DFVarRef ref = scope.lookupArgument(i);
                 frame.addInputRef(ref);
@@ -2120,16 +2118,14 @@ public class Java2DF {
                 ctx.set(assign);
                 i++;
             }
+        }
 
+        try {
             // Process the function body.
             processStatement(
-                ctx, methodSpace, graph, finder, scope, frame,
-		methodDecl.getBody());
+                ctx, methodSpace, graph, finder, scope, frame, body);
             frame.close(ctx);
             //frame.dump();
-
-            Logger.debug("Success: "+method.getSignature());
-            return graph;
         } catch (UnsupportedSyntax e) {
             //e.printStackTrace();
             e.name = method.getSignature();
@@ -2142,25 +2138,8 @@ public class Java2DF {
             Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+method);
             throw e;
         }
-    }
 
-    @SuppressWarnings("unchecked")
-    private DFGraph processInitializer(
-        DFTypeFinder finder, DFKlass klass,
-        Initializer initializer)
-        throws UnsupportedSyntax, EntityNotFound {
-        DFTypeSpace typeSpace = klass.getKlassSpace();
-        DFMethod method = klass.getInitializer();
-        DFVarScope scope = method.getScope();
-        assert scope != null;
-        DFFrame frame = method.getFrame();
-        assert frame != null;
-        DFGraph graph = new DFGraph(scope, frame, method, true, initializer);
-        DFContext ctx = new DFContext(graph, scope);
-        processStatement(
-            ctx, typeSpace, graph, finder, scope, frame,
-            initializer.getBody());
-        frame.close(ctx);
+        Logger.debug("Success: "+method.getSignature());
         return graph;
     }
 
@@ -2363,14 +2342,16 @@ public class Java2DF {
                     if (ast instanceof MethodDeclaration) {
                         MethodDeclaration methodDecl = (MethodDeclaration)ast;
                         if (methodDecl.getBody() != null) {
-                            DFGraph graph = processMethodDeclaration(
-                                finder2, method, methodDecl);
+                            DFGraph graph = processMethod(
+                                finder2, method, methodDecl,
+                                methodDecl.getBody(), methodDecl.parameters());
                             exportGraph(graph);
                         }
                     } else if (ast instanceof Initializer) {
                         Initializer initializer = (Initializer)ast;
-                        DFGraph graph = processInitializer(
-                            finder2, klass, initializer);
+                        DFGraph graph = processMethod(
+                            finder2, klass.getInitializer(), initializer,
+                            initializer.getBody(), null);
                         exportGraph(graph);
                     }
                 } catch (UnsupportedSyntax e) {

@@ -188,14 +188,14 @@ public class DFFrame {
         }
         this.build(finder, method, scope, methodDecl.getBody());
     }
-    
+
     public void build(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Initializer initializer)
         throws UnsupportedSyntax, EntityNotFound {
         this.build(finder, method, scope, initializer.getBody());
     }
-    
+
     @SuppressWarnings("unchecked")
     private void build(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
@@ -671,7 +671,7 @@ public class DFFrame {
             DFTypeSpace anonSpace = new DFTypeSpace(null, id);
             DFKlass klass = finder.resolveKlass(
                 scope.lookupThis().getRefType());
-            DFKlass anonKlass = new DFAnonKlass(
+            DFKlass anonKlass = new DFKlass(
                 id, anonSpace, klass, scope,
                 DFBuiltinTypes.getObjectKlass());
             if (body instanceof Statement) {
