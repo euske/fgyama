@@ -36,8 +36,6 @@ public class DFKlass extends DFType {
         new ArrayList<DFVarRef>();
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
-    private Map<String, DFMethod> _ast2method =
-        new HashMap<String, DFMethod>();
     private Map<String, DFLocalVarScope> _ast2scope =
         new HashMap<String, DFLocalVarScope>();
 
@@ -275,10 +273,6 @@ public class DFKlass extends DFType {
             }
         }
         throw new MethodNotFound(name.getIdentifier(), argTypes);
-    }
-
-    public DFMethod getMethodByAST(ASTNode ast) {
-        return _ast2method.get(Utils.encodeASTNode(ast));
     }
 
     private DFVarRef addField(
@@ -646,8 +640,8 @@ public class DFKlass extends DFType {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-                DFKlass klass = _klassSpace.getKlass(decl.getName());
-                klass.build(finder, decl);
+                // Do nothing for a child klass.
+                // (They will be loaded/built independently.)
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
@@ -691,7 +685,6 @@ public class DFKlass extends DFType {
                     new DFMethodType(argTypes, returnType));
                 DFLocalVarScope scope = this.getMethodScope(decl);
                 method.build(finder, scope, decl);
-                _ast2method.put(Utils.encodeASTNode(decl), method);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
