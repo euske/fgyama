@@ -14,7 +14,7 @@
       <ast length="190" start="104" type="55"/>
       <scope name="basic_enum"/>
     </graph>
-    <graph ins="NE.E_1 NE.E_4" name="LE;.&lt;init&gt;(I)LE;" outs="NE.E.b0_5" style="">
+    <graph ins="NE.E_1 NE.E_4" name="LE;.&lt;init&gt;(I)LE;" outs="NE.E.b0_5" style="constructor">
       <ast length="44" start="56" type="31"/>
       <scope name="E.E">
         <scope name="E.E.b0">
