@@ -50,14 +50,15 @@ public class DFRootTypeSpace extends DFTypeSpace {
         int j = fullName.lastIndexOf('/');
         DFTypeSpace space = this.lookupSpace(fullName.substring(0, j).replace('/', '.'));
         DFKlass klass = space.createKlass(null, null, fullName.substring(j+1));
+        klass.setFinder(_finder);
         while (0 <= i) {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
             space = klass.getKlassSpace();
             klass = space.createKlass(klass, klass.getKlassScope(), name);
+            klass.setFinder(_finder);
         }
-        klass.setFinder(_finder);
         klass.setJarPath(jarPath, filePath);
     }
 

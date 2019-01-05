@@ -16,34 +16,42 @@ public class DFBuiltinTypes {
         File rtFile = new File(libDir, "rt.jar");
         rootSpace.loadJarFile(rtFile.getAbsolutePath());
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
+        DFTypeFinder finder = new DFTypeFinder(rootSpace);
         _object = java_lang.getKlass("Object");
-        _object.load();
+        _object.load(finder);
         _class = java_lang.getKlass("Class");
-        _class.load();
+        _class.load(finder);
         _enum = java_lang.getKlass("Enum");
-        _enum.load();
+        _enum.load(finder);
         _string = java_lang.getKlass("String");
-        _string.load();
+        _string.load(finder);
         _byte = java_lang.getKlass("Byte");
-        _byte.load();
+        _byte.load(finder);
         _character = java_lang.getKlass("Character");
-        _character.load();
+        _character.load(finder);
         _short = java_lang.getKlass("Short");
-        _short.load();
+        _short.load(finder);
         _integer = java_lang.getKlass("Integer");
-        _integer.load();
+        _integer.load(finder);
         _long = java_lang.getKlass("Long");
-        _long.load();
+        _long.load(finder);
         _float = java_lang.getKlass("Float");
-        _float.load();
+        _float.load(finder);
         _double = java_lang.getKlass("Double");
-        _double.load();
+        _double.load(finder);
         _boolean = java_lang.getKlass("Boolean");
-        _boolean.load();
+        _boolean.load(finder);
         _exception = java_lang.getKlass("Exception");
-        _exception.load();
-        _array = java_lang.createKlass(null, null, "_Array");
-        _array.addField("length", false, DFBasicType.INT);
+        _exception.load(finder);
+        _array = new ArrayKlass(java_lang, _object);
+    }
+
+    private static class ArrayKlass extends DFKlass {
+        public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
+            super("_Array", typeSpace, null, null, baseKlass);
+            this.addField("length", false, DFBasicType.INT);
+            this.setLoaded();
+        }
     }
 
     private static DFKlass _object = null;

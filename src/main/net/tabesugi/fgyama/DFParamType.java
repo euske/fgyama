@@ -48,7 +48,8 @@ public class DFParamType extends DFKlass {
 
     public void load(DFTypeFinder finder, JNITypeParser parser)
         throws TypeNotFound {
-	_baseKlass = (DFKlass)parser.getType(finder);
+        this.setLoaded();
+        _baseKlass = (DFKlass)parser.getType(finder);
     }
 
     protected void buildFromTree(DFTypeFinder finder, ASTNode ast)

@@ -20,6 +20,7 @@ public class DFMethod implements Comparable<DFMethod> {
     private Set<DFMethod> _callers =
         new HashSet<DFMethod>();
 
+    private DFTypeFinder _finder = null;
     private DFVarScope _scope = null;
     private DFFrame _frame = null;
     private ASTNode _ast = null;
@@ -164,6 +165,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return callers;
     }
 
+    public DFTypeFinder getFinder() {
+        return _finder;
+    }
+
     public DFVarScope getScope() {
         return _scope;
     }
@@ -180,6 +185,7 @@ public class DFMethod implements Comparable<DFMethod> {
         DFTypeFinder finder, DFLocalVarScope scope,
         MethodDeclaration decl)
         throws UnsupportedSyntax, TypeNotFound {
+        _finder = finder;
         scope.build(finder, decl);
         _scope = scope;
         //_scope.dump();
@@ -196,6 +202,7 @@ public class DFMethod implements Comparable<DFMethod> {
         DFTypeFinder finder, DFLocalVarScope scope,
         Initializer initializer)
         throws UnsupportedSyntax, TypeNotFound {
+        _finder = finder;
         scope.build(finder, initializer);
         _scope = scope;
         _frame = new DFFrame(DFFrame.RETURNABLE);

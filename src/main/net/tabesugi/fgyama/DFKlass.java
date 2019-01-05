@@ -15,13 +15,17 @@ import org.eclipse.jdt.core.dom.*;
 public class DFKlass extends DFType {
 
     protected String _name;
+
+    // Ultimately every klass must have a baseKlass, but
+    // they're not defined until it is loaded.
     protected DFKlass _baseKlass = null;
+    // Ditto for base Interfaces.
     protected DFKlass[] _baseIfaces = null;
 
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
-    private DFVarScope _klassScope = null;
+    private DFVarScope _klassScope;
 
     private DFParamType[] _paramTypes = null;
     private Map<String, DFParamKlass> _paramKlasses =
@@ -37,8 +41,8 @@ public class DFKlass extends DFType {
     private Map<String, DFLocalVarScope> _ast2scope =
         new HashMap<String, DFLocalVarScope>();
 
-    private DFTypeFinder _finder = null;
     private boolean _loaded = false;
+    private DFTypeFinder _finder = null;
     private String _jarPath = null;
     private String _filePath = null;
     private ASTNode _ast = null;
@@ -54,7 +58,7 @@ public class DFKlass extends DFType {
         _baseKlass = baseKlass;
         _klassScope = new DFKlassScope(this, parentScope, name);
         _initializer = this.addMethod(
-            null, "<init>", DFCallStyle.Initializer,
+            null, "<clinit>", DFCallStyle.Initializer,
             new DFMethodType(new DFType[] {}, DFBasicType.VOID));
     }
 
@@ -66,6 +70,7 @@ public class DFKlass extends DFType {
         _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
         _initializer = genericKlass._initializer;
+        this.setLoaded();
     }
 
     @Override
@@ -112,7 +117,7 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass getParamKlass(DFType[] mapTypes) {
-        String name = _name+DFParamKlass.getParamName(mapTypes);
+        String name = _name + DFParamKlass.getParamName(mapTypes);
         DFParamKlass klass = _paramKlasses.get(name);
         if (klass == null) {
             klass = new DFParamKlass(name, this, _paramTypes, mapTypes);
@@ -188,6 +193,7 @@ public class DFKlass extends DFType {
 
     protected DFVarRef lookupField(String id)
         throws VariableNotFound {
+        assert _loaded;
         if (_klassScope != null) {
             try {
                 return _klassScope.lookupRef("."+id);
@@ -217,10 +223,12 @@ public class DFKlass extends DFType {
     }
 
     protected List<DFVarRef> getFields() {
+        assert _loaded;
 	return _fields;
     }
 
     public List<DFMethod> getMethods() {
+        assert _loaded;
 	return _methods;
     }
 
@@ -241,6 +249,7 @@ public class DFKlass extends DFType {
 
     public DFMethod lookupMethod(SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
+        assert _loaded;
         DFMethod method = this.lookupMethod1(name, argTypes);
         if (method != null) {
             return method;
@@ -277,7 +286,7 @@ public class DFKlass extends DFType {
         return this.addField(name.getIdentifier(), isStatic, type);
     }
 
-    public DFVarRef addField(
+    protected DFVarRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
         DFVarRef ref = _klassScope.addRef("."+id, type);
@@ -308,6 +317,7 @@ public class DFKlass extends DFType {
     }
 
     public void addOverrides() {
+        assert _loaded;
         for (DFMethod method : _methods) {
             if (_baseKlass != null) {
                 _baseKlass.overrideMethod(method, 0);
@@ -352,9 +362,10 @@ public class DFKlass extends DFType {
     public DFTypeFinder getFinder() {
         return _finder;
     }
+
     public void setFinder(DFTypeFinder finder) {
+        assert _finder == null || _finder == finder;
         _finder = finder;
-        _klassSpace.setFinder(finder.extend(this));
     }
     public void setTree(ASTNode ast) {
         _ast = ast;
@@ -364,15 +375,20 @@ public class DFKlass extends DFType {
         _filePath = filePath;
     }
 
+    protected void setLoaded() {
+        assert !_loaded;
+        _loaded = true;
+    }
+
     public void load()
         throws TypeNotFound {
-        if (_finder == null) return;
         this.load(_finder);
     }
     public void load(DFTypeFinder finder)
         throws TypeNotFound {
         if (_loaded) return;
-        _loaded = true;
+        this.setLoaded();
+        assert finder != null;
         assert _ast != null || _jarPath != null;
         if (_ast != null) {
             try {
@@ -468,13 +484,12 @@ public class DFKlass extends DFType {
             if (meth.isPrivate()) continue;
             sig = getSignature(meth.getAttributes());
 	    DFMethodType methodType;
-            DFTypeSpace methodSpace = null;
+            DFTypeSpace methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
 	    if (sig != null) {
                 //Logger.info("meth: "+meth.getName()+","+sig);
-                methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
-		finder = new DFTypeFinder(finder, methodSpace);
 		JNITypeParser parser = new JNITypeParser(sig);
                 DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
+		finder = new DFTypeFinder(finder, methodSpace);
 		if (paramTypes != null) {
 		    parser.buildParamTypes(finder, paramTypes);
 		}
@@ -571,8 +586,11 @@ public class DFKlass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
         // Get superclass.
+        if (_parentKlass != null) {
+            finder = finder.extend(_parentKlass);
+        }
+        finder = new DFTypeFinder(finder, _klassSpace);
         try {
-            finder = new DFTypeFinder(finder, _klassSpace);
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
             finder = finder.extend(_baseKlass);
@@ -607,8 +625,11 @@ public class DFKlass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build: "+this+": "+annotTypeDecl.getName());
         // Get superclass.
+        if (_parentKlass != null) {
+            finder = finder.extend(_parentKlass);
+        }
+        finder = new DFTypeFinder(finder, _klassSpace);
         try {
-            finder = new DFTypeFinder(finder, _klassSpace);
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             finder = finder.extend(_baseKlass);
             // Lookup child klasses.

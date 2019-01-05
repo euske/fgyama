@@ -20,6 +20,8 @@ public enum DFCallStyle {
             return "static";
         case Initializer:
             return "initializer";
+        case Constructor:
+            return "constructor";
         default:
             return null;
         }

@@ -42,8 +42,11 @@ public class DFTypeFinder {
         DFTypeFinder finder = this;
         if (klass instanceof DFParamKlass) {
             DFKlass genericKlass = ((DFParamKlass)klass).getGeneric();
+            assert genericKlass != null;
             finder = finder.extend(genericKlass);
         } else {
+            assert klass.getKlassSpace() != null;
+            finder = new DFTypeFinder(finder, klass.getKlassSpace());
             DFKlass baseKlass = klass.getBaseKlass();
             if (baseKlass != null) {
                 finder = finder.extend(baseKlass);
@@ -54,24 +57,31 @@ public class DFTypeFinder {
                     finder = finder.extend(iface);
                 }
             }
-            DFTypeSpace klassSpace = klass.getKlassSpace();
-            if (klassSpace != null) {
-                finder = new DFTypeFinder(finder, klassSpace);
-            }
         }
         return finder;
     }
 
     public DFKlass lookupKlass(Name name)
         throws TypeNotFound {
-        return this.lookupKlass(name.getFullyQualifiedName());
+        try {
+            DFKlass klass = _space.getKlass(name);
+            klass.load();
+            return klass;
+        } catch (TypeNotFound e) {
+            if (_next != null) {
+                return _next.lookupKlass(name);
+            } else {
+                throw new TypeNotFound(name.getFullyQualifiedName());
+            }
+        }
     }
 
     public DFKlass lookupKlass(String name)
         throws TypeNotFound {
-        DFKlass klass;
         try {
-            klass = _space.getKlass(name.replace('$', '.'));
+            DFKlass klass = _space.getKlass(name.replace('$', '.'));
+            klass.load(this);
+            return klass;
         } catch (TypeNotFound e) {
             if (_next != null) {
                 return _next.lookupKlass(name);
@@ -79,8 +89,6 @@ public class DFTypeFinder {
                 throw new TypeNotFound(name);
             }
         }
-        klass.load();
-        return klass;
     }
 
     public DFKlass resolveKlass(Type type)
@@ -96,7 +104,9 @@ public class DFTypeFinder {
         } else if (type instanceof DFArrayType) {
             return DFBuiltinTypes.getArrayKlass();
         } else if (type instanceof DFKlass) {
-            return (DFKlass)type;
+            DFKlass klass = (DFKlass)type;
+            klass.load();
+            return klass;
         } else {
             throw new TypeNotFound(type.getTypeName());
         }

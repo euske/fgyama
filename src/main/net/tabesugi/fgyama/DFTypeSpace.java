@@ -585,13 +585,6 @@ public class DFTypeSpace {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public void setFinder(DFTypeFinder finder) {
-        for (DFKlass klass : _id2klass.values()) {
-            klass.setFinder(finder);
-        }
-    }
-
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");

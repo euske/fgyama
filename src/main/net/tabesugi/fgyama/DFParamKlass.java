@@ -22,10 +22,15 @@ public class DFParamKlass extends DFKlass {
     public DFParamKlass(String name, DFKlass genericKlass,
                         DFParamType[] paramTypes, DFType[] mapTypes) {
         super(name, genericKlass);
+        assert genericKlass != null;
+        assert paramTypes != null;
+        assert mapTypes != null;
         _genericKlass = genericKlass;
         _mapTypes = mapTypes;
         _typeMap = new HashMap<DFParamType, DFType>();
         for (int i = 0; i < mapTypes.length; i++) {
+            assert paramTypes[i] != null;
+            assert mapTypes[i] != null;
             _typeMap.put(paramTypes[i], mapTypes[i]);
         }
     }
