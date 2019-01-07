@@ -978,7 +978,7 @@ public class Java2DF {
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
                             klass, null, id, DFCallStyle.InstanceMethod,
-                            new DFMethodType(argTypes, null));
+                            new DFMethodType(argTypes, null), finder);
                         Logger.error("Fallback method: "+klass+": "+fallback);
                         method = fallback;
                     }
@@ -1029,7 +1029,7 @@ public class Java2DF {
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, DFCallStyle.InstanceMethod,
-                        new DFMethodType(argTypes, null));
+                        new DFMethodType(argTypes, null), finder);
                     Logger.error("Fallback method: "+baseKlass+": "+fallback);
                     method = fallback;
                 }
@@ -2150,7 +2150,7 @@ public class Java2DF {
 	DFTypeSpace klassSpace = klass.getKlassSpace();
         DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
-        DFTypeFinder finder = klass.getFinder().extend(klass);
+        DFTypeFinder finder = klass.getFinder();
         for (BodyDeclaration body : decls) {
             try {
                 if (body instanceof AbstractTypeDeclaration) {

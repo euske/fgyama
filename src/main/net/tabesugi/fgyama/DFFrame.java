@@ -399,301 +399,306 @@ public class DFFrame {
         throws UnsupportedSyntax, EntityNotFound {
         assert expr != null;
 
-        if (expr instanceof Annotation) {
-            return null;
+        try {
+	    if (expr instanceof Annotation) {
+		return null;
 
-        } else if (expr instanceof Name) {
-            Name name = (Name)expr;
-            DFVarRef ref;
-            if (name.isSimpleName()) {
-                ref = scope.lookupVar((SimpleName)name);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                DFKlass klass;
-                try {
-                    // Try assuming it's a variable access.
-                    DFType type = this.build(finder, method, scope, qname.getQualifier());
-                    if (type == null) return type;
-                    klass = finder.resolveKlass(type);
-                } catch (EntityNotFound e) {
-                    // Turned out it's a class variable.
-                    klass = finder.lookupKlass(qname.getQualifier());
-                }
-                SimpleName fieldName = qname.getName();
-                ref = klass.lookupField(fieldName);
-            }
-            this.addInputRef(ref);
-            return ref.getRefType();
+	    } else if (expr instanceof Name) {
+		Name name = (Name)expr;
+		DFVarRef ref;
+		if (name.isSimpleName()) {
+		    ref = scope.lookupVar((SimpleName)name);
+		} else {
+		    QualifiedName qname = (QualifiedName)name;
+		    DFKlass klass;
+		    try {
+			// Try assuming it's a variable access.
+			DFType type = this.build(finder, method, scope, qname.getQualifier());
+			if (type == null) return type;
+			klass = finder.resolveKlass(type);
+		    } catch (EntityNotFound e) {
+			// Turned out it's a class variable.
+			klass = finder.lookupKlass(qname.getQualifier());
+		    }
+		    SimpleName fieldName = qname.getName();
+		    ref = klass.lookupField(fieldName);
+		}
+		this.addInputRef(ref);
+		return ref.getRefType();
 
-        } else if (expr instanceof ThisExpression) {
-            ThisExpression thisExpr = (ThisExpression)expr;
-            Name name = thisExpr.getQualifier();
-            DFVarRef ref;
-            if (name != null) {
-                DFKlass klass = finder.lookupKlass(name);
-                ref = klass.getKlassScope().lookupThis();
-            } else {
-                ref = scope.lookupThis();
-            }
-            this.addInputRef(ref);
-            return ref.getRefType();
+	    } else if (expr instanceof ThisExpression) {
+		ThisExpression thisExpr = (ThisExpression)expr;
+		Name name = thisExpr.getQualifier();
+		DFVarRef ref;
+		if (name != null) {
+		    DFKlass klass = finder.lookupKlass(name);
+		    ref = klass.getKlassScope().lookupThis();
+		} else {
+		    ref = scope.lookupThis();
+		}
+		this.addInputRef(ref);
+		return ref.getRefType();
 
-        } else if (expr instanceof BooleanLiteral) {
-            return DFBasicType.BOOLEAN;
+	    } else if (expr instanceof BooleanLiteral) {
+		return DFBasicType.BOOLEAN;
 
-        } else if (expr instanceof CharacterLiteral) {
-            return DFBasicType.CHAR;
+	    } else if (expr instanceof CharacterLiteral) {
+		return DFBasicType.CHAR;
 
-        } else if (expr instanceof NullLiteral) {
-            return DFNullType.NULL;
+	    } else if (expr instanceof NullLiteral) {
+		return DFNullType.NULL;
 
-        } else if (expr instanceof NumberLiteral) {
-            return DFBasicType.INT;
+	    } else if (expr instanceof NumberLiteral) {
+		return DFBasicType.INT;
 
-        } else if (expr instanceof StringLiteral) {
-            return DFBuiltinTypes.getStringKlass();
+	    } else if (expr instanceof StringLiteral) {
+		return DFBuiltinTypes.getStringKlass();
 
-        } else if (expr instanceof TypeLiteral) {
-            return DFBuiltinTypes.getClassKlass();
+	    } else if (expr instanceof TypeLiteral) {
+		return DFBuiltinTypes.getClassKlass();
 
-        } else if (expr instanceof PrefixExpression) {
-            PrefixExpression prefix = (PrefixExpression)expr;
-            PrefixExpression.Operator op = prefix.getOperator();
-            Expression operand = prefix.getOperand();
-            if (op == PrefixExpression.Operator.INCREMENT ||
-                op == PrefixExpression.Operator.DECREMENT) {
-                this.buildAssignment(finder, method, scope, operand);
-            }
-            return this.build(finder, method, scope, operand);
+	    } else if (expr instanceof PrefixExpression) {
+		PrefixExpression prefix = (PrefixExpression)expr;
+		PrefixExpression.Operator op = prefix.getOperator();
+		Expression operand = prefix.getOperand();
+		if (op == PrefixExpression.Operator.INCREMENT ||
+		    op == PrefixExpression.Operator.DECREMENT) {
+		    this.buildAssignment(finder, method, scope, operand);
+		}
+		return this.build(finder, method, scope, operand);
 
-        } else if (expr instanceof PostfixExpression) {
-            PostfixExpression postfix = (PostfixExpression)expr;
-            PostfixExpression.Operator op = postfix.getOperator();
-            Expression operand = postfix.getOperand();
-            if (op == PostfixExpression.Operator.INCREMENT ||
-                op == PostfixExpression.Operator.DECREMENT) {
-                this.buildAssignment(finder, method, scope, operand);
-            }
-            return this.build(finder, method, scope, operand);
+	    } else if (expr instanceof PostfixExpression) {
+		PostfixExpression postfix = (PostfixExpression)expr;
+		PostfixExpression.Operator op = postfix.getOperator();
+		Expression operand = postfix.getOperand();
+		if (op == PostfixExpression.Operator.INCREMENT ||
+		    op == PostfixExpression.Operator.DECREMENT) {
+		    this.buildAssignment(finder, method, scope, operand);
+		}
+		return this.build(finder, method, scope, operand);
 
-        } else if (expr instanceof InfixExpression) {
-            InfixExpression infix = (InfixExpression)expr;
-            InfixExpression.Operator op = infix.getOperator();
-            DFType left = this.build(finder, method, scope, infix.getLeftOperand());
-            DFType right = this.build(finder, method, scope, infix.getRightOperand());
-            return DFType.inferInfixType(left, op, right);
+	    } else if (expr instanceof InfixExpression) {
+		InfixExpression infix = (InfixExpression)expr;
+		InfixExpression.Operator op = infix.getOperator();
+		DFType left = this.build(finder, method, scope, infix.getLeftOperand());
+		DFType right = this.build(finder, method, scope, infix.getRightOperand());
+		return DFType.inferInfixType(left, op, right);
 
-        } else if (expr instanceof ParenthesizedExpression) {
-            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            return this.build(finder, method, scope, paren.getExpression());
+	    } else if (expr instanceof ParenthesizedExpression) {
+		ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+		return this.build(finder, method, scope, paren.getExpression());
 
-        } else if (expr instanceof Assignment) {
-            Assignment assn = (Assignment)expr;
-            Assignment.Operator op = assn.getOperator();
-            if (op != Assignment.Operator.ASSIGN) {
-                this.build(finder, method, scope, assn.getLeftHandSide());
-            }
-            this.buildAssignment(finder, method, scope, assn.getLeftHandSide());
-            return this.build(finder, method, scope, assn.getRightHandSide());
+	    } else if (expr instanceof Assignment) {
+		Assignment assn = (Assignment)expr;
+		Assignment.Operator op = assn.getOperator();
+		if (op != Assignment.Operator.ASSIGN) {
+		    this.build(finder, method, scope, assn.getLeftHandSide());
+		}
+		this.buildAssignment(finder, method, scope, assn.getLeftHandSide());
+		return this.build(finder, method, scope, assn.getRightHandSide());
 
-        } else if (expr instanceof VariableDeclarationExpression) {
-            VariableDeclarationExpression decl =
-                (VariableDeclarationExpression)expr;
-            for (VariableDeclarationFragment frag :
-                     (List<VariableDeclarationFragment>) decl.fragments()) {
-                DFVarRef ref = scope.lookupVar(frag.getName());
-                this.addOutputRef(ref);
-                Expression init = frag.getInitializer();
-                if (init != null) {
-                    this.build(finder, method, scope, init);
-                }
-            }
-            return null; // XXX what do?
+	    } else if (expr instanceof VariableDeclarationExpression) {
+		VariableDeclarationExpression decl =
+		    (VariableDeclarationExpression)expr;
+		for (VariableDeclarationFragment frag :
+			 (List<VariableDeclarationFragment>) decl.fragments()) {
+		    DFVarRef ref = scope.lookupVar(frag.getName());
+		    this.addOutputRef(ref);
+		    Expression init = frag.getInitializer();
+		    if (init != null) {
+			this.build(finder, method, scope, init);
+		    }
+		}
+		return null; // XXX what do?
 
-        } else if (expr instanceof MethodInvocation) {
-            MethodInvocation invoke = (MethodInvocation)expr;
-            Expression expr1 = invoke.getExpression();
-            DFKlass klass = null;
-            if (expr1 == null) {
-                DFVarRef ref = scope.lookupThis();
-                this.addInputRef(ref);
-                klass = finder.resolveKlass(ref.getRefType());
-            } else {
-                if (expr1 instanceof Name) {
-                    try {
-                        klass = finder.lookupKlass((Name)expr1);
-                    } catch (TypeNotFound e) {
-                    }
-                }
-                if (klass == null) {
-                    DFType type = this.build(finder, method, scope, expr1);
-                    if (type == null) return type;
-                    klass = finder.resolveKlass(type);
-                }
-            }
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) invoke.arguments()) {
-                DFType type = this.build(finder, method, scope, arg);
-                if (type == null) return type;
-                typeList.add(type);
-            }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
-            try {
-                DFMethod method1 = klass.lookupMethod(
-                    invoke.getName(), argTypes);
-                method1.addCaller(method);
-                return method1.getReturnType();
-            } catch (MethodNotFound e) {
-                return null;
-            }
+	    } else if (expr instanceof MethodInvocation) {
+		MethodInvocation invoke = (MethodInvocation)expr;
+		Expression expr1 = invoke.getExpression();
+		DFKlass klass = null;
+		if (expr1 == null) {
+		    DFVarRef ref = scope.lookupThis();
+		    this.addInputRef(ref);
+		    klass = finder.resolveKlass(ref.getRefType());
+		} else {
+		    if (expr1 instanceof Name) {
+			try {
+			    klass = finder.lookupKlass((Name)expr1);
+			} catch (TypeNotFound e) {
+			}
+		    }
+		    if (klass == null) {
+			DFType type = this.build(finder, method, scope, expr1);
+			if (type == null) return type;
+			klass = finder.resolveKlass(type);
+		    }
+		}
+		List<DFType> typeList = new ArrayList<DFType>();
+		for (Expression arg : (List<Expression>) invoke.arguments()) {
+		    DFType type = this.build(finder, method, scope, arg);
+		    if (type == null) return type;
+		    typeList.add(type);
+		}
+		DFType[] argTypes = new DFType[typeList.size()];
+		typeList.toArray(argTypes);
+		try {
+		    DFMethod method1 = klass.lookupMethod(
+			invoke.getName(), argTypes);
+		    method1.addCaller(method);
+		    return method1.getReturnType();
+		} catch (MethodNotFound e) {
+		    return null;
+		}
 
-        } else if (expr instanceof SuperMethodInvocation) {
-            SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) sinvoke.arguments()) {
-                DFType type = this.build(finder, method, scope, arg);
-                if (type == null) return type;
-                typeList.add(type);
-            }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
-            DFKlass klass =
-                finder.resolveKlass(scope.lookupThis().getRefType());
-            DFKlass baseKlass = klass.getBaseKlass();
-            try {
-                DFMethod method1 = baseKlass.lookupMethod(
-                    sinvoke.getName(), argTypes);
-                method1.addCaller(method);
-                return method1.getReturnType();
-            } catch (MethodNotFound e) {
-                return null;
-            }
+	    } else if (expr instanceof SuperMethodInvocation) {
+		SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
+		List<DFType> typeList = new ArrayList<DFType>();
+		for (Expression arg : (List<Expression>) sinvoke.arguments()) {
+		    DFType type = this.build(finder, method, scope, arg);
+		    if (type == null) return type;
+		    typeList.add(type);
+		}
+		DFType[] argTypes = new DFType[typeList.size()];
+		typeList.toArray(argTypes);
+		DFKlass klass =
+		    finder.resolveKlass(scope.lookupThis().getRefType());
+		DFKlass baseKlass = klass.getBaseKlass();
+		try {
+		    DFMethod method1 = baseKlass.lookupMethod(
+			sinvoke.getName(), argTypes);
+		    method1.addCaller(method);
+		    return method1.getReturnType();
+		} catch (MethodNotFound e) {
+		    return null;
+		}
 
-        } else if (expr instanceof ArrayCreation) {
-            ArrayCreation ac = (ArrayCreation)expr;
-            for (Expression dim : (List<Expression>) ac.dimensions()) {
-                this.build(finder, method, scope, dim);
-            }
-            ArrayInitializer init = ac.getInitializer();
-            if (init != null) {
-                this.build(finder, method, scope, init);
-            }
-            return finder.resolve(ac.getType().getElementType());
+	    } else if (expr instanceof ArrayCreation) {
+		ArrayCreation ac = (ArrayCreation)expr;
+		for (Expression dim : (List<Expression>) ac.dimensions()) {
+		    this.build(finder, method, scope, dim);
+		}
+		ArrayInitializer init = ac.getInitializer();
+		if (init != null) {
+		    this.build(finder, method, scope, init);
+		}
+		return finder.resolve(ac.getType().getElementType());
 
-        } else if (expr instanceof ArrayInitializer) {
-            ArrayInitializer init = (ArrayInitializer)expr;
-            DFType type = null;
-            for (Expression expr1 : (List<Expression>) init.expressions()) {
-                type = this.build(finder, method, scope, expr1);
-            }
-            return type;
+	    } else if (expr instanceof ArrayInitializer) {
+		ArrayInitializer init = (ArrayInitializer)expr;
+		DFType type = null;
+		for (Expression expr1 : (List<Expression>) init.expressions()) {
+		    type = this.build(finder, method, scope, expr1);
+		}
+		return type;
 
-        } else if (expr instanceof ArrayAccess) {
-            ArrayAccess aa = (ArrayAccess)expr;
-            this.build(finder, method, scope, aa.getIndex());
-            DFType type = this.build(finder, method, scope, aa.getArray());
-            if (type instanceof DFArrayType) {
-                DFVarRef ref = scope.lookupArray(type);
-                this.addInputRef(ref);
-                type = ((DFArrayType)type).getElemType();
-            }
-            return type;
+	    } else if (expr instanceof ArrayAccess) {
+		ArrayAccess aa = (ArrayAccess)expr;
+		this.build(finder, method, scope, aa.getIndex());
+		DFType type = this.build(finder, method, scope, aa.getArray());
+		if (type instanceof DFArrayType) {
+		    DFVarRef ref = scope.lookupArray(type);
+		    this.addInputRef(ref);
+		    type = ((DFArrayType)type).getElemType();
+		}
+		return type;
 
-        } else if (expr instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess)expr;
-            Expression expr1 = fa.getExpression();
-            DFKlass klass = null;
-            if (expr1 instanceof Name) {
-                try {
-                    klass = finder.lookupKlass((Name)expr1);
-                } catch (TypeNotFound e) {
-                }
-            }
-            if (klass == null) {
-                DFType type = this.build(finder, method, scope, expr1);
-                if (type == null) return type;
-                klass = finder.resolveKlass(type);
-            }
-            SimpleName fieldName = fa.getName();
-            DFVarRef ref = klass.lookupField(fieldName);
-            this.addInputRef(ref);
-            return ref.getRefType();
+	    } else if (expr instanceof FieldAccess) {
+		FieldAccess fa = (FieldAccess)expr;
+		Expression expr1 = fa.getExpression();
+		DFKlass klass = null;
+		if (expr1 instanceof Name) {
+		    try {
+			klass = finder.lookupKlass((Name)expr1);
+		    } catch (TypeNotFound e) {
+		    }
+		}
+		if (klass == null) {
+		    DFType type = this.build(finder, method, scope, expr1);
+		    if (type == null) return type;
+		    klass = finder.resolveKlass(type);
+		}
+		SimpleName fieldName = fa.getName();
+		DFVarRef ref = klass.lookupField(fieldName);
+		this.addInputRef(ref);
+		return ref.getRefType();
 
-        } else if (expr instanceof SuperFieldAccess) {
-            SuperFieldAccess sfa = (SuperFieldAccess)expr;
-            SimpleName fieldName = sfa.getName();
-            DFKlass klass = finder.resolveKlass(
-                scope.lookupThis().getRefType()).getBaseKlass();
-            DFVarRef ref = klass.lookupField(fieldName);
-            this.addInputRef(ref);
-            return ref.getRefType();
+	    } else if (expr instanceof SuperFieldAccess) {
+		SuperFieldAccess sfa = (SuperFieldAccess)expr;
+		SimpleName fieldName = sfa.getName();
+		DFKlass klass = finder.resolveKlass(
+		    scope.lookupThis().getRefType()).getBaseKlass();
+		DFVarRef ref = klass.lookupField(fieldName);
+		this.addInputRef(ref);
+		return ref.getRefType();
 
-        } else if (expr instanceof CastExpression) {
-            CastExpression cast = (CastExpression)expr;
-            this.build(finder, method, scope, cast.getExpression());
-            return finder.resolve(cast.getType());
+	    } else if (expr instanceof CastExpression) {
+		CastExpression cast = (CastExpression)expr;
+		this.build(finder, method, scope, cast.getExpression());
+		return finder.resolve(cast.getType());
 
-        } else if (expr instanceof ClassInstanceCreation) {
-            ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            AnonymousClassDeclaration anonDecl =
-                cstr.getAnonymousClassDeclaration();
-            DFType instType;
-            if (anonDecl != null) {
-                String id = Utils.encodeASTNode(anonDecl);
-                DFTypeSpace anonSpace = method.getChildSpace().lookupSpace(id);
-                instType = anonSpace.getKlass(id);
-            } else {
-                instType = finder.resolve(cstr.getType());
-            }
-            Expression expr1 = cstr.getExpression();
-            if (expr1 != null) {
-                this.build(finder, method, scope, expr1);
-            }
-            for (Expression arg : (List<Expression>) cstr.arguments()) {
-                this.build(finder, method, scope, arg);
-            }
-            return instType;
+	    } else if (expr instanceof ClassInstanceCreation) {
+		ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
+		AnonymousClassDeclaration anonDecl =
+		    cstr.getAnonymousClassDeclaration();
+		DFType instType;
+		if (anonDecl != null) {
+		    String id = Utils.encodeASTNode(anonDecl);
+		    DFTypeSpace anonSpace = method.getChildSpace().lookupSpace(id);
+		    instType = anonSpace.getKlass(id);
+		} else {
+		    instType = finder.resolve(cstr.getType());
+		}
+		Expression expr1 = cstr.getExpression();
+		if (expr1 != null) {
+		    this.build(finder, method, scope, expr1);
+		}
+		for (Expression arg : (List<Expression>) cstr.arguments()) {
+		    this.build(finder, method, scope, arg);
+		}
+		return instType;
 
-        } else if (expr instanceof ConditionalExpression) {
-            ConditionalExpression cond = (ConditionalExpression)expr;
-            this.build(finder, method, scope, cond.getExpression());
-            this.build(finder, method, scope, cond.getThenExpression());
-            return this.build(finder, method, scope, cond.getElseExpression());
+	    } else if (expr instanceof ConditionalExpression) {
+		ConditionalExpression cond = (ConditionalExpression)expr;
+		this.build(finder, method, scope, cond.getExpression());
+		this.build(finder, method, scope, cond.getThenExpression());
+		return this.build(finder, method, scope, cond.getElseExpression());
 
-        } else if (expr instanceof InstanceofExpression) {
-            return DFBasicType.BOOLEAN;
+	    } else if (expr instanceof InstanceofExpression) {
+		return DFBasicType.BOOLEAN;
 
-        } else if (expr instanceof LambdaExpression) {
-            LambdaExpression lambda = (LambdaExpression)expr;
-            String id = "lambda";
-            ASTNode body = lambda.getBody();
-            DFTypeSpace anonSpace = new DFTypeSpace(null, id);
-            DFKlass klass = finder.resolveKlass(
-                scope.lookupThis().getRefType());
-            DFKlass anonKlass = new DFKlass(
-                id, anonSpace, klass, scope,
-                DFBuiltinTypes.getObjectKlass());
-            if (body instanceof Statement) {
-                // XXX TODO Statement lambda
-            } else if (body instanceof Expression) {
-                // XXX TODO Expresssion lambda
-            } else {
-                throw new UnsupportedSyntax(body);
-            }
-            return anonKlass;
+	    } else if (expr instanceof LambdaExpression) {
+		LambdaExpression lambda = (LambdaExpression)expr;
+		String id = "lambda";
+		ASTNode body = lambda.getBody();
+		DFTypeSpace anonSpace = new DFTypeSpace(null, id);
+		DFKlass klass = finder.resolveKlass(
+		    scope.lookupThis().getRefType());
+		DFKlass anonKlass = new DFKlass(
+		    id, anonSpace, klass, scope,
+		    DFBuiltinTypes.getObjectKlass());
+		if (body instanceof Statement) {
+		    // XXX TODO Statement lambda
+		} else if (body instanceof Expression) {
+		    // XXX TODO Expresssion lambda
+		} else {
+		    throw new UnsupportedSyntax(body);
+		}
+		return anonKlass;
 
-        } else if (expr instanceof MethodReference) {
-            // MethodReference
-            //  CreationReference
-            //  ExpressionMethodReference
-            //  SuperMethodReference
-            //  TypeMethodReference
-            throw new UnsupportedSyntax(expr);
+	    } else if (expr instanceof MethodReference) {
+		// MethodReference
+		//  CreationReference
+		//  ExpressionMethodReference
+		//  SuperMethodReference
+		//  TypeMethodReference
+		throw new UnsupportedSyntax(expr);
 
-        } else {
-            // ???
-            throw new UnsupportedSyntax(expr);
+	    } else {
+		// ???
+		throw new UnsupportedSyntax(expr);
+	    }
+        } catch (EntityNotFound e) {
+            e.setAst(expr);
+            throw e;
         }
     }
 

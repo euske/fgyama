@@ -54,23 +54,26 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
-        String name, DFCallStyle callStyle, DFMethodType methodType) {
+        String name, DFCallStyle callStyle, DFMethodType methodType,
+	DFTypeFinder finder) {
         _klass = klass;
         _childSpace = childSpace;
         _name = name;
         _callStyle = callStyle;
         _methodType = methodType;
+	_finder = finder;
     }
 
     public DFMethod(
         DFKlass klass, DFTypeSpace childSpace,
         String name, DFCallStyle callStyle, DFMethodType methodType,
-        DFOverride[] overrides) {
+        DFTypeFinder finder, DFOverride[] overrides) {
         _klass = klass;
         _childSpace = childSpace;
         _name = name;
         _callStyle = callStyle;
         _methodType = methodType;
+	_finder = finder;
 	for (DFOverride override : overrides) {
 	    _overrides.add(override);
 	}
@@ -150,7 +153,7 @@ public class DFMethod implements Comparable<DFMethod> {
         if (changed) {
             return new DFMethod(
                 _klass, _childSpace, _name, _callStyle,
-                methodType, overrides);
+                methodType, _finder, overrides);
         }
         return this;
     }
@@ -166,7 +169,7 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFTypeFinder getFinder() {
-        return _finder;
+        return new DFTypeFinder(_finder, _childSpace);
     }
 
     public DFVarScope getScope() {
@@ -182,32 +185,29 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public void build(
-        DFTypeFinder finder, DFLocalVarScope scope,
-        MethodDeclaration decl)
+        DFLocalVarScope scope, MethodDeclaration decl)
         throws UnsupportedSyntax, TypeNotFound {
-        _finder = finder;
-        scope.build(finder, decl);
+        scope.build(_finder, decl);
         _scope = scope;
         //_scope.dump();
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
-            _frame.build(finder, this, _scope, decl);
+            _frame.build(_finder, this, _scope, decl);
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
+            Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+this);
         }
         _ast = decl;
     }
 
     public void build(
-        DFTypeFinder finder, DFLocalVarScope scope,
-        Initializer initializer)
+        DFLocalVarScope scope, Initializer initializer)
         throws UnsupportedSyntax, TypeNotFound {
-        _finder = finder;
-        scope.build(finder, initializer);
+        scope.build(_finder, initializer);
         _scope = scope;
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
-            _frame.build(finder, this, _scope, initializer);
+            _frame.build(_finder, this, _scope, initializer);
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
         }

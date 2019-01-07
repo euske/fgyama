@@ -31,7 +31,7 @@ public class DFKlass extends DFType {
     private Map<String, DFParamKlass> _paramKlasses =
         new HashMap<String, DFParamKlass>();
 
-    private DFMethod _initializer;
+    private DFMethod _initializer = null;
     private List<DFVarRef> _fields =
         new ArrayList<DFVarRef>();
     private List<DFMethod> _methods =
@@ -55,9 +55,6 @@ public class DFKlass extends DFType {
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
         _klassScope = new DFKlassScope(this, parentScope, name);
-        _initializer = this.addMethod(
-            null, "<clinit>", DFCallStyle.Initializer,
-            new DFMethodType(new DFType[] {}, DFBasicType.VOID));
     }
 
     protected DFKlass(String name, DFKlass genericKlass) {
@@ -291,9 +288,9 @@ public class DFKlass extends DFType {
 
     private DFMethod addMethod(
         DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
-        DFMethodType methodType) {
+        DFMethodType methodType, DFTypeFinder finder) {
         return this.addMethod(
-            new DFMethod(this, methodSpace, id, callStyle, methodType));
+            new DFMethod(this, methodSpace, id, callStyle, methodType, finder));
     }
 
     private DFMethod addMethod(DFMethod method) {
@@ -356,7 +353,7 @@ public class DFKlass extends DFType {
     }
 
     public DFTypeFinder getFinder() {
-        return _finder;
+        return _finder.extend(this);
     }
 
     public void setFinder(DFTypeFinder finder) {
@@ -507,7 +504,7 @@ public class DFKlass extends DFType {
                     DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
             }
 	    this.addMethod(
-                methodSpace, meth.getName(), callStyle, methodType);
+                methodSpace, meth.getName(), callStyle, methodType, finder);
         }
     }
 
@@ -609,7 +606,8 @@ public class DFKlass extends DFType {
             // Enum has a special method "values()".
             this.addMethod(
                 null, "values", DFCallStyle.InstanceMethod,
-                new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
+                new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)),
+		finder);
         } catch (TypeNotFound e) {
             e.setAst(enumDecl);
             throw e;
@@ -684,10 +682,11 @@ public class DFKlass extends DFType {
                 }
                 DFMethod method = this.addMethod(
                     methodSpace, name, callStyle,
-                    new DFMethodType(argTypes, returnType));
+                    new DFMethodType(argTypes, returnType),
+		    finder);
 		if (decl.getBody() != null) {
 		    DFLocalVarScope scope = this.getMethodScope(decl);
-		    method.build(finder, scope, decl);
+		    method.build(scope, decl);
 		}
 
             } else if (body instanceof EnumConstantDeclaration) {
@@ -700,7 +699,11 @@ public class DFKlass extends DFType {
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
                 DFLocalVarScope scope = this.getMethodScope(initializer);
-                _initializer.build(finder, scope, initializer);
+                _initializer = new DFMethod(
+		    this, null, "<clinit>", DFCallStyle.Initializer,
+		    new DFMethodType(new DFType[] {}, DFBasicType.VOID),
+		    finder);
+		_initializer.build(scope, initializer);
 
             } else {
                 throw new UnsupportedSyntax(body);
