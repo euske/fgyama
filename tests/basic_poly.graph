@@ -17,8 +17,8 @@
       <scope name="basic_poly_Baa"/>
     </graph>
     <graph name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
-      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <caller name="Lbasic_poly_Baa;.main()V"/>
+      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <ast length="64" start="42" type="31"/>
       <scope name="basic_poly_Foo.moo">
         <scope name="basic_poly_Foo.moo.b0">

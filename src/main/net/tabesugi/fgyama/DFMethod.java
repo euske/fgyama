@@ -162,6 +162,7 @@ public class DFMethod implements Comparable<DFMethod> {
     public DFMethod[] getCallers() {
         DFMethod[] callers = new DFMethod[_callers.size()];
         _callers.toArray(callers);
+        Arrays.sort(callers);
         return callers;
     }
 
