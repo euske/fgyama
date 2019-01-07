@@ -25,8 +25,9 @@ abstract class ProgNode extends DFNode {
     }
 
     @Override
-    public Element toXML(Document document) {
-        Element elem = super.toXML(document);
+    public Element toXML(
+	Document document, Set<DFNode> input, Set<DFNode> output) {
+        Element elem = super.toXML(document, input, output);
         if (_ast != null) {
             Element east = document.createElement("ast");
             east.setAttribute("type", Integer.toString(_ast.getNodeType()));

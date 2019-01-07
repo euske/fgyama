@@ -34,12 +34,14 @@ public class DFGraph {
 
     public Element toXML(Document document) {
         Element elem = document.createElement("graph");
+	Set<DFNode> input = null;
+	Set<DFNode> output = null;
         if (_method != null) {
             elem.setAttribute("name", _method.getSignature());
             elem.setAttribute("style", _method.getCallStyle().toString());
 	    DFFrame frame = _method.getFrame();
-	    elem.setAttribute("ins", getNodeIds(frame.getInputNodes()));
-	    elem.setAttribute("outs", getNodeIds(frame.getOutputNodes()));
+	    input = frame.getInputNodes();
+	    output = frame.getOutputNodes();
 	    for (DFMethod caller : _method.getCallers()) {
 		Element ecaller = document.createElement("caller");
 		ecaller.setAttribute("name", caller.getSignature());
@@ -59,7 +61,7 @@ public class DFGraph {
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
         Arrays.sort(nodes);
-        elem.appendChild(_root.toXML(document, nodes));
+        elem.appendChild(_root.toXML(document, nodes, input, output));
         return elem;
     }
 

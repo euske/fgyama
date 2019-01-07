@@ -23,10 +23,10 @@ public class DFFrame {
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
-    private List<DFNode> _inputNodes =
-        new ArrayList<DFNode>();
-    private List<DFNode> _outputNodes =
-        new ArrayList<DFNode>();
+    private Set<DFNode> _inputNodes =
+        new HashSet<DFNode>();
+    private Set<DFNode> _outputNodes =
+        new HashSet<DFNode>();
 
     public static final String ANONYMOUS = "@ANONYMOUS";
     public static final String BREAKABLE = "@BREAKABLE";
@@ -161,16 +161,12 @@ public class DFFrame {
         }
     }
 
-    public DFNode[] getInputNodes() {
-        DFNode[] nodes = new DFNode[_inputNodes.size()];
-        _inputNodes.toArray(nodes);
-        return nodes;
+    public Set<DFNode> getInputNodes() {
+        return _inputNodes;
     }
 
-    public DFNode[] getOutputNodes() {
-        DFNode[] nodes = new DFNode[_outputNodes.size()];
-        _outputNodes.toArray(nodes);
-        return nodes;
+    public Set<DFNode> getOutputNodes() {
+        return _outputNodes;
     }
 
     @SuppressWarnings("unchecked")
