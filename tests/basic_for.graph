@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_for.java">
-    <graph ins="" name="basic_for" outs="" style="initializer">
+    <graph name="basic_for" style="initializer">
       <ast length="141" start="0" type="55"/>
       <scope name="basic_for"/>
     </graph>

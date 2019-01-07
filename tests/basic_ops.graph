@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_ops.java">
-    <graph ins="" name="basic_ops" outs="" style="initializer">
+    <graph name="basic_ops" style="initializer">
       <ast length="188" start="0" type="55"/>
       <scope name="basic_ops"/>
     </graph>

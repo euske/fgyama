@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_exception.java">
-    <graph ins="" name="basic_exception/A" outs="" style="initializer">
+    <graph name="basic_exception/A" style="initializer">
       <ast length="61" start="36" type="55"/>
       <scope name="basic_exception/A">
         <node data="uninitialized" id="Nbasic_exception/A_1" kind="const" type="@null"/>
@@ -10,7 +10,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="basic_exception" outs="" style="initializer">
+    <graph name="basic_exception" style="initializer">
       <ast length="433" start="0" type="55"/>
       <scope name="basic_exception"/>
     </graph>
@@ -121,6 +121,7 @@
       </scope>
     </graph>
     <graph ins="" name="Lbasic_exception;.moo()Ljava/lang/String;" outs="Nbasic_exception.moo.b0_4 Nbasic_exception.moo.b0_8" style="instance">
+      <caller name="Lbasic_exception;.foo()V"/>
       <ast length="89" start="342" type="31"/>
       <scope name="basic_exception.moo">
         <scope name="basic_exception.moo.b0">

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <graph ins="" name="dom/meep/basic_names/Bar" outs="" style="initializer">
+    <graph name="dom/meep/basic_names/Bar" style="initializer">
       <ast length="12" start="44" type="55"/>
       <scope name="dom/meep/basic_names/Bar"/>
     </graph>
-    <graph ins="" name="dom/meep/basic_names" outs="" style="initializer">
+    <graph name="dom/meep/basic_names" style="initializer">
       <ast length="451" start="19" type="55"/>
       <scope name="dom/meep/basic_names">
         <node data="123" id="Ndom/meep/basic_names_1" kind="const" type="I">
@@ -16,7 +16,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="dom/meep/basic_names/:AST:31:79:210/Baz" outs="" style="initializer">
+    <graph name="dom/meep/basic_names/:AST:31:79:210/Baz" style="initializer">
       <ast length="67" start="144" type="55"/>
       <scope name="dom/meep/basic_names/:AST:31:79:210/Baz">
         <node data="uninitialized" id="Ndom/meep/basic_names/:AST:31:79:210/Baz_1" kind="const" type="@null"/>
@@ -27,6 +27,7 @@
       </scope>
     </graph>
     <graph ins="Ndom/meep/basic_names.doit_11 Ndom/meep/basic_names.doit_13 Ndom/meep/basic_names.doit_2" name="Ldom/meep/basic_names;.doit()V" outs="Ndom/meep/basic_names.doit.b0_9" style="instance">
+      <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
       <ast length="210" start="79" type="31"/>
       <scope name="dom/meep/basic_names.doit">
         <scope name="dom/meep/basic_names.doit.b0">
@@ -143,6 +144,7 @@
       </scope>
     </graph>
     <graph ins="" name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" outs="" style="instance">
+      <caller name="Ldom/meep/basic_names;.doit()V"/>
       <ast length="14" start="187" type="31"/>
       <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo">
         <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo.b0"/>

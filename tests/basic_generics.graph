@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <graph ins="" name="basic_generics/Moo/Baa" outs="" style="initializer">
+    <graph name="basic_generics/Moo/Baa" style="initializer">
       <ast length="13" start="254" type="55"/>
       <scope name="basic_generics/Moo/Baa"/>
     </graph>
-    <graph ins="" name="basic_generics/Moo" outs="" style="initializer">
+    <graph name="basic_generics/Moo" style="initializer">
       <ast length="238" start="35" type="55"/>
       <scope name="basic_generics/Moo">
         <node data="uninitialized" id="Nbasic_generics/Moo_1" kind="const" type="@null"/>
@@ -14,7 +14,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="basic_generics" outs="" style="initializer">
+    <graph name="basic_generics" style="initializer">
       <ast length="546" start="0" type="55"/>
       <scope name="basic_generics"/>
     </graph>
@@ -135,6 +135,7 @@
       </scope>
     </graph>
     <graph ins="Nbasic_generics/Moo.get_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" outs="Nbasic_generics/Moo.get.b0_3" style="instance">
+      <caller name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;"/>
       <ast length="41" start="134" type="31"/>
       <scope name="basic_generics/Moo.get">
         <scope name="basic_generics/Moo.get.b0">
@@ -151,6 +152,7 @@
       </scope>
     </graph>
     <graph ins="Nbasic_generics/Moo.copy_2" name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" outs="Nbasic_generics/Moo.copy.b0_4" style="instance">
+      <caller name="Lbasic_generics;.test()V"/>
       <ast length="59" start="185" type="31"/>
       <scope name="basic_generics/Moo.copy">
         <scope name="basic_generics/Moo.copy.b0">

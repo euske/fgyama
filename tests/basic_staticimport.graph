@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_staticimport.java">
-    <graph ins="" name="basic_staticimport" outs="" style="initializer">
+    <graph name="basic_staticimport" style="initializer">
       <ast length="94" start="69" type="55"/>
       <scope name="basic_staticimport"/>
     </graph>

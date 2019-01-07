@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph ins="" name="basic_funcs" outs="" style="initializer">
+    <graph name="basic_funcs" style="initializer">
       <ast length="403" start="0" type="55"/>
       <scope name="basic_funcs"/>
     </graph>
@@ -84,6 +84,8 @@
       </scope>
     </graph>
     <graph ins="Nbasic_funcs.moo_1 Nbasic_funcs.moo_20" name="Lbasic_funcs;.moo(I)I" outs="Nbasic_funcs.moo.b0_23" style="static">
+      <caller name="Lbasic_funcs;.moo(I)I"/>
+      <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
       <ast length="142" start="204" type="31"/>
       <scope name="basic_funcs.moo">
         <scope name="basic_funcs.moo.b0">
@@ -176,6 +178,7 @@
       </scope>
     </graph>
     <graph ins="" name="Lbasic_funcs;.foo()I" outs="Nbasic_funcs.foo.b0_2" style="static">
+      <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast length="49" start="352" type="31"/>
       <scope name="basic_funcs.foo">
         <scope name="basic_funcs.foo.b0">

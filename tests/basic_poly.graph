@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_poly.java">
-    <graph ins="" name="basic_poly_Foo" outs="" style="initializer">
+    <graph name="basic_poly_Foo" style="initializer">
       <ast length="108" start="0" type="55"/>
       <scope name="basic_poly_Foo">
         <node data="0" id="Nbasic_poly_Foo_1" kind="const" type="I">
@@ -12,11 +12,13 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="basic_poly_Baa" outs="" style="initializer">
+    <graph name="basic_poly_Baa" style="initializer">
       <ast length="442" start="110" type="55"/>
       <scope name="basic_poly_Baa"/>
     </graph>
     <graph ins="Nbasic_poly_Foo.moo_1 Nbasic_poly_Foo.moo_5" name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Foo.moo.b0_6" style="instance">
+      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
+      <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast length="64" start="42" type="31"/>
       <scope name="basic_poly_Foo.moo">
         <scope name="basic_poly_Foo.moo.b0">
@@ -45,6 +47,7 @@
       </scope>
     </graph>
     <graph ins="Nbasic_poly_Baa.moo_1 Nbasic_poly_Baa.moo_9" name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Baa.moo.b0_12" style="instance">
+      <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast length="90" start="160" type="31"/>
       <scope name="basic_poly_Baa.moo">
         <scope name="basic_poly_Baa.moo.b0">

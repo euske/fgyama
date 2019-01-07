@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_enum.java">
-    <graph ins="" name="E" outs="" style="initializer">
+    <graph name="E" style="initializer">
       <ast length="102" start="0" type="71"/>
       <scope name="E">
         <node data="uninitialized" id="NE_1" kind="const" type="@null"/>
@@ -10,7 +10,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="basic_enum" outs="" style="initializer">
+    <graph name="basic_enum" style="initializer">
       <ast length="190" start="104" type="55"/>
       <scope name="basic_enum"/>
     </graph>
