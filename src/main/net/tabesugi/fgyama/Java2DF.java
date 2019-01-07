@@ -978,7 +978,7 @@ public class Java2DF {
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
                             klass, null, id, DFCallStyle.InstanceMethod,
-                            new DFMethodType(argTypes, null), finder);
+                            new DFMethodType(argTypes, null));
                         Logger.error("Fallback method: "+klass+": "+fallback);
                         method = fallback;
                     }
@@ -1029,7 +1029,7 @@ public class Java2DF {
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, DFCallStyle.InstanceMethod,
-                        new DFMethodType(argTypes, null), finder);
+                        new DFMethodType(argTypes, null));
                     Logger.error("Fallback method: "+baseKlass+": "+fallback);
                     method = fallback;
                 }
@@ -2301,22 +2301,27 @@ public class Java2DF {
         }
     }
 
-    // List interprocedural relationships.
-    public void listRelationships() {
-        for (DFKlass[] klasses : _klassList.values()) {
-            for (DFKlass klass : klasses) {
-                klass.addOverrides();
-            }
+    // Pass4
+    public void buildMethods(String key)
+        throws EntityNotFound {
+        DFKlass[] klasses = _klassList.get(key);
+	for (DFKlass klass : klasses) {
+	    klass.addOverrides();
         }
-        Set<DFMethod> methods = new HashSet<DFMethod>();
-        for (DFKlass[] klasses : _klassList.values()) {
-            for (DFKlass klass : klasses) {
-                methods.addAll(klass.getMethods());
-            }
+        //Set<DFMethod> methods = new HashSet<DFMethod>();
+	for (DFKlass klass : klasses) {
+	    for (DFMethod method : klass.getMethods()) {
+		try {
+		    method.buildFrame();
+		} catch (UnsupportedSyntax e) {
+		    String astName = e.ast.getClass().getName();
+		    Logger.error("Pass4: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+		}
+	    }
         }
     }
 
-    // pass4
+    // pass5
     @SuppressWarnings("unchecked")
     public void buildGraphs(String key, CompilationUnit cunit)
         throws EntityNotFound {
@@ -2351,7 +2356,7 @@ public class Java2DF {
                     }
                 } catch (UnsupportedSyntax e) {
                     String astName = e.ast.getClass().getName();
-                    Logger.error("Pass4: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                    Logger.error("Pass5: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
                 }
             }
         }
@@ -2473,10 +2478,17 @@ public class Java2DF {
                 System.err.println("Pass3: Class not found: "+e.name);
 	    }
         }
-        converter.listRelationships();
+        for (String path : files) {
+            Logger.info("Pass4: "+path);
+	    try {
+		converter.buildMethods(path);
+            } catch (EntityNotFound e) {
+                System.err.println("Pass4: Error at "+path+" ("+e.name+")");
+	    }
+	}
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
-            Logger.info("Pass4: "+path);
+            Logger.info("Pass5: "+path);
             try {
                 CompilationUnit cunit = srcs.get(path);
                 exporter.startFile(path);
