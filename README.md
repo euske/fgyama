@@ -93,6 +93,7 @@ Coding style:
 TODOs:
 ------
   * Interprocedural field watch.
+  * Add parameterized class to TypeSpace.
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.

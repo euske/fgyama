@@ -244,10 +244,11 @@ public class DFTypeSpace {
 		;
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
+                Statement stmt = initializer.getBody();
                 DFLocalVarScope scope = new DFLocalVarScope(
                     parentScope, "<clinit>");
                 parentKlass.addMethodScope(initializer, scope);
-                this.build(list, initializer.getBody(), parentKlass, scope);
+                this.build(list, stmt, parentKlass, scope);
 
 	    } else {
 		throw new UnsupportedSyntax(body);

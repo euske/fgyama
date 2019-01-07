@@ -306,8 +306,10 @@ public class DFKlass extends DFType {
         _ast2scope.put(Utils.encodeASTNode(ast), scope);
     }
 
-    public DFLocalVarScope getMethodScope(ASTNode ast) {
-        return _ast2scope.get(Utils.encodeASTNode(ast));
+    private DFLocalVarScope getMethodScope(ASTNode ast) {
+	String key = Utils.encodeASTNode(ast);
+        assert _ast2scope.containsKey(key);
+        return _ast2scope.get(key);
     }
 
     public void addOverrides() {
@@ -683,8 +685,10 @@ public class DFKlass extends DFType {
                 DFMethod method = this.addMethod(
                     methodSpace, name, callStyle,
                     new DFMethodType(argTypes, returnType));
-                DFLocalVarScope scope = this.getMethodScope(decl);
-                method.build(finder, scope, decl);
+		if (decl.getBody() != null) {
+		    DFLocalVarScope scope = this.getMethodScope(decl);
+		    method.build(finder, scope, decl);
+		}
 
             } else if (body instanceof EnumConstantDeclaration) {
 
