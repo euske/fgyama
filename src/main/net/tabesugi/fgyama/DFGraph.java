@@ -13,9 +13,7 @@ import org.w3c.dom.*;
 public class DFGraph {
 
     private DFVarScope _root;
-    private DFFrame _frame;
     private DFMethod _method;
-    private boolean _init;
     private ASTNode _ast;
 
     private List<DFNode> _nodes =
@@ -23,12 +21,9 @@ public class DFGraph {
 
     // DFGraph for a method.
     public DFGraph(
-        DFVarScope root, DFFrame frame, DFMethod method,
-        boolean init, ASTNode ast) {
+        DFVarScope root, DFMethod method, ASTNode ast) {
         _root = root;
-        _frame = frame;
         _method = method;
-        _init = init;
         _ast = ast;
     }
 
@@ -42,6 +37,14 @@ public class DFGraph {
         if (_method != null) {
             elem.setAttribute("name", _method.getSignature());
             elem.setAttribute("style", _method.getCallStyle().toString());
+	    DFFrame frame = _method.getFrame();
+	    elem.setAttribute("ins", getNodeIds(frame.getInputNodes()));
+	    elem.setAttribute("outs", getNodeIds(frame.getOutputNodes()));
+	    for (DFMethod caller : _method.getCallers()) {
+		Element ecaller = document.createElement("caller");
+		ecaller.setAttribute("name", caller.getSignature());
+		elem.appendChild(ecaller);
+	    }
         } else {
             elem.setAttribute("name", _root.getFullName());
             elem.setAttribute("style", DFCallStyle.Initializer.toString());
@@ -53,8 +56,6 @@ public class DFGraph {
             east.setAttribute("length", Integer.toString(_ast.getLength()));
             elem.appendChild(east);
         }
-        elem.setAttribute("ins", getNodeIds(_frame.getInputNodes()));
-        elem.setAttribute("outs", getNodeIds(_frame.getOutputNodes()));
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
         Arrays.sort(nodes);
@@ -89,12 +90,15 @@ public class DFGraph {
             }
         }
         // Do not remove input/output nodes.
-        for (DFNode node : _frame.getInputNodes()) {
-            removed.remove(node);
-        }
-        for (DFNode node : _frame.getOutputNodes()) {
-            removed.remove(node);
-        }
+        if (_method != null) {
+	    DFFrame frame = _method.getFrame();
+	    for (DFNode node : frame.getInputNodes()) {
+		removed.remove(node);
+	    }
+	    for (DFNode node : frame.getOutputNodes()) {
+		removed.remove(node);
+	    }
+	}
         for (DFNode node : removed) {
             _nodes.remove(node);
         }

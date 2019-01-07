@@ -2100,7 +2100,7 @@ public class Java2DF {
         DFFrame frame = method.getFrame();
         assert frame != null;
         DFTypeSpace methodSpace = method.getChildSpace();
-        DFGraph graph = new DFGraph(scope, frame, method, false, ast);
+        DFGraph graph = new DFGraph(scope, method, ast);
         DFContext ctx = new DFContext(graph, scope);
         DFTypeFinder finder = method.getFinder();
         if (parameters != null) {
@@ -2148,7 +2148,7 @@ public class Java2DF {
         DFVarScope klassScope = klass.getKlassScope();
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
 	DFTypeSpace klassSpace = klass.getKlassSpace();
-        DFGraph klassGraph = new DFGraph(klassScope, klassFrame, null, true, ast);
+        DFGraph klassGraph = new DFGraph(klassScope, null, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
         DFTypeFinder finder = klass.getFinder();
         for (BodyDeclaration body : decls) {
