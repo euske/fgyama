@@ -4,7 +4,7 @@
       <ast length="150" start="0" type="55"/>
       <scope name="basic_continue"/>
     </graph>
-    <graph ins="Nbasic_continue.foo_1" name="Lbasic_continue;.foo(I)V" outs="" style="static">
+    <graph name="Lbasic_continue;.foo(I)V" style="static">
       <ast length="113" start="35" type="31"/>
       <scope name="basic_continue.foo">
         <scope name="basic_continue.foo.b0">
@@ -74,7 +74,7 @@
             <ast length="3" start="138" type="37"/>
           </node>
         </scope>
-        <node id="Nbasic_continue.foo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Nbasic_continue.foo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="58" type="44"/>
         </node>
         <node id="Nbasic_continue.foo_2" kind="assign" ref="basic_continue.foo/$x" type="I">

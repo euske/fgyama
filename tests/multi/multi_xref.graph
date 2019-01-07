@@ -20,7 +20,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/multi_xref1.moo.b0_3 Ndom/meep/multi_xref1.moo_2" name="Ldom/meep/multi_xref1;.moo()V" outs="Ndom/meep/multi_xref1.moo.b0_10 Ndom/meep/multi_xref1.moo.b0_8" style="instance">
+    <graph name="Ldom/meep/multi_xref1;.moo()V" style="instance">
       <caller name="Ldom/meep/multi_xref2;.foo()V"/>
       <ast length="139" start="115" type="31"/>
       <scope name="dom/meep/multi_xref1.moo">
@@ -29,7 +29,7 @@
             <link src="Ndom/meep/multi_xref1.moo_2"/>
             <ast length="4" start="136" type="52"/>
           </node>
-          <node id="Ndom/meep/multi_xref1.moo.b0_3" kind="fieldassign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node flow="in" id="Ndom/meep/multi_xref1.moo.b0_3" kind="fieldassign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link src="Ndom/meep/multi_xref1.moo.b0_5"/>
             <link label="obj" src="Ndom/meep/multi_xref1.moo.b0_1"/>
             <ast length="10" start="136" type="22"/>
@@ -49,14 +49,14 @@
             <link label="obj" src="Ndom/meep/multi_xref1.moo.b0_6"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node id="Ndom/meep/multi_xref1.moo.b0_8" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node flow="out" id="Ndom/meep/multi_xref1.moo.b0_8" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link label="update" src="Ndom/meep/multi_xref1.moo.b0_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.bam()I" id="Ndom/meep/multi_xref1.moo.b0_9" kind="call" type="I">
             <ast length="17" start="190" type="32"/>
           </node>
-          <node id="Ndom/meep/multi_xref1.moo.b0_10" kind="fieldassign" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node flow="out" id="Ndom/meep/multi_xref1.moo.b0_10" kind="fieldassign" ref="dom/dood/multi_xref3/.boo" type="I">
             <link src="Ndom/meep/multi_xref1.moo.b0_12"/>
             <ast length="24" start="217" type="40"/>
           </node>
@@ -68,7 +68,7 @@
             <ast length="30" start="217" type="7"/>
           </node>
         </scope>
-        <node id="Ndom/meep/multi_xref1.moo_2" ref="#this" type="Ldom/meep/multi_xref1;"/>
+        <node flow="in" id="Ndom/meep/multi_xref1.moo_2" ref="#this" type="Ldom/meep/multi_xref1;"/>
       </scope>
     </graph>
   </file>
@@ -83,7 +83,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/multi_xref2.foo.b0_3 Ndom/meep/multi_xref2.foo_12 Ndom/meep/multi_xref2.foo_16 Ndom/meep/multi_xref2.foo_2" name="Ldom/meep/multi_xref2;.foo()V" outs="Ndom/meep/multi_xref2.foo.b0_8" style="instance">
+    <graph name="Ldom/meep/multi_xref2;.foo()V" style="instance">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast length="164" start="75" type="31"/>
       <scope name="dom/meep/multi_xref2.foo">
@@ -92,7 +92,7 @@
             <link src="Ndom/meep/multi_xref2.foo_2"/>
             <ast length="4" start="96" type="52"/>
           </node>
-          <node id="Ndom/meep/multi_xref2.foo.b0_3" kind="fieldassign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node flow="in" id="Ndom/meep/multi_xref2.foo.b0_3" kind="fieldassign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link src="Ndom/meep/multi_xref2.foo.b0_5"/>
             <link label="obj" src="Ndom/meep/multi_xref2.foo.b0_1"/>
             <ast length="10" start="96" type="22"/>
@@ -112,7 +112,7 @@
             <link label="obj" src="Ndom/meep/multi_xref2.foo.b0_6"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Ndom/meep/multi_xref2.foo.b0_8" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node flow="out" id="Ndom/meep/multi_xref2.foo.b0_8" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link label="update" src="Ndom/meep/multi_xref2.foo.b0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
@@ -142,13 +142,13 @@
             <ast length="28" start="204" type="7"/>
           </node>
         </scope>
-        <node id="Ndom/meep/multi_xref2.foo_2" ref="#this" type="Ldom/meep/multi_xref2;"/>
+        <node flow="in" id="Ndom/meep/multi_xref2.foo_2" ref="#this" type="Ldom/meep/multi_xref2;"/>
         <node id="Ndom/meep/multi_xref2.foo_10" ref="dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
-        <node id="Ndom/meep/multi_xref2.foo_12" ref="dom/meep/multi_xref1/baa/.baz" type="I"/>
-        <node id="Ndom/meep/multi_xref2.foo_16" ref="dom/dood/multi_xref3/.boo" type="I"/>
+        <node flow="in" id="Ndom/meep/multi_xref2.foo_12" ref="dom/meep/multi_xref1/baa/.baz" type="I"/>
+        <node flow="in" id="Ndom/meep/multi_xref2.foo_16" ref="dom/dood/multi_xref3/.boo" type="I"/>
       </scope>
     </graph>
-    <graph ins="" name="Ldom/meep/multi_xref2;.bam()I" outs="Ndom/meep/multi_xref2.bam.b0_2" style="static">
+    <graph name="Ldom/meep/multi_xref2;.bam()I" style="static">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast length="50" start="245" type="31"/>
       <scope name="dom/meep/multi_xref2.bam">
@@ -156,7 +156,7 @@
           <node data="42" id="Ndom/meep/multi_xref2.bam.b0_1" kind="const" type="I">
             <ast length="2" start="286" type="34"/>
           </node>
-          <node id="Ndom/meep/multi_xref2.bam.b0_2" kind="output" ref="#return" type="I">
+          <node flow="out" id="Ndom/meep/multi_xref2.bam.b0_2" kind="output" ref="#return" type="I">
             <link src="Ndom/meep/multi_xref2.bam.b0_1"/>
             <ast length="10" start="279" type="41"/>
           </node>
@@ -177,7 +177,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Ldom/dood/multi_xref3;.baa()V" outs="" style="instance">
+    <graph name="Ldom/dood/multi_xref3;.baa()V" style="instance">
       <ast length="79" start="114" type="31"/>
       <scope name="dom/dood/multi_xref3.baa">
         <scope name="dom/dood/multi_xref3.baa.b0">

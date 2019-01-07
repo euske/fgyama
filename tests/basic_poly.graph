@@ -16,7 +16,7 @@
       <ast length="442" start="110" type="55"/>
       <scope name="basic_poly_Baa"/>
     </graph>
-    <graph ins="Nbasic_poly_Foo.moo_1 Nbasic_poly_Foo.moo_5" name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Foo.moo.b0_6" style="instance">
+    <graph name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast length="64" start="42" type="31"/>
@@ -31,22 +31,22 @@
             <link label="obj" src="Nbasic_poly_Foo.moo.b0_3"/>
             <ast length="5" start="94" type="40"/>
           </node>
-          <node id="Nbasic_poly_Foo.moo.b0_6" kind="output" ref="#return" type="I">
+          <node flow="out" id="Nbasic_poly_Foo.moo.b0_6" kind="output" ref="#return" type="I">
             <link src="Nbasic_poly_Foo.moo.b0_4"/>
             <ast length="13" start="87" type="41"/>
           </node>
         </scope>
-        <node id="Nbasic_poly_Foo.moo_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
+        <node flow="in" id="Nbasic_poly_Foo.moo_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
           <ast length="18" start="57" type="44"/>
         </node>
         <node id="Nbasic_poly_Foo.moo_2" kind="assign" ref="basic_poly_Foo.moo/$obj" type="Lbasic_poly_Foo;">
           <link src="Nbasic_poly_Foo.moo_1"/>
           <ast length="18" start="57" type="44"/>
         </node>
-        <node id="Nbasic_poly_Foo.moo_5" ref="basic_poly_Foo/.x" type="I"/>
+        <node flow="in" id="Nbasic_poly_Foo.moo_5" ref="basic_poly_Foo/.x" type="I"/>
       </scope>
     </graph>
-    <graph ins="Nbasic_poly_Baa.moo_1 Nbasic_poly_Baa.moo_9" name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" outs="Nbasic_poly_Baa.moo.b0_12" style="instance">
+    <graph name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast length="90" start="160" type="31"/>
       <scope name="basic_poly_Baa.moo">
@@ -81,12 +81,12 @@
             <link label="R" src="Nbasic_poly_Baa.moo.b0_10"/>
             <ast length="7" start="236" type="27"/>
           </node>
-          <node id="Nbasic_poly_Baa.moo.b0_12" kind="output" ref="#return" type="I">
+          <node flow="out" id="Nbasic_poly_Baa.moo.b0_12" kind="output" ref="#return" type="I">
             <link src="Nbasic_poly_Baa.moo.b0_11"/>
             <ast length="15" start="229" type="41"/>
           </node>
         </scope>
-        <node id="Nbasic_poly_Baa.moo_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
+        <node flow="in" id="Nbasic_poly_Baa.moo_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
           <ast length="18" start="175" type="44"/>
         </node>
         <node id="Nbasic_poly_Baa.moo_2" kind="assign" ref="basic_poly_Baa.moo/$obj" type="Lbasic_poly_Foo;">
@@ -94,10 +94,10 @@
           <ast length="18" start="175" type="44"/>
         </node>
         <node id="Nbasic_poly_Baa.moo_3" ref="#this" type="Lbasic_poly_Baa;"/>
-        <node id="Nbasic_poly_Baa.moo_9" ref="basic_poly_Foo/.x" type="I"/>
+        <node flow="in" id="Nbasic_poly_Baa.moo_9" ref="basic_poly_Foo/.x" type="I"/>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_poly_Baa;.main()V" outs="" style="static">
+    <graph name="Lbasic_poly_Baa;.main()V" style="static">
       <ast length="294" start="256" type="31"/>
       <scope name="basic_poly_Baa.main">
         <scope name="basic_poly_Baa.main.b0">

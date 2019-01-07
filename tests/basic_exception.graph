@@ -14,7 +14,7 @@
       <ast length="433" start="0" type="55"/>
       <scope name="basic_exception"/>
     </graph>
-    <graph ins="Nbasic_exception.foo_11 Nbasic_exception.foo_19 Nbasic_exception.foo_26" name="Lbasic_exception;.foo()V" outs="" style="instance">
+    <graph name="Lbasic_exception;.foo()V" style="instance">
       <ast length="233" start="103" type="31"/>
       <scope name="basic_exception.foo">
         <scope name="basic_exception.foo.b0">
@@ -115,12 +115,12 @@
             <ast length="174" start="156" type="54"/>
           </node>
         </scope>
-        <node id="Nbasic_exception.foo_11" ref="#this" type="Lbasic_exception;"/>
-        <node id="Nbasic_exception.foo_19" ref="basic_exception/A/.text" type="Ljava/lang/String;"/>
-        <node id="Nbasic_exception.foo_26" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nbasic_exception.foo_11" ref="#this" type="Lbasic_exception;"/>
+        <node flow="in" id="Nbasic_exception.foo_19" ref="basic_exception/A/.text" type="Ljava/lang/String;"/>
+        <node flow="in" id="Nbasic_exception.foo_26" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
       </scope>
     </graph>
-    <graph ins="" name="Lbasic_exception;.moo()Ljava/lang/String;" outs="Nbasic_exception.moo.b0_4 Nbasic_exception.moo.b0_8" style="instance">
+    <graph name="Lbasic_exception;.moo()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_exception;.foo()V"/>
       <ast length="89" start="342" type="31"/>
       <scope name="basic_exception.moo">
@@ -135,7 +135,7 @@
             <link src="Nbasic_exception.moo.b0_2"/>
             <ast length="14" start="391" type="53"/>
           </node>
-          <node id="Nbasic_exception.moo.b0_4" kind="join" ref="#exception" type="Ljava/lang/Exception;">
+          <node flow="out" id="Nbasic_exception.moo.b0_4" kind="join" ref="#exception" type="Ljava/lang/Exception;">
             <link label="cond" src="Nbasic_exception.moo.b0_1"/>
             <link label="false" src="Nbasic_exception.moo_6"/>
             <link label="true" src="Nbasic_exception.moo.b0_5"/>
@@ -145,7 +145,7 @@
           <node data="a" id="Nbasic_exception.moo.b0_7" kind="const" type="Ljava/lang/String;">
             <ast length="3" start="421" type="45"/>
           </node>
-          <node id="Nbasic_exception.moo.b0_8" kind="output" ref="#return" type="Ljava/lang/String;">
+          <node flow="out" id="Nbasic_exception.moo.b0_8" kind="output" ref="#return" type="Ljava/lang/String;">
             <link src="Nbasic_exception.moo.b0_7"/>
             <ast length="11" start="414" type="41"/>
           </node>

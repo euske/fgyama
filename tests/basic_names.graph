@@ -26,7 +26,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/basic_names.doit_11 Ndom/meep/basic_names.doit_13 Ndom/meep/basic_names.doit_2" name="Ldom/meep/basic_names;.doit()V" outs="Ndom/meep/basic_names.doit.b0_9" style="instance">
+    <graph name="Ldom/meep/basic_names;.doit()V" style="instance">
       <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
       <ast length="210" start="79" type="31"/>
       <scope name="dom/meep/basic_names.doit">
@@ -58,7 +58,7 @@
             <link src="Ndom/meep/basic_names.doit.b0_7"/>
             <ast length="3" start="249" type="42"/>
           </node>
-          <node id="Ndom/meep/basic_names.doit.b0_9" kind="fieldassign" ref="dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I">
+          <node flow="out" id="Ndom/meep/basic_names.doit.b0_9" kind="fieldassign" ref="dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I">
             <link src="Ndom/meep/basic_names.doit.b0_14"/>
             <link label="obj" src="Ndom/meep/basic_names.doit.b0_8"/>
             <ast length="5" start="249" type="40"/>
@@ -89,12 +89,12 @@
             <ast length="9" start="273" type="32"/>
           </node>
         </scope>
-        <node id="Ndom/meep/basic_names.doit_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
-        <node id="Ndom/meep/basic_names.doit_11" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="Ndom/meep/basic_names.doit_13" ref="dom/meep/basic_names/.y" type="I"/>
+        <node flow="in" id="Ndom/meep/basic_names.doit_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Ndom/meep/basic_names.doit_11" ref="#this" type="Ldom/meep/basic_names;"/>
+        <node flow="in" id="Ndom/meep/basic_names.doit_13" ref="dom/meep/basic_names/.y" type="I"/>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/basic_names.meh_1" name="Ldom/meep/basic_names;.meh()V" outs="" style="instance">
+    <graph name="Ldom/meep/basic_names;.meh()V" style="instance">
       <ast length="56" start="295" type="31"/>
       <scope name="dom/meep/basic_names.meh">
         <scope name="dom/meep/basic_names.meh.b0">
@@ -107,10 +107,10 @@
             <ast length="6" start="323" type="32"/>
           </node>
         </scope>
-        <node id="Ndom/meep/basic_names.meh_1" ref="#this" type="Ldom/meep/basic_names;"/>
+        <node flow="in" id="Ndom/meep/basic_names.meh_1" ref="#this" type="Ldom/meep/basic_names;"/>
       </scope>
     </graph>
-    <graph ins="Ndom/meep/basic_names.main_1" name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" outs="" style="static">
+    <graph name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" style="static">
       <ast length="111" start="357" type="31"/>
       <scope name="dom/meep/basic_names.main">
         <scope name="dom/meep/basic_names.main.b0">
@@ -134,7 +134,7 @@
             <ast length="10" start="451" type="32"/>
           </node>
         </scope>
-        <node id="Ndom/meep/basic_names.main_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
+        <node flow="in" id="Ndom/meep/basic_names.main_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast length="13" start="381" type="44"/>
         </node>
         <node id="Ndom/meep/basic_names.main_2" kind="assign" ref="dom/meep/basic_names.main/$args" type="[Ljava/lang/String;">
@@ -143,7 +143,7 @@
         </node>
       </scope>
     </graph>
-    <graph ins="" name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" outs="" style="instance">
+    <graph name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" style="instance">
       <caller name="Ldom/meep/basic_names;.doit()V"/>
       <ast length="14" start="187" type="31"/>
       <scope name="dom/meep/basic_names/:AST:31:79:210/Baz.moo">

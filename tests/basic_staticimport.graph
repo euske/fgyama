@@ -4,7 +4,7 @@
       <ast length="94" start="69" type="55"/>
       <scope name="basic_staticimport"/>
     </graph>
-    <graph ins="Nbasic_staticimport.foo_2 Nbasic_staticimport.foo_3" name="Lbasic_staticimport;.foo()V" outs="" style="static">
+    <graph name="Lbasic_staticimport;.foo()V" style="static">
       <ast length="54" start="107" type="31"/>
       <scope name="basic_staticimport.foo">
         <scope name="basic_staticimport.foo.b0">
@@ -34,8 +34,8 @@
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>
-        <node id="Nbasic_staticimport.foo_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
-        <node id="Nbasic_staticimport.foo_3" ref="#this" type="Lbasic_staticimport;"/>
+        <node flow="in" id="Nbasic_staticimport.foo_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nbasic_staticimport.foo_3" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
     </graph>
   </file>

@@ -4,7 +4,7 @@
       <ast length="137" start="0" type="55"/>
       <scope name="basic_do"/>
     </graph>
-    <graph ins="Nbasic_do.foo_1" name="Lbasic_do;.foo(I)I" outs="Nbasic_do.foo.b0_23" style="static">
+    <graph name="Lbasic_do;.foo(I)I" style="static">
       <ast length="106" start="29" type="31"/>
       <scope name="basic_do.foo">
         <scope name="basic_do.foo.b0">
@@ -91,12 +91,12 @@
             <link src="Nbasic_do.foo.b0.do0_21"/>
             <ast length="1" start="127" type="42"/>
           </node>
-          <node id="Nbasic_do.foo.b0_23" kind="output" ref="#return" type="I">
+          <node flow="out" id="Nbasic_do.foo.b0_23" kind="output" ref="#return" type="I">
             <link src="Nbasic_do.foo.b0_22"/>
             <ast length="9" start="120" type="41"/>
           </node>
         </scope>
-        <node id="Nbasic_do.foo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Nbasic_do.foo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="51" type="44"/>
         </node>
         <node id="Nbasic_do.foo_2" kind="assign" ref="basic_do.foo/$x" type="I">

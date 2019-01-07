@@ -4,7 +4,7 @@
       <ast length="128" start="0" type="55"/>
       <scope name="basic_if"/>
     </graph>
-    <graph ins="Nbasic_if.foo_1" name="Lbasic_if;.foo(I)V" outs="" style="static">
+    <graph name="Lbasic_if;.foo(I)V" style="static">
       <ast length="97" start="29" type="31"/>
       <scope name="basic_if.foo">
         <scope name="basic_if.foo.b0">
@@ -53,7 +53,7 @@
             <ast length="50" start="70" type="25"/>
           </node>
         </scope>
-        <node id="Nbasic_if.foo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Nbasic_if.foo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="52" type="44"/>
         </node>
         <node id="Nbasic_if.foo_2" kind="assign" ref="basic_if.foo/$x" type="I">

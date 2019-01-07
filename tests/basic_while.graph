@@ -4,7 +4,7 @@
       <ast length="111" start="0" type="55"/>
       <scope name="basic_while"/>
     </graph>
-    <graph ins="Nbasic_while.foo_1" name="Lbasic_while;.foo(I)V" outs="" style="static">
+    <graph name="Lbasic_while;.foo(I)V" style="static">
       <ast length="77" start="32" type="31"/>
       <scope name="basic_while.foo">
         <scope name="basic_while.foo.b0">
@@ -65,7 +65,7 @@
             <ast length="3" start="99" type="37"/>
           </node>
         </scope>
-        <node id="Nbasic_while.foo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Nbasic_while.foo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="55" type="44"/>
         </node>
         <node id="Nbasic_while.foo_2" kind="assign" ref="basic_while.foo/$x" type="I">

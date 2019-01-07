@@ -4,7 +4,7 @@
       <ast length="187" start="0" type="55"/>
       <scope name="basic_switch"/>
     </graph>
-    <graph ins="Nbasic_switch.foo_1" name="Lbasic_switch;.foo(I)I" outs="Nbasic_switch.foo.b0_21" style="static">
+    <graph name="Lbasic_switch;.foo(I)I" style="static">
       <ast length="152" start="33" type="31"/>
       <scope name="basic_switch.foo">
         <scope name="basic_switch.foo.b0">
@@ -79,12 +79,12 @@
             <link src="Nbasic_switch.foo.b0.switch0_16"/>
             <ast length="1" start="177" type="42"/>
           </node>
-          <node id="Nbasic_switch.foo.b0_21" kind="output" ref="#return" type="I">
+          <node flow="out" id="Nbasic_switch.foo.b0_21" kind="output" ref="#return" type="I">
             <link src="Nbasic_switch.foo.b0_20"/>
             <ast length="9" start="170" type="41"/>
           </node>
         </scope>
-        <node id="Nbasic_switch.foo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Nbasic_switch.foo_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="55" type="44"/>
         </node>
         <node id="Nbasic_switch.foo_2" kind="assign" ref="basic_switch.foo/$n" type="I">
