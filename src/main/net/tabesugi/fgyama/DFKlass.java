@@ -88,7 +88,7 @@ public class DFKlass extends DFType {
     public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
 	if (type instanceof DFArrayType) {
-	    type = DFBuiltinTypes.getObjectKlass();
+	    type = DFBuiltinTypes.getArrayKlass();
 	} else if (type == DFBasicType.BYTE) {
 	    type = DFBuiltinTypes.getByteKlass();
 	} else if (type == DFBasicType.CHAR) {
@@ -311,7 +311,7 @@ public class DFKlass extends DFType {
 
     public void addOverrides() {
         assert _loaded;
-        for (DFMethod method : _methods) {
+        for (DFMethod method : getMethods()) {
             if (_baseKlass != null) {
                 _baseKlass.overrideMethod(method, 0);
             }
@@ -325,7 +325,7 @@ public class DFKlass extends DFType {
 
     private void overrideMethod(DFMethod method1, int level) {
 	level++;
-        for (DFMethod method0 : _methods) {
+        for (DFMethod method0 : getMethods()) {
             if (method0.equals(method1)) {
                 method0.addOverride(method1, level);
                 break;
