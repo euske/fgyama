@@ -357,7 +357,7 @@ public class DFKlass extends DFType {
     }
 
     public void setFinder(DFTypeFinder finder) {
-        assert _finder == null || _finder == finder;
+        //assert _finder == null || _finder == finder;
         _finder = finder;
     }
     public void setTree(ASTNode ast) {

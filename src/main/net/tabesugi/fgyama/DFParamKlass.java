@@ -28,7 +28,7 @@ public class DFParamKlass extends DFKlass {
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
         _typeMap = new HashMap<DFMapType, DFType>();
-        for (int i = 0; i < mapTypes.length; i++) {
+        for (int i = 0; i < paramTypes.length; i++) {
             assert mapTypes[i] != null;
             assert paramTypes[i] != null;
             _typeMap.put(mapTypes[i], paramTypes[i]);
