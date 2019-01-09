@@ -12,32 +12,32 @@ import org.eclipse.jdt.core.dom.*;
 public class DFParamKlass extends DFKlass {
 
     private DFKlass _genericKlass;
-    private DFType[] _mapTypes;
-    private Map<DFParamType, DFType> _typeMap;
+    private DFType[] _paramTypes;
+    private Map<DFMapType, DFType> _typeMap;
 
     private Map<DFVarRef, DFVarRef> _paramFields =
         new HashMap<DFVarRef, DFVarRef>();
     private List<DFMethod> _paramMethods = null;
 
     public DFParamKlass(String name, DFKlass genericKlass,
-                        DFParamType[] paramTypes, DFType[] mapTypes) {
+                        DFMapType[] mapTypes, DFType[] paramTypes) {
         super(name, genericKlass);
         assert genericKlass != null;
-        assert paramTypes != null;
         assert mapTypes != null;
+        assert paramTypes != null;
         _genericKlass = genericKlass;
-        _mapTypes = mapTypes;
-        _typeMap = new HashMap<DFParamType, DFType>();
+        _paramTypes = paramTypes;
+        _typeMap = new HashMap<DFMapType, DFType>();
         for (int i = 0; i < mapTypes.length; i++) {
-            assert paramTypes[i] != null;
             assert mapTypes[i] != null;
-            _typeMap.put(paramTypes[i], mapTypes[i]);
+            assert paramTypes[i] != null;
+            _typeMap.put(mapTypes[i], paramTypes[i]);
         }
     }
 
-    public static String getParamName(DFType[] mapTypes) {
+    public static String getParamName(DFType[] paramTypes) {
         StringBuilder b = new StringBuilder();
-        for (DFType type : mapTypes) {
+        for (DFType type : paramTypes) {
             if (0 < b.length()) {
                 b.append(",");
             }
@@ -50,8 +50,8 @@ public class DFParamKlass extends DFKlass {
         return _genericKlass;
     }
 
-    public DFType[] getMapTypes() {
-        return _mapTypes;
+    public DFType[] getParamTypes() {
+        return _paramTypes;
     }
 
     @Override
@@ -83,20 +83,20 @@ public class DFParamKlass extends DFKlass {
 	return _paramMethods;
     }
 
-    public int isSubclassOf(DFKlass klass, Map<DFParamType, DFType> typeMap) {
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (!(klass instanceof DFParamKlass)) {
 	    // A<T> isSubclassOf B -> A isSubclassOf B.
 	    return _genericKlass.isSubclassOf(klass, typeMap);
 	}
 	// A<T> isSubclassOf B<S>?
         DFParamKlass pklass = (DFParamKlass)klass;
-        if (_mapTypes.length != pklass._mapTypes.length) return -1;
+        if (_paramTypes.length != pklass._paramTypes.length) return -1;
 	// A isSubclassOf B?
         int dist = _genericKlass.isSubclassOf(pklass._genericKlass, typeMap);
         if (dist < 0) return -1;
-        for (int i = 0; i < _mapTypes.length; i++) {
+        for (int i = 0; i < _paramTypes.length; i++) {
 	    // T isSubclassOf S? -> S canConvertFrom T?
-            int d = pklass._mapTypes[i].canConvertFrom(_mapTypes[i], typeMap);
+            int d = pklass._paramTypes[i].canConvertFrom(_paramTypes[i], typeMap);
             if (d < 0) return -1;
             dist += d;
         }

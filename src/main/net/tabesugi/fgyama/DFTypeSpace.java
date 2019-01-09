@@ -101,8 +101,8 @@ public class DFTypeSpace {
         return this.addKlass(klass);
     }
 
-    public DFParamType createParamType(String id) {
-        DFParamType pt = new DFParamType(id, this);
+    public DFMapType createMapType(String id) {
+        DFMapType pt = new DFMapType(id, this);
         this.addKlass(pt);
         return pt;
     }
@@ -177,7 +177,7 @@ public class DFTypeSpace {
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, typeDecl);
         list.add(klass);
-        klass.addParamTypes(typeDecl.typeParameters());
+        klass.addMapTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getKlassSpace();
 	child.build(list, klass, klass.getKlassScope(),
 		    typeDecl.bodyDeclarations());

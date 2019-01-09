@@ -27,7 +27,7 @@ public class DFKlass extends DFType {
     private DFKlass _parentKlass;
     private DFVarScope _klassScope;
 
-    private DFParamType[] _paramTypes = null;
+    private DFMapType[] _mapTypes = null;
     private Map<String, DFParamKlass> _paramKlasses =
         new HashMap<String, DFParamKlass>();
 
@@ -75,8 +75,8 @@ public class DFKlass extends DFType {
 
     public String getTypeName() {
         String name = "L"+this.getFullName();
-        if (_paramTypes != null && 0 < _paramTypes.length) {
-            name += DFParamKlass.getParamName(_paramTypes);
+        if (_mapTypes != null && 0 < _mapTypes.length) {
+            name += DFParamKlass.getParamName(_mapTypes);
         }
         return name+";";
     }
@@ -85,7 +85,7 @@ public class DFKlass extends DFType {
         return (this == type);
     }
 
-    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
 	if (type instanceof DFArrayType) {
 	    type = DFBuiltinTypes.getArrayKlass();
@@ -115,21 +115,21 @@ public class DFKlass extends DFType {
         String name = _name + DFParamKlass.getParamName(mapTypes);
         DFParamKlass klass = _paramKlasses.get(name);
         if (klass == null) {
-            klass = new DFParamKlass(name, this, _paramTypes, mapTypes);
+            klass = new DFParamKlass(name, this, _mapTypes, mapTypes);
             _paramKlasses.put(name, klass);
         }
         return klass;
     }
 
-    public void addParamTypes(List<TypeParameter> tps) {
+    public void addMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
-        _paramTypes = new DFParamType[tps.size()];
+        _mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFParamType pt = _klassSpace.createParamType(id);
+            DFMapType pt = _klassSpace.createMapType(id);
             pt.setTree(tp);
-            _paramTypes[i] = pt;
+            _mapTypes[i] = pt;
         }
     }
 
@@ -171,7 +171,7 @@ public class DFKlass extends DFType {
         return _initializer;
     }
 
-    public int isSubclassOf(DFKlass klass, Map<DFParamType, DFType> typeMap) {
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (this == klass) return 0;
         if (_baseKlass != null) {
             int dist = _baseKlass.isSubclassOf(klass, typeMap);
@@ -428,9 +428,9 @@ public class DFKlass extends DFType {
         if (sig != null) {
             //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
-	    _paramTypes = JNITypeParser.getParamTypes(sig, _klassSpace);
-	    if (_paramTypes != null) {
-		parser.buildParamTypes(finder, _paramTypes);
+	    _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
+	    if (_mapTypes != null) {
+		parser.buildMapTypes(finder, _mapTypes);
 	    }
 	    _baseKlass = (DFKlass)parser.getType(finder);
 	    finder = finder.extend(_baseKlass);
@@ -481,10 +481,10 @@ public class DFKlass extends DFType {
 	    if (sig != null) {
                 //Logger.info("meth: "+meth.getName()+","+sig);
 		JNITypeParser parser = new JNITypeParser(sig);
-                DFParamType[] paramTypes = JNITypeParser.getParamTypes(sig, methodSpace);
+                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
 		finder = new DFTypeFinder(finder, methodSpace);
-		if (paramTypes != null) {
-		    parser.buildParamTypes(finder, paramTypes);
+		if (mapTypes != null) {
+		    parser.buildMapTypes(finder, mapTypes);
 		}
 		methodType = (DFMethodType)parser.getType(finder);
 	    } else {
@@ -543,8 +543,8 @@ public class DFKlass extends DFType {
         }
         finder = new DFTypeFinder(finder, _klassSpace);
         try {
-	    if (_paramTypes != null) {
-                for (DFParamType pt : _paramTypes) {
+	    if (_mapTypes != null) {
+                for (DFMapType pt : _mapTypes) {
                     pt.load(finder);
                 }
 	    }
@@ -661,7 +661,7 @@ public class DFKlass extends DFType {
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id2 = tp.getName().getIdentifier();
-                    DFParamType pt = methodSpace.createParamType(id2);
+                    DFMapType pt = methodSpace.createMapType(id2);
                     pt.setTree(tp);
                     pt.load(finder);
                 }

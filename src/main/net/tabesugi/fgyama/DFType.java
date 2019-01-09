@@ -13,9 +13,9 @@ public abstract class DFType {
 
     public abstract String getTypeName();
     public abstract boolean equals(DFType type);
-    public abstract int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap);
+    public abstract int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap);
 
-    public DFType parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
         return this;
     }
 

@@ -35,7 +35,7 @@ public class DFMethodType extends DFType {
         return true;
     }
 
-    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (!(type instanceof DFMethodType)) return -1;
         DFMethodType mtype = (DFMethodType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
@@ -48,7 +48,7 @@ public class DFMethodType extends DFType {
         return dist;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFParamType, DFType> typeMap) {
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFType> typeMap) {
         if (_argTypes == null || argTypes == null) return 0;
         if (_argTypes.length != argTypes.length) return -1;
         int dist = 0;
@@ -90,7 +90,7 @@ public class DFMethodType extends DFType {
         return b.toString();
     }
 
-    public DFMethodType parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFMethodType parameterize(Map<DFMapType, DFType> typeMap) {
         DFType returnType = _returnType.parameterize(typeMap);
         boolean changed = (_returnType != returnType);
         DFType[] argTypes = new DFType[_argTypes.length];

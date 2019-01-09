@@ -136,7 +136,7 @@ public class DFMethod implements Comparable<DFMethod> {
         return methods;
     }
 
-    public DFMethod parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFMethod parameterize(Map<DFMapType, DFType> typeMap) {
         DFMethodType methodType = _methodType.parameterize(typeMap);
         boolean changed = (_methodType != methodType);
         DFOverride[] overrides = new DFOverride[_overrides.size()];

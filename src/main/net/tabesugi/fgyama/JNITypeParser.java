@@ -133,7 +133,7 @@ public class JNITypeParser {
         return a;
     }
 
-    public void buildParamTypes(DFTypeFinder finder, DFParamType[] paramTypes)
+    public void buildMapTypes(DFTypeFinder finder, DFMapType[] mapTypes)
         throws TypeNotFound {
         if (_text.charAt(_pos) != '<') return;
         _pos++;
@@ -145,17 +145,17 @@ public class JNITypeParser {
 	    if (_text.charAt(_pos) == ':') {
 		_pos++;	 // ???
 	    }
-            DFParamType pt = paramTypes[n++];
+            DFMapType pt = mapTypes[n++];
             pt.load(finder, this);
         }
         _pos++;
     }
 
-    public static DFParamType[] getParamTypes(String text, DFTypeSpace childSpace) {
+    public static DFMapType[] getMapTypes(String text, DFTypeSpace childSpace) {
 	int pos = 0;
         if (text.charAt(pos) != '<') return null;
         pos++;
-        List<DFParamType> params = new ArrayList<DFParamType>();
+        List<DFMapType> params = new ArrayList<DFMapType>();
         while (text.charAt(pos) != '>') {
 	    int i = text.indexOf(':', pos);
 	    String id = text.substring(pos, i);
@@ -163,14 +163,14 @@ public class JNITypeParser {
 	    if (text.charAt(pos) == ':') {
 		pos++;	 // ???
 	    }
-            DFParamType pt = childSpace.createParamType(id);
+            DFMapType pt = childSpace.createMapType(id);
             params.add(pt);
 	    pos = skipType(text, pos);
         }
         pos++;
-        DFParamType[] paramTypes = new DFParamType[params.size()];
-        params.toArray(paramTypes);
-        return paramTypes;
+        DFMapType[] mapTypes = new DFMapType[params.size()];
+        params.toArray(mapTypes);
+        return mapTypes;
     }
 
     private static int skipType(String text, int pos) {

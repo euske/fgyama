@@ -21,7 +21,7 @@ public class DFArrayType extends DFType {
         _ndims = ndims;
     }
 
-    public DFType parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
         if (typeMap.containsKey(_elemType)) {
             return new DFArrayType(typeMap.get(_elemType), _ndims);
         } else {
@@ -48,7 +48,7 @@ public class DFArrayType extends DFType {
                 _ndims == ((DFArrayType)type)._ndims);
     }
 
-    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) return -1;
         DFArrayType atype = (DFArrayType)type;

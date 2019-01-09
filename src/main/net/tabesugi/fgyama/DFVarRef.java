@@ -62,7 +62,7 @@ public class DFVarRef implements Comparable<DFVarRef> {
         return _type;
     }
 
-    public DFVarRef parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFVarRef parameterize(Map<DFMapType, DFType> typeMap) {
         if (typeMap.containsKey(_type)) {
             return new DFVarRef(_scope, _name, typeMap.get(_type));
         }

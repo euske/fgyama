@@ -24,7 +24,7 @@ public class DFNullType extends DFType {
         return (type instanceof DFNullType);
     }
 
-    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         return -1;
     }

@@ -7,18 +7,18 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFParamType
+//  DFMapType
 //
-public class DFParamType extends DFKlass {
+public class DFMapType extends DFKlass {
 
-    public DFParamType(
+    public DFMapType(
         String name, DFTypeSpace typeSpace) {
         super(name, typeSpace, null, null, DFBuiltinTypes.getObjectKlass());
     }
 
     @Override
     public String toString() {
-        return ("<DFParamType("+this.getFullName()+":"+_baseKlass+")>");
+        return ("<DFMapType("+this.getFullName()+":"+_baseKlass+")>");
     }
 
     @Override
@@ -26,9 +26,9 @@ public class DFParamType extends DFKlass {
         return _name+":"+_baseKlass.getTypeName();
     }
 
-    public int canConvertFrom(DFType type, Map<DFParamType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (typeMap == null) {
-            typeMap = new HashMap<DFParamType, DFType>();
+            typeMap = new HashMap<DFMapType, DFType>();
         }
         DFType type2 = typeMap.get(this);
         if (type2 != null) {
@@ -38,7 +38,7 @@ public class DFParamType extends DFKlass {
         return _baseKlass.canConvertFrom(type, typeMap);
     }
 
-    public DFType parameterize(Map<DFParamType, DFType> typeMap) {
+    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
         if (typeMap.containsKey(this)) {
             return typeMap.get(this);
         } else {
@@ -60,16 +60,16 @@ public class DFParamType extends DFKlass {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, TypeParameter typeParam)
+    private void build(DFTypeFinder finder, TypeParameter tp)
         throws TypeNotFound {
-        //Logger.info("DFParamType.build: "+this+": "+typeParam);
+        //Logger.info("DFMapType.build: "+this+": "+tp);
         try {
-            List<Type> bounds = typeParam.typeBounds();
+            List<Type> bounds = tp.typeBounds();
             if (0 < bounds.size()) {
                 _baseIfaces = new DFKlass[bounds.size()-1];
                 for (int i = 0; i < bounds.size(); i++) {
                     DFKlass klass = finder.resolveKlass(bounds.get(i));
-                    //Logger.info("DFParamType.build: "+this+": "+klass);
+                    //Logger.info("DFMapType.build: "+this+": "+klass);
                     if (i == 0) {
                         _baseKlass = klass;
                     } else {
@@ -79,7 +79,7 @@ public class DFParamType extends DFKlass {
                 }
             }
         } catch (TypeNotFound e) {
-            e.setAst(typeParam);
+            e.setAst(tp);
             throw e;
         }
     }

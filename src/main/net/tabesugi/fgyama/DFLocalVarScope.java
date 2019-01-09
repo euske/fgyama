@@ -66,16 +66,16 @@ public class DFLocalVarScope extends DFVarScope {
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers.
-            DFType paramType = finder.resolve(decl.getType());
+            DFType argType = finder.resolve(decl.getType());
             if (decl.isVarargs()) {
-                paramType = new DFArrayType(paramType, 1);
+                argType = new DFArrayType(argType, 1);
             }
 	    int ndims = decl.getExtraDimensions();
 	    if (ndims != 0) {
-		paramType = new DFArrayType(paramType, ndims);
+		argType = new DFArrayType(argType, ndims);
 	    }
-            this.addRef("#arg"+i, paramType);
-            this.addVar(decl.getName(), paramType);
+            this.addRef("#arg"+i, argType);
+            this.addVar(decl.getName(), argType);
             i++;
         }
         this.build(finder, methodDecl.getBody());
