@@ -2393,7 +2393,7 @@ public class Java2DF {
 		    if (!path.equals("-")) {
 			input = new FileInputStream(path);
 		    }
-		    Logger.info("Input file: "+path);
+		    Logger.info("Input file:", path);
 		    BufferedReader reader = new BufferedReader(
 			new InputStreamReader(input));
 		    while (true) {
@@ -2410,7 +2410,7 @@ public class Java2DF {
                 String path = args[++i];
                 try {
                     output = new FileOutputStream(path);
-                    Logger.info("Exporting: "+path);
+                    Logger.info("Exporting:", path);
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
                 }
@@ -2450,7 +2450,7 @@ public class Java2DF {
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
         for (String path : files) {
-            Logger.info("Pass1: "+path);
+            Logger.info("Pass1:", path);
             try {
                 CompilationUnit cunit = Utils.parseFile(path);
                 srcs.put(path, cunit);
@@ -2460,7 +2460,7 @@ public class Java2DF {
 	    }
         }
         for (String path : files) {
-            Logger.info("Pass2: "+path);
+            Logger.info("Pass2:", path);
             try {
                 CompilationUnit cunit = srcs.get(path);
                 converter.buildTypeFinder(path, cunit);
@@ -2470,7 +2470,7 @@ public class Java2DF {
 	    }
         }
         for (String path : files) {
-            Logger.info("Pass3: "+path);
+            Logger.info("Pass3:", path);
             try {
                 CompilationUnit cunit = srcs.get(path);
                 converter.loadKlasses(path, cunit);
@@ -2480,7 +2480,7 @@ public class Java2DF {
 	    }
         }
         for (String path : files) {
-            Logger.info("Pass4: "+path);
+            Logger.info("Pass4:", path);
 	    try {
 		converter.buildMethods(path);
             } catch (EntityNotFound e) {
@@ -2489,7 +2489,7 @@ public class Java2DF {
 	}
         for (String path : files) {
             if (processed != null && !processed.contains(path)) continue;
-            Logger.info("Pass5: "+path);
+            Logger.info("Pass5:", path);
             try {
                 CompilationUnit cunit = srcs.get(path);
                 exporter.startFile(path);

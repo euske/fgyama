@@ -12,21 +12,32 @@ public class Logger {
 
     public static int LogLevel = 1;
 
-    public static void debug(String s) {
+    public static void debug(String ... a) {
 	if (2 <= LogLevel) {
-	    out.println(s);
+            println(a);
 	}
     }
 
-    public static void info(String s) {
+    public static void info(String ... a) {
 	if (1 <= LogLevel) {
-	    out.println(s);
+            println(a);
 	}
     }
 
-    public static void error(String s) {
+    public static void error(String ... a) {
 	if (0 <= LogLevel) {
-	    out.println(s);
+            println(a);
 	}
+    }
+
+    private static void println(String[] a) {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < a.length; i++) {
+            if (i != 0) {
+                b.append(" ");
+            }
+            b.append(a[i]);
+        }
+        out.println(b.toString());
     }
 }
