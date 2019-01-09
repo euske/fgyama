@@ -54,7 +54,7 @@ public class DFKlass extends DFType {
         _klassSpace = typeSpace.lookupSpace(name);
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
-        _klassScope = new DFKlassScope(this, parentScope, name);
+        _klassScope = new DFKlassScope(parentScope, name);
     }
 
     protected DFKlass(String name, DFKlass genericKlass) {
@@ -713,19 +713,18 @@ public class DFKlass extends DFType {
     // DFKlassScope
     private class DFKlassScope extends DFVarScope {
 
-        private DFKlass _klass;
         private DFVarRef _this;
 
-        public DFKlassScope(DFKlass klass, DFVarScope parent, String id) {
+        public DFKlassScope(DFVarScope parent, String id) {
             super(parent, id);
-            _klass = klass;
-            _this = this.addRef("#this", klass);
+            _this = this.addRef("#this", DFKlass.this);
         }
 
         public String getFullName() {
-            return _klass.getFullName();
+            return DFKlass.this.getFullName();
         }
 
+        @Override
         public DFVarRef lookupThis() {
             return _this;
         }
@@ -738,14 +737,14 @@ public class DFKlass extends DFType {
                 return super.lookupVar1(id);
             } catch (VariableNotFound e) {
                 // try field names.
-                return _klass.lookupField(id);
+                return DFKlass.this.lookupField(id);
             }
         }
 
         // dumpContents (for debugging)
         public void dumpContents(PrintStream out, String indent) {
             super.dumpContents(out, indent);
-            for (DFMethod method : _methods) {
+            for (DFMethod method : DFKlass.this.getMethods()) {
                 out.println(indent+"defined: "+method);
             }
         }
