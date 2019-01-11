@@ -94,6 +94,7 @@ TODOs:
 ------
   * Interprocedural field watch.
   * Add parameterized class to TypeSpace.
+  * DFMethodType should have an Exception field.
   * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.

@@ -2345,6 +2345,7 @@ public class Java2DF {
         DFKlass[] klasses = _klassList.get(key);
         for (DFKlass klass : klasses) {
             for (DFMethod method : klass.getMethods()) {
+                if (method.getFrame() == null) continue;
                 ASTNode ast = method.getTree();
                 try {
                     if (ast instanceof MethodDeclaration) {
