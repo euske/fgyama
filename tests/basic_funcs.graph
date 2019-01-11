@@ -1,196 +1,196 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_funcs.java">
-    <graph name="basic_funcs" style="initializer">
+    <method name="basic_funcs" style="initializer">
       <ast length="403" start="0" type="55"/>
       <scope name="basic_funcs"/>
-    </graph>
-    <graph name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
+    </method>
+    <method name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
       <ast length="166" start="32" type="31"/>
       <scope name="basic_funcs.main">
         <scope name="basic_funcs.main.b0">
-          <node id="Nbasic_funcs.main.b0_3" kind="ref" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
-            <link src="Nbasic_funcs.main_2"/>
+          <node id="Nf2e83a28_3" kind="ref" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
+            <link src="Nf2e83a28_2"/>
             <ast length="4" start="92" type="42"/>
           </node>
-          <node data="0" id="Nbasic_funcs.main.b0_4" kind="const" type="I">
+          <node data="0" id="Nf2e83a28_4" kind="const" type="I">
             <ast length="1" start="97" type="34"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_5" kind="arrayref" ref="%:Ljava/lang/String;" type="Ljava/lang/String;">
-            <link label="array" src="Nbasic_funcs.main.b0_3"/>
-            <link label="index" src="Nbasic_funcs.main.b0_4"/>
+          <node id="Nf2e83a28_5" kind="arrayref" ref="%:Ljava/lang/String;" type="Ljava/lang/String;">
+            <link label="array" src="Nf2e83a28_3"/>
+            <link label="index" src="Nf2e83a28_4"/>
             <ast length="7" start="92" type="2"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_6" kind="assign" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
-            <link src="Nbasic_funcs.main.b0_5"/>
+          <node id="Nf2e83a28_6" kind="assign" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+            <link src="Nf2e83a28_5"/>
             <ast length="11" start="88" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_7" kind="ref" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
-            <link src="Nbasic_funcs.main.b0_6"/>
+          <node id="Nf2e83a28_7" kind="ref" ref="basic_funcs.main.b0/$a" type="Ljava/lang/String;">
+            <link src="Nf2e83a28_6"/>
             <ast length="1" start="134" type="42"/>
           </node>
-          <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nbasic_funcs.main.b0_8" kind="call" type="I">
-            <link label="arg0" src="Nbasic_funcs.main.b0_7"/>
+          <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nf2e83a28_8" kind="call" type="I">
+            <link label="arg0" src="Nf2e83a28_7"/>
             <ast length="19" start="117" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_9" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
-            <link src="Nbasic_funcs.main.b0_8"/>
+          <node id="Nf2e83a28_9" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nf2e83a28_8"/>
             <ast length="23" start="113" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_11" kind="ref" ref="basic_funcs.main.b0/$b" type="I">
-            <link src="Nbasic_funcs.main.b0_9"/>
+          <node id="Nf2e83a28_11" kind="ref" ref="basic_funcs.main.b0/$b" type="I">
+            <link src="Nf2e83a28_9"/>
             <ast length="1" start="158" type="42"/>
           </node>
-          <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.main.b0_12" kind="call" type="I">
-            <link label="arg0" src="Nbasic_funcs.main.b0_11"/>
-            <link label="obj" src="Nbasic_funcs.main_10"/>
+          <node data="Lbasic_funcs;.moo(I)I" id="Nf2e83a28_12" kind="call" type="I">
+            <link label="arg0" src="Nf2e83a28_11"/>
+            <link label="obj" src="Nf2e83a28_10"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_13" kind="assign" ref="#this" type="Lbasic_funcs;">
-            <link label="update" src="Nbasic_funcs.main.b0_12"/>
+          <node id="Nf2e83a28_13" kind="assign" ref="#this" type="Lbasic_funcs;">
+            <link label="update" src="Nf2e83a28_12"/>
             <ast length="6" start="154" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_14" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
-            <link src="Nbasic_funcs.main.b0_12"/>
+          <node id="Nf2e83a28_14" kind="assign" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nf2e83a28_12"/>
             <ast length="10" start="150" type="59"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_15" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link src="Nbasic_funcs.main_16"/>
+          <node id="Nf2e83a28_15" kind="fieldref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link src="Nf2e83a28_16"/>
             <ast length="10" start="170" type="40"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_17" kind="ref" ref="basic_funcs.main.b0/$c" type="I">
-            <link src="Nbasic_funcs.main.b0_14"/>
+          <node id="Nf2e83a28_17" kind="ref" ref="basic_funcs.main.b0/$c" type="I">
+            <link src="Nf2e83a28_14"/>
             <ast length="1" start="189" type="42"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(I)V" id="Nbasic_funcs.main.b0_18" kind="call" type="V">
-            <link label="arg0" src="Nbasic_funcs.main.b0_17"/>
-            <link label="obj" src="Nbasic_funcs.main.b0_15"/>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="Nf2e83a28_18" kind="call" type="V">
+            <link label="arg0" src="Nf2e83a28_17"/>
+            <link label="obj" src="Nf2e83a28_15"/>
             <ast length="21" start="170" type="32"/>
           </node>
-          <node id="Nbasic_funcs.main.b0_19" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="update" src="Nbasic_funcs.main.b0_18"/>
+          <node id="Nf2e83a28_19" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link label="update" src="Nf2e83a28_18"/>
             <ast length="21" start="170" type="32"/>
           </node>
         </scope>
-        <node flow="in" id="Nbasic_funcs.main_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
+        <node flow="in" id="Nf2e83a28_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast length="13" start="56" type="44"/>
         </node>
-        <node id="Nbasic_funcs.main_2" kind="assign" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
-          <link src="Nbasic_funcs.main_1"/>
+        <node id="Nf2e83a28_2" kind="assign" ref="basic_funcs.main/$args" type="[Ljava/lang/String;">
+          <link src="Nf2e83a28_1"/>
           <ast length="13" start="56" type="44"/>
         </node>
-        <node flow="in" id="Nbasic_funcs.main_10" ref="#this" type="Lbasic_funcs;"/>
-        <node flow="in" id="Nbasic_funcs.main_16" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
-        <node flow="in" id="Nbasic_funcs.main_20" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node flow="in" id="Nf2e83a28_10" ref="#this" type="Lbasic_funcs;"/>
+        <node flow="in" id="Nf2e83a28_16" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nf2e83a28_20" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
       </scope>
-    </graph>
-    <graph name="Lbasic_funcs;.moo(I)I" style="static">
+    </method>
+    <method name="Lbasic_funcs;.moo(I)I" style="static">
       <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast length="142" start="204" type="31"/>
       <scope name="basic_funcs.moo">
         <scope name="basic_funcs.moo.b0">
           <scope name="basic_funcs.moo.b0.b0">
-            <node data="Lbasic_funcs;.foo()I" id="Nbasic_funcs.moo.b0.b0_7" kind="call" type="I">
-              <link label="obj" src="Nbasic_funcs.moo_20"/>
+            <node data="Lbasic_funcs;.foo()I" id="Ndd66d29_7" kind="call" type="I">
+              <link label="obj" src="Ndd66d29_20"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="Nbasic_funcs.moo.b0.b0_8" kind="assign" ref="#this" type="Lbasic_funcs;">
-              <link label="update" src="Nbasic_funcs.moo.b0.b0_7"/>
+            <node id="Ndd66d29_8" kind="assign" ref="#this" type="Lbasic_funcs;">
+              <link label="update" src="Ndd66d29_7"/>
               <ast length="5" start="276" type="32"/>
             </node>
-            <node id="Nbasic_funcs.moo.b0.b0_9" kind="output" ref="#return" type="I">
-              <link src="Nbasic_funcs.moo.b0.b0_7"/>
+            <node id="Ndd66d29_9" kind="output" ref="#return" type="I">
+              <link src="Ndd66d29_7"/>
               <ast length="13" start="269" type="41"/>
             </node>
           </scope>
           <scope name="basic_funcs.moo.b0.b1">
-            <node id="Nbasic_funcs.moo.b0.b1_11" kind="ref" ref="basic_funcs.moo/$x" type="I">
-              <link src="Nbasic_funcs.moo_2"/>
+            <node id="Ndd66d29_11" kind="ref" ref="basic_funcs.moo/$x" type="I">
+              <link src="Ndd66d29_2"/>
               <ast length="1" start="323" type="42"/>
             </node>
-            <node data="1" id="Nbasic_funcs.moo.b0.b1_13" kind="const" type="I">
+            <node data="1" id="Ndd66d29_13" kind="const" type="I">
               <ast length="1" start="325" type="34"/>
             </node>
-            <node data="-" id="Nbasic_funcs.moo.b0.b1_14" kind="infix" type="I">
-              <link label="L" src="Nbasic_funcs.moo.b0.b1_11"/>
-              <link label="R" src="Nbasic_funcs.moo.b0.b1_13"/>
+            <node data="-" id="Ndd66d29_14" kind="infix" type="I">
+              <link label="L" src="Ndd66d29_11"/>
+              <link label="R" src="Ndd66d29_13"/>
               <ast length="3" start="323" type="27"/>
             </node>
-            <node data="Lbasic_funcs;.moo(I)I" id="Nbasic_funcs.moo.b0.b1_15" kind="call" type="I">
-              <link label="arg0" src="Nbasic_funcs.moo.b0.b1_14"/>
-              <link label="obj" src="Nbasic_funcs.moo_20"/>
+            <node data="Lbasic_funcs;.moo(I)I" id="Ndd66d29_15" kind="call" type="I">
+              <link label="arg0" src="Ndd66d29_14"/>
+              <link label="obj" src="Ndd66d29_20"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node id="Nbasic_funcs.moo.b0.b1_16" kind="assign" ref="#this" type="Lbasic_funcs;">
-              <link label="update" src="Nbasic_funcs.moo.b0.b1_15"/>
+            <node id="Ndd66d29_16" kind="assign" ref="#this" type="Lbasic_funcs;">
+              <link label="update" src="Ndd66d29_15"/>
               <ast length="8" start="319" type="32"/>
             </node>
-            <node data="2" id="Nbasic_funcs.moo.b0.b1_17" kind="const" type="I">
+            <node data="2" id="Ndd66d29_17" kind="const" type="I">
               <ast length="1" start="328" type="34"/>
             </node>
-            <node data="+" id="Nbasic_funcs.moo.b0.b1_18" kind="infix" type="I">
-              <link label="L" src="Nbasic_funcs.moo.b0.b1_15"/>
-              <link label="R" src="Nbasic_funcs.moo.b0.b1_17"/>
+            <node data="+" id="Ndd66d29_18" kind="infix" type="I">
+              <link label="L" src="Ndd66d29_15"/>
+              <link label="R" src="Ndd66d29_17"/>
               <ast length="10" start="319" type="27"/>
             </node>
-            <node id="Nbasic_funcs.moo.b0.b1_19" kind="output" ref="#return" type="I">
-              <link src="Nbasic_funcs.moo.b0.b1_18"/>
+            <node id="Ndd66d29_19" kind="output" ref="#return" type="I">
+              <link src="Ndd66d29_18"/>
               <ast length="18" start="312" type="41"/>
             </node>
           </scope>
-          <node id="Nbasic_funcs.moo.b0_3" kind="ref" ref="basic_funcs.moo/$x" type="I">
-            <link src="Nbasic_funcs.moo_2"/>
+          <node id="Ndd66d29_3" kind="ref" ref="basic_funcs.moo/$x" type="I">
+            <link src="Ndd66d29_2"/>
             <ast length="1" start="247" type="42"/>
           </node>
-          <node data="0" id="Nbasic_funcs.moo.b0_4" kind="const" type="I">
+          <node data="0" id="Ndd66d29_4" kind="const" type="I">
             <ast length="1" start="252" type="34"/>
           </node>
-          <node data="==" id="Nbasic_funcs.moo.b0_5" kind="infix" type="Z">
-            <link label="L" src="Nbasic_funcs.moo.b0_3"/>
-            <link label="R" src="Nbasic_funcs.moo.b0_4"/>
+          <node data="==" id="Ndd66d29_5" kind="infix" type="Z">
+            <link label="L" src="Ndd66d29_3"/>
+            <link label="R" src="Ndd66d29_4"/>
             <ast length="6" start="247" type="27"/>
           </node>
-          <node id="Nbasic_funcs.moo.b0_21" kind="join" ref="#return" type="I">
-            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
-            <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
-            <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
+          <node id="Ndd66d29_21" kind="join" ref="#return" type="I">
+            <link label="cond" src="Ndd66d29_5"/>
+            <link label="false" src="Ndd66d29_19"/>
+            <link label="true" src="Ndd66d29_9"/>
             <ast length="97" start="243" type="25"/>
           </node>
-          <node id="Nbasic_funcs.moo.b0_22" kind="join" ref="#return" type="I">
-            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
-            <link label="false" src="Nbasic_funcs.moo.b0_21"/>
-            <link label="true" src="Nbasic_funcs.moo.b0.b0_9"/>
+          <node id="Ndd66d29_22" kind="join" ref="#return" type="I">
+            <link label="cond" src="Ndd66d29_5"/>
+            <link label="false" src="Ndd66d29_21"/>
+            <link label="true" src="Ndd66d29_9"/>
           </node>
-          <node flow="out" id="Nbasic_funcs.moo.b0_23" kind="join" ref="#return" type="I">
-            <link label="cond" src="Nbasic_funcs.moo.b0_5"/>
-            <link label="false" src="Nbasic_funcs.moo.b0.b1_19"/>
-            <link label="true" src="Nbasic_funcs.moo.b0_22"/>
+          <node flow="out" id="Ndd66d29_23" kind="join" ref="#return" type="I">
+            <link label="cond" src="Ndd66d29_5"/>
+            <link label="false" src="Ndd66d29_19"/>
+            <link label="true" src="Ndd66d29_22"/>
           </node>
         </scope>
-        <node flow="in" id="Nbasic_funcs.moo_1" kind="input" ref="#arg0" type="I">
+        <node flow="in" id="Ndd66d29_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="226" type="44"/>
         </node>
-        <node id="Nbasic_funcs.moo_2" kind="assign" ref="basic_funcs.moo/$x" type="I">
-          <link src="Nbasic_funcs.moo_1"/>
+        <node id="Ndd66d29_2" kind="assign" ref="basic_funcs.moo/$x" type="I">
+          <link src="Ndd66d29_1"/>
           <ast length="5" start="226" type="44"/>
         </node>
-        <node flow="in" id="Nbasic_funcs.moo_20" ref="#this" type="Lbasic_funcs;"/>
+        <node flow="in" id="Ndd66d29_20" ref="#this" type="Lbasic_funcs;"/>
       </scope>
-    </graph>
-    <graph name="Lbasic_funcs;.foo()I" style="static">
+    </method>
+    <method name="Lbasic_funcs;.foo()I" style="static">
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast length="49" start="352" type="31"/>
       <scope name="basic_funcs.foo">
         <scope name="basic_funcs.foo.b0">
-          <node data="3" id="Nbasic_funcs.foo.b0_1" kind="const" type="I">
+          <node data="3" id="Nd468707_1" kind="const" type="I">
             <ast length="1" start="393" type="34"/>
           </node>
-          <node flow="out" id="Nbasic_funcs.foo.b0_2" kind="output" ref="#return" type="I">
-            <link src="Nbasic_funcs.foo.b0_1"/>
+          <node flow="out" id="Nd468707_2" kind="output" ref="#return" type="I">
+            <link src="Nd468707_1"/>
             <ast length="9" start="386" type="41"/>
           </node>
         </scope>
       </scope>
-    </graph>
+    </method>
   </file>
 </fgyama>
