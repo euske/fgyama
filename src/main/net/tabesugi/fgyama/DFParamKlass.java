@@ -35,7 +35,7 @@ public class DFParamKlass extends DFKlass {
         }
     }
 
-    public static String getParamName(DFType[] paramTypes) {
+    public static String getParamKlassName(String name, DFType[] paramTypes) {
         StringBuilder b = new StringBuilder();
         for (DFType type : paramTypes) {
             if (0 < b.length()) {
@@ -43,7 +43,7 @@ public class DFParamKlass extends DFKlass {
             }
             b.append(type.getTypeName());
         }
-        return "<"+b.toString()+">";
+        return name+"<"+b.toString()+">";
     }
 
     public DFKlass getGeneric() {

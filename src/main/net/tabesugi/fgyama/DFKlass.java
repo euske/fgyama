@@ -28,8 +28,6 @@ public class DFKlass extends DFType {
     private DFVarScope _klassScope;
 
     private DFMapType[] _mapTypes = null;
-    private Map<String, DFParamKlass> _paramKlasses =
-        new HashMap<String, DFParamKlass>();
 
     private DFMethod _initializer = null;
     private List<DFVarRef> _fields =
@@ -76,7 +74,7 @@ public class DFKlass extends DFType {
     public String getTypeName() {
         String name = "L"+this.getFullName();
         if (_mapTypes != null && 0 < _mapTypes.length) {
-            name += DFParamKlass.getParamName(_mapTypes);
+            name = DFParamKlass.getParamKlassName(name, _mapTypes);
         }
         return name+";";
     }
@@ -112,13 +110,14 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass getParamKlass(DFType[] mapTypes) {
-        String name = _name + DFParamKlass.getParamName(mapTypes);
-        DFParamKlass klass = _paramKlasses.get(name);
-        if (klass == null) {
-            klass = new DFParamKlass(name, this, _mapTypes, mapTypes);
-            _paramKlasses.put(name, klass);
+        String name = DFParamKlass.getParamKlassName(_name, mapTypes);
+        try {
+            return (DFParamKlass)_klassSpace.getKlass(name);
+        } catch (TypeNotFound e) {
+            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, mapTypes);
+            _klassSpace.addKlass(klass);
+            return klass;
         }
-        return klass;
     }
 
     public void addMapTypes(List<TypeParameter> tps) {
