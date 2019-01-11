@@ -18,4 +18,8 @@ public class UnsupportedSyntax extends Exception {
         assert ast != null;
         this.ast = ast;
     }
+
+    public String getAstName() {
+        return this.ast.getClass().getName();
+    }
 }

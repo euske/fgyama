@@ -2125,15 +2125,13 @@ public class Java2DF {
                 ctx, methodSpace, graph, finder, scope, frame, body);
             frame.close(ctx);
             //frame.dump();
-        } catch (UnsupportedSyntax e) {
-            e.name = method.getSignature();
-            throw e;
         } catch (MethodNotFound e) {
-            Logger.error("Method not found: "+e.name+"("+Utils.join(", ", e.argTypes)+
-                         ") ast="+e.ast+" method="+method);
+            e.setMethod(method);
+            Logger.error("MethodNotFound: "+e.name+"("+Utils.join(", ", e.argTypes)+")");
             throw e;
         } catch (EntityNotFound e) {
-            Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+method);
+            e.setMethod(method);
+            Logger.error("EntityNotFound: "+e.name);
             throw e;
         }
 
@@ -2144,7 +2142,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void processBodyDeclarations(
         DFKlass klass, ASTNode ast, List<BodyDeclaration> decls)
-        throws EntityNotFound {
+        throws UnsupportedSyntax, EntityNotFound {
         // lookup base/child klasses.
         DFVarScope klassScope = klass.getKlassScope();
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
@@ -2153,62 +2151,54 @@ public class Java2DF {
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
         DFTypeFinder finder = klass.getFinder();
         for (BodyDeclaration body : decls) {
-            try {
-                if (body instanceof AbstractTypeDeclaration) {
-                    AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
-                    DFKlass childKlass = klassSpace.getKlass(abstTypeDecl.getName());
-                    processBodyDeclarations(
-                        childKlass, abstTypeDecl,
-                        abstTypeDecl.bodyDeclarations());
+            if (body instanceof AbstractTypeDeclaration) {
+                AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
+                DFKlass childKlass = klassSpace.getKlass(abstTypeDecl.getName());
+                processBodyDeclarations(
+                    childKlass, abstTypeDecl,
+                    abstTypeDecl.bodyDeclarations());
 
-                } else if (body instanceof FieldDeclaration) {
-                    FieldDeclaration fieldDecl = (FieldDeclaration)body;
-                    for (VariableDeclarationFragment frag :
-                             (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                        DFVarRef ref = klass.lookupField(frag.getName());
-                        DFNode value = null;
-                        Expression init = frag.getInitializer();
-                        if (init != null) {
-                            processExpression(
-                                klassCtx, klassSpace, klassGraph, finder,
-                                klassScope, klassFrame, init);
-                            value = klassCtx.getRValue();
-                        }
-                        if (value == null) {
-                            // uninitialized field: default = null.
-                            value = new ConstNode(
-                                klassGraph, klassScope,
-                                DFNullType.NULL, null, "uninitialized");
-                        }
-                        DFNode assign = new SingleAssignNode(
-                            klassGraph, klassScope, ref, frag);
-                        assign.accept(value);
+            } else if (body instanceof FieldDeclaration) {
+                FieldDeclaration fieldDecl = (FieldDeclaration)body;
+                for (VariableDeclarationFragment frag :
+                         (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
+                    DFVarRef ref = klass.lookupField(frag.getName());
+                    DFNode value = null;
+                    Expression init = frag.getInitializer();
+                    if (init != null) {
+                        processExpression(
+                            klassCtx, klassSpace, klassGraph, finder,
+                            klassScope, klassFrame, init);
+                        value = klassCtx.getRValue();
                     }
-
-                } else if (body instanceof MethodDeclaration) {
-		    MethodDeclaration methodDecl = (MethodDeclaration)body;
-
-                } else if (body instanceof EnumConstantDeclaration) {
-                    EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
-                    // XXX ignore AnonymousClassDeclaration
-                    // XXX ignore Arguments
-
-                } else if (body instanceof AnnotationTypeMemberDeclaration) {
-                    AnnotationTypeMemberDeclaration annot =
-                        (AnnotationTypeMemberDeclaration)body;
-                    // XXX ignore annotations.
-
-                } else if (body instanceof Initializer) {
-
-                } else {
-                    throw new UnsupportedSyntax(body);
+                    if (value == null) {
+                        // uninitialized field: default = null.
+                        value = new ConstNode(
+                            klassGraph, klassScope,
+                            DFNullType.NULL, null, "uninitialized");
+                    }
+                    DFNode assign = new SingleAssignNode(
+                        klassGraph, klassScope, ref, frag);
+                    assign.accept(value);
                 }
-            } catch (UnsupportedSyntax e) {
-                String astName = e.ast.getClass().getName();
-                Logger.error("Fail: "+e.name+" (Unsupported: "+astName+") "+e.ast);
-                if (_exporter != null) {
-                    _exporter.writeError(e.name, astName);
-                }
+
+            } else if (body instanceof MethodDeclaration) {
+                MethodDeclaration methodDecl = (MethodDeclaration)body;
+
+            } else if (body instanceof EnumConstantDeclaration) {
+                EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
+                // XXX ignore AnonymousClassDeclaration
+                // XXX ignore Arguments
+
+            } else if (body instanceof AnnotationTypeMemberDeclaration) {
+                AnnotationTypeMemberDeclaration annot =
+                    (AnnotationTypeMemberDeclaration)body;
+                // XXX ignore annotations.
+
+            } else if (body instanceof Initializer) {
+
+            } else {
+                throw new UnsupportedSyntax(body);
             }
         }
         exportGraph(klassGraph);
@@ -2257,15 +2247,13 @@ public class Java2DF {
             }
             _klassList.put(key, klasses);
         } catch (UnsupportedSyntax e) {
-            String astName = e.ast.getClass().getName();
-            Logger.error("Pass1: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+            Logger.error("Pass1: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
         }
     }
 
     // pass2
     @SuppressWarnings("unchecked")
-    public void buildTypeFinder(String key, CompilationUnit cunit)
-        throws TypeNotFound {
+    public void setTypeFinder(String key, CompilationUnit cunit) {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = prepareTypeFinder(packageSpace, cunit.imports());
         DFKlass[] klasses = _klassList.get(key);
@@ -2285,20 +2273,30 @@ public class Java2DF {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
             DFKlass klass;
-            if (importDecl.isOnDemand()) {
-                klass = _rootSpace.getKlass(name);
-		klass.load();
-                module.importStatic(klass);
-            } else {
-                QualifiedName qname = (QualifiedName)name;
-                klass = _rootSpace.getKlass(qname.getQualifier());
-		klass.load();
-                module.importStatic(klass, qname.getName());
+            try {
+                if (importDecl.isOnDemand()) {
+                    klass = _rootSpace.getKlass(name);
+                    klass.load();
+                    module.importStatic(klass);
+                } else {
+                    QualifiedName qname = (QualifiedName)name;
+                    klass = _rootSpace.getKlass(qname.getQualifier());
+                    klass.load();
+                    module.importStatic(klass, qname.getName());
+                }
+            } catch (TypeNotFound e) {
+                Logger.error("Pass3: TypeNotFound at "+key+" ("+e.name+")");
+                if (0 < _strict) throw e;
             }
         }
         DFKlass[] klasses = _klassList.get(key);
         for (DFKlass klass : klasses) {
-            klass.load();
+            try {
+                klass.load();
+            } catch (TypeNotFound e) {
+                Logger.error("Pass3: TypeNotFound at "+key+" ("+e.name+")");
+                if (0 < _strict) throw e;
+            }
         }
     }
 
@@ -2315,8 +2313,10 @@ public class Java2DF {
 		try {
 		    method.buildFrame();
 		} catch (UnsupportedSyntax e) {
-		    String astName = e.ast.getClass().getName();
-		    Logger.error("Pass4: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                    Logger.error("Pass4: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+                } catch (EntityNotFound e) {
+                    Logger.error("Pass4: EntityNotFound at "+key+" ("+e.name+")");
+                    if (0 < _strict) throw e;
 		}
 	    }
         }
@@ -2331,9 +2331,16 @@ public class Java2DF {
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-            processBodyDeclarations(
-                klass, abstTypeDecl,
-                abstTypeDecl.bodyDeclarations());
+            try {
+                processBodyDeclarations(
+                    klass, abstTypeDecl,
+                    abstTypeDecl.bodyDeclarations());
+            } catch (UnsupportedSyntax e) {
+                Logger.error("Pass5: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+            } catch (EntityNotFound e) {
+                Logger.error("Pass5: EntityNotFound at "+key+" ("+e.name+")");
+                if (0 < _strict) throw e;
+            }
         }
         DFKlass[] klasses = _klassList.get(key);
         for (DFKlass klass : klasses) {
@@ -2356,8 +2363,10 @@ public class Java2DF {
                         exportGraph(graph);
                     }
                 } catch (UnsupportedSyntax e) {
-                    String astName = e.ast.getClass().getName();
-                    Logger.error("Pass5: unsupported: "+e.name+" (Unsupported: "+astName+") "+e.ast);
+                    Logger.error("Pass5: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+                } catch (EntityNotFound e) {
+                    Logger.error("Pass5: EntityNotFound at "+key+" ("+e.name+")");
+                    if (0 < _strict) throw e;
                 }
             }
         }
@@ -2457,48 +2466,34 @@ public class Java2DF {
                 converter.buildTypeSpace(path, cunit);
             } catch (IOException e) {
                 System.err.println("Cannot open input file: "+path);
-	    }
+            }
         }
         for (String path : files) {
             Logger.info("Pass2:", path);
-            try {
-                CompilationUnit cunit = srcs.get(path);
-                converter.buildTypeFinder(path, cunit);
-            } catch (TypeNotFound e) {
-                e.printStackTrace();
-                System.err.println("Pass2: Class not found: "+e.name);
-	    }
+            CompilationUnit cunit = srcs.get(path);
+            converter.setTypeFinder(path, cunit);
         }
-        for (String path : files) {
-            Logger.info("Pass3:", path);
-            try {
+        try {
+            for (String path : files) {
+                Logger.info("Pass3:", path);
                 CompilationUnit cunit = srcs.get(path);
                 converter.loadKlasses(path, cunit);
-            } catch (TypeNotFound e) {
-                e.printStackTrace();
-                System.err.println("Pass3: Class not found: "+e.name);
-	    }
-        }
-        for (String path : files) {
-            Logger.info("Pass4:", path);
-	    try {
-		converter.buildMethods(path);
-            } catch (EntityNotFound e) {
-                System.err.println("Pass4: Error at "+path+" ("+e.name+")");
-	    }
-	}
-        for (String path : files) {
-            if (processed != null && !processed.contains(path)) continue;
-            Logger.info("Pass5:", path);
-            try {
+            }
+            for (String path : files) {
+                Logger.info("Pass4:", path);
+                converter.buildMethods(path);
+            }
+            for (String path : files) {
+                if (processed != null && !processed.contains(path)) continue;
+                Logger.info("Pass5:", path);
                 CompilationUnit cunit = srcs.get(path);
                 exporter.startFile(path);
                 converter.buildGraphs(path, cunit);
                 exporter.endFile();
-            } catch (EntityNotFound e) {
-                e.printStackTrace();
-                System.err.println("Pass5: Error at "+path+" ("+e.name+")");
             }
+        } catch (EntityNotFound e) {
+            e.printStackTrace();
+            Logger.error("EntityNotFound: method="+e.method+", ast="+e.ast);
         }
         exporter.close();
 

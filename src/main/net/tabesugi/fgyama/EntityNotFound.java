@@ -13,6 +13,7 @@ public class EntityNotFound extends Exception {
 
     public String name;
     public ASTNode ast = null;
+    public DFMethod method = null;
 
     public EntityNotFound(String name) {
         this.name = name;
@@ -21,6 +22,12 @@ public class EntityNotFound extends Exception {
     public void setAst(ASTNode ast) {
         if (this.ast == null) {
             this.ast = ast;
+        }
+    }
+
+    public void setMethod(DFMethod method) {
+        if (this.method == null) {
+            this.method = method;
         }
     }
 }

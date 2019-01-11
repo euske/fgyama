@@ -44,7 +44,7 @@ public class UnitTestDF extends XMLTestCase {
         }
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
-            _converter.buildTypeFinder(javaPaths[i], cunit);
+            _converter.setTypeFinder(javaPaths[i], cunit);
         }
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
