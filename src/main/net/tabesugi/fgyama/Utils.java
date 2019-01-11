@@ -78,6 +78,10 @@ public class Utils {
 	return b.toString();
     }
 
+    public static String hashString(String s) {
+        return Integer.toHexString(s.hashCode());
+    }
+
     public static String readFile(String path)
         throws IOException {
         return readFile(new File(path));

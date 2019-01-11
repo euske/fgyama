@@ -16,6 +16,7 @@ public class DFGraph {
     private DFMethod _method;
     private ASTNode _ast;
 
+    private String _hash = null;
     private List<DFNode> _nodes =
         new ArrayList<DFNode>();
 
@@ -32,8 +33,19 @@ public class DFGraph {
         return ("<DFGraph("+_root.getFullName()+")>");
     }
 
+    public String getHash() {
+        if (_hash == null) {
+            if (_method != null) {
+                _hash = Utils.hashString(_method.getSignature());
+            } else {
+                _hash = Utils.hashString(_root.getFullName());
+            }
+        }
+        return _hash;
+    }
+
     public Element toXML(Document document) {
-        Element elem = document.createElement("graph");
+        Element elem = document.createElement("method");
 	Set<DFNode> input = null;
 	Set<DFNode> output = null;
         if (_method != null) {

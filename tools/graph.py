@@ -57,7 +57,7 @@ class DFGraph:
         return self
 
     def toxml(self):
-        egraph = Element('graph')
+        egraph = Element('method')
         egraph.set('name', self.name)
         if self.ast is not None:
             east = Element('ast')
@@ -171,7 +171,7 @@ class DFNode:
 ##  parse_graph
 ##
 def parse_graph(gid, egraph, src=None):
-    assert egraph.tag == 'graph'
+    assert egraph.tag == 'method'
     gname = egraph.get('name')
     style = egraph.get('style')
     graph = DFGraph(gid, gname, style, src)
@@ -241,7 +241,7 @@ def load_graphs(fp, gid=0):
         if efile.tag != 'file': continue
         path = efile.get('path')
         for egraph in efile.getchildren():
-            if egraph.tag != 'graph': continue
+            if egraph.tag != 'method': continue
             if gid is not None:
                 gid += 1
             yield parse_graph(gid, egraph, src=path)

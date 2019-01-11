@@ -88,7 +88,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public String getNodeId() {
-        return ("N"+_scope.getFullName()+"_"+_id);
+        return ("N"+_graph.getHash()+"_"+_id);
     }
 
     public String getKind() {
