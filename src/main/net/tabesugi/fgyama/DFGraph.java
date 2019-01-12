@@ -77,20 +77,6 @@ public class DFGraph {
         return elem;
     }
 
-    private static String getNodeIds(DFNode[] nodes) {
-        List<String> nodeIds = new ArrayList<String>();
-        for (DFNode node : nodes) {
-            DFVarRef ref = node.getRef();
-            if (ref != null && !ref.isLocal()) {
-                nodeIds.add(node.getNodeId());
-            }
-        }
-        String[] names = new String[nodeIds.size()];
-        nodeIds.toArray(names);
-        Arrays.sort(names);
-        return Utils.join(" ", names);
-    }
-
     public int addNode(DFNode node) {
         _nodes.add(node);
         return _nodes.size();
