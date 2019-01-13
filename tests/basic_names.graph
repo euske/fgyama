@@ -141,6 +141,9 @@
           <link src="Ne9ca43ba_1"/>
           <ast length="13" start="381" type="44"/>
         </node>
+        <node flow="in" id="Ne9ca43ba_8" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Ne9ca43ba_9" ref="dom/meep/basic_names/.y" type="I"/>
+        <node flow="out" id="Ne9ca43ba_10" ref="dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I"/>
       </scope>
     </method>
     <method name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" style="instance">

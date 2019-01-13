@@ -70,6 +70,7 @@
             <ast length="16" start="421" type="59"/>
           </node>
         </scope>
+        <node flow="in" id="Nb2004d57_13" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
     <method name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;" style="static">
@@ -100,6 +101,7 @@
           <link src="N289636c4_1"/>
           <ast length="3" start="520" type="44"/>
         </node>
+        <node flow="in" id="N289636c4_7" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
     <method name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.&lt;init&gt;(T:Ljava/lang/Object;)Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" style="constructor">

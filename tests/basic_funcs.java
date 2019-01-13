@@ -1,5 +1,8 @@
 public class basic_funcs {
 
+    public int y = 0;
+    public int z = 0;
+
     public static void main(String[] args) {
         String a = args[0];
         int b = Integer.parseInt(a);
@@ -8,6 +11,7 @@ public class basic_funcs {
     }
 
     public static int moo(int x) {
+        z += 9;
         if (x == 0) {
             return foo();
         } else {
@@ -16,6 +20,7 @@ public class basic_funcs {
     }
 
     public static int foo() {
-        return 3;
+        z = 7;
+        return y;
     }
 }

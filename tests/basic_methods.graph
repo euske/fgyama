@@ -35,7 +35,7 @@
             <link src="N929107f2_1"/>
             <ast length="64" start="161" type="59"/>
           </node>
-          <node flow="out" id="N929107f2_3" kind="assign" ref="basic_methods/.x" type="I">
+          <node flow="both" id="N929107f2_3" kind="assign" ref="basic_methods/.x" type="I">
             <link src="N929107f2_7"/>
             <ast length="1" start="305" type="42"/>
           </node>

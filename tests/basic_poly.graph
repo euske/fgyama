@@ -244,6 +244,7 @@
             <ast length="12" start="531" type="7"/>
           </node>
         </scope>
+        <node flow="in" id="N98dd04bd_36" ref="basic_poly_Foo/.x" type="I"/>
       </scope>
     </method>
   </file>
