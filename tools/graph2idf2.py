@@ -2,11 +2,15 @@
 import sys
 from graph import get_graphs
 
+def ind(i): return ('  '*i)
+
 IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output'])
 def getfeat(node):
     if node.kind in IGNORED:
         return None
     elif node.kind == 'assignop' and node.data == '=':
+        return None
+    elif node.ref == '#exception':
         return None
     elif node.data is None:
         return node.kind
@@ -15,14 +19,6 @@ def getfeat(node):
         return '%s:%s' % (node.kind, data)
     else:
         return '%s:%s' % (node.kind, node.data)
-
-def getarg(label):
-    if label == 'obj':
-        return '#this'
-    elif label.startswith('arg'):
-        return '#'+label
-    else:
-        return label
 
 
 ##  Chain Link
@@ -66,7 +62,8 @@ def main(argv):
         return usage()
     debug = 0
     maxlen = 5
-    mincall = 2
+    mincall = 1
+    maxoverrides = 1
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-m': maxlen = int(v)
@@ -82,10 +79,9 @@ def main(argv):
             if graph.src not in srcmap:
                 fid = len(srcmap)
                 srcmap[graph.src] = fid
+                print('+SOURCE %d %s' % (fid, graph.src))
             graphs.append(graph)
             gid2graph[graph.name] = graph
-    for (name,fid) in srcmap.items():
-        print('+SOURCE %d %s' % (fid, name))
 
     print('# graphs: %r' % len(graphs), file=sys.stderr)
 
@@ -101,12 +97,9 @@ def main(argv):
         return
     for src in graphs:
         for node in src:
-            if node.kind == 'call':
+            if node.kind in ('call', 'new'):
                 for gid in node.data.split(' '):
                     addcall(node, gid)
-            elif node.kind == 'new':
-                gid = node.data
-                addcall(node, gid)
 
     def getchain(node, label, chain):
         feat = getfeat(node)
@@ -119,14 +112,36 @@ def main(argv):
             v += (',%s,%s,%s' % (fid, s, e))
         return CLink(v, chain)
 
-    def trace(n0, label, chain0=None):
-        chain1 = getchain(n0, label, chain0)
-        if chain1 is not None and maxlen <= len(chain1):
-            yield ' '.join(reversed(list(chain1)))
+    def trace(r, label, n0, chain0=None, level=0):
+        #print(ind(level)+'trace', label, n0)
+        if label is None:
+            chain1 = chain0
+        elif label == 'update' or label.startswith('_'):
+            return
         else:
-            for (label, n1) in n0.outputs:
-                for z in trace(n1, label, chain1):
-                    yield z
+            if n0.kind in ('call', 'new'):
+                args = set( label for label in n0.inputs.keys()
+                            if not label.startswith('_') )
+                funcs = n0.data.split(' ')
+                for gid in funcs[:maxoverrides]:
+                    if gid not in gid2graph: continue
+                    graph = gid2graph[gid]
+                    for n1 in graph.ins:
+                        label = n1.ref
+                        if label not in args: continue
+                        trace(r, label, n1, chain0, level+1)
+            chain1 = getchain(n0, label, chain0)
+            if chain1 != chain0:
+                r.append(' '.join(reversed(list(chain1))))
+                if maxlen <= len(chain1): return
+        for (label, n1) in n0.outputs:
+            trace(r, label, n1, chain1, level+1)
+        if n0.kind == 'output':
+            gid = n0.graph.name
+            if gid in caller:
+                for nc in caller[n0.graph.name]:
+                    for (label, n1) in nc.outputs:
+                        trace(r, label, n1, chain1, level+1)
         return
 
     for graph in graphs:
@@ -140,10 +155,10 @@ def main(argv):
             name = gid
         print('# start: %r' % gid, file=sys.stderr)
         for funcall in caller[gid]:
-            for (label,n) in funcall.outputs:
-                if label == 'update': continue
-                for feats in trace(n, label):
-                    print('+PATH %s forw %s' % (name, feats))
+            r = []
+            trace(r, None, funcall)
+            for feats in r:
+                print('+PATH %s forw %s' % (name, feats))
 
     return 0
 
