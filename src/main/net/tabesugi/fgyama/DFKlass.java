@@ -31,8 +31,8 @@ public class DFKlass extends DFType {
 
     private DFMethod _initializer = null;
     private DFMethod _constructor = null;
-    private List<DFVarRef> _fields =
-        new ArrayList<DFVarRef>();
+    private List<DFRef> _fields =
+        new ArrayList<DFRef>();
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFLocalVarScope> _ast2scope =
@@ -192,7 +192,7 @@ public class DFKlass extends DFType {
         return -1;
     }
 
-    protected DFVarRef lookupField(String id)
+    protected DFRef lookupField(String id)
         throws VariableNotFound {
         assert _loaded;
         if (_klassScope != null) {
@@ -218,12 +218,12 @@ public class DFKlass extends DFType {
         throw new VariableNotFound("."+id);
     }
 
-    public DFVarRef lookupField(SimpleName name)
+    public DFRef lookupField(SimpleName name)
         throws VariableNotFound {
         return this.lookupField(name.getIdentifier());
     }
 
-    protected List<DFVarRef> getFields() {
+    protected List<DFRef> getFields() {
         assert _loaded;
 	return _fields;
     }
@@ -278,15 +278,15 @@ public class DFKlass extends DFType {
         throw new MethodNotFound(name.getIdentifier(), argTypes);
     }
 
-    private DFVarRef addField(
+    private DFRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         return this.addField(name.getIdentifier(), isStatic, type);
     }
 
-    protected DFVarRef addField(
+    protected DFRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
-        DFVarRef ref = _klassScope.addRef("."+id, type);
+        DFRef ref = _klassScope.addRef("."+id, type);
         //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
@@ -746,7 +746,7 @@ public class DFKlass extends DFType {
     // DFKlassScope
     private class DFKlassScope extends DFVarScope {
 
-        private DFVarRef _this;
+        private DFRef _this;
 
         public DFKlassScope(DFVarScope parent, String id) {
             super(parent, id);
@@ -758,12 +758,12 @@ public class DFKlass extends DFType {
         }
 
         @Override
-        public DFVarRef lookupThis() {
+        public DFRef lookupThis() {
             return _this;
         }
 
         @Override
-        protected DFVarRef lookupVar1(String id)
+        protected DFRef lookupVar1(String id)
             throws VariableNotFound {
             // try local variables first.
             try {

@@ -14,10 +14,10 @@ public class DFContext {
     private DFGraph _graph;
     private DFVarScope _scope;
 
-    private SortedMap<DFVarRef, DFNode> _first =
-        new TreeMap<DFVarRef, DFNode>();
-    private SortedMap<DFVarRef, DFNode> _last =
-        new TreeMap<DFVarRef, DFNode>();
+    private SortedMap<DFRef, DFNode> _first =
+        new TreeMap<DFRef, DFNode>();
+    private SortedMap<DFRef, DFNode> _last =
+        new TreeMap<DFRef, DFNode>();
     private DFNode _lval = null;
     private DFNode _rval = null;
 
@@ -27,7 +27,7 @@ public class DFContext {
     }
 
     // get(ref): get a current value of the context if defined.
-    public DFNode get(DFVarRef ref) {
+    public DFNode get(DFRef ref) {
         DFNode node = _last.get(ref);
         if (node == null) {
             assert !_first.containsKey(ref);
@@ -38,7 +38,7 @@ public class DFContext {
         return node;
     }
 
-    public DFNode getFirst(DFVarRef ref) {
+    public DFNode getFirst(DFRef ref) {
         DFNode node = _first.get(ref);
         if (node == null) {
             assert !_last.containsKey(ref);
@@ -58,7 +58,7 @@ public class DFContext {
     }
 
     public void set(DFNode node) {
-        DFVarRef ref = node.getRef();
+        DFRef ref = node.getRef();
         assert ref != null;
         _last.put(ref, node);
         if (!_first.containsKey(ref)) {
@@ -78,17 +78,17 @@ public class DFContext {
         return _first.values();
     }
 
-    public DFVarRef[] getChanged() {
-        List<DFVarRef> refs = new ArrayList<DFVarRef>();
-        for (Map.Entry<DFVarRef, DFNode> ent : _first.entrySet()) {
-            DFVarRef ref = ent.getKey();
+    public DFRef[] getChanged() {
+        List<DFRef> refs = new ArrayList<DFRef>();
+        for (Map.Entry<DFRef, DFNode> ent : _first.entrySet()) {
+            DFRef ref = ent.getKey();
             DFNode node0 = ent.getValue();
             DFNode node1 = _last.get(ref);
             if (node0 != node1) {
                 refs.add(ref);
             }
         }
-        DFVarRef[] a = new DFVarRef[refs.size()];
+        DFRef[] a = new DFRef[refs.size()];
         refs.toArray(a);
         return a;
     }
@@ -100,11 +100,11 @@ public class DFContext {
     public void dump(PrintStream out) {
         out.println("DFContext");
         out.println("  firsts:");
-        for (Map.Entry<DFVarRef, DFNode> ent : _first.entrySet()) {
+        for (Map.Entry<DFRef, DFNode> ent : _first.entrySet()) {
             out.println("    "+ent.getKey()+" = "+ent.getValue());
         }
         out.println("  lasts:");
-        for (Map.Entry<DFVarRef, DFNode> ent : _last.entrySet()) {
+        for (Map.Entry<DFRef, DFNode> ent : _last.entrySet()) {
             out.println("    "+ent.getKey()+" = "+ent.getValue());
         }
         if (_lval != null) {

@@ -12,8 +12,8 @@ import org.w3c.dom.*;
 //
 public class DFGlobalVarScope extends DFVarScope {
 
-    private Map<String, DFVarRef> _id2ref =
-        new HashMap<String, DFVarRef>();
+    private Map<String, DFRef> _id2ref =
+        new HashMap<String, DFRef>();
 
     public DFGlobalVarScope() {
         super("GLOBAL");
@@ -24,21 +24,21 @@ public class DFGlobalVarScope extends DFVarScope {
         return ("<DFGlobalVarScope>");
     }
 
-    public DFVarRef lookupArray(DFType type) {
-        DFVarRef ref;
+    public DFRef lookupArray(DFType type) {
+        DFRef ref;
         if (type instanceof DFArrayType) {
             DFType elemType = ((DFArrayType)type).getElemType();
 	    String id = "%:"+elemType.getTypeName();
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
-		ref = new DFVarRef(null, id, elemType);
+		ref = new DFRef(null, id, elemType);
 		_id2ref.put(id, ref);
 	    }
         } else {
 	    String id = "%:?";
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
-		ref = new DFVarRef(null, id, null);
+		ref = new DFRef(null, id, null);
 		_id2ref.put(id, ref);
 	    }
         }

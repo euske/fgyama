@@ -46,7 +46,7 @@ public class DFLocalVarScope extends DFVarScope {
         return scope;
     }
 
-    private DFVarRef addVar(SimpleName name, DFType type) {
+    private DFRef addVar(SimpleName name, DFType type) {
         //Logger.info("DFLocalVarScope.addVar:", this, ":", name, "->", type);
         return this.addRef("$"+name.getIdentifier(), type);
     }

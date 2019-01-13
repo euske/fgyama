@@ -16,10 +16,10 @@ public class DFFrame {
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
-    private SortedSet<DFVarRef> _inputRefs =
-        new TreeSet<DFVarRef>();
-    private SortedSet<DFVarRef> _outputRefs =
-        new TreeSet<DFVarRef>();
+    private SortedSet<DFRef> _inputRefs =
+        new TreeSet<DFRef>();
+    private SortedSet<DFRef> _outputRefs =
+        new TreeSet<DFRef>();
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
@@ -79,14 +79,14 @@ public class DFFrame {
 
     public boolean expandRefs(DFFrame childFrame) {
         boolean added = false;
-        for (DFVarRef ref : childFrame._inputRefs) {
+        for (DFRef ref : childFrame._inputRefs) {
             if (ref.isLocal() || ref.isTemporary()) continue;
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
                 added = true;
             }
         }
-        for (DFVarRef ref : childFrame._outputRefs) {
+        for (DFRef ref : childFrame._outputRefs) {
             if (ref.isLocal() || ref.isTemporary()) continue;
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
@@ -96,11 +96,11 @@ public class DFFrame {
         return added;
     }
 
-    private void addInputRef(DFVarRef ref) {
+    private void addInputRef(DFRef ref) {
         _inputRefs.add(ref);
     }
 
-    private void addOutputRef(DFVarRef ref) {
+    private void addOutputRef(DFRef ref) {
         _outputRefs.add(ref);
     }
 
@@ -110,20 +110,20 @@ public class DFFrame {
     }
 
     private void removeRefs(DFVarScope childScope) {
-        for (DFVarRef ref : childScope.getRefs()) {
+        for (DFRef ref : childScope.getRefs()) {
             _inputRefs.remove(ref);
             _outputRefs.remove(ref);
         }
     }
 
-    public DFVarRef[] getInputRefs() {
-        DFVarRef[] refs = new DFVarRef[_inputRefs.size()];
+    public DFRef[] getInputRefs() {
+        DFRef[] refs = new DFRef[_inputRefs.size()];
         _inputRefs.toArray(refs);
         return refs;
     }
 
-    public DFVarRef[] getOutputRefs() {
-        DFVarRef[] refs = new DFVarRef[_outputRefs.size()];
+    public DFRef[] getOutputRefs() {
+        DFRef[] refs = new DFRef[_outputRefs.size()];
         _outputRefs.toArray(refs);
         return refs;
     }
@@ -148,12 +148,12 @@ public class DFFrame {
                 ctx.set(node);
             }
         }
-        for (DFVarRef ref : _inputRefs) {
+        for (DFRef ref : _inputRefs) {
             DFNode node = ctx.getFirst(ref);
             assert node != null;
             _inputNodes.add(node);
         }
-        for (DFVarRef ref : _outputRefs) {
+        for (DFRef ref : _outputRefs) {
             DFNode node = ctx.get(ref);
             assert node != null;
             _outputNodes.add(node);
@@ -163,7 +163,7 @@ public class DFFrame {
     public Set<DFNode> getInputNodes() {
         Set<DFNode> nodes = new HashSet<DFNode>();
         for (DFNode node : _inputNodes) {
-            DFVarRef ref = node.getRef();
+            DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isTemporary()) {
                 nodes.add(node);
             }
@@ -174,7 +174,7 @@ public class DFFrame {
     public Set<DFNode> getOutputNodes() {
         Set<DFNode> nodes = new HashSet<DFNode>();
         for (DFNode node : _outputNodes) {
-            DFVarRef ref = node.getRef();
+            DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isTemporary()) {
                 nodes.add(node);
             }
@@ -191,7 +191,7 @@ public class DFFrame {
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
             // XXX Ignore modifiers and dimensions.
-            DFVarRef ref = scope.lookupArgument(i);
+            DFRef ref = scope.lookupArgument(i);
             this.addInputRef(ref);
             i++;
         }
@@ -230,7 +230,7 @@ public class DFFrame {
                 (VariableDeclarationStatement)stmt;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                DFVarRef ref = scope.lookupVar(frag.getName());
+                DFRef ref = scope.lookupVar(frag.getName());
                 this.addOutputRef(ref);
                 Expression init = frag.getInitializer();
                 if (init != null) {
@@ -274,7 +274,7 @@ public class DFFrame {
                     if (expr != null) {
                         if (enumKlass != null && expr instanceof SimpleName) {
                             // special treatment for enum.
-                            DFVarRef ref = enumKlass.lookupField((SimpleName)expr);
+                            DFRef ref = enumKlass.lookupField((SimpleName)expr);
                             this.addInputRef(ref);
                         } else {
                             childFrame.build(finder, method, childScope, expr);
@@ -414,7 +414,7 @@ public class DFFrame {
 
 	    } else if (expr instanceof Name) {
 		Name name = (Name)expr;
-		DFVarRef ref;
+		DFRef ref;
 		if (name.isSimpleName()) {
 		    ref = scope.lookupVar((SimpleName)name);
 		} else {
@@ -438,7 +438,7 @@ public class DFFrame {
 	    } else if (expr instanceof ThisExpression) {
 		ThisExpression thisExpr = (ThisExpression)expr;
 		Name name = thisExpr.getQualifier();
-		DFVarRef ref;
+		DFRef ref;
 		if (name != null) {
 		    DFKlass klass = finder.lookupKlass(name);
 		    ref = klass.getKlassScope().lookupThis();
@@ -511,7 +511,7 @@ public class DFFrame {
 		    (VariableDeclarationExpression)expr;
 		for (VariableDeclarationFragment frag :
 			 (List<VariableDeclarationFragment>) decl.fragments()) {
-		    DFVarRef ref = scope.lookupVar(frag.getName());
+		    DFRef ref = scope.lookupVar(frag.getName());
 		    this.addOutputRef(ref);
 		    Expression init = frag.getInitializer();
 		    if (init != null) {
@@ -525,7 +525,7 @@ public class DFFrame {
 		Expression expr1 = invoke.getExpression();
 		DFKlass klass = null;
 		if (expr1 == null) {
-		    DFVarRef ref = scope.lookupThis();
+		    DFRef ref = scope.lookupThis();
 		    this.addInputRef(ref);
 		    klass = finder.resolveKlass(ref.getRefType());
 		} else {
@@ -604,7 +604,7 @@ public class DFFrame {
 		this.build(finder, method, scope, aa.getIndex());
 		DFType type = this.build(finder, method, scope, aa.getArray());
 		if (type instanceof DFArrayType) {
-		    DFVarRef ref = scope.lookupArray(type);
+		    DFRef ref = scope.lookupArray(type);
 		    this.addInputRef(ref);
 		    type = ((DFArrayType)type).getElemType();
 		}
@@ -626,7 +626,7 @@ public class DFFrame {
 		    klass = finder.resolveKlass(type);
 		}
 		SimpleName fieldName = fa.getName();
-		DFVarRef ref = klass.lookupField(fieldName);
+		DFRef ref = klass.lookupField(fieldName);
 		this.addInputRef(ref);
 		return ref.getRefType();
 
@@ -635,7 +635,7 @@ public class DFFrame {
 		SimpleName fieldName = sfa.getName();
 		DFKlass klass = finder.resolveKlass(
 		    scope.lookupThis().getRefType()).getBaseKlass();
-		DFVarRef ref = klass.lookupField(fieldName);
+		DFRef ref = klass.lookupField(fieldName);
 		this.addInputRef(ref);
 		return ref.getRefType();
 
@@ -719,7 +719,7 @@ public class DFFrame {
 
         if (expr instanceof Name) {
             Name name = (Name)expr;
-            DFVarRef ref;
+            DFRef ref;
             if (name.isSimpleName()) {
                 ref = scope.lookupVar((SimpleName)name);
             } else {
@@ -744,7 +744,7 @@ public class DFFrame {
             DFType type = this.build(finder, method, scope, aa.getArray());
             this.build(finder, method, scope, aa.getIndex());
             if (type instanceof DFArrayType) {
-                DFVarRef ref = scope.lookupArray(type);
+                DFRef ref = scope.lookupArray(type);
                 this.addOutputRef(ref);
             }
 
@@ -764,7 +764,7 @@ public class DFFrame {
                 klass = finder.resolveKlass(type);
             }
             SimpleName fieldName = fa.getName();
-            DFVarRef ref = klass.lookupField(fieldName);
+            DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -772,7 +772,7 @@ public class DFFrame {
             SimpleName fieldName = sfa.getName();
             DFKlass klass = finder.resolveKlass(
                 scope.lookupThis().getRefType()).getBaseKlass();
-            DFVarRef ref = klass.lookupField(fieldName);
+            DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
         } else {
@@ -788,12 +788,12 @@ public class DFFrame {
         out.println(indent+_label+" {");
         String i2 = indent + "  ";
         StringBuilder inputs = new StringBuilder();
-        for (DFVarRef ref : this.getInputRefs()) {
+        for (DFRef ref : this.getInputRefs()) {
             inputs.append(" "+ref);
         }
         out.println(i2+"inputs:"+inputs);
         StringBuilder outputs = new StringBuilder();
-        for (DFVarRef ref : this.getOutputRefs()) {
+        for (DFRef ref : this.getOutputRefs()) {
             outputs.append(" "+ref);
         }
         out.println(i2+"outputs:"+outputs);

@@ -15,8 +15,8 @@ public class DFParamKlass extends DFKlass {
     private DFType[] _paramTypes;
     private Map<DFMapType, DFType> _typeMap;
 
-    private Map<DFVarRef, DFVarRef> _paramFields =
-        new HashMap<DFVarRef, DFVarRef>();
+    private Map<DFRef, DFRef> _paramFields =
+        new HashMap<DFRef, DFRef>();
     private List<DFMethod> _paramMethods = null;
 
     public DFParamKlass(String name, DFKlass genericKlass,
@@ -60,10 +60,10 @@ public class DFParamKlass extends DFKlass {
     }
 
     @Override
-    protected DFVarRef lookupField(String id)
+    protected DFRef lookupField(String id)
         throws VariableNotFound {
-        DFVarRef ref0 = _genericKlass.lookupField(id);
-	DFVarRef ref1 = _paramFields.get(ref0);
+        DFRef ref0 = _genericKlass.lookupField(id);
+	DFRef ref1 = _paramFields.get(ref0);
 	if (ref1 == null) {
 	    ref1 = ref0.parameterize(_typeMap);
 	    _paramFields.put(ref0, ref1);

@@ -7,16 +7,16 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFVarRef
+//  DFRef
 //  Place to store a value.
 //
-public class DFVarRef implements Comparable<DFVarRef> {
+public class DFRef implements Comparable<DFRef> {
 
     private DFVarScope _scope;
     private String _name;
     private DFType _type;
 
-    public DFVarRef(DFVarScope scope, String name, DFType type) {
+    public DFRef(DFVarScope scope, String name, DFType type) {
         assert 2 <= name.length();
         _scope = scope;
         _name = name;
@@ -26,14 +26,14 @@ public class DFVarRef implements Comparable<DFVarRef> {
     @Override
     public String toString() {
         if (_type == null) {
-            return ("<DFVarRef("+this.getFullName()+")>");
+            return ("<DFRef("+this.getFullName()+")>");
         } else {
-            return ("<DFVarRef("+this.getFullName()+": "+_type.toString()+">");
+            return ("<DFRef("+this.getFullName()+": "+_type.toString()+">");
         }
     }
 
     @Override
-    public int compareTo(DFVarRef ref) {
+    public int compareTo(DFRef ref) {
         if (ref == this) return 0;
         if (ref._scope == _scope) {
             return _name.compareTo(ref._name);
@@ -66,9 +66,9 @@ public class DFVarRef implements Comparable<DFVarRef> {
         return _type;
     }
 
-    public DFVarRef parameterize(Map<DFMapType, DFType> typeMap) {
+    public DFRef parameterize(Map<DFMapType, DFType> typeMap) {
         if (typeMap.containsKey(_type)) {
-            return new DFVarRef(_scope, _name, typeMap.get(_type));
+            return new DFRef(_scope, _name, typeMap.get(_type));
         }
         return this;
     }

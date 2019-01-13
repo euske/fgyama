@@ -16,8 +16,8 @@ public class DFVarScope implements Comparable<DFVarScope> {
     private DFVarScope _parent;
     private String _name;
 
-    private Map<String, DFVarRef> _id2ref =
-        new HashMap<String, DFVarRef>();
+    private Map<String, DFRef> _id2ref =
+        new HashMap<String, DFRef>();
 
     protected DFVarScope(String name) {
         _parent = null;
@@ -74,21 +74,21 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    protected DFVarRef addRef(String id, DFType type) {
+    protected DFRef addRef(String id, DFType type) {
         return this.addRef(id, type, this);
     }
-    protected DFVarRef addRef(String id, DFType type, DFVarScope scope) {
-        DFVarRef ref = _id2ref.get(id);
+    protected DFRef addRef(String id, DFType type, DFVarScope scope) {
+        DFRef ref = _id2ref.get(id);
         if (ref == null) {
-            ref = new DFVarRef(scope, id, type);
+            ref = new DFRef(scope, id, type);
             _id2ref.put(id, ref);
         }
         return ref;
     }
 
-    protected DFVarRef lookupRef(String id)
+    protected DFRef lookupRef(String id)
         throws VariableNotFound {
-        DFVarRef ref = _id2ref.get(id);
+        DFRef ref = _id2ref.get(id);
         if (ref != null) {
             return ref;
         } else {
@@ -96,17 +96,17 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFVarRef lookupThis() {
+    public DFRef lookupThis() {
         assert _parent != null;
         return _parent.lookupThis();
     }
 
-    protected DFVarRef lookupVar1(String id)
+    protected DFRef lookupVar1(String id)
         throws VariableNotFound {
         return this.lookupRef("$"+id);
     }
 
-    public DFVarRef lookupVar(SimpleName name)
+    public DFRef lookupVar(SimpleName name)
         throws VariableNotFound {
         try {
             return this.lookupVar1(name.getIdentifier());
@@ -122,7 +122,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
 	return _parent.lookupStaticMethod(name, argTypes);
     }
 
-    public DFVarRef lookupArgument(int index)
+    public DFRef lookupArgument(int index)
         throws VariableNotFound {
         try {
             return this.lookupRef("#arg"+index);
@@ -132,7 +132,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFVarRef lookupReturn()
+    public DFRef lookupReturn()
         throws VariableNotFound {
         try {
             return this.lookupRef("#return");
@@ -142,7 +142,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFVarRef lookupException()
+    public DFRef lookupException()
         throws VariableNotFound {
         try {
             return this.lookupRef("#exception");
@@ -152,12 +152,12 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    public DFVarRef lookupArray(DFType type) {
+    public DFRef lookupArray(DFType type) {
         return _parent.lookupArray(type);
     }
 
-    public DFVarRef[] getRefs() {
-        DFVarRef[] refs = new DFVarRef[_id2ref.size()];
+    public DFRef[] getRefs() {
+        DFRef[] refs = new DFRef[_id2ref.size()];
         _id2ref.values().toArray(refs);
         return refs;
     }
@@ -184,7 +184,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
         out.println(indent+"}");
     }
     public void dumpContents(PrintStream out, String indent) {
-        for (DFVarRef ref : _id2ref.values()) {
+        for (DFRef ref : _id2ref.values()) {
             out.println(indent+"defined: "+ref);
         }
     }

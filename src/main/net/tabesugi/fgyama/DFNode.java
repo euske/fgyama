@@ -16,7 +16,7 @@ public class DFNode implements Comparable<DFNode> {
     private int _id;
     private DFVarScope _scope;
     private DFType _type;
-    private DFVarRef _ref;
+    private DFRef _ref;
 
     private DFNode _input = null;
     private SortedMap<String, DFNode> _inputs =
@@ -24,7 +24,7 @@ public class DFNode implements Comparable<DFNode> {
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
-    public DFNode(DFGraph graph, DFVarScope scope, DFType type, DFVarRef ref) {
+    public DFNode(DFGraph graph, DFVarScope scope, DFType type, DFRef ref) {
         _graph = graph;
         _id = graph.addNode(this);
         _scope = scope;
@@ -81,7 +81,7 @@ public class DFNode implements Comparable<DFNode> {
         return _type;
     }
 
-    public DFVarRef getRef() {
+    public DFRef getRef() {
         return _ref;
     }
 
