@@ -57,16 +57,14 @@ public class DFNode implements Comparable<DFNode> {
         }
         if (_ref != null) {
             elem.setAttribute("ref", _ref.getFullName());
-	    if (!_ref.isLocal()) {
-		boolean fin = (input != null && input.contains(this));
-		boolean fout = (output != null && output.contains(this));
-		if (fin && fout) {
-		    elem.setAttribute("flow", "both");
-		} else if (fin) {
-		    elem.setAttribute("flow", "in");
-		} else if (fout) {
-		    elem.setAttribute("flow", "out");
-		}
+            boolean fin = (input != null && input.contains(this));
+            boolean fout = (output != null && output.contains(this));
+            if (fin && fout) {
+                elem.setAttribute("flow", "both");
+            } else if (fin) {
+                elem.setAttribute("flow", "in");
+            } else if (fout) {
+                elem.setAttribute("flow", "out");
 	    }
         }
         for (DFLink link : this.getLinks()) {

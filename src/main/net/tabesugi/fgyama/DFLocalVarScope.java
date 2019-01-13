@@ -60,8 +60,8 @@ public class DFLocalVarScope extends DFVarScope {
         //Logger.info("DFLocalVarScope.build: "+this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? DFBasicType.VOID : finder.resolve(returnType);
-        this.addRef("#return", type);
-        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass());
+        this.addRef("#return", type, null);
+        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
@@ -74,7 +74,7 @@ public class DFLocalVarScope extends DFVarScope {
 	    if (ndims != 0) {
 		argType = new DFArrayType(argType, ndims);
 	    }
-            this.addRef("#arg"+i, argType);
+            this.addRef("#arg"+i, argType, null);
             this.addVar(decl.getName(), argType);
             i++;
         }
@@ -83,7 +83,7 @@ public class DFLocalVarScope extends DFVarScope {
 
     public void build(DFTypeFinder finder, Initializer initializer)
         throws UnsupportedSyntax, TypeNotFound {
-        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass());
+        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         this.build(finder, initializer.getBody());
     }
 

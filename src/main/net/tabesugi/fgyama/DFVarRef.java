@@ -46,6 +46,10 @@ public class DFVarRef implements Comparable<DFVarRef> {
         return (_scope instanceof DFLocalVarScope);
     }
 
+    public boolean isTemporary() {
+        return (_scope == null);
+    }
+
     public String getName() {
 	return _name;
     }

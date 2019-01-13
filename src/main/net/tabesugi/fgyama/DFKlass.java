@@ -740,7 +740,7 @@ public class DFKlass extends DFType {
 
         public DFKlassScope(DFVarScope parent, String id) {
             super(parent, id);
-            _this = this.addRef("#this", DFKlass.this);
+            _this = this.addRef("#this", DFKlass.this, null);
         }
 
         public String getFullName() {
