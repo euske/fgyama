@@ -77,29 +77,36 @@ public class DFFrame {
         return frame;
     }
 
-    public void addInputRef(DFVarRef ref) {
-        _inputRefs.add(ref);
-    }
-
-    public void addOutputRef(DFVarRef ref) {
-        _outputRefs.add(ref);
-    }
-
     public boolean expandRefs(DFFrame childFrame) {
         boolean added = false;
         for (DFVarRef ref : childFrame._inputRefs) {
+            if (ref.isLocal() || ref.isTemporary()) continue;
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
                 added = true;
             }
         }
         for (DFVarRef ref : childFrame._outputRefs) {
+            if (ref.isLocal() || ref.isTemporary()) continue;
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
                 added = true;
             }
         }
         return added;
+    }
+
+    private void addInputRef(DFVarRef ref) {
+        _inputRefs.add(ref);
+    }
+
+    private void addOutputRef(DFVarRef ref) {
+        _outputRefs.add(ref);
+    }
+
+    private void expandLocalRefs(DFFrame childFrame) {
+        _inputRefs.addAll(childFrame._inputRefs);
+        _outputRefs.addAll(childFrame._outputRefs);
     }
 
     private void removeRefs(DFVarScope childScope) {
@@ -118,14 +125,6 @@ public class DFFrame {
     public DFVarRef[] getOutputRefs() {
         DFVarRef[] refs = new DFVarRef[_outputRefs.size()];
         _outputRefs.toArray(refs);
-        return refs;
-    }
-
-    public DFVarRef[] getInsAndOuts() {
-        SortedSet<DFVarRef> inouts = new TreeSet<DFVarRef>(_inputRefs);
-        inouts.retainAll(_outputRefs);
-        DFVarRef[] refs = new DFVarRef[inouts.size()];
-        inouts.toArray(refs);
         return refs;
     }
 
@@ -162,11 +161,25 @@ public class DFFrame {
     }
 
     public Set<DFNode> getInputNodes() {
-        return _inputNodes;
+        Set<DFNode> nodes = new HashSet<DFNode>();
+        for (DFNode node : _inputNodes) {
+            DFVarRef ref = node.getRef();
+            if (!ref.isLocal() || ref.isTemporary()) {
+                nodes.add(node);
+            }
+        }
+        return nodes;
     }
 
     public Set<DFNode> getOutputNodes() {
-        return _outputNodes;
+        Set<DFNode> nodes = new HashSet<DFNode>();
+        for (DFNode node : _outputNodes) {
+            DFVarRef ref = node.getRef();
+            if (!ref.isLocal() || ref.isTemporary()) {
+                nodes.add(node);
+            }
+        }
+        return nodes;
     }
 
     @SuppressWarnings("unchecked")
@@ -235,12 +248,12 @@ public class DFFrame {
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
             thenFrame.build(finder, method, scope, thenStmt);
-            this.expandRefs(thenFrame);
+            this.expandLocalRefs(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = this.addChild(DFFrame.ANONYMOUS, elseStmt);
                 elseFrame.build(finder, method, scope, elseStmt);
-                this.expandRefs(elseFrame);
+                this.expandLocalRefs(elseFrame);
             }
 
         } else if (stmt instanceof SwitchStatement) {
@@ -272,7 +285,7 @@ public class DFFrame {
                 }
             }
             childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)stmt;
@@ -281,7 +294,7 @@ public class DFFrame {
             childFrame.build(finder, method, scope, whileStmt.getExpression());
             childFrame.build(finder, method, childScope, whileStmt.getBody());
             childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)stmt;
@@ -290,7 +303,7 @@ public class DFFrame {
             childFrame.build(finder, method, childScope, doStmt.getBody());
             childFrame.build(finder, method, scope, doStmt.getExpression());
             childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)stmt;
@@ -308,7 +321,7 @@ public class DFFrame {
                 childFrame.build(finder, method, childScope, update);
             }
             childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
@@ -317,7 +330,7 @@ public class DFFrame {
             DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             childFrame.build(finder, method, childScope, eForStmt.getBody());
             childFrame.removeRefs(childScope);
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof ReturnStatement) {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
@@ -337,7 +350,7 @@ public class DFFrame {
             String label = labelName.getIdentifier();
             DFFrame childFrame = this.addChild(label, stmt);
             childFrame.build(finder, method, scope, labeledStmt.getBody());
-            this.expandRefs(childFrame);
+            this.expandLocalRefs(childFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
@@ -349,14 +362,14 @@ public class DFFrame {
             DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
             tryFrame.build(finder, method, tryScope, tryStmt.getBody());
             tryFrame.removeRefs(tryScope);
-            this.expandRefs(tryFrame);
+            this.expandLocalRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 DFVarScope catchScope = scope.getChildByAST(cc);
                 DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
                 catchFrame.build(finder, method, catchScope, cc.getBody());
                 catchFrame.removeRefs(catchScope);
-                this.expandRefs(catchFrame);
+                this.expandLocalRefs(catchFrame);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
@@ -784,11 +797,6 @@ public class DFFrame {
             outputs.append(" "+ref);
         }
         out.println(i2+"outputs:"+outputs);
-        StringBuilder inouts = new StringBuilder();
-        for (DFVarRef ref : this.getInsAndOuts()) {
-            inouts.append(" "+ref);
-        }
-        out.println(i2+"in/outs:"+inouts);
         for (DFFrame frame : _ast2child.values()) {
             frame.dump(out, i2);
         }

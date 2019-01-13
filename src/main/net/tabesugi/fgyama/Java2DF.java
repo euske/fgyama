@@ -2307,11 +2307,12 @@ public class Java2DF {
 	for (DFKlass klass : klasses) {
 	    klass.addOverrides();
         }
-        //Set<DFMethod> methods = new HashSet<DFMethod>();
+        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 	for (DFKlass klass : klasses) {
 	    for (DFMethod method : klass.getMethods()) {
 		try {
 		    method.buildFrame();
+                    queue.add(method);
 		} catch (UnsupportedSyntax e) {
                     Logger.error("Pass4: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
                 } catch (EntityNotFound e) {
@@ -2319,6 +2320,19 @@ public class Java2DF {
                     if (0 < _strict) throw e;
 		}
 	    }
+        }
+        // Expand callee frames recursively.
+        while (!queue.isEmpty()) {
+            DFMethod method = queue.remove();
+            DFFrame fcallee = method.getFrame();
+            if (fcallee == null) continue;
+            for (DFMethod caller : method.getCallers()) {
+                DFFrame fcaller = caller.getFrame();
+                if (fcaller == null) continue;
+                if (fcaller.expandRefs(fcallee)) {
+                    queue.add(caller);
+                }
+            }
         }
     }
 
