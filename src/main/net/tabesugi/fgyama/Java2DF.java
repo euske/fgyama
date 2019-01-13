@@ -551,7 +551,7 @@ class ObjectUpdateNode extends SingleAssignNode {
 
     public ObjectUpdateNode(
         DFGraph graph, DFVarScope scope, DFVarRef ref,
-        ASTNode ast, MethodCallNode call) {
+        ASTNode ast, CallNode call) {
         super(graph, scope, ref, ast);
         this.accept(call, "update");
     }
@@ -988,11 +988,36 @@ public class Java2DF {
                 MethodCallNode call = new MethodCallNode(
                     graph, scope, methods, invoke, obj);
                 call.setArgs(args);
+                {
+                    Set<DFVarRef> refs = new HashSet<DFVarRef>();
+                    for (DFMethod method1 : methods) {
+                        DFFrame frame1 = method1.getFrame();
+                        if (frame1 == null) continue;
+                        refs.addAll(Arrays.asList(frame1.getInputRefs()));
+                    }
+                    for (DFVarRef ref : refs) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        call.accept(ctx.get(ref), ref.getFullName());
+                    }
+                }
                 ctx.setRValue(call);
                 if (obj != null && obj.getRef() != null) {
                     // the object is updated.
                     ctx.set(new ObjectUpdateNode(
                                 graph, scope, obj.getRef(), invoke, call));
+                }
+                {
+                    Set<DFVarRef> refs = new HashSet<DFVarRef>();
+                    for (DFMethod method1 : methods) {
+                        DFFrame frame1 = method1.getFrame();
+                        if (frame1 == null) continue;
+                        refs.addAll(Arrays.asList(frame1.getInputRefs()));
+                    }
+                    for (DFVarRef ref : refs) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        ctx.set(new ObjectUpdateNode(
+                                    graph, scope, ref, invoke, call));
+                    }
                 }
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
@@ -1038,11 +1063,25 @@ public class Java2DF {
                 MethodCallNode call = new MethodCallNode(
                     graph, scope, methods, sinvoke, obj);
                 call.setArgs(args);
+                DFFrame frame1 = method.getFrame();
+                if (frame1 != null) {
+                    for (DFVarRef ref : frame1.getInputRefs()) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        call.accept(ctx.get(ref), ref.getFullName());
+                    }
+                }
                 ctx.setRValue(call);
                 if (obj != null && obj.getRef() != null) {
                     // the object is updated.
                     ctx.set(new ObjectUpdateNode(
                                 graph, scope, obj.getRef(), sinvoke, call));
+                }
+                if (frame1 != null) {
+                    for (DFVarRef ref : frame1.getOutputRefs()) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        ctx.set(new ObjectUpdateNode(
+                                    graph, scope, ref, sinvoke, call));
+                    }
                 }
                 if (call.exception != null) {
                     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
@@ -1146,16 +1185,16 @@ public class Java2DF {
                 ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
                 AnonymousClassDeclaration anonDecl =
                     cstr.getAnonymousClassDeclaration();
-                DFType instType;
+                DFKlass instKlass;
                 if (anonDecl != null) {
                     String id = Utils.encodeASTNode(anonDecl);
                     DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
 		    DFKlass anonKlass = anonSpace.getKlass(id);
 		    processBodyDeclarations(
 			anonKlass, anonDecl, anonDecl.bodyDeclarations());
-		    instType = anonKlass;
+		    instKlass = anonKlass;
                 } else {
-                    instType = finder.resolve(cstr.getType());
+                    instKlass = finder.resolveKlass(cstr.getType());
                 }
                 Expression expr1 = cstr.getExpression();
                 DFNode obj = null;
@@ -1173,9 +1212,28 @@ public class Java2DF {
                 DFNode[] args = new DFNode[argList.size()];
                 argList.toArray(args);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, instType, cstr, obj);
+                    graph, scope, instKlass, cstr, obj);
                 call.setArgs(args);
+                DFMethod method = instKlass.getConstructor();
+                DFFrame frame1 = method.getFrame();
+                if (frame1 != null) {
+                    for (DFVarRef ref : frame1.getInputRefs()) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        call.accept(ctx.get(ref), ref.getFullName());
+                    }
+                }
                 ctx.setRValue(call);
+                if (frame1 != null) {
+                    for (DFVarRef ref : frame1.getOutputRefs()) {
+                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        ctx.set(new ObjectUpdateNode(
+                                    graph, scope, ref, cstr, call));
+                    }
+                }
+                if (call.exception != null) {
+                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                    frame.addExit(new DFExit(dstFrame, call.exception));
+                }
 
             } else if (expr instanceof ConditionalExpression) {
                 ConditionalExpression cond = (ConditionalExpression)expr;

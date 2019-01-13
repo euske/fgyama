@@ -30,6 +30,7 @@ public class DFKlass extends DFType {
     private DFMapType[] _mapTypes = null;
 
     private DFMethod _initializer = null;
+    private DFMethod _constructor = null;
     private List<DFVarRef> _fields =
         new ArrayList<DFVarRef>();
     private List<DFMethod> _methods =
@@ -62,7 +63,6 @@ public class DFKlass extends DFType {
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
-        _initializer = genericKlass._initializer;
         this.setLoaded();
     }
 
@@ -168,6 +168,13 @@ public class DFKlass extends DFType {
 
     public DFMethod getInitializer() {
         return _initializer;
+    }
+
+    public DFMethod getConstructor() {
+        if (_constructor != null) {
+            return _constructor;
+        }
+        return _baseKlass.getConstructor();
     }
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
@@ -504,15 +511,15 @@ public class DFKlass extends DFType {
 		DFType returnType = finder.resolve(meth.getReturnType());
 		methodType = new DFMethodType(argTypes, returnType);
 	    }
-            DFCallStyle callStyle;
             if (meth.getName().equals("<init>")) {
-                callStyle = DFCallStyle.Constructor;
+                _constructor = this.addMethod(
+                    methodSpace, meth.getName(), DFCallStyle.Constructor, methodType);
             } else {
-                callStyle = (meth.isStatic())?
+                DFCallStyle callStyle = (meth.isStatic())?
                     DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
+                this.addMethod(
+                    methodSpace, meth.getName(), callStyle, methodType);
             }
-	    this.addMethod(
-                methodSpace, meth.getName(), callStyle, methodType);
         }
     }
 
@@ -710,6 +717,9 @@ public class DFKlass extends DFType {
 		    method.setScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
+                if (decl.isConstructor()) {
+                    _constructor = method;
+                }
 
             } else if (body instanceof EnumConstantDeclaration) {
 
