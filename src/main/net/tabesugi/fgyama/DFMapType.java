@@ -62,14 +62,14 @@ public class DFMapType extends DFKlass {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, TypeParameter tp)
         throws TypeNotFound {
-        //Logger.info("DFMapType.build: "+this+": "+tp);
+        //Logger.info("DFMapType.build:", this, ":", tp);
         try {
             List<Type> bounds = tp.typeBounds();
             if (0 < bounds.size()) {
                 _baseIfaces = new DFKlass[bounds.size()-1];
                 for (int i = 0; i < bounds.size(); i++) {
                     DFKlass klass = finder.resolveKlass(bounds.get(i));
-                    //Logger.info("DFMapType.build: "+this+": "+klass);
+                    //Logger.info("DFMapType.build:", this, ":", klass);
                     if (i == 0) {
                         _baseKlass = klass;
                     } else {

@@ -709,7 +709,7 @@ class DFModuleScope extends DFVarScope {
     }
 
     public void importStatic(DFKlass klass) {
-	Logger.debug("ImportStatic: "+klass+".*");
+	Logger.debug("ImportStatic:", klass+".*");
 	for (DFVarRef ref : klass.getFields()) {
 	    _refs.put(ref.getName(), ref);
 	}
@@ -719,7 +719,7 @@ class DFModuleScope extends DFVarScope {
     }
 
     public void importStatic(DFKlass klass, SimpleName name) {
-	Logger.debug("ImportStatic: "+klass+"."+name);
+	Logger.debug("ImportStatic:", klass+"."+name);
 	String id = name.getIdentifier();
 	try {
 	    DFVarRef ref = klass.lookupField(name);
@@ -980,7 +980,7 @@ public class Java2DF {
                         DFMethod fallback = new DFMethod(
                             klass, null, id, DFCallStyle.InstanceMethod,
                             new DFMethodType(argTypes, null));
-                        Logger.error("Fallback method: "+klass+": "+fallback);
+                        Logger.error("Fallback method:", klass, ":", fallback);
                         method = fallback;
                     }
                 }
@@ -1056,7 +1056,7 @@ public class Java2DF {
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, DFCallStyle.InstanceMethod,
                         new DFMethodType(argTypes, null));
-                    Logger.error("Fallback method: "+baseKlass+": "+fallback);
+                    Logger.error("Fallback method:", baseKlass, ":", fallback);
                     method = fallback;
                 }
                 DFMethod methods[] = new DFMethod[] { method };
@@ -2124,18 +2124,18 @@ public class Java2DF {
         for (ImportDeclaration importDecl : imports) {
             Name name = importDecl.getName();
 	    if (importDecl.isOnDemand()) {
-		Logger.debug("Import: "+name+".*");
+		Logger.debug("Import:", name+".*");
 		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
 	    } else {
 		assert name.isQualifiedName();
 		try {
 		    DFKlass klass = _rootSpace.getKlass(name);
-		    Logger.debug("Import: "+name);
+		    Logger.debug("Import:", name);
 		    importSpace.addKlass(klass);
 		    n++;
 		} catch (TypeNotFound e) {
 		    if (!importDecl.isStatic()) {
-			Logger.error("Import: Class not found: "+e.name);
+			Logger.error("Import: Class not found:", e.name);
 		    }
 		}
 	    }
@@ -2185,15 +2185,15 @@ public class Java2DF {
             //frame.dump();
         } catch (MethodNotFound e) {
             e.setMethod(method);
-            Logger.error("MethodNotFound: "+e.name+"("+Utils.join(", ", e.argTypes)+")");
+            Logger.error("MethodNotFound:", e.name+"("+Utils.join(", ", e.argTypes)+")");
             throw e;
         } catch (EntityNotFound e) {
             e.setMethod(method);
-            Logger.error("EntityNotFound: "+e.name);
+            Logger.error("EntityNotFound:", e.name);
             throw e;
         }
 
-        Logger.debug("Success: "+method.getSignature());
+        Logger.debug("Success:", method.getSignature());
         return graph;
     }
 
@@ -2301,11 +2301,11 @@ public class Java2DF {
         try {
             DFKlass[] klasses = packageSpace.buildModuleSpace(cunit, module);
             for (DFKlass klass : klasses) {
-                Logger.debug("Pass1: created: "+klass);
+                Logger.debug("Pass1: created:", klass);
             }
             _klassList.put(key, klasses);
         } catch (UnsupportedSyntax e) {
-            Logger.error("Pass1: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+            Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
         }
     }
 
@@ -2343,7 +2343,7 @@ public class Java2DF {
                     module.importStatic(klass, qname.getName());
                 }
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at "+key+" ("+e.name+")");
+                Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
@@ -2352,7 +2352,7 @@ public class Java2DF {
             try {
                 klass.load();
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at "+key+" ("+e.name+")");
+                Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
@@ -2372,9 +2372,9 @@ public class Java2DF {
 		    method.buildFrame();
                     queue.add(method);
 		} catch (UnsupportedSyntax e) {
-                    Logger.error("Pass4: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+                    Logger.error("Pass4: Unsupported at", key, e.name, "("+e.getAstName()+")");
                 } catch (EntityNotFound e) {
-                    Logger.error("Pass4: EntityNotFound at "+key+" ("+e.name+")");
+                    Logger.error("Pass4: EntityNotFound at", key, "("+e.name+")");
                     if (0 < _strict) throw e;
 		}
 	    }
@@ -2408,9 +2408,9 @@ public class Java2DF {
                     klass, abstTypeDecl,
                     abstTypeDecl.bodyDeclarations());
             } catch (UnsupportedSyntax e) {
-                Logger.error("Pass5: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+                Logger.error("Pass5: Unsupported at", key, e.name, "("+e.getAstName()+")");
             } catch (EntityNotFound e) {
-                Logger.error("Pass5: EntityNotFound at "+key+" ("+e.name+")");
+                Logger.error("Pass5: EntityNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
@@ -2436,9 +2436,9 @@ public class Java2DF {
                         exportGraph(graph);
                     }
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass5: Unsupported at "+key+" "+e.name+" ("+e.getAstName()+")");
+                    Logger.error("Pass5: Unsupported at", key, e.name, "("+e.getAstName()+")");
                 } catch (EntityNotFound e) {
-                    Logger.error("Pass5: EntityNotFound at "+key+" ("+e.name+")");
+                    Logger.error("Pass5: EntityNotFound at", key, "("+e.name+")");
                     if (0 < _strict) throw e;
                 }
             }
@@ -2522,7 +2522,7 @@ public class Java2DF {
         try {
             converter = new Java2DF(rootSpace, strict);
         } catch (TypeNotFound e) {
-            Logger.error("Class not found: "+e.name);
+            Logger.error("Class not found:", e.name);
             System.err.println("Fatal error at initialization.");
             System.exit(1);
             return;

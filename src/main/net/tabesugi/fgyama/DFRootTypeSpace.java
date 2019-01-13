@@ -29,7 +29,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
 
     public void loadJarFile(String jarPath)
         throws IOException {
-        Logger.info("Loading: "+jarPath);
+        Logger.info("Loading:", jarPath);
         JarFile jarfile = new JarFile(jarPath);
         try {
             for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {

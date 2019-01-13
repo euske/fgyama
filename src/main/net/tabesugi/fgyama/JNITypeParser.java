@@ -22,7 +22,7 @@ public class JNITypeParser {
     public DFType getType(DFTypeFinder finder)
         throws TypeNotFound {
 	if (_text.length() <= _pos) return null;
-	//Logger.info("  getType: "+_text.substring(_pos)+", finder="+finder);
+	//Logger.info("  getType:", _text.substring(_pos), "finder="+finder);
         switch (_text.charAt(_pos)) {
         case 'B':
             _pos++;
@@ -175,7 +175,7 @@ public class JNITypeParser {
 
     private static int skipType(String text, int pos) {
 	if (text.length() <= pos) return pos;
-	//Logger.info("  skipType: "+text.substring(pos));
+	//Logger.info("  skipType:", text.substring(pos));
         switch (text.charAt(pos)) {
         case 'B':
         case 'C':

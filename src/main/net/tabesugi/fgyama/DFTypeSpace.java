@@ -74,7 +74,7 @@ public class DFTypeSpace {
             space = new DFTypeSpace(this, id);
             _children.add(space);
             _id2space.put(id, space);
-            //Logger.info("DFTypeSpace.addChild: "+this+": "+id);
+            //Logger.info("DFTypeSpace.addChild:", this, ":", id);
         }
         return space;
     }
@@ -97,7 +97,7 @@ public class DFTypeSpace {
         klass = new DFKlass(
             id, this, parentKlass, parentScope,
             DFBuiltinTypes.getObjectKlass());
-        //Logger.info("DFTypeSpace.createKlass: "+klass);
+        //Logger.info("DFTypeSpace.createKlass:", klass);
         return this.addKlass(klass);
     }
 
@@ -112,7 +112,7 @@ public class DFTypeSpace {
         assert id.indexOf('.') < 0;
         //assert !_id2klass.containsKey(id);
         _id2klass.put(id, klass);
-        //Logger.info("DFTypeSpace.addKlass: "+this+": "+id);
+        //Logger.info("DFTypeSpace.addKlass:", this, ":", id);
         return klass;
     }
 
@@ -122,7 +122,7 @@ public class DFTypeSpace {
     }
     public DFKlass getKlass(String id)
         throws TypeNotFound {
-        //Logger.info("DFTypeSpace.getKlass: "+this+": "+id);
+        //Logger.info("DFTypeSpace.getKlass:", this, ":", id);
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
@@ -173,7 +173,7 @@ public class DFTypeSpace {
         List<DFKlass> list, TypeDeclaration typeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFTypeSpace.build:", this, ":", typeDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, typeDecl);
         list.add(klass);
@@ -188,7 +188,7 @@ public class DFTypeSpace {
         List<DFKlass> list, EnumDeclaration enumDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build: "+this+": "+enumDecl.getName());
+        //Logger.info("DFTypeSpace.build:", this, ":", enumDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, enumDecl);
         list.add(klass);
@@ -202,7 +202,7 @@ public class DFTypeSpace {
         List<DFKlass> list, AnnotationTypeDeclaration annotTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build: "+this+": "+annotTypeDecl.getName());
+        //Logger.info("DFTypeSpace.build:", this, ":", annotTypeDecl.getName());
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, annotTypeDecl);
         list.add(klass);

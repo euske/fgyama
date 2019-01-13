@@ -39,7 +39,7 @@ public class DFLocalVarScope extends DFVarScope {
 
     protected DFLocalVarScope addChild(String basename, ASTNode ast) {
         String id = basename + _children.size();
-        //Logger.info("DFLocalVarScope.addChild: "+this+": "+id);
+        //Logger.info("DFLocalVarScope.addChild:", this, ":", id);
         DFLocalVarScope scope = new DFLocalVarScope(this, id);
         _children.add(scope);
         _ast2child.put(Utils.encodeASTNode(ast), scope);
@@ -47,7 +47,7 @@ public class DFLocalVarScope extends DFVarScope {
     }
 
     private DFVarRef addVar(SimpleName name, DFType type) {
-        //Logger.info("DFLocalVarScope.addVar: "+this+": "+name+" -> "+type);
+        //Logger.info("DFLocalVarScope.addVar:", this, ":", name, "->", type);
         return this.addRef("$"+name.getIdentifier(), type);
     }
 
@@ -57,7 +57,7 @@ public class DFLocalVarScope extends DFVarScope {
     @SuppressWarnings("unchecked")
     public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFLocalVarScope.build: "+this);
+        //Logger.info("DFLocalVarScope.build:", this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = (returnType == null)? DFBasicType.VOID : finder.resolve(returnType);
         this.addRef("#return", type, null);

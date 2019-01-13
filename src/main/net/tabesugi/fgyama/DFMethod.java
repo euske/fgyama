@@ -120,7 +120,7 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public void addOverride(DFMethod method, int level) {
 	DFOverride override = new DFOverride(method, level);
-	//Logger.info("DFMethod.addOverride: "+this+" <- "+override);
+	//Logger.info("DFMethod.addOverride:", this, "<-", override);
         _overrides.add(override);
     }
 
@@ -215,7 +215,7 @@ public class DFMethod implements Comparable<DFMethod> {
 	    }
         } catch (EntityNotFound e) {
             // XXX ignore EntityNotFound for now
-            Logger.error("Entity not found: "+e.name+" ast="+e.ast+" method="+this);
+            Logger.error("Entity not found:", e.name, "ast="+e.ast, "method="+this);
         }
     }
 }

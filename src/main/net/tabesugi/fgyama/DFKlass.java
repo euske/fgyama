@@ -287,7 +287,7 @@ public class DFKlass extends DFType {
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
         DFVarRef ref = _klassScope.addRef("."+id, type);
-        //Logger.info("DFKlass.addField: "+ref);
+        //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
     }
@@ -300,7 +300,7 @@ public class DFKlass extends DFType {
     }
 
     private DFMethod addMethod(DFMethod method) {
-        //Logger.info("DFKlass.addMethod: "+method);
+        //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
         return method;
     }
@@ -394,7 +394,7 @@ public class DFKlass extends DFType {
                 this.buildFromTree(finder, _ast);
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
-                Logger.error("Error: Unsupported syntax: "+e.name+" ("+astName+")");
+                Logger.error("Error: Unsupported syntax:", e.name, "("+astName+")");
                 throw new TypeNotFound(this.getFullName());
             }
         } else if (_jarPath != null) {
@@ -409,7 +409,7 @@ public class DFKlass extends DFType {
                     jarfile.close();
                 }
             } catch (IOException e) {
-                Logger.error("Error: Not found: "+_jarPath+"/"+_filePath);
+                Logger.error("Error: Not found:", _jarPath+"/"+_filePath);
                 throw new TypeNotFound(this.getFullName());
             }
         }
@@ -435,7 +435,7 @@ public class DFKlass extends DFType {
         finder0 = new DFTypeFinder(finder0, _klassSpace);
         String sig = getSignature(jklass.getAttributes());
         if (sig != null) {
-            //Logger.info("jklass: "+jklass.getClassName()+","+jklass.isEnum()+","+sig);
+            //Logger.info("jklass:", jklass.getClassName(), jklass.isEnum(), sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
 	    if (_mapTypes != null) {
@@ -480,7 +480,7 @@ public class DFKlass extends DFType {
             sig = getSignature(fld.getAttributes());
 	    DFType type;
 	    if (sig != null) {
-                //Logger.info("fld: "+fld.getName()+","+sig);
+                //Logger.info("fld:", fld.getName(), sig);
 		JNITypeParser parser = new JNITypeParser(sig);
 		type = parser.getType(finder);
 	    } else {
@@ -494,7 +494,7 @@ public class DFKlass extends DFType {
 	    DFMethodType methodType;
             DFTypeSpace methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
 	    if (sig != null) {
-                //Logger.info("meth: "+meth.getName()+","+sig);
+                //Logger.info("meth:", meth.getName(), sig);
 		JNITypeParser parser = new JNITypeParser(sig);
                 DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
 		finder = new DFTypeFinder(finder, methodSpace);
@@ -551,7 +551,7 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+typeDecl.getName());
+        //Logger.info("DFKlass.build:", this, ":", typeDecl.getName());
         // Setup a temporary finder for looking up a base class
         // that might refer to the parent/inner classes.
         DFTypeFinder finder0 = finder;
@@ -569,7 +569,7 @@ public class DFKlass extends DFType {
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
                 _baseKlass = finder0.resolveKlass(superClass);
-                //Logger.info("DFKlass.build: "+this+" extends "+_baseKlass);
+                //Logger.info("DFKlass.build:", this, "extends", _baseKlass);
                 finder = finder.extend(_baseKlass);
             } else {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -579,7 +579,7 @@ public class DFKlass extends DFType {
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
 		DFKlass iface = finder0.resolveKlass(ifaces.get(i));
-                //Logger.info("DFKlass.build: "+this+" implements "+iface);
+                //Logger.info("DFKlass.build:", this, "implements", iface);
                 baseIfaces[i] = iface;
                 finder = finder.extend(iface);
             }
@@ -600,7 +600,7 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+enumDecl.getName());
+        //Logger.info("DFKlass.build:", this, ":", enumDecl.getName());
         // Setup a temporary finder for looking up a base class
         // that might refer to the parent/inner classes.
         DFTypeFinder finder0 = finder;
@@ -647,7 +647,7 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build: "+this+": "+annotTypeDecl.getName());
+        //Logger.info("DFKlass.build:", this, ":", annotTypeDecl.getName());
         _baseKlass = DFBuiltinTypes.getObjectKlass();
         finder = finder.extend(_baseKlass);
         if (_parentKlass != null) {
