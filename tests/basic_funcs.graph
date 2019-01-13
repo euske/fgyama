@@ -44,7 +44,7 @@
             <ast length="1" start="179" type="42"/>
           </node>
           <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="Nf2e83a28_8" kind="call" type="I">
-            <link label="arg0" src="Nf2e83a28_7"/>
+            <link label="#arg0" src="Nf2e83a28_7"/>
             <ast length="19" start="162" type="32"/>
           </node>
           <node id="Nf2e83a28_9" kind="assign" ref="basic_funcs.main.b0/$b" type="I">
@@ -56,10 +56,10 @@
             <ast length="1" start="203" type="42"/>
           </node>
           <node data="Lbasic_funcs;.moo(I)I" id="Nf2e83a28_12" kind="call" type="I">
-            <link label="arg0" src="Nf2e83a28_11"/>
+            <link label="#arg0" src="Nf2e83a28_11"/>
+            <link label="#this" src="Nf2e83a28_10"/>
             <link label="basic_funcs/.y" src="Nf2e83a28_13"/>
             <link label="basic_funcs/.z" src="Nf2e83a28_14"/>
-            <link label="obj" src="Nf2e83a28_10"/>
             <ast length="6" start="199" type="32"/>
           </node>
           <node id="Nf2e83a28_15" kind="assign" ref="#this" type="Lbasic_funcs;">
@@ -87,8 +87,8 @@
             <ast length="1" start="234" type="42"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(I)V" id="Nf2e83a28_22" kind="call" type="V">
-            <link label="arg0" src="Nf2e83a28_21"/>
-            <link label="obj" src="Nf2e83a28_19"/>
+            <link label="#arg0" src="Nf2e83a28_21"/>
+            <link label="#this" src="Nf2e83a28_19"/>
             <ast length="21" start="215" type="32"/>
           </node>
           <node id="Nf2e83a28_23" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
@@ -118,8 +118,8 @@
         <scope name="basic_funcs.moo.b0">
           <scope name="basic_funcs.moo.b0.b0">
             <node data="Lbasic_funcs;.foo()I" id="Ndd66d29_11" kind="call" type="I">
+              <link label="#this" src="Ndd66d29_31"/>
               <link label="basic_funcs/.y" src="Ndd66d29_32"/>
-              <link label="obj" src="Ndd66d29_31"/>
               <ast length="5" start="337" type="32"/>
             </node>
             <node id="Ndd66d29_13" kind="assign" ref="#this" type="Lbasic_funcs;">
@@ -149,10 +149,10 @@
               <ast length="3" start="384" type="27"/>
             </node>
             <node data="Lbasic_funcs;.moo(I)I" id="Ndd66d29_22" kind="call" type="I">
-              <link label="arg0" src="Ndd66d29_21"/>
+              <link label="#arg0" src="Ndd66d29_21"/>
+              <link label="#this" src="Ndd66d29_31"/>
               <link label="basic_funcs/.y" src="Ndd66d29_32"/>
               <link label="basic_funcs/.z" src="Ndd66d29_3"/>
-              <link label="obj" src="Ndd66d29_31"/>
               <ast length="8" start="380" type="32"/>
             </node>
             <node id="Ndd66d29_25" kind="assign" ref="#this" type="Lbasic_funcs;">

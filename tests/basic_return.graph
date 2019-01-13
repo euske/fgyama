@@ -22,8 +22,8 @@
             <ast length="5" start="192" type="27"/>
           </node>
           <node data="Lbasic_return;.f(I)?" id="N41f01687_11" kind="call">
-            <link label="arg0" src="N41f01687_10"/>
-            <link label="obj" src="N41f01687_7"/>
+            <link label="#arg0" src="N41f01687_10"/>
+            <link label="#this" src="N41f01687_7"/>
             <ast length="8" start="190" type="32"/>
           </node>
           <node id="N41f01687_12" kind="assign" ref="#this" type="Lbasic_return;">

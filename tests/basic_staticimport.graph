@@ -16,8 +16,8 @@
             <ast length="1" start="151" type="34"/>
           </node>
           <node data="Ljava/lang/Math;.sin(D)D" id="Nede5cb52_5" kind="call" type="D">
-            <link label="arg0" src="Nede5cb52_4"/>
-            <link label="obj" src="Nede5cb52_3"/>
+            <link label="#arg0" src="Nede5cb52_4"/>
+            <link label="#this" src="Nede5cb52_3"/>
             <ast length="6" start="147" type="32"/>
           </node>
           <node id="Nede5cb52_6" kind="assign" ref="#this" type="Lbasic_staticimport;">
@@ -25,8 +25,8 @@
             <ast length="6" start="147" type="32"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
-            <link label="arg0" src="Nede5cb52_5"/>
-            <link label="obj" src="Nede5cb52_1"/>
+            <link label="#arg0" src="Nede5cb52_5"/>
+            <link label="#this" src="Nede5cb52_1"/>
             <ast length="19" start="135" type="32"/>
           </node>
           <node id="Nede5cb52_8" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">

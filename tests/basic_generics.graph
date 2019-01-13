@@ -26,7 +26,7 @@
             <ast length="5" start="349" type="45"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="Nb2004d57_2" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <link label="arg0" src="Nb2004d57_1"/>
+            <link label="#arg0" src="Nb2004d57_1"/>
             <ast length="22" start="333" type="14"/>
           </node>
           <node id="Nb2004d57_3" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -38,7 +38,7 @@
             <ast length="3" start="376" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()Ljava/lang/String;" id="Nb2004d57_5" kind="call" type="Ljava/lang/String;">
-            <link label="obj" src="Nb2004d57_4"/>
+            <link label="#this" src="Nb2004d57_4"/>
             <ast length="9" start="376" type="32"/>
           </node>
           <node id="Nb2004d57_6" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -46,7 +46,7 @@
             <ast length="9" start="376" type="32"/>
           </node>
           <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="Nb2004d57_7" kind="call" type="Ljava/lang/String;">
-            <link label="obj" src="Nb2004d57_5"/>
+            <link label="#this" src="Nb2004d57_5"/>
             <ast length="23" start="376" type="32"/>
           </node>
           <node id="Nb2004d57_8" kind="assign" ref="basic_generics.test.b0/$b" type="Ljava/lang/String;">
@@ -58,8 +58,8 @@
             <ast length="3" start="427" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" id="Nb2004d57_10" kind="call" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
+            <link label="#this" src="Nb2004d57_9"/>
             <link label="basic_generics/Moo/.x" src="Nb2004d57_11"/>
-            <link label="obj" src="Nb2004d57_9"/>
             <ast length="10" start="427" type="32"/>
           </node>
           <node id="Nb2004d57_12" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -87,8 +87,8 @@
             <ast length="1" start="534" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" id="N289636c4_4" kind="call" type="T:Ljava/lang/Object;">
+            <link label="#this" src="N289636c4_3"/>
             <link label="basic_generics/Moo/.x" src="N289636c4_5"/>
-            <link label="obj" src="N289636c4_3"/>
             <ast length="7" start="534" type="32"/>
           </node>
           <node id="N289636c4_6" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
@@ -173,7 +173,7 @@
             <ast length="1" start="231" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" id="N6aac3c64_3" kind="new" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
-            <link label="arg0" src="N6aac3c64_1"/>
+            <link label="#arg0" src="N6aac3c64_1"/>
             <ast length="13" start="220" type="14"/>
           </node>
           <node flow="out" id="N6aac3c64_4" kind="output" ref="#return" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">

@@ -25,7 +25,7 @@
                 <ast length="1" start="174" type="42"/>
               </node>
               <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="N707c57b4_5" kind="call" type="Ljava/lang/String;">
-                <link label="obj" src="N707c57b4_11"/>
+                <link label="#this" src="N707c57b4_11"/>
                 <ast length="5" start="178" type="32"/>
               </node>
               <node id="N707c57b4_6" kind="assign" ref="#this" type="Lbasic_exception;">
@@ -86,8 +86,8 @@
                 <ast length="1" start="317" type="42"/>
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="N707c57b4_24" kind="call" type="V">
-                <link label="arg0" src="N707c57b4_23"/>
-                <link label="obj" src="N707c57b4_21"/>
+                <link label="#arg0" src="N707c57b4_23"/>
+                <link label="#this" src="N707c57b4_21"/>
                 <ast length="21" start="298" type="32"/>
               </node>
               <node id="N707c57b4_25" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">

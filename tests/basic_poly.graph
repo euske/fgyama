@@ -56,9 +56,9 @@
             <ast length="3" start="215" type="42"/>
           </node>
           <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="Ndd5e2105_5" kind="call" type="I">
-            <link label="arg0" src="Ndd5e2105_4"/>
+            <link label="#arg0" src="Ndd5e2105_4"/>
+            <link label="#this" src="Ndd5e2105_3"/>
             <link label="basic_poly_Foo/.x" src="Ndd5e2105_6"/>
-            <link label="obj" src="Ndd5e2105_3"/>
             <ast length="14" start="205" type="48"/>
           </node>
           <node id="Ndd5e2105_7" kind="assign" ref="#this" type="Lbasic_poly_Baa;">
@@ -118,9 +118,9 @@
             <ast length="1" start="355" type="42"/>
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="N98dd04bd_5" kind="call" type="I">
-            <link label="arg0" src="N98dd04bd_4"/>
+            <link label="#arg0" src="N98dd04bd_4"/>
+            <link label="#this" src="N98dd04bd_3"/>
             <link label="basic_poly_Foo/.x" src="N98dd04bd_6"/>
-            <link label="obj" src="N98dd04bd_3"/>
             <ast length="8" start="349" type="32"/>
           </node>
           <node id="N98dd04bd_7" kind="assign" ref="basic_poly_Baa.main.b0/$a" type="Lbasic_poly_Foo;">
@@ -155,9 +155,9 @@
             <ast length="1" start="426" type="42"/>
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="N98dd04bd_15" kind="call" type="I">
-            <link label="arg0" src="N98dd04bd_14"/>
+            <link label="#arg0" src="N98dd04bd_14"/>
+            <link label="#this" src="N98dd04bd_13"/>
             <link label="basic_poly_Foo/.x" src="N98dd04bd_8"/>
-            <link label="obj" src="N98dd04bd_13"/>
             <ast length="8" start="420" type="32"/>
           </node>
           <node id="N98dd04bd_16" kind="assign" ref="basic_poly_Baa.main.b0/$b" type="Lbasic_poly_Foo;">
@@ -185,9 +185,9 @@
             <ast length="1" start="448" type="42"/>
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="N98dd04bd_22" kind="call" type="I">
-            <link label="arg0" src="N98dd04bd_21"/>
+            <link label="#arg0" src="N98dd04bd_21"/>
+            <link label="#this" src="N98dd04bd_20"/>
             <link label="basic_poly_Foo/.x" src="N98dd04bd_17"/>
-            <link label="obj" src="N98dd04bd_20"/>
             <ast length="8" start="442" type="32"/>
           </node>
           <node id="N98dd04bd_23" kind="assign" ref="basic_poly_Baa.main.b0/$b" type="Lbasic_poly_Foo;">
@@ -222,9 +222,9 @@
             <ast length="1" start="519" type="42"/>
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" id="N98dd04bd_31" kind="call" type="I">
-            <link label="arg0" src="N98dd04bd_30"/>
+            <link label="#arg0" src="N98dd04bd_30"/>
+            <link label="#this" src="N98dd04bd_29"/>
             <link label="basic_poly_Foo/.x" src="N98dd04bd_24"/>
-            <link label="obj" src="N98dd04bd_29"/>
             <ast length="8" start="513" type="32"/>
           </node>
           <node id="N98dd04bd_32" kind="assign" ref="basic_poly_Baa.main.b0/$c" type="Lbasic_poly_Baa;">
@@ -252,9 +252,9 @@
             <ast length="1" start="541" type="42"/>
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" id="N98dd04bd_38" kind="call" type="I">
-            <link label="arg0" src="N98dd04bd_37"/>
+            <link label="#arg0" src="N98dd04bd_37"/>
+            <link label="#this" src="N98dd04bd_36"/>
             <link label="basic_poly_Foo/.x" src="N98dd04bd_33"/>
-            <link label="obj" src="N98dd04bd_36"/>
             <ast length="8" start="535" type="32"/>
           </node>
           <node id="N98dd04bd_39" kind="assign" ref="basic_poly_Baa.main.b0/$c" type="Lbasic_poly_Baa;">

@@ -48,9 +48,9 @@
             <ast length="1" start="105" type="34"/>
           </node>
           <node data="Lbasic_ops;.moo(II)?" id="Nce57b47f_14" kind="call">
-            <link label="arg0" src="Nce57b47f_12"/>
-            <link label="arg1" src="Nce57b47f_13"/>
-            <link label="obj" src="Nce57b47f_11"/>
+            <link label="#arg0" src="Nce57b47f_12"/>
+            <link label="#arg1" src="Nce57b47f_13"/>
+            <link label="#this" src="Nce57b47f_11"/>
             <ast length="9" start="98" type="32"/>
           </node>
           <node id="Nce57b47f_15" kind="assign" ref="#this" type="Lbasic_ops;">

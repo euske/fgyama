@@ -511,7 +511,7 @@ abstract class CallNode extends ProgNode {
 
     public void setArgs(DFNode[] args) {
         for (int i = 0; i < args.length; i++) {
-            String label = "arg"+i;
+            String label = "#arg"+i;
             this.accept(args[i], label);
         }
         this.args = args;
@@ -528,7 +528,7 @@ class MethodCallNode extends CallNode {
         ASTNode ast, DFNode obj) {
         super(graph, scope, methods[0].getReturnType(), null, ast);
         if (obj != null) {
-            this.accept(obj, "obj");
+            this.accept(obj, "#this");
         }
         this.methods = methods;
     }
@@ -566,7 +566,7 @@ class CreateObjectNode extends CallNode {
         super(graph, scope, type, null, ast);
         assert type != null;
         if (obj != null) {
-            this.accept(obj, "obj");
+            this.accept(obj, "#this");
         }
     }
 

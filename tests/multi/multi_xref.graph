@@ -46,11 +46,11 @@
             <ast length="5" start="169" type="42"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.foo()V" id="N2082c4f8_7" kind="call" type="V">
+            <link label="#this" src="N2082c4f8_6"/>
             <link label="dom/dood/multi_xref3/.boo" src="N2082c4f8_9"/>
             <link label="dom/meep/multi_xref1/.xref2" src="N2082c4f8_3"/>
             <link label="dom/meep/multi_xref1/baa/.baz" src="N2082c4f8_10"/>
             <link label="dom/meep/multi_xref2/.xref1" src="N2082c4f8_8"/>
-            <link label="obj" src="N2082c4f8_6"/>
             <ast length="11" start="169" type="32"/>
           </node>
           <node id="N2082c4f8_11" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
@@ -132,11 +132,11 @@
             <ast length="5" start="129" type="42"/>
           </node>
           <node data="Ldom/meep/multi_xref1;.moo()V" id="Na8d547a0_7" kind="call" type="V">
+            <link label="#this" src="Na8d547a0_6"/>
             <link label="dom/dood/multi_xref3/.boo" src="Na8d547a0_9"/>
             <link label="dom/meep/multi_xref1/.xref2" src="Na8d547a0_8"/>
             <link label="dom/meep/multi_xref1/baa/.baz" src="Na8d547a0_10"/>
             <link label="dom/meep/multi_xref2/.xref1" src="Na8d547a0_3"/>
-            <link label="obj" src="Na8d547a0_6"/>
             <ast length="11" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_11" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
@@ -237,7 +237,7 @@
             <ast length="5" start="175" type="42"/>
           </node>
           <node data="Ldom/meep/multi_xref1;.foo()?" id="Ne96a6cc2_4" kind="call">
-            <link label="obj" src="Ne96a6cc2_3"/>
+            <link label="#this" src="Ne96a6cc2_3"/>
             <ast length="11" start="175" type="32"/>
           </node>
           <node id="Ne96a6cc2_5" kind="assign" ref="dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
