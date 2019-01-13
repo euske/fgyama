@@ -12,31 +12,31 @@ public class Logger {
 
     public static int LogLevel = 1;
 
-    public static void debug(String ... a) {
+    public static void debug(Object ... a) {
 	if (2 <= LogLevel) {
             println(a);
 	}
     }
 
-    public static void info(String ... a) {
+    public static void info(Object ... a) {
 	if (1 <= LogLevel) {
             println(a);
 	}
     }
 
-    public static void error(String ... a) {
+    public static void error(Object ... a) {
 	if (0 <= LogLevel) {
             println(a);
 	}
     }
 
-    private static void println(String[] a) {
+    private static void println(Object[] a) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < a.length; i++) {
             if (i != 0) {
                 b.append(" ");
             }
-            b.append(a[i]);
+            b.append(a[i].toString());
         }
         out.println(b.toString());
     }
