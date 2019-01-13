@@ -92,7 +92,6 @@ Coding style:
 
 TODOs:
 ------
-  * Interprocedural field watch.
   * DFMethodType should have an Exception field.
   * Handle consecutive SwitchCases.
   * Lambdas.
