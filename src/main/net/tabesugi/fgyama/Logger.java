@@ -36,7 +36,11 @@ public class Logger {
             if (i != 0) {
                 b.append(" ");
             }
-            b.append(a[i].toString());
+            if (a[i] == null) {
+                b.append("null");
+            } else {
+                b.append(a[i].toString());
+            }
         }
         out.println(b.toString());
     }
