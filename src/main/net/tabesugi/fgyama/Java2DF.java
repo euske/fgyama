@@ -989,11 +989,11 @@ public class Java2DF {
                     graph, scope, methods, invoke, obj);
                 call.setArgs(args);
                 {
-                    Set<DFRef> refs = new HashSet<DFRef>();
+                    SortedSet<DFRef> refs = new TreeSet<DFRef>();
                     for (DFMethod method1 : methods) {
                         DFFrame frame1 = method1.getFrame();
                         if (frame1 == null) continue;
-                        refs.addAll(Arrays.asList(frame1.getInputRefs()));
+                        refs.addAll(frame1.getInputRefs());
                     }
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isTemporary()) continue;
@@ -1007,11 +1007,11 @@ public class Java2DF {
                                 graph, scope, obj.getRef(), invoke, call));
                 }
                 {
-                    Set<DFRef> refs = new HashSet<DFRef>();
+                    SortedSet<DFRef> refs = new TreeSet<DFRef>();
                     for (DFMethod method1 : methods) {
                         DFFrame frame1 = method1.getFrame();
                         if (frame1 == null) continue;
-                        refs.addAll(Arrays.asList(frame1.getInputRefs()));
+                        refs.addAll(frame1.getInputRefs());
                     }
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isTemporary()) continue;
@@ -1603,14 +1603,14 @@ public class Java2DF {
                 if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(Arrays.asList(thenFrame.getOutputRefs()));
+            outRefs.addAll(thenFrame.getOutputRefs());
         }
         if (elseFrame != null && elseCtx != null) {
             for (DFNode src : elseCtx.getFirsts()) {
                 if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(Arrays.asList(elseFrame.getOutputRefs()));
+            outRefs.addAll(elseFrame.getOutputRefs());
         }
 
         // Attach a JoinNode to each variable.
@@ -1872,7 +1872,7 @@ public class Java2DF {
             src.accept(ctx.get(src.getRef()));
         }
         DFNode exc = tryCtx.get(tryScope.lookupException());
-        outRefs.addAll(Arrays.asList(tryFrame.getOutputRefs()));
+        outRefs.addAll(tryFrame.getOutputRefs());
 
         List<CatchClause> catches = tryStmt.catchClauses();
         int ncats = catches.size();
@@ -1896,7 +1896,7 @@ public class Java2DF {
                 if (src.hasInput()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(Arrays.asList(catchFrame.getOutputRefs()));
+            outRefs.addAll(catchFrame.getOutputRefs());
             frames[i] = catchFrame;
             ctxs[i] = catchCtx;
         }

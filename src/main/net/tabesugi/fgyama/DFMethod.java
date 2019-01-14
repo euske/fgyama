@@ -17,8 +17,8 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFCallStyle _callStyle;
     private DFMethodType _methodType;
 
-    private Set<DFMethod> _callers =
-        new HashSet<DFMethod>();
+    private SortedSet<DFMethod> _callers =
+        new TreeSet<DFMethod>();
 
     private DFTypeFinder _finder = null;
     private DFLocalVarScope _scope = null;
@@ -159,11 +159,8 @@ public class DFMethod implements Comparable<DFMethod> {
         _callers.add(method);
     }
 
-    public DFMethod[] getCallers() {
-        DFMethod[] callers = new DFMethod[_callers.size()];
-        _callers.toArray(callers);
-        Arrays.sort(callers);
-        return callers;
+    public SortedSet<DFMethod> getCallers() {
+        return _callers;
     }
 
     public void setFinder(DFTypeFinder finder) {

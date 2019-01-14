@@ -23,10 +23,10 @@ public class DFFrame {
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
-    private Set<DFNode> _inputNodes =
-        new HashSet<DFNode>();
-    private Set<DFNode> _outputNodes =
-        new HashSet<DFNode>();
+    private SortedSet<DFNode> _inputNodes =
+        new TreeSet<DFNode>();
+    private SortedSet<DFNode> _outputNodes =
+        new TreeSet<DFNode>();
 
     public static final String ANONYMOUS = "@ANONYMOUS";
     public static final String BREAKABLE = "@BREAKABLE";
@@ -116,16 +116,12 @@ public class DFFrame {
         }
     }
 
-    public DFRef[] getInputRefs() {
-        DFRef[] refs = new DFRef[_inputRefs.size()];
-        _inputRefs.toArray(refs);
-        return refs;
+    public SortedSet<DFRef> getInputRefs() {
+        return _inputRefs;
     }
 
-    public DFRef[] getOutputRefs() {
-        DFRef[] refs = new DFRef[_outputRefs.size()];
-        _outputRefs.toArray(refs);
-        return refs;
+    public SortedSet<DFRef> getOutputRefs() {
+        return _outputRefs;
     }
 
     public DFExit[] getExits() {
@@ -160,8 +156,8 @@ public class DFFrame {
         }
     }
 
-    public Set<DFNode> getInputNodes() {
-        Set<DFNode> nodes = new HashSet<DFNode>();
+    public SortedSet<DFNode> getInputNodes() {
+        SortedSet<DFNode> nodes = new TreeSet<DFNode>();
         for (DFNode node : _inputNodes) {
             DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isTemporary()) {
@@ -171,8 +167,8 @@ public class DFFrame {
         return nodes;
     }
 
-    public Set<DFNode> getOutputNodes() {
-        Set<DFNode> nodes = new HashSet<DFNode>();
+    public SortedSet<DFNode> getOutputNodes() {
+        SortedSet<DFNode> nodes = new TreeSet<DFNode>();
         for (DFNode node : _outputNodes) {
             DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isTemporary()) {
