@@ -131,9 +131,10 @@ def main(argv):
         return (v1, (srcmap[v2],int(v3),int(v4)))
     def getfeat(v):
         # strip ast
-        (v1,_,v) = v.partition(',')
-        (v2,_,v) = v.partition(',')
-        return (v1,v2)
+        (v,_,v4) = v.rpartition(',')
+        (v,_,v3) = v.rpartition(',')
+        (v1,_,v2) = v.rpartition(',')
+        return v1
     def getloc(v):
         (v,_,v3) = v.rpartition(',')
         (v,_,v2) = v.rpartition(',')

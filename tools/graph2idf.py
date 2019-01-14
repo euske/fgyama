@@ -8,6 +8,8 @@ def getfeat(label, node):
         return None
     elif node.kind == 'assignop' and node.data == '=':
         return None
+    elif node.kind == 'join' and label != 'cond':
+        return None
     elif node.ref == '#exception':
         return None
     elif node.data is None:
