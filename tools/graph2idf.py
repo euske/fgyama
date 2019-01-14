@@ -2,10 +2,8 @@
 import sys
 from graph import get_graphs
 
-def ind(i): return ('  '*i)
-
 IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output'])
-def getfeat(node):
+def getfeat(label, node):
     if node.kind in IGNORED:
         return None
     elif node.kind == 'assignop' and node.data == '=':
@@ -13,12 +11,12 @@ def getfeat(node):
     elif node.ref == '#exception':
         return None
     elif node.data is None:
-        return node.kind
+        return '%s:%s' % (label, node.kind)
     elif node.kind == 'call':
         (data,_,_) = node.data.partition(' ')
-        return '%s:%s' % (node.kind, data)
+        return '%s:%s:%s' % (label, node.kind, data)
     else:
-        return '%s:%s' % (node.kind, node.data)
+        return '%s:%s:%s' % (label, node.kind, node.data)
 
 
 ##  Chain Link
@@ -47,7 +45,6 @@ class CLink:
         for obj in self:
             if obj is obj0: return True
         return False
-
 
 # main
 def main(argv):
@@ -101,19 +98,20 @@ def main(argv):
                 for gid in node.data.split(' '):
                     addcall(node, gid)
 
-    def getchain(node, label, chain):
-        feat = getfeat(node)
+    def getchain(label, node, chain):
+        feat = getfeat(label, node)
         if feat is None: return chain
-        v = ('%s,%s' % (label, feat))
         if node.ast is not None:
             src = node.graph.src
             fid = srcmap[src]
             (_,s,e) = node.ast
-            v += (',%s,%s,%s' % (fid, s, e))
-        return CLink(v, chain)
+            feat += (',%s,%s,%s' % (fid, s, e))
+        return CLink(feat, chain)
 
-    def trace(r, done, label, n0, chain0=None, level=0):
-        #print(ind(level)+'trace', label, n0)
+    def trace(out, label, n0, done, chain0=None, level=0):
+        #print('[%d] trace' % level, label, n0)
+        if n0 in done: return
+        done.add(n0)
         if label is None:
             chain1 = chain0
         elif label == 'update' or label.startswith('_'):
@@ -125,26 +123,23 @@ def main(argv):
                 funcs = n0.data.split(' ')
                 for gid in funcs[:maxoverrides]:
                     if gid not in gid2graph: continue
-                    if gid in done: continue
                     graph = gid2graph[gid]
-                    done.add(gid)
                     for n1 in graph.ins:
                         label = n1.ref
                         if label not in args: continue
-                        trace(r, done, label, n1, chain0, level+1)
-            chain1 = getchain(n0, label, chain0)
+                        trace(out, label, n1, done, chain0, level+1)
+            chain1 = getchain(label, n0, chain0)
             if chain1 != chain0:
-                r.append(list(chain1))
+                out.append(list(chain1))
                 if maxlen <= len(chain1): return
         for (label, n1) in n0.outputs:
-            trace(r, done, label, n1, chain1, level+1)
+            trace(out, label, n1, done, chain1, level+1)
         if n0.kind == 'output':
             gid = n0.graph.name
-            if gid in caller and gid not in done:
-                done.add(gid)
+            if gid in caller:
                 for nc in caller[n0.graph.name]:
                     for (label, n1) in nc.outputs:
-                        trace(r, done, label, n1, chain1, level+1)
+                        trace(out, label, n1, done, chain1, level+1)
         return
 
     for graph in graphs:
@@ -158,10 +153,9 @@ def main(argv):
             name = gid
         print('# start: %r' % gid, file=sys.stderr)
         for funcall in caller[gid]:
-            r = []
-            done = set()
-            trace(r, done, None, funcall)
-            for feats in r:
+            out = []
+            trace(out, None, funcall, set())
+            for feats in out:
                 print('+PATH %s forw %s' % (name, ' '.join(reversed(feats))))
 
     return 0
