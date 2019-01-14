@@ -112,7 +112,7 @@ def main(argv):
             v += (',%s,%s,%s' % (fid, s, e))
         return CLink(v, chain)
 
-    def trace(r, label, n0, chain0=None, level=0):
+    def trace(r, done, label, n0, chain0=None, level=0):
         #print(ind(level)+'trace', label, n0)
         if label is None:
             chain1 = chain0
@@ -125,23 +125,26 @@ def main(argv):
                 funcs = n0.data.split(' ')
                 for gid in funcs[:maxoverrides]:
                     if gid not in gid2graph: continue
+                    if gid in done: continue
                     graph = gid2graph[gid]
+                    done.add(gid)
                     for n1 in graph.ins:
                         label = n1.ref
                         if label not in args: continue
-                        trace(r, label, n1, chain0, level+1)
+                        trace(r, done, label, n1, chain0, level+1)
             chain1 = getchain(n0, label, chain0)
             if chain1 != chain0:
-                r.append(' '.join(reversed(list(chain1))))
+                r.append(list(chain1))
                 if maxlen <= len(chain1): return
         for (label, n1) in n0.outputs:
-            trace(r, label, n1, chain1, level+1)
+            trace(r, done, label, n1, chain1, level+1)
         if n0.kind == 'output':
             gid = n0.graph.name
-            if gid in caller:
+            if gid in caller and gid not in done:
+                done.add(gid)
                 for nc in caller[n0.graph.name]:
                     for (label, n1) in nc.outputs:
-                        trace(r, label, n1, chain1, level+1)
+                        trace(r, done, label, n1, chain1, level+1)
         return
 
     for graph in graphs:
@@ -156,9 +159,10 @@ def main(argv):
         print('# start: %r' % gid, file=sys.stderr)
         for funcall in caller[gid]:
             r = []
-            trace(r, None, funcall)
+            done = set()
+            trace(r, done, None, funcall)
             for feats in r:
-                print('+PATH %s forw %s' % (name, feats))
+                print('+PATH %s forw %s' % (name, ' '.join(reversed(feats))))
 
     return 0
 
