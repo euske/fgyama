@@ -21,16 +21,16 @@ def getfeat(label, node):
         return '%s:%s:%s' % (label, node.kind, node.data)
 
 
-##  Chain Link
+##  Cons
 ##
-class CLink:
+class Cons:
 
-    def __init__(self, obj, prev=None):
-        self.obj = obj
-        self.prev = prev
+    def __init__(self, car, cdr=None):
+        self.car = car
+        self.cdr = cdr
         self.length = 1
-        if (prev is not None):
-            self.length = prev.length+1
+        if (cdr is not None):
+            self.length = cdr.length+1
         return
 
     def __len__(self):
@@ -39,14 +39,56 @@ class CLink:
     def __iter__(self):
         c = self
         while c is not None:
-            yield c.obj
-            c = c.prev
+            yield c.car
+            c = c.cdr
         return
 
     def __contains__(self, obj0):
         for obj in self:
             if obj is obj0: return True
         return False
+
+
+##  IPVertex (Inter-Procedural Vertex)
+##  (why vertex? because calling this another "node" is confusing!)
+##
+class IPVertex:
+
+    vid_base = 0
+
+    def __init__(self, node):
+        IPVertex.vid_base += 1
+        self.vid = self.vid_base
+        self.node = node
+        self.inputs = []
+        self.outputs = []
+        return
+
+    def __repr__(self):
+        return ('<IPVertex(%d)>' % (self.vid))
+
+    def connect(self, feat, output):
+        #print('# connect: %r %s %r' % (self, feat, output))
+        assert output is not self
+        assert isinstance(feat, str)
+        assert isinstance(output, IPVertex)
+        self.outputs.append((feat, output))
+        output.inputs.append((feat, self))
+        return
+
+    def enum(self, direction, prev=None):
+        if direction < 0:
+            vtxs = self.inputs
+        else:
+            vtxs = self.outputs
+        yield prev
+        for (feat,vtx) in vtxs:
+            if feat is not None:
+                prev = Cons((feat, self.node), prev)
+            for z in vtx.enum(direction, prev):
+                yield z
+        return
+
 
 # main
 def main(argv):
@@ -100,49 +142,49 @@ def main(argv):
                 for gid in node.data.split(' '):
                     addcall(node, gid)
 
-    def getchain(label, node, chain):
-        feat = getfeat(label, node)
-        if feat is None: return chain
+    def trace(out, v0, label, n1, length=0):
+        #print('[%d] trace' % length, label, n1)
+        if maxlen <= length: return
+        if label is not None and (label == 'update' or label.startswith('_')): return
+        feat = getfeat(label, n1)
+        if feat is None:
+            v1 = v0
+        elif n1 in out:
+            v1 = out[n1]
+            v0.connect(feat, v1)
+            return
+        else:
+            v1 = out[n1] = IPVertex(n1)
+            v0.connect(feat, v1)
+        length += 1
+        if n1.kind in ('call', 'new'):
+            args = set( label for label in n1.inputs.keys()
+                        if not label.startswith('_') )
+            funcs = n1.data.split(' ')
+            for gid in funcs[:maxoverrides]:
+                if gid not in gid2graph: continue
+                graph = gid2graph[gid]
+                for n2 in graph.ins:
+                    label = n2.ref
+                    if label not in args: continue
+                    trace(out, v1, label, n2, length)
+        for (label, n2) in n1.outputs:
+            trace(out, v1, label, n2, length)
+        if n1.kind == 'output':
+            gid = n1.graph.name
+            if gid in caller:
+                for nc in caller[n1.graph.name]:
+                    for (label, n2) in nc.outputs:
+                        trace(out, v1, label, n2, length)
+        return
+
+    def fmt(feat, node):
         if node.ast is not None:
             src = node.graph.src
             fid = srcmap[src]
             (_,s,e) = node.ast
             feat += (',%s,%s,%s' % (fid, s, e))
-        return CLink(feat, chain)
-
-    def trace(out, label, n0, done, chain0=None, level=0):
-        #print('[%d] trace' % level, label, n0)
-        if n0 in done: return
-        done.add(n0)
-        if label is None:
-            chain1 = chain0
-        elif label == 'update' or label.startswith('_'):
-            return
-        else:
-            if n0.kind in ('call', 'new'):
-                args = set( label for label in n0.inputs.keys()
-                            if not label.startswith('_') )
-                funcs = n0.data.split(' ')
-                for gid in funcs[:maxoverrides]:
-                    if gid not in gid2graph: continue
-                    graph = gid2graph[gid]
-                    for n1 in graph.ins:
-                        label = n1.ref
-                        if label not in args: continue
-                        trace(out, label, n1, done, chain0, level+1)
-            chain1 = getchain(label, n0, chain0)
-            if chain1 != chain0:
-                out.append(list(chain1))
-                if maxlen <= len(chain1): return
-        for (label, n1) in n0.outputs:
-            trace(out, label, n1, done, chain1, level+1)
-        if n0.kind == 'output':
-            gid = n0.graph.name
-            if gid in caller:
-                for nc in caller[n0.graph.name]:
-                    for (label, n1) in nc.outputs:
-                        trace(out, label, n1, done, chain1, level+1)
-        return
+        return feat
 
     for graph in graphs:
         gid = graph.name
@@ -155,11 +197,16 @@ def main(argv):
             name = gid
         print('# start: %r' % gid, file=sys.stderr)
         for funcall in caller[gid]:
-            out = []
-            trace(out, None, funcall, set())
-            for feats in out:
-                print('+PATH %s forw %s' % (name, ' '.join(reversed(feats))))
-
+            out = {}
+            v1 = IPVertex(funcall)
+            trace(out, v1, None, funcall)
+            for feats in v1.enum(+1):
+                if feats is None: continue
+                if len(feats) <= 1: continue
+                a = list(feats)
+                a.reverse()
+                print('+PATH %s forw %s' %
+                      (name, ' '.join( fmt(feat,n) for (feat,n) in a[1:] )))
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
