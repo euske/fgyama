@@ -84,7 +84,7 @@ class IPVertex:
         yield prev
         for (feat,vtx) in vtxs:
             if feat is not None:
-                prev = Cons((feat, self.node), prev)
+                prev = Cons((feat, vtx.node), prev)
             for z in vtx.enum(direction, prev):
                 yield z
         return
@@ -199,14 +199,14 @@ def main(argv):
         for funcall in caller[gid]:
             out = {}
             v1 = IPVertex(funcall)
-            trace(out, v1, None, funcall)
+            for (label,n) in funcall.outputs:
+                trace(out, v1, label, n)
             for feats in v1.enum(+1):
                 if feats is None: continue
                 if len(feats) <= 1: continue
-                a = list(feats)
-                a.reverse()
+                a = reversed(list(feats))
                 print('+PATH %s forw %s' %
-                      (name, ' '.join( fmt(feat,n) for (feat,n) in a[1:] )))
+                      (name, ' '.join( fmt(feat,n) for (feat,n) in a )))
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
