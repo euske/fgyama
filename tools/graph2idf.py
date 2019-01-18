@@ -105,19 +105,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-m maxlen] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-m maxlen] [-n mincall] [-M maxoverrides] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dm:')
+        (opts, args) = getopt.getopt(argv[1:], 'dm:n:M:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     maxlen = 5
-    mincall = 1
+    mincall = 2
     maxoverrides = 1
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-m': maxlen = int(v)
+        elif k == '-n': mincall = int(v)
+        elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
 
     # Load graphs.
