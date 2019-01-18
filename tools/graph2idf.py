@@ -20,6 +20,15 @@ def getfeat(label, node):
     else:
         return '%s:%s:%s' % (label, node.kind, node.data)
 
+def skiplink(label, node):
+    if label is None:
+        return False
+    if label.startswith('_'):
+        return True
+    if label in ('update',):
+        return True
+    return False
+
 
 ##  Cons
 ##
@@ -76,15 +85,16 @@ class IPVertex:
         output.inputs.append((feat, self))
         return
 
-    def enum(self, direction, prev=None):
+    def enum(self, direction, prev0=None):
         if direction < 0:
             vtxs = self.inputs
         else:
             vtxs = self.outputs
-        yield prev
+        yield prev0
         for (feat,vtx) in vtxs:
+            prev = prev0
             if feat is not None:
-                prev = Cons((feat, vtx.node), prev)
+                prev = Cons((feat, vtx.node), prev0)
             for z in vtx.enum(direction, prev):
                 yield z
         return
@@ -143,10 +153,10 @@ def main(argv):
                     addcall(node, gid)
 
     def trace(out, v0, label, n1, length=0):
-        #print('[%d] trace' % length, label, n1)
         if maxlen <= length: return
-        if label is not None and (label == 'update' or label.startswith('_')): return
+        if skiplink(label, n1): return
         feat = getfeat(label, n1)
+        #print('[trace: %s]' % n1.graph.name, v0, feat)
         if feat is None:
             v1 = v0
         elif n1 in out:
@@ -159,11 +169,12 @@ def main(argv):
         length += 1
         if n1.kind in ('call', 'new'):
             args = set( label for label in n1.inputs.keys()
-                        if not label.startswith('_') )
+                        if label.startswith('#arg') )
             funcs = n1.data.split(' ')
             for gid in funcs[:maxoverrides]:
                 if gid not in gid2graph: continue
                 graph = gid2graph[gid]
+                #print(' ', v0, 'funcall', graph)
                 for n2 in graph.ins:
                     label = n2.ref
                     if label not in args: continue
@@ -173,19 +184,20 @@ def main(argv):
         if n1.kind == 'output':
             gid = n1.graph.name
             if gid in caller:
-                for nc in caller[n1.graph.name]:
+                #print(' ', v0, 'return', gid)
+                for nc in caller[gid]:
                     for (label, n2) in nc.outputs:
                         trace(out, v1, label, n2, length)
         return
 
-    def fmt(feat, node):
-        if node.ast is not None:
-            src = node.graph.src
-            fid = srcmap[src]
-            (_,s,e) = node.ast
-            feat += (',%s,%s,%s' % (fid, s, e))
-        return feat
+    def getsrc(node):
+        if node.ast is None: return ''
+        src = node.graph.src
+        fid = srcmap[src]
+        (_,s,e) = node.ast
+        return (',%s,%s,%s' % (fid, s, e))
 
+    nfeats = 0
     for graph in graphs:
         gid = graph.name
         if gid not in caller or len(caller[gid]) < mincall: continue
@@ -197,16 +209,19 @@ def main(argv):
             name = gid
         print('# start: %r' % gid, file=sys.stderr)
         for funcall in caller[gid]:
+            #print('# funcall:', gid, 'at', funcall.graph.name)
             out = {}
             v1 = IPVertex(funcall)
             for (label,n) in funcall.outputs:
                 trace(out, v1, label, n)
             for feats in v1.enum(+1):
                 if feats is None: continue
-                if len(feats) <= 1: continue
                 a = reversed(list(feats))
+                nfeats += 1
                 print('+PATH %s forw %s' %
-                      (name, ' '.join( fmt(feat,n) for (feat,n) in a )))
+                      (name, ' '.join( feat+getsrc(n) for (feat,n) in a )))
+
+    print('# feats: %r' % nfeats, file=sys.stderr)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
