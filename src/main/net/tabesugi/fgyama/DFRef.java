@@ -18,6 +18,7 @@ public class DFRef implements Comparable<DFRef> {
 
     public DFRef(DFVarScope scope, String name, DFType type) {
         assert 2 <= name.length();
+        assert scope != null || name.startsWith("#");
         _scope = scope;
         _name = name;
         _type = type;
@@ -50,13 +51,15 @@ public class DFRef implements Comparable<DFRef> {
         return (_scope == null);
     }
 
-    public String getName() {
+    protected String getName() {
 	return _name;
     }
 
     public String getFullName() {
-        if (_scope != null) {
-            return _scope.getFullName()+"/"+_name;
+        if (_scope instanceof DFLocalVarScope) {
+            return "$"+_scope.getFullName()+"/"+_name;
+        } else if (_scope != null) {
+            return "@"+_scope.getFullName()+"/"+_name;
         } else {
             return _name;
         }

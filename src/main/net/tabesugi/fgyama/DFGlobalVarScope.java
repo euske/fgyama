@@ -28,20 +28,30 @@ public class DFGlobalVarScope extends DFVarScope {
         DFRef ref;
         if (type instanceof DFArrayType) {
             DFType elemType = ((DFArrayType)type).getElemType();
-	    String id = "%:"+elemType.getTypeName();
+	    String id = elemType.getTypeName();
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
-		ref = new DFRef(null, id, elemType);
+		ref = new DFElemRef(this, id, elemType);
 		_id2ref.put(id, ref);
 	    }
         } else {
-	    String id = "%:?";
+	    String id = "?";
 	    ref = _id2ref.get(id);
 	    if (ref == null) {
-		ref = new DFRef(null, id, null);
+		ref = new DFElemRef(this, id, null);
 		_id2ref.put(id, ref);
 	    }
         }
         return ref;
+    }
+
+    private class DFElemRef extends DFRef {
+        public DFElemRef(DFVarScope scope, String name, DFType type) {
+            super(scope, ":"+name, type);
+        }
+
+        public String getFullName() {
+            return "%"+getName();
+        }
     }
 }
