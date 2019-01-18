@@ -8,11 +8,11 @@
       <ast length="145" start="104" type="31"/>
       <scope name="basic_return.foo">
         <scope name="basic_return.foo.b0">
-          <node id="N41f01687_8" kind="ref" ref="basic_return.foo/$a" type="I">
+          <node id="N41f01687_8" kind="ref" ref="$basic_return.foo/$a" type="I">
             <link src="N41f01687_2"/>
             <ast length="1" start="192" type="42"/>
           </node>
-          <node id="N41f01687_9" kind="ref" ref="basic_return.foo/$b" type="I">
+          <node id="N41f01687_9" kind="ref" ref="$basic_return.foo/$b" type="I">
             <link src="N41f01687_4"/>
             <ast length="1" start="196" type="42"/>
           </node>
@@ -30,11 +30,11 @@
             <link label="update" src="N41f01687_11"/>
             <ast length="8" start="190" type="32"/>
           </node>
-          <node id="N41f01687_13" kind="assign" ref="basic_return.foo.b0/$d" type="I">
+          <node id="N41f01687_13" kind="assign" ref="$basic_return.foo.b0/$d" type="I">
             <link src="N41f01687_11"/>
             <ast length="12" start="186" type="59"/>
           </node>
-          <node id="N41f01687_14" kind="ref" ref="basic_return.foo/$a" type="I">
+          <node id="N41f01687_14" kind="ref" ref="$basic_return.foo/$a" type="I">
             <link src="N41f01687_2"/>
             <ast length="1" start="232" type="42"/>
           </node>
@@ -42,11 +42,11 @@
             <link src="N41f01687_14"/>
             <ast length="2" start="231" type="38"/>
           </node>
-          <node id="N41f01687_16" kind="ref" ref="basic_return.foo.b0/$d" type="I">
+          <node id="N41f01687_16" kind="ref" ref="$basic_return.foo.b0/$d" type="I">
             <link src="N41f01687_13"/>
             <ast length="1" start="237" type="42"/>
           </node>
-          <node id="N41f01687_17" kind="ref" ref="basic_return.foo/$c" type="I">
+          <node id="N41f01687_17" kind="ref" ref="$basic_return.foo/$c" type="I">
             <link src="N41f01687_6"/>
             <ast length="1" start="241" type="42"/>
           </node>
@@ -68,21 +68,21 @@
         <node flow="in" id="N41f01687_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="126" type="44"/>
         </node>
-        <node id="N41f01687_2" kind="assign" ref="basic_return.foo/$a" type="I">
+        <node id="N41f01687_2" kind="assign" ref="$basic_return.foo/$a" type="I">
           <link src="N41f01687_1"/>
           <ast length="5" start="126" type="44"/>
         </node>
         <node flow="in" id="N41f01687_3" kind="input" ref="#arg1" type="I">
           <ast length="5" start="133" type="44"/>
         </node>
-        <node id="N41f01687_4" kind="assign" ref="basic_return.foo/$b" type="I">
+        <node id="N41f01687_4" kind="assign" ref="$basic_return.foo/$b" type="I">
           <link src="N41f01687_3"/>
           <ast length="5" start="133" type="44"/>
         </node>
         <node flow="in" id="N41f01687_5" kind="input" ref="#arg2" type="I">
           <ast length="5" start="140" type="44"/>
         </node>
-        <node id="N41f01687_6" kind="assign" ref="basic_return.foo/$c" type="I">
+        <node id="N41f01687_6" kind="assign" ref="$basic_return.foo/$c" type="I">
           <link src="N41f01687_5"/>
           <ast length="5" start="140" type="44"/>
         </node>

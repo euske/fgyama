@@ -4,7 +4,7 @@
       <ast length="34" start="75" type="55"/>
       <scope name="dom/meep/multi_xref1/baa">
         <node data="uninitialized" id="Ndc8f1e44_1" kind="const" type="@null"/>
-        <node id="Ndc8f1e44_2" kind="assign" ref="dom/meep/multi_xref1/baa/.baz" type="I">
+        <node id="Ndc8f1e44_2" kind="assign" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
           <link src="Ndc8f1e44_1"/>
           <ast length="3" start="99" type="59"/>
         </node>
@@ -14,7 +14,7 @@
       <ast length="237" start="19" type="55"/>
       <scope name="dom/meep/multi_xref1">
         <node data="uninitialized" id="N8cb55551_1" kind="const" type="@null"/>
-        <node id="N8cb55551_2" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+        <node id="N8cb55551_2" kind="assign" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
           <link src="N8cb55551_1"/>
           <ast length="5" start="63" type="59"/>
         </node>
@@ -29,7 +29,7 @@
             <link src="N2082c4f8_2"/>
             <ast length="4" start="136" type="52"/>
           </node>
-          <node flow="in" id="N2082c4f8_3" kind="fieldassign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node flow="in" id="N2082c4f8_3" kind="fieldassign" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link src="N2082c4f8_5"/>
             <link label="obj" src="N2082c4f8_1"/>
             <ast length="10" start="136" type="22"/>
@@ -37,61 +37,61 @@
           <node data="Ldom/meep/multi_xref2;" id="N2082c4f8_4" kind="new" type="Ldom/meep/multi_xref2;">
             <ast length="17" start="149" type="14"/>
           </node>
-          <node data="=" id="N2082c4f8_5" kind="assignop" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node data="=" id="N2082c4f8_5" kind="assignop" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link label="R" src="N2082c4f8_4"/>
             <ast length="30" start="136" type="7"/>
           </node>
-          <node id="N2082c4f8_6" kind="ref" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node id="N2082c4f8_6" kind="ref" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link src="N2082c4f8_3"/>
             <ast length="5" start="169" type="42"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.foo()V" id="N2082c4f8_7" kind="call" type="V">
             <link label="#this" src="N2082c4f8_6"/>
-            <link label="dom/dood/multi_xref3/.boo" src="N2082c4f8_8"/>
-            <link label="dom/meep/multi_xref1/.xref2" src="N2082c4f8_3"/>
-            <link label="dom/meep/multi_xref1/baa/.baz" src="N2082c4f8_10"/>
-            <link label="dom/meep/multi_xref2/.xref1" src="N2082c4f8_9"/>
+            <link label="@dom/dood/multi_xref3/.boo" src="N2082c4f8_8"/>
+            <link label="@dom/meep/multi_xref1/.xref2" src="N2082c4f8_3"/>
+            <link label="@dom/meep/multi_xref1/baa/.baz" src="N2082c4f8_10"/>
+            <link label="@dom/meep/multi_xref2/.xref1" src="N2082c4f8_9"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node id="N2082c4f8_11" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node id="N2082c4f8_11" kind="assign" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link label="update" src="N2082c4f8_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node id="N2082c4f8_12" kind="assign" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node id="N2082c4f8_12" kind="assign" ref="@dom/dood/multi_xref3/.boo" type="I">
             <link label="update" src="N2082c4f8_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node flow="out" id="N2082c4f8_13" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node flow="out" id="N2082c4f8_13" kind="assign" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link label="update" src="N2082c4f8_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node flow="out" id="N2082c4f8_14" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node flow="out" id="N2082c4f8_14" kind="assign" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link label="update" src="N2082c4f8_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
-          <node id="N2082c4f8_15" kind="assign" ref="dom/meep/multi_xref1/baa/.baz" type="I">
+          <node id="N2082c4f8_15" kind="assign" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
             <link label="update" src="N2082c4f8_7"/>
             <ast length="11" start="169" type="32"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.bam()I" id="N2082c4f8_16" kind="call" type="I">
             <ast length="17" start="190" type="32"/>
           </node>
-          <node flow="out" id="N2082c4f8_17" kind="fieldassign" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node flow="out" id="N2082c4f8_17" kind="fieldassign" ref="@dom/dood/multi_xref3/.boo" type="I">
             <link src="N2082c4f8_19"/>
             <ast length="24" start="217" type="40"/>
           </node>
           <node data="123" id="N2082c4f8_18" kind="const" type="I">
             <ast length="3" start="244" type="34"/>
           </node>
-          <node data="=" id="N2082c4f8_19" kind="assignop" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node data="=" id="N2082c4f8_19" kind="assignop" ref="@dom/dood/multi_xref3/.boo" type="I">
             <link label="R" src="N2082c4f8_18"/>
             <ast length="30" start="217" type="7"/>
           </node>
         </scope>
         <node flow="in" id="N2082c4f8_2" ref="#this" type="Ldom/meep/multi_xref1;"/>
-        <node flow="in" id="N2082c4f8_8" ref="dom/dood/multi_xref3/.boo" type="I"/>
-        <node flow="in" id="N2082c4f8_9" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;"/>
-        <node flow="in" id="N2082c4f8_10" ref="dom/meep/multi_xref1/baa/.baz" type="I"/>
+        <node flow="in" id="N2082c4f8_8" ref="@dom/dood/multi_xref3/.boo" type="I"/>
+        <node flow="in" id="N2082c4f8_9" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;"/>
+        <node flow="in" id="N2082c4f8_10" ref="@dom/meep/multi_xref1/baa/.baz" type="I"/>
       </scope>
     </method>
   </file>
@@ -100,7 +100,7 @@
       <ast length="278" start="19" type="55"/>
       <scope name="dom/meep/multi_xref2">
         <node data="uninitialized" id="N8cb55552_1" kind="const" type="@null"/>
-        <node id="N8cb55552_2" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+        <node id="N8cb55552_2" kind="assign" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
           <link src="N8cb55552_1"/>
           <ast length="5" start="63" type="59"/>
         </node>
@@ -115,7 +115,7 @@
             <link src="Na8d547a0_2"/>
             <ast length="4" start="96" type="52"/>
           </node>
-          <node flow="in" id="Na8d547a0_3" kind="fieldassign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node flow="in" id="Na8d547a0_3" kind="fieldassign" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link src="Na8d547a0_5"/>
             <link label="obj" src="Na8d547a0_1"/>
             <ast length="10" start="96" type="22"/>
@@ -123,73 +123,73 @@
           <node data="Ldom/meep/multi_xref1;" id="Na8d547a0_4" kind="new" type="Ldom/meep/multi_xref1;">
             <ast length="17" start="109" type="14"/>
           </node>
-          <node data="=" id="Na8d547a0_5" kind="assignop" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node data="=" id="Na8d547a0_5" kind="assignop" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link label="R" src="Na8d547a0_4"/>
             <ast length="30" start="96" type="7"/>
           </node>
-          <node id="Na8d547a0_6" kind="ref" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Na8d547a0_6" kind="ref" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link src="Na8d547a0_3"/>
             <ast length="5" start="129" type="42"/>
           </node>
           <node data="Ldom/meep/multi_xref1;.moo()V" id="Na8d547a0_7" kind="call" type="V">
             <link label="#this" src="Na8d547a0_6"/>
-            <link label="dom/dood/multi_xref3/.boo" src="Na8d547a0_8"/>
-            <link label="dom/meep/multi_xref1/.xref2" src="Na8d547a0_9"/>
-            <link label="dom/meep/multi_xref1/baa/.baz" src="Na8d547a0_10"/>
-            <link label="dom/meep/multi_xref2/.xref1" src="Na8d547a0_3"/>
+            <link label="@dom/dood/multi_xref3/.boo" src="Na8d547a0_8"/>
+            <link label="@dom/meep/multi_xref1/.xref2" src="Na8d547a0_9"/>
+            <link label="@dom/meep/multi_xref1/baa/.baz" src="Na8d547a0_10"/>
+            <link label="@dom/meep/multi_xref2/.xref1" src="Na8d547a0_3"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Na8d547a0_11" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Na8d547a0_11" kind="assign" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link label="update" src="Na8d547a0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node flow="out" id="Na8d547a0_12" kind="assign" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node flow="out" id="Na8d547a0_12" kind="assign" ref="@dom/dood/multi_xref3/.boo" type="I">
             <link label="update" src="Na8d547a0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node flow="out" id="Na8d547a0_13" kind="assign" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
+          <node flow="out" id="Na8d547a0_13" kind="assign" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
             <link label="update" src="Na8d547a0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node flow="out" id="Na8d547a0_14" kind="assign" ref="dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
+          <node flow="out" id="Na8d547a0_14" kind="assign" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
             <link label="update" src="Na8d547a0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Na8d547a0_15" kind="assign" ref="dom/meep/multi_xref1/baa/.baz" type="I">
+          <node id="Na8d547a0_15" kind="assign" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
             <link label="update" src="Na8d547a0_7"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Na8d547a0_16" kind="ref" ref="dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;">
+          <node id="Na8d547a0_16" kind="ref" ref="$dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;">
             <link src="Na8d547a0_17"/>
             <ast length="3" start="187" type="42"/>
           </node>
-          <node id="Na8d547a0_18" kind="fieldref" ref="dom/meep/multi_xref1/baa/.baz" type="I">
+          <node id="Na8d547a0_18" kind="fieldref" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
             <link src="Na8d547a0_15"/>
             <link label="obj" src="Na8d547a0_16"/>
             <ast length="7" start="187" type="40"/>
           </node>
-          <node id="Na8d547a0_19" kind="assign" ref="dom/meep/multi_xref2.foo.b0/$b" type="I">
+          <node id="Na8d547a0_19" kind="assign" ref="$dom/meep/multi_xref2.foo.b0/$b" type="I">
             <link src="Na8d547a0_18"/>
             <ast length="11" start="183" type="59"/>
           </node>
-          <node id="Na8d547a0_20" kind="assign" ref="dom/meep/multi_xref2.foo.b0/$b" type="I">
+          <node id="Na8d547a0_20" kind="assign" ref="$dom/meep/multi_xref2.foo.b0/$b" type="I">
             <link src="Na8d547a0_22"/>
             <ast length="1" start="204" type="42"/>
           </node>
-          <node id="Na8d547a0_21" kind="fieldref" ref="dom/dood/multi_xref3/.boo" type="I">
+          <node id="Na8d547a0_21" kind="fieldref" ref="@dom/dood/multi_xref3/.boo" type="I">
             <link src="Na8d547a0_12"/>
             <ast length="24" start="208" type="40"/>
           </node>
-          <node data="=" id="Na8d547a0_22" kind="assignop" ref="dom/meep/multi_xref2.foo.b0/$b" type="I">
+          <node data="=" id="Na8d547a0_22" kind="assignop" ref="$dom/meep/multi_xref2.foo.b0/$b" type="I">
             <link label="R" src="Na8d547a0_21"/>
             <ast length="28" start="204" type="7"/>
           </node>
         </scope>
         <node flow="in" id="Na8d547a0_2" ref="#this" type="Ldom/meep/multi_xref2;"/>
-        <node flow="in" id="Na8d547a0_8" ref="dom/dood/multi_xref3/.boo" type="I"/>
-        <node flow="in" id="Na8d547a0_9" ref="dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;"/>
-        <node flow="in" id="Na8d547a0_10" ref="dom/meep/multi_xref1/baa/.baz" type="I"/>
-        <node id="Na8d547a0_17" ref="dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
+        <node flow="in" id="Na8d547a0_8" ref="@dom/dood/multi_xref3/.boo" type="I"/>
+        <node flow="in" id="Na8d547a0_9" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;"/>
+        <node flow="in" id="Na8d547a0_10" ref="@dom/meep/multi_xref1/baa/.baz" type="I"/>
+        <node id="Na8d547a0_17" ref="$dom/meep/multi_xref2.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
       </scope>
     </method>
     <method name="Ldom/meep/multi_xref2;.bam()I" style="static">
@@ -215,7 +215,7 @@
         <node data="100" id="Nc5ac4130_1" kind="const" type="I">
           <ast length="3" start="104" type="34"/>
         </node>
-        <node id="Nc5ac4130_2" kind="assign" ref="dom/dood/multi_xref3/.boo" type="I">
+        <node id="Nc5ac4130_2" kind="assign" ref="@dom/dood/multi_xref3/.boo" type="I">
           <link src="Nc5ac4130_1"/>
           <ast length="9" start="98" type="59"/>
         </node>
@@ -228,11 +228,11 @@
           <node data="Ldom/meep/multi_xref1;" id="Ne96a6cc2_1" kind="new" type="Ldom/meep/multi_xref1;">
             <ast length="17" start="155" type="14"/>
           </node>
-          <node id="Ne96a6cc2_2" kind="assign" ref="dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Ne96a6cc2_2" kind="assign" ref="$dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
             <link src="Ne96a6cc2_1"/>
             <ast length="25" start="147" type="59"/>
           </node>
-          <node id="Ne96a6cc2_3" kind="ref" ref="dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Ne96a6cc2_3" kind="ref" ref="$dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
             <link src="Ne96a6cc2_2"/>
             <ast length="5" start="175" type="42"/>
           </node>
@@ -240,7 +240,7 @@
             <link label="#this" src="Ne96a6cc2_3"/>
             <ast length="11" start="175" type="32"/>
           </node>
-          <node id="Ne96a6cc2_5" kind="assign" ref="dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Ne96a6cc2_5" kind="assign" ref="$dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
             <link label="update" src="Ne96a6cc2_4"/>
             <ast length="11" start="175" type="32"/>
           </node>

@@ -8,7 +8,7 @@
       <ast length="238" start="35" type="55"/>
       <scope name="basic_generics/Moo">
         <node data="uninitialized" id="Ncc70f04b_1" kind="const" type="@null"/>
-        <node id="Ncc70f04b_2" kind="assign" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+        <node id="Ncc70f04b_2" kind="assign" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
           <link src="Ncc70f04b_1"/>
           <ast length="1" start="68" type="59"/>
         </node>
@@ -29,11 +29,11 @@
             <link label="#arg0" src="Nb2004d57_1"/>
             <ast length="22" start="333" type="14"/>
           </node>
-          <node id="Nb2004d57_3" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_3" kind="assign" ref="$basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_2"/>
             <ast length="28" start="327" type="59"/>
           </node>
-          <node id="Nb2004d57_4" kind="ref" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_4" kind="ref" ref="$basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_3"/>
             <ast length="3" start="376" type="42"/>
           </node>
@@ -41,7 +41,7 @@
             <link label="#this" src="Nb2004d57_4"/>
             <ast length="9" start="376" type="32"/>
           </node>
-          <node id="Nb2004d57_6" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_6" kind="assign" ref="$basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link label="update" src="Nb2004d57_5"/>
             <ast length="9" start="376" type="32"/>
           </node>
@@ -49,53 +49,53 @@
             <link label="#this" src="Nb2004d57_5"/>
             <ast length="23" start="376" type="32"/>
           </node>
-          <node id="Nb2004d57_8" kind="assign" ref="basic_generics.test.b0/$b" type="Ljava/lang/String;">
+          <node id="Nb2004d57_8" kind="assign" ref="$basic_generics.test.b0/$b" type="Ljava/lang/String;">
             <link src="Nb2004d57_7"/>
             <ast length="27" start="372" type="59"/>
           </node>
-          <node id="Nb2004d57_9" kind="ref" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_9" kind="ref" ref="$basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_6"/>
             <ast length="3" start="427" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" id="Nb2004d57_10" kind="call" type="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
             <link label="#this" src="Nb2004d57_9"/>
-            <link label="basic_generics/Moo/.x" src="Nb2004d57_11"/>
+            <link label="@basic_generics/Moo/.x" src="Nb2004d57_11"/>
             <ast length="10" start="427" type="32"/>
           </node>
-          <node id="Nb2004d57_12" kind="assign" ref="basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_12" kind="assign" ref="$basic_generics.test.b0/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link label="update" src="Nb2004d57_10"/>
             <ast length="10" start="427" type="32"/>
           </node>
-          <node id="Nb2004d57_13" kind="assign" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node id="Nb2004d57_13" kind="assign" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link label="update" src="Nb2004d57_10"/>
             <ast length="10" start="427" type="32"/>
           </node>
-          <node id="Nb2004d57_14" kind="assign" ref="basic_generics.test.b0/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_14" kind="assign" ref="$basic_generics.test.b0/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_10"/>
             <ast length="16" start="421" type="59"/>
           </node>
         </scope>
-        <node flow="in" id="Nb2004d57_11" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
+        <node flow="in" id="Nb2004d57_11" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
     <method name="Lbasic_generics;.foo(E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;)T:Ljava/lang/Object;" style="static">
       <ast length="65" start="479" type="31"/>
       <scope name="basic_generics.foo">
         <scope name="basic_generics.foo.b0">
-          <node id="N289636c4_3" kind="ref" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
+          <node id="N289636c4_3" kind="ref" ref="$basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
             <link src="N289636c4_2"/>
             <ast length="1" start="534" type="42"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.get()T:Ljava/lang/Object;" id="N289636c4_4" kind="call" type="T:Ljava/lang/Object;">
             <link label="#this" src="N289636c4_3"/>
-            <link label="basic_generics/Moo/.x" src="N289636c4_5"/>
+            <link label="@basic_generics/Moo/.x" src="N289636c4_5"/>
             <ast length="7" start="534" type="32"/>
           </node>
-          <node id="N289636c4_6" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
+          <node id="N289636c4_6" kind="assign" ref="$basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
             <link label="update" src="N289636c4_4"/>
             <ast length="7" start="534" type="32"/>
           </node>
-          <node id="N289636c4_7" kind="assign" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node id="N289636c4_7" kind="assign" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link label="update" src="N289636c4_4"/>
             <ast length="7" start="534" type="32"/>
           </node>
@@ -107,11 +107,11 @@
         <node flow="in" id="N289636c4_1" kind="input" ref="#arg0" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
           <ast length="3" start="520" type="44"/>
         </node>
-        <node id="N289636c4_2" kind="assign" ref="basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
+        <node id="N289636c4_2" kind="assign" ref="$basic_generics.foo/$x" type="E:Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;">
           <link src="N289636c4_1"/>
           <ast length="3" start="520" type="44"/>
         </node>
-        <node flow="in" id="N289636c4_5" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
+        <node flow="in" id="N289636c4_5" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
     <method name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.&lt;init&gt;(T:Ljava/lang/Object;)Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" style="constructor">
@@ -122,16 +122,16 @@
             <link src="Nc1a85b9f_4"/>
             <ast length="4" start="103" type="52"/>
           </node>
-          <node flow="out" id="Nc1a85b9f_5" kind="fieldassign" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node flow="out" id="Nc1a85b9f_5" kind="fieldassign" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link src="Nc1a85b9f_7"/>
             <link label="obj" src="Nc1a85b9f_3"/>
             <ast length="6" start="103" type="22"/>
           </node>
-          <node id="Nc1a85b9f_6" kind="ref" ref="basic_generics/Moo.Moo/$x" type="T:Ljava/lang/Object;">
+          <node id="Nc1a85b9f_6" kind="ref" ref="$basic_generics/Moo.Moo/$x" type="T:Ljava/lang/Object;">
             <link src="Nc1a85b9f_2"/>
             <ast length="1" start="112" type="42"/>
           </node>
-          <node data="=" id="Nc1a85b9f_7" kind="assignop" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node data="=" id="Nc1a85b9f_7" kind="assignop" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link label="R" src="Nc1a85b9f_6"/>
             <ast length="10" start="103" type="7"/>
           </node>
@@ -139,7 +139,7 @@
         <node flow="in" id="Nc1a85b9f_1" kind="input" ref="#arg0" type="T:Ljava/lang/Object;">
           <ast length="3" start="84" type="44"/>
         </node>
-        <node id="Nc1a85b9f_2" kind="assign" ref="basic_generics/Moo.Moo/$x" type="T:Ljava/lang/Object;">
+        <node id="Nc1a85b9f_2" kind="assign" ref="$basic_generics/Moo.Moo/$x" type="T:Ljava/lang/Object;">
           <link src="Nc1a85b9f_1"/>
           <ast length="3" start="84" type="44"/>
         </node>
@@ -151,7 +151,7 @@
       <ast length="41" start="134" type="31"/>
       <scope name="basic_generics/Moo.get">
         <scope name="basic_generics/Moo.get.b0">
-          <node id="N58c7b7ef_1" kind="ref" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node id="N58c7b7ef_1" kind="ref" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link src="N58c7b7ef_2"/>
             <ast length="1" start="163" type="42"/>
           </node>
@@ -160,7 +160,7 @@
             <ast length="9" start="156" type="41"/>
           </node>
         </scope>
-        <node flow="in" id="N58c7b7ef_2" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
+        <node flow="in" id="N58c7b7ef_2" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
     <method name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" style="instance">
@@ -168,7 +168,7 @@
       <ast length="59" start="185" type="31"/>
       <scope name="basic_generics/Moo.copy">
         <scope name="basic_generics/Moo.copy.b0">
-          <node id="N6aac3c64_1" kind="ref" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
+          <node id="N6aac3c64_1" kind="ref" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
             <link src="N6aac3c64_2"/>
             <ast length="1" start="231" type="42"/>
           </node>
@@ -181,7 +181,7 @@
             <ast length="21" start="213" type="41"/>
           </node>
         </scope>
-        <node flow="in" id="N6aac3c64_2" ref="basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
+        <node flow="in" id="N6aac3c64_2" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
   </file>

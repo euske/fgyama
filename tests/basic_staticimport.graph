@@ -8,7 +8,7 @@
       <ast length="54" start="107" type="31"/>
       <scope name="basic_staticimport.foo">
         <scope name="basic_staticimport.foo.b0">
-          <node id="Nede5cb52_1" kind="ref" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+          <node id="Nede5cb52_1" kind="ref" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
             <link src="Nede5cb52_2"/>
             <ast length="3" start="135" type="42"/>
           </node>
@@ -29,12 +29,12 @@
             <link label="#this" src="Nede5cb52_1"/>
             <ast length="19" start="135" type="32"/>
           </node>
-          <node id="Nede5cb52_8" kind="assign" ref="java/lang/System/.out" type="Ljava/io/PrintStream;">
+          <node id="Nede5cb52_8" kind="assign" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
             <link label="update" src="Nede5cb52_7"/>
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>
-        <node flow="in" id="Nede5cb52_2" ref="java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nede5cb52_2" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;"/>
         <node flow="in" id="Nede5cb52_3" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
     </method>
