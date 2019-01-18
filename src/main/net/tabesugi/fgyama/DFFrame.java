@@ -80,14 +80,14 @@ public class DFFrame {
     public boolean expandRefs(DFFrame childFrame) {
         boolean added = false;
         for (DFRef ref : childFrame._inputRefs) {
-            if (ref.isLocal() || ref.isTemporary()) continue;
+            if (ref.isLocal() || ref.isInternal()) continue;
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
                 added = true;
             }
         }
         for (DFRef ref : childFrame._outputRefs) {
-            if (ref.isLocal() || ref.isTemporary()) continue;
+            if (ref.isLocal() || ref.isInternal()) continue;
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
                 added = true;
@@ -160,7 +160,7 @@ public class DFFrame {
         SortedSet<DFNode> nodes = new TreeSet<DFNode>();
         for (DFNode node : _inputNodes) {
             DFRef ref = node.getRef();
-            if (!ref.isLocal() || ref.isTemporary()) {
+            if (!ref.isLocal() || ref.isInternal()) {
                 nodes.add(node);
             }
         }
@@ -171,7 +171,7 @@ public class DFFrame {
         SortedSet<DFNode> nodes = new TreeSet<DFNode>();
         for (DFNode node : _outputNodes) {
             DFRef ref = node.getRef();
-            if (!ref.isLocal() || ref.isTemporary()) {
+            if (!ref.isLocal() || ref.isInternal()) {
                 nodes.add(node);
             }
         }

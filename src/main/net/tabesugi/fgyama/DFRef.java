@@ -47,7 +47,7 @@ public class DFRef implements Comparable<DFRef> {
         return (_scope instanceof DFLocalVarScope);
     }
 
-    public boolean isTemporary() {
+    public boolean isInternal() {
         return (_scope == null);
     }
 

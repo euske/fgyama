@@ -996,7 +996,7 @@ public class Java2DF {
                         refs.addAll(frame1.getInputRefs());
                     }
                     for (DFRef ref : refs) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1014,7 +1014,7 @@ public class Java2DF {
                         refs.addAll(frame1.getInputRefs());
                     }
                     for (DFRef ref : refs) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ObjectUpdateNode(
                                     graph, scope, ref, invoke, call));
                     }
@@ -1066,7 +1066,7 @@ public class Java2DF {
                 DFFrame frame1 = method.getFrame();
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getInputRefs()) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1078,7 +1078,7 @@ public class Java2DF {
                 }
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ObjectUpdateNode(
                                     graph, scope, ref, sinvoke, call));
                     }
@@ -1218,14 +1218,14 @@ public class Java2DF {
                 DFFrame frame1 = method.getFrame();
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getInputRefs()) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
                 ctx.setRValue(call);
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
-                        if (ref.isLocal() || ref.isTemporary()) continue;
+                        if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ObjectUpdateNode(
                                     graph, scope, ref, cstr, call));
                     }
