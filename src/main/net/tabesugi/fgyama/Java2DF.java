@@ -1684,7 +1684,6 @@ public class Java2DF {
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	SwitchStatement switchStmt)
         throws UnsupportedSyntax, EntityNotFound {
-        DFVarScope switchScope = scope.getChildByAST(switchStmt);
         processExpression(
             ctx, typeSpace, graph, finder, scope, frame,
             switchStmt.getExpression());
@@ -1695,6 +1694,7 @@ public class Java2DF {
             ((DFKlass)type).isEnum()) {
             enumKlass = finder.resolveKlass(type);
         }
+        DFVarScope switchScope = scope.getChildByAST(switchStmt);
         DFFrame switchFrame = frame.getChildByAST(switchStmt);
 
         SwitchCase switchCase = null;
@@ -1797,12 +1797,12 @@ public class Java2DF {
 	ForStatement forStmt)
         throws UnsupportedSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(forStmt);
-        DFFrame loopFrame = frame.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         for (Expression init : (List<Expression>) forStmt.initializers()) {
             processExpression(
                 ctx, typeSpace, graph, finder, loopScope, frame, init);
         }
+        DFFrame loopFrame = frame.getChildByAST(forStmt);
         Expression expr = forStmt.getExpression();
         DFNode condValue;
         if (expr != null) {
