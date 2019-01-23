@@ -9,8 +9,8 @@ def q(s):
             .replace('<','&lt;')
             .replace('"','&quot;'))
 
-def show_html_headers():
-    print('''<html>
+def show_html_headers(fp):
+    fp.write('''<html>
 <style>
 pre { margin: 1em; border: 1px solid gray;}
 h2 { border-bottom: 2px solid black; color: red; }
@@ -38,34 +38,34 @@ function toggle(id) {
 ''')
     return
 
-def show_html(src, url, ranges, ncontext=3):
+def show_html(fp, src, url, ranges, ncontext=3):
     def astart(nid):
         return '<span class="p%s">' % nid
     def aend(anno):
         return '</span>'
     def abody(annos, s):
         return q(s.replace('\n',''))
-    print('<div class=src><a href="%s">%s</a></div>' % (q(url), src.name))
-    print('<pre>')
+    fp.write('<div class=src><a href="%s">%s</a></div>\n' % (q(url), src.name))
+    fp.write('<pre>\n')
     for (lineno,s) in src.show(
             ranges, astart=astart, aend=aend, abody=abody, ncontext=ncontext):
         if lineno is None:
-            print ('     '+s)
+            fp.write('     '+s+'\n')
         else:
             lineno += 1
-            print ('<a href="%s#L%d">%5d</a>:%s' %
-                   (q(url), lineno, lineno, s))
-    print('</pre>')
+            fp.write('<a href="%s#L%d">%5d</a>:%s\n' %
+                     (q(url), lineno, lineno, s))
+    fp.write('</pre>\n')
     return
 
-def show_text(src, ranges, ncontext=3):
-    print('#', src.name)
+def show_text(fp, src, ranges, ncontext=3):
+    fp.write('#\n', src.name)
     for (lineno,line) in src.show(ranges, ncontext=ncontext):
         if lineno is None:
-            print(line.rstrip())
+            fp.write(line.rstrip()+'\n')
         else:
-            print(lineno, line.rstrip())
-    print()
+            fp.write('%4d: %s\n' % (lineno, line.rstrip()))
+    fp.write('\n')
     return
 
 class FeatTree:
@@ -105,23 +105,27 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-B basedir] [-H] [-t threshold] [-m maxresults] '
-              'out.idf' %
-              argv[0])
+        print('usage: %s [-o output] [-H] [-B basedir] '
+              '[-t threshold] [-m maxresults] [-c encoding] '
+              'out.idf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'B:Ht:m:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:m:c:')
     except getopt.GetoptError:
         return usage()
-    srcdb = None
+    output = None
     html = False
+    srcdb = None
+    encoding = None
     threshold = 10
     maxresults = 100
     for (k, v) in opts:
-        if k == '-B': srcdb = SourceDB(v)
+        if k == '-o': output = v
         elif k == '-H': html = True
+        elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-t': threshold = float(v)
         elif k == '-m': maxresults = int(v)
+        elif k == '-c': encoding = v
     if not args: return usage()
 
     def splitfeat(v):
@@ -167,7 +171,7 @@ def main(argv):
     featall = sum(featmap.values())
     for k in featmap.keys():
         featmap[k] = log(featall/featmap[k])
-    print('read: %d paths, %d sources, %d feats (all: %d)' %
+    print('Read: %d paths, %d sources, %d feats (all: %d)' %
           (paths, len(srcmap), len(featmap), featall), file=sys.stderr)
     #
     results = {}
@@ -189,28 +193,32 @@ def main(argv):
     results = sorted(results.values(), key=lambda x:x[0], reverse=True)
     if 0 < maxresults:
         results = results[:maxresults]
-    print('results: %d' % len(results), file=sys.stderr)
+    print('Results: %d' % len(results), file=sys.stderr)
 
+    if output is None:
+        fp = sys.stdout
+    else:
+        fp = open(output, 'w')
     if html:
-        show_html_headers()
+        show_html_headers(fp)
     mid = 0
     for (score,tree) in results:
         feats = tree.feats()
         if html:
-            print('<h2>[%.3f] <code>%s</code> (%d)</h2>' %
-                  (score, q(repr(feats)), len(tree.matches)))
+            fp.write('<h2>[%.3f] <code>%s</code> (%d)</h2>\n' %
+                     (score, q(repr(feats)), len(tree.matches)))
         else:
-            print('! %.3f %r %d' % (score, feats, len(tree.matches)))
+            fp.write('! %.3f %r %d\n' % (score, feats, len(tree.matches)))
         for (func,locs) in tree.matches.items():
             if html:
                 mid += 1
-                print('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
-                      '<code>%s</code></h3>' % (mid, mid, q(func)))
+                fp.write('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
+                         '<code>%s</code></h3>\n' % (mid, mid, q(func)))
             else:
-                print('+ %s' % func)
+                fp.write('+ %s\n' % func)
             if srcdb is None: continue
             if html:
-                print('<div class=result hidden id="M%d">' % mid)
+                fp.write('<div class=result hidden id="M%d">\n' % mid)
             nodes = {}
             for (i,loc) in enumerate(locs):
                 if loc is None: continue
@@ -225,15 +233,18 @@ def main(argv):
                 a.append((start, start+length, i))
             for (src,ranges) in nodes.items():
                 if html:
-                    show_html(src, src.name, ranges)
+                    show_html(fp, src, src.name, ranges)
                 else:
-                    show_text(src, ranges)
+                    show_text(fp, src, ranges)
             if html:
-                print('</div>')
+                fp.write('</div>\n')
         if html:
-            print('<hr>')
+            fp.write('<hr>\n')
         else:
-            print()
+            fp.write()
+
+    if fp is not sys.stdout:
+        fp.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

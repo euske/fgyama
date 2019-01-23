@@ -154,8 +154,9 @@ class SourceFile:
 ##
 class SourceDB:
 
-    def __init__(self, basedir):
+    def __init__(self, basedir, encoding=None):
         self.basedir = basedir
+        self.encoding = encoding
         self._cache = {}
         return
 
@@ -165,7 +166,7 @@ class SourceDB:
         else:
             path = os.path.join(self.basedir, name)
             try:
-                with open(path) as fp:
+                with open(path, encoding=self.encoding) as fp:
                     data = fp.read()
             except IOError:
                 raise KeyError(name)

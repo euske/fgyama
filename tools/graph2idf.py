@@ -78,24 +78,26 @@ class IPVertex:
 
     def connect(self, feat, output):
         #print('# connect: %r %s %r' % (self, feat, output))
-        assert output is not self
+        #assert output is not self
         assert isinstance(feat, str)
         assert isinstance(output, IPVertex)
         self.outputs.append((feat, output))
         output.inputs.append((feat, self))
         return
 
-    def enum(self, direction, prev0=None):
+    def enum(self, direction, prev0=None, done=None):
+        if done is not None and self in done: return
+        done = Cons(self, done)
         if direction < 0:
             vtxs = self.inputs
         else:
             vtxs = self.outputs
-        yield prev0
         for (feat,vtx) in vtxs:
             prev = prev0
             if feat is not None:
                 prev = Cons((feat, vtx.node), prev0)
-            for z in vtx.enum(direction, prev):
+                yield prev
+            for z in vtx.enum(direction, prev, done):
                 yield z
         return
 
@@ -105,38 +107,46 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-m maxlen] [-n mincall] [-M maxoverrides] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-o output] [-m maxlen] [-n mincall] '
+              '[-M maxoverrides] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dm:n:M:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:m:n:M:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     maxlen = 5
     mincall = 2
     maxoverrides = 1
+    output = None
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-o': output = v
         elif k == '-m': maxlen = int(v)
         elif k == '-n': mincall = int(v)
         elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
+
+    if output is None:
+        fp = sys.stdout
+    else:
+        fp = open(output, 'w')
 
     # Load graphs.
     graphs = []
     srcmap = {}
     gid2graph = {}
     for path in args:
-        print('# loading: %r...' % path, file=sys.stderr)
+        print('Loading: %r...' % path, file=sys.stderr)
         for graph in get_graphs(path):
             if graph.src not in srcmap:
                 fid = len(srcmap)
                 srcmap[graph.src] = fid
-                print('+SOURCE %d %s' % (fid, graph.src))
+                fp.write('+SOURCE %d %s\n' % (fid, graph.src))
             graphs.append(graph)
             gid2graph[graph.name] = graph
 
-    print('# graphs: %r' % len(graphs), file=sys.stderr)
+    print('Graphs: %r' % len(graphs), file=sys.stderr)
 
     # Enumerate caller/callee relationships.
     caller = {}
@@ -202,6 +212,8 @@ def main(argv):
     nfeats = 0
     for graph in graphs:
         gid = graph.name
+        if '.toString()' in gid: continue
+        if '.equals(L' in gid: continue
         if gid not in caller or len(caller[gid]) < mincall: continue
         if graph.ast is not None:
             fid = srcmap[graph.src]
@@ -209,9 +221,9 @@ def main(argv):
             name = ('%s,%s,%s,%s' % (gid, fid, s, e))
         else:
             name = gid
-        print('# start: %r' % gid, file=sys.stderr)
+        fp.write('# gid: %r\n' % gid)
         for funcall in caller[gid]:
-            #print('# funcall:', gid, 'at', funcall.graph.name)
+            fp.write('#   at %r\n' % funcall.graph.name)
             out = {}
             v1 = IPVertex(funcall)
             for (label,n) in funcall.outputs:
@@ -219,11 +231,13 @@ def main(argv):
             for feats in v1.enum(+1):
                 if feats is None: continue
                 a = reversed(list(feats))
+                fp.write('+PATH %s forw %s\n' %
+                          (name, ' '.join( feat+getsrc(n) for (feat,n) in a )))
                 nfeats += 1
-                print('+PATH %s forw %s' %
-                      (name, ' '.join( feat+getsrc(n) for (feat,n) in a )))
+    print('Features: %r' % nfeats, file=sys.stderr)
 
-    print('# feats: %r' % nfeats, file=sys.stderr)
+    if fp is not sys.stdout:
+        fp.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
