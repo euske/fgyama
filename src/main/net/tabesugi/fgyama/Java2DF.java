@@ -2266,7 +2266,8 @@ public class Java2DF {
 
     private DFRootTypeSpace _rootSpace;
     private int _strict;
-    private Exporter _exporter;
+    private List<Exporter> _exporters =
+        new ArrayList<Exporter>();
     private DFGlobalVarScope _globalScope =
         new DFGlobalVarScope();
     private Map<String, DFModuleScope> _moduleScope =
@@ -2282,14 +2283,18 @@ public class Java2DF {
         DFBuiltinTypes.initialize(rootSpace);
     }
 
-    public void setExporter(Exporter exporter) {
-        _exporter = exporter;
+    public void addExporter(Exporter exporter) {
+        _exporters.add(exporter);
+    }
+
+    public void removeExporter(Exporter exporter) {
+        _exporters.remove(exporter);
     }
 
     protected void exportGraph(DFGraph graph) {
         graph.cleanup();
-        if (_exporter != null) {
-            _exporter.writeGraph(graph);
+        for (Exporter exporter : _exporters) {
+            exporter.writeGraph(graph);
         }
     }
 
@@ -2528,7 +2533,7 @@ public class Java2DF {
             return;
         }
         XmlExporter exporter = new XmlExporter();
-        converter.setExporter(exporter);
+        converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
         for (String path : files) {

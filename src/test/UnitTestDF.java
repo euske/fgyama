@@ -33,7 +33,7 @@ public class UnitTestDF extends XMLTestCase {
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
 	XmlExporter exporter = new XmlExporter();
-        _converter.setExporter(exporter);
+        _converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
         for (int i = 0; i < javaPaths.length; i++) {
@@ -60,6 +60,7 @@ public class UnitTestDF extends XMLTestCase {
             exporter.endFile();
         }
 	exporter.close();
+        _converter.removeExporter(exporter);
         Document refdoc = Utils.readXml(xmlPath);
 	try {
 	    assertXMLEqual(refdoc, exporter.document);
