@@ -2298,7 +2298,7 @@ public class Java2DF {
         }
     }
 
-    // pass1
+    // Pass1: populate TypeSpaces.
     public void buildTypeSpace(String key, CompilationUnit cunit) {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFModuleScope module = new DFModuleScope(_globalScope, key);
@@ -2314,7 +2314,7 @@ public class Java2DF {
         }
     }
 
-    // pass2
+    // Pass2: set references to external Klasses.
     @SuppressWarnings("unchecked")
     public void setTypeFinder(String key, CompilationUnit cunit) {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
@@ -2325,7 +2325,7 @@ public class Java2DF {
         }
     }
 
-    // pass3
+    // Pass3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(String key, CompilationUnit cunit)
         throws TypeNotFound {
@@ -2363,7 +2363,7 @@ public class Java2DF {
         }
     }
 
-    // Pass3.5
+    // Pass3.5: list all methods.
     public void listMethods(String key) {
         // Extend the klass list.
         List<DFKlass> klasses = new ArrayList<DFKlass>();
@@ -2382,7 +2382,7 @@ public class Java2DF {
         _klassList.put(key, a);
     }
 
-    // Pass4
+    // Pass4: build all methods.
     public void buildMethods(String key)
         throws EntityNotFound {
         DFKlass[] klasses = _klassList.get(key);
@@ -2415,7 +2415,7 @@ public class Java2DF {
         }
     }
 
-    // pass5
+    // Pass5: generate graphs for each method.
     @SuppressWarnings("unchecked")
     public void buildGraphs(String key, CompilationUnit cunit)
         throws EntityNotFound {
