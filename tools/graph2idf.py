@@ -168,7 +168,7 @@ def main(argv):
         if maxlen <= length: return
         if skiplink(label, n1): return
         feat = getfeat(label, n1)
-        #print('[trace: %s]' % n1.graph.name, v0, feat)
+        #print('[trace: %s]' % n1.graph.name, v0, n1, feat)
         if feat is None:
             v1 = v0
         elif n1 in out:
@@ -178,7 +178,7 @@ def main(argv):
         else:
             v1 = out[n1] = IPVertex(n1)
             v0.connect(feat, v1)
-        length += 1
+            length += 1
         if n1.kind in ('call', 'new'):
             args = set( label for label in n1.inputs.keys()
                         if label.startswith('#arg') )
@@ -186,11 +186,11 @@ def main(argv):
             for gid in funcs[:maxoverrides]:
                 if gid not in gid2graph: continue
                 graph = gid2graph[gid]
-                #print(' ', v0, 'funcall', graph)
+                #print(' ', v0, 'funcall', graph, args)
                 for n2 in graph.ins:
                     label = n2.ref
                     if label not in args: continue
-                    trace(out, v1, label, n2, length)
+                    trace(out, v0, label, n2, length)
         for (label, n2) in n1.outputs:
             trace(out, v1, label, n2, length)
         if n1.kind == 'output':
@@ -210,19 +210,19 @@ def main(argv):
         return (',%s,%s,%s' % (fid, s, e))
 
     nfeats = 0
-    for graph in graphs:
-        gid = graph.name
+    for (gid,funcalls) in caller.items():
         if '.toString()' in gid: continue
         if '.equals(L' in gid: continue
-        if gid not in caller or len(caller[gid]) < mincall: continue
-        if graph.ast is not None:
-            fid = srcmap[graph.src]
-            (_,s,e) = graph.ast
-            name = ('%s,%s,%s,%s' % (gid, fid, s, e))
-        else:
-            name = gid
+        if len(funcalls) < mincall: continue
+        name = gid
+        if gid in gid2graph:
+            graph = gid2graph[gid]
+            if graph.ast is not None:
+                fid = srcmap[graph.src]
+                (_,s,e) = graph.ast
+                name = ('%s,%s,%s,%s' % (gid, fid, s, e))
         fp.write('# gid: %r\n' % gid)
-        for funcall in caller[gid]:
+        for funcall in funcalls:
             fp.write('#   at %r\n' % funcall.graph.name)
             out = {}
             v1 = IPVertex(funcall)
