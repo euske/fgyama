@@ -22,8 +22,9 @@ public class DFMethod implements Comparable<DFMethod> {
 
     private DFTypeFinder _finder = null;
     private DFLocalVarScope _scope = null;
-    private DFFrame _frame = null;
     private ASTNode _ast = null;
+
+    private DFFrame _frame = null;
 
     private List<DFOverride> _overrides = new ArrayList<DFOverride>();
 
@@ -62,14 +63,15 @@ public class DFMethod implements Comparable<DFMethod> {
         _methodType = methodType;
     }
 
-    public DFMethod(
-        DFKlass klass, DFTypeSpace childSpace,
-        String name, DFCallStyle callStyle, DFMethodType methodType,
-        DFOverride[] overrides) {
-        _klass = klass;
-        _childSpace = childSpace;
-        _name = name;
-        _callStyle = callStyle;
+    private DFMethod(
+        DFMethod method, DFMethodType methodType, DFOverride[] overrides) {
+        _klass = method._klass;
+        _childSpace = method._childSpace;
+        _name = method._name;
+        _callStyle = method._callStyle;
+        _finder = method._finder;
+        _scope = method._scope;
+        _ast = method._ast;
         _methodType = methodType;
 	for (DFOverride override : overrides) {
 	    _overrides.add(override);
@@ -148,9 +150,7 @@ public class DFMethod implements Comparable<DFMethod> {
             overrides[i] = new DFOverride(method1, override.level);
         }
         if (changed) {
-            return new DFMethod(
-                _klass, _childSpace, _name, _callStyle,
-                methodType, overrides);
+            return new DFMethod(this, methodType, overrides);
         }
         return this;
     }

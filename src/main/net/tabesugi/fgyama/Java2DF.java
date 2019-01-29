@@ -2363,13 +2363,29 @@ public class Java2DF {
         }
     }
 
+    // Pass3.5
+    public void listMethods(String key) {
+        // Extend the klass list.
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
+	for (DFKlass klass : _klassList.get(key)) {
+            if (klass.isParameterized()) {
+                klasses.addAll(Arrays.asList(klass.getParamKlasses()));
+            } else {
+                klasses.add(klass);
+            }
+        }
+	for (DFKlass klass : klasses) {
+            klass.addOverrides();
+        }
+        DFKlass[] a = new DFKlass[klasses.size()];
+        klasses.toArray(a);
+        _klassList.put(key, a);
+    }
+
     // Pass4
     public void buildMethods(String key)
         throws EntityNotFound {
         DFKlass[] klasses = _klassList.get(key);
-	for (DFKlass klass : klasses) {
-	    klass.addOverrides();
-        }
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 	for (DFKlass klass : klasses) {
 	    for (DFMethod method : klass.getMethods()) {
@@ -2556,6 +2572,9 @@ public class Java2DF {
                 Logger.info("Pass3:", path);
                 CompilationUnit cunit = srcs.get(path);
                 converter.loadKlasses(path, cunit);
+            }
+            for (String path : files) {
+                converter.listMethods(path);
             }
             for (String path : files) {
                 Logger.info("Pass4:", path);

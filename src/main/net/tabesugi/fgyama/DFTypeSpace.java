@@ -177,7 +177,7 @@ public class DFTypeSpace {
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, typeDecl);
         list.add(klass);
-        klass.addMapTypes(typeDecl.typeParameters());
+        klass.setMapTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getKlassSpace();
 	child.build(list, klass, klass.getKlassScope(),
 		    typeDecl.bodyDeclarations());

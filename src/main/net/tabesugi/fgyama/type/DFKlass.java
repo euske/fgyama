@@ -28,6 +28,8 @@ public class DFKlass extends DFType {
     private DFVarScope _klassScope;
 
     private DFMapType[] _mapTypes = null;
+    private List<DFParamKlass> _paramKlasses =
+        new ArrayList<DFParamKlass>();
 
     private DFMethod _initializer = null;
     private DFMethod _constructor = null;
@@ -110,17 +112,25 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass getParamKlass(DFType[] mapTypes) {
+        assert this.isParameterized();
         String name = DFParamKlass.getParamKlassName(_name, mapTypes);
         try {
             return (DFParamKlass)_klassSpace.getKlass(name);
         } catch (TypeNotFound e) {
             DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, mapTypes);
             _klassSpace.addKlass(klass);
+            _paramKlasses.add(klass);
             return klass;
         }
     }
 
-    public void addMapTypes(List<TypeParameter> tps) {
+    public DFParamKlass[] getParamKlasses() {
+        DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
+        _paramKlasses.toArray(klasses);
+        return klasses;
+    }
+
+    public void setMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
         _mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
@@ -160,6 +170,10 @@ public class DFKlass extends DFType {
         return (_baseKlass instanceof DFParamKlass &&
                 ((DFParamKlass)_baseKlass).getGeneric() ==
                 DFBuiltinTypes.getEnumKlass());
+    }
+
+    public boolean isParameterized() {
+        return (_mapTypes != null && 0 < _mapTypes.length);
     }
 
     public String getFullName() {

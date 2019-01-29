@@ -51,6 +51,9 @@ public class UnitTestDF extends XMLTestCase {
             _converter.loadKlasses(javaPaths[i], cunit);
         }
         for (int i = 0; i < javaPaths.length; i++) {
+	    _converter.listMethods(javaPaths[i]);
+	}
+        for (int i = 0; i < javaPaths.length; i++) {
 	    _converter.buildMethods(javaPaths[i]);
 	}
         for (int i = 0; i < javaPaths.length; i++) {
