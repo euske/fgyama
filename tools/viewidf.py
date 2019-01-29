@@ -132,7 +132,10 @@ def main(argv):
         (v,_,v4) = v.rpartition(',')
         (v,_,v3) = v.rpartition(',')
         (v1,_,v2) = v.rpartition(',')
-        return (v1, (srcmap[v2],int(v3),int(v4)))
+        if v2:
+            return (v1, (srcmap[v2],int(v3),int(v4)))
+        else:
+            return (v1, None)
     def getfeat(v):
         # strip ast
         (v,_,v4) = v.rpartition(',')
@@ -159,8 +162,10 @@ def main(argv):
         elif f[0] == '+PATH' and f[2] == 'forw':
             paths += 1
             (func,loc0) = splitfeat(f[1])
+            locs = [ getloc(x) for x in f[3:] ]
+            if loc0 is not None:
+                locs = [loc0] + locs
             feats = [ getfeat(x) for x in f[3:] ]
-            locs = [loc0] + [ getloc(x) for x in f[3:] ]
             tree = root
             for (i,feat) in enumerate(feats):
                 if feat not in featmap:
@@ -241,7 +246,7 @@ def main(argv):
         if html:
             fp.write('<hr>\n')
         else:
-            fp.write()
+            fp.write('\n')
 
     if fp is not sys.stdout:
         fp.close()

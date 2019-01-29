@@ -164,12 +164,13 @@ def main(argv):
                 for gid in node.data.split(' '):
                     addcall(node, gid)
 
-    def trace(out, v0, label, n1, length=0):
+    def trace(out, v0, label, n1, length=0, done=None):
         if maxlen <= length: return
         if skiplink(label, n1): return
         feat = getfeat(label, n1)
         #print('[trace: %s]' % n1.graph.name, v0, n1, feat)
         if feat is None:
+            if done is not None and n1 in done: return
             v1 = v0
         elif n1 in out:
             v1 = out[n1]
@@ -179,6 +180,7 @@ def main(argv):
             v1 = out[n1] = IPVertex(n1)
             v0.connect(feat, v1)
             length += 1
+        done = Cons(n1, done)
         if n1.kind in ('call', 'new'):
             args = set( label for label in n1.inputs.keys()
                         if label.startswith('#arg') )
@@ -190,16 +192,16 @@ def main(argv):
                 for n2 in graph.ins:
                     label = n2.ref
                     if label not in args: continue
-                    trace(out, v0, label, n2, length)
+                    trace(out, v0, label, n2, length, done)
         for (label, n2) in n1.outputs:
-            trace(out, v1, label, n2, length)
+            trace(out, v1, label, n2, length, done)
         if n1.kind == 'output':
             gid = n1.graph.name
             if gid in caller:
                 #print(' ', v0, 'return', gid)
                 for nc in caller[gid]:
                     for (label, n2) in nc.outputs:
-                        trace(out, v1, label, n2, length)
+                        trace(out, v1, label, n2, length, done)
         return
 
     def getsrc(node):
@@ -214,7 +216,7 @@ def main(argv):
         if '.toString()' in gid: continue
         if '.equals(L' in gid: continue
         if len(funcalls) < mincall: continue
-        name = gid
+        name = gid+',,,'
         if gid in gid2graph:
             graph = gid2graph[gid]
             if graph.ast is not None:
