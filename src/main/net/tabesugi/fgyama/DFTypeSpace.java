@@ -18,10 +18,8 @@ public class DFTypeSpace {
     private DFTypeSpace _parent;
     private String _name;
 
-    private List<DFTypeSpace> _children =
-        new ArrayList<DFTypeSpace>();
-    private Map<String, DFTypeSpace> _id2space =
-        new HashMap<String, DFTypeSpace>();
+    private SortedMap<String, DFTypeSpace> _id2space =
+        new TreeMap<String, DFTypeSpace>();
     private Map<String, DFKlass> _id2klass =
         new HashMap<String, DFKlass>();
 
@@ -41,10 +39,6 @@ public class DFTypeSpace {
         } else {
             return _parent.getFullName()+_name+"/";
         }
-    }
-
-    public String getAnonName() {
-        return "anon"+_children.size(); // assign unique id.
     }
 
     public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
@@ -72,7 +66,6 @@ public class DFTypeSpace {
         DFTypeSpace space = _id2space.get(id);
         if (space == null) {
             space = new DFTypeSpace(this, id);
-            _children.add(space);
             _id2space.put(id, space);
             //Logger.info("DFTypeSpace.addChild:", this, ":", id);
         }
@@ -596,7 +589,7 @@ public class DFTypeSpace {
         for (DFKlass klass : _id2klass.values()) {
             out.println(i2+"defined: "+klass);
         }
-        for (DFTypeSpace space : _children) {
+        for (DFTypeSpace space : _id2space.values()) {
             space.dump(out, i2);
         }
         out.println(indent+"}");

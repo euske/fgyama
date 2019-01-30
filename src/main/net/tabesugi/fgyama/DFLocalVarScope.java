@@ -12,10 +12,8 @@ import org.w3c.dom.*;
 //
 public class DFLocalVarScope extends DFVarScope {
 
-    private List<DFLocalVarScope> _children =
-        new ArrayList<DFLocalVarScope>();
-    private Map<String, DFLocalVarScope> _ast2child =
-        new HashMap<String, DFLocalVarScope>();
+    private SortedMap<String, DFLocalVarScope> _ast2child =
+        new TreeMap<String, DFLocalVarScope>();
 
     protected DFLocalVarScope(DFVarScope parent, String name) {
         super(parent, name);
@@ -25,6 +23,23 @@ public class DFLocalVarScope extends DFVarScope {
         super(parent, name);
     }
 
+    // Copy constructor.
+    public DFLocalVarScope(DFLocalVarScope scope) {
+        super(scope);
+        copyFrom(scope);
+    }
+    public DFLocalVarScope(DFVarScope parent, DFLocalVarScope scope) {
+        super(parent, scope);
+        copyFrom(scope);
+    }
+    private void copyFrom(DFLocalVarScope scope) {
+        for (Map.Entry<String, DFLocalVarScope> e :
+                 scope._ast2child.entrySet()) {
+            DFLocalVarScope s = new DFLocalVarScope(this, e.getValue());
+            _ast2child.put(e.getKey(), s);
+        }
+    }
+
     public DFLocalVarScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
@@ -32,16 +47,15 @@ public class DFLocalVarScope extends DFVarScope {
     }
 
     public DFLocalVarScope[] getChildren() {
-        DFLocalVarScope[] scopes = new DFLocalVarScope[_children.size()];
-        _children.toArray(scopes);
+        DFLocalVarScope[] scopes = new DFLocalVarScope[_ast2child.size()];
+        _ast2child.values().toArray(scopes);
         return scopes;
     }
 
     protected DFLocalVarScope addChild(String basename, ASTNode ast) {
-        String id = basename + _children.size();
+        String id = basename + _ast2child.size();
         //Logger.info("DFLocalVarScope.addChild:", this, ":", id);
         DFLocalVarScope scope = new DFLocalVarScope(this, id);
-        _children.add(scope);
         _ast2child.put(Utils.encodeASTNode(ast), scope);
         return scope;
     }

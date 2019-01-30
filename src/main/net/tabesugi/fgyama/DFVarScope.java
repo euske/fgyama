@@ -33,6 +33,23 @@ public class DFVarScope implements Comparable<DFVarScope> {
         this(parent, name.getIdentifier());
     }
 
+    // Copy constructor.
+    public DFVarScope(DFVarScope scope) {
+        _parent = scope._parent;
+        _name = scope._name;
+        copyFrom(scope);
+    }
+    public DFVarScope(DFVarScope parent, DFVarScope scope) {
+        _parent = parent;
+        _name = scope._name;
+        copyFrom(scope);
+    }
+    private void copyFrom(DFVarScope scope) {
+        for (Map.Entry<String, DFRef> e : scope._id2ref.entrySet()) {
+            _id2ref.put(e.getKey(), e.getValue());
+        }
+    }
+
     @Override
     public int compareTo(DFVarScope scope) {
         if (scope == null) return +1;
