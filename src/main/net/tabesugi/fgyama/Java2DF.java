@@ -546,10 +546,10 @@ class MethodCallNode extends CallNode {
     }
 }
 
-// ObjectUpdateNode:
-class ObjectUpdateNode extends SingleAssignNode {
+// UpdateNode:
+class UpdateNode extends SingleAssignNode {
 
-    public ObjectUpdateNode(
+    public UpdateNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
         ASTNode ast, CallNode call) {
         super(graph, scope, ref, ast);
@@ -1001,11 +1001,6 @@ public class Java2DF {
                     }
                 }
                 ctx.setRValue(call);
-                if (obj != null && obj.getRef() != null) {
-                    // the object is updated.
-                    ctx.set(new ObjectUpdateNode(
-                                graph, scope, obj.getRef(), invoke, call));
-                }
                 {
                     SortedSet<DFRef> refs = new TreeSet<DFRef>();
                     for (DFMethod method1 : methods) {
@@ -1015,7 +1010,7 @@ public class Java2DF {
                     }
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new ObjectUpdateNode(
+                        ctx.set(new UpdateNode(
                                     graph, scope, ref, invoke, call));
                     }
                 }
@@ -1071,15 +1066,10 @@ public class Java2DF {
                     }
                 }
                 ctx.setRValue(call);
-                if (obj != null && obj.getRef() != null) {
-                    // the object is updated.
-                    ctx.set(new ObjectUpdateNode(
-                                graph, scope, obj.getRef(), sinvoke, call));
-                }
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new ObjectUpdateNode(
+                        ctx.set(new UpdateNode(
                                     graph, scope, ref, sinvoke, call));
                     }
                 }
@@ -1226,7 +1216,7 @@ public class Java2DF {
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new ObjectUpdateNode(
+                        ctx.set(new UpdateNode(
                                     graph, scope, ref, cstr, call));
                     }
                 }
