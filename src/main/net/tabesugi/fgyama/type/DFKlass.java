@@ -76,7 +76,7 @@ public class DFKlass extends DFType {
     public String getTypeName() {
         String name = "L"+this.getFullName();
         if (_mapTypes != null && 0 < _mapTypes.length) {
-            name = DFParamKlass.getParamKlassName(name, _mapTypes);
+            name = name + DFParamKlass.getParamNames(_mapTypes);
         }
         return name+";";
     }
@@ -113,7 +113,7 @@ public class DFKlass extends DFType {
 
     public DFParamKlass getParamKlass(DFType[] mapTypes) {
         assert this.isParameterized();
-        String name = DFParamKlass.getParamKlassName(_name, mapTypes);
+        String name = _name + DFParamKlass.getParamNames(mapTypes);
         try {
             return (DFParamKlass)_klassSpace.getKlass(name);
         } catch (TypeNotFound e) {

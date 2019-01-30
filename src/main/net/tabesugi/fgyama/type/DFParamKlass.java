@@ -19,6 +19,17 @@ public class DFParamKlass extends DFKlass {
         new HashMap<DFRef, DFRef>();
     private List<DFMethod> _paramMethods = null;
 
+    public static String getParamNames(DFType[] paramTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFType type : paramTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(type.getTypeName());
+        }
+        return "<"+b.toString()+">";
+    }
+
     public DFParamKlass(String name, DFKlass genericKlass,
                         DFMapType[] mapTypes, DFType[] paramTypes) {
         super(name, genericKlass);
@@ -33,17 +44,6 @@ public class DFParamKlass extends DFKlass {
             assert paramTypes[i] != null;
             _typeMap.put(mapTypes[i], paramTypes[i]);
         }
-    }
-
-    public static String getParamKlassName(String name, DFType[] paramTypes) {
-        StringBuilder b = new StringBuilder();
-        for (DFType type : paramTypes) {
-            if (0 < b.length()) {
-                b.append(",");
-            }
-            b.append(type.getTypeName());
-        }
-        return name+"<"+b.toString()+">";
     }
 
     public DFKlass getGeneric() {
