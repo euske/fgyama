@@ -2390,7 +2390,7 @@ public class Java2DF {
 	for (DFKlass klass : klasses) {
 	    for (DFMethod method : klass.getMethods()) {
 		try {
-		    method.buildFrame();
+		    method.buildScopeAndFrame();
                     queue.add(method);
 		} catch (UnsupportedSyntax e) {
                     Logger.error("Pass4: Unsupported at", key, e.name, "("+e.getAstName()+")");

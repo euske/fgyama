@@ -25,7 +25,7 @@ public class DFKlass extends DFType {
     private DFTypeSpace _typeSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
-    private DFVarScope _klassScope;
+    private DFKlassScope _klassScope;
 
     private DFMapType[] _mapTypes = null;
     private List<DFParamKlass> _paramKlasses =
@@ -680,6 +680,7 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void build(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
+        _klassScope.build();
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
@@ -727,8 +728,8 @@ public class DFKlass extends DFType {
                     methodSpace, name, callStyle,
                     new DFMethodType(argTypes, returnType));
 		if (decl.getBody() != null) {
+		    method.setSrcScope(this.getMethodScope(decl));
 		    method.setFinder(finder);
-		    method.setScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
                 if (decl.isConstructor()) {
@@ -747,8 +748,8 @@ public class DFKlass extends DFType {
                 _initializer = new DFMethod(
 		    this, null, "<clinit>", DFCallStyle.Initializer,
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
+		_initializer.setSrcScope(this.getMethodScope(initializer));
 		_initializer.setFinder(finder);
-		_initializer.setScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);
 
             } else {
@@ -764,11 +765,14 @@ public class DFKlass extends DFType {
 
         public DFKlassScope(DFVarScope parent, String id) {
             super(parent, id);
-            _this = this.addRef("#this", DFKlass.this, null);
         }
 
         public String getFullName() {
             return DFKlass.this.getFullName();
+        }
+
+        public void build() {
+            _this = this.addRef("#this", DFKlass.this, null);
         }
 
         @Override

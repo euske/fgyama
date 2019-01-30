@@ -20,10 +20,11 @@ public class DFMethod implements Comparable<DFMethod> {
     private SortedSet<DFMethod> _callers =
         new TreeSet<DFMethod>();
 
+    private DFLocalVarScope _srcScope = null;
     private DFTypeFinder _finder = null;
-    private DFLocalVarScope _scope = null;
     private ASTNode _ast = null;
 
+    private DFLocalVarScope _scope = null;
     private DFFrame _frame = null;
 
     private List<DFOverride> _overrides = new ArrayList<DFOverride>();
@@ -64,13 +65,14 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     private DFMethod(
-        DFMethod method, DFMethodType methodType, DFOverride[] overrides) {
-        _klass = method._klass;
-        _childSpace = method._childSpace;
+        DFMethod method, DFKlass paramKlass,
+        DFMethodType methodType, DFOverride[] overrides) {
+        _klass = paramKlass;
+        _childSpace = method._childSpace; // XXX copy()
         _name = method._name;
         _callStyle = method._callStyle;
+        _srcScope = method._srcScope;
         _finder = method._finder;
-        _scope = method._scope;
         _ast = method._ast;
         _methodType = methodType;
 	for (DFOverride override : overrides) {
@@ -138,21 +140,21 @@ public class DFMethod implements Comparable<DFMethod> {
         return methods;
     }
 
-    public DFMethod parameterize(Map<DFMapType, DFType> typeMap) {
+    public DFMethod parameterize(
+        DFParamKlass paramKlass, Map<DFMapType, DFType> typeMap) {
+        // XXX change TypeFinder
         DFMethodType methodType = _methodType.parameterize(typeMap);
         boolean changed = (_methodType != methodType);
         DFOverride[] overrides = new DFOverride[_overrides.size()];
         for (int i = 0; i < overrides.length; i++) {
             DFOverride override = _overrides.get(i);
 	    DFMethod method0 = override.method;
-            DFMethod method1 = method0.parameterize(typeMap);
+            DFMethod method1 = method0.parameterize(paramKlass, typeMap);
             changed = changed || (method0 != method1);
             overrides[i] = new DFOverride(method1, override.level);
         }
-        if (changed) {
-            return new DFMethod(this, methodType, overrides);
-        }
-        return this;
+        if (!changed) return this;
+        return new DFMethod(this, paramKlass, methodType, overrides);
     }
 
     public void addCaller(DFMethod method) {
@@ -170,11 +172,8 @@ public class DFMethod implements Comparable<DFMethod> {
         return new DFTypeFinder(_finder, _childSpace);
     }
 
-    public void setScope(DFLocalVarScope scope) {
-        _scope = scope;
-    }
-    public DFLocalVarScope getScope() {
-        return _scope;
+    public void setSrcScope(DFLocalVarScope srcScope) {
+        _srcScope = srcScope;
     }
 
     public void setTree(ASTNode ast) {
@@ -184,15 +183,19 @@ public class DFMethod implements Comparable<DFMethod> {
         return _ast;
     }
 
+    public DFLocalVarScope getScope() {
+        return _scope;
+    }
     public DFFrame getFrame() {
         return _frame;
     }
 
-    public void buildFrame()
+    public void buildScopeAndFrame()
         throws UnsupportedSyntax, TypeNotFound {
 	if (_ast == null) return;
+	assert _srcScope != null;
 	assert _finder != null;
-	assert _scope != null;
+        _scope = new DFLocalVarScope(_srcScope);
 	if (_ast instanceof MethodDeclaration) {
 	    _scope.build(_finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof Initializer) {

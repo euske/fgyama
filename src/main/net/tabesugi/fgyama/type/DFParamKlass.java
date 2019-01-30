@@ -76,7 +76,7 @@ public class DFParamKlass extends DFKlass {
 	if (_paramMethods == null) {
 	    _paramMethods = new ArrayList<DFMethod>();
 	    for (DFMethod method0 : _genericKlass.getMethods()) {
-		DFMethod method1 = method0.parameterize(_typeMap);
+		DFMethod method1 = method0.parameterize(this, _typeMap);
 		_paramMethods.add(method1);
 	    }
 	}
