@@ -142,7 +142,8 @@ def main(argv):
             if graph.src not in srcmap:
                 fid = len(srcmap)
                 srcmap[graph.src] = fid
-                fp.write('+SOURCE %d %s\n' % (fid, graph.src))
+                src = (fid, graph.src)
+                fp.write('+SOURCE %r\n' % (src,))
             graphs.append(graph)
             gid2graph[graph.name] = graph
 
@@ -183,7 +184,7 @@ def main(argv):
         done = Cons(n1, done)
         if n1.kind in ('call', 'new'):
             args = set( label for label in n1.inputs.keys()
-                        if label.startswith('#arg') )
+                        if label.startswith('#arg') or label == '#this' )
             funcs = n1.data.split(' ')
             for gid in funcs[:maxoverrides]:
                 if gid not in gid2graph: continue
@@ -205,24 +206,24 @@ def main(argv):
         return
 
     def getsrc(node):
-        if node.ast is None: return ''
+        if node.ast is None: return None
         src = node.graph.src
         fid = srcmap[src]
         (_,s,e) = node.ast
-        return (',%s,%s,%s' % (fid, s, e))
+        return (fid, s, e)
 
     nfeats = 0
     for (gid,funcalls) in caller.items():
         if '.toString()' in gid: continue
         if '.equals(L' in gid: continue
         if len(funcalls) < mincall: continue
-        name = gid+',,,'
+        src = None
         if gid in gid2graph:
             graph = gid2graph[gid]
             if graph.ast is not None:
                 fid = srcmap[graph.src]
                 (_,s,e) = graph.ast
-                name = ('%s,%s,%s,%s' % (gid, fid, s, e))
+                src = (fid, s, e)
         fp.write('# gid: %r\n' % gid)
         for funcall in funcalls:
             fp.write('#   at %r\n' % funcall.graph.name)
@@ -232,9 +233,10 @@ def main(argv):
                 trace(out, v1, label, n)
             for feats in v1.enum(+1):
                 if feats is None: continue
-                a = reversed(list(feats))
-                fp.write('+PATH %s forw %s\n' %
-                          (name, ' '.join( feat+getsrc(n) for (feat,n) in a )))
+                a = list(feats)
+                a.append((None,funcall))
+                data = (gid, src, [ (feat,getsrc(n)) for (feat,n) in reversed(a) ])
+                fp.write('+FORW %r\n' % (data,))
                 nfeats += 1
     print('Features: %r' % nfeats, file=sys.stderr)
 

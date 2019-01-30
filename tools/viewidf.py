@@ -106,11 +106,11 @@ def main(argv):
     import getopt
     def usage():
         print('usage: %s [-o output] [-H] [-B basedir] '
-              '[-t threshold] [-m maxresults] [-c encoding] '
+              '[-t threshold] [-m maxresults] [-M maxlength] [-c encoding] '
               'out.idf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:m:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:m:M:c:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -119,35 +119,16 @@ def main(argv):
     encoding = None
     threshold = 10
     maxresults = 100
+    maxlength = 200
     for (k, v) in opts:
         if k == '-o': output = v
         elif k == '-H': html = True
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-t': threshold = float(v)
         elif k == '-m': maxresults = int(v)
+        elif k == '-M': maxlength = int(v)
         elif k == '-c': encoding = v
     if not args: return usage()
-
-    def splitfeat(v):
-        (v,_,v4) = v.rpartition(',')
-        (v,_,v3) = v.rpartition(',')
-        (v1,_,v2) = v.rpartition(',')
-        if v2:
-            return (v1, (srcmap[v2],int(v3),int(v4)))
-        else:
-            return (v1, None)
-    def getfeat(v):
-        # strip ast
-        (v,_,v4) = v.rpartition(',')
-        (v,_,v3) = v.rpartition(',')
-        (v1,_,v2) = v.rpartition(',')
-        return v1
-    def getloc(v):
-        (v,_,v3) = v.rpartition(',')
-        (v,_,v2) = v.rpartition(',')
-        (v,_,v1) = v.rpartition(',')
-        if not v1: return None
-        return (srcmap[v1],int(v2),int(v3))
 
     paths = 0
     srcmap = {}
@@ -156,22 +137,22 @@ def main(argv):
     for line in fileinput.input(args):
         line = line.strip()
         if not line.startswith('+'): continue
-        f = line.split(' ')
-        if f[0] == '+SOURCE':
-            srcmap[f[1]] = f[2]
-        elif f[0] == '+PATH' and f[2] == 'forw':
+        (k,_,v) = line.partition(' ')
+        if k == '+SOURCE':
+            (fid,name) = eval(v)
+            srcmap[fid] = name
+        elif k == '+FORW':
             paths += 1
-            (func,loc0) = splitfeat(f[1])
-            locs = [ getloc(x) for x in f[3:] ]
+            (gid,loc0,feats) = eval(v)
+            locs = [ loc for (_,loc) in feats ]
             if loc0 is not None:
-                locs = [loc0] + locs
-            feats = [ getfeat(x) for x in f[3:] ]
+                locs.insert(0, loc0)
             tree = root
-            for (i,feat) in enumerate(feats):
+            for (i,(feat,_)) in enumerate(feats):
                 if feat not in featmap:
                     featmap[feat] = 0
                 featmap[feat] += 1
-                tree = tree.add(feat, func, locs[:i+2])
+                tree = tree.add(feat, gid, locs[:i+2])
     #
     featall = sum(featmap.values())
     for k in featmap.keys():
@@ -227,9 +208,10 @@ def main(argv):
             nodes = {}
             for (i,loc) in enumerate(locs):
                 if loc is None: continue
-                (name,start,length) = loc
+                (fid,start,length) = loc
+                name = srcmap[fid]
                 if i == 0:
-                    length = max(length, 200)
+                    length = min(length, maxlength)
                 src = srcdb.get(name)
                 if src in nodes:
                     a = nodes[src]
