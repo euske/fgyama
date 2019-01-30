@@ -62,37 +62,29 @@
             <link label="@basic_funcs/.z" src="Nf2e83a28_14"/>
             <ast length="6" start="199" type="32"/>
           </node>
-          <node id="Nf2e83a28_15" kind="assign" ref="#this" type="Lbasic_funcs;">
+          <node id="Nf2e83a28_15" kind="assign" ref="@basic_funcs/.y" type="I">
             <link label="update" src="Nf2e83a28_12"/>
             <ast length="6" start="199" type="32"/>
           </node>
-          <node id="Nf2e83a28_16" kind="assign" ref="@basic_funcs/.y" type="I">
+          <node flow="out" id="Nf2e83a28_16" kind="assign" ref="@basic_funcs/.z" type="I">
             <link label="update" src="Nf2e83a28_12"/>
             <ast length="6" start="199" type="32"/>
           </node>
-          <node flow="out" id="Nf2e83a28_17" kind="assign" ref="@basic_funcs/.z" type="I">
-            <link label="update" src="Nf2e83a28_12"/>
-            <ast length="6" start="199" type="32"/>
-          </node>
-          <node id="Nf2e83a28_18" kind="assign" ref="$basic_funcs.main.b0/$c" type="I">
+          <node id="Nf2e83a28_17" kind="assign" ref="$basic_funcs.main.b0/$c" type="I">
             <link src="Nf2e83a28_12"/>
             <ast length="10" start="195" type="59"/>
           </node>
-          <node id="Nf2e83a28_19" kind="fieldref" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link src="Nf2e83a28_20"/>
+          <node id="Nf2e83a28_18" kind="fieldref" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
+            <link src="Nf2e83a28_19"/>
             <ast length="10" start="215" type="40"/>
           </node>
-          <node id="Nf2e83a28_21" kind="ref" ref="$basic_funcs.main.b0/$c" type="I">
-            <link src="Nf2e83a28_18"/>
+          <node id="Nf2e83a28_20" kind="ref" ref="$basic_funcs.main.b0/$c" type="I">
+            <link src="Nf2e83a28_17"/>
             <ast length="1" start="234" type="42"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(I)V" id="Nf2e83a28_22" kind="call" type="V">
-            <link label="#arg0" src="Nf2e83a28_21"/>
-            <link label="#this" src="Nf2e83a28_19"/>
-            <ast length="21" start="215" type="32"/>
-          </node>
-          <node id="Nf2e83a28_23" kind="assign" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="update" src="Nf2e83a28_22"/>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="Nf2e83a28_21" kind="call" type="V">
+            <link label="#arg0" src="Nf2e83a28_20"/>
+            <link label="#this" src="Nf2e83a28_18"/>
             <ast length="21" start="215" type="32"/>
           </node>
         </scope>
@@ -106,8 +98,8 @@
         <node flow="in" id="Nf2e83a28_10" ref="#this" type="Lbasic_funcs;"/>
         <node flow="in" id="Nf2e83a28_13" ref="@basic_funcs/.y" type="I"/>
         <node flow="in" id="Nf2e83a28_14" ref="@basic_funcs/.z" type="I"/>
-        <node flow="in" id="Nf2e83a28_20" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;"/>
-        <node flow="in" id="Nf2e83a28_24" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node flow="in" id="Nf2e83a28_19" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nf2e83a28_22" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
       </scope>
     </method>
     <method name="Lbasic_funcs;.moo(I)I" style="static">
@@ -118,65 +110,57 @@
         <scope name="basic_funcs.moo.b0">
           <scope name="basic_funcs.moo.b0.b0">
             <node data="Lbasic_funcs;.foo()I" id="Ndd66d29_11" kind="call" type="I">
-              <link label="#this" src="Ndd66d29_31"/>
-              <link label="@basic_funcs/.y" src="Ndd66d29_32"/>
+              <link label="#this" src="Ndd66d29_29"/>
+              <link label="@basic_funcs/.y" src="Ndd66d29_30"/>
               <ast length="5" start="337" type="32"/>
             </node>
-            <node id="Ndd66d29_13" kind="assign" ref="#this" type="Lbasic_funcs;">
+            <node id="Ndd66d29_13" kind="assign" ref="@basic_funcs/.y" type="I">
               <link label="update" src="Ndd66d29_11"/>
               <ast length="5" start="337" type="32"/>
             </node>
-            <node id="Ndd66d29_14" kind="assign" ref="@basic_funcs/.y" type="I">
-              <link label="update" src="Ndd66d29_11"/>
-              <ast length="5" start="337" type="32"/>
-            </node>
-            <node id="Ndd66d29_15" kind="output" ref="#return" type="I">
+            <node id="Ndd66d29_14" kind="output" ref="#return" type="I">
               <link src="Ndd66d29_11"/>
               <ast length="13" start="330" type="41"/>
             </node>
           </scope>
           <scope name="basic_funcs.moo.b0.b1">
-            <node id="Ndd66d29_18" kind="ref" ref="$basic_funcs.moo/$x" type="I">
+            <node id="Ndd66d29_17" kind="ref" ref="$basic_funcs.moo/$x" type="I">
               <link src="Ndd66d29_2"/>
               <ast length="1" start="384" type="42"/>
             </node>
-            <node data="1" id="Ndd66d29_20" kind="const" type="I">
+            <node data="1" id="Ndd66d29_19" kind="const" type="I">
               <ast length="1" start="386" type="34"/>
             </node>
-            <node data="-" id="Ndd66d29_21" kind="infix" type="I">
-              <link label="L" src="Ndd66d29_18"/>
-              <link label="R" src="Ndd66d29_20"/>
+            <node data="-" id="Ndd66d29_20" kind="infix" type="I">
+              <link label="L" src="Ndd66d29_17"/>
+              <link label="R" src="Ndd66d29_19"/>
               <ast length="3" start="384" type="27"/>
             </node>
-            <node data="Lbasic_funcs;.moo(I)I" id="Ndd66d29_22" kind="call" type="I">
-              <link label="#arg0" src="Ndd66d29_21"/>
-              <link label="#this" src="Ndd66d29_31"/>
-              <link label="@basic_funcs/.y" src="Ndd66d29_32"/>
+            <node data="Lbasic_funcs;.moo(I)I" id="Ndd66d29_21" kind="call" type="I">
+              <link label="#arg0" src="Ndd66d29_20"/>
+              <link label="#this" src="Ndd66d29_29"/>
+              <link label="@basic_funcs/.y" src="Ndd66d29_30"/>
               <link label="@basic_funcs/.z" src="Ndd66d29_3"/>
               <ast length="8" start="380" type="32"/>
             </node>
-            <node id="Ndd66d29_25" kind="assign" ref="#this" type="Lbasic_funcs;">
-              <link label="update" src="Ndd66d29_22"/>
+            <node id="Ndd66d29_24" kind="assign" ref="@basic_funcs/.y" type="I">
+              <link label="update" src="Ndd66d29_21"/>
               <ast length="8" start="380" type="32"/>
             </node>
-            <node id="Ndd66d29_26" kind="assign" ref="@basic_funcs/.y" type="I">
-              <link label="update" src="Ndd66d29_22"/>
+            <node id="Ndd66d29_25" kind="assign" ref="@basic_funcs/.z" type="I">
+              <link label="update" src="Ndd66d29_21"/>
               <ast length="8" start="380" type="32"/>
             </node>
-            <node id="Ndd66d29_27" kind="assign" ref="@basic_funcs/.z" type="I">
-              <link label="update" src="Ndd66d29_22"/>
-              <ast length="8" start="380" type="32"/>
-            </node>
-            <node data="2" id="Ndd66d29_28" kind="const" type="I">
+            <node data="2" id="Ndd66d29_26" kind="const" type="I">
               <ast length="1" start="389" type="34"/>
             </node>
-            <node data="+" id="Ndd66d29_29" kind="infix" type="I">
-              <link label="L" src="Ndd66d29_22"/>
-              <link label="R" src="Ndd66d29_28"/>
+            <node data="+" id="Ndd66d29_27" kind="infix" type="I">
+              <link label="L" src="Ndd66d29_21"/>
+              <link label="R" src="Ndd66d29_26"/>
               <ast length="10" start="380" type="27"/>
             </node>
-            <node id="Ndd66d29_30" kind="output" ref="#return" type="I">
-              <link src="Ndd66d29_29"/>
+            <node id="Ndd66d29_28" kind="output" ref="#return" type="I">
+              <link src="Ndd66d29_27"/>
               <ast length="18" start="373" type="41"/>
             </node>
           </scope>
@@ -204,31 +188,31 @@
             <link label="R" src="Ndd66d29_8"/>
             <ast length="6" start="308" type="27"/>
           </node>
-          <node id="Ndd66d29_33" kind="join" ref="#return" type="I">
+          <node id="Ndd66d29_31" kind="join" ref="#return" type="I">
             <link label="cond" src="Ndd66d29_9"/>
-            <link label="false" src="Ndd66d29_30"/>
-            <link label="true" src="Ndd66d29_15"/>
+            <link label="false" src="Ndd66d29_28"/>
+            <link label="true" src="Ndd66d29_14"/>
             <ast length="97" start="304" type="25"/>
           </node>
-          <node id="Ndd66d29_34" kind="join" ref="#return" type="I">
+          <node id="Ndd66d29_32" kind="join" ref="#return" type="I">
             <link label="cond" src="Ndd66d29_9"/>
-            <link label="false" src="Ndd66d29_33"/>
-            <link label="true" src="Ndd66d29_15"/>
+            <link label="false" src="Ndd66d29_31"/>
+            <link label="true" src="Ndd66d29_14"/>
           </node>
-          <node id="Ndd66d29_35" kind="join" ref="@basic_funcs/.z" type="I">
+          <node id="Ndd66d29_33" kind="join" ref="@basic_funcs/.z" type="I">
             <link label="cond" src="Ndd66d29_9"/>
             <link label="false" src="Ndd66d29_3"/>
             <link label="true" src="Ndd66d29_3"/>
           </node>
-          <node flow="out" id="Ndd66d29_36" kind="join" ref="#return" type="I">
+          <node flow="out" id="Ndd66d29_34" kind="join" ref="#return" type="I">
             <link label="cond" src="Ndd66d29_9"/>
-            <link label="false" src="Ndd66d29_30"/>
-            <link label="true" src="Ndd66d29_34"/>
+            <link label="false" src="Ndd66d29_28"/>
+            <link label="true" src="Ndd66d29_32"/>
           </node>
-          <node flow="out" id="Ndd66d29_37" kind="join" ref="@basic_funcs/.z" type="I">
+          <node flow="out" id="Ndd66d29_35" kind="join" ref="@basic_funcs/.z" type="I">
             <link label="cond" src="Ndd66d29_9"/>
-            <link label="false" src="Ndd66d29_27"/>
-            <link label="true" src="Ndd66d29_35"/>
+            <link label="false" src="Ndd66d29_25"/>
+            <link label="true" src="Ndd66d29_33"/>
           </node>
         </scope>
         <node flow="in" id="Ndd66d29_1" kind="input" ref="#arg0" type="I">
@@ -239,8 +223,8 @@
           <ast length="5" start="271" type="44"/>
         </node>
         <node flow="in" id="Ndd66d29_5" ref="@basic_funcs/.z" type="I"/>
-        <node flow="in" id="Ndd66d29_31" ref="#this" type="Lbasic_funcs;"/>
-        <node flow="in" id="Ndd66d29_32" ref="@basic_funcs/.y" type="I"/>
+        <node flow="in" id="Ndd66d29_29" ref="#this" type="Lbasic_funcs;"/>
+        <node flow="in" id="Ndd66d29_30" ref="@basic_funcs/.y" type="I"/>
       </scope>
     </method>
     <method name="Lbasic_funcs;.foo()I" style="static">

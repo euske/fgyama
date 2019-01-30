@@ -20,17 +20,9 @@
             <link label="#this" src="Nede5cb52_3"/>
             <ast length="6" start="147" type="32"/>
           </node>
-          <node id="Nede5cb52_6" kind="assign" ref="#this" type="Lbasic_staticimport;">
-            <link label="update" src="Nede5cb52_5"/>
-            <ast length="6" start="147" type="32"/>
-          </node>
-          <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
+          <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_6" kind="call" type="V">
             <link label="#arg0" src="Nede5cb52_5"/>
             <link label="#this" src="Nede5cb52_1"/>
-            <ast length="19" start="135" type="32"/>
-          </node>
-          <node id="Nede5cb52_8" kind="assign" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
-            <link label="update" src="Nede5cb52_7"/>
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>
