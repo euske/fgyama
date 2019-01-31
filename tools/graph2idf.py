@@ -2,13 +2,13 @@
 import sys
 from graph import get_graphs
 
-IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output'])
+IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output', 'begin', 'repeat'])
 def getfeat(label, node):
     if node.kind in IGNORED:
         return None
     elif node.kind == 'assignop' and node.data == '=':
         return None
-    elif node.kind == 'join' and label != 'cond':
+    elif node.kind in ('join','end') and label != 'cond':
         return None
     elif node.ref == '#exception':
         return None
@@ -139,6 +139,7 @@ def main(argv):
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
         for graph in get_graphs(path):
+            if graph.style == 'initializer': continue
             if graph.src not in srcmap:
                 fid = len(srcmap)
                 srcmap[graph.src] = fid
@@ -147,7 +148,9 @@ def main(argv):
             graphs.append(graph)
             gid2graph[graph.name] = graph
 
-    print('Graphs: %r' % len(graphs), file=sys.stderr)
+    print('Read: %d sources, %d graphs' %
+          (len(srcmap), len(graphs)),
+          file=sys.stderr)
 
     # Enumerate caller/callee relationships.
     caller = {}
@@ -212,7 +215,7 @@ def main(argv):
         (_,s,e) = node.ast
         return (fid, s, e)
 
-    nfeats = 0
+    nents = 0
     for (gid,funcalls) in caller.items():
         if '.toString()' in gid: continue
         if '.equals(L' in gid: continue
@@ -225,6 +228,8 @@ def main(argv):
                 (_,s,e) = graph.ast
                 src = (fid, s, e)
         fp.write('# gid: %r\n' % gid)
+        data = (gid, src)
+        fp.write('+FUNC %r\n' % (data,))
         for funcall in funcalls:
             fp.write('#   at %r\n' % funcall.graph.name)
             out = {}
@@ -235,10 +240,11 @@ def main(argv):
                 if feats is None: continue
                 a = list(feats)
                 a.append((None,funcall))
-                data = (gid, src, [ (feat,getsrc(n)) for (feat,n) in reversed(a) ])
+                a.reverse()
+                data = [ (feat,getsrc(n)) for (feat,n) in a ]
                 fp.write('+FORW %r\n' % (data,))
-                nfeats += 1
-    print('Features: %r' % nfeats, file=sys.stderr)
+                nents += 1
+    print('Ents: %r' % nents, file=sys.stderr)
 
     if fp is not sys.stdout:
         fp.close()

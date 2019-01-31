@@ -3,6 +3,40 @@ import sys
 from math import log
 from srcdb import SourceDB
 
+
+##  FeatTree
+##
+class FeatTree:
+
+    def __init__(self, parent=None, feat=None):
+        if parent is None:
+            self.level = 0
+        else:
+            self.level = parent.level+1
+        self.parent = parent
+        self.feat = feat
+        self.matches = {}
+        self._d = {}
+        return
+
+    def getchildren(self):
+        return self._d.items()
+
+    def getpath(self):
+        while self.feat is not None:
+            yield self.feat
+            self = self.parent
+        return
+
+    def add(self, feat, key, value):
+        if feat in self._d:
+            t = self._d[feat]
+        else:
+            t = self._d[feat] = FeatTree(self, feat)
+        t.matches[key] = value
+        return t
+
+
 def q(s):
     return (s.replace('&','&amp;')
             .replace('>','&gt;')
@@ -16,16 +50,16 @@ pre { margin: 1em; border: 1px solid gray;}
 h2 { border-bottom: 2px solid black; color: red; }
 h3 { border-bottom: 1px solid black; }
 .src { font-size: 75%; font-weight: bold; margin: 1em; }
-.p0 { background:#ffff00; color:black; }
-.p1 { background:#00ffff; color:black; }
-.p2 { background:#88ff88; color:black; }
-.p3 { background:#ff88ff; color:black; }
-.p4 { background:#8888ff; color:black; }
-.p5 { background:#ff0000; color:white; }
-.p6 { background:#008800; color:white; }
-.p7 { background:#0000ff; color:white; }
-.p8 { background:#004488; color:white; }
-.p9 { background:#884400; color:white; }
+.p1 { background:#ffff00; color:black; }
+.p2 { background:#00ffff; color:black; }
+.p3 { background:#88ff88; color:black; }
+.p4 { background:#ff88ff; color:black; }
+.p5 { background:#8888ff; color:black; }
+.p6 { background:#ff0000; color:white; }
+.p7 { background:#008800; color:white; }
+.p8 { background:#0000ff; color:white; }
+.p9 { background:#004488; color:white; }
+.p10 { background:#884400; color:white; }
 </style>
 <script>
 function toggle(id) {
@@ -59,7 +93,7 @@ def show_html(fp, src, url, ranges, ncontext=3):
     return
 
 def show_text(fp, src, ranges, ncontext=3):
-    fp.write('#\n', src.name)
+    fp.write('# %s\n' % src.name)
     for (lineno,line) in src.show(ranges, ncontext=ncontext):
         if lineno is None:
             fp.write(line.rstrip()+'\n')
@@ -67,39 +101,6 @@ def show_text(fp, src, ranges, ncontext=3):
             fp.write('%4d: %s\n' % (lineno, line.rstrip()))
     fp.write('\n')
     return
-
-class FeatTree:
-
-    def __init__(self, parent=None, feat=None):
-        if parent is None:
-            self.level = 0
-        else:
-            self.level = parent.level+1
-        self.parent = parent
-        self.feat = feat
-        self.matches = {}
-        self._d = {}
-        return
-
-    def feats(self):
-        a = []
-        while self.feat is not None:
-            a.append(self.feat)
-            self = self.parent
-        a.reverse()
-        return a
-
-    def children(self):
-        return self._d.items()
-
-    def add(self, feat, func, locs):
-        if feat in self._d:
-            t = self._d[feat]
-        else:
-            t = self._d[feat] = FeatTree(self, feat)
-        t.matches[func] = locs
-        return t
-
 
 def main(argv):
     import fileinput
@@ -130,9 +131,13 @@ def main(argv):
         elif k == '-c': encoding = v
     if not args: return usage()
 
-    paths = 0
+    # Index features.
     srcmap = {}
-    featmap = {}
+    funcmap = {}
+    usedfuncs = set()
+    featfreq = {}
+    func = None
+    nents = 0
     root = FeatTree()
     for line in fileinput.input(args):
         line = line.strip()
@@ -141,29 +146,36 @@ def main(argv):
         if k == '+SOURCE':
             (fid,name) = eval(v)
             srcmap[fid] = name
+        elif k == '+FUNC':
+            (func,src) = eval(v)
+            funcmap[func] = src
         elif k == '+FORW':
-            paths += 1
-            (gid,loc0,feats) = eval(v)
-            locs = [ loc for (_,loc) in feats ]
-            if loc0 is not None:
-                locs.insert(0, loc0)
+            assert func is not None
+            usedfuncs.add(func)
+            nents += 1
+            feats = eval(v)
             tree = root
+            locs = [ loc for (_,loc) in feats ]
             for (i,(feat,_)) in enumerate(feats):
-                if feat not in featmap:
-                    featmap[feat] = 0
-                featmap[feat] += 1
-                tree = tree.add(feat, gid, locs[:i+2])
+                if i == 0: continue
+                if feat not in featfreq:
+                    featfreq[feat] = 0
+                featfreq[feat] += 1
+                tree = tree.add(feat, func, (locs,i+1))
     #
-    featall = sum(featmap.values())
-    for k in featmap.keys():
-        featmap[k] = log(featall/featmap[k])
-    print('Read: %d paths, %d sources, %d feats (all: %d)' %
-          (paths, len(srcmap), len(featmap), featall), file=sys.stderr)
-    #
+    featall = sum(featfreq.values())
+    print('Read: %d ents, %d sources, %d funcs, %d feats (all: %d)' %
+          (nents, len(srcmap), len(usedfuncs), len(featfreq), featall),
+          file=sys.stderr)
+    featscore = {}
+    for (k,v) in featfreq.items():
+        featscore[k] = log(featall/v)
+
+    # Discover similars.
     results = {}
     def traverse(tree, score0=0):
-        for (feat,st) in tree.children():
-            score1 = score0 + featmap.get(feat, 0)
+        for (feat,st) in tree.getchildren():
+            score1 = score0 + featscore.get(feat, 0)
             if threshold <= score1 and 2 <= len(st.matches):
                 funcs = tuple(sorted(st.matches.keys()))
                 if funcs in results:
@@ -181,6 +193,7 @@ def main(argv):
         results = results[:maxresults]
     print('Results: %d' % len(results), file=sys.stderr)
 
+    # Output results.
     if output is None:
         fp = sys.stdout
     else:
@@ -189,13 +202,15 @@ def main(argv):
         show_html_headers(fp)
     mid = 0
     for (score,tree) in results:
-        feats = tree.feats()
+        feats = list(tree.getpath())
+        feats.reverse()
         if html:
             fp.write('<h2>[%.3f] <code>%s</code> (%d)</h2>\n' %
                      (score, q(repr(feats)), len(tree.matches)))
         else:
             fp.write('! %.3f %r %d\n' % (score, feats, len(tree.matches)))
-        for (func,locs) in tree.matches.items():
+        for (func,(locs,n)) in tree.matches.items():
+            locs = locs[:n]
             if html:
                 mid += 1
                 fp.write('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
@@ -206,18 +221,23 @@ def main(argv):
             if html:
                 fp.write('<div class=result hidden id="M%d">\n' % mid)
             nodes = {}
-            for (i,loc) in enumerate(locs):
-                if loc is None: continue
+            def add(loc, i, maxlength):
                 (fid,start,length) = loc
                 name = srcmap[fid]
-                if i == 0:
-                    length = min(length, maxlength)
+                length = min(length, maxlength)
                 src = srcdb.get(name)
                 if src in nodes:
                     a = nodes[src]
                 else:
                     a = nodes[src] = []
                 a.append((start, start+length, i))
+                return
+            loc = funcmap[func]
+            if loc is not None:
+                add(loc, 0, maxlength)
+            for loc in locs:
+                if loc is not None:
+                    add(loc, i+1, sys.maxsize)
             for (src,ranges) in nodes.items():
                 if html:
                     show_html(fp, src, src.name, ranges)
@@ -229,7 +249,6 @@ def main(argv):
             fp.write('<hr>\n')
         else:
             fp.write('\n')
-
     if fp is not sys.stdout:
         fp.close()
     return 0
