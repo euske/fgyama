@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import io
 import sys
 from subprocess import Popen, PIPE
 from graph import DFGraph, DFNode
@@ -56,41 +57,63 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     out.write(h+'}\n')
     return
 
-def run_dot(graph, type='svg'):
+def run_dot(graphs, type='svg'):
     args = ['dot', '-T'+type]
-    print('run_dot: %r' % args)
+    print('run_dot: %r' % args, file=sys.stderr)
+    data = io.StringIO()
+    for graph in graphs:
+        write_gv(data, graph.root, name=graph.name)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
-    write_gv(p.stdin, graph.root, name=graph.name)
-    p.stdin.close()
-    output = ''
-    for (i,line) in enumerate(p.stdout):
-        if i < 5: continue      # skip the first 5 lines.
-        output += line
-    p.wait()
-    return output
+    (stdout, _) = p.communicate(data.getvalue())
+    a = []
+    lines = []
+    for line in stdout.splitlines():
+        if line.startswith('<?'):
+            if lines:
+                a.append(''.join(lines))
+                lines = []
+            continue
+        lines.append(line)
+    if lines:
+        a.append(''.join(lines))
+    return a
 
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-n name] [-h nid] [graph ...]' % argv[0])
+        print('usage: %s [-H] [-o output] [-n name] [-h nid] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:h:n:')
+        (opts, args) = getopt.getopt(argv[1:], 'Ho:h:n:')
     except getopt.GetoptError:
         return usage()
+    html = False
     output = sys.stdout
     highlight = None
     names = None
     for (k, v) in opts:
-        if k == '-o': output = open(v, 'w')
+        if k == '-H': html = True
+        elif k == '-o': output = open(v, 'w')
         elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
         elif k == '-n': names = [v]
     if not args: return usage()
 
+    graphs = []
     for path in args:
         for graph in get_graphs(path):
             if names and graph.name not in names: continue
+            graphs.append(graph)
+
+    if html:
+        output.write('<!DOCTYPE html><html><body>\n')
+        for data in run_dot(graphs):
+            output.write('<div>\n')
+            output.write(data)
+            output.write('</div><hr>\n')
+        output.write('</body>')
+    else:
+        for graph in graphs:
             write_gv(output, graph.root,
                      highlight=highlight, name=graph.name)
     return 0

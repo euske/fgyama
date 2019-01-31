@@ -12,7 +12,7 @@
   <property name="input" location="${testsDir}/basic_return.java" />
   <property name="out_xml" location="${tmpDir}/out.xml" />
   <property name="out_graph" location="${tmpDir}/out.graph" />
-  <property name="out_gv" location="${tmpDir}/out.gv" />
+  <property name="out_html" location="${tmpDir}/out.html" />
 
   <path id="build.classpath">
     <pathelement location="${libDir}/bcel-6.2.jar"/>
@@ -79,14 +79,10 @@
   <target name="graph" depends="run">
     <exec executable="python" failonerror="true">
       <arg value="${toolsDir}/graph2gv.py" />
+      <arg value="-H" />
       <arg value="-o" />
-      <arg file="${out_gv}" />
+      <arg file="${out_html}" />
       <arg file="${out_graph}" />
-    </exec>
-    <exec executable="dot" failonerror="true">
-      <arg value="-Tsvg" />
-      <arg value="-O" />
-      <arg file="${out_gv}" />
     </exec>
   </target>
 
