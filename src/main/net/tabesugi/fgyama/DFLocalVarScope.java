@@ -65,6 +65,33 @@ public class DFLocalVarScope extends DFVarScope {
         return this.addRef("$"+name.getIdentifier(), type);
     }
 
+    public DFRef lookupArgument(int index)
+        throws VariableNotFound {
+        try {
+            return this.lookupRef("#arg"+index);
+        } catch (VariableNotFound e) {
+            return super.lookupArgument(index);
+        }
+    }
+
+    public DFRef lookupReturn()
+        throws VariableNotFound {
+        try {
+            return this.lookupRef("#return");
+        } catch (VariableNotFound e) {
+            return super.lookupReturn();
+        }
+    }
+
+    public DFRef lookupException()
+        throws VariableNotFound {
+        try {
+            return this.lookupRef("#exception");
+        } catch (VariableNotFound e) {
+            return super.lookupException();
+        }
+    }
+
     /**
      * Lists all the variables defined inside a method.
      */

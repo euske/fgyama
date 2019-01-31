@@ -141,35 +141,24 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFRef lookupArgument(int index)
         throws VariableNotFound {
-        try {
-            return this.lookupRef("#arg"+index);
-        } catch (VariableNotFound e) {
-            if (_parent == null) throw e;
-            return _parent.lookupArgument(index);
-        }
+        assert _parent != null;
+        return _parent.lookupArgument(index);
     }
 
     public DFRef lookupReturn()
         throws VariableNotFound {
-        try {
-            return this.lookupRef("#return");
-        } catch (VariableNotFound e) {
-            if (_parent == null) throw e;
-            return _parent.lookupReturn();
-        }
+        assert _parent != null;
+        return _parent.lookupReturn();
     }
 
     public DFRef lookupException()
         throws VariableNotFound {
-        try {
-            return this.lookupRef("#exception");
-        } catch (VariableNotFound e) {
-            if (_parent == null) throw e;
-            return _parent.lookupException();
-        }
+        assert _parent != null;
+        return _parent.lookupException();
     }
 
     public DFRef lookupArray(DFType type) {
+        assert _parent != null;
         return _parent.lookupArray(type);
     }
 
