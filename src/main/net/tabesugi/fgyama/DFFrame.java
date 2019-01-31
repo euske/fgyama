@@ -350,6 +350,7 @@ public class DFFrame {
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+            this.build(finder, method, scope, syncStmt.getExpression());
             this.build(finder, method, scope, syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {

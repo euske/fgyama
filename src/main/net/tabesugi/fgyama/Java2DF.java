@@ -2044,6 +2044,9 @@ public class Java2DF {
 
         } else if (stmt instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+            processExpression(
+                ctx, typeSpace, graph, finder, scope, frame,
+                syncStmt.getExpression());
             processStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 syncStmt.getBody());

@@ -254,15 +254,13 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
-            SimpleName labelName = labeledStmt.getLabel();
-            String label = labelName.getIdentifier();
             Statement stmt = labeledStmt.getBody();
             this.build(finder, stmt);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            Block block = syncStmt.getBody();
-            this.build(finder, block);
+            this.build(finder, syncStmt.getExpression());
+            this.build(finder, syncStmt.getBody());
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;

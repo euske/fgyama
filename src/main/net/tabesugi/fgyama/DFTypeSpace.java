@@ -366,8 +366,8 @@ public class DFTypeSpace {
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            Block block = syncStmt.getBody();
-            this.build(list, block, klass, parentScope);
+            this.build(list, syncStmt.getExpression(), klass, parentScope);
+            this.build(list, syncStmt.getBody(), klass, parentScope);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
