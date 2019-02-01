@@ -91,27 +91,6 @@ public class DFTypeFinder {
         }
     }
 
-    public DFKlass resolveKlass(Type type)
-        throws TypeNotFound {
-        return this.resolveKlass(resolve(type));
-    }
-
-    public DFKlass resolveKlass(DFType type)
-        throws TypeNotFound {
-        if (type == null) {
-            // treat unknown class as Object.
-            return DFBuiltinTypes.getObjectKlass();
-        } else if (type instanceof DFArrayType) {
-            return DFBuiltinTypes.getArrayKlass();
-        } else if (type instanceof DFKlass) {
-            DFKlass klass = (DFKlass)type;
-            klass.load();
-            return klass;
-        } else {
-            throw new TypeNotFound(type.getTypeName());
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
         throws TypeNotFound {
@@ -136,7 +115,7 @@ public class DFTypeFinder {
             for (int i = 0; i < args.size(); i++) {
                 paramTypes[i] = this.resolve(args.get(i));
             }
-            return genericKlass.getParamKlass(paramTypes);
+            return genericKlass.parameterize(paramTypes);
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
@@ -205,6 +184,27 @@ public class DFTypeFinder {
         } else {
             // ???
             throw new TypeNotFound(type.toString());
+        }
+    }
+
+    public DFKlass resolveKlass(Type type)
+        throws TypeNotFound {
+        return this.resolveKlass(resolve(type));
+    }
+
+    public DFKlass resolveKlass(DFType type)
+        throws TypeNotFound {
+        if (type == null) {
+            // treat unknown class as Object.
+            return DFBuiltinTypes.getObjectKlass();
+        } else if (type instanceof DFArrayType) {
+            return DFBuiltinTypes.getArrayKlass();
+        } else if (type instanceof DFKlass) {
+            DFKlass klass = (DFKlass)type;
+            klass.load();
+            return klass;
+        } else {
+            throw new TypeNotFound(type.getTypeName());
         }
     }
 

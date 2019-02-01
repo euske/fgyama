@@ -144,16 +144,13 @@ public class DFMethod implements Comparable<DFMethod> {
         DFParamKlass paramKlass, Map<DFMapType, DFType> typeMap) {
         // XXX change TypeFinder
         DFMethodType methodType = _methodType.parameterize(typeMap);
-        boolean changed = (_methodType != methodType);
         DFOverride[] overrides = new DFOverride[_overrides.size()];
         for (int i = 0; i < overrides.length; i++) {
             DFOverride override = _overrides.get(i);
 	    DFMethod method0 = override.method;
             DFMethod method1 = method0.parameterize(paramKlass, typeMap);
-            changed = changed || (method0 != method1);
             overrides[i] = new DFOverride(method1, override.level);
         }
-        if (!changed) return this;
         return new DFMethod(this, paramKlass, methodType, overrides);
     }
 

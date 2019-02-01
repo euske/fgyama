@@ -64,7 +64,7 @@ public class JNITypeParser {
 		    _pos = i;
 		    DFKlass klass = finder.lookupKlass(name.replace('/','.'));
                     DFType[] mapTypes = this.getTypes(finder, '<', '>');
-                    klass = klass.getParamKlass(mapTypes);
+                    klass = klass.parameterize(mapTypes);
                     char c3 = _text.charAt(_pos);
                     if (c3 == ';') {
                         _pos++;

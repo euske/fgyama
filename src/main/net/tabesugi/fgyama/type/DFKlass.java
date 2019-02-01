@@ -111,7 +111,8 @@ public class DFKlass extends DFType {
         return ((DFKlass)type).isSubclassOf(this, typeMap);
     }
 
-    public DFParamKlass getParamKlass(DFType[] mapTypes) {
+    public DFParamKlass parameterize(DFType[] mapTypes) {
+        assert _loaded;
         assert this.isParameterized();
         String name = _name + DFParamKlass.getParamNames(mapTypes);
         try {
@@ -625,7 +626,7 @@ public class DFKlass extends DFType {
         // Get superclass.
         try {
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
-            _baseKlass = enumKlass.getParamKlass(new DFType[] { this });
+            _baseKlass = enumKlass.parameterize(new DFType[] { this });
             finder = finder.extend(_baseKlass);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();

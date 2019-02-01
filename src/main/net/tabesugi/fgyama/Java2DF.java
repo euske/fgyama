@@ -2430,29 +2430,39 @@ public class Java2DF {
         }
         DFKlass[] klasses = _klassList.get(key);
         for (DFKlass klass : klasses) {
+            DFMethod init = klass.getInitializer();
+            if (init != null) {
+                try {
+                    Initializer initializer = (Initializer)init.getTree();
+                    DFGraph graph = processMethod(
+                        init, initializer,
+                        initializer.getBody(), null);
+                    exportGraph(graph);
+                } catch (UnsupportedSyntax e) {
+                    Logger.error("Pass5: Unsupported at", key,
+                                 e.name, "("+e.getAstName()+")");
+                } catch (EntityNotFound e) {
+                    Logger.error("Pass5: EntityNotFound at", key,
+                                 "("+e.name+")");
+                    if (0 < _strict) throw e;
+                }
+            }
             for (DFMethod method : klass.getMethods()) {
                 if (method.getFrame() == null) continue;
-                ASTNode ast = method.getTree();
+                MethodDeclaration methodDecl = (MethodDeclaration)method.getTree();
                 try {
-                    if (ast instanceof MethodDeclaration) {
-                        MethodDeclaration methodDecl = (MethodDeclaration)ast;
-                        if (methodDecl.getBody() != null) {
-                            DFGraph graph = processMethod(
-                                method, methodDecl,
-                                methodDecl.getBody(), methodDecl.parameters());
-                            exportGraph(graph);
-                        }
-                    } else if (ast instanceof Initializer) {
-                        Initializer initializer = (Initializer)ast;
+                    if (methodDecl.getBody() != null) {
                         DFGraph graph = processMethod(
-                            klass.getInitializer(), initializer,
-                            initializer.getBody(), null);
+                            method, methodDecl,
+                            methodDecl.getBody(), methodDecl.parameters());
                         exportGraph(graph);
                     }
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass5: Unsupported at", key, e.name, "("+e.getAstName()+")");
+                    Logger.error("Pass5: Unsupported at", key,
+                                 e.name, "("+e.getAstName()+")");
                 } catch (EntityNotFound e) {
-                    Logger.error("Pass5: EntityNotFound at", key, "("+e.name+")");
+                    Logger.error("Pass5: EntityNotFound at", key,
+                                 "("+e.name+")");
                     if (0 < _strict) throw e;
                 }
             }
