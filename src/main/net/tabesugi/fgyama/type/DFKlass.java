@@ -746,8 +746,9 @@ public class DFKlass extends DFType {
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
+                DFTypeSpace methodSpace = _klassSpace.lookupSpace("<clinit>");
                 _initializer = new DFMethod(
-		    this, null, "<clinit>", DFCallStyle.Initializer,
+		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
 		_initializer.setSrcScope(this.getMethodScope(initializer));
 		_initializer.setFinder(finder);

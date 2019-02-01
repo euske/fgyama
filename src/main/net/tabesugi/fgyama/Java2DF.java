@@ -2381,6 +2381,17 @@ public class Java2DF {
         DFKlass[] klasses = _klassList.get(key);
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 	for (DFKlass klass : klasses) {
+            DFMethod init = klass.getInitializer();
+            if (init != null) {
+		try {
+                    init.buildScopeAndFrame();
+		} catch (UnsupportedSyntax e) {
+                    Logger.error("Pass4: Unsupported at", key, e.name, "("+e.getAstName()+")");
+                } catch (EntityNotFound e) {
+                    Logger.error("Pass4: EntityNotFound at", key, "("+e.name+")");
+                    if (0 < _strict) throw e;
+                }
+            }
 	    for (DFMethod method : klass.getMethods()) {
 		try {
 		    method.buildScopeAndFrame();
