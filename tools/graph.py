@@ -167,6 +167,20 @@ class DFNode:
                 yield (label, src)
         return
 
+    def dump(self, d, maxlev, lev=0, label=None):
+        if label is None:
+            print('  '*lev+str(self))
+        else:
+            print('  '*lev+label+':'+str(self))
+        if lev < maxlev:
+            if d < 0:
+                nodes = self.inputs.items()
+            else:
+                nodes = self.outputs
+            for (label,n) in nodes:
+                n.dump(d, maxlev, lev+1, label)
+        return
+
 
 ##  parse_graph
 ##
