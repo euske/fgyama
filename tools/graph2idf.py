@@ -108,29 +108,31 @@ def main(argv):
     import getopt
     def usage():
         print('usage: %s [-d] [-o output] [-m maxlen] [-n mincall] '
-              '[-M maxoverrides] [graph ...]' % argv[0])
+              '[-M maxoverride] [graph ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:m:n:M:')
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxlen = 5
+    maxlen = 50
     mincall = 2
-    maxoverrides = 1
+    maxoverride = 1
+    maxfanout = 100
     output = None
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': output = v
         elif k == '-m': maxlen = int(v)
         elif k == '-n': mincall = int(v)
-        elif k == '-M': maxoverrides = int(v)
+        elif k == '-M': maxoverride = int(v)
     if not args: return usage()
 
     if output is None:
         fp = sys.stdout
     else:
         fp = open(output, 'w')
+    dbg = fp
 
     # Load graphs.
     graphs = []
@@ -153,22 +155,23 @@ def main(argv):
           file=sys.stderr)
 
     # Enumerate caller/callee relationships.
-    caller = {}
+    funcalls = {}
     def addcall(x, y): # (caller, callee)
-        if y in caller:
-            a = caller[y]
+        if y in funcalls:
+            a = funcalls[y]
         else:
-            a = caller[y] = []
+            a = funcalls[y] = []
         if x not in a:
             a.append(x)
         return
     for src in graphs:
         for node in src:
             if node.kind in ('call', 'new'):
-                for gid in node.data.split(' '):
+                funcs = node.data.split(' ')
+                for gid in funcs[:maxoverride]:
                     addcall(node, gid)
 
-    def trace(out, v0, label, n1, length=0, done=None):
+    def trace(out, v0, label, n1, length=0, done=None, caller=None):
         if maxlen <= length: return
         if skiplink(label, n1): return
         if done is not None and n1 in done: return
@@ -176,6 +179,7 @@ def main(argv):
         #print('[trace: %s]' % n1.graph.name, v0, n1, feat)
         if feat is None:
             v1 = v0
+            length += 1
         elif n1 in out:
             v1 = out[n1]
             v0.connect(feat, v1)
@@ -183,29 +187,28 @@ def main(argv):
         else:
             v1 = out[n1] = IPVertex(n1)
             v0.connect(feat, v1)
-            length += 1
+            length += 10
         done = Cons(n1, done)
         if n1.kind in ('call', 'new'):
+            nc = Cons(n1, caller)
             args = set( label for label in n1.inputs.keys()
                         if label.startswith('#arg') or label == '#this' )
             funcs = n1.data.split(' ')
-            for gid in funcs[:maxoverrides]:
+            for gid in funcs[:maxoverride]:
                 if gid not in gid2graph: continue
                 graph = gid2graph[gid]
                 #print(' ', v0, 'funcall', graph, args)
                 for n2 in graph.ins:
                     label = n2.ref
                     if label not in args: continue
-                    trace(out, v0, label, n2, length, done)
-        for (label, n2) in n1.outputs:
-            trace(out, v1, label, n2, length, done)
+                    trace(out, v0, label, n2, length, done, nc)
+        for (label, n2) in n1.outputs[:maxfanout]:
+            trace(out, v1, label, n2, length, done, caller)
         if n1.kind == 'output':
-            gid = n1.graph.name
-            if gid in caller:
-                #print(' ', v0, 'return', gid)
-                for nc in caller[gid]:
-                    for (label, n2) in nc.outputs:
-                        trace(out, v1, label, n2, length, done)
+            if caller is not None:
+                #print(' ', v0, 'return', n1.graph.name)
+                for (label, n2) in caller.car.outputs[:maxfanout]:
+                    trace(out, v1, label, n2, length, done, caller.cdr)
         return
 
     def getsrc(node):
@@ -216,10 +219,10 @@ def main(argv):
         return (fid, s, e)
 
     nents = 0
-    for (gid,funcalls) in caller.items():
+    for (gid,nodes) in funcalls.items():
         if '.toString()' in gid: continue
         if '.equals(L' in gid: continue
-        if len(funcalls) < mincall: continue
+        if len(nodes) < mincall: continue
         src = None
         if gid in gid2graph:
             graph = gid2graph[gid]
@@ -227,11 +230,11 @@ def main(argv):
                 fid = srcmap[graph.src]
                 (_,s,e) = graph.ast
                 src = (fid, s, e)
-        fp.write('# gid: %r\n' % gid)
+        dbg.write('# gid: %r\n' % gid)
         data = (gid, src)
         fp.write('+FUNC %r\n' % (data,))
-        for funcall in funcalls:
-            fp.write('#   at %r\n' % funcall.graph.name)
+        for funcall in nodes:
+            dbg.write('#   at %r\n' % funcall.graph.name)
             out = {}
             v1 = IPVertex(funcall)
             for (label,n) in funcall.outputs:
