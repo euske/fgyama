@@ -106,12 +106,12 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-H] [-B basedir] '
-              '[-t threshold] [-m maxresults] [-M maxlength] [-c encoding] '
+        print('usage: %s [-o output] [-H] [-B basedir] [-t threshold] '
+              '[-n minproj] [-m maxresults] [-M maxlength] [-c encoding] '
               'out.idf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:m:M:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:n:m:M:c:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -119,6 +119,7 @@ def main(argv):
     srcdb = None
     encoding = None
     threshold = 10
+    minproj = 1
     maxresults = 100
     maxlength = 200
     for (k, v) in opts:
@@ -126,6 +127,7 @@ def main(argv):
         elif k == '-H': html = True
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-t': threshold = float(v)
+        elif k == '-n': minproj = int(v)
         elif k == '-m': maxresults = int(v)
         elif k == '-M': maxlength = int(v)
         elif k == '-c': encoding = v
@@ -139,29 +141,31 @@ def main(argv):
     func = None
     nents = 0
     root = FeatTree()
-    for line in fileinput.input(args):
-        line = line.strip()
-        if not line.startswith('+'): continue
-        (k,_,v) = line.partition(' ')
-        if k == '+SOURCE':
-            (fid,name) = eval(v)
-            srcmap[fid] = name
-        elif k == '+FUNC':
-            (func,src) = eval(v)
-            funcmap[func] = src
-        elif k == '+FORW':
-            assert func is not None
-            usedfuncs.add(func)
-            nents += 1
-            feats = eval(v)
-            tree = root
-            locs = [ loc for (_,loc) in feats ]
-            for (i,(feat,_)) in enumerate(feats):
-                if i == 0: continue
-                if feat not in featfreq:
-                    featfreq[feat] = 0
-                featfreq[feat] += 1
-                tree = tree.add(feat, func, (locs,i+1))
+    for path in args:
+        with open(path) as fp:
+            for line in fp:
+                line = line.strip()
+                if not line.startswith('+'): continue
+                (k,_,v) = line.partition(' ')
+                if k == '+SOURCE':
+                    (fid,name) = eval(v)
+                    srcmap[fid] = name
+                elif k == '+FUNC':
+                    (func,src) = eval(v)
+                    funcmap[func] = (path,src)
+                elif k == '+FORW':
+                    assert func is not None
+                    usedfuncs.add(func)
+                    nents += 1
+                    feats = eval(v)
+                    tree = root
+                    locs = [ loc for (_,loc) in feats ]
+                    for (i,(feat,_)) in enumerate(feats):
+                        if i == 0: continue
+                        if feat not in featfreq:
+                            featfreq[feat] = 0
+                        featfreq[feat] += 1
+                        tree = tree.add(feat, func, (locs,i+1))
     #
     featall = sum(featfreq.values())
     print('Read: %d ents, %d sources, %d funcs, %d feats (all: %d)' %
@@ -187,6 +191,16 @@ def main(argv):
             traverse(st, score1)
         return
     traverse(root)
+
+    # Remove clusters from a single project.
+    for funcs in list(results.keys()):
+        a = set()
+        for func in funcs:
+            (proj,loc) = funcmap[func]
+            if loc is not None:
+                a.add(proj)
+        if len(a) < minproj:
+            del results[funcs]
 
     results = sorted(results.values(), key=lambda x:x[0], reverse=True)
     if 0 < maxresults:
@@ -232,7 +246,7 @@ def main(argv):
                     a = nodes[src] = []
                 a.append((start, start+length, i))
                 return
-            loc = funcmap[func]
+            (_,loc) = funcmap[func]
             if loc is not None:
                 add(loc, 0, maxlength)
             for loc in locs:
