@@ -171,10 +171,10 @@ def main(argv):
     def trace(out, v0, label, n1, length=0, done=None):
         if maxlen <= length: return
         if skiplink(label, n1): return
+        if done is not None and n1 in done: return
         feat = getfeat(label, n1)
         #print('[trace: %s]' % n1.graph.name, v0, n1, feat)
         if feat is None:
-            if done is not None and n1 in done: return
             v1 = v0
         elif n1 in out:
             v1 = out[n1]

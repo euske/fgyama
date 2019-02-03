@@ -111,14 +111,14 @@ public class DFKlass extends DFType {
         return ((DFKlass)type).isSubclassOf(this, typeMap);
     }
 
-    public DFParamKlass parameterize(DFType[] mapTypes) {
+    public DFParamKlass parameterize(DFType[] paramTypes) {
         assert _loaded;
         assert this.isParameterized();
-        String name = _name + DFParamKlass.getParamNames(mapTypes);
+        String name = _name + DFParamKlass.getParamNames(paramTypes);
         try {
             return (DFParamKlass)_klassSpace.getKlass(name);
         } catch (TypeNotFound e) {
-            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, mapTypes);
+            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, paramTypes);
             _klassSpace.addKlass(klass);
             _paramKlasses.add(klass);
             return klass;
