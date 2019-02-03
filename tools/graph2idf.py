@@ -196,19 +196,18 @@ def main(argv):
         done = Cons(n1, done)
         if n1.kind in ('call', 'new'):
             caller1 = Cons(n1, caller)
-            args = set( label for (label,n) in n1.inputs.items()
-                        if (n is n0 and
-                            (label.startswith('#arg') or label == '#this')) )
             funcs = n1.data.split(' ')
             for gid in funcs[:maxoverride]:
                 if gid not in gid2graph: continue
-                if 2 <= debug:
-                    print(' [funcall]', gid, args)
                 graph = gid2graph[gid]
+                if 2 <= debug:
+                    print(' [funcall]', gid, graph.ins)
                 for n2 in graph.ins:
-                    label = n2.ref
-                    if label not in args: continue
-                    trace(out, v0, n0, label, n2, length, done, caller1)
+                    arg = n2.ref
+                    if arg != '#this' and not arg.startswith('#arg'): continue
+                    if arg not in n1.inputs: continue
+                    if n1.inputs[arg] is not n0: continue
+                    trace(out, v0, n0, arg, n2, length, done, caller1)
         for (label, n2) in n1.outputs[:maxfanout]:
             trace(out, v1, n1, label, n2, length, done, caller)
         if n1.kind == 'output':
