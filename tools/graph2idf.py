@@ -132,7 +132,10 @@ def main(argv):
         fp = sys.stdout
     else:
         fp = open(output, 'w')
-    dbg = fp
+    if 0 < debug:
+        dbg = sys.stderr
+    else:
+        dbg = fp
 
     # Load graphs.
     graphs = []
@@ -146,7 +149,8 @@ def main(argv):
                 fid = len(srcmap)
                 srcmap[graph.src] = fid
                 src = (fid, graph.src)
-                fp.write('+SOURCE %r\n' % (src,))
+                if debug == 0:
+                    fp.write('+SOURCE %r\n' % (src,))
             graphs.append(graph)
             gid2graph[graph.name] = graph
 
@@ -171,12 +175,13 @@ def main(argv):
                 for gid in funcs[:maxoverride]:
                     addcall(node, gid)
 
-    def trace(out, v0, label, n1, length=0, done=None, caller=None):
+    def trace(out, v0, n0, label, n1, length=0, done=None, caller=None):
         if maxlen <= length: return
         if skiplink(label, n1): return
         if done is not None and n1 in done: return
         feat = getfeat(label, n1)
-        #print('[trace: %s]' % n1.graph.name, v0, n1, feat)
+        if debug:
+            print('[trace: %s]' % n1.graph.name, v0, n1, feat)
         if feat is None:
             v1 = v0
             length += 1
@@ -190,25 +195,27 @@ def main(argv):
             length += 10
         done = Cons(n1, done)
         if n1.kind in ('call', 'new'):
-            nc = Cons(n1, caller)
-            args = set( label for label in n1.inputs.keys()
-                        if label.startswith('#arg') or label == '#this' )
+            caller1 = Cons(n1, caller)
+            args = set( label for (label,n) in n1.inputs.items()
+                        if (n is n0 and
+                            (label.startswith('#arg') or label == '#this')) )
             funcs = n1.data.split(' ')
             for gid in funcs[:maxoverride]:
                 if gid not in gid2graph: continue
+                if 2 <= debug:
+                    print(' [funcall]', gid, args)
                 graph = gid2graph[gid]
-                #print(' ', v0, 'funcall', graph, args)
                 for n2 in graph.ins:
                     label = n2.ref
                     if label not in args: continue
-                    trace(out, v0, label, n2, length, done, nc)
+                    trace(out, v0, n0, label, n2, length, done, caller1)
         for (label, n2) in n1.outputs[:maxfanout]:
-            trace(out, v1, label, n2, length, done, caller)
+            trace(out, v1, n1, label, n2, length, done, caller)
         if n1.kind == 'output':
             if caller is not None:
                 #print(' ', v0, 'return', n1.graph.name)
                 for (label, n2) in caller.car.outputs[:maxfanout]:
-                    trace(out, v1, label, n2, length, done, caller.cdr)
+                    trace(out, v1, n0, label, n2, length, done, caller.cdr)
         return
 
     def getsrc(node):
@@ -234,11 +241,12 @@ def main(argv):
         data = (gid, src)
         fp.write('+FUNC %r\n' % (data,))
         for funcall in nodes:
-            dbg.write('#   at %r\n' % funcall.graph.name)
+            caller = funcall.graph.name
+            dbg.write('#   at %r\n' % caller)
             out = {}
             v1 = IPVertex(funcall)
             for (label,n) in funcall.outputs:
-                trace(out, v1, label, n)
+                trace(out, v1, funcall, label, n)
             for feats in v1.enum(+1):
                 if feats is None: continue
                 a = list(feats)
