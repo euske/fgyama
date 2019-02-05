@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_methods.java">
-    <method name="basic_methods/A" style="initializer">
-      <ast length="84" start="34" type="55"/>
-      <scope name="basic_methods/A"/>
-    </method>
     <method name="basic_methods" style="initializer">
       <ast length="452" start="0" type="55"/>
       <scope name="basic_methods">
@@ -15,14 +11,6 @@
           <ast length="5" start="128" type="59"/>
         </node>
       </scope>
-    </method>
-    <method name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52" style="initializer">
-      <ast length="52" start="173" type="1"/>
-      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52"/>
-    </method>
-    <method name="basic_methods/:AST:31:139:246/moo" style="initializer">
-      <ast length="68" start="228" type="55"/>
-      <scope name="basic_methods/:AST:31:139:246/moo"/>
     </method>
     <method name="Lbasic_methods;.fa()V" style="instance">
       <ast length="246" start="139" type="31"/>
@@ -102,6 +90,10 @@
         </scope>
       </scope>
     </method>
+    <method name="basic_methods/A" style="initializer">
+      <ast length="84" start="34" type="55"/>
+      <scope name="basic_methods/A"/>
+    </method>
     <method name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
       <ast length="60" start="52" type="31"/>
@@ -117,6 +109,10 @@
         </scope>
       </scope>
     </method>
+    <method name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52" style="initializer">
+      <ast length="52" start="173" type="1"/>
+      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52"/>
+    </method>
     <method name="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;.toString()Ljava/lang/String;" style="instance">
       <ast length="42" start="180" type="31"/>
       <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString">
@@ -130,6 +126,10 @@
           </node>
         </scope>
       </scope>
+    </method>
+    <method name="basic_methods/:AST:31:139:246/moo" style="initializer">
+      <ast length="68" start="228" type="55"/>
+      <scope name="basic_methods/:AST:31:139:246/moo"/>
     </method>
     <method name="Lbasic_methods/:AST:31:139:246/moo;.fc()I" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>

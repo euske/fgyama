@@ -1,15 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/multi/dom/meep/multi_xref1.java">
-    <method name="dom/meep/multi_xref1/baa" style="initializer">
-      <ast length="34" start="75" type="55"/>
-      <scope name="dom/meep/multi_xref1/baa">
-        <node data="uninitialized" id="Ndc8f1e44_1" kind="const" type="@null"/>
-        <node id="Ndc8f1e44_2" kind="assign" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
-          <link src="Ndc8f1e44_1"/>
-          <ast length="3" start="99" type="59"/>
-        </node>
-      </scope>
-    </method>
     <method name="dom/meep/multi_xref1" style="initializer">
       <ast length="237" start="19" type="55"/>
       <scope name="dom/meep/multi_xref1">
@@ -88,6 +78,16 @@
         <node flow="in" id="N2082c4f8_8" ref="@dom/dood/multi_xref3/.boo" type="I"/>
         <node flow="in" id="N2082c4f8_9" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;"/>
         <node flow="in" id="N2082c4f8_10" ref="@dom/meep/multi_xref1/baa/.baz" type="I"/>
+      </scope>
+    </method>
+    <method name="dom/meep/multi_xref1/baa" style="initializer">
+      <ast length="34" start="75" type="55"/>
+      <scope name="dom/meep/multi_xref1/baa">
+        <node data="uninitialized" id="Ndc8f1e44_1" kind="const" type="@null"/>
+        <node id="Ndc8f1e44_2" kind="assign" ref="@dom/meep/multi_xref1/baa/.baz" type="I">
+          <link src="Ndc8f1e44_1"/>
+          <ast length="3" start="99" type="59"/>
+        </node>
       </scope>
     </method>
   </file>

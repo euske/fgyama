@@ -12,10 +12,6 @@
         </node>
       </scope>
     </method>
-    <method name="basic_poly_Baa" style="initializer">
-      <ast length="442" start="110" type="55"/>
-      <scope name="basic_poly_Baa"/>
-    </method>
     <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
@@ -45,6 +41,10 @@
         </node>
         <node flow="in" id="N172925c9_5" ref="@basic_poly_Foo/.x" type="I"/>
       </scope>
+    </method>
+    <method name="basic_poly_Baa" style="initializer">
+      <ast length="442" start="110" type="55"/>
+      <scope name="basic_poly_Baa"/>
     </method>
     <method name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>

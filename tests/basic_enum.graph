@@ -10,10 +10,6 @@
         </node>
       </scope>
     </method>
-    <method name="basic_enum" style="initializer">
-      <ast length="190" start="104" type="55"/>
-      <scope name="basic_enum"/>
-    </method>
     <method name="LE;.&lt;init&gt;(I)LE;" style="constructor">
       <ast length="44" start="56" type="31"/>
       <scope name="E.E">
@@ -45,6 +41,10 @@
         </node>
         <node flow="in" id="Nea4f5f38_4" ref="#this" type="LE;"/>
       </scope>
+    </method>
+    <method name="basic_enum" style="initializer">
+      <ast length="190" start="104" type="55"/>
+      <scope name="basic_enum"/>
     </method>
     <method name="Lbasic_enum;.foo()V" style="static">
       <ast length="158" start="134" type="31"/>

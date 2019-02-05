@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_names.java">
-    <method name="dom/meep/basic_names/Bar" style="initializer">
-      <ast length="12" start="44" type="55"/>
-      <scope name="dom/meep/basic_names/Bar"/>
-    </method>
     <method name="dom/meep/basic_names" style="initializer">
       <ast length="451" start="19" type="55"/>
       <scope name="dom/meep/basic_names">
@@ -13,16 +9,6 @@
         <node id="N6a5d0158_2" kind="assign" ref="@dom/meep/basic_names/.y" type="I">
           <link src="N6a5d0158_1"/>
           <ast length="7" start="65" type="59"/>
-        </node>
-      </scope>
-    </method>
-    <method name="dom/meep/basic_names/:AST:31:79:210/Baz" style="initializer">
-      <ast length="67" start="144" type="55"/>
-      <scope name="dom/meep/basic_names/:AST:31:79:210/Baz">
-        <node data="uninitialized" id="N753e8ac6_1" kind="const" type="@null"/>
-        <node id="N753e8ac6_2" kind="assign" ref="@dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I">
-          <link src="N753e8ac6_1"/>
-          <ast length="1" start="172" type="59"/>
         </node>
       </scope>
     </method>
@@ -138,6 +124,20 @@
         <node flow="in" id="Ne9ca43ba_7" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;"/>
         <node flow="in" id="Ne9ca43ba_8" ref="@dom/meep/basic_names/.y" type="I"/>
         <node flow="out" id="Ne9ca43ba_11" ref="@dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I"/>
+      </scope>
+    </method>
+    <method name="dom/meep/basic_names/Bar" style="initializer">
+      <ast length="12" start="44" type="55"/>
+      <scope name="dom/meep/basic_names/Bar"/>
+    </method>
+    <method name="dom/meep/basic_names/:AST:31:79:210/Baz" style="initializer">
+      <ast length="67" start="144" type="55"/>
+      <scope name="dom/meep/basic_names/:AST:31:79:210/Baz">
+        <node data="uninitialized" id="N753e8ac6_1" kind="const" type="@null"/>
+        <node id="N753e8ac6_2" kind="assign" ref="@dom/meep/basic_names/:AST:31:79:210/Baz/.x" type="I">
+          <link src="N753e8ac6_1"/>
+          <ast length="1" start="172" type="59"/>
+        </node>
       </scope>
     </method>
     <method name="Ldom/meep/basic_names/:AST:31:79:210/Baz;.moo()V" style="instance">
