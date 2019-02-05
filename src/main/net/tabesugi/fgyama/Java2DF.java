@@ -2113,7 +2113,7 @@ public class Java2DF {
         if (parameters != null) {
             int i = 0;
             for (SingleVariableDeclaration decl : parameters) {
-                // XXX Ignore modifiers and dimensions.
+                // XXX Ignore modifiers.
                 DFRef ref = scope.lookupArgument(i);
                 DFNode input = new InputNode(graph, scope, ref, decl);
                 ctx.set(input);
@@ -2184,17 +2184,10 @@ public class Java2DF {
                 }
 
             } else if (body instanceof MethodDeclaration) {
-                MethodDeclaration methodDecl = (MethodDeclaration)body;
 
             } else if (body instanceof EnumConstantDeclaration) {
-                EnumConstantDeclaration econst = (EnumConstantDeclaration)body;
-                // XXX ignore AnonymousClassDeclaration
-                // XXX ignore Arguments
 
             } else if (body instanceof AnnotationTypeMemberDeclaration) {
-                AnnotationTypeMemberDeclaration annot =
-                    (AnnotationTypeMemberDeclaration)body;
-                // XXX ignore annotations.
 
             } else if (body instanceof Initializer) {
 

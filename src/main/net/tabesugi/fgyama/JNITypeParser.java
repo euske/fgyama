@@ -104,7 +104,7 @@ public class JNITypeParser {
             return this.getType(finder);
         case '-':
             _pos++;
-            this.getType(finder); // XXX Ignore superclass.
+            this.getType(finder); // XXX Treat lowerbound class as Object.
             return DFBuiltinTypes.getObjectKlass();
         case '*':
             _pos++;

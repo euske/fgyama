@@ -312,6 +312,7 @@ public class DFLocalVarScope extends DFVarScope {
                 this.buildExpr(finder, expr);
             }
         } else if (ast instanceof TypeDeclarationStatement) {
+            // Inline classes are processed separately.
 
         } else {
             throw new UnsupportedSyntax(ast);
@@ -468,7 +469,7 @@ public class DFLocalVarScope extends DFVarScope {
                      (List<Expression>) cstr.arguments()) {
                 this.buildExpr(finder, arg);
             }
-            // XXX Ignored getAnonymousClassDeclaration().
+            // Anonymous classes are processed separately.
 
         } else if (ast instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)ast;
