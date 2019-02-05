@@ -52,10 +52,7 @@ public class UnitTestDF extends XMLTestCase {
         }
         _converter.listMethods();
         for (int i = 0; i < javaPaths.length; i++) {
-            CompilationUnit cunit = srcs.get(javaPaths[i]);
-            exporter.startFile(javaPaths[i]);
-            _converter.buildGraphs(javaPaths[i], cunit);
-            exporter.endFile();
+            _converter.buildGraphs(javaPaths[i]);
         }
 	exporter.close();
         _converter.removeExporter(exporter);

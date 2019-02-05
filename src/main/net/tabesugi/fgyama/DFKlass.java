@@ -45,6 +45,7 @@ public class DFKlass extends DFType {
     private String _jarPath = null;
     private String _filePath = null;
     private ASTNode _ast = null;
+    private List<BodyDeclaration> _decls = null;
 
     public DFKlass(
         String name, DFTypeSpace typeSpace,
@@ -686,6 +687,7 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
+        _decls = decls;
         _klassScope.build();
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -767,6 +769,13 @@ public class DFKlass extends DFType {
                 throw new UnsupportedSyntax(body);
             }
         }
+    }
+
+    public ASTNode getAST() {
+        return _ast;
+    }
+    public List<BodyDeclaration> getDecls() {
+        return _decls;
     }
 
     // DFKlassScope
