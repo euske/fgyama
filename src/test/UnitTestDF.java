@@ -50,12 +50,7 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
             _converter.loadKlasses(javaPaths[i], cunit);
         }
-        for (int i = 0; i < javaPaths.length; i++) {
-	    _converter.listMethods(javaPaths[i]);
-	}
-        for (int i = 0; i < javaPaths.length; i++) {
-	    _converter.buildMethods(javaPaths[i]);
-	}
+        _converter.listMethods();
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
             exporter.startFile(javaPaths[i]);

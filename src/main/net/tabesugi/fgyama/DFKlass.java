@@ -174,6 +174,7 @@ public class DFKlass extends DFType {
     }
 
     public boolean isParameterized() {
+        assert _loaded;
         return (_mapTypes != null && 0 < _mapTypes.length);
     }
 
