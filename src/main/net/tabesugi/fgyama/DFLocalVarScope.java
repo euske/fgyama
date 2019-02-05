@@ -96,11 +96,13 @@ public class DFLocalVarScope extends DFVarScope {
      * Lists all the variables defined inside a method.
      */
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, MethodDeclaration methodDecl)
+    public void buildMethodDecl(
+        DFTypeFinder finder, MethodDeclaration methodDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFLocalVarScope.build:", this);
         Type returnType = methodDecl.getReturnType2();
-        DFType type = (returnType == null)? DFBasicType.VOID : finder.resolve(returnType);
+        DFType type = ((returnType == null)?
+                       DFBasicType.VOID : finder.resolve(returnType));
         this.addRef("#return", type, null);
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         int i = 0;
@@ -119,17 +121,18 @@ public class DFLocalVarScope extends DFVarScope {
             this.addVar(decl.getName(), argType);
             i++;
         }
-        this.build(finder, methodDecl.getBody());
+        this.buildStmt(finder, methodDecl.getBody());
     }
 
-    public void build(DFTypeFinder finder, Initializer initializer)
+    public void buildInitializer(
+        DFTypeFinder finder, Initializer initializer)
         throws UnsupportedSyntax, TypeNotFound {
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
-        this.build(finder, initializer.getBody());
+        this.buildStmt(finder, initializer.getBody());
     }
 
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, Statement ast)
+    private void buildStmt(DFTypeFinder finder, Statement ast)
         throws UnsupportedSyntax, TypeNotFound {
         assert ast != null;
 
@@ -140,7 +143,7 @@ public class DFLocalVarScope extends DFVarScope {
             DFLocalVarScope childScope = this.getChildByAST(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                childScope.build(finder, stmt);
+                childScope.buildStmt(finder, stmt);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -157,87 +160,87 @@ public class DFLocalVarScope extends DFVarScope {
 			    (ndims != 0)? new DFArrayType(varType, ndims) : varType);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.build(finder, expr);
+                    this.buildExpr(finder, expr);
                 }
             }
 
         } else if (ast instanceof ExpressionStatement) {
             ExpressionStatement exprStmt = (ExpressionStatement)ast;
             Expression expr = exprStmt.getExpression();
-            this.build(finder, expr);
+            this.buildExpr(finder, expr);
 
         } else if (ast instanceof ReturnStatement) {
             ReturnStatement returnStmt = (ReturnStatement)ast;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
 
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Expression expr = ifStmt.getExpression();
-            this.build(finder, expr);
+            this.buildExpr(finder, expr);
             Statement thenStmt = ifStmt.getThenStatement();
-            this.build(finder, thenStmt);
+            this.buildStmt(finder, thenStmt);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.build(finder, elseStmt);
+                this.buildStmt(finder, elseStmt);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             DFLocalVarScope childScope = this.getChildByAST(ast);
             Expression expr = switchStmt.getExpression();
-            childScope.build(finder, expr);
+            childScope.buildExpr(finder, expr);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                childScope.build(finder, stmt);
+                childScope.buildStmt(finder, stmt);
             }
 
         } else if (ast instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)ast;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
 
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
-            this.build(finder, expr);
+            this.buildExpr(finder, expr);
             DFLocalVarScope childScope = this.getChildByAST(ast);
             Statement stmt = whileStmt.getBody();
-            childScope.build(finder, stmt);
+            childScope.buildStmt(finder, stmt);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             DFLocalVarScope childScope = this.getChildByAST(ast);
             Statement stmt = doStmt.getBody();
-            childScope.build(finder, stmt);
+            childScope.buildStmt(finder, stmt);
             Expression expr = doStmt.getExpression();
-            childScope.build(finder, expr);
+            childScope.buildExpr(finder, expr);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             DFLocalVarScope childScope = this.getChildByAST(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                childScope.build(finder, init);
+                childScope.buildExpr(finder, init);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                childScope.build(finder, expr);
+                childScope.buildExpr(finder, expr);
             }
             Statement stmt = forStmt.getBody();
-            childScope.build(finder, stmt);
+            childScope.buildStmt(finder, stmt);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                childScope.build(finder, update);
+                childScope.buildExpr(finder, update);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            this.build(finder, eForStmt.getExpression());
+            this.buildExpr(finder, eForStmt.getExpression());
             DFLocalVarScope childScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             // XXX Ignore modifiers.
@@ -246,7 +249,7 @@ public class DFLocalVarScope extends DFVarScope {
             childScope.addVar(decl.getName(),
 			      (ndims != 0)? new DFArrayType(varType, ndims) : varType);
             Statement stmt = eForStmt.getBody();
-            childScope.build(finder, stmt);
+            childScope.buildStmt(finder, stmt);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -255,21 +258,21 @@ public class DFLocalVarScope extends DFVarScope {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.build(finder, stmt);
+            this.buildStmt(finder, stmt);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            this.build(finder, syncStmt.getExpression());
-            this.build(finder, syncStmt.getBody());
+            this.buildExpr(finder, syncStmt.getExpression());
+            this.buildStmt(finder, syncStmt.getBody());
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             DFLocalVarScope childScope = this.getChildByAST(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                childScope.build(finder, decl);
+                childScope.buildExpr(finder, decl);
             }
-            childScope.build(finder, tryStmt.getBody());
+            childScope.buildStmt(finder, tryStmt.getBody());
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -277,34 +280,36 @@ public class DFLocalVarScope extends DFVarScope {
                 // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
 		int ndims = decl.getExtraDimensions();
-		catchScope.addVar(decl.getName(),
-				  (ndims != 0)? new DFArrayType(varType, ndims) : varType);
-                catchScope.build(finder, cc.getBody());
+                if (ndims != 0) {
+                    varType = new DFArrayType(varType, ndims);
+                }
+		catchScope.addVar(decl.getName(), varType);
+                catchScope.buildStmt(finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.build(finder, finBlock);
+                this.buildStmt(finder, finBlock);
             }
 
         } else if (ast instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)ast;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
 
         } else if (ast instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
 
         } else if (ast instanceof SuperConstructorInvocation) {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
         } else if (ast instanceof TypeDeclarationStatement) {
 
@@ -318,7 +323,7 @@ public class DFLocalVarScope extends DFVarScope {
      * Lists all the variables defined within an expression.
      */
     @SuppressWarnings("unchecked")
-    public void build(DFTypeFinder finder, Expression ast)
+    private void buildExpr(DFTypeFinder finder, Expression ast)
         throws UnsupportedSyntax, TypeNotFound {
         assert ast != null;
 
@@ -344,42 +349,42 @@ public class DFLocalVarScope extends DFVarScope {
             PrefixExpression prefix = (PrefixExpression)ast;
             PrefixExpression.Operator op = prefix.getOperator();
             Expression operand = prefix.getOperand();
-            this.build(finder, operand);
+            this.buildExpr(finder, operand);
             if (op == PrefixExpression.Operator.INCREMENT ||
                 op == PrefixExpression.Operator.DECREMENT) {
-                this.buildLeft(finder, operand);
+                this.buildAssignment(finder, operand);
             }
 
         } else if (ast instanceof PostfixExpression) {
             PostfixExpression postfix = (PostfixExpression)ast;
             PostfixExpression.Operator op = postfix.getOperator();
             Expression operand = postfix.getOperand();
-            this.build(finder, operand);
+            this.buildExpr(finder, operand);
             if (op == PostfixExpression.Operator.INCREMENT ||
                 op == PostfixExpression.Operator.DECREMENT) {
-                this.buildLeft(finder, operand);
+                this.buildAssignment(finder, operand);
             }
 
         } else if (ast instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)ast;
             InfixExpression.Operator op = infix.getOperator();
             Expression loperand = infix.getLeftOperand();
-            this.build(finder, loperand);
+            this.buildExpr(finder, loperand);
             Expression roperand = infix.getRightOperand();
-            this.build(finder, roperand);
+            this.buildExpr(finder, roperand);
 
         } else if (ast instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-            this.build(finder, paren.getExpression());
+            this.buildExpr(finder, paren.getExpression());
 
         } else if (ast instanceof Assignment) {
             Assignment assn = (Assignment)ast;
             Assignment.Operator op = assn.getOperator();
-            this.buildLeft(finder, assn.getLeftHandSide());
+            this.buildAssignment(finder, assn.getLeftHandSide());
             if (op != Assignment.Operator.ASSIGN) {
-                this.build(finder, assn.getLeftHandSide());
+                this.buildExpr(finder, assn.getLeftHandSide());
             }
-            this.build(finder, assn.getRightHandSide());
+            this.buildExpr(finder, assn.getRightHandSide());
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
@@ -387,12 +392,15 @@ public class DFLocalVarScope extends DFVarScope {
             DFType varType = finder.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
+                DFType vt = varType;
 		int ndims = frag.getExtraDimensions();
-                this.addVar(frag.getName(),
-			    (ndims != 0)? new DFArrayType(varType, ndims) : varType);
+                if (ndims != 0) {
+                    vt = new DFArrayType(vt, ndims);
+                }
+                this.addVar(frag.getName(), vt);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.build(finder, expr);
+                    this.buildExpr(finder, expr);
                 }
             }
 
@@ -400,47 +408,47 @@ public class DFLocalVarScope extends DFVarScope {
             MethodInvocation invoke = (MethodInvocation)ast;
             Expression expr = invoke.getExpression();
             if (expr != null) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
             for (Expression arg :
                      (List<Expression>) invoke.arguments()) {
-                this.build(finder, arg);
+                this.buildExpr(finder, arg);
             }
 
         } else if (ast instanceof SuperMethodInvocation) {
             SuperMethodInvocation si = (SuperMethodInvocation)ast;
             for (Expression arg :
                      (List<Expression>) si.arguments()) {
-                this.build(finder, arg);
+                this.buildExpr(finder, arg);
             }
 
         } else if (ast instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)ast;
             for (Expression dim :
                      (List<Expression>) ac.dimensions()) {
-                this.build(finder, dim);
+                this.buildExpr(finder, dim);
             }
             ArrayInitializer init = ac.getInitializer();
             if (init != null) {
-                this.build(finder, init);
+                this.buildExpr(finder, init);
             }
 
         } else if (ast instanceof ArrayInitializer) {
             ArrayInitializer init = (ArrayInitializer)ast;
             for (Expression expr :
                      (List<Expression>) init.expressions()) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
 
         } else if (ast instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)ast;
-            this.build(finder, aa.getArray());
-            this.build(finder, aa.getIndex());
+            this.buildExpr(finder, aa.getArray());
+            this.buildExpr(finder, aa.getIndex());
 
         } else if (ast instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)ast;
             SimpleName fieldName = fa.getName();
-            this.build(finder, fa.getExpression());
+            this.buildExpr(finder, fa.getExpression());
 
         } else if (ast instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)ast;
@@ -448,29 +456,29 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof CastExpression) {
             CastExpression cast = (CastExpression)ast;
-            this.build(finder, cast.getExpression());
+            this.buildExpr(finder, cast.getExpression());
 
         } else if (ast instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
             Expression expr = cstr.getExpression();
             if (expr != null) {
-                this.build(finder, expr);
+                this.buildExpr(finder, expr);
             }
             for (Expression arg :
                      (List<Expression>) cstr.arguments()) {
-                this.build(finder, arg);
+                this.buildExpr(finder, arg);
             }
             // XXX Ignored getAnonymousClassDeclaration().
 
         } else if (ast instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)ast;
-            this.build(finder, cond.getExpression());
-            this.build(finder, cond.getThenExpression());
-            this.build(finder, cond.getElseExpression());
+            this.buildExpr(finder, cond.getExpression());
+            this.buildExpr(finder, cond.getThenExpression());
+            this.buildExpr(finder, cond.getElseExpression());
 
         } else if (ast instanceof InstanceofExpression) {
             InstanceofExpression instof = (InstanceofExpression)ast;
-            this.build(finder, instof.getLeftOperand());
+            this.buildExpr(finder, instof.getLeftOperand());
 
         } else {
             // LambdaExpression
@@ -488,7 +496,7 @@ public class DFLocalVarScope extends DFVarScope {
      * Lists all the l-values for an expression.
      */
     @SuppressWarnings("unchecked")
-    public void buildLeft(DFTypeFinder finder, Expression ast)
+    private void buildAssignment(DFTypeFinder finder, Expression ast)
         throws UnsupportedSyntax, TypeNotFound {
         assert ast != null;
 
@@ -496,13 +504,13 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)ast;
-            this.build(finder, aa.getArray());
-            this.build(finder, aa.getIndex());
+            this.buildExpr(finder, aa.getArray());
+            this.buildExpr(finder, aa.getIndex());
 
         } else if (ast instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)ast;
             SimpleName fieldName = fa.getName();
-            this.build(finder, fa.getExpression());
+            this.buildExpr(finder, fa.getExpression());
 
         } else if (ast instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)ast;

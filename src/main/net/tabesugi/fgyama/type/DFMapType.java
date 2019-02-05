@@ -55,12 +55,12 @@ public class DFMapType extends DFKlass {
     protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
         throws UnsupportedSyntax, TypeNotFound {
         if (ast instanceof TypeParameter) {
-            this.build(finder, (TypeParameter)ast);
+            this.buildTypeParam(finder, (TypeParameter)ast);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, TypeParameter tp)
+    private void buildTypeParam(DFTypeFinder finder, TypeParameter tp)
         throws TypeNotFound {
         //Logger.info("DFMapType.build:", this, ":", tp);
         try {

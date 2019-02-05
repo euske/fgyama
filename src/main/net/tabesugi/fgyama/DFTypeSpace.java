@@ -83,6 +83,16 @@ public class DFTypeSpace {
     }
 
     protected DFKlass createKlass(
+        DFKlass parentKlass, DFVarScope parentScope,
+        AnonymousClassDeclaration anonDecl) {
+        String id = Utils.encodeASTNode(anonDecl);
+        DFKlass klass = this.createKlass(
+            parentKlass, parentScope, id);
+        klass.setTree(anonDecl);
+        return klass;
+    }
+
+    protected DFKlass createKlass(
         DFKlass parentKlass, DFVarScope parentScope, String id) {
         assert id.indexOf('.') < 0;
         DFKlass klass = _id2klass.get(id);
@@ -135,34 +145,37 @@ public class DFTypeSpace {
         List<DFKlass> list = new ArrayList<DFKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) cunit.types()) {
-            this.build(list, abstTypeDecl, null, scope);
+            this.buildAbstTypeDecl(list, abstTypeDecl, null, scope);
         }
         DFKlass[] klasses = new DFKlass[list.size()];
         list.toArray(klasses);
         return klasses;
     }
 
-    private void build(
+    private void buildAbstTypeDecl(
         List<DFKlass> list, AbstractTypeDeclaration abstTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         assert abstTypeDecl != null;
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build(list, (TypeDeclaration)abstTypeDecl,
-                       parentKlass, parentScope);
+            this.buildTypeDecl(
+                list, (TypeDeclaration)abstTypeDecl,
+                parentKlass, parentScope);
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.build(list, (EnumDeclaration)abstTypeDecl,
-                       parentKlass, parentScope);
+            this.buildEnumDecl(
+                list, (EnumDeclaration)abstTypeDecl,
+                parentKlass, parentScope);
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.build(list, (AnnotationTypeDeclaration)abstTypeDecl,
-                       parentKlass, parentScope);
+            this.buildAnnotTypeDecl(
+                list, (AnnotationTypeDeclaration)abstTypeDecl,
+                parentKlass, parentScope);
         } else {
             throw new UnsupportedSyntax(abstTypeDecl);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildTypeDecl(
         List<DFKlass> list, TypeDeclaration typeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -172,12 +185,13 @@ public class DFTypeSpace {
         list.add(klass);
         klass.setMapTypes(typeDecl.typeParameters());
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(list, klass, klass.getKlassScope(),
-		    typeDecl.bodyDeclarations());
+	child.buildDecls(
+            list, klass, klass.getKlassScope(),
+            typeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildEnumDecl(
         List<DFKlass> list, EnumDeclaration enumDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -186,12 +200,13 @@ public class DFTypeSpace {
             parentKlass, parentScope, enumDecl);
         list.add(klass);
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(list, klass, klass.getKlassScope(),
-		    enumDecl.bodyDeclarations());
+	child.buildDecls(
+            list, klass, klass.getKlassScope(),
+            enumDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildAnnotTypeDecl(
         List<DFKlass> list, AnnotationTypeDeclaration annotTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -200,26 +215,44 @@ public class DFTypeSpace {
             parentKlass, parentScope, annotTypeDecl);
         list.add(klass);
         DFTypeSpace child = klass.getKlassSpace();
-	child.build(list, klass, klass.getKlassScope(),
-		    annotTypeDecl.bodyDeclarations());
+	child.buildDecls(
+            list, klass, klass.getKlassScope(),
+            annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildAnnonDecl(
+        List<DFKlass> list, AnonymousClassDeclaration anonDecl,
+        DFKlass parentKlass, DFVarScope parentScope)
+        throws UnsupportedSyntax {
+        String id = Utils.encodeASTNode(anonDecl);
+        DFTypeSpace anonSpace = this.lookupSpace(id);
+        DFKlass klass = anonSpace.createKlass(
+            parentKlass, parentScope, anonDecl);
+        list.add(klass);
+        DFTypeSpace child = klass.getKlassSpace();
+        child.buildDecls(
+            list, klass, klass.getKlassScope(),
+            anonDecl.bodyDeclarations());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildDecls(
         List<DFKlass> list, DFKlass klass, DFVarScope parentScope,
 	List<BodyDeclaration> decls)
         throws UnsupportedSyntax {
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
-		this.build(list, (AbstractTypeDeclaration)body,
-			   klass, parentScope);
+		this.buildAbstTypeDecl(
+                    list, (AbstractTypeDeclaration)body,
+                    klass, parentScope);
 	    } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        this.build(list, init, klass, parentScope);
+                        this.buildExpr(list, init, klass, parentScope);
                     }
                 }
 	    } else if (body instanceof MethodDeclaration) {
@@ -231,7 +264,7 @@ public class DFTypeSpace {
                     DFLocalVarScope scope = new DFLocalVarScope(
                         parentScope, methodDecl.getName());
                     klass.addMethodScope(methodDecl, scope);
-                    methodSpace.build(list, stmt, klass, scope);
+                    methodSpace.buildStmt(list, stmt, klass, scope);
                 }
 	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
 		;
@@ -241,7 +274,7 @@ public class DFTypeSpace {
                 DFLocalVarScope scope = new DFLocalVarScope(
                     parentScope, "<clinit>");
                 klass.addMethodScope(initializer, scope);
-                this.build(list, stmt, klass, scope);
+                this.buildStmt(list, stmt, klass, scope);
 
 	    } else {
 		throw new UnsupportedSyntax(body);
@@ -250,7 +283,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildStmt(
         List<DFKlass> list, Statement ast,
         DFKlass klass, DFLocalVarScope parentScope)
         throws UnsupportedSyntax {
@@ -264,7 +297,7 @@ public class DFTypeSpace {
             DFLocalVarScope childScope = parentScope.addChild("b", ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                this.build(list, stmt, klass, childScope);
+                this.buildStmt(list, stmt, klass, childScope);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -276,84 +309,84 @@ public class DFTypeSpace {
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.build(list, expr, klass, parentScope);
+                    this.buildExpr(list, expr, klass, parentScope);
                 }
             }
 
         } else if (ast instanceof ExpressionStatement) {
             ExpressionStatement exprStmt = (ExpressionStatement)ast;
-            this.build(list, exprStmt.getExpression(), klass, parentScope);
+            this.buildExpr(list, exprStmt.getExpression(), klass, parentScope);
 
         } else if (ast instanceof ReturnStatement) {
             ReturnStatement returnStmt = (ReturnStatement)ast;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
-                this.build(list, expr, klass, parentScope);
+                this.buildExpr(list, expr, klass, parentScope);
             }
 
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
-            this.build(list, ifStmt.getExpression(), klass, parentScope);
+            this.buildExpr(list, ifStmt.getExpression(), klass, parentScope);
             Statement thenStmt = ifStmt.getThenStatement();
-            this.build(list, thenStmt, klass, parentScope);
+            this.buildStmt(list, thenStmt, klass, parentScope);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.build(list, elseStmt, klass, parentScope);
+                this.buildStmt(list, elseStmt, klass, parentScope);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             DFLocalVarScope childScope = parentScope.addChild("switch", ast);
-            this.build(list, switchStmt.getExpression(), klass, childScope);
+            this.buildExpr(list, switchStmt.getExpression(), klass, childScope);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.build(list, stmt, klass, childScope);
+                this.buildStmt(list, stmt, klass, childScope);
             }
 
         } else if (ast instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)ast;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
-                this.build(list, expr, klass, parentScope);
+                this.buildExpr(list, expr, klass, parentScope);
             }
 
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
-            this.build(list, whileStmt.getExpression(), klass, parentScope);
+            this.buildExpr(list, whileStmt.getExpression(), klass, parentScope);
             DFLocalVarScope childScope = parentScope.addChild("while", ast);
             Statement stmt = whileStmt.getBody();
-            this.build(list, stmt, klass, childScope);
+            this.buildStmt(list, stmt, klass, childScope);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             DFLocalVarScope childScope = parentScope.addChild("do", ast);
             Statement stmt = doStmt.getBody();
-            this.build(list, stmt, klass, childScope);
-            this.build(list, doStmt.getExpression(), klass, childScope);
+            this.buildStmt(list, stmt, klass, childScope);
+            this.buildExpr(list, doStmt.getExpression(), klass, childScope);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             DFLocalVarScope childScope = parentScope.addChild("for", ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                this.build(list, init, klass, childScope);
+                this.buildExpr(list, init, klass, childScope);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                this.build(list, expr, klass, childScope);
+                this.buildExpr(list, expr, klass, childScope);
             }
             Statement stmt = forStmt.getBody();
-            this.build(list, stmt, klass, childScope);
+            this.buildStmt(list, stmt, klass, childScope);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                this.build(list, update, klass, childScope);
+                this.buildExpr(list, update, klass, childScope);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            this.build(list, eForStmt.getExpression(), klass, parentScope);
+            this.buildExpr(list, eForStmt.getExpression(), klass, parentScope);
             DFLocalVarScope childScope = parentScope.addChild("efor", ast);
-            this.build(list, eForStmt.getBody(), klass, childScope);
+            this.buildStmt(list, eForStmt.getBody(), klass, childScope);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -362,56 +395,57 @@ public class DFTypeSpace {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.build(list, stmt, klass, parentScope);
+            this.buildStmt(list, stmt, klass, parentScope);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            this.build(list, syncStmt.getExpression(), klass, parentScope);
-            this.build(list, syncStmt.getBody(), klass, parentScope);
+            this.buildExpr(list, syncStmt.getExpression(), klass, parentScope);
+            this.buildStmt(list, syncStmt.getBody(), klass, parentScope);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             DFLocalVarScope childScope = parentScope.addChild("try", ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                this.build(list, decl, klass, childScope);
+                this.buildExpr(list, decl, klass, childScope);
             }
-            this.build(list, tryStmt.getBody(), klass, childScope);
+            this.buildStmt(list, tryStmt.getBody(), klass, childScope);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 DFLocalVarScope catchScope = parentScope.addChild("catch", cc);
-                this.build(list, cc.getBody(), klass, catchScope);
+                this.buildStmt(list, cc.getBody(), klass, catchScope);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.build(list, finBlock, klass, parentScope);
+                this.buildStmt(list, finBlock, klass, parentScope);
             }
 
         } else if (ast instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)ast;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
-                this.build(list, expr, klass, parentScope);
+                this.buildExpr(list, expr, klass, parentScope);
             }
 
         } else if (ast instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
-                this.build(list, expr, klass, parentScope);
+                this.buildExpr(list, expr, klass, parentScope);
             }
 
         } else if (ast instanceof SuperConstructorInvocation) {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
-                this.build(list, expr, klass, parentScope);
+                this.buildExpr(list, expr, klass, parentScope);
             }
 
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
-            this.build(list, typeDeclStmt.getDeclaration(),
-                       klass, parentScope);
+            this.buildAbstTypeDecl(
+                list, typeDeclStmt.getDeclaration(),
+                klass, parentScope);
 
         } else {
             throw new UnsupportedSyntax(ast);
@@ -420,7 +454,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(
+    private void buildExpr(
         List<DFKlass> list, Expression expr,
         DFKlass klass, DFVarScope parentScope)
         throws UnsupportedSyntax {
@@ -446,25 +480,25 @@ public class DFTypeSpace {
 
         } else if (expr instanceof PrefixExpression) {
             PrefixExpression prefix = (PrefixExpression)expr;
-            this.build(list, prefix.getOperand(), klass, parentScope);
+            this.buildExpr(list, prefix.getOperand(), klass, parentScope);
 
         } else if (expr instanceof PostfixExpression) {
             PostfixExpression postfix = (PostfixExpression)expr;
-            this.build(list, postfix.getOperand(), klass, parentScope);
+            this.buildExpr(list, postfix.getOperand(), klass, parentScope);
 
         } else if (expr instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)expr;
-            this.build(list, infix.getLeftOperand(), klass, parentScope);
-            this.build(list, infix.getRightOperand(), klass, parentScope);
+            this.buildExpr(list, infix.getLeftOperand(), klass, parentScope);
+            this.buildExpr(list, infix.getRightOperand(), klass, parentScope);
 
         } else if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            this.build(list, paren.getExpression(), klass, parentScope);
+            this.buildExpr(list, paren.getExpression(), klass, parentScope);
 
         } else if (expr instanceof Assignment) {
             Assignment assn = (Assignment)expr;
-            this.build(list, assn.getLeftHandSide(), klass, parentScope);
-            this.build(list, assn.getRightHandSide(), klass, parentScope);
+            this.buildExpr(list, assn.getLeftHandSide(), klass, parentScope);
+            this.buildExpr(list, assn.getRightHandSide(), klass, parentScope);
 
         } else if (expr instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl =
@@ -473,7 +507,7 @@ public class DFTypeSpace {
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 Expression init = frag.getInitializer();
                 if (init != null) {
-                    this.build(list, init, klass, parentScope);
+                    this.buildExpr(list, init, klass, parentScope);
                 }
             }
 
@@ -481,76 +515,69 @@ public class DFTypeSpace {
             MethodInvocation invoke = (MethodInvocation)expr;
             Expression expr1 = invoke.getExpression();
             if (expr1 != null) {
-                this.build(list, expr1, klass, parentScope);
+                this.buildExpr(list, expr1, klass, parentScope);
             }
             for (Expression arg : (List<Expression>) invoke.arguments()) {
-                this.build(list, arg, klass, parentScope);
+                this.buildExpr(list, arg, klass, parentScope);
             }
 
         } else if (expr instanceof SuperMethodInvocation) {
             SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
             for (Expression arg : (List<Expression>) sinvoke.arguments()) {
-                this.build(list, arg, klass, parentScope);
+                this.buildExpr(list, arg, klass, parentScope);
             }
 
         } else if (expr instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)expr;
             for (Expression dim : (List<Expression>) ac.dimensions()) {
-                this.build(list, dim, klass, parentScope);
+                this.buildExpr(list, dim, klass, parentScope);
             }
             ArrayInitializer init = ac.getInitializer();
             if (init != null) {
-                this.build(list, init, klass, parentScope);
+                this.buildExpr(list, init, klass, parentScope);
             }
 
         } else if (expr instanceof ArrayInitializer) {
             ArrayInitializer init = (ArrayInitializer)expr;
             for (Expression expr1 : (List<Expression>) init.expressions()) {
-                this.build(list, expr1, klass, parentScope);
+                this.buildExpr(list, expr1, klass, parentScope);
             }
 
         } else if (expr instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)expr;
-            this.build(list, aa.getIndex(), klass, parentScope);
-            this.build(list, aa.getArray(), klass, parentScope);
+            this.buildExpr(list, aa.getIndex(), klass, parentScope);
+            this.buildExpr(list, aa.getArray(), klass, parentScope);
 
         } else if (expr instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)expr;
-            this.build(list, fa.getExpression(), klass, parentScope);
+            this.buildExpr(list, fa.getExpression(), klass, parentScope);
 
         } else if (expr instanceof SuperFieldAccess) {
 
         } else if (expr instanceof CastExpression) {
             CastExpression cast = (CastExpression)expr;
-            this.build(list, cast.getExpression(), klass, parentScope);
+            this.buildExpr(list, cast.getExpression(), klass, parentScope);
 
         } else if (expr instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
-                this.build(list, expr1, klass, parentScope);
+                this.buildExpr(list, expr1, klass, parentScope);
             }
             for (Expression arg : (List<Expression>) cstr.arguments()) {
-                this.build(list, arg, klass, parentScope);
+                this.buildExpr(list, arg, klass, parentScope);
             }
             AnonymousClassDeclaration anonDecl =
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
-                String id = Utils.encodeASTNode(anonDecl);
-                DFTypeSpace anonSpace = this.lookupSpace(id);
-                DFKlass anonKlass = anonSpace.createKlass(
-                    klass, parentScope, id);
-                anonKlass.setTree(anonDecl);
-                list.add(anonKlass);
-                anonSpace.build(list, anonKlass, anonKlass.getKlassScope(),
-                                anonDecl.bodyDeclarations());
+                this.buildAnnonDecl(list, anonDecl, klass, parentScope);
             }
 
         } else if (expr instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)expr;
-            this.build(list, cond.getExpression(), klass, parentScope);
-            this.build(list, cond.getThenExpression(), klass, parentScope);
-            this.build(list, cond.getElseExpression(), klass, parentScope);
+            this.buildExpr(list, cond.getExpression(), klass, parentScope);
+            this.buildExpr(list, cond.getThenExpression(), klass, parentScope);
+            this.buildExpr(list, cond.getElseExpression(), klass, parentScope);
 
         } else if (expr instanceof InstanceofExpression) {
 

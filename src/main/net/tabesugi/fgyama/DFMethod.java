@@ -194,9 +194,9 @@ public class DFMethod implements Comparable<DFMethod> {
 	assert _finder != null;
         _scope = new DFLocalVarScope(_srcScope);
 	if (_ast instanceof MethodDeclaration) {
-	    _scope.build(_finder, (MethodDeclaration)_ast);
+	    _scope.buildMethodDecl(_finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof Initializer) {
-	    _scope.build(_finder, (Initializer)_ast);
+	    _scope.buildInitializer(_finder, (Initializer)_ast);
 	}  else {
 	    throw new UnsupportedSyntax(_ast);
 	}
@@ -204,9 +204,11 @@ public class DFMethod implements Comparable<DFMethod> {
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
 	    if (_ast instanceof MethodDeclaration) {
-		_frame.build(_finder, this, _scope, (MethodDeclaration)_ast);
+		_frame.buildMethodDecl(
+                    _finder, this, _scope, (MethodDeclaration)_ast);
 	    } else if (_ast instanceof Initializer) {
-		_frame.build(_finder, this, _scope, (Initializer)_ast);
+		_frame.buildInitializer(
+                    _finder, this, _scope, (Initializer)_ast);
 	    }  else {
 		throw new UnsupportedSyntax(_ast);
 	    }

@@ -542,29 +542,31 @@ public class DFKlass extends DFType {
     protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
         throws UnsupportedSyntax, TypeNotFound {
         if (ast instanceof AbstractTypeDeclaration) {
-            this.build(finder, (AbstractTypeDeclaration)ast);
+            this.buildAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
         } else if (ast instanceof AnonymousClassDeclaration) {
             AnonymousClassDeclaration decl = (AnonymousClassDeclaration)ast;
-            this.build(finder, decl.bodyDeclarations());
+            this.buildDecls(finder, decl.bodyDeclarations());
         }
     }
 
-    private void build(DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
+    private void buildAbstTypeDecl(
+        DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.build(finder, (TypeDeclaration)abstTypeDecl);
+            this.buildTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.build(finder, (EnumDeclaration)abstTypeDecl);
+            this.buildEnumDecl(finder, (EnumDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.build(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+            this.buildAnnotTypeDecl(finder, (AnnotationTypeDeclaration)abstTypeDecl);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, TypeDeclaration typeDecl)
+    private void buildTypeDecl(
+        DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build:", this, ":", typeDecl.getName());
         // Setup a temporary finder for looking up a base class
@@ -605,7 +607,7 @@ public class DFKlass extends DFType {
                 finder = finder.extend(_parentKlass);
             }
             finder = new DFTypeFinder(finder, _klassSpace);
-            this.build(finder, typeDecl.bodyDeclarations());
+            this.buildDecls(finder, typeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(typeDecl);
             throw e;
@@ -613,7 +615,8 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, EnumDeclaration enumDecl)
+    private void buildEnumDecl(
+        DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build:", this, ":", enumDecl.getName());
         // Setup a temporary finder for looking up a base class
@@ -648,7 +651,7 @@ public class DFKlass extends DFType {
                 finder = finder.extend(_parentKlass);
             }
             finder = new DFTypeFinder(finder, _klassSpace);
-            this.build(finder, enumDecl.bodyDeclarations());
+            this.buildDecls(finder, enumDecl.bodyDeclarations());
             // Enum has a special method "values()".
             this.addMethod(
                 null, "values", DFCallStyle.InstanceMethod,
@@ -660,7 +663,8 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
+    private void buildAnnotTypeDecl(
+        DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build:", this, ":", annotTypeDecl.getName());
         _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -671,7 +675,7 @@ public class DFKlass extends DFType {
         finder = new DFTypeFinder(finder, _klassSpace);
         try {
             // Lookup child klasses.
-            this.build(finder, annotTypeDecl.bodyDeclarations());
+            this.buildDecls(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
             throw e;
@@ -679,7 +683,7 @@ public class DFKlass extends DFType {
     }
 
     @SuppressWarnings("unchecked")
-    private void build(DFTypeFinder finder, List<BodyDeclaration> decls)
+    private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
         _klassScope.build();
         for (BodyDeclaration body : decls) {
@@ -690,12 +694,15 @@ public class DFKlass extends DFType {
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
-                DFType type = finder.resolve(decl.getType());
+                DFType fldType = finder.resolve(decl.getType());
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) decl.fragments()) {
+                    DFType ft = fldType;
                     int ndims = frag.getExtraDimensions();
-                    this.addField(frag.getName(), isStatic(decl),
-                                  (ndims != 0)? new DFArrayType(type, ndims) : type);
+                    if (ndims != 0) {
+                        ft = new DFArrayType(ft, ndims);
+                    }
+                    this.addField(frag.getName(), isStatic(decl), ft);
                 }
 
             } else if (body instanceof MethodDeclaration) {
@@ -740,7 +747,8 @@ public class DFKlass extends DFType {
             } else if (body instanceof EnumConstantDeclaration) {
 
             } else if (body instanceof AnnotationTypeMemberDeclaration) {
-                AnnotationTypeMemberDeclaration decl = (AnnotationTypeMemberDeclaration)body;
+                AnnotationTypeMemberDeclaration decl =
+                    (AnnotationTypeMemberDeclaration)body;
                 DFType type = finder.resolve(decl.getType());
                 this.addField(decl.getName(), isStatic(decl), type);
 
