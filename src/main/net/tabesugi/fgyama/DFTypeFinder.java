@@ -80,7 +80,7 @@ public class DFTypeFinder {
         throws TypeNotFound {
         try {
             DFKlass klass = _space.getKlass(name.replace('$', '.'));
-            klass.load(this);
+            klass.load();
             return klass;
         } catch (TypeNotFound e) {
             if (_next != null) {

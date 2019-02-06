@@ -391,25 +391,19 @@ public class DFKlass extends DFType {
         _filePath = filePath;
     }
 
+    public void load()
+        throws TypeNotFound {
+        this.build(_finder);
+    }
+
     protected void setBuilt() {
         assert !_built;
         _built = true;
     }
 
-    public void load()
+    public void build(DFTypeFinder finder)
         throws TypeNotFound {
         if (_built) return;
-        this.build(_finder);
-    }
-
-    public void load(DFTypeFinder finder)
-        throws TypeNotFound {
-        if (_built) return;
-	this.build(finder);
-    }
-
-    private void build(DFTypeFinder finder)
-        throws TypeNotFound {
         this.setBuilt();
         assert finder != null;
         assert _ast != null || _jarPath != null;
