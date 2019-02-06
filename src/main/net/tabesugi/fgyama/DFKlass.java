@@ -22,7 +22,7 @@ public class DFKlass extends DFType {
     // Ditto for base Interfaces.
     protected DFKlass[] _baseIfaces = null;
 
-    private DFTypeSpace _typeSpace;
+    private DFTypeSpace _parentSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
     private DFKlassScope _klassScope;
@@ -48,12 +48,12 @@ public class DFKlass extends DFType {
     private List<BodyDeclaration> _decls = null;
 
     public DFKlass(
-        String name, DFTypeSpace typeSpace,
+        String name, DFTypeSpace parentSpace,
         DFKlass parentKlass, DFVarScope parentScope,
         DFKlass baseKlass) {
         _name = name;
-        _typeSpace = typeSpace;
-        _klassSpace = typeSpace.lookupSpace(name);
+        _parentSpace = parentSpace;
+        _klassSpace = parentSpace.lookupSpace(name);
         _parentKlass = parentKlass;
         _baseKlass = baseKlass;
         _klassScope = new DFKlassScope(parentScope, name);
@@ -61,7 +61,7 @@ public class DFKlass extends DFType {
 
     protected DFKlass(String name, DFKlass genericKlass) {
         _name = name;
-        _typeSpace = genericKlass._typeSpace;
+        _parentSpace = genericKlass._parentSpace;
         _klassSpace = genericKlass._klassSpace;
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
@@ -182,7 +182,7 @@ public class DFKlass extends DFType {
     }
 
     public String getFullName() {
-        return _typeSpace.getFullName()+_name;
+        return _parentSpace.getFullName()+_name;
     }
 
     public DFMethod getInitializer() {

@@ -2253,12 +2253,9 @@ public class Java2DF {
     // Pass2: set references to external Klasses.
     @SuppressWarnings("unchecked")
     public void setTypeFinder(String key, CompilationUnit cunit) {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
-        finder = new DFTypeFinder(finder, packageSpace);
-        DFTypeSpace importSpace = new DFTypeSpace(null, "Import");
-        int n = 0;
+        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
             Name name = importDecl.getName();
@@ -2271,7 +2268,6 @@ public class Java2DF {
 		    DFKlass klass = _rootSpace.getKlass(name);
 		    Logger.debug("Import:", name);
 		    importSpace.addKlass(klass);
-		    n++;
 		} catch (TypeNotFound e) {
 		    if (!importDecl.isStatic()) {
 			Logger.error("Import: Class not found:", e.name);
@@ -2279,11 +2275,10 @@ public class Java2DF {
 		}
 	    }
         }
-        if (0 < n) {
-            finder = new DFTypeFinder(finder, importSpace);
-        }
-        DFKlass[] klasses = _klassList.get(key);
-        for (DFKlass klass : klasses) {
+	finder = new DFTypeFinder(finder, importSpace);
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        finder = new DFTypeFinder(finder, packageSpace);
+        for (DFKlass klass : _klassList.get(key)) {
             klass.setFinder(finder);
         }
     }
