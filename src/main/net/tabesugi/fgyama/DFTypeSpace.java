@@ -257,7 +257,7 @@ public class DFTypeSpace {
                 MethodDeclaration methodDecl = (MethodDeclaration)body;
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
-                    String id = Utils.encodeASTNode(methodDecl);
+                    String id = "method"+Utils.encodeASTNode(methodDecl);
                     DFTypeSpace methodSpace = this.lookupSpace(id);
                     DFLocalVarScope scope = new DFLocalVarScope(
                         parentScope, methodDecl.getName());

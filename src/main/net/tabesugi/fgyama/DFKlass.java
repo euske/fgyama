@@ -720,7 +720,7 @@ public class DFKlass extends DFType {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 List<TypeParameter> tps = decl.typeParameters();
-                String id = Utils.encodeASTNode(decl);
+                String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
                 finder = new DFTypeFinder(finder, methodSpace);
                 for (int i = 0; i < tps.size(); i++) {
