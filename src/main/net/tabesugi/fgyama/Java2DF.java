@@ -2106,7 +2106,7 @@ public class Java2DF {
         assert scope != null;
         DFFrame frame = method.getFrame();
         assert frame != null;
-        DFTypeSpace methodSpace = method.getChildSpace();
+        DFTypeSpace methodSpace = method.getMethodSpace();
         DFGraph graph = new DFGraph(scope, method, ast);
         DFContext ctx = new DFContext(graph, scope);
         DFTypeFinder finder = method.getFinder();

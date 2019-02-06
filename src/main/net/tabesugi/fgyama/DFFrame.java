@@ -652,7 +652,7 @@ public class DFFrame {
 		DFType instType;
 		if (anonDecl != null) {
 		    String id = Utils.encodeASTNode(anonDecl);
-		    DFTypeSpace anonSpace = method.getChildSpace().lookupSpace(id);
+		    DFTypeSpace anonSpace = method.getMethodSpace().lookupSpace(id);
 		    instType = anonSpace.getKlass(id);
 		} else {
 		    instType = finder.resolve(cstr.getType());

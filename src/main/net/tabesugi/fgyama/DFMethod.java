@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMethod implements Comparable<DFMethod> {
 
     private DFKlass _klass;
-    private DFTypeSpace _childSpace;
+    private DFTypeSpace _methodSpace;
     private String _name;
     private DFCallStyle _callStyle;
     private DFMethodType _methodType;
@@ -55,10 +55,10 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFMethod(
-        DFKlass klass, DFTypeSpace childSpace,
+        DFKlass klass, DFTypeSpace methodSpace,
         String name, DFCallStyle callStyle, DFMethodType methodType) {
         _klass = klass;
-        _childSpace = childSpace;
+        _methodSpace = methodSpace;
         _name = name;
         _callStyle = callStyle;
         _methodType = methodType;
@@ -68,7 +68,7 @@ public class DFMethod implements Comparable<DFMethod> {
         DFMethod method, DFKlass paramKlass,
         DFMethodType methodType, DFOverride[] overrides) {
         _klass = paramKlass;
-        _childSpace = method._childSpace; // XXX copy()
+        _methodSpace = method._methodSpace; // XXX copy()
         _name = method._name;
         _callStyle = method._callStyle;
         _srcScope = method._srcScope;
@@ -109,8 +109,8 @@ public class DFMethod implements Comparable<DFMethod> {
         return _callStyle;
     }
 
-    public DFTypeSpace getChildSpace() {
-        return _childSpace;
+    public DFTypeSpace getMethodSpace() {
+        return _methodSpace;
     }
 
     public DFType getReturnType() {
@@ -163,14 +163,14 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFTypeFinder getFinder() {
-        return new DFTypeFinder(_finder, _childSpace);
+        return new DFTypeFinder(_finder, _methodSpace);
     }
 
     public void setFinder(DFTypeFinder finder) {
         //assert _finder == null || _finder == finder;
         _finder = finder;
-	finder = new DFTypeFinder(finder, _childSpace);
-	for (DFKlass child : _childSpace.getKlasses()) {
+	finder = new DFTypeFinder(finder, _methodSpace);
+	for (DFKlass child : _methodSpace.getKlasses()) {
 	    child.setFinder(finder);
 	}
     }
