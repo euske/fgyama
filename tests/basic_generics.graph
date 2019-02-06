@@ -1,19 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <file path="tests/basic_generics.java">
-    <method name="basic_generics/Moo/Baa" style="initializer">
-      <ast length="13" start="254" type="55"/>
-      <scope name="basic_generics/Moo/Baa"/>
-    </method>
-    <method name="basic_generics/Moo" style="initializer">
-      <ast length="238" start="35" type="55"/>
-      <scope name="basic_generics/Moo">
-        <node data="uninitialized" id="Ncc70f04b_1" kind="const" type="@null"/>
-        <node id="Ncc70f04b_2" kind="assign" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;">
-          <link src="Ncc70f04b_1"/>
-          <ast length="1" start="68" type="59"/>
-        </node>
-      </scope>
-    </method>
     <method name="basic_generics" style="initializer">
       <ast length="546" start="0" type="55"/>
       <scope name="basic_generics"/>
@@ -96,6 +82,15 @@
         <node flow="in" id="N289636c4_5" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
     </method>
+    <method name="basic_generics/Moo" style="initializer">
+      <scope name="basic_generics/Moo">
+        <node data="uninitialized" id="Ncc70f04b_1" kind="const" type="@null"/>
+        <node id="Ncc70f04b_2" kind="assign" ref="@basic_generics/Moo/.x&lt;T:Ljava/lang/Object;&gt;" type="T:Ljava/lang/Object;">
+          <link src="Ncc70f04b_1"/>
+          <ast length="1" start="68" type="59"/>
+        </node>
+      </scope>
+    </method>
     <method name="Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;.&lt;init&gt;(T:Ljava/lang/Object;)Lbasic_generics/Moo&lt;T:Ljava/lang/Object;&gt;;" style="constructor">
       <ast length="44" start="80" type="31"/>
       <scope name="basic_generics/Moo.Moo">
@@ -144,6 +139,10 @@
         </scope>
         <node flow="in" id="N58c7b7ef_2" ref="@basic_generics/Moo/.x" type="T:Ljava/lang/Object;"/>
       </scope>
+    </method>
+    <method name="basic_generics/Moo/Baa" style="initializer">
+      <ast length="13" start="254" type="55"/>
+      <scope name="basic_generics/Moo/Baa"/>
     </method>
   </file>
 </fgyama>

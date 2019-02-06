@@ -66,6 +66,8 @@ public class DFKlass extends DFType {
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
         _baseKlass = genericKlass._baseKlass;
+        _finder = genericKlass._finder;
+        _decls = genericKlass._decls;
         this.setLoaded();
     }
 
