@@ -162,11 +162,17 @@ public class DFMethod implements Comparable<DFMethod> {
         return _callers;
     }
 
-    public void setFinder(DFTypeFinder finder) {
-	_finder = finder;
-    }
     public DFTypeFinder getFinder() {
         return new DFTypeFinder(_finder, _childSpace);
+    }
+
+    public void setFinder(DFTypeFinder finder) {
+        //assert _finder == null || _finder == finder;
+        _finder = finder;
+	finder = new DFTypeFinder(finder, _childSpace);
+	for (DFKlass child : _childSpace.getKlasses()) {
+	    child.setFinder(finder);
+	}
     }
 
     public void setSrcScope(DFLocalVarScope srcScope) {

@@ -2235,19 +2235,23 @@ public class Java2DF {
     }
 
     // Pass1: populate TypeSpaces.
+    @SuppressWarnings("unchecked")
     public void buildTypeSpace(String key, CompilationUnit cunit) {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFModuleScope module = new DFModuleScope(_globalScope, key);
         _moduleScope.put(key, module);
-        try {
-            DFKlass[] klasses = packageSpace.buildModuleSpace(cunit, module);
-            for (DFKlass klass : klasses) {
+	List<DFKlass> klasses = new ArrayList<DFKlass>();
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.buildAbstTypeDecl(
+		    abstTypeDecl, null, module);
                 Logger.debug("Pass1: created:", klass);
-            }
-            _klassList.put(key, klasses);
-        } catch (UnsupportedSyntax e) {
-            Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
-        }
+		klasses.add(klass);
+	    } catch (UnsupportedSyntax e) {
+		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
+	    }
+	}
     }
 
     // Pass2: set references to external Klasses.
@@ -2278,9 +2282,14 @@ public class Java2DF {
 	finder = new DFTypeFinder(finder, importSpace);
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         finder = new DFTypeFinder(finder, packageSpace);
-        for (DFKlass klass : _klassList.get(key)) {
-            klass.setFinder(finder);
-        }
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+		klass.setFinder(finder);
+	    } catch (TypeNotFound e) {
+	    }
+	}
     }
 
     // Pass3: load class definitions and define parameterized Klasses.
@@ -2310,18 +2319,25 @@ public class Java2DF {
                 if (0 < _strict) throw e;
             }
         }
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         List<DFKlass> klasses = new ArrayList<DFKlass>();
-	for (DFKlass klass : _klassList.get(key)) {
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
             try {
-                klass.load();
-                if (klass.isParameterized()) {
-                    for (DFKlass pklass : klass.getParamKlasses()) {
-                        pklass.load();
-                        klasses.add(pklass);
-                    }
-                } else {
-                    klasses.add(klass);
-                }
+		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+		List<DFKlass> list = new ArrayList<DFKlass>();
+		klass.enumChildKlasses(list);
+		for (DFKlass klass1 : list) {
+		    klass1.load();
+		    if (klass1.isParameterized()) {
+			for (DFKlass pklass : klass1.getParamKlasses()) {
+			    pklass.load();
+			    klasses.add(pklass);
+			}
+		    } else {
+			klasses.add(klass1);
+		    }
+		}
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;

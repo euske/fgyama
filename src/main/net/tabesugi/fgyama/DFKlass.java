@@ -128,6 +128,13 @@ public class DFKlass extends DFType {
         }
     }
 
+    public void enumChildKlasses(List<DFKlass> list) {
+	list.add(this);
+	for (DFKlass child : _klassSpace.getKlasses()) {
+	    child.enumChildKlasses(list);
+	}
+    }
+
     public DFParamKlass[] getParamKlasses() {
         DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
         _paramKlasses.toArray(klasses);
@@ -381,8 +388,13 @@ public class DFKlass extends DFType {
 
     public void setFinder(DFTypeFinder finder) {
         //assert _finder == null || _finder == finder;
-        _finder = finder;
+	_finder = finder;
+	finder = new DFTypeFinder(finder, _klassSpace);
+	for (DFKlass child : _klassSpace.getKlasses()) {
+	    child.setFinder(finder);
+	}
     }
+
     public void setTree(ASTNode ast) {
         _ast = ast;
     }
