@@ -171,7 +171,7 @@ public class DFMethod implements Comparable<DFMethod> {
         _finder = finder;
 	finder = new DFTypeFinder(finder, _methodSpace);
 	for (DFKlass child : _methodSpace.getKlasses()) {
-	    child.setFinder(finder);
+	    child.setBaseFinder(finder);
 	}
     }
 

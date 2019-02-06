@@ -1178,9 +1178,8 @@ public class Java2DF {
                 DFKlass instKlass;
                 if (anonDecl != null) {
                     // Anonymous classes are processed separately.
-                    String id = Utils.encodeASTNode(anonDecl);
-                    DFTypeSpace anonSpace = typeSpace.lookupSpace(id);
-		    DFKlass anonKlass = anonSpace.getKlass(id);
+                    String id = "anon"+Utils.encodeASTNode(anonDecl);
+		    DFKlass anonKlass = typeSpace.getKlass(id);
 		    instKlass = anonKlass;
                 } else {
                     instKlass = finder.resolveKlass(cstr.getType());
@@ -2286,7 +2285,7 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-		klass.setFinder(finder);
+		klass.setBaseFinder(finder);
 	    } catch (TypeNotFound e) {
 	    }
 	}
@@ -2326,8 +2325,10 @@ public class Java2DF {
             try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
 		List<DFKlass> list = new ArrayList<DFKlass>();
-		klass.enumChildKlasses(list);
+                list.add(klass);
+		klass.getKlassSpace().enumKlasses(list);
 		for (DFKlass klass1 : list) {
+                    if (klass1 instanceof DFMapType) continue;
 		    klass1.load();
 		    if (klass1.isParameterized()) {
 			for (DFKlass pklass : klass1.getParamKlasses()) {

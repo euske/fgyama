@@ -85,7 +85,7 @@ public class DFTypeSpace {
     protected DFKlass createKlass(
         DFKlass parentKlass, DFVarScope parentScope,
         AnonymousClassDeclaration anonDecl) {
-        String id = Utils.encodeASTNode(anonDecl);
+        String id = "anon"+Utils.encodeASTNode(anonDecl);
         DFKlass klass = this.createKlass(
             parentKlass, parentScope, id);
         klass.setTree(anonDecl);
@@ -142,6 +142,13 @@ public class DFTypeSpace {
 	DFKlass[] klasses = new DFKlass[_id2klass.size()];
 	_id2klass.values().toArray(klasses);
 	return klasses;
+    }
+
+    public void enumKlasses(List<DFKlass> list) {
+        list.addAll(_id2klass.values());
+        for (DFTypeSpace child : _id2space.values()) {
+            child.enumKlasses(list);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -214,13 +221,11 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    private DFKlass buildAnnonDecl(
+    private DFKlass buildAnonDecl(
         AnonymousClassDeclaration anonDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
-        String id = Utils.encodeASTNode(anonDecl);
-        DFTypeSpace anonSpace = this.lookupSpace(id);
-        DFKlass klass = anonSpace.createKlass(
+        DFKlass klass = this.createKlass(
             parentKlass, parentScope, anonDecl);
         DFTypeSpace child = klass.getKlassSpace();
         child.buildDecls(
@@ -563,7 +568,7 @@ public class DFTypeSpace {
             AnonymousClassDeclaration anonDecl =
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
-                this.buildAnnonDecl(anonDecl, klass, parentScope);
+                this.buildAnonDecl(anonDecl, klass, parentScope);
             }
 
         } else if (expr instanceof ConditionalExpression) {
