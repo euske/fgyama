@@ -16,7 +16,7 @@
       <ast length="246" start="139" type="31"/>
       <scope name="basic_methods.fa">
         <scope name="basic_methods.fa.b0">
-          <node data="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;" id="N929107f2_1" kind="new" type="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;">
+          <node data="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;" id="N929107f2_1" kind="new" type="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;">
             <ast length="60" start="165" type="14"/>
           </node>
           <node id="N929107f2_2" kind="assign" ref="$basic_methods.fa.b0/$a" type="Lbasic_methods/A;">
@@ -43,18 +43,18 @@
             <link label="#this" src="N929107f2_7"/>
             <ast length="12" start="323" type="32"/>
           </node>
-          <node data="Lbasic_methods/:AST:31:139:246/moo;" id="N929107f2_9" kind="new" type="Lbasic_methods/:AST:31:139:246/moo;">
+          <node data="Lbasic_methods/method:AST:31:139:246/moo;" id="N929107f2_9" kind="new" type="Lbasic_methods/method:AST:31:139:246/moo;">
             <ast length="9" start="353" type="14"/>
           </node>
-          <node id="N929107f2_10" kind="assign" ref="$basic_methods.fa.b0/$c" type="Lbasic_methods/:AST:31:139:246/moo;">
+          <node id="N929107f2_10" kind="assign" ref="$basic_methods.fa.b0/$c" type="Lbasic_methods/method:AST:31:139:246/moo;">
             <link src="N929107f2_9"/>
             <ast length="13" start="349" type="59"/>
           </node>
-          <node id="N929107f2_11" kind="ref" ref="$basic_methods.fa.b0/$c" type="Lbasic_methods/:AST:31:139:246/moo;">
+          <node id="N929107f2_11" kind="ref" ref="$basic_methods.fa.b0/$c" type="Lbasic_methods/method:AST:31:139:246/moo;">
             <link src="N929107f2_10"/>
             <ast length="1" start="372" type="42"/>
           </node>
-          <node data="Lbasic_methods/:AST:31:139:246/moo;.fc()I" id="N929107f2_12" kind="call" type="I">
+          <node data="Lbasic_methods/method:AST:31:139:246/moo;.fc()I" id="N929107f2_12" kind="call" type="I">
             <link label="#this" src="N929107f2_11"/>
             <link label="@basic_methods/.x" src="N929107f2_3"/>
             <ast length="6" start="372" type="32"/>
@@ -109,49 +109,49 @@
         </scope>
       </scope>
     </method>
-    <method name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52" style="initializer">
+    <method name="basic_methods/method:AST:31:139:246/anon:AST:1:173:52" style="initializer">
       <ast length="52" start="173" type="1"/>
-      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52"/>
+      <scope name="basic_methods/method:AST:31:139:246/anon:AST:1:173:52"/>
     </method>
-    <method name="Lbasic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52;.toString()Ljava/lang/String;" style="instance">
+    <method name="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;.toString()Ljava/lang/String;" style="instance">
       <ast length="42" start="180" type="31"/>
-      <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString">
-        <scope name="basic_methods/:AST:31:139:246/:AST:1:173:52/:AST:1:173:52.toString.b0">
-          <node data="AAA" id="Nc7ac5e03_1" kind="const" type="Ljava/lang/String;">
+      <scope name="basic_methods/method:AST:31:139:246/anon:AST:1:173:52.toString">
+        <scope name="basic_methods/method:AST:31:139:246/anon:AST:1:173:52.toString.b0">
+          <node data="AAA" id="Ne86629a0_1" kind="const" type="Ljava/lang/String;">
             <ast length="5" start="214" type="45"/>
           </node>
-          <node flow="out" id="Nc7ac5e03_2" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="Nc7ac5e03_1"/>
+          <node flow="out" id="Ne86629a0_2" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="Ne86629a0_1"/>
             <ast length="13" start="207" type="41"/>
           </node>
         </scope>
       </scope>
     </method>
-    <method name="basic_methods/:AST:31:139:246/moo" style="initializer">
+    <method name="basic_methods/method:AST:31:139:246/moo" style="initializer">
       <ast length="68" start="228" type="55"/>
-      <scope name="basic_methods/:AST:31:139:246/moo"/>
+      <scope name="basic_methods/method:AST:31:139:246/moo"/>
     </method>
-    <method name="Lbasic_methods/:AST:31:139:246/moo;.fc()I" style="instance">
+    <method name="Lbasic_methods/method:AST:31:139:246/moo;.fc()I" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
       <ast length="48" start="245" type="31"/>
-      <scope name="basic_methods/:AST:31:139:246/moo.fc">
-        <scope name="basic_methods/:AST:31:139:246/moo.fc.b0">
-          <node id="Nc909cfad_1" kind="ref" ref="#this" type="Lbasic_methods;">
-            <link src="Nc909cfad_2"/>
+      <scope name="basic_methods/method:AST:31:139:246/moo.fc">
+        <scope name="basic_methods/method:AST:31:139:246/moo.fc.b0">
+          <node id="N778a15ce_1" kind="ref" ref="#this" type="Lbasic_methods;">
+            <link src="N778a15ce_2"/>
             <ast length="18" start="270" type="52"/>
           </node>
-          <node id="Nc909cfad_3" kind="fieldref" ref="@basic_methods/.x" type="I">
-            <link src="Nc909cfad_4"/>
-            <link label="obj" src="Nc909cfad_1"/>
+          <node id="N778a15ce_3" kind="fieldref" ref="@basic_methods/.x" type="I">
+            <link src="N778a15ce_4"/>
+            <link label="obj" src="N778a15ce_1"/>
             <ast length="20" start="270" type="22"/>
           </node>
-          <node flow="out" id="Nc909cfad_5" kind="output" ref="#return" type="I">
-            <link src="Nc909cfad_3"/>
+          <node flow="out" id="N778a15ce_5" kind="output" ref="#return" type="I">
+            <link src="N778a15ce_3"/>
             <ast length="28" start="263" type="41"/>
           </node>
         </scope>
-        <node flow="in" id="Nc909cfad_2" ref="#this" type="Lbasic_methods;"/>
-        <node flow="in" id="Nc909cfad_4" ref="@basic_methods/.x" type="I"/>
+        <node flow="in" id="N778a15ce_2" ref="#this" type="Lbasic_methods;"/>
+        <node flow="in" id="N778a15ce_4" ref="@basic_methods/.x" type="I"/>
       </scope>
     </method>
   </file>
