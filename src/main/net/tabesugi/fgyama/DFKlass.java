@@ -40,7 +40,7 @@ public class DFKlass extends DFType {
     private Map<String, DFLocalVarScope> _ast2scope =
         new HashMap<String, DFLocalVarScope>();
 
-    private boolean _loaded = false;
+    private boolean _built = false;
     private DFTypeFinder _finder = null;
     private String _jarPath = null;
     private String _filePath = null;
@@ -68,7 +68,7 @@ public class DFKlass extends DFType {
         _baseKlass = genericKlass._baseKlass;
         _finder = genericKlass._finder;
         _decls = genericKlass._decls;
-        this.setLoaded();
+        this.setBuilt();
     }
 
     @Override
@@ -115,7 +115,7 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass parameterize(DFType[] paramTypes) {
-        assert _loaded;
+        assert _built;
         assert this.isParameterized();
         String name = _name + DFParamKlass.getParamNames(paramTypes);
         try {
@@ -140,9 +140,7 @@ public class DFKlass extends DFType {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            DFMapType pt = _klassSpace.createMapType(id);
-            pt.setTree(tp);
-            _mapTypes[i] = pt;
+            _mapTypes[i] = _klassSpace.createMapType(id);
         }
     }
 
@@ -177,7 +175,7 @@ public class DFKlass extends DFType {
     }
 
     public boolean isParameterized() {
-        assert _loaded;
+        assert _built;
         return (_mapTypes != null && 0 < _mapTypes.length);
     }
 
@@ -213,7 +211,7 @@ public class DFKlass extends DFType {
 
     protected DFRef lookupField(String id)
         throws VariableNotFound {
-        assert _loaded;
+        assert _built;
         if (_klassScope != null) {
             try {
                 return _klassScope.lookupRef("."+id);
@@ -243,12 +241,12 @@ public class DFKlass extends DFType {
     }
 
     protected List<DFRef> getFields() {
-        assert _loaded;
+        assert _built;
 	return _fields;
     }
 
     public List<DFMethod> getMethods() {
-        assert _loaded;
+        assert _built;
 	return _methods;
     }
 
@@ -269,7 +267,7 @@ public class DFKlass extends DFType {
 
     public DFMethod lookupMethod(SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
-        assert _loaded;
+        assert _built;
         DFMethod method = this.lookupMethod1(name, argTypes);
         if (method != null) {
             return method;
@@ -335,7 +333,7 @@ public class DFKlass extends DFType {
     }
 
     public void addOverrides() {
-        assert _loaded;
+        assert _built;
         for (DFMethod method : getMethods()) {
             if (_baseKlass != null) {
                 _baseKlass.overrideMethod(method, 0);
@@ -393,19 +391,26 @@ public class DFKlass extends DFType {
         _filePath = filePath;
     }
 
-    protected void setLoaded() {
-        assert !_loaded;
-        _loaded = true;
+    protected void setBuilt() {
+        assert !_built;
+        _built = true;
     }
 
     public void load()
         throws TypeNotFound {
-        this.load(_finder);
+        if (_built) return;
+        this.build(_finder);
     }
+
     public void load(DFTypeFinder finder)
         throws TypeNotFound {
-        if (_loaded) return;
-        this.setLoaded();
+        if (_built) return;
+	this.build(finder);
+    }
+
+    private void build(DFTypeFinder finder)
+        throws TypeNotFound {
+        this.setBuilt();
         assert finder != null;
         assert _ast != null || _jarPath != null;
         if (_ast != null) {
@@ -432,15 +437,6 @@ public class DFKlass extends DFType {
                 throw new TypeNotFound(this.getFullName());
             }
         }
-    }
-
-    private static String getSignature(Attribute[] attrs) {
-        for (Attribute attr : attrs) {
-            if (attr instanceof org.apache.bcel.classfile.Signature) {
-                return ((org.apache.bcel.classfile.Signature)attr).getSignature();
-            }
-        }
-        return null;
     }
 
     private void buildFromJKlass(DFTypeFinder finder, JavaClass jklass)
@@ -542,6 +538,15 @@ public class DFKlass extends DFType {
         }
     }
 
+    private static String getSignature(Attribute[] attrs) {
+        for (Attribute attr : attrs) {
+            if (attr instanceof org.apache.bcel.classfile.Signature) {
+                return ((org.apache.bcel.classfile.Signature)attr).getSignature();
+            }
+        }
+        return null;
+    }
+
     @SuppressWarnings("unchecked")
     protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
         throws UnsupportedSyntax, TypeNotFound {
@@ -583,8 +588,11 @@ public class DFKlass extends DFType {
         try {
             // Get superclass.
 	    if (_mapTypes != null) {
-                for (DFMapType pt : _mapTypes) {
-                    pt.load(finder0);
+                List<TypeParameter> tps = typeDecl.typeParameters();
+                for (int i = 0; i < _mapTypes.length; i++) {
+		    DFMapType pt = _mapTypes[i];
+		    TypeParameter tp = tps.get(i);
+                    pt.buildTypeParam(finder0, tp);
                 }
 	    }
             Type superClass = typeDecl.getSuperclassType();
@@ -720,8 +728,7 @@ public class DFKlass extends DFType {
                     TypeParameter tp = tps.get(i);
                     String id2 = tp.getName().getIdentifier();
                     DFMapType pt = methodSpace.createMapType(id2);
-                    pt.setTree(tp);
-                    pt.load(finder);
+                    pt.buildTypeParam(finder, tp);
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;

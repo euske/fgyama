@@ -146,7 +146,7 @@ public class JNITypeParser {
 		_pos++;	 // ???
 	    }
             DFMapType pt = mapTypes[n++];
-            pt.load(finder, this);
+            pt.setBaseKlass((DFKlass)getType(finder));
         }
         _pos++;
     }

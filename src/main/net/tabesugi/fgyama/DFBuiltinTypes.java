@@ -50,7 +50,7 @@ public class DFBuiltinTypes {
         public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
             super("_Array", typeSpace, null, null, baseKlass);
             this.addField("length", false, DFBasicType.INT);
-            this.setLoaded();
+            this.setBuilt();
         }
     }
 

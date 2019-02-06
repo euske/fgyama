@@ -14,6 +14,7 @@ public class DFMapType extends DFKlass {
     public DFMapType(
         String name, DFTypeSpace typeSpace) {
         super(name, typeSpace, null, null, DFBuiltinTypes.getObjectKlass());
+        this.setBuilt();
     }
 
     @Override
@@ -46,21 +47,13 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    public void load(DFTypeFinder finder, JNITypeParser parser)
+    public void setBaseKlass(DFKlass baseKlass)
         throws TypeNotFound {
-        this.setLoaded();
-        _baseKlass = (DFKlass)parser.getType(finder);
-    }
-
-    protected void buildFromTree(DFTypeFinder finder, ASTNode ast)
-        throws UnsupportedSyntax, TypeNotFound {
-        if (ast instanceof TypeParameter) {
-            this.buildTypeParam(finder, (TypeParameter)ast);
-        }
+        _baseKlass = baseKlass;
     }
 
     @SuppressWarnings("unchecked")
-    private void buildTypeParam(DFTypeFinder finder, TypeParameter tp)
+    public void buildTypeParam(DFTypeFinder finder, TypeParameter tp)
         throws TypeNotFound {
         //Logger.info("DFMapType.build:", this, ":", tp);
         try {
