@@ -187,7 +187,7 @@ public class DFMethod implements Comparable<DFMethod> {
         return _frame;
     }
 
-    public void buildScopeAndFrame()
+    public void buildScope()
         throws UnsupportedSyntax, TypeNotFound {
 	if (_ast == null) return;
 	assert _srcScope != null;
@@ -201,6 +201,13 @@ public class DFMethod implements Comparable<DFMethod> {
 	    throw new UnsupportedSyntax(_ast);
 	}
         //_scope.dump();
+    }
+
+    public void buildFrame()
+        throws UnsupportedSyntax, TypeNotFound {
+	if (_ast == null) return;
+	assert _scope != null;
+	assert _finder != null;
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
 	    if (_ast instanceof MethodDeclaration) {

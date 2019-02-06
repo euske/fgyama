@@ -2348,14 +2348,13 @@ public class Java2DF {
             }
         }
 
-        // Build call graphs.
-        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
+        // Build method scopes.
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
                 DFMethod init = klass.getInitializer();
                 if (init != null) {
                     try {
-                        init.buildScopeAndFrame();
+                        init.buildScope();
                     } catch (UnsupportedSyntax e) {
                         Logger.error("Pass4: Unsupported at", klass,
                                      e.name, "("+e.getAstName()+")");
@@ -2367,7 +2366,39 @@ public class Java2DF {
                 }
                 for (DFMethod method : klass.getMethods()) {
                     try {
-                        method.buildScopeAndFrame();
+                        method.buildScope();
+                    } catch (UnsupportedSyntax e) {
+                        Logger.error("Pass4: Unsupported at", klass,
+                                     e.name, "("+e.getAstName()+")");
+                    } catch (EntityNotFound e) {
+                        Logger.error("Pass4: EntityNotFound at", klass,
+                                     "("+e.name+")");
+                        if (0 < _strict) throw e;
+                    }
+                }
+            }
+        }
+
+        // Build call graphs.
+        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
+        for (DFKlass[] klasses : _klassList.values()) {
+            for (DFKlass klass : klasses) {
+                DFMethod init = klass.getInitializer();
+                if (init != null) {
+                    try {
+                        init.buildFrame();
+                    } catch (UnsupportedSyntax e) {
+                        Logger.error("Pass4: Unsupported at", klass,
+                                     e.name, "("+e.getAstName()+")");
+                    } catch (EntityNotFound e) {
+                        Logger.error("Pass4: EntityNotFound at", klass,
+                                     "("+e.name+")");
+                        if (0 < _strict) throw e;
+                    }
+                }
+                for (DFMethod method : klass.getMethods()) {
+                    try {
+                        method.buildFrame();
                         queue.add(method);
                     } catch (UnsupportedSyntax e) {
                         Logger.error("Pass4: Unsupported at", klass,
