@@ -221,8 +221,8 @@ def main(argv):
         if node.ast is None: return None
         src = node.graph.src
         fid = srcmap[src]
-        (_,s,e) = node.ast
-        return (fid, s, e)
+        (_,loc,length) = node.ast
+        return (fid, loc, length)
 
     nents = 0
     for (gid,nodes) in funcalls.items():
@@ -234,8 +234,8 @@ def main(argv):
             graph = gid2graph[gid]
             if graph.ast is not None:
                 fid = srcmap[graph.src]
-                (_,s,e) = graph.ast
-                src = (fid, s, e)
+                (_,loc,length) = graph.ast
+                src = (fid, loc, length)
         dbg.write('# gid: %r\n' % gid)
         data = (gid, src)
         fp.write('+FUNC %r\n' % (data,))
