@@ -9,6 +9,8 @@ import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
+import org.apache.bcel.*;
+import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
@@ -380,5 +382,14 @@ public class Utils {
         default:
             return null;
         }
+    }
+
+    public static String getJKlassSignature(Attribute[] attrs) {
+        for (Attribute attr : attrs) {
+            if (attr instanceof org.apache.bcel.classfile.Signature) {
+                return ((org.apache.bcel.classfile.Signature)attr).getSignature();
+            }
+        }
+        return null;
     }
 }

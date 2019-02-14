@@ -2330,7 +2330,7 @@ public class Java2DF {
 		for (DFKlass klass1 : list) {
                     if (klass1 instanceof DFMapType) continue;
 		    klass1.load();
-		    if (klass1.isParameterized()) {
+		    if (klass1.isGeneric()) {
 			for (DFKlass pklass : klass1.getParamKlasses()) {
 			    pklass.load();
 			    klasses.add(pklass);

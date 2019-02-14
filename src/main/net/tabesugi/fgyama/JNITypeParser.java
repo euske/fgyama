@@ -168,6 +168,7 @@ public class JNITypeParser {
 	    pos = skipType(text, pos);
         }
         pos++;
+        if (params.size() == 0) return null;
         DFMapType[] mapTypes = new DFMapType[params.size()];
         params.toArray(mapTypes);
         return mapTypes;

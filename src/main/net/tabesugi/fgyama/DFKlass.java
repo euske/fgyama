@@ -28,8 +28,7 @@ public class DFKlass extends DFType {
     private DFKlassScope _klassScope;
 
     private DFMapType[] _mapTypes = null;
-    private List<DFParamKlass> _paramKlasses =
-        new ArrayList<DFParamKlass>();
+    private List<DFParamKlass> _paramKlasses = null;
 
     private DFMethod _initializer = null;
     private DFMethod _constructor = null;
@@ -115,8 +114,7 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass parameterize(DFType[] paramTypes) {
-        assert _built;
-        assert this.isParameterized();
+        assert _mapTypes != null;
         String name = _name + DFParamKlass.getParamNames(paramTypes);
         try {
             return (DFParamKlass)_klassSpace.getKlass(name);
@@ -129,6 +127,7 @@ public class DFKlass extends DFType {
     }
 
     public DFParamKlass[] getParamKlasses() {
+        assert _paramKlasses != null;
         DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
         _paramKlasses.toArray(klasses);
         return klasses;
@@ -136,11 +135,21 @@ public class DFKlass extends DFType {
 
     public void setMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
-        _mapTypes = new DFMapType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            TypeParameter tp = tps.get(i);
-            String id = tp.getName().getIdentifier();
-            _mapTypes[i] = _klassSpace.createMapType(id);
+        if (0 < tps.size()) {
+            _mapTypes = new DFMapType[tps.size()];
+            for (int i = 0; i < tps.size(); i++) {
+                TypeParameter tp = tps.get(i);
+                String id = tp.getName().getIdentifier();
+                _mapTypes[i] = _klassSpace.createMapType(id);
+            }
+            _paramKlasses = new ArrayList<DFParamKlass>();
+        }
+    }
+
+    public void setMapTypes(String sig) {
+        _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
+        if (_mapTypes != null) {
+            _paramKlasses = new ArrayList<DFParamKlass>();
         }
     }
 
@@ -174,9 +183,8 @@ public class DFKlass extends DFType {
                 DFBuiltinTypes.getEnumKlass());
     }
 
-    public boolean isParameterized() {
-        assert _built;
-        return (_mapTypes != null && 0 < _mapTypes.length);
+    public boolean isGeneric() {
+        return (_mapTypes != null);
     }
 
     public String getFullName() {
@@ -447,11 +455,11 @@ public class DFKlass extends DFType {
             finder0 = finder0.extend(_parentKlass);
         }
         finder0 = new DFTypeFinder(finder0, _klassSpace);
-        String sig = getSignature(jklass.getAttributes());
+        String sig = Utils.getJKlassSignature(jklass.getAttributes());
         if (sig != null) {
             //Logger.info("jklass:", jklass.getClassName(), jklass.isEnum(), sig);
+            setMapTypes(sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
-	    _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
 	    if (_mapTypes != null) {
 		parser.buildMapTypes(finder0, _mapTypes);
 	    }
@@ -491,7 +499,7 @@ public class DFKlass extends DFType {
         }
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
-            sig = getSignature(fld.getAttributes());
+            sig = Utils.getJKlassSignature(fld.getAttributes());
 	    DFType type;
 	    if (sig != null) {
                 //Logger.info("fld:", fld.getName(), sig);
@@ -504,7 +512,7 @@ public class DFKlass extends DFType {
         }
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
-            sig = getSignature(meth.getAttributes());
+            sig = Utils.getJKlassSignature(meth.getAttributes());
 	    DFMethodType methodType;
             DFTypeSpace methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
 	    if (sig != null) {
@@ -535,15 +543,6 @@ public class DFKlass extends DFType {
                     methodSpace, meth.getName(), callStyle, methodType);
             }
         }
-    }
-
-    private static String getSignature(Attribute[] attrs) {
-        for (Attribute attr : attrs) {
-            if (attr instanceof org.apache.bcel.classfile.Signature) {
-                return ((org.apache.bcel.classfile.Signature)attr).getSignature();
-            }
-        }
-        return null;
     }
 
     @SuppressWarnings("unchecked")
