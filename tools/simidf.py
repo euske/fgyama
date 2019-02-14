@@ -106,12 +106,12 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-H] [-B basedir] [-t threshold] '
-              '[-n minproj] [-m maxresults] [-M maxlength] [-c encoding] '
+        print('usage: %s [-o output] [-H] [-B basedir] [-c encoding] '
+              '[-t threshold] [-n minproj] [-m maxresults] [-M maxlength] '
               'out.idf ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:HB:t:n:m:M:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HB:c:t:n:m:M:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -126,11 +126,11 @@ def main(argv):
         if k == '-o': output = v
         elif k == '-H': html = True
         elif k == '-B': srcdb = SourceDB(v, encoding)
+        elif k == '-c': encoding = v
         elif k == '-t': threshold = float(v)
         elif k == '-n': minproj = int(v)
         elif k == '-m': maxresults = int(v)
         elif k == '-M': maxlength = int(v)
-        elif k == '-c': encoding = v
     if not args: return usage()
 
     # Index features.
