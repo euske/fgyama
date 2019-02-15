@@ -22,11 +22,6 @@ public class DFMapType extends DFKlass {
         return ("<DFMapType("+this.getFullName()+":"+_baseKlass+")>");
     }
 
-    @Override
-    public String getTypeName() {
-        return _name+":"+_baseKlass.getTypeName();
-    }
-
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (typeMap == null) {
             typeMap = new HashMap<DFMapType, DFType>();

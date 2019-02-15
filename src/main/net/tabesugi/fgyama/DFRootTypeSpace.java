@@ -30,19 +30,21 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public void loadJarFile(String jarPath)
         throws IOException {
         Logger.info("Loading:", jarPath);
-        JarFile jarfile = new JarFile(jarPath);
+        JarFile jarFile = new JarFile(jarPath);
         try {
-            for (Enumeration<JarEntry> es = jarfile.entries(); es.hasMoreElements(); ) {
-                JarEntry je = es.nextElement();
-                String filePath = je.getName();
-                addFile(jarPath, filePath);
+            for (Enumeration<JarEntry> es = jarFile.entries(); es.hasMoreElements(); ) {
+                JarEntry jarEntry = es.nextElement();
+                addFile(jarFile, jarEntry);
             }
         } finally {
-            jarfile.close();
+            jarFile.close();
         }
     }
 
-    private void addFile(String jarPath, String filePath) {
+    private void addFile(JarFile jarFile, JarEntry jarEntry)
+        throws IOException {
+        String jarPath = jarFile.getName();
+        String filePath = jarEntry.getName();
         if (!filePath.endsWith(".class")) return;
         String s = filePath.substring(0, filePath.length()-6);
         int i = s.indexOf('$');
@@ -60,6 +62,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
             klass.setBaseFinder(_finder);
         }
         klass.setJarPath(jarPath, filePath);
+        InputStream strm = jarFile.getInputStream(jarEntry);
+        JavaClass jklass = new ClassParser(strm, filePath).parse();
+        String sig = Utils.getJKlassSignature(jklass.getAttributes());
+        if (sig != null) {
+            klass.setMapTypes(sig);
+        }
     }
-
 }

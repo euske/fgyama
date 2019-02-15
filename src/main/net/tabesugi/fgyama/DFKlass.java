@@ -458,7 +458,6 @@ public class DFKlass extends DFType {
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
         if (sig != null) {
             //Logger.info("jklass:", jklass.getClassName(), jklass.isEnum(), sig);
-            setMapTypes(sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    if (_mapTypes != null) {
 		parser.buildMapTypes(finder0, _mapTypes);
