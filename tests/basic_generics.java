@@ -9,7 +9,8 @@ public class basic_generics {
         }
 
         T get() {
-            return x;
+            T y = x;
+            return y;
         }
 
         Moo<T> copy() {

@@ -2329,13 +2329,13 @@ public class Java2DF {
 		klass.getKlassSpace().enumKlasses(list);
 		for (DFKlass klass1 : list) {
                     if (klass1 instanceof DFMapType) continue;
-		    klass1.load();
 		    if (klass1.isGeneric()) {
 			for (DFKlass pklass : klass1.getParamKlasses()) {
 			    pklass.load();
 			    klasses.add(pklass);
 			}
 		    } else {
+                        klass1.load();
 			klasses.add(klass1);
 		    }
 		}
