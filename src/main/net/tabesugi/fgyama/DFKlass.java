@@ -14,37 +14,35 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFKlass extends DFType {
 
-    protected String _name;
-
-    // Ultimately every klass must have a baseKlass, but
-    // they're not defined until it is loaded.
-    protected DFKlass _baseKlass = null;
-    // Ditto for base Interfaces.
-    protected DFKlass[] _baseIfaces = null;
-
+    // These fields are available upon construction.
+    private String _name;
     private DFTypeSpace _parentSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
     private DFKlassScope _klassScope;
+    private Map<String, DFLocalVarScope> _methodScopes;
 
+    // These fields are set immediately.
+    private ASTNode _ast = null;
+    private String _jarPath = null;
+    private String _filePath = null;
+
+    // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
     private List<DFParamKlass> _paramKlasses = null;
 
+    // This field is available after setFinder(). (Pass2)
+    private DFTypeFinder _finder = null;
+
+    // The following fields are available after the klass is loaded.
+    private boolean _built = false;
+    private DFKlass _baseKlass = null;
+    private DFKlass[] _baseIfaces = null;
+    private List<BodyDeclaration> _decls = null;
     private DFMethod _initializer = null;
     private DFMethod _constructor = null;
-    private List<DFRef> _fields =
-        new ArrayList<DFRef>();
-    private List<DFMethod> _methods =
-        new ArrayList<DFMethod>();
-    private Map<String, DFLocalVarScope> _ast2scope =
-        new HashMap<String, DFLocalVarScope>();
-
-    private boolean _built = false;
-    private DFTypeFinder _finder = null;
-    private String _jarPath = null;
-    private String _filePath = null;
-    private ASTNode _ast = null;
-    private List<BodyDeclaration> _decls = null;
+    private List<DFRef> _fields = null;
+    private List<DFMethod> _methods = null;
 
     public DFKlass(
         String name, DFTypeSpace parentSpace,
@@ -54,20 +52,32 @@ public class DFKlass extends DFType {
         _parentSpace = parentSpace;
         _klassSpace = parentSpace.lookupSpace(name);
         _parentKlass = parentKlass;
-        _baseKlass = baseKlass;
         _klassScope = new DFKlassScope(parentScope, name);
+        _methodScopes = new HashMap<String, DFLocalVarScope>();
+        _baseKlass = baseKlass;
     }
 
+    // Constructor for a parameterized klass.
     protected DFKlass(String name, DFKlass genericKlass) {
         _name = name;
         _parentSpace = genericKlass._parentSpace;
         _klassSpace = genericKlass._klassSpace;
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
+        _methodScopes = genericKlass._methodScopes;
         _baseKlass = genericKlass._baseKlass;
+
+        _ast = genericKlass._ast;
+        _jarPath = genericKlass._jarPath;
+        _filePath = genericKlass._filePath;
+
+        assert _mapTypes == null;
+        assert _paramKlasses == null;
+
         _finder = genericKlass._finder;
-        _decls = genericKlass._decls;
-        this.setBuilt();
+
+        // not loaded yet!
+        assert !_built;
     }
 
     @Override
@@ -113,26 +123,6 @@ public class DFKlass extends DFType {
         return ((DFKlass)type).isSubclassOf(this, typeMap);
     }
 
-    public DFParamKlass parameterize(DFType[] paramTypes) {
-        assert _mapTypes != null;
-        String name = _name + DFParamKlass.getParamNames(paramTypes);
-        try {
-            return (DFParamKlass)_klassSpace.getKlass(name);
-        } catch (TypeNotFound e) {
-            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, paramTypes);
-            _klassSpace.addKlass(klass);
-            _paramKlasses.add(klass);
-            return klass;
-        }
-    }
-
-    public DFParamKlass[] getParamKlasses() {
-        assert _paramKlasses != null;
-        DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
-        _paramKlasses.toArray(klasses);
-        return klasses;
-    }
-
     public void setMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
         if (0 < tps.size()) {
@@ -153,6 +143,53 @@ public class DFKlass extends DFType {
         }
     }
 
+    public void putMethodScope(ASTNode ast, DFLocalVarScope scope) {
+        _methodScopes.put(Utils.encodeASTNode(ast), scope);
+    }
+
+    public DFParamKlass parameterize(DFType[] paramTypes) {
+        assert _mapTypes != null;
+        assert _paramKlasses != null;
+        String name = _name + DFParamKlass.getParamNames(paramTypes);
+        try {
+            return (DFParamKlass)_klassSpace.getKlass(name);
+        } catch (TypeNotFound e) {
+            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, paramTypes);
+            _klassSpace.addKlass(name, klass);
+            _paramKlasses.add(klass);
+            return klass;
+        }
+    }
+
+    public DFParamKlass[] getParamKlasses() {
+        assert _paramKlasses != null;
+        DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
+        _paramKlasses.toArray(klasses);
+        return klasses;
+    }
+
+    public void setBaseFinder(DFTypeFinder finder) {
+        //assert _finder == null || _finder == finder;
+	_finder = finder;
+	finder = new DFTypeFinder(finder, _klassSpace);
+	for (DFKlass child : _klassSpace.getKlasses()) {
+	    child.setBaseFinder(finder);
+	}
+    }
+
+    public DFTypeFinder getFinder() {
+        return _finder.extend(this);
+    }
+
+    public void setJarPath(String jarPath, String filePath) {
+        _jarPath = jarPath;
+        _filePath = filePath;
+    }
+
+    public void setTree(ASTNode ast) {
+        _ast = ast;
+    }
+
     public String getKlassName() {
         return _name;
     }
@@ -169,10 +206,22 @@ public class DFKlass extends DFType {
         return _klassScope;
     }
 
+    private DFLocalVarScope getMethodScope(ASTNode ast) {
+	String key = Utils.encodeASTNode(ast);
+        assert _methodScopes.containsKey(key);
+        return _methodScopes.get(key);
+    }
+
+    public void setBaseKlass(DFKlass baseKlass) {
+        _baseKlass = baseKlass;
+    }
     public DFKlass getBaseKlass() {
         return _baseKlass;
     }
 
+    public void setBaseIfaces(DFKlass[] baseIfaces) {
+        _baseIfaces = baseIfaces;
+    }
     public DFKlass[] getBaseIfaces() {
         return _baseIfaces;
     }
@@ -330,16 +379,6 @@ public class DFKlass extends DFType {
         return method;
     }
 
-    public void addMethodScope(ASTNode ast, DFLocalVarScope scope) {
-        _ast2scope.put(Utils.encodeASTNode(ast), scope);
-    }
-
-    private DFLocalVarScope getMethodScope(ASTNode ast) {
-	String key = Utils.encodeASTNode(ast);
-        assert _ast2scope.containsKey(key);
-        return _ast2scope.get(key);
-    }
-
     public void addOverrides() {
         assert _built;
         for (DFMethod method : getMethods()) {
@@ -383,27 +422,6 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public DFTypeFinder getFinder() {
-        return _finder.extend(this);
-    }
-
-    public void setBaseFinder(DFTypeFinder finder) {
-        //assert _finder == null || _finder == finder;
-	_finder = finder;
-	finder = new DFTypeFinder(finder, _klassSpace);
-	for (DFKlass child : _klassSpace.getKlasses()) {
-	    child.setBaseFinder(finder);
-	}
-    }
-
-    public void setTree(ASTNode ast) {
-        _ast = ast;
-    }
-    public void setJarPath(String jarPath, String filePath) {
-        _jarPath = jarPath;
-        _filePath = filePath;
-    }
-
     public void load()
         throws TypeNotFound {
         this.build(_finder);
@@ -412,6 +430,8 @@ public class DFKlass extends DFType {
     protected void setBuilt() {
         assert !_built;
         _built = true;
+        _fields = new ArrayList<DFRef>();
+        _methods =  new ArrayList<DFMethod>();
     }
 
     public void build(DFTypeFinder finder)

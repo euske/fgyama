@@ -101,17 +101,16 @@ public class DFTypeSpace {
             id, this, parentKlass, parentScope,
             DFBuiltinTypes.getObjectKlass());
         //Logger.info("DFTypeSpace.createKlass:", klass);
-        return this.addKlass(klass);
+        return this.addKlass(id, klass);
     }
 
     public DFMapType createMapType(String id) {
         DFMapType pt = new DFMapType(id, this);
-        this.addKlass(pt);
+        this.addKlass(id, pt);
         return pt;
     }
 
-    public DFKlass addKlass(DFKlass klass) {
-        String id = klass.getKlassName();
+    public DFKlass addKlass(String id, DFKlass klass) {
         assert id.indexOf('.') < 0;
         //assert !_id2klass.containsKey(id);
         _id2klass.put(id, klass);
@@ -261,7 +260,7 @@ public class DFTypeSpace {
                     DFTypeSpace methodSpace = this.lookupSpace(id);
                     DFLocalVarScope scope = new DFLocalVarScope(
                         parentScope, methodDecl.getName());
-                    klass.addMethodScope(methodDecl, scope);
+                    klass.putMethodScope(methodDecl, scope);
                     methodSpace.buildStmt(stmt, klass, scope);
                 }
 	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
@@ -271,7 +270,7 @@ public class DFTypeSpace {
                 Statement stmt = initializer.getBody();
                 DFLocalVarScope scope = new DFLocalVarScope(
                     parentScope, "<clinit>");
-                klass.addMethodScope(initializer, scope);
+                klass.putMethodScope(initializer, scope);
                 this.buildStmt(stmt, klass, scope);
 
 	    } else {

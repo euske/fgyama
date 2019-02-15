@@ -2270,7 +2270,8 @@ public class Java2DF {
 		try {
 		    DFKlass klass = _rootSpace.getKlass(name);
 		    Logger.debug("Import:", name);
-		    importSpace.addKlass(klass);
+                    String id = ((QualifiedName)name).getName().getIdentifier();
+		    importSpace.addKlass(id, klass);
 		} catch (TypeNotFound e) {
 		    if (!importDecl.isStatic()) {
 			Logger.error("Import: Class not found:", e.name);

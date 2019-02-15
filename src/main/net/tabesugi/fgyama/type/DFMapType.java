@@ -19,7 +19,7 @@ public class DFMapType extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFMapType("+this.getFullName()+":"+_baseKlass+")>");
+        return ("<DFMapType("+this.getFullName()+":"+this.getBaseKlass()+")>");
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
@@ -31,7 +31,7 @@ public class DFMapType extends DFKlass {
             return type2.canConvertFrom(type, typeMap);
         }
         typeMap.put(this, type);
-        return _baseKlass.canConvertFrom(type, typeMap);
+        return this.getBaseKlass().canConvertFrom(type, typeMap);
     }
 
     public DFType parameterize(Map<DFMapType, DFType> typeMap) {
@@ -42,11 +42,6 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    public void setBaseKlass(DFKlass baseKlass)
-        throws TypeNotFound {
-        _baseKlass = baseKlass;
-    }
-
     @SuppressWarnings("unchecked")
     public void buildTypeParam(DFTypeFinder finder, TypeParameter tp)
         throws TypeNotFound {
@@ -54,17 +49,20 @@ public class DFMapType extends DFKlass {
         try {
             List<Type> bounds = tp.typeBounds();
             if (0 < bounds.size()) {
-                _baseIfaces = new DFKlass[bounds.size()-1];
+                DFKlass baseKlass = null;
+                DFKlass[] baseIfaces = new DFKlass[bounds.size()-1];
                 for (int i = 0; i < bounds.size(); i++) {
                     DFKlass klass = finder.resolveKlass(bounds.get(i));
                     //Logger.info("DFMapType.build:", this, ":", klass);
                     if (i == 0) {
-                        _baseKlass = klass;
+                        baseKlass = klass;
                     } else {
-                        _baseIfaces[i-1] = klass;
+                        baseIfaces[i-1] = klass;
                     }
                     finder = finder.extend(klass);
                 }
+                setBaseKlass(baseKlass);
+                setBaseIfaces(baseIfaces);
             }
         } catch (TypeNotFound e) {
             e.setAst(tp);
