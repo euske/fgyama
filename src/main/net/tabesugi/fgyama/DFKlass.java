@@ -19,8 +19,10 @@ public class DFKlass extends DFType {
     private DFTypeSpace _parentSpace;
     private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
+    private List<DFKlass> _childKlasses;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes;
+    private List<DFParamKlass> _paramKlasses;
 
     // These fields are set immediately.
     private ASTNode _ast = null;
@@ -29,7 +31,6 @@ public class DFKlass extends DFType {
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
-    private List<DFParamKlass> _paramKlasses = null;
 
     // This field is available after setFinder(). (Pass2)
     private DFTypeFinder _finder = null;
@@ -51,8 +52,14 @@ public class DFKlass extends DFType {
         _parentSpace = parentSpace;
         _klassSpace = parentSpace.lookupSpace(name);
         _parentKlass = parentKlass;
+        _childKlasses = new ArrayList<DFKlass>();
         _klassScope = new DFKlassScope(parentScope, name);
         _methodScopes = new HashMap<String, DFLocalVarScope>();
+        _paramKlasses = new ArrayList<DFParamKlass>();
+
+        if (_parentKlass != null) {
+            _parentKlass._childKlasses.add(this);
+        }
     }
 
     // Constructor for a parameterized klass.
@@ -63,13 +70,13 @@ public class DFKlass extends DFType {
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
         _methodScopes = genericKlass._methodScopes;
+        _paramKlasses = null;
 
         _ast = genericKlass._ast;
         _jarPath = genericKlass._jarPath;
         _filePath = genericKlass._filePath;
 
         assert _mapTypes == null;
-        assert _paramKlasses == null;
 
         _finder = genericKlass._finder;
 
@@ -148,19 +155,17 @@ public class DFKlass extends DFType {
                 String id = tp.getName().getIdentifier();
                 _mapTypes[i] = _klassSpace.createMapType(id);
             }
-            _paramKlasses = new ArrayList<DFParamKlass>();
         }
     }
 
     public void setMapTypes(String sig) {
         _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
-        if (_mapTypes != null) {
-            _paramKlasses = new ArrayList<DFParamKlass>();
-        }
     }
 
     public boolean isGeneric() {
-        return (_mapTypes != null);
+        if (_mapTypes != null) return true;
+        if (_parentKlass != null) return _parentKlass.isGeneric();
+        return false;
     }
 
     public DFParamKlass parameterize(DFType[] paramTypes) {
@@ -171,6 +176,7 @@ public class DFKlass extends DFType {
             return (DFParamKlass)_klassSpace.getKlass(name);
         } catch (TypeNotFound e) {
             DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, paramTypes);
+            // XXX childKlasses not parameterized.
             _klassSpace.addKlass(name, klass);
             _paramKlasses.add(klass);
             return klass;
@@ -619,7 +625,7 @@ public class DFKlass extends DFType {
                 for (int i = 0; i < _mapTypes.length; i++) {
 		    DFMapType pt = _mapTypes[i];
 		    TypeParameter tp = tps.get(i);
-                    pt.buildTypeParam(finder0, tp);
+                    //pt.buildTypeParam(finder0, tp);
                 }
 	    }
             Type superClass = typeDecl.getSuperclassType();
@@ -777,7 +783,7 @@ public class DFKlass extends DFType {
                     TypeParameter tp = tps.get(i);
                     String id2 = tp.getName().getIdentifier();
                     DFMapType pt = methodSpace.createMapType(id2);
-                    pt.buildTypeParam(finder, tp);
+                    //pt.buildTypeParam(finder, tp);
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
