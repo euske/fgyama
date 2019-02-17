@@ -151,6 +151,22 @@ public class JNITypeParser {
         _pos++;
     }
 
+    public void skipMapTypes() {
+        if (_text.charAt(_pos) != '<') return;
+        _pos++;
+	int n = 0;
+        while (_text.charAt(_pos) != '>') {
+	    int i = _text.indexOf(':', _pos);
+	    String id = _text.substring(_pos, i);
+	    _pos = i+1;
+	    if (_text.charAt(_pos) == ':') {
+		_pos++;	 // ???
+	    }
+	    _pos = skipType(_text, _pos);
+        }
+        _pos++;
+    }
+
     public static DFMapType[] getMapTypes(String text, DFTypeSpace typeSpace) {
 	int pos = 0;
         if (text.charAt(pos) != '<') return null;

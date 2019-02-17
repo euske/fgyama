@@ -260,6 +260,7 @@ public class DFFrame {
             if (type instanceof DFKlass &&
                 ((DFKlass)type).isEnum()) {
                 enumKlass = finder.resolveKlass(type);
+                enumKlass.load();
             }
             DFVarScope childScope = scope.getChildByAST(stmt);
             DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
@@ -428,6 +429,7 @@ public class DFFrame {
 			// Turned out it's a class variable.
 			klass = finder.lookupKlass(qname.getQualifier());
 		    }
+                    klass.load();
 		    SimpleName fieldName = qname.getName();
 		    ref = klass.lookupField(fieldName);
 		}
@@ -440,6 +442,7 @@ public class DFFrame {
 		DFRef ref;
 		if (name != null) {
 		    DFKlass klass = finder.lookupKlass(name);
+                    klass.load();
 		    ref = klass.getKlassScope().lookupThis();
 		} else {
 		    ref = scope.lookupThis();
@@ -542,6 +545,7 @@ public class DFFrame {
 			klass = finder.resolveKlass(type);
 		    }
 		}
+                klass.load();
 		List<DFType> typeList = new ArrayList<DFType>();
 		for (Expression arg : (List<Expression>) invoke.arguments()) {
 		    DFType type = this.buildExpr(finder, method, scope, arg);
@@ -569,9 +573,11 @@ public class DFFrame {
 		}
 		DFType[] argTypes = new DFType[typeList.size()];
 		typeList.toArray(argTypes);
-		DFKlass klass =
-		    finder.resolveKlass(scope.lookupThis().getRefType());
+		DFKlass klass = finder.resolveKlass(
+                    scope.lookupThis().getRefType());
+                klass.load();
 		DFKlass baseKlass = klass.getBaseKlass();
+                baseKlass.load();
 		try {
 		    DFMethod method1 = baseKlass.lookupMethod(
 			sinvoke.getName(), argTypes);
@@ -626,6 +632,7 @@ public class DFFrame {
 		    if (type == null) return type;
 		    klass = finder.resolveKlass(type);
 		}
+                klass.load();
 		SimpleName fieldName = fa.getName();
 		DFRef ref = klass.lookupField(fieldName);
 		this.addInputRef(ref);
@@ -636,6 +643,7 @@ public class DFFrame {
 		SimpleName fieldName = sfa.getName();
 		DFKlass klass = finder.resolveKlass(
 		    scope.lookupThis().getRefType()).getBaseKlass();
+                klass.load();
 		DFRef ref = klass.lookupField(fieldName);
 		this.addInputRef(ref);
 		return ref.getRefType();
@@ -682,9 +690,7 @@ public class DFFrame {
 		DFTypeSpace anonSpace = new DFTypeSpace(null, id);
 		DFKlass klass = finder.resolveKlass(
 		    scope.lookupThis().getRefType());
-		DFKlass anonKlass = new DFKlass(
-		    id, anonSpace, klass, scope,
-		    DFBuiltinTypes.getObjectKlass());
+		DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
 		if (body instanceof Statement) {
 		    // XXX TODO Statement lambda
 		} else if (body instanceof Expression) {
@@ -736,6 +742,7 @@ public class DFFrame {
                     // Turned out it's a class variable.
                     klass = finder.lookupKlass(qname.getQualifier());
                 }
+                klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
             }
@@ -765,6 +772,7 @@ public class DFFrame {
                 if (type == null) return;
                 klass = finder.resolveKlass(type);
             }
+            klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
@@ -774,6 +782,7 @@ public class DFFrame {
             SimpleName fieldName = sfa.getName();
             DFKlass klass = finder.resolveKlass(
                 scope.lookupThis().getRefType()).getBaseKlass();
+            klass.load();
             DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 

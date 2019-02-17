@@ -97,9 +97,7 @@ public class DFTypeSpace {
         assert id.indexOf('.') < 0;
         DFKlass klass = _id2klass.get(id);
         if (klass != null) return klass;
-        klass = new DFKlass(
-            id, this, parentKlass, parentScope,
-            DFBuiltinTypes.getObjectKlass());
+        klass = new DFKlass(id, this, parentKlass, parentScope);
         //Logger.info("DFTypeSpace.createKlass:", klass);
         return this.addKlass(id, klass);
     }

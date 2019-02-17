@@ -13,7 +13,7 @@ public class DFMapType extends DFKlass {
 
     public DFMapType(
         String name, DFTypeSpace typeSpace) {
-        super(name, typeSpace, null, null, DFBuiltinTypes.getObjectKlass());
+        super(name, typeSpace, null, null);
         this.setBuilt();
     }
 

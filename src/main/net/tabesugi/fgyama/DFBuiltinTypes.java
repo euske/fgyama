@@ -20,9 +20,9 @@ public class DFBuiltinTypes {
         _object = java_lang.getKlass("Object");
         _object.build(finder);
         _class = java_lang.getKlass("Class");
-        _class.build(finder);
+        //_class.build(finder);
         _enum = java_lang.getKlass("Enum");
-        _enum.build(finder);
+        //_enum.build(finder);
         _string = java_lang.getKlass("String");
         _string.build(finder);
         _byte = java_lang.getKlass("Byte");
@@ -48,7 +48,8 @@ public class DFBuiltinTypes {
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
-            super("_Array", typeSpace, null, null, baseKlass);
+            super("_Array", typeSpace, null, null);
+            this.setBaseKlass(baseKlass);
             this.setBuilt();
             this.addField("length", false, DFBasicType.INT);
         }

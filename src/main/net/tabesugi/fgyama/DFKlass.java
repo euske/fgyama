@@ -46,15 +46,13 @@ public class DFKlass extends DFType {
 
     public DFKlass(
         String name, DFTypeSpace parentSpace,
-        DFKlass parentKlass, DFVarScope parentScope,
-        DFKlass baseKlass) {
+        DFKlass parentKlass, DFVarScope parentScope) {
         _name = name;
         _parentSpace = parentSpace;
         _klassSpace = parentSpace.lookupSpace(name);
         _parentKlass = parentKlass;
         _klassScope = new DFKlassScope(parentScope, name);
         _methodScopes = new HashMap<String, DFLocalVarScope>();
-        _baseKlass = baseKlass;
     }
 
     // Constructor for a parameterized klass.
@@ -65,7 +63,6 @@ public class DFKlass extends DFType {
         _parentKlass = genericKlass._parentKlass;
         _klassScope = genericKlass._klassScope;
         _methodScopes = genericKlass._methodScopes;
-        _baseKlass = genericKlass._baseKlass;
 
         _ast = genericKlass._ast;
         _jarPath = genericKlass._jarPath;
@@ -123,6 +120,25 @@ public class DFKlass extends DFType {
         return ((DFKlass)type).isSubclassOf(this, typeMap);
     }
 
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
+        if (this == klass) return 0;
+        if (_baseKlass != null) {
+            int dist = _baseKlass.isSubclassOf(klass, typeMap);
+            if (0 <= dist) return dist+1;
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                int dist = iface.isSubclassOf(klass, typeMap);
+                if (0 <= dist) return dist+1;
+            }
+        }
+        return -1;
+    }
+
+    public String getFullName() {
+        return _parentSpace.getFullName()+_name;
+    }
+
     public void setMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
         if (0 < tps.size()) {
@@ -143,8 +159,8 @@ public class DFKlass extends DFType {
         }
     }
 
-    public void putMethodScope(ASTNode ast, DFLocalVarScope scope) {
-        _methodScopes.put(Utils.encodeASTNode(ast), scope);
+    public boolean isGeneric() {
+        return (_mapTypes != null);
     }
 
     public DFParamKlass parameterize(DFType[] paramTypes) {
@@ -166,19 +182,6 @@ public class DFKlass extends DFType {
         DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
         _paramKlasses.toArray(klasses);
         return klasses;
-    }
-
-    public void setBaseFinder(DFTypeFinder finder) {
-        //assert _finder == null || _finder == finder;
-	_finder = finder;
-	finder = new DFTypeFinder(finder, _klassSpace);
-	for (DFKlass child : _klassSpace.getKlasses()) {
-	    child.setBaseFinder(finder);
-	}
-    }
-
-    public DFTypeFinder getFinder() {
-        return _finder.extend(this);
     }
 
     public void setJarPath(String jarPath, String filePath) {
@@ -206,16 +209,34 @@ public class DFKlass extends DFType {
         return _klassScope;
     }
 
+    public void putMethodScope(ASTNode ast, DFLocalVarScope scope) {
+        _methodScopes.put(Utils.encodeASTNode(ast), scope);
+    }
+
     private DFLocalVarScope getMethodScope(ASTNode ast) {
 	String key = Utils.encodeASTNode(ast);
         assert _methodScopes.containsKey(key);
         return _methodScopes.get(key);
     }
 
+    public void setBaseFinder(DFTypeFinder finder) {
+        //assert _finder == null || _finder == finder;
+	_finder = finder;
+	finder = new DFTypeFinder(finder, _klassSpace);
+	for (DFKlass child : _klassSpace.getKlasses()) {
+	    child.setBaseFinder(finder);
+	}
+    }
+
+    public DFTypeFinder getFinder() {
+        return _finder.extend(this);
+    }
+
     public void setBaseKlass(DFKlass baseKlass) {
         _baseKlass = baseKlass;
     }
     public DFKlass getBaseKlass() {
+        assert _built;
         return _baseKlass;
     }
 
@@ -223,47 +244,29 @@ public class DFKlass extends DFType {
         _baseIfaces = baseIfaces;
     }
     public DFKlass[] getBaseIfaces() {
+        assert _built;
         return _baseIfaces;
     }
 
     public boolean isEnum() {
+        assert _built;
         return (_baseKlass instanceof DFParamKlass &&
                 ((DFParamKlass)_baseKlass).getGeneric() ==
                 DFBuiltinTypes.getEnumKlass());
     }
 
-    public boolean isGeneric() {
-        return (_mapTypes != null);
-    }
-
-    public String getFullName() {
-        return _parentSpace.getFullName()+_name;
-    }
-
     public DFMethod getInitializer() {
+        assert _built;
         return _initializer;
     }
 
     public DFMethod getConstructor() {
+        assert _built;
         if (_constructor != null) {
             return _constructor;
         }
+        assert _baseKlass != null;
         return _baseKlass.getConstructor();
-    }
-
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
-        if (this == klass) return 0;
-        if (_baseKlass != null) {
-            int dist = _baseKlass.isSubclassOf(klass, typeMap);
-            if (0 <= dist) return dist+1;
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                int dist = iface.isSubclassOf(klass, typeMap);
-                if (0 <= dist) return dist+1;
-            }
-        }
-        return -1;
     }
 
     protected DFRef lookupField(String id)
@@ -440,6 +443,8 @@ public class DFKlass extends DFType {
         this.setBuilt();
         assert finder != null;
         assert _ast != null || _jarPath != null;
+        // a generic class is only referred to, but not built.
+        assert !this.isGeneric();
         if (_ast != null) {
             try {
                 this.buildFromTree(finder, _ast);
@@ -477,17 +482,21 @@ public class DFKlass extends DFType {
         finder0 = new DFTypeFinder(finder0, _klassSpace);
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
         if (sig != null) {
-            //Logger.info("jklass:", jklass.getClassName(), jklass.isEnum(), sig);
+            //Logger.info("jklass:", this, sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
-	    if (_mapTypes != null) {
+            if (this instanceof DFParamKlass) {
+                parser.skipMapTypes();
+            } else if (_mapTypes != null) {
 		parser.buildMapTypes(finder0, _mapTypes);
 	    }
 	    _baseKlass = (DFKlass)parser.getType(finder0);
+            _baseKlass.load();
 	    finder = finder.extend(_baseKlass);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
 		DFKlass iface = (DFKlass)parser.getType(finder0);
 		if (iface == null) break;
+                iface.load();
 		ifaces.add(iface);
 		finder = finder.extend(iface);
 	    }
@@ -497,6 +506,7 @@ public class DFKlass extends DFType {
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
 		_baseKlass = finder0.lookupKlass(superClass);
+                _baseKlass.load();
 		finder = finder.extend(_baseKlass);
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
@@ -504,6 +514,7 @@ public class DFKlass extends DFType {
                 DFKlass[] baseIfaces = new DFKlass[ifaces.length];
 		for (int i = 0; i < ifaces.length; i++) {
 		    DFKlass iface = finder0.lookupKlass(ifaces[i]);
+                    iface.load();
 		    baseIfaces[i] = iface;
 		    finder = finder.extend(iface);
 		}
@@ -571,8 +582,7 @@ public class DFKlass extends DFType {
             this.buildAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
         } else if (ast instanceof AnonymousClassDeclaration) {
-            AnonymousClassDeclaration decl = (AnonymousClassDeclaration)ast;
-            this.buildDecls(finder, decl.bodyDeclarations());
+            this.buildAnonDecl(finder, (AnonymousClassDeclaration)ast);
         }
     }
 
@@ -620,6 +630,7 @@ public class DFKlass extends DFType {
             } else {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
+            _baseKlass.load();
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
@@ -627,6 +638,7 @@ public class DFKlass extends DFType {
 		DFKlass iface = finder0.resolveKlass(ifaces.get(i));
                 //Logger.info("DFKlass.build:", this, "implements", iface);
                 baseIfaces[i] = iface;
+                iface.load();
                 finder = finder.extend(iface);
             }
             _baseIfaces = baseIfaces;
@@ -659,12 +671,14 @@ public class DFKlass extends DFType {
         try {
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.parameterize(new DFType[] { this });
+            _baseKlass.load();
             finder = finder.extend(_baseKlass);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
 		DFKlass iface = finder0.resolveKlass(ifaces.get(i));
+                iface.load();
                 baseIfaces[i] = iface;
                 finder = finder.extend(iface);
             }
@@ -697,6 +711,7 @@ public class DFKlass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         //Logger.info("DFKlass.build:", this, ":", annotTypeDecl.getName());
         _baseKlass = DFBuiltinTypes.getObjectKlass();
+        _baseKlass.load();
         finder = finder.extend(_baseKlass);
         if (_parentKlass != null) {
             finder = finder.extend(_parentKlass);
@@ -707,6 +722,23 @@ public class DFKlass extends DFType {
             this.buildDecls(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
+            throw e;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildAnonDecl(
+        DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
+        throws UnsupportedSyntax, TypeNotFound {
+        _baseKlass = DFBuiltinTypes.getObjectKlass();
+        _baseKlass.load();
+        finder = finder.extend(_baseKlass);
+        finder = new DFTypeFinder(finder, _klassSpace);
+        try {
+            // Lookup child klasses.
+            this.buildDecls(finder, anonDecl.bodyDeclarations());
+        } catch (TypeNotFound e) {
+            e.setAst(anonDecl);
             throw e;
         }
     }

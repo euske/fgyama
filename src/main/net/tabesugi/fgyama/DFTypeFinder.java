@@ -40,22 +40,16 @@ public class DFTypeFinder {
 
     public DFTypeFinder extend(DFKlass klass) {
         DFTypeFinder finder = this;
-        if (klass instanceof DFParamKlass) {
-            DFKlass genericKlass = ((DFParamKlass)klass).getGeneric();
-            assert genericKlass != null;
-            finder = finder.extend(genericKlass);
-        } else {
-            assert klass.getKlassSpace() != null;
-            finder = new DFTypeFinder(finder, klass.getKlassSpace());
-            DFKlass baseKlass = klass.getBaseKlass();
-            if (baseKlass != null) {
-                finder = finder.extend(baseKlass);
-            }
-            DFKlass[] baseIfaces = klass.getBaseIfaces();
-            if (baseIfaces != null) {
-                for (DFKlass iface : baseIfaces) {
-                    finder = finder.extend(iface);
-                }
+        assert klass.getKlassSpace() != null;
+        finder = new DFTypeFinder(finder, klass.getKlassSpace());
+        DFKlass baseKlass = klass.getBaseKlass();
+        if (baseKlass != null) {
+            finder = finder.extend(baseKlass);
+        }
+        DFKlass[] baseIfaces = klass.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
+                finder = finder.extend(iface);
             }
         }
         return finder;
@@ -64,9 +58,7 @@ public class DFTypeFinder {
     public DFKlass lookupKlass(Name name)
         throws TypeNotFound {
         try {
-            DFKlass klass = _space.getKlass(name);
-            klass.load();
-            return klass;
+            return _space.getKlass(name);
         } catch (TypeNotFound e) {
             if (_next != null) {
                 return _next.lookupKlass(name);
@@ -79,9 +71,7 @@ public class DFTypeFinder {
     public DFKlass lookupKlass(String name)
         throws TypeNotFound {
         try {
-            DFKlass klass = _space.getKlass(name.replace('$', '.'));
-            klass.load();
-            return klass;
+            return _space.getKlass(name.replace('$', '.'));
         } catch (TypeNotFound e) {
             if (_next != null) {
                 return _next.lookupKlass(name);
@@ -200,9 +190,7 @@ public class DFTypeFinder {
         } else if (type instanceof DFArrayType) {
             return DFBuiltinTypes.getArrayKlass();
         } else if (type instanceof DFKlass) {
-            DFKlass klass = (DFKlass)type;
-            klass.load();
-            return klass;
+            return (DFKlass)type;
         } else {
             throw new TypeNotFound(type.getTypeName());
         }

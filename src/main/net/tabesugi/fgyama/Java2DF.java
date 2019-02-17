@@ -1259,9 +1259,7 @@ public class Java2DF {
                 DFKlass klass = finder.resolveKlass(
                     scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
-                DFKlass anonKlass = new DFKlass(
-                    id, anonSpace, klass, scope,
-                    DFBuiltinTypes.getObjectKlass());
+                DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
                 assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
@@ -1285,8 +1283,7 @@ public class Java2DF {
                     scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFKlass(
-                    "methodref", anonSpace, klass, scope,
-                    DFBuiltinTypes.getObjectKlass());
+                    "methodref", anonSpace, klass, scope);
                 // XXX TODO method ref
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, anonKlass, mref, null);
@@ -2579,6 +2576,7 @@ public class Java2DF {
         try {
             converter = new Java2DF(rootSpace, strict);
         } catch (TypeNotFound e) {
+            e.printStackTrace();
             Logger.error("Class not found:", e.name);
             System.err.println("Fatal error at initialization.");
             System.exit(1);
