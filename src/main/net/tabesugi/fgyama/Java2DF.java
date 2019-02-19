@@ -2145,13 +2145,22 @@ public class Java2DF {
     private DFGraph processKlassBody(DFKlass klass)
         throws UnsupportedSyntax, EntityNotFound {
         // lookup base/child klasses.
+        ASTNode ast = klass.getAST();
+        List<BodyDeclaration> decls;
+        if (ast instanceof AbstractTypeDeclaration) {
+            decls = ((AbstractTypeDeclaration)ast).bodyDeclarations();
+        } else if (ast instanceof AnonymousClassDeclaration) {
+            decls = ((AnonymousClassDeclaration)ast).bodyDeclarations();
+        } else {
+            throw new UnsupportedSyntax(ast);
+        }
         DFVarScope klassScope = klass.getKlassScope();
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
 	DFTypeSpace klassSpace = klass.getKlassSpace();
-        DFGraph klassGraph = new DFGraph(klassScope, null, klass.getAST());
+        DFGraph klassGraph = new DFGraph(klassScope, null, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
         DFTypeFinder finder = klass.getFinder();
-        for (BodyDeclaration body : klass.getDecls()) {
+        for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Inner classes are processed separately.
 
@@ -2283,7 +2292,7 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-		klass.setBaseFinder(finder);
+		klass.setBaseFinderRec(finder);
 	    } catch (TypeNotFound e) {
 	    }
 	}

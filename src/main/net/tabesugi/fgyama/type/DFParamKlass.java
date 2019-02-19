@@ -14,6 +14,7 @@ public class DFParamKlass extends DFKlass {
     private DFKlass _genericKlass;
     private DFType[] _paramTypes;
     private Map<DFMapType, DFType> _typeMap;
+    private DFTypeSpace _mapTypeSpace;
 
     private Map<DFRef, DFRef> _paramFields = null;
     private List<DFMethod> _paramMethods = null;
@@ -37,16 +38,26 @@ public class DFParamKlass extends DFKlass {
         assert paramTypes != null;
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
+        _mapTypeSpace = new DFTypeSpace(null, "map:"+name);
         _typeMap = new HashMap<DFMapType, DFType>();
         for (int i = 0; i < paramTypes.length; i++) {
             assert mapTypes[i] != null;
             assert paramTypes[i] != null;
             _typeMap.put(mapTypes[i], paramTypes[i]);
+            _mapTypeSpace.addKlass(
+                mapTypes[i].getKlassName(),
+                (DFKlass)paramTypes[i]);
         }
     }
 
     public DFKlass getGeneric() {
         return _genericKlass;
+    }
+
+    @Override
+    public void setBaseFinder(DFTypeFinder finder) {
+        finder = new DFTypeFinder(finder, _mapTypeSpace);
+        super.setBaseFinder(finder);
     }
 
     @Override

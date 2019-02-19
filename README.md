@@ -92,11 +92,6 @@ Coding style:
 
 TODOs:
 ------
-  * basic_generics.java:
-    T get() {
-      T y = x;
-      return y;
-    }
   * DFMethodType should have an Exception field.
   * Handle consecutive SwitchCases.
   * Lambdas.

@@ -21,7 +21,6 @@ public class DFMethod implements Comparable<DFMethod> {
         new TreeSet<DFMethod>();
 
     private DFLocalVarScope _srcScope = null;
-    private DFTypeFinder _finder = null;
     private ASTNode _ast = null;
 
     private DFLocalVarScope _scope = null;
@@ -72,7 +71,6 @@ public class DFMethod implements Comparable<DFMethod> {
         _name = method._name;
         _callStyle = method._callStyle;
         _srcScope = method._srcScope;
-        _finder = method._finder;
         _ast = method._ast;
         _methodType = methodType;
 	for (DFOverride override : overrides) {
@@ -162,17 +160,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return _callers;
     }
 
-    public DFTypeFinder getFinder() {
-        return new DFTypeFinder(_finder, _methodSpace);
-    }
-
-    public void setFinder(DFTypeFinder finder) {
-        //assert _finder == null || _finder == finder;
-        _finder = finder;
-	finder = new DFTypeFinder(finder, _methodSpace);
-	for (DFKlass child : _methodSpace.getKlasses()) {
-	    child.setBaseFinder(finder);
-	}
+    public DFTypeFinder getFinder()
+        throws TypeNotFound {
+        DFTypeFinder finder = _klass.getFinder();
+        return new DFTypeFinder(finder, _methodSpace);
     }
 
     public void setSrcScope(DFLocalVarScope srcScope) {
@@ -197,12 +188,12 @@ public class DFMethod implements Comparable<DFMethod> {
         throws UnsupportedSyntax, TypeNotFound {
 	if (_ast == null) return;
 	assert _srcScope != null;
-	assert _finder != null;
+	DFTypeFinder finder = this.getFinder();
         _scope = new DFLocalVarScope(_srcScope);
 	if (_ast instanceof MethodDeclaration) {
-	    _scope.buildMethodDecl(_finder, (MethodDeclaration)_ast);
+	    _scope.buildMethodDecl(finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof Initializer) {
-	    _scope.buildInitializer(_finder, (Initializer)_ast);
+	    _scope.buildInitializer(finder, (Initializer)_ast);
 	}  else {
 	    throw new UnsupportedSyntax(_ast);
 	}
@@ -213,15 +204,15 @@ public class DFMethod implements Comparable<DFMethod> {
         throws UnsupportedSyntax, TypeNotFound {
 	if (_ast == null) return;
 	assert _scope != null;
-	assert _finder != null;
+	DFTypeFinder finder = this.getFinder();
         _frame = new DFFrame(DFFrame.RETURNABLE);
         try {
 	    if (_ast instanceof MethodDeclaration) {
 		_frame.buildMethodDecl(
-                    _finder, this, _scope, (MethodDeclaration)_ast);
+                    finder, this, _scope, (MethodDeclaration)_ast);
 	    } else if (_ast instanceof Initializer) {
 		_frame.buildInitializer(
-                    _finder, this, _scope, (Initializer)_ast);
+                    finder, this, _scope, (Initializer)_ast);
 	    }  else {
 		throw new UnsupportedSyntax(_ast);
 	    }

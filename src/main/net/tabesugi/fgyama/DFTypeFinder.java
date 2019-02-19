@@ -38,17 +38,20 @@ public class DFTypeFinder {
         return ("<DFTypeFinder: "+Utils.join(", ", path)+">");
     }
 
-    public DFTypeFinder extend(DFKlass klass) {
+    public DFTypeFinder extend(DFKlass klass)
+        throws TypeNotFound {
         DFTypeFinder finder = this;
         assert klass.getKlassSpace() != null;
         finder = new DFTypeFinder(finder, klass.getKlassSpace());
         DFKlass baseKlass = klass.getBaseKlass();
         if (baseKlass != null) {
+            baseKlass.load();
             finder = finder.extend(baseKlass);
         }
         DFKlass[] baseIfaces = klass.getBaseIfaces();
         if (baseIfaces != null) {
             for (DFKlass iface : baseIfaces) {
+                iface.load();
                 finder = finder.extend(iface);
             }
         }

@@ -19,7 +19,7 @@ public class DFMapType extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFMapType("+this.getFullName()+":"+this.getBaseKlass()+")>");
+        return ("<DFMapType("+this.getFullName()+")>");
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {

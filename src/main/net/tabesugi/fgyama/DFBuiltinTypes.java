@@ -18,32 +18,32 @@ public class DFBuiltinTypes {
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
         DFTypeFinder finder = new DFTypeFinder(rootSpace);
         _object = java_lang.getKlass("Object");
-        _object.build(finder);
         _class = java_lang.getKlass("Class");
-        //_class.build(finder);
         _enum = java_lang.getKlass("Enum");
-        //_enum.build(finder);
         _string = java_lang.getKlass("String");
-        _string.build(finder);
         _byte = java_lang.getKlass("Byte");
-        _byte.build(finder);
         _character = java_lang.getKlass("Character");
-        _character.build(finder);
         _short = java_lang.getKlass("Short");
-        _short.build(finder);
         _integer = java_lang.getKlass("Integer");
-        _integer.build(finder);
         _long = java_lang.getKlass("Long");
-        _long.build(finder);
         _float = java_lang.getKlass("Float");
-        _float.build(finder);
         _double = java_lang.getKlass("Double");
-        _double.build(finder);
         _boolean = java_lang.getKlass("Boolean");
-        _boolean.build(finder);
         _exception = java_lang.getKlass("Exception");
-        _exception.build(finder);
         _array = new ArrayKlass(java_lang, _object);
+        _object.load();
+        //_class.load();
+        //_enum.load();
+        _string.load();
+        _byte.load();
+        _character.load();
+        _short.load();
+        _integer.load();
+        _long.load();
+        _float.load();
+        _double.load();
+        _boolean.load();
+        _exception.load();
     }
 
     private static class ArrayKlass extends DFKlass {
