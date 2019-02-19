@@ -383,9 +383,12 @@ public class DFKlass extends DFType {
 
     private DFMethod addMethod(
         DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
+        DFMapType[] mapTypes, DFTypeFinder finder,
         DFMethodType methodType) {
         return this.addMethod(
-            new DFMethod(this, methodSpace, id, callStyle, methodType));
+            new DFMethod(
+                this, methodSpace, id, callStyle,
+                mapTypes, finder, methodType));
     }
 
     private DFMethod addMethod(DFMethod method) {
@@ -550,10 +553,11 @@ public class DFKlass extends DFType {
             sig = Utils.getJKlassSignature(meth.getAttributes());
 	    DFMethodType methodType;
             DFTypeSpace methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
+            DFMapType[] mapTypes = null;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
 		JNITypeParser parser = new JNITypeParser(sig);
-                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
+                mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
 		finder = new DFTypeFinder(finder, methodSpace);
                 // XXX Use maptypes.
 		methodType = (DFMethodType)parser.getType(finder);
@@ -568,12 +572,14 @@ public class DFKlass extends DFType {
 	    }
             if (meth.getName().equals("<init>")) {
                 _constructor = this.addMethod(
-                    methodSpace, meth.getName(), DFCallStyle.Constructor, methodType);
+                    methodSpace, meth.getName(), DFCallStyle.Constructor,
+                    mapTypes, finder, methodType);
             } else {
                 DFCallStyle callStyle = (meth.isStatic())?
                     DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 this.addMethod(
-                    methodSpace, meth.getName(), callStyle, methodType);
+                    methodSpace, meth.getName(), callStyle,
+                    mapTypes, finder, methodType);
             }
         }
     }
@@ -676,7 +682,7 @@ public class DFKlass extends DFType {
             }
             // Enum has a special method "values()".
             this.addMethod(
-                null, "values", DFCallStyle.InstanceMethod,
+                null, "values", DFCallStyle.InstanceMethod, null, finder,
                 new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
             this.buildDecls(finder, enumDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
@@ -781,7 +787,7 @@ public class DFKlass extends DFType {
                         DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 }
                 DFMethod method = this.addMethod(
-                    methodSpace, name, callStyle,
+                    methodSpace, name, callStyle, mapTypes, finder,
                     new DFMethodType(argTypes, returnType));
 		if (decl.getBody() != null) {
 		    method.setBaseScope(this.getMethodScope(decl));
@@ -804,6 +810,7 @@ public class DFKlass extends DFType {
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace("<clinit>");
                 _initializer = new DFMethod(
 		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
+                    null, finder,
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
 		_initializer.setBaseScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);

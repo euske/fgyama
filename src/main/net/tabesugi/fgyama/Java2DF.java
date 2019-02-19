@@ -979,7 +979,7 @@ public class Java2DF {
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
                             klass, null, id, DFCallStyle.InstanceMethod,
-                            new DFMethodType(argTypes, null));
+                            null, finder, new DFMethodType(argTypes, null));
                         Logger.error("Fallback method:", klass, ":", fallback);
                         method = fallback;
                     }
@@ -1050,7 +1050,7 @@ public class Java2DF {
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
                         baseKlass, null, id, DFCallStyle.InstanceMethod,
-                        new DFMethodType(argTypes, null));
+                        null, finder, new DFMethodType(argTypes, null));
                     Logger.error("Fallback method:", baseKlass, ":", fallback);
                     method = fallback;
                 }

@@ -15,6 +15,8 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFTypeSpace _methodSpace;
     private String _name;
     private DFCallStyle _callStyle;
+    private DFMapType[] _mapTypes;
+    private DFTypeFinder _finder;
     private DFMethodType _methodType;
 
     private SortedSet<DFMethod> _callers =
@@ -55,27 +57,16 @@ public class DFMethod implements Comparable<DFMethod> {
 
     public DFMethod(
         DFKlass klass, DFTypeSpace methodSpace,
-        String name, DFCallStyle callStyle, DFMethodType methodType) {
+        String name, DFCallStyle callStyle,
+        DFMapType[] mapTypes, DFTypeFinder finder,
+        DFMethodType methodType) {
         _klass = klass;
         _methodSpace = methodSpace;
         _name = name;
         _callStyle = callStyle;
+        _mapTypes = mapTypes;
+        _finder = finder;
         _methodType = methodType;
-    }
-
-    private DFMethod(
-        DFMethod method, DFKlass paramKlass,
-        DFMethodType methodType, DFOverride[] overrides) {
-        _klass = paramKlass;
-        _methodSpace = method._methodSpace; // XXX copy()
-        _name = method._name;
-        _callStyle = method._callStyle;
-        _baseScope = method._baseScope;
-        _ast = method._ast;
-        _methodType = methodType;
-	for (DFOverride override : overrides) {
-	    _overrides.add(override);
-	}
     }
 
     @Override
@@ -138,20 +129,6 @@ public class DFMethod implements Comparable<DFMethod> {
         return methods;
     }
 
-    public DFMethod parameterize(
-        DFParamKlass paramKlass, Map<DFMapType, DFType> typeMap) {
-        // XXX change TypeFinder
-        DFMethodType methodType = _methodType.parameterize(typeMap);
-        DFOverride[] overrides = new DFOverride[_overrides.size()];
-        for (int i = 0; i < overrides.length; i++) {
-            DFOverride override = _overrides.get(i);
-	    DFMethod method0 = override.method;
-            DFMethod method1 = method0.parameterize(paramKlass, typeMap);
-            overrides[i] = new DFOverride(method1, override.level);
-        }
-        return new DFMethod(this, paramKlass, methodType, overrides);
-    }
-
     public void addCaller(DFMethod method) {
         _callers.add(method);
     }
@@ -160,10 +137,8 @@ public class DFMethod implements Comparable<DFMethod> {
         return _callers;
     }
 
-    public DFTypeFinder getFinder()
-        throws TypeNotFound {
-        DFTypeFinder finder = _klass.getFinder();
-        return new DFTypeFinder(finder, _methodSpace);
+    public DFTypeFinder getFinder() {
+        return _finder;
     }
 
     public void setBaseScope(DFLocalVarScope baseScope) {
