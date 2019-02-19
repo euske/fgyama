@@ -456,7 +456,6 @@ public class DFKlass extends DFType {
         throws TypeNotFound {
         if (_built) return;
         this.setBuilt();
-        if (finder == null) { Logger.error("build:", this, finder); }
         assert finder != null;
         assert _mapTypes == null;
         assert _ast != null || _jarPath != null;
@@ -495,7 +494,6 @@ public class DFKlass extends DFType {
         if (sig != null) {
             //Logger.info("jklass:", this, sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
-            parser.skipMapTypes();
 	    _baseKlass = (DFKlass)parser.getType(finder);
             _baseKlass.load();
 	    finder = finder.extend(_baseKlass);
@@ -556,10 +554,9 @@ public class DFKlass extends DFType {
             DFMapType[] mapTypes = null;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
-		JNITypeParser parser = new JNITypeParser(sig);
                 mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
+		JNITypeParser parser = new JNITypeParser(sig);
 		finder = new DFTypeFinder(finder, methodSpace);
-                // XXX Use maptypes.
 		methodType = (DFMethodType)parser.getType(finder);
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();

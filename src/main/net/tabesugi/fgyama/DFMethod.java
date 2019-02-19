@@ -67,6 +67,11 @@ public class DFMethod implements Comparable<DFMethod> {
         _mapTypes = mapTypes;
         _finder = finder;
         _methodType = methodType;
+        if (_methodSpace != null) {
+            for (DFKlass child : _methodSpace.getKlasses()) {
+                child.setBaseFinderRec(finder);
+            }
+        }
     }
 
     @Override

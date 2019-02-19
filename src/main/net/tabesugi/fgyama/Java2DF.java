@@ -2624,7 +2624,7 @@ public class Java2DF {
             }
         } catch (EntityNotFound e) {
             e.printStackTrace();
-            Logger.error("EntityNotFound: method="+e.method+", ast="+e.ast);
+            Logger.error("EntityNotFound: "+e.name+", method="+e.method+", ast="+e.ast);
         }
         exporter.close();
 

@@ -17,6 +17,7 @@ public class JNITypeParser {
     public JNITypeParser(String text) {
         _text = text;
         _pos = 0;
+        skipMapTypes();
     }
 
     public DFType getType(DFTypeFinder finder)
