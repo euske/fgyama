@@ -2335,7 +2335,6 @@ public class Java2DF {
                 list.add(klass);
 		klass.getKlassSpace().enumKlasses(list);
 		for (DFKlass klass1 : list) {
-                    if (klass1 instanceof DFMapType) continue;
 		    if (klass1.isGeneric()) {
 			for (DFKlass pklass : klass1.getParamKlasses()) {
 			    pklass.load();

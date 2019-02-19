@@ -102,12 +102,6 @@ public class DFTypeSpace {
         return this.addKlass(id, klass);
     }
 
-    public DFMapType createMapType(String id) {
-        DFMapType pt = new DFMapType(id, this);
-        this.addKlass(id, pt);
-        return pt;
-    }
-
     public DFKlass addKlass(String id, DFKlass klass) {
         assert id.indexOf('.') < 0;
         //assert !_id2klass.containsKey(id);
@@ -608,8 +602,8 @@ public class DFTypeSpace {
     public void dump(PrintStream out, String indent) {
         out.println(indent+this.getFullName()+" {");
         String i2 = indent + "  ";
-        for (DFKlass klass : _id2klass.values()) {
-            out.println(i2+"defined: "+klass);
+        for (Map.Entry<String,DFKlass> e : _id2klass.entrySet()) {
+            out.println(i2+"defined: "+e.getKey()+" "+e.getValue());
         }
         for (DFTypeSpace space : _id2space.values()) {
             space.dump(out, i2);

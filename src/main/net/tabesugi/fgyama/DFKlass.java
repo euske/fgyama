@@ -77,8 +77,6 @@ public class DFKlass extends DFType {
 
         assert _mapTypes == null;
 
-        _baseFinder = genericKlass._baseFinder;
-
         // not loaded yet!
         assert !_built;
     }
@@ -152,7 +150,7 @@ public class DFKlass extends DFType {
             for (int i = 0; i < tps.size(); i++) {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
-                _mapTypes[i] = _klassSpace.createMapType(id);
+                _mapTypes[i] = new DFMapType(id);
             }
         }
     }
@@ -235,6 +233,10 @@ public class DFKlass extends DFType {
         for (DFKlass child : _klassSpace.getKlasses()) {
             child.setBaseFinderRec(finder);
         }
+    }
+
+    public DFTypeFinder getBaseFinder() {
+        return _baseFinder;
     }
 
     public DFTypeFinder getFinder()
@@ -755,11 +757,14 @@ public class DFKlass extends DFType {
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
                 finder = new DFTypeFinder(finder, methodSpace);
-                for (int i = 0; i < tps.size(); i++) {
-                    TypeParameter tp = tps.get(i);
-                    String id2 = tp.getName().getIdentifier();
-                    DFMapType pt = methodSpace.createMapType(id2);
-                    //pt.buildTypeParam(finder, tp);
+                DFMapType[] mapTypes = null;
+                if (0 < tps.size()) {
+                    mapTypes = new DFMapType[tps.size()];
+                    for (int i = 0; i < tps.size(); i++) {
+                        TypeParameter tp = tps.get(i);
+                        String id2 = tp.getName().getIdentifier();
+                        mapTypes[i] = new DFMapType(id2);
+                    }
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
@@ -779,7 +784,7 @@ public class DFKlass extends DFType {
                     methodSpace, name, callStyle,
                     new DFMethodType(argTypes, returnType));
 		if (decl.getBody() != null) {
-		    method.setSrcScope(this.getMethodScope(decl));
+		    method.setBaseScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
                 if (decl.isConstructor()) {
@@ -800,7 +805,7 @@ public class DFKlass extends DFType {
                 _initializer = new DFMethod(
 		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
-		_initializer.setSrcScope(this.getMethodScope(initializer));
+		_initializer.setBaseScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);
 
             } else {

@@ -9,29 +9,30 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMapType
 //
-public class DFMapType extends DFKlass {
+public class DFMapType extends DFType {
 
-    public DFMapType(
-        String name, DFTypeSpace typeSpace) {
-        super(name, typeSpace, null, null);
-        this.setBuilt();
+    private String _name;
+
+    public DFMapType(String name) {
+        _name = name;
     }
 
     @Override
     public String toString() {
-        return ("<DFMapType("+this.getFullName()+")>");
+        return ("<DFMapType("+_name+")>");
+    }
+
+    public String getTypeName() {
+        return _name;
+    }
+
+    public boolean equals(DFType type) {
+        return (this == type);
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
-        if (typeMap == null) {
-            typeMap = new HashMap<DFMapType, DFType>();
-        }
-        DFType type2 = typeMap.get(this);
-        if (type2 != null) {
-            return type2.canConvertFrom(type, typeMap);
-        }
-        typeMap.put(this, type);
-        return this.getBaseKlass().canConvertFrom(type, typeMap);
+        assert false;
+        return -1;
     }
 
     public DFType parameterize(Map<DFMapType, DFType> typeMap) {
@@ -39,34 +40,6 @@ public class DFMapType extends DFKlass {
             return typeMap.get(this);
         } else {
             return this;
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public void buildTypeParam(DFTypeFinder finder, TypeParameter tp)
-        throws TypeNotFound {
-        //Logger.info("DFMapType.build:", this, ":", tp);
-        try {
-            List<Type> bounds = tp.typeBounds();
-            if (0 < bounds.size()) {
-                DFKlass baseKlass = null;
-                DFKlass[] baseIfaces = new DFKlass[bounds.size()-1];
-                for (int i = 0; i < bounds.size(); i++) {
-                    DFKlass klass = finder.resolveKlass(bounds.get(i));
-                    //Logger.info("DFMapType.build:", this, ":", klass);
-                    if (i == 0) {
-                        baseKlass = klass;
-                    } else {
-                        baseIfaces[i-1] = klass;
-                    }
-                    finder = finder.extend(klass);
-                }
-                setBaseKlass(baseKlass);
-                setBaseIfaces(baseIfaces);
-            }
-        } catch (TypeNotFound e) {
-            e.setAst(tp);
-            throw e;
         }
     }
 }

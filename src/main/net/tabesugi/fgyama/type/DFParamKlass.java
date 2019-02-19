@@ -16,9 +16,6 @@ public class DFParamKlass extends DFKlass {
     private Map<DFMapType, DFType> _typeMap;
     private DFTypeSpace _mapTypeSpace;
 
-    private Map<DFRef, DFRef> _paramFields = null;
-    private List<DFMethod> _paramMethods = null;
-
     public static String getParamNames(DFType[] paramTypes) {
         StringBuilder b = new StringBuilder();
         for (DFType type : paramTypes) {
@@ -38,16 +35,19 @@ public class DFParamKlass extends DFKlass {
         assert paramTypes != null;
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _mapTypeSpace = new DFTypeSpace(null, "map:"+name);
         _typeMap = new HashMap<DFMapType, DFType>();
+        _mapTypeSpace = new DFTypeSpace(null, name);
         for (int i = 0; i < paramTypes.length; i++) {
             assert mapTypes[i] != null;
             assert paramTypes[i] != null;
             _typeMap.put(mapTypes[i], paramTypes[i]);
             _mapTypeSpace.addKlass(
-                mapTypes[i].getKlassName(),
-                (DFKlass)paramTypes[i]);
+                mapTypes[i].getTypeName(), (DFKlass)paramTypes[i]);
         }
+        DFTypeFinder finder = genericKlass.getBaseFinder();
+        assert finder != null;
+        finder = new DFTypeFinder(finder, _mapTypeSpace);
+        this.setBaseFinder(finder);
     }
 
     public DFKlass getGeneric() {
@@ -55,44 +55,9 @@ public class DFParamKlass extends DFKlass {
     }
 
     @Override
-    public void setBaseFinder(DFTypeFinder finder) {
-        finder = new DFTypeFinder(finder, _mapTypeSpace);
-        super.setBaseFinder(finder);
-    }
-
-    @Override
     public String toString() {
         return ("<DFParamKlass("+this.getFullName()+")");
     }
-
-    /*
-    @Override
-    protected DFRef lookupField(String id)
-        throws VariableNotFound {
-        if (_paramFields == null) {
-            _paramFields = new HashMap<DFRef, DFRef>();
-        }
-        DFRef ref0 = _genericKlass.lookupField(id);
-	DFRef ref1 = _paramFields.get(ref0);
-	if (ref1 == null) {
-	    ref1 = ref0.parameterize(_typeMap);
-	    _paramFields.put(ref0, ref1);
-	}
-	return ref1;
-    }
-
-    @Override
-    public List<DFMethod> getMethods() {
-        if (_paramMethods == null) {
-            _paramMethods = new ArrayList<DFMethod>();
-            for (DFMethod method0 : _genericKlass.getMethods()) {
-                DFMethod method1 = method0.parameterize(this, _typeMap);
-                _paramMethods.add(method1);
-            }
-        }
-	return _paramMethods;
-    }
-    */
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (!(klass instanceof DFParamKlass)) {

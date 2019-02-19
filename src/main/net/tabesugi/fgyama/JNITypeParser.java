@@ -133,24 +133,6 @@ public class JNITypeParser {
         return a;
     }
 
-    public void buildMapTypes(DFTypeFinder finder, DFMapType[] mapTypes)
-        throws TypeNotFound {
-        if (_text.charAt(_pos) != '<') return;
-        _pos++;
-	int n = 0;
-        while (_text.charAt(_pos) != '>') {
-	    int i = _text.indexOf(':', _pos);
-	    String id = _text.substring(_pos, i);
-	    _pos = i+1;
-	    if (_text.charAt(_pos) == ':') {
-		_pos++;	 // ???
-	    }
-            DFMapType pt = mapTypes[n++];
-            pt.setBaseKlass((DFKlass)getType(finder));
-        }
-        _pos++;
-    }
-
     public void skipMapTypes() {
         if (_text.charAt(_pos) != '<') return;
         _pos++;
@@ -179,7 +161,7 @@ public class JNITypeParser {
 	    if (text.charAt(pos) == ':') {
 		pos++;	 // ???
 	    }
-            DFMapType pt = typeSpace.createMapType(id);
+            DFMapType pt = new DFMapType(id);
             params.add(pt);
 	    pos = skipType(text, pos);
         }
