@@ -19,8 +19,8 @@ class Item {
     updated: number = 0;
 
     load(cols: string[]) {
-        this.category = cols[2];
-        this.updated = parseInt(cols[4]);
+        this.category = cols[0];
+        this.updated = parseInt(cols[1]);
     }
 
     save() {
@@ -50,10 +50,10 @@ function importText(data: ItemList, text: string) {
 function exportText(fieldName: string, data: ItemList): string {
     let cids = Object.getOwnPropertyNames(data);
     let lines = [] as string[];
-    lines.push('#START');
+    lines.push('#START '+fieldName);
     for (let cid of cids.sort()) {
         let item = data[cid];
-        lines.push(fieldName+':'+cid+','+item.save());
+        lines.push(cid+','+item.save());
     }
     lines.push('#END');
     return lines.join('\n');
@@ -71,9 +71,9 @@ function updateHTML(data: ItemList) {
     let cids = Object.getOwnPropertyNames(data);
     for (let cid of cids) {
         let item = data[cid];
-        let sel2 = document.getElementById('SC'+cid) as HTMLSelectElement;
-        if (sel2 !== null) {
-            sel2.value = item.category;
+        let sel = document.getElementById('SC'+cid) as HTMLSelectElement;
+        if (sel !== null) {
+            sel.value = item.category;
         }
     }
 }
@@ -105,7 +105,7 @@ function initData(fieldName: string): ItemList {
             let option = document.createElement('option');
             let v = k.substr(0, i);
             option.setAttribute('value', v);
-            option.innerText = v+')'+k.substr(i+1);
+            option.innerText = v+') '+k.substr(i+1);
             select.appendChild(option);
         }
         e.appendChild(select);
@@ -125,8 +125,8 @@ function initData(fieldName: string): ItemList {
 
     for (let e of toArray(document.getElementsByClassName('ui'))) {
         let cid = e.id;
-        let sel2 = makeSelect(e, 'SC'+cid, CATEGORIES);
-        sel2.addEventListener('change', onCategoryChanged);
+        let sel1 = makeSelect(e, 'SC'+cid, CATEGORIES);
+        sel1.addEventListener('change', onCategoryChanged);
         e.appendChild(document.createTextNode(' '));
         data[cid] = new Item();
     }
@@ -141,8 +141,7 @@ function run(fieldName: string, id: string) {
 	saveText(fieldName);
     }
     textarea = document.getElementById(id) as HTMLTextAreaElement;
-    if (window.localStorage &&
-        window.localStorage.getItem(fieldName)) {
+    if (window.localStorage) {
         textarea.value = window.localStorage.getItem(fieldName);
     }
     textarea.addEventListener('input', onTextChanged);

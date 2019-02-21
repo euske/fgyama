@@ -152,7 +152,11 @@ def main(argv):
                 if debug == 0:
                     fp.write('+SOURCE %r\n' % (src,))
             graphs.append(graph)
-            gid2graph[graph.name] = graph
+            name = graph.name
+            i = name.find('.<init>')
+            if 0 <= i:
+                name = name[:i+7]
+            gid2graph[name] = graph
 
     print('Read: %d sources, %d graphs' %
           (len(srcmap), len(graphs)),
@@ -170,10 +174,12 @@ def main(argv):
         return
     for src in graphs:
         for node in src:
-            if node.kind in ('call', 'new'):
+            if node.kind == 'call':
                 funcs = node.data.split(' ')
                 for gid in funcs[:maxoverride]:
                     addcall(node, gid)
+            elif node.kind == 'new':
+                addcall(node, node.data+'.<init>')
 
     def trace(out, v0, n0, label, n1, length=0, done=None, caller=None):
         if maxlen <= length: return

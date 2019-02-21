@@ -31,6 +31,9 @@ class FeatTree:
             self = self.parent
         return
 
+    def getkey(self):
+        return ''.join(self.getpath())
+
     def add(self, feat, key, value):
         if feat in self._d:
             t = self._d[feat]
@@ -55,8 +58,9 @@ pre { margin: 1em; border: 1px solid gray;}
 .pair { border-bottom: 2px solid black; color: red; }
 .catui { border: 1px solid black; padding: 2px; background: #eeeeee; }
 .item { border-bottom: 1px solid black; }
+.red { color: red }
 .result { }
-.src { font-size: 75%; font-weight: bold; margin: 1em; }
+.src { font-size: 75%; font-weight: bold; font-family: monospace; }
 .src0 { background:#eeffff; }
 .src1 { background:#ffffee; }
 .p1 { background:#ffff00; color:black; }
@@ -75,14 +79,7 @@ pre { margin: 1em; border: 1px solid gray;}
         out.write('<script>')
         out.write(fp.read())
         out.write('</script>')
-    out.write('''<script>
-function toggle(id) {
-  let e = document.getElementById(id);
-  e.hidden = !e.hidden;
-}
-</script>
-<script src="helper.js"></script>
-<body onload="run('%s', 'results')">
+    out.write('''<body onload="run('%s', 'results')">
 <h1>Functional Clone Tagging Experiment: %s</h1>
 
 <h2>Your Mission</h2>
@@ -97,16 +94,23 @@ function toggle(id) {
   <li> Same Signature (Functions share the same Java signature.)
   <li> No Relation
   </ol>
-  Notice: certain functions (e.g. <code>java.lang.Math.min()</code>) don't have a source code.
-<li> When it's undecidable from the given snippet or
-    it takes more than <u>3 minutes</u> for a pair,
-    choose <code>Unknown</code>.
+ When it's undecidable from the given snippet or
+ it takes more than <u>3 minutes</u> for a pair,
+ choose <code>Unknown</code>.
+<li> <strong>Notice:</strong>
+  Some functions might not have a source code:
+  <ul>
+    <li> It's a part of Java standard API (e.g. <code>java.lang.Math.min()</code>).
+    Consult the Java reference manual and make an educated guess.
+    <li> Due to an extraction bug.
+    Mark the pair as <code>Unknown</code>.
+  </ul>
+<li> <strong>Caution:</strong>
+    <u>Do not consult others about the code during this experiment.</u>
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
   the experiment organizer.<br>
-<li> <strong>Caution:</strong>
-    <u>Do not consult others about the code during this experiment.</u>
 </ul>
 ''' % (fieldname, title))
     return
@@ -230,8 +234,7 @@ def main(argv):
         if len(a) < minproj:
             del results[funcs]
 
-    #results = sorted(results.values(), key=lambda x:x[0], reverse=True)
-    results = list(results.values())
+    results = sorted(results.values(), key=lambda x:x[1].getkey(), reverse=True)
     if 0 < maxresults:
         results = results[:maxresults]
     print('Results: %d' % len(results), file=sys.stderr)
@@ -242,18 +245,18 @@ def main(argv):
     else:
         fp = open(output, 'w')
     show_html_headers(fp, 'PairTagging_'+title, title)
-    mid = 0
     for (index,(_,tree)) in enumerate(results):
         pid = 'p%03d' % index
         fp.write('<h2 class=pair>Pair %d</h2>\n' % index)
         fp.write('<div class=catui>Category: <span id="%s" class=ui> </span></div>\n' % (pid))
         for (sid,(func,(locs,n))) in enumerate(tree.matches.items()):
             if sid == 2: break
-            mid += 1
-            fp.write('<h3 class=item><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
-                     '<code>%s</code></h3>\n' % (mid, mid, q(func)))
+            mid = 'm%d_%d' % (index, sid)
+            fp.write('<h3 class=item><code>%s</code>' % q(func))
+            if '.<init>' in func:
+                fp.write('&nbsp;<span class=red>(constructor)</span>')
+            fp.write('</h3>\n')
             if srcdb is None: continue
-            fp.write('<div class=result hidden id="M%d">\n' % mid)
             nodes = {}
             def add(loc, i, maxlength):
                 (fid,start,length) = loc
@@ -271,7 +274,6 @@ def main(argv):
                 add(loc, 0, maxlength)
             for (src,ranges) in nodes.items():
                 show_html(fp, 'src%d' % sid, src, ranges)
-            fp.write('</div>\n')
         fp.write('<hr>\n')
     if fp is not sys.stdout:
         fp.close()
