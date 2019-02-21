@@ -40,7 +40,6 @@ public class DFKlass extends DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initializer = null;
-    private DFMethod _constructor = null;
     private List<DFRef> _fields = null;
     private List<DFMethod> _methods = null;
 
@@ -272,15 +271,6 @@ public class DFKlass extends DFType {
         return _initializer;
     }
 
-    public DFMethod getConstructor() {
-        assert _built;
-        if (_constructor != null) {
-            return _constructor;
-        }
-        assert _baseKlass != null;
-        return _baseKlass.getConstructor();
-    }
-
     protected DFRef lookupField(String id)
         throws VariableNotFound {
         assert _built;
@@ -322,11 +312,13 @@ public class DFKlass extends DFType {
 	return _methods;
     }
 
-    private DFMethod lookupMethod1(SimpleName name, DFType[] argTypes) {
-        String id = name.getIdentifier();
+    private DFMethod lookupMethod1(
+        DFCallStyle callStyle, SimpleName name, DFType[] argTypes) {
+        String id = (name == null)? null : name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
+            if (method1.getCallStyle() != callStyle) continue;
             int dist = method1.canAccept(id, argTypes);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
@@ -337,29 +329,30 @@ public class DFKlass extends DFType {
         return bestMethod;
     }
 
-    public DFMethod lookupMethod(SimpleName name, DFType[] argTypes)
+    public DFMethod lookupMethod(
+        DFCallStyle callStyle, SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
         assert _built;
-        DFMethod method = this.lookupMethod1(name, argTypes);
+        DFMethod method = this.lookupMethod1(callStyle, name, argTypes);
         if (method != null) {
             return method;
         }
         if (_parentKlass != null) {
             try {
-                return _parentKlass.lookupMethod(name, argTypes);
+                return _parentKlass.lookupMethod(callStyle, name, argTypes);
             } catch (MethodNotFound e) {
             }
         }
         if (_baseKlass != null) {
             try {
-                return _baseKlass.lookupMethod(name, argTypes);
+                return _baseKlass.lookupMethod(callStyle, name, argTypes);
             } catch (MethodNotFound e) {
             }
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
                 try {
-                    return iface.lookupMethod(name, argTypes);
+                    return iface.lookupMethod(callStyle, name, argTypes);
                 } catch (MethodNotFound e) {
                 }
             }
@@ -489,6 +482,7 @@ public class DFKlass extends DFType {
 
     private void buildFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws TypeNotFound {
+        //Logger.info("DFKlass.buildFromJKlass:", this, finder);
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
         if (sig != null) {
@@ -555,6 +549,7 @@ public class DFKlass extends DFType {
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
+                if (mapTypes != null) continue; // XXX
 		JNITypeParser parser = new JNITypeParser(sig);
 		finder = new DFTypeFinder(finder, methodSpace);
 		methodType = (DFMethodType)parser.getType(finder);
@@ -567,17 +562,17 @@ public class DFKlass extends DFType {
 		DFType returnType = finder.resolve(meth.getReturnType());
 		methodType = new DFMethodType(argTypes, returnType);
 	    }
+            DFCallStyle callStyle;
             if (meth.getName().equals("<init>")) {
-                _constructor = this.addMethod(
-                    methodSpace, meth.getName(), DFCallStyle.Constructor,
-                    mapTypes, finder, methodType);
+                callStyle = DFCallStyle.Constructor;
+            } else if (meth.isStatic()) {
+                callStyle = DFCallStyle.StaticMethod;
             } else {
-                DFCallStyle callStyle = (meth.isStatic())?
-                    DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
-                this.addMethod(
-                    methodSpace, meth.getName(), callStyle,
-                    mapTypes, finder, methodType);
+                callStyle = DFCallStyle.InstanceMethod;
             }
+            this.addMethod(
+                methodSpace, meth.getName(), callStyle,
+                mapTypes, finder, methodType);
         }
     }
 
@@ -610,7 +605,7 @@ public class DFKlass extends DFType {
     private void buildTypeDecl(
         DFTypeFinder finder, TypeDeclaration typeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build:", this, finder);
+        //Logger.info("DFKlass.buildFromTree:", this, finder);
         // Load base klasses/interfaces.
         try {
             // Get superclass.
@@ -649,7 +644,7 @@ public class DFKlass extends DFType {
     private void buildEnumDecl(
         DFTypeFinder finder, EnumDeclaration enumDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build:", this, ":", enumDecl.getName());
+        //Logger.info("DFKlass.buildFromTree:", this, finder);
         // Load base klasses/interfaces.
         try {
             // Get superclass.
@@ -692,7 +687,7 @@ public class DFKlass extends DFType {
     private void buildAnnotTypeDecl(
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws UnsupportedSyntax, TypeNotFound {
-        //Logger.info("DFKlass.build:", this, ":", annotTypeDecl.getName());
+        //Logger.info("DFKlass.buildFromTree:", this, finder);
         try {
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -769,6 +764,7 @@ public class DFKlass extends DFType {
                         mapTypes[i] = new DFMapType(id2);
                     }
                 }
+                if (mapTypes != null) continue; // XXX
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
                 String name;
@@ -790,9 +786,6 @@ public class DFKlass extends DFType {
 		    method.setBaseScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
-                if (decl.isConstructor()) {
-                    _constructor = method;
-                }
 
             } else if (body instanceof EnumConstantDeclaration) {
 

@@ -112,7 +112,7 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public int canAccept(String name, DFType[] argTypes) {
-        if (!_name.equals(name)) return -1;
+        if (name != null && !_name.equals(name)) return -1;
         return _methodType.canAccept(argTypes, null);
     }
 

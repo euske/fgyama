@@ -560,14 +560,16 @@ class UpdateNode extends SingleAssignNode {
 // CreateObjectNode
 class CreateObjectNode extends CallNode {
 
+    public DFMethod constructor;
+
     public CreateObjectNode(
-        DFGraph graph, DFVarScope scope, DFType type,
+        DFGraph graph, DFVarScope scope, DFType type, DFMethod constructor,
         ASTNode ast, DFNode obj) {
         super(graph, scope, type, null, ast);
-        assert type != null;
         if (obj != null) {
             this.accept(obj, "#this");
         }
+        this.constructor = constructor;
     }
 
     @Override
@@ -577,7 +579,7 @@ class CreateObjectNode extends CallNode {
 
     @Override
     public String getData() {
-        return this.getNodeType().getTypeName();
+        return this.constructor.getSignature();
     }
 }
 
@@ -726,7 +728,8 @@ class DFModuleScope extends DFVarScope {
 	    _refs.put(ref.getName(), ref);
 	} catch (VariableNotFound e) {
             try {
-                DFMethod method = klass.lookupMethod(name, null);
+                DFMethod method = klass.lookupMethod(
+                    DFCallStyle.StaticMethod, name, null);
                 _methods.add(method);
             } catch (MethodNotFound ee) {
             }
@@ -930,6 +933,7 @@ public class Java2DF {
             } else if (expr instanceof MethodInvocation) {
                 MethodInvocation invoke = (MethodInvocation)expr;
                 Expression expr1 = invoke.getExpression();
+                DFCallStyle callStyle = DFCallStyle.InstanceMethod;
                 DFNode obj = null;
                 DFKlass klass = null;
                 if (expr1 == null) {
@@ -938,6 +942,7 @@ public class Java2DF {
                     if (expr1 instanceof Name) {
                         try {
                             klass = finder.lookupKlass((Name)expr1);
+                            callStyle = DFCallStyle.StaticMethod;
                         } catch (TypeNotFound e) {
                         }
                     }
@@ -965,7 +970,8 @@ public class Java2DF {
                 typeList.toArray(argTypes);
                 DFMethod method;
                 try {
-                    method = klass.lookupMethod(invoke.getName(), argTypes);
+                    method = klass.lookupMethod(
+                        callStyle, invoke.getName(), argTypes);
                 } catch (MethodNotFound e) {
 		    // try static imports.
                     try {
@@ -1040,7 +1046,8 @@ public class Java2DF {
                 assert baseKlass != null;
                 DFMethod method;
                 try {
-                    method = baseKlass.lookupMethod(sinvoke.getName(), argTypes);
+                    method = baseKlass.lookupMethod(
+                        DFCallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 } catch (MethodNotFound e) {
                     if (0 < _strict) {
                         e.setAst(expr);
@@ -1192,18 +1199,24 @@ public class Java2DF {
                     obj = ctx.getRValue();
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
+                List<DFType> typeList = new ArrayList<DFType>();
                 for (Expression arg : (List<Expression>) cstr.arguments()) {
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, arg);
-                    argList.add(ctx.getRValue());
+                    DFNode node = ctx.getRValue();
+                    argList.add(node);
+                    typeList.add(node.getNodeType());
                 }
                 DFNode[] args = new DFNode[argList.size()];
                 argList.toArray(args);
+                DFType[] argTypes = new DFType[typeList.size()];
+                typeList.toArray(argTypes);
+                DFMethod constructor = instKlass.lookupMethod(
+                    DFCallStyle.Constructor, null, argTypes);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, instKlass, cstr, obj);
+                    graph, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);
-                DFMethod method = instKlass.getConstructor();
-                DFFrame frame1 = method.getFrame();
+                DFFrame frame1 = constructor.getFrame();
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getInputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
@@ -1268,8 +1281,10 @@ public class Java2DF {
                 } else {
                     throw new UnsupportedSyntax(body);
                 }
+                DFMethod constructor = anonKlass.lookupMethod(
+                    DFCallStyle.Constructor, null, null);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, anonKlass, lambda, null);
+                    graph, scope, anonKlass, constructor, lambda, null);
                 ctx.setRValue(call);
 
             } else if (expr instanceof MethodReference) {
@@ -1279,14 +1294,16 @@ public class Java2DF {
                 //  SuperMethodReference
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
+                // XXX TODO method ref
                 DFKlass klass = finder.resolveKlass(
                     scope.lookupThis().getRefType());
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFKlass(
                     "methodref", anonSpace, klass, scope);
-                // XXX TODO method ref
+                DFMethod constructor = anonKlass.lookupMethod(
+                    DFCallStyle.Constructor, null, null);
                 CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, anonKlass, mref, null);
+                    graph, scope, anonKlass, constructor, mref, null);
                 ctx.setRValue(call);
 
             } else {
