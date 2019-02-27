@@ -5,16 +5,56 @@ from math import sqrt, log
 from srcdb import SourceDB
 from graph import get_graphs
 
+def find_lcs_len(s1, s2):
+    m = [ [ 0 for x in s2 ] for y in s1 ]
+    for p1 in range(len(s1)):
+        for p2 in range(len(s2)):
+            if s1[p1] == s2[p2]:
+                if p1 and p2:
+                    m[p1][p2] = m[p1-1][p2-1]+1
+                else:
+                    m[p1][p2] = 1
+            elif m[p1-1][p2] < m[p1][p2-1]:
+                m[p1][p2] = m[p1][p2-1]
+            else:                             # m[p1][p2-1] < m[p1-1][p2]
+                m[p1][p2] = m[p1-1][p2]
+    return m[-1][-1]
+
+def tokensim(g1, t1, g2, t2):
+    s1 = sum( (idf[w1]*f1)**2 for (w1,f1) in t1.items() )
+    s2 = sum( (idf[w2]*f2)**2 for (w2,f2) in t2.items() )
+    s3 = 0
+    for (w,f1) in t1.items():
+        if w in t2:
+            f2 = t2[w]
+            s3 += (idf[w]**2)*f1*f2
+    return s3/sqrt(s1*s2)
+
+def getname(name):
+    if ';.<init>' in name:
+        (name,_,_) = name.partition(';.<init>')
+        (_,_,name) = name.rpartition('/')
+    elif ';.' in name:
+        (_,_,name) = name.partition(';.')
+        (name,_,_) = name.partition('(')
+    return name
+
+def namesim(g1, t1, g2, t2):
+    n1 = getname(g1.name)
+    n2 = getname(g2.name)
+    c = find_lcs_len(n1, n2)
+    return c/max(len(n1), len(n2))
+
 # main
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-v] [-o output] [-B basedir] [-c encoding] [-t threshold] '
+        print('usage: %s [-v] [-o output] {-T|-N} [-B basedir] [-c encoding] [-t threshold] '
               'out.graph ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'vo:B:c:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'vo:TNB:c:t:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -22,9 +62,12 @@ def main(argv):
     encoding = 'utf-8'
     threshold = 0.7
     verbose = False
+    calcsim = tokensim
     for (k, v) in opts:
         if k == '-v': verbose = True
         elif k == '-o': output = v
+        elif k == '-T': calcsim = tokensim
+        elif k == '-N': calcsim = namesim
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-c': encoding = v
         elif k == '-t': threshold = float(v)
@@ -68,19 +111,10 @@ def main(argv):
         idf[t] = log(total/n)
 
     sys.stderr.write('Clustering')
-    def calcsim(t1, t2):
-        s1 = sum( (idf[w1]*f1)**2 for (w1,f1) in t1.items() )
-        s2 = sum( (idf[w2]*f2)**2 for (w2,f2) in t2.items() )
-        s3 = 0
-        for (w,f1) in t1.items():
-            if w in t2:
-                f2 = t2[w]
-                s3 += (idf[w]**2)*f1*f2
-        return s3/sqrt(s1*s2)
     a = []
     for (i,(g1,c1)) in enumerate(tokens):
         for (g2,c2) in tokens[i+1:]:
-            sim = calcsim(c1,c2)
+            sim = calcsim(g1,c1,g2,c2)
             if threshold <= sim:
                 a.append((sim,g1,g2))
         sys.stderr.write('.')
