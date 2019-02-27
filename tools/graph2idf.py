@@ -158,10 +158,6 @@ def main(argv):
                 name = name[:i+7]
             gid2graph[name] = graph
 
-    print('Read: %d sources, %d graphs' %
-          (len(srcmap), len(graphs)),
-          file=sys.stderr)
-
     # Enumerate caller/callee relationships.
     funcalls = {}
     def addcall(x, y): # (caller, callee)
@@ -180,6 +176,10 @@ def main(argv):
                     addcall(node, gid)
             elif node.kind == 'new':
                 addcall(node, node.data+'.<init>')
+
+    print('Read: %d sources, %d graphs, %d funcalls' %
+          (len(srcmap), len(graphs), sum( len(a) for a in funcalls.values() )),
+          file=sys.stderr)
 
     def trace(out, v0, n0, label, n1, length=0, done=None, caller=None):
         if maxlen <= length: return

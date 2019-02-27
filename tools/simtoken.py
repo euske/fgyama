@@ -10,19 +10,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-B basedir] [-c encoding] [-t threshold] '
+        print('usage: %s [-v] [-o output] [-B basedir] [-c encoding] [-t threshold] '
               'out.graph ...' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:B:c:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'vo:B:c:t:')
     except getopt.GetoptError:
         return usage()
     output = None
     srcdb = None
     encoding = 'utf-8'
     threshold = 0.7
+    verbose = False
     for (k, v) in opts:
-        if k == '-o': output = v
+        if k == '-v': verbose = True
+        elif k == '-o': output = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-c': encoding = v
         elif k == '-t': threshold = float(v)
@@ -120,6 +122,7 @@ def main(argv):
         fp.write('= %d\n' % len(c))
         for graph in c:
             fp.write('+ %s\n' % graph.name)
+            if not verbose: continue
             if graph.src is None or graph.ast is None: continue
             src = srcdb.get(graph.src)
             (_,loc,length) = graph.ast

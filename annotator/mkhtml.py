@@ -147,6 +147,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     output = None
+    html = False
     srcdb = None
     encoding = None
     threshold = 10
@@ -155,6 +156,7 @@ def main(argv):
     maxlength = 500
     for (k, v) in opts:
         if k == '-o': output = v
+        elif k == '-H': html = True
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-c': encoding = v
         elif k == '-t': threshold = float(v)
@@ -244,14 +246,20 @@ def main(argv):
         fp = sys.stdout
     else:
         fp = open(output, 'w')
-    show_html_headers(fp, 'PairTagging_'+title, title)
-    for (index,(_,tree)) in enumerate(results):
+    if html:
+        show_html_headers(fp, 'PairTagging_'+title, title)
+    for (index,(score,tree)) in enumerate(results):
         pid = 'p%03d' % index
-        fp.write('<h2 class=pair>Pair %d</h2>\n' % index)
-        fp.write('<div class=catui>Category: <span id="%s" class=ui> </span></div>\n' % (pid))
+        if html:
+            fp.write('<h2 class=pair>Pair %d</h2>\n' % index)
+            fp.write('<div class=catui>Category: <span id="%s" class=ui> </span></div>\n' % (pid))
+        else:
+            fp.write('= %s %.3f\n' % (pid, score))
         for (sid,(func,(locs,n))) in enumerate(tree.matches.items()):
+            if not html:
+                fp.write('+ %s\n' % func)
+                continue
             if sid == 2: break
-            mid = 'm%d_%d' % (index, sid)
             fp.write('<h3 class=item><code>%s</code>' % q(func))
             if '.<init>' in func:
                 fp.write('&nbsp;<span class=red>(constructor)</span>')
@@ -274,7 +282,10 @@ def main(argv):
                 add(loc, 0, maxlength)
             for (src,ranges) in nodes.items():
                 show_html(fp, 'src%d' % sid, src, ranges)
-        fp.write('<hr>\n')
+        if html:
+            fp.write('<hr>\n')
+        else:
+            fp.write('\n')
     if fp is not sys.stdout:
         fp.close()
     return 0
