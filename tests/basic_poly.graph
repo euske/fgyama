@@ -98,7 +98,7 @@
       <ast length="294" start="256" type="31"/>
       <scope name="basic_poly_Baa.main">
         <scope name="basic_poly_Baa.main.b0">
-          <node data="Lbasic_poly_Foo;" id="N98dd04bd_1" kind="new" type="Lbasic_poly_Foo;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N98dd04bd_1" kind="new" type="Lbasic_poly_Foo;">
             <ast length="20" start="311" type="14"/>
           </node>
           <node id="N98dd04bd_2" kind="assign" ref="$basic_poly_Baa.main.b0/$a" type="Lbasic_poly_Foo;">
@@ -127,7 +127,7 @@
             <link src="N98dd04bd_5"/>
             <ast length="12" start="345" type="59"/>
           </node>
-          <node data="Lbasic_poly_Baa;" id="N98dd04bd_9" kind="new" type="Lbasic_poly_Baa;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N98dd04bd_9" kind="new" type="Lbasic_poly_Baa;">
             <ast length="20" start="386" type="14"/>
           </node>
           <node id="N98dd04bd_10" kind="assign" ref="$basic_poly_Baa.main.b0/$b" type="Lbasic_poly_Foo;">
@@ -186,7 +186,7 @@
             <link label="R" src="N98dd04bd_20"/>
             <ast length="12" start="438" type="7"/>
           </node>
-          <node data="Lbasic_poly_Baa;" id="N98dd04bd_23" kind="new" type="Lbasic_poly_Baa;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N98dd04bd_23" kind="new" type="Lbasic_poly_Baa;">
             <ast length="20" start="479" type="14"/>
           </node>
           <node id="N98dd04bd_24" kind="assign" ref="$basic_poly_Baa.main.b0/$c" type="Lbasic_poly_Baa;">

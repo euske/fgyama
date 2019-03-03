@@ -16,7 +16,7 @@
       <ast length="246" start="139" type="31"/>
       <scope name="basic_methods.fa">
         <scope name="basic_methods.fa.b0">
-          <node data="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;" id="N929107f2_1" kind="new" type="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_1" kind="new" type="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;">
             <ast length="60" start="165" type="14"/>
           </node>
           <node id="N929107f2_2" kind="assign" ref="$basic_methods.fa.b0/$a" type="Lbasic_methods/A;">
@@ -43,7 +43,7 @@
             <link label="#this" src="N929107f2_7"/>
             <ast length="12" start="323" type="32"/>
           </node>
-          <node data="Lbasic_methods/method:AST:31:139:246/moo;" id="N929107f2_9" kind="new" type="Lbasic_methods/method:AST:31:139:246/moo;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_9" kind="new" type="Lbasic_methods/method:AST:31:139:246/moo;">
             <ast length="9" start="353" type="14"/>
           </node>
           <node id="N929107f2_10" kind="assign" ref="$basic_methods.fa.b0/$c" type="Lbasic_methods/method:AST:31:139:246/moo;">

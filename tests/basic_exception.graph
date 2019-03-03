@@ -110,7 +110,7 @@
           <node data="true" id="N3204ac33_1" kind="const" type="Z">
             <ast length="4" start="385" type="9"/>
           </node>
-          <node data="Lbasic_exception/A;" id="N3204ac33_2" kind="new" type="Lbasic_exception/A;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N3204ac33_2" kind="new" type="Lbasic_exception/A;">
             <ast length="7" start="397" type="14"/>
           </node>
           <node id="N3204ac33_3" kind="throw" ref="#exception" type="Ljava/lang/Exception;">

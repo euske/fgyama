@@ -29,7 +29,7 @@
             <link label="#this" src="Na7c7a6e8_1"/>
             <ast length="26" start="108" type="32"/>
           </node>
-          <node data="Ldom/meep/basic_names/method:AST:31:79:210/Baz;" id="Na7c7a6e8_5" kind="new" type="Ldom/meep/basic_names/method:AST:31:79:210/Baz;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Na7c7a6e8_5" kind="new" type="Ldom/meep/basic_names/method:AST:31:79:210/Baz;">
             <ast length="9" start="230" type="14"/>
           </node>
           <node id="Na7c7a6e8_6" kind="assign" ref="$dom/meep/basic_names.doit.b0/$baz" type="Ldom/meep/basic_names/method:AST:31:79:210/Baz;">
@@ -88,7 +88,7 @@
       <ast length="111" start="357" type="31"/>
       <scope name="dom/meep/basic_names.main">
         <scope name="dom/meep/basic_names.main.b0">
-          <node data="Ldom/meep/basic_names;" id="Ne9ca43ba_3" kind="new" type="Ldom/meep/basic_names;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Ne9ca43ba_3" kind="new" type="Ldom/meep/basic_names;">
             <ast length="17" start="424" type="14"/>
           </node>
           <node id="Ne9ca43ba_4" kind="assign" ref="$dom/meep/basic_names.main.b0/$foo" type="Ldom/meep/basic_names;">

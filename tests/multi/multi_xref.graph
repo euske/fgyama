@@ -24,7 +24,7 @@
             <link label="obj" src="N2082c4f8_1"/>
             <ast length="10" start="136" type="22"/>
           </node>
-          <node data="Ldom/meep/multi_xref2;" id="N2082c4f8_4" kind="new" type="Ldom/meep/multi_xref2;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N2082c4f8_4" kind="new" type="Ldom/meep/multi_xref2;">
             <ast length="17" start="149" type="14"/>
           </node>
           <node data="=" id="N2082c4f8_5" kind="assignop" ref="@dom/meep/multi_xref1/.xref2" type="Ldom/meep/multi_xref2;">
@@ -116,7 +116,7 @@
             <link label="obj" src="Na8d547a0_1"/>
             <ast length="10" start="96" type="22"/>
           </node>
-          <node data="Ldom/meep/multi_xref1;" id="Na8d547a0_4" kind="new" type="Ldom/meep/multi_xref1;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Na8d547a0_4" kind="new" type="Ldom/meep/multi_xref1;">
             <ast length="17" start="109" type="14"/>
           </node>
           <node data="=" id="Na8d547a0_5" kind="assignop" ref="@dom/meep/multi_xref2/.xref1" type="Ldom/meep/multi_xref1;">
@@ -217,7 +217,7 @@
       <ast length="79" start="114" type="31"/>
       <scope name="dom/dood/multi_xref3.baa">
         <scope name="dom/dood/multi_xref3.baa.b0">
-          <node data="Ldom/meep/multi_xref1;" id="Ne96a6cc2_1" kind="new" type="Ldom/meep/multi_xref1;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Ne96a6cc2_1" kind="new" type="Ldom/meep/multi_xref1;">
             <ast length="17" start="155" type="14"/>
           </node>
           <node id="Ne96a6cc2_2" kind="assign" ref="$dom/dood/multi_xref3.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
