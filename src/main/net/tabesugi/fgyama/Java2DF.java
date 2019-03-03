@@ -756,8 +756,10 @@ public class Java2DF {
 
         try {
             if (expr instanceof Annotation) {
+		// "@Annotation"
 
             } else if (expr instanceof Name) {
+		// "a.b"
                 Name name = (Name)expr;
                 if (name.isSimpleName()) {
                     DFRef ref = scope.lookupVar((SimpleName)name);
@@ -787,6 +789,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof ThisExpression) {
+		// "this"
                 ThisExpression thisExpr = (ThisExpression)expr;
                 Name name = thisExpr.getQualifier();
                 DFRef ref;
@@ -801,29 +804,34 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof BooleanLiteral) {
+		// "true", "false"
                 boolean value = ((BooleanLiteral)expr).booleanValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope, DFBasicType.BOOLEAN,
                                   expr, Boolean.toString(value)));
 
             } else if (expr instanceof CharacterLiteral) {
+		// "'c'"
                 char value = ((CharacterLiteral)expr).charValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope, DFBasicType.CHAR,
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof NullLiteral) {
+		// "null"
                 ctx.setRValue(new ConstNode(
                                   graph, scope, DFNullType.NULL,
                                   expr, "null"));
 
             } else if (expr instanceof NumberLiteral) {
+		// "42"
                 String value = ((NumberLiteral)expr).getToken();
                 ctx.setRValue(new ConstNode(
                                   graph, scope, DFBasicType.INT,
                                   expr, value));
 
             } else if (expr instanceof StringLiteral) {
+		// ""abc""
                 String value = ((StringLiteral)expr).getLiteralValue();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
@@ -831,6 +839,7 @@ public class Java2DF {
                                   expr, Utils.quote(value)));
 
             } else if (expr instanceof TypeLiteral) {
+		// "A.class"
                 Type value = ((TypeLiteral)expr).getType();
                 ctx.setRValue(new ConstNode(
                                   graph, scope,
@@ -845,6 +854,7 @@ public class Java2DF {
                     ctx, typeSpace, graph, finder, scope, frame, operand);
                 if (op == PrefixExpression.Operator.INCREMENT ||
                     op == PrefixExpression.Operator.DECREMENT) {
+		    // "++x"
                     processAssignment(
                         ctx, typeSpace, graph, finder, scope, frame, operand);
                     DFNode assign = ctx.getLValue();
@@ -856,6 +866,7 @@ public class Java2DF {
                     ctx.set(assign);
                     ctx.setRValue(value);
                 } else {
+		    // "!a"
                     DFNode value = new PrefixNode(
                         graph, scope, null,
                         expr, op);
@@ -864,6 +875,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof PostfixExpression) {
+		// "y--"
                 PostfixExpression postfix = (PostfixExpression)expr;
                 PostfixExpression.Operator op = postfix.getOperator();
                 Expression operand = postfix.getOperand();
@@ -882,6 +894,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof InfixExpression) {
+		// "a+b"
                 InfixExpression infix = (InfixExpression)expr;
                 InfixExpression.Operator op = infix.getOperator();
                 processExpression(
@@ -898,12 +911,14 @@ public class Java2DF {
                                   graph, scope, type, expr, op, lvalue, rvalue));
 
             } else if (expr instanceof ParenthesizedExpression) {
+		// "(expr)"
                 ParenthesizedExpression paren = (ParenthesizedExpression)expr;
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame,
                     paren.getExpression());
 
             } else if (expr instanceof Assignment) {
+		// "p = q"
                 Assignment assn = (Assignment)expr;
                 Assignment.Operator op = assn.getOperator();
                 processAssignment(
@@ -925,6 +940,7 @@ public class Java2DF {
                 ctx.setRValue(assign);
 
             } else if (expr instanceof VariableDeclarationExpression) {
+		// "int a=2"
                 VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
                 processVariableDeclaration(
                     ctx, typeSpace, graph, finder, scope, frame,
@@ -952,7 +968,7 @@ public class Java2DF {
                         }
                     }
                     if (klass == null) {
-                        // "expression.method()"
+                        // "expr.method()"
                         processExpression(
                             ctx, typeSpace, graph, finder, scope, frame, expr1);
                         obj = ctx.getRValue();
@@ -1030,6 +1046,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof SuperMethodInvocation) {
+		// "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
                 DFNode obj = ctx.get(scope.lookupThis());
                 List<DFNode> argList = new ArrayList<DFNode>();
@@ -1090,6 +1107,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof ArrayCreation) {
+		// "new int[10]"
                 ArrayCreation ac = (ArrayCreation)expr;
                 DFType arrayType = finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
@@ -1107,6 +1125,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof ArrayInitializer) {
+		// "{ 5,9,4,0 }"
                 ArrayInitializer init = (ArrayInitializer)expr;
                 ValueSetNode arr = null;
                 for (Expression expr1 : (List<Expression>) init.expressions()) {
@@ -1125,6 +1144,7 @@ public class Java2DF {
                 // XXX array ref is not used.
 
             } else if (expr instanceof ArrayAccess) {
+		// "a[0]"
                 ArrayAccess aa = (ArrayAccess)expr;
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame,
@@ -1140,6 +1160,7 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof FieldAccess) {
+		// "(expr).foo"
                 FieldAccess fa = (FieldAccess)expr;
                 Expression expr1 = fa.getExpression();
                 DFNode obj = null;
@@ -1163,6 +1184,7 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof SuperFieldAccess) {
+		// "super.baa"
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
@@ -1173,6 +1195,7 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof CastExpression) {
+		// "(String)"
                 CastExpression cast = (CastExpression)expr;
                 DFType type = finder.resolve(cast.getType());
                 processExpression(
@@ -1183,6 +1206,7 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof ClassInstanceCreation) {
+		// "new T()"
                 ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
                 AnonymousClassDeclaration anonDecl =
                     cstr.getAnonymousClassDeclaration();
@@ -1241,6 +1265,7 @@ public class Java2DF {
                 }
 
             } else if (expr instanceof ConditionalExpression) {
+		// "c? a : b"
                 ConditionalExpression cond = (ConditionalExpression)expr;
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame,
@@ -1260,6 +1285,7 @@ public class Java2DF {
                 ctx.setRValue(join);
 
             } else if (expr instanceof InstanceofExpression) {
+		// "a instanceof A"
                 InstanceofExpression instof = (InstanceofExpression)expr;
                 DFType type = finder.resolve(instof.getRightOperand());
                 processExpression(
@@ -1270,6 +1296,7 @@ public class Java2DF {
                 ctx.setRValue(node);
 
             } else if (expr instanceof LambdaExpression) {
+		// "x -> { ... }"
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
@@ -1332,6 +1359,7 @@ public class Java2DF {
         assert expr != null;
 
         if (expr instanceof Name) {
+	    // "a.b"
             Name name = (Name)expr;
             if (name.isSimpleName()) {
                 DFRef ref = scope.lookupVar((SimpleName)name);
@@ -1357,6 +1385,7 @@ public class Java2DF {
             }
 
         } else if (expr instanceof ArrayAccess) {
+	    // "a[0]"
             ArrayAccess aa = (ArrayAccess)expr;
             processExpression(
                 ctx, typeSpace, graph, finder, scope, frame,
@@ -1372,6 +1401,7 @@ public class Java2DF {
             ctx.setLValue(node);
 
         } else if (expr instanceof FieldAccess) {
+	    // "(expr).foo"
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
             processExpression(
@@ -1383,6 +1413,7 @@ public class Java2DF {
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
         } else if (expr instanceof SuperFieldAccess) {
+	    // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFNode obj = ctx.get(scope.lookupThis());
@@ -1961,9 +1992,11 @@ public class Java2DF {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
+	    // "assert x;"
             // XXX Ignore asserts.
 
         } else if (stmt instanceof Block) {
+	    // "{ ... }"
             processBlock(
                 ctx, typeSpace, graph, finder, scope, frame,
 		(Block)stmt);
@@ -1971,21 +2004,25 @@ public class Java2DF {
         } else if (stmt instanceof EmptyStatement) {
 
         } else if (stmt instanceof VariableDeclarationStatement) {
+	    // "int a = 2;"
             processVariableDeclarationStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (VariableDeclarationStatement)stmt);
 
         } else if (stmt instanceof ExpressionStatement) {
+	    // "foo();"
             processExpressionStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (ExpressionStatement)stmt);
 
         } else if (stmt instanceof IfStatement) {
+	    // "if (c) { ... } else { ... }"
             processIfStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (IfStatement)stmt);
 
         } else if (stmt instanceof SwitchStatement) {
+	    // "switch (x) { case 0: ...; }"
             processSwitchStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (SwitchStatement)stmt);
@@ -1995,26 +2032,31 @@ public class Java2DF {
             throw new UnsupportedSyntax(stmt);
 
         } else if (stmt instanceof WhileStatement) {
+	    // "while (c) { ... }"
             processWhileStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (WhileStatement)stmt);
 
         } else if (stmt instanceof DoStatement) {
+	    // "do { ... } while (c);"
             processDoStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (DoStatement)stmt);
 
         } else if (stmt instanceof ForStatement) {
+	    // "for (i = 0; i < 10; i++) { ... }"
             processForStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (ForStatement)stmt);
 
         } else if (stmt instanceof EnhancedForStatement) {
+	    // "for (x : array) { ... }"
             processEnhancedForStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (EnhancedForStatement)stmt);
 
         } else if (stmt instanceof ReturnStatement) {
+	    // "return 42;"
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
             DFFrame dstFrame = frame.find(DFFrame.RETURNABLE);
             Expression expr = rtrnStmt.getExpression();
@@ -2031,6 +2073,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof BreakStatement) {
+	    // "break;"
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
             String dstLabel = (labelName != null)?
@@ -2041,6 +2084,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof ContinueStatement) {
+	    // "continue;"
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
             String dstLabel = (labelName != null)?
@@ -2051,6 +2095,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof LabeledStatement) {
+	    // "here:"
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
             processStatement(
@@ -2059,6 +2104,7 @@ public class Java2DF {
             labeledFrame.close(ctx);
 
         } else if (stmt instanceof SynchronizedStatement) {
+	    // "synchronized (this) { ... }"
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             processExpression(
                 ctx, typeSpace, graph, finder, scope, frame,
@@ -2068,11 +2114,13 @@ public class Java2DF {
                 syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
+	    // "try { ... } catch (e) { ... }"
             processTryStatement(
                 ctx, typeSpace, graph, finder, scope, frame,
                 (TryStatement)stmt);
 
         } else if (stmt instanceof ThrowStatement) {
+	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             processExpression(
                 ctx, typeSpace, graph, finder, scope, frame,
@@ -2088,6 +2136,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
+	    // "this(args)"
             // XXX Use MethodCallNode.
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) ci.arguments()) {
@@ -2096,6 +2145,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
+	    // "super(args)"
             // XXX Use MethodCallNode.
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) sci.arguments()) {
@@ -2104,6 +2154,7 @@ public class Java2DF {
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
+	    // "class K { ... }"
             // Inline classes are processed separately.
 
         } else {
