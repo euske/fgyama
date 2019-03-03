@@ -318,7 +318,11 @@ public class DFKlass extends DFType {
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
-            if (method1.getCallStyle() != callStyle) continue;
+            DFCallStyle callStyle1 = method1.getCallStyle();
+            if (!(callStyle == callStyle1 ||
+                  (callStyle == DFCallStyle.InstanceOrStatic &&
+                   (callStyle1 == DFCallStyle.InstanceMethod ||
+                    callStyle1 == DFCallStyle.StaticMethod)))) continue;
             int dist = method1.canAccept(id, argTypes);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {

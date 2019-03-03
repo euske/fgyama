@@ -933,13 +933,18 @@ public class Java2DF {
             } else if (expr instanceof MethodInvocation) {
                 MethodInvocation invoke = (MethodInvocation)expr;
                 Expression expr1 = invoke.getExpression();
-                DFCallStyle callStyle = DFCallStyle.InstanceMethod;
+                DFCallStyle callStyle;
                 DFNode obj = null;
                 DFKlass klass = null;
                 if (expr1 == null) {
+                    // "method()"
                     obj = ctx.get(scope.lookupThis());
+                    klass = finder.resolveKlass(obj.getNodeType());
+                    callStyle = DFCallStyle.InstanceOrStatic;
                 } else {
+                    callStyle = DFCallStyle.InstanceMethod;
                     if (expr1 instanceof Name) {
+                        // "ClassName.method()"
                         try {
                             klass = finder.lookupKlass((Name)expr1);
                             callStyle = DFCallStyle.StaticMethod;
@@ -947,13 +952,12 @@ public class Java2DF {
                         }
                     }
                     if (klass == null) {
+                        // "expression.method()"
                         processExpression(
                             ctx, typeSpace, graph, finder, scope, frame, expr1);
                         obj = ctx.getRValue();
+                        klass = finder.resolveKlass(obj.getNodeType());
                     }
-                }
-                if (obj != null) {
-                    klass = finder.resolveKlass(obj.getNodeType());
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
                 List<DFType> typeList = new ArrayList<DFType>();
