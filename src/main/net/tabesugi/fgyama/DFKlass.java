@@ -22,7 +22,7 @@ public class DFKlass extends DFType {
     private List<DFKlass> _childKlasses;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes;
-    private List<DFParamKlass> _paramKlasses;
+    private List<DFKlass> _paramKlasses;
 
     // These fields are set immediately.
     private ASTNode _ast = null;
@@ -31,6 +31,10 @@ public class DFKlass extends DFType {
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
+
+    // These fields are available only for parameterized klasses.
+    private DFKlass _genericKlass = null;
+    private DFType[] _paramTypes = null;
 
     // This field is available after setBaseFinder(). (Pass2)
     private DFTypeFinder _baseFinder = null;
@@ -53,7 +57,7 @@ public class DFKlass extends DFType {
         _childKlasses = new ArrayList<DFKlass>();
         _klassScope = new DFKlassScope(parentScope, name);
         _methodScopes = new HashMap<String, DFLocalVarScope>();
-        _paramKlasses = new ArrayList<DFParamKlass>();
+        _paramKlasses = new ArrayList<DFKlass>();
 
         if (_parentKlass != null) {
             _parentKlass._childKlasses.add(this);
@@ -61,7 +65,11 @@ public class DFKlass extends DFType {
     }
 
     // Constructor for a parameterized klass.
-    protected DFKlass(String name, DFKlass genericKlass) {
+    private DFKlass(
+        String name, DFKlass genericKlass,
+        DFType[] paramTypes) {
+        assert genericKlass != null;
+        assert paramTypes != null;
         _name = name;
         _parentSpace = genericKlass._parentSpace;
         _klassSpace = genericKlass._klassSpace;
@@ -70,14 +78,29 @@ public class DFKlass extends DFType {
         _methodScopes = genericKlass._methodScopes;
         _paramKlasses = null;
 
+        _genericKlass = genericKlass;
+        _paramTypes = paramTypes;
+
         _ast = genericKlass._ast;
         _jarPath = genericKlass._jarPath;
         _filePath = genericKlass._filePath;
 
         assert _mapTypes == null;
+        DFMapType[] mapTypes = genericKlass._mapTypes;
 
         // not loaded yet!
         assert !_built;
+
+        DFTypeSpace mapTypeSpace = new DFTypeSpace(null, name);
+        for (int i = 0; i < paramTypes.length; i++) {
+            assert mapTypes[i] != null;
+            assert paramTypes[i] != null;
+            mapTypeSpace.addKlass(
+                mapTypes[i].getTypeName(), (DFKlass)paramTypes[i]);
+        }
+        DFTypeFinder finder = genericKlass._baseFinder;
+        assert finder != null;
+        _baseFinder = new DFTypeFinder(finder, mapTypeSpace);
     }
 
     @Override
@@ -88,7 +111,7 @@ public class DFKlass extends DFType {
     public String getTypeName() {
         String name = "L"+this.getFullName();
         if (_mapTypes != null && 0 < _mapTypes.length) {
-            name = name + DFParamKlass.getParamNames(_mapTypes);
+            name = name + getParamNames(_mapTypes);
         }
         return name+";";
     }
@@ -125,6 +148,20 @@ public class DFKlass extends DFType {
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (this == klass) return 0;
+        if (_genericKlass != null && klass._genericKlass != null) {
+            // A<T> isSubclassOf B<S>?
+            if (_paramTypes.length != klass._paramTypes.length) return -1;
+            // A isSubclassOf B?
+            int dist = _genericKlass.isSubclassOf(klass._genericKlass, typeMap);
+            if (dist < 0) return -1;
+            for (int i = 0; i < _paramTypes.length; i++) {
+                // T isSubclassOf S? -> S canConvertFrom T?
+                int d = klass._paramTypes[i].canConvertFrom(_paramTypes[i], typeMap);
+                if (d < 0) return -1;
+                dist += d;
+            }
+            return dist;
+        }
         if (_baseKlass != null) {
             int dist = _baseKlass.isSubclassOf(klass, typeMap);
             if (0 <= dist) return dist+1;
@@ -164,14 +201,18 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public DFParamKlass parameterize(DFType[] paramTypes) {
+    public DFKlass getGeneric() {
+        return _genericKlass;
+    }
+
+    public DFKlass parameterize(DFType[] paramTypes) {
         assert _mapTypes != null;
         assert _paramKlasses != null;
-        String name = _name + DFParamKlass.getParamNames(paramTypes);
+        String name = _name + getParamNames(paramTypes);
         try {
-            return (DFParamKlass)_klassSpace.getKlass(name);
+            return _klassSpace.getKlass(name);
         } catch (TypeNotFound e) {
-            DFParamKlass klass = new DFParamKlass(name, this, _mapTypes, paramTypes);
+            DFKlass klass = new DFKlass(name, this, paramTypes);
             // XXX childKlasses not parameterized.
             _klassSpace.addKlass(name, klass);
             _paramKlasses.add(klass);
@@ -179,9 +220,9 @@ public class DFKlass extends DFType {
         }
     }
 
-    public DFParamKlass[] getParamKlasses() {
+    public DFKlass[] getParamKlasses() {
         assert _paramKlasses != null;
-        DFParamKlass[] klasses = new DFParamKlass[_paramKlasses.size()];
+        DFKlass[] klasses = new DFKlass[_paramKlasses.size()];
         _paramKlasses.toArray(klasses);
         return klasses;
     }
@@ -261,9 +302,7 @@ public class DFKlass extends DFType {
 
     public boolean isEnum() {
         assert _built;
-        return (_baseKlass instanceof DFParamKlass &&
-                ((DFParamKlass)_baseKlass).getGeneric() ==
-                DFBuiltinTypes.getEnumKlass());
+        return 0 <= _baseKlass.isSubclassOf(DFBuiltinTypes.getEnumKlass(), null);
     }
 
     public DFMethod getInitializer() {
@@ -817,6 +856,17 @@ public class DFKlass extends DFType {
 
     public ASTNode getAST() {
         return _ast;
+    }
+
+    private static String getParamNames(DFType[] paramTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFType type : paramTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(type.getTypeName());
+        }
+        return "<"+b.toString()+">";
     }
 
     // DFKlassScope
