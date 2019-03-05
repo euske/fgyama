@@ -201,10 +201,6 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public DFKlass getGeneric() {
-        return _genericKlass;
-    }
-
     public DFKlass parameterize(DFType[] paramTypes) {
         assert _mapTypes != null;
         assert _paramKlasses != null;
@@ -302,7 +298,8 @@ public class DFKlass extends DFType {
 
     public boolean isEnum() {
         assert _built;
-        return 0 <= _baseKlass.isSubclassOf(DFBuiltinTypes.getEnumKlass(), null);
+        return (_baseKlass._genericKlass ==
+                DFBuiltinTypes.getEnumKlass());
     }
 
     public DFMethod getInitializer() {
