@@ -232,6 +232,10 @@ public class DFKlass extends DFType {
         _ast = ast;
     }
 
+    public ASTNode getTree() {
+        return _ast;
+    }
+
     public String getKlassName() {
         return _name;
     }
@@ -849,10 +853,6 @@ public class DFKlass extends DFType {
                 throw new UnsupportedSyntax(body);
             }
         }
-    }
-
-    public ASTNode getAST() {
-        return _ast;
     }
 
     private static String getParamNames(DFType[] paramTypes) {

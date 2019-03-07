@@ -2217,7 +2217,7 @@ public class Java2DF {
     private DFGraph processKlassBody(DFKlass klass)
         throws UnsupportedSyntax, EntityNotFound {
         // lookup base/child klasses.
-        ASTNode ast = klass.getAST();
+        ASTNode ast = klass.getTree();
         List<BodyDeclaration> decls;
         if (ast instanceof AbstractTypeDeclaration) {
             decls = ((AbstractTypeDeclaration)ast).bodyDeclarations();
