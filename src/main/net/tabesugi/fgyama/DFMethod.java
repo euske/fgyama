@@ -28,7 +28,8 @@ public class DFMethod implements Comparable<DFMethod> {
     private DFLocalVarScope _scope = null;
     private DFFrame _frame = null;
 
-    private List<DFOverride> _overrides = new ArrayList<DFOverride>();
+    // List of subclass' methods overriding this method.
+    private List<DFMethod> _overrides = new ArrayList<DFMethod>();
 
     private class DFOverride implements Comparable<DFOverride> {
 
@@ -89,6 +90,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return _methodType.equals(method._methodType);
     }
 
+    public boolean isGeneric() {
+        return (_mapTypes != null);
+    }
+
     public String getSignature() {
         String name;
         if (_klass != null) {
@@ -116,21 +121,28 @@ public class DFMethod implements Comparable<DFMethod> {
         return _methodType.canAccept(argTypes, null);
     }
 
-    public void addOverride(DFMethod method, int level) {
-	DFOverride override = new DFOverride(method, level);
-	//Logger.info("DFMethod.addOverride:", this, "<-", override);
-        _overrides.add(override);
+    public void addOverride(DFMethod method) {
+	//Logger.info("DFMethod.addOverride:", this, "<-", method);
+        _overrides.add(method);
+    }
+
+    private void listOverrides(List<DFOverride> overrides, int prio) {
+        overrides.add(new DFOverride(this, prio));
+        for (DFMethod method : _overrides) {
+            method.listOverrides(overrides, prio+1);
+        }
     }
 
     public DFMethod[] getOverrides() {
-        DFOverride[] overrides = new DFOverride[_overrides.size()];
-        _overrides.toArray(overrides);
-        Arrays.sort(overrides);
-        DFMethod[] methods = new DFMethod[overrides.length+1];
-	for (int i = 0; i < overrides.length; i++) {
-	    methods[i] = overrides[i].method;
+        List<DFOverride> overrides = new ArrayList<DFOverride>();
+        this.listOverrides(overrides, 0);
+        DFOverride[] a = new DFOverride[overrides.size()];
+        overrides.toArray(a);
+        Arrays.sort(a);
+        DFMethod[] methods = new DFMethod[a.length];
+	for (int i = 0; i < a.length; i++) {
+	    methods[i] = a[i].method;
 	}
-	methods[overrides.length] = this;
         return methods;
     }
 

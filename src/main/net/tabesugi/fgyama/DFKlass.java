@@ -431,37 +431,23 @@ public class DFKlass extends DFType {
     private DFMethod addMethod(DFMethod method) {
         //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
-        return method;
-    }
-
-    public void addOverrides() {
-        assert _built;
-        for (DFMethod method : getMethods()) {
-            if (_baseKlass != null) {
-                _baseKlass.overrideMethod(method, 0);
-            }
-            if (_baseIfaces != null) {
-                for (DFKlass iface : _baseIfaces) {
-                    iface.overrideMethod(method, 0);
-                }
-            }
-        }
-    }
-
-    private void overrideMethod(DFMethod method1, int level) {
-	level++;
-        for (DFMethod method0 : getMethods()) {
-            if (method0.equals(method1)) {
-                method0.addOverride(method1, level);
-                break;
-            }
-        }
+        // override the parent methods.
         if (_baseKlass != null) {
-            _baseKlass.overrideMethod(method1, level);
+            _baseKlass.overrideMethod(method);
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                iface.overrideMethod(method1, level);
+                iface.overrideMethod(method);
+            }
+        }
+        return method;
+    }
+
+    private void overrideMethod(DFMethod method1) {
+        for (DFMethod method0 : getMethods()) {
+            if (method0.equals(method1)) {
+                method0.addOverride(method1);
+                break;
             }
         }
     }

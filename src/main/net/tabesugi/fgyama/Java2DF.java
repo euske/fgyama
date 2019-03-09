@@ -2403,6 +2403,8 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+                if (klass.isGeneric()) continue;
+
 		List<DFKlass> list = new ArrayList<DFKlass>();
                 list.add(klass);
 		klass.getKlassSpace().enumKlasses(list);
@@ -2432,11 +2434,6 @@ public class Java2DF {
         throws TypeNotFound {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
-        for (DFKlass[] klasses : _klassList.values()) {
-            for (DFKlass klass : klasses) {
-                klass.addOverrides();
-            }
-        }
 
         // Build method scopes.
         for (DFKlass[] klasses : _klassList.values()) {
