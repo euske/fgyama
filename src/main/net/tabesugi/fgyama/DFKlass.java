@@ -468,6 +468,10 @@ public class DFKlass extends DFType {
         this.build(_baseFinder);
     }
 
+    public boolean isBuilt() {
+        return _built;
+    }
+
     protected void setBuilt() {
         assert !_built;
         _built = true;

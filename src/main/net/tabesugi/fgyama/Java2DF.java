@@ -2370,6 +2370,472 @@ public class Java2DF {
 	}
     }
 
+    private void loadUsedKlasses(DFKlass klass)
+        throws UnsupportedSyntax, TypeNotFound {
+        if (klass.isGeneric()) return;
+        if (klass.isBuilt()) return;
+        //Logger.info("loadUsedKlasses:", klass);
+        klass.load();
+        List<DFKlass> toload = new ArrayList<DFKlass>();
+        for (DFMethod method : klass.getMethods()) {
+            if (method.isGeneric()) continue;
+            ASTNode ast = method.getTree();
+            if (ast == null) continue;
+            DFTypeFinder finder = method.getFinder();
+            DFTypeSpace typeSpace = method.getMethodSpace();
+	    if (ast instanceof MethodDeclaration) {
+                MethodDeclaration methodDecl = (MethodDeclaration)ast;
+                this.buildStmt(finder, typeSpace, methodDecl.getBody(), toload);
+	    } else if (ast instanceof Initializer) {
+                Initializer initializer = (Initializer)ast;
+		this.buildStmt(finder, typeSpace, initializer.getBody(), toload);
+	    }  else {
+		throw new UnsupportedSyntax(ast);
+	    }
+        }
+        for (DFKlass klass1 : toload) {
+            loadUsedKlasses(klass1);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildStmt(
+        DFTypeFinder finder, DFTypeSpace typeSpace,
+        Statement ast, List<DFKlass> toload)
+        throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
+
+        if (ast instanceof AssertStatement) {
+
+        } else if (ast instanceof Block) {
+            Block block = (Block)ast;
+            for (Statement stmt :
+                     (List<Statement>) block.statements()) {
+                this.buildStmt(finder, typeSpace, stmt, toload);
+            }
+
+        } else if (ast instanceof EmptyStatement) {
+
+        } else if (ast instanceof VariableDeclarationStatement) {
+            VariableDeclarationStatement varStmt =
+                (VariableDeclarationStatement)ast;
+            DFType varType = finder.resolve(varStmt.getType());
+            if (varType instanceof DFKlass) {
+                toload.add((DFKlass)varType);
+            }
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) varStmt.fragments()) {
+                Expression expr = frag.getInitializer();
+                if (expr != null) {
+                    this.buildExpr(finder, typeSpace, expr, toload);
+                }
+            }
+
+        } else if (ast instanceof ExpressionStatement) {
+            ExpressionStatement exprStmt = (ExpressionStatement)ast;
+            Expression expr = exprStmt.getExpression();
+            this.buildExpr(finder, typeSpace, expr, toload);
+
+        } else if (ast instanceof ReturnStatement) {
+            ReturnStatement returnStmt = (ReturnStatement)ast;
+            Expression expr = returnStmt.getExpression();
+            if (expr != null) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+
+        } else if (ast instanceof IfStatement) {
+            IfStatement ifStmt = (IfStatement)ast;
+            Expression expr = ifStmt.getExpression();
+            this.buildExpr(finder, typeSpace, expr, toload);
+            Statement thenStmt = ifStmt.getThenStatement();
+            this.buildStmt(finder, typeSpace, thenStmt, toload);
+            Statement elseStmt = ifStmt.getElseStatement();
+            if (elseStmt != null) {
+                this.buildStmt(finder, typeSpace, elseStmt, toload);
+            }
+
+        } else if (ast instanceof SwitchStatement) {
+            SwitchStatement switchStmt = (SwitchStatement)ast;
+            Expression expr = switchStmt.getExpression();
+            this.buildExpr(finder, typeSpace, expr, toload);
+            for (Statement stmt :
+                     (List<Statement>) switchStmt.statements()) {
+                this.buildStmt(finder, typeSpace, stmt, toload);
+            }
+
+        } else if (ast instanceof SwitchCase) {
+            SwitchCase switchCase = (SwitchCase)ast;
+            Expression expr = switchCase.getExpression();
+            if (expr != null) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+
+        } else if (ast instanceof WhileStatement) {
+            WhileStatement whileStmt = (WhileStatement)ast;
+            Expression expr = whileStmt.getExpression();
+            this.buildExpr(finder, typeSpace, expr, toload);
+            Statement stmt = whileStmt.getBody();
+            this.buildStmt(finder, typeSpace, stmt, toload);
+
+        } else if (ast instanceof DoStatement) {
+            DoStatement doStmt = (DoStatement)ast;
+            Statement stmt = doStmt.getBody();
+            this.buildStmt(finder, typeSpace, stmt, toload);
+            Expression expr = doStmt.getExpression();
+            this.buildExpr(finder, typeSpace, expr, toload);
+
+        } else if (ast instanceof ForStatement) {
+            ForStatement forStmt = (ForStatement)ast;
+            for (Expression init :
+                     (List<Expression>) forStmt.initializers()) {
+                this.buildExpr(finder, typeSpace, init, toload);
+            }
+            Expression expr = forStmt.getExpression();
+            if (expr != null) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+            Statement stmt = forStmt.getBody();
+            this.buildStmt(finder, typeSpace, stmt, toload);
+            for (Expression update :
+                     (List<Expression>) forStmt.updaters()) {
+                this.buildExpr(finder, typeSpace, update, toload);
+            }
+
+        } else if (ast instanceof EnhancedForStatement) {
+            EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+            this.buildExpr(finder, typeSpace, eForStmt.getExpression(), toload);
+            SingleVariableDeclaration decl = eForStmt.getParameter();
+            DFType varType = finder.resolve(decl.getType());
+            if (varType instanceof DFKlass) {
+                toload.add((DFKlass)varType);
+            }
+            Statement stmt = eForStmt.getBody();
+            this.buildStmt(finder, typeSpace, stmt, toload);
+
+        } else if (ast instanceof BreakStatement) {
+
+        } else if (ast instanceof ContinueStatement) {
+
+        } else if (ast instanceof LabeledStatement) {
+            LabeledStatement labeledStmt = (LabeledStatement)ast;
+            Statement stmt = labeledStmt.getBody();
+            this.buildStmt(finder, typeSpace, stmt, toload);
+
+        } else if (ast instanceof SynchronizedStatement) {
+            SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+            this.buildExpr(finder, typeSpace, syncStmt.getExpression(), toload);
+            this.buildStmt(finder, typeSpace, syncStmt.getBody(), toload);
+
+        } else if (ast instanceof TryStatement) {
+            TryStatement tryStmt = (TryStatement)ast;
+            for (VariableDeclarationExpression decl :
+                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
+                this.buildExpr(finder, typeSpace, decl, toload);
+            }
+            this.buildStmt(finder, typeSpace, tryStmt.getBody(), toload);
+            for (CatchClause cc :
+                     (List<CatchClause>) tryStmt.catchClauses()) {
+                SingleVariableDeclaration decl = cc.getException();
+                DFType varType = finder.resolve(decl.getType());
+                if (varType instanceof DFKlass) {
+                    toload.add((DFKlass)varType);
+                }
+                this.buildStmt(finder, typeSpace, cc.getBody(), toload);
+            }
+            Block finBlock = tryStmt.getFinally();
+            if (finBlock != null) {
+                this.buildStmt(finder, typeSpace, finBlock, toload);
+            }
+
+        } else if (ast instanceof ThrowStatement) {
+            ThrowStatement throwStmt = (ThrowStatement)ast;
+            Expression expr = throwStmt.getExpression();
+            if (expr != null) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+
+        } else if (ast instanceof ConstructorInvocation) {
+            ConstructorInvocation ci = (ConstructorInvocation)ast;
+            for (Expression expr :
+                     (List<Expression>) ci.arguments()) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+
+        } else if (ast instanceof SuperConstructorInvocation) {
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
+            for (Expression expr :
+                     (List<Expression>) sci.arguments()) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+        } else if (ast instanceof TypeDeclarationStatement) {
+            // Inline classes are processed separately.
+
+        } else {
+            throw new UnsupportedSyntax(ast);
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildExpr(
+        DFTypeFinder finder, DFTypeSpace typeSpace,
+        Expression ast, List<DFKlass> toload)
+        throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
+
+        if (ast instanceof Annotation) {
+
+        } else if (ast instanceof Name) {
+            // "a.b"
+            Name name = (Name)ast;
+            if (name.isQualifiedName()) {
+                QualifiedName qname = (QualifiedName)name;
+                try {
+                    // Try assuming it's a class variable.
+                    DFKlass klass = finder.lookupKlass(qname.getQualifier());
+                    toload.add(klass);
+                } catch (TypeNotFound e) {
+                }
+            }
+
+        } else if (ast instanceof ThisExpression) {
+            // "this"
+            ThisExpression thisExpr = (ThisExpression)ast;
+            Name name = thisExpr.getQualifier();
+            if (name != null) {
+                DFKlass klass = finder.lookupKlass(name);
+                toload.add(klass);
+            }
+
+        } else if (ast instanceof BooleanLiteral) {
+
+        } else if (ast instanceof CharacterLiteral) {
+
+        } else if (ast instanceof NullLiteral) {
+
+        } else if (ast instanceof NumberLiteral) {
+
+        } else if (ast instanceof StringLiteral) {
+
+        } else if (ast instanceof TypeLiteral) {
+
+        } else if (ast instanceof PrefixExpression) {
+            PrefixExpression prefix = (PrefixExpression)ast;
+            PrefixExpression.Operator op = prefix.getOperator();
+            Expression operand = prefix.getOperand();
+            this.buildExpr(finder, typeSpace, operand, toload);
+            if (op == PrefixExpression.Operator.INCREMENT ||
+                op == PrefixExpression.Operator.DECREMENT) {
+                this.buildAssignment(finder, typeSpace, operand, toload);
+            }
+
+        } else if (ast instanceof PostfixExpression) {
+            PostfixExpression postfix = (PostfixExpression)ast;
+            PostfixExpression.Operator op = postfix.getOperator();
+            Expression operand = postfix.getOperand();
+            this.buildExpr(finder, typeSpace, operand, toload);
+            if (op == PostfixExpression.Operator.INCREMENT ||
+                op == PostfixExpression.Operator.DECREMENT) {
+                this.buildAssignment(finder, typeSpace, operand, toload);
+            }
+
+        } else if (ast instanceof InfixExpression) {
+            InfixExpression infix = (InfixExpression)ast;
+            InfixExpression.Operator op = infix.getOperator();
+            Expression loperand = infix.getLeftOperand();
+            this.buildExpr(finder, typeSpace, loperand, toload);
+            Expression roperand = infix.getRightOperand();
+            this.buildExpr(finder, typeSpace, roperand, toload);
+
+        } else if (ast instanceof ParenthesizedExpression) {
+            ParenthesizedExpression paren = (ParenthesizedExpression)ast;
+            this.buildExpr(finder, typeSpace, paren.getExpression(), toload);
+
+        } else if (ast instanceof Assignment) {
+            Assignment assn = (Assignment)ast;
+            Assignment.Operator op = assn.getOperator();
+            this.buildAssignment(finder, typeSpace, assn.getLeftHandSide(), toload);
+            if (op != Assignment.Operator.ASSIGN) {
+                this.buildExpr(finder, typeSpace, assn.getLeftHandSide(), toload);
+            }
+            this.buildExpr(finder, typeSpace, assn.getRightHandSide(), toload);
+
+        } else if (ast instanceof VariableDeclarationExpression) {
+            VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
+            DFType varType = finder.resolve(decl.getType());
+            if (varType instanceof DFKlass) {
+                toload.add((DFKlass)varType);
+            }
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) decl.fragments()) {
+                DFType vt = varType;
+                Expression expr = frag.getInitializer();
+                if (expr != null) {
+                    this.buildExpr(finder, typeSpace, expr, toload);
+                }
+            }
+
+        } else if (ast instanceof MethodInvocation) {
+            MethodInvocation invoke = (MethodInvocation)ast;
+            Expression expr = invoke.getExpression();
+            if (expr != null) {
+                if (expr instanceof Name) {
+                    // "ClassName.method()"
+                    try {
+                        DFKlass klass = finder.lookupKlass((Name)expr);
+                        toload.add(klass);
+                    } catch (TypeNotFound e) {
+                        this.buildExpr(finder, typeSpace, expr, toload);
+                    }
+                }
+            }
+            for (Expression arg :
+                     (List<Expression>) invoke.arguments()) {
+                this.buildExpr(finder, typeSpace, arg, toload);
+            }
+
+        } else if (ast instanceof SuperMethodInvocation) {
+            SuperMethodInvocation si = (SuperMethodInvocation)ast;
+            for (Expression arg :
+                     (List<Expression>) si.arguments()) {
+                this.buildExpr(finder, typeSpace, arg, toload);
+            }
+
+        } else if (ast instanceof ArrayCreation) {
+            ArrayCreation ac = (ArrayCreation)ast;
+            for (Expression dim :
+                     (List<Expression>) ac.dimensions()) {
+                this.buildExpr(finder, typeSpace, dim, toload);
+            }
+            ArrayInitializer init = ac.getInitializer();
+            if (init != null) {
+                this.buildExpr(finder, typeSpace, init, toload);
+            }
+            DFType type = finder.resolve(ac.getType().getElementType());
+            if (type instanceof DFKlass) {
+                toload.add((DFKlass)type);
+            }
+
+        } else if (ast instanceof ArrayInitializer) {
+            ArrayInitializer init = (ArrayInitializer)ast;
+            for (Expression expr :
+                     (List<Expression>) init.expressions()) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+
+        } else if (ast instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess)ast;
+            this.buildExpr(finder, typeSpace, aa.getArray(), toload);
+            this.buildExpr(finder, typeSpace, aa.getIndex(), toload);
+
+        } else if (ast instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess)ast;
+            SimpleName fieldName = fa.getName();
+            Expression expr = fa.getExpression();
+            if (expr instanceof Name) {
+                try {
+                    DFKlass klass = finder.lookupKlass((Name)expr);
+                    toload.add(klass);
+                } catch (TypeNotFound e) {
+                    this.buildExpr(finder, typeSpace, expr, toload);
+                }
+            }
+
+        } else if (ast instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)ast;
+            SimpleName fieldName = sfa.getName();
+
+        } else if (ast instanceof CastExpression) {
+            CastExpression cast = (CastExpression)ast;
+            this.buildExpr(finder, typeSpace, cast.getExpression(), toload);
+            DFType type = finder.resolve(cast.getType());
+            if (type instanceof DFKlass) {
+                toload.add((DFKlass)type);
+            }
+
+        } else if (ast instanceof ClassInstanceCreation) {
+            ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
+            AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
+            DFType instType;
+            if (anonDecl != null) {
+                String id = "anon"+Utils.encodeASTNode(anonDecl);
+                instType = typeSpace.getKlass(id);
+            } else {
+                instType = finder.resolve(cstr.getType());
+            }
+            if (instType instanceof DFKlass) {
+                toload.add((DFKlass)instType);
+            }
+            Expression expr = cstr.getExpression();
+            if (expr != null) {
+                this.buildExpr(finder, typeSpace, expr, toload);
+            }
+            for (Expression arg :
+                     (List<Expression>) cstr.arguments()) {
+                this.buildExpr(finder, typeSpace, arg, toload);
+            }
+
+        } else if (ast instanceof ConditionalExpression) {
+            ConditionalExpression cond = (ConditionalExpression)ast;
+            this.buildExpr(finder, typeSpace, cond.getExpression(), toload);
+            this.buildExpr(finder, typeSpace, cond.getThenExpression(), toload);
+            this.buildExpr(finder, typeSpace, cond.getElseExpression(), toload);
+
+        } else if (ast instanceof InstanceofExpression) {
+            InstanceofExpression instof = (InstanceofExpression)ast;
+            this.buildExpr(finder, typeSpace, instof.getLeftOperand(), toload);
+
+        } else {
+            // LambdaExpression
+            // MethodReference
+            //  CreationReference
+            //  ExpressionMethodReference
+            //  SuperMethodReference
+            //  TypeMethodReference
+            throw new UnsupportedSyntax(ast);
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void buildAssignment(
+        DFTypeFinder finder, DFTypeSpace typeSpace,
+        Expression ast, List<DFKlass> toload)
+        throws UnsupportedSyntax, TypeNotFound {
+        assert ast != null;
+
+        if (ast instanceof Name) {
+
+        } else if (ast instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess)ast;
+            this.buildExpr(finder, typeSpace, aa.getArray(), toload);
+            this.buildExpr(finder, typeSpace, aa.getIndex(), toload);
+
+        } else if (ast instanceof FieldAccess) {
+            // "(expr).foo"
+            FieldAccess fa = (FieldAccess)ast;
+            Expression expr = fa.getExpression();
+            if (expr instanceof Name) {
+                try {
+                    DFKlass klass = finder.lookupKlass((Name)expr);
+                    toload.add(klass);
+                } catch (TypeNotFound e) {
+		    this.buildExpr(finder, typeSpace, expr, toload);
+                }
+            }
+            SimpleName fieldName = fa.getName();
+            this.buildExpr(finder, typeSpace, expr, toload);
+
+        } else if (ast instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)ast;
+            SimpleName fieldName = sfa.getName();
+
+        } else {
+            throw new UnsupportedSyntax(ast);
+
+        }
+    }
+
     // Pass3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(String key, CompilationUnit cunit)
@@ -2404,7 +2870,7 @@ public class Java2DF {
             try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
                 if (klass.isGeneric()) continue;
-
+                loadUsedKlasses(klass);
 		List<DFKlass> list = new ArrayList<DFKlass>();
                 list.add(klass);
 		klass.getKlassSpace().enumKlasses(list);
@@ -2419,6 +2885,8 @@ public class Java2DF {
 			klasses.add(klass1);
 		    }
 		}
+            } catch (UnsupportedSyntax e) {
+
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;
@@ -2438,6 +2906,7 @@ public class Java2DF {
         // Build method scopes.
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
+                assert !klass.isGeneric();
                 DFMethod init = klass.getInitializer();
                 if (init != null) {
                     try {
@@ -2470,6 +2939,7 @@ public class Java2DF {
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
+                assert !klass.isGeneric();
                 DFMethod init = klass.getInitializer();
                 if (init != null) {
                     try {
@@ -2484,6 +2954,7 @@ public class Java2DF {
                     }
                 }
                 for (DFMethod method : klass.getMethods()) {
+                    if (method.isGeneric()) continue;
                     try {
                         method.buildFrame();
                         queue.add(method);
