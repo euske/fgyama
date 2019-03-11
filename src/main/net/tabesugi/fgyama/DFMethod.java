@@ -198,6 +198,7 @@ public class DFMethod implements Comparable<DFMethod> {
 	assert _scope != null;
 	DFTypeFinder finder = this.getFinder();
         _frame = new DFFrame(DFFrame.RETURNABLE);
+	Logger.info("buildFrame", this);
         try {
 	    if (_ast instanceof MethodDeclaration) {
 		_frame.buildMethodDecl(

@@ -2438,17 +2438,23 @@ public class Java2DF {
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
-                for (DFType argType : finder.resolveArgs(decl)) {
-                    if (argType instanceof DFKlass) {
-                        toLoad.add((DFKlass)argType);
-                    }
-                }
-                if (!decl.isConstructor()) {
-                    DFType returnType = finder.resolve(decl.getReturnType2());
-                    if (returnType instanceof DFKlass) {
-                        toLoad.add((DFKlass)returnType);
-                    }
-                }
+                String id = "method"+Utils.encodeASTNode(decl);
+                DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
+                finder = new DFTypeFinder(finder, methodSpace);
+                List<TypeParameter> tps = decl.typeParameters();
+		if (tps.size() == 0) {
+		    for (DFType argType : finder.resolveArgs(decl)) {
+			if (argType instanceof DFKlass) {
+			    toLoad.add((DFKlass)argType);
+			}
+		    }
+		    if (!decl.isConstructor()) {
+			DFType returnType = finder.resolve(decl.getReturnType2());
+			if (returnType instanceof DFKlass) {
+			    toLoad.add((DFKlass)returnType);
+			}
+		    }
+		}
 
             } else if (body instanceof EnumConstantDeclaration) {
 

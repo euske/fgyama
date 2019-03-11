@@ -785,10 +785,10 @@ public class DFKlass extends DFType {
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
-                List<TypeParameter> tps = decl.typeParameters();
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
                 finder = new DFTypeFinder(finder, methodSpace);
+                List<TypeParameter> tps = decl.typeParameters();
                 DFMapType[] mapTypes = null;
                 if (0 < tps.size()) {
                     mapTypes = new DFMapType[tps.size()];
