@@ -670,15 +670,16 @@ class CatchJoin extends SingleAssignNode {
 
 }
 
-// DFModuleScope
-class DFModuleScope extends DFVarScope {
+//  DFFileScope
+//  File-wide scope for methods and variables.
+class DFFileScope extends DFVarScope {
 
     private Map<String, DFRef> _refs =
 	new HashMap<String, DFRef>();
     private List<DFMethod> _methods =
 	new ArrayList<DFMethod>();
 
-    public DFModuleScope(DFVarScope parent, String path) {
+    public DFFileScope(DFVarScope parent, String path) {
 	super(parent, "["+path+"]");
     }
 
@@ -2275,101 +2276,6 @@ public class Java2DF {
         return klassGraph;
     }
 
-    /// Top-level functions.
-
-    private DFRootTypeSpace _rootSpace;
-    private int _strict;
-    private List<Exporter> _exporters =
-        new ArrayList<Exporter>();
-    private DFGlobalVarScope _globalScope =
-        new DFGlobalVarScope();
-    private Map<String, DFModuleScope> _moduleScope =
-        new HashMap<String, DFModuleScope>();
-    private Map<String, DFKlass[]> _klassList =
-        new HashMap<String, DFKlass[]>();
-
-    public Java2DF(
-        DFRootTypeSpace rootSpace, int strict)
-        throws IOException, TypeNotFound {
-        _rootSpace = rootSpace;
-        _strict = strict;
-        DFBuiltinTypes.initialize(rootSpace);
-    }
-
-    public void addExporter(Exporter exporter) {
-        _exporters.add(exporter);
-    }
-
-    public void removeExporter(Exporter exporter) {
-        _exporters.remove(exporter);
-    }
-
-    public void exportGraph(DFGraph graph) {
-        graph.cleanup();
-        for (Exporter exporter : _exporters) {
-            exporter.writeGraph(graph);
-        }
-    }
-
-    // Pass1: populate TypeSpaces.
-    @SuppressWarnings("unchecked")
-    public void buildTypeSpace(String key, CompilationUnit cunit) {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFModuleScope module = new DFModuleScope(_globalScope, key);
-        _moduleScope.put(key, module);
-	List<DFKlass> klasses = new ArrayList<DFKlass>();
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.buildAbstTypeDecl(
-		    abstTypeDecl, null, module);
-                Logger.debug("Pass1: created:", klass);
-		klasses.add(klass);
-	    } catch (UnsupportedSyntax e) {
-		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
-	    }
-	}
-    }
-
-    // Pass2: set references to external Klasses.
-    @SuppressWarnings("unchecked")
-    public void setTypeFinder(String key, CompilationUnit cunit) {
-        DFTypeFinder finder = new DFTypeFinder(_rootSpace);
-        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
-        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
-        for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
-            Name name = importDecl.getName();
-	    if (importDecl.isOnDemand()) {
-		Logger.debug("Import:", name+".*");
-		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
-	    } else {
-		assert name.isQualifiedName();
-		try {
-		    DFKlass klass = _rootSpace.getKlass(name);
-		    Logger.debug("Import:", name);
-                    String id = ((QualifiedName)name).getName().getIdentifier();
-		    importSpace.addKlass(id, klass);
-		} catch (TypeNotFound e) {
-		    if (!importDecl.isStatic()) {
-			Logger.error("Import: Class not found:", e.name);
-		    }
-		}
-	    }
-        }
-	finder = new DFTypeFinder(finder, importSpace);
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        finder = new DFTypeFinder(finder, packageSpace);
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-		klass.setBaseFinderRec(finder);
-	    } catch (TypeNotFound e) {
-	    }
-	}
-    }
-
     @SuppressWarnings("unchecked")
     private void loadConcreteKlasses(DFKlass klass)
         throws TypeNotFound {
@@ -2845,12 +2751,107 @@ public class Java2DF {
         }
     }
 
+    /// Top-level functions.
+
+    private DFRootTypeSpace _rootSpace;
+    private int _strict;
+    private List<Exporter> _exporters =
+        new ArrayList<Exporter>();
+    private DFGlobalVarScope _globalScope =
+        new DFGlobalVarScope();
+    private Map<String, DFFileScope> _fileScope =
+        new HashMap<String, DFFileScope>();
+    private Map<String, DFKlass[]> _klassList =
+        new HashMap<String, DFKlass[]>();
+
+    public Java2DF(
+        DFRootTypeSpace rootSpace, int strict)
+        throws IOException, TypeNotFound {
+        _rootSpace = rootSpace;
+        _strict = strict;
+        DFBuiltinTypes.initialize(rootSpace);
+    }
+
+    public void addExporter(Exporter exporter) {
+        _exporters.add(exporter);
+    }
+
+    public void removeExporter(Exporter exporter) {
+        _exporters.remove(exporter);
+    }
+
+    public void exportGraph(DFGraph graph) {
+        graph.cleanup();
+        for (Exporter exporter : _exporters) {
+            exporter.writeGraph(graph);
+        }
+    }
+
+    // Pass1: populate TypeSpaces.
+    @SuppressWarnings("unchecked")
+    public void buildTypeSpace(String key, CompilationUnit cunit) {
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFFileScope fileScope = new DFFileScope(_globalScope, key);
+        _fileScope.put(key, fileScope);
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.buildAbstTypeDecl(
+		    abstTypeDecl, null, fileScope);
+                Logger.debug("Pass1: created:", klass);
+	    } catch (UnsupportedSyntax e) {
+		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
+	    }
+	}
+    }
+
+    // Pass2: set references to external Klasses.
+    @SuppressWarnings("unchecked")
+    public void setTypeFinder(String key, CompilationUnit cunit) {
+	// Search path for types: ROOT -> java.lang -> package -> imports.
+        DFTypeFinder finder = new DFTypeFinder(_rootSpace);
+        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        finder = new DFTypeFinder(finder, packageSpace);
+	// Populate the import space.
+        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
+        for (ImportDeclaration importDecl :
+                 (List<ImportDeclaration>) cunit.imports()) {
+            Name name = importDecl.getName();
+	    if (importDecl.isOnDemand()) {
+		Logger.debug("Import:", name+".*");
+		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
+	    } else {
+		assert name.isQualifiedName();
+		try {
+		    DFKlass klass = _rootSpace.getKlass(name);
+		    Logger.debug("Import:", name);
+                    String id = ((QualifiedName)name).getName().getIdentifier();
+		    importSpace.addKlass(id, klass);
+		} catch (TypeNotFound e) {
+		    if (!importDecl.isStatic()) {
+			Logger.error("Import: Class not found:", e.name);
+		    }
+		}
+	    }
+        }
+	finder = new DFTypeFinder(finder, importSpace);
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+		klass.setBaseFinderRec(finder);
+	    } catch (TypeNotFound e) {
+	    }
+	}
+    }
+
     // Pass3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(String key, CompilationUnit cunit)
         throws TypeNotFound {
         // Process static imports.
-        DFModuleScope module = _moduleScope.get(key);
+        DFFileScope fileScope = _fileScope.get(key);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
             if (!importDecl.isStatic()) continue;
@@ -2860,12 +2861,12 @@ public class Java2DF {
                 if (importDecl.isOnDemand()) {
                     klass = _rootSpace.getKlass(name);
                     klass.load();
-                    module.importStatic(klass);
+                    fileScope.importStatic(klass);
                 } else {
                     QualifiedName qname = (QualifiedName)name;
                     klass = _rootSpace.getKlass(qname.getQualifier());
                     klass.load();
-                    module.importStatic(klass, qname.getName());
+                    fileScope.importStatic(klass, qname.getName());
                 }
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
@@ -3118,7 +3119,9 @@ public class Java2DF {
                 strict++;
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
-                System.err.println("usage: Java2DF [-v] [-S] [-i input] [-o output] [-C jar] [-p path] [path ...]");
+                System.err.println(
+		    "usage: Java2DF [-v] [-S] [-i input] [-o output]" +
+		    " [-C jar] [-p path] [path ...]");
                 System.exit(1);
                 return;
             } else {
