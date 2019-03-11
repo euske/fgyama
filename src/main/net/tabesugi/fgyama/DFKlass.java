@@ -17,8 +17,9 @@ public class DFKlass extends DFType {
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _parentSpace;
-    private DFTypeSpace _klassSpace;
     private DFKlass _parentKlass;
+    private DFVarScope _parentScope;
+    private DFTypeSpace _klassSpace;
     private List<DFKlass> _childKlasses;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes;
@@ -52,8 +53,9 @@ public class DFKlass extends DFType {
         DFKlass parentKlass, DFVarScope parentScope) {
         _name = name;
         _parentSpace = parentSpace;
-        _klassSpace = parentSpace.lookupSpace(name);
         _parentKlass = parentKlass;
+	_parentScope = parentScope;
+        _klassSpace = parentSpace.lookupSpace(name);
         _childKlasses = new ArrayList<DFKlass>();
         _klassScope = new DFKlassScope(parentScope, name);
         _methodScopes = new HashMap<String, DFLocalVarScope>();
@@ -72,11 +74,16 @@ public class DFKlass extends DFType {
         assert paramTypes != null;
         _name = name;
         _parentSpace = genericKlass._parentSpace;
-        _klassSpace = genericKlass._klassSpace;
         _parentKlass = genericKlass._parentKlass;
-        _klassScope = genericKlass._klassScope;
-        _methodScopes = genericKlass._methodScopes;
+        _parentScope = genericKlass._parentScope;
+        _klassSpace = _parentSpace.lookupSpace(name);
+        _klassScope = new DFKlassScope(_parentScope, name);
+        _methodScopes = new HashMap<String, DFLocalVarScope>();
         _paramKlasses = null;
+
+        if (_parentKlass != null) {
+            _parentKlass._childKlasses.add(this);
+        }
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
@@ -206,11 +213,10 @@ public class DFKlass extends DFType {
         assert _paramKlasses != null;
         String name = _name + getParamNames(paramTypes);
         try {
-            return _klassSpace.getKlass(name);
+            return _parentSpace.getKlass(name);
         } catch (TypeNotFound e) {
             DFKlass klass = new DFKlass(name, this, paramTypes);
-            // XXX childKlasses not parameterized.
-            _klassSpace.addKlass(name, klass);
+            _parentSpace.addKlass(name, klass);
             _paramKlasses.add(klass);
             return klass;
         }
@@ -484,7 +490,6 @@ public class DFKlass extends DFType {
         if (_built) return;
         this.setBuilt();
         assert finder != null;
-        assert _mapTypes == null;
         assert _ast != null || _jarPath != null;
         // a generic class is only referred to, but not built.
         assert !this.isGeneric();
