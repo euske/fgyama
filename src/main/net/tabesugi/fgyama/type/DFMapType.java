@@ -26,6 +26,11 @@ public class DFMapType extends DFType {
         return _name;
     }
 
+    public DFKlass getBaseKlass() {
+        // XXX every MapType is default to Object.
+        return DFBuiltinTypes.getObjectKlass();
+    }
+
     public boolean equals(DFType type) {
         return (this == type);
     }
@@ -46,5 +51,8 @@ public class DFMapType extends DFType {
         } else {
             return this;
         }
+    }
+
+    public void build(DFTypeFinder finder) {
     }
 }

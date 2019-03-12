@@ -645,7 +645,11 @@ public class DFFrame {
 		if (init != null) {
 		    this.buildExpr(finder, method, scope, init);
 		}
-		return finder.resolve(ac.getType().getElementType());
+                DFType type = finder.resolve(ac.getType().getElementType());
+                if (type instanceof DFKlass) {
+                    ((DFKlass)type).load();
+                }
+		return type;
 
 	    } else if (expr instanceof ArrayInitializer) {
 		// "{ 5,9,4,0 }"
@@ -705,7 +709,11 @@ public class DFFrame {
 		// "(String)"
 		CastExpression cast = (CastExpression)expr;
 		this.buildExpr(finder, method, scope, cast.getExpression());
-		return finder.resolve(cast.getType());
+                DFType type = finder.resolve(cast.getType());
+                if (type instanceof DFKlass) {
+                    ((DFKlass)type).load();
+                }
+		return type;
 
 	    } else if (expr instanceof ClassInstanceCreation) {
 		// "new T()"
@@ -720,6 +728,9 @@ public class DFFrame {
 		} else {
 		    instType = finder.resolve(cstr.getType());
 		}
+                if (instType instanceof DFKlass) {
+                    ((DFKlass)instType).load();
+                }
 		Expression expr1 = cstr.getExpression();
 		if (expr1 != null) {
 		    this.buildExpr(finder, method, scope, expr1);
