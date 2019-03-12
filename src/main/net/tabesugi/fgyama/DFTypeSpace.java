@@ -41,16 +41,8 @@ public class DFTypeSpace {
         }
     }
 
-    public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
-        if (pkgDecl == null) {
-            return this;
-        } else {
-            return this.lookupSpace(pkgDecl.getName());
-        }
-    }
-
-    public DFTypeSpace lookupSpace(Name name) {
-        return this.lookupSpace(name.getFullyQualifiedName());
+    public DFTypeSpace lookupSpace(SimpleName name) {
+        return this.lookupSpace(name.getIdentifier());
     }
 
     public DFTypeSpace lookupSpace(String id) {
@@ -73,23 +65,9 @@ public class DFTypeSpace {
     }
 
     protected DFKlass createKlass(
-        DFKlass parentKlass, DFVarScope parentScope,
-        AbstractTypeDeclaration abstDecl) {
-        SimpleName name = abstDecl.getName();
-        DFKlass klass = this.createKlass(
+        DFKlass parentKlass, DFVarScope parentScope, SimpleName name) {
+        return this.createKlass(
             parentKlass, parentScope, name.getIdentifier());
-        klass.setTree(abstDecl);
-        return klass;
-    }
-
-    protected DFKlass createKlass(
-        DFKlass parentKlass, DFVarScope parentScope,
-        AnonymousClassDeclaration anonDecl) {
-        String id = "anon"+Utils.encodeASTNode(anonDecl);
-        DFKlass klass = this.createKlass(
-            parentKlass, parentScope, id);
-        klass.setTree(anonDecl);
-        return klass;
     }
 
     protected DFKlass createKlass(
@@ -148,85 +126,19 @@ public class DFTypeSpace {
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         assert abstTypeDecl != null;
+        //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
+        DFKlass klass = this.createKlass(
+            parentKlass, parentScope, abstTypeDecl.getName());
         if (abstTypeDecl instanceof TypeDeclaration) {
-            return this.buildTypeDecl(
-                (TypeDeclaration)abstTypeDecl,
-                parentKlass, parentScope);
-        } else if (abstTypeDecl instanceof EnumDeclaration) {
-            return this.buildEnumDecl(
-                (EnumDeclaration)abstTypeDecl,
-                parentKlass, parentScope);
-        } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            return this.buildAnnotTypeDecl(
-                 (AnnotationTypeDeclaration)abstTypeDecl,
-                parentKlass, parentScope);
-        } else {
-            throw new UnsupportedSyntax(abstTypeDecl);
+            klass.setMapTypes(
+                ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private DFKlass buildTypeDecl(
-        TypeDeclaration typeDecl,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build:", this, ":", typeDecl.getName());
-        DFKlass klass = this.createKlass(
-            parentKlass, parentScope, typeDecl);
-        klass.setMapTypes(typeDecl.typeParameters());
-        DFTypeSpace child = klass.getKlassSpace();
-	child.buildDecls(
-            klass, klass.getKlassScope(),
-            typeDecl.bodyDeclarations());
+        klass.setTree(abstTypeDecl);
 	return klass;
     }
 
     @SuppressWarnings("unchecked")
-    private DFKlass buildEnumDecl(
-        EnumDeclaration enumDecl,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build:", this, ":", enumDecl.getName());
-        DFKlass klass = this.createKlass(
-            parentKlass, parentScope, enumDecl);
-        DFTypeSpace child = klass.getKlassSpace();
-	child.buildDecls(
-            klass, klass.getKlassScope(),
-            enumDecl.bodyDeclarations());
-	return klass;
-    }
-
-    @SuppressWarnings("unchecked")
-    private DFKlass buildAnnotTypeDecl(
-        AnnotationTypeDeclaration annotTypeDecl,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        //Logger.info("DFTypeSpace.build:", this, ":", annotTypeDecl.getName());
-        DFKlass klass = this.createKlass(
-            parentKlass, parentScope, annotTypeDecl);
-        DFTypeSpace child = klass.getKlassSpace();
-	child.buildDecls(
-            klass, klass.getKlassScope(),
-            annotTypeDecl.bodyDeclarations());
-	return klass;
-    }
-
-    @SuppressWarnings("unchecked")
-    private DFKlass buildAnonDecl(
-        AnonymousClassDeclaration anonDecl,
-        DFKlass parentKlass, DFVarScope parentScope)
-        throws UnsupportedSyntax {
-        DFKlass klass = this.createKlass(
-            parentKlass, parentScope, anonDecl);
-        DFTypeSpace child = klass.getKlassSpace();
-        child.buildDecls(
-            klass, klass.getKlassScope(),
-            anonDecl.bodyDeclarations());
-	return klass;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void buildDecls(
+    public void buildDecls(
         DFKlass klass, DFVarScope parentScope,
 	List<BodyDeclaration> decls)
         throws UnsupportedSyntax {
@@ -559,7 +471,9 @@ public class DFTypeSpace {
             AnonymousClassDeclaration anonDecl =
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
-                this.buildAnonDecl(anonDecl, klass, parentScope);
+                String id = "anon"+Utils.encodeASTNode(anonDecl);
+                DFKlass anonKlass = this.createKlass(klass, parentScope, id);
+                anonKlass.setTree(anonDecl);
             }
 
         } else if (expr instanceof ConditionalExpression) {

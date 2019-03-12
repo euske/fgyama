@@ -670,15 +670,16 @@ class CatchJoin extends SingleAssignNode {
 
 }
 
-// DFModuleScope
-class DFModuleScope extends DFVarScope {
+//  DFFileScope
+//  File-wide scope for methods and variables.
+class DFFileScope extends DFVarScope {
 
     private Map<String, DFRef> _refs =
 	new HashMap<String, DFRef>();
     private List<DFMethod> _methods =
 	new ArrayList<DFMethod>();
 
-    public DFModuleScope(DFVarScope parent, String path) {
+    public DFFileScope(DFVarScope parent, String path) {
 	super(parent, "["+path+"]");
     }
 
@@ -2275,111 +2276,14 @@ public class Java2DF {
         return klassGraph;
     }
 
-    /// Top-level functions.
-
-    private DFRootTypeSpace _rootSpace;
-    private int _strict;
-    private List<Exporter> _exporters =
-        new ArrayList<Exporter>();
-    private DFGlobalVarScope _globalScope =
-        new DFGlobalVarScope();
-    private Map<String, DFModuleScope> _moduleScope =
-        new HashMap<String, DFModuleScope>();
-    private Map<String, DFKlass[]> _klassList =
-        new HashMap<String, DFKlass[]>();
-
-    public Java2DF(
-        DFRootTypeSpace rootSpace, int strict)
-        throws IOException, TypeNotFound {
-        _rootSpace = rootSpace;
-        _strict = strict;
-        DFBuiltinTypes.initialize(rootSpace);
-    }
-
-    public void addExporter(Exporter exporter) {
-        _exporters.add(exporter);
-    }
-
-    public void removeExporter(Exporter exporter) {
-        _exporters.remove(exporter);
-    }
-
-    public void exportGraph(DFGraph graph) {
-        graph.cleanup();
-        for (Exporter exporter : _exporters) {
-            exporter.writeGraph(graph);
-        }
-    }
-
-    // Pass1: populate TypeSpaces.
     @SuppressWarnings("unchecked")
-    public void buildTypeSpace(String key, CompilationUnit cunit) {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFModuleScope module = new DFModuleScope(_globalScope, key);
-        _moduleScope.put(key, module);
-	List<DFKlass> klasses = new ArrayList<DFKlass>();
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.buildAbstTypeDecl(
-		    abstTypeDecl, null, module);
-                Logger.debug("Pass1: created:", klass);
-		klasses.add(klass);
-	    } catch (UnsupportedSyntax e) {
-		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
-	    }
-	}
-    }
-
-    // Pass2: set references to external Klasses.
-    @SuppressWarnings("unchecked")
-    public void setTypeFinder(String key, CompilationUnit cunit) {
-        DFTypeFinder finder = new DFTypeFinder(_rootSpace);
-        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
-        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
-        for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
-            Name name = importDecl.getName();
-	    if (importDecl.isOnDemand()) {
-		Logger.debug("Import:", name+".*");
-		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
-	    } else {
-		assert name.isQualifiedName();
-		try {
-		    DFKlass klass = _rootSpace.getKlass(name);
-		    Logger.debug("Import:", name);
-                    String id = ((QualifiedName)name).getName().getIdentifier();
-		    importSpace.addKlass(id, klass);
-		} catch (TypeNotFound e) {
-		    if (!importDecl.isStatic()) {
-			Logger.error("Import: Class not found:", e.name);
-		    }
-		}
-	    }
-        }
-	finder = new DFTypeFinder(finder, importSpace);
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        finder = new DFTypeFinder(finder, packageSpace);
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-		klass.setBaseFinderRec(finder);
-	    } catch (TypeNotFound e) {
-	    }
-	}
-    }
-
-    @SuppressWarnings("unchecked")
-    private void loadConcreteKlasses(DFKlass klass)
+    private void loadUsedKlasses(DFKlass klass)
         throws TypeNotFound {
-        if (klass.isGeneric()) return;
         if (klass.isBuilt()) return;
-        //Logger.info("loadConcreteKlasses:", klass);
+        //Logger.info("loadUsedKlasses:", klass);
         klass.load();
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         for (DFMethod method : klass.getMethods()) {
-            if (method.isGeneric()) continue;
             ASTNode ast = method.getTree();
             if (ast == null) continue;
             DFTypeFinder finder = method.getFinder();
@@ -2387,10 +2291,10 @@ public class Java2DF {
             try {
                 if (ast instanceof MethodDeclaration) {
                     MethodDeclaration methodDecl = (MethodDeclaration)ast;
-                    this.listKlassesStmt(finder, typeSpace, methodDecl.getBody(), toLoad);
+                    this.enumKlassesStmt(finder, typeSpace, methodDecl.getBody(), toLoad);
                 } else if (ast instanceof Initializer) {
                     Initializer initializer = (Initializer)ast;
-                    this.listKlassesStmt(finder, typeSpace, initializer.getBody(), toLoad);
+                    this.enumKlassesStmt(finder, typeSpace, initializer.getBody(), toLoad);
                 }
             } catch (UnsupportedSyntax e) {
             }
@@ -2401,20 +2305,20 @@ public class Java2DF {
         try {
             if (ast instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
-                this.listKlassesDecls(finder, typeSpace, abstDecl.bodyDeclarations(), toLoad);
+                this.enumKlassesDecls(finder, typeSpace, abstDecl.bodyDeclarations(), toLoad);
             } else if (ast instanceof AnonymousClassDeclaration) {
                 AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
-                this.listKlassesDecls(finder, typeSpace, anonDecl.bodyDeclarations(), toLoad);
+                this.enumKlassesDecls(finder, typeSpace, anonDecl.bodyDeclarations(), toLoad);
             }
         } catch (UnsupportedSyntax e) {
         }
         for (DFKlass klass1 : toLoad) {
-            loadConcreteKlasses(klass1);
+            loadUsedKlasses(klass1);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void listKlassesDecls(
+    private void enumKlassesDecls(
         DFTypeFinder finder, DFTypeSpace typeSpace,
         List<BodyDeclaration> decls, List<DFKlass> toLoad)
         throws UnsupportedSyntax, TypeNotFound {
@@ -2432,23 +2336,29 @@ public class Java2DF {
                     }
                     Expression expr = frag.getInitializer();
                     if (expr != null) {
-                        this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                        this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
                     }
                 }
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
-                for (DFType argType : finder.resolveArgs(decl)) {
-                    if (argType instanceof DFKlass) {
-                        toLoad.add((DFKlass)argType);
-                    }
-                }
-                if (!decl.isConstructor()) {
-                    DFType returnType = finder.resolve(decl.getReturnType2());
-                    if (returnType instanceof DFKlass) {
-                        toLoad.add((DFKlass)returnType);
-                    }
-                }
+                String id = "method"+Utils.encodeASTNode(decl);
+                DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
+                finder = new DFTypeFinder(finder, methodSpace);
+                List<TypeParameter> tps = decl.typeParameters();
+		if (tps.size() == 0) {
+		    for (DFType argType : finder.resolveArgs(decl)) {
+			if (argType instanceof DFKlass) {
+			    toLoad.add((DFKlass)argType);
+			}
+		    }
+		    if (!decl.isConstructor()) {
+			DFType returnType = finder.resolve(decl.getReturnType2());
+			if (returnType instanceof DFKlass) {
+			    toLoad.add((DFKlass)returnType);
+			}
+		    }
+		}
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -2469,7 +2379,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void listKlassesStmt(
+    private void enumKlassesStmt(
         DFTypeFinder finder, DFTypeSpace typeSpace,
         Statement ast, List<DFKlass> toLoad)
         throws UnsupportedSyntax, TypeNotFound {
@@ -2481,7 +2391,7 @@ public class Java2DF {
             Block block = (Block)ast;
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+                this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -2497,90 +2407,90 @@ public class Java2DF {
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                    this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
                 }
             }
 
         } else if (ast instanceof ExpressionStatement) {
             ExpressionStatement exprStmt = (ExpressionStatement)ast;
             Expression expr = exprStmt.getExpression();
-            this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
 
         } else if (ast instanceof ReturnStatement) {
             ReturnStatement returnStmt = (ReturnStatement)ast;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
 
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Expression expr = ifStmt.getExpression();
-            this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             Statement thenStmt = ifStmt.getThenStatement();
-            this.listKlassesStmt(finder, typeSpace, thenStmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, thenStmt, toLoad);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.listKlassesStmt(finder, typeSpace, elseStmt, toLoad);
+                this.enumKlassesStmt(finder, typeSpace, elseStmt, toLoad);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             Expression expr = switchStmt.getExpression();
-            this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+                this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
             }
 
         } else if (ast instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)ast;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
 
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
-            this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             Statement stmt = whileStmt.getBody();
-            this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             Statement stmt = doStmt.getBody();
-            this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
             Expression expr = doStmt.getExpression();
-            this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                this.listKlassesExpr(finder, typeSpace, init, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, init, toLoad);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
             Statement stmt = forStmt.getBody();
-            this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                this.listKlassesExpr(finder, typeSpace, update, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, update, toLoad);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            this.listKlassesExpr(finder, typeSpace, eForStmt.getExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, eForStmt.getExpression(), toLoad);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFType varType = finder.resolve(decl.getType());
             if (varType instanceof DFKlass) {
                 toLoad.add((DFKlass)varType);
             }
             Statement stmt = eForStmt.getBody();
-            this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -2589,20 +2499,20 @@ public class Java2DF {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.listKlassesStmt(finder, typeSpace, stmt, toLoad);
+            this.enumKlassesStmt(finder, typeSpace, stmt, toLoad);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            this.listKlassesExpr(finder, typeSpace, syncStmt.getExpression(), toLoad);
-            this.listKlassesStmt(finder, typeSpace, syncStmt.getBody(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, syncStmt.getExpression(), toLoad);
+            this.enumKlassesStmt(finder, typeSpace, syncStmt.getBody(), toLoad);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                this.listKlassesExpr(finder, typeSpace, decl, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, decl, toLoad);
             }
-            this.listKlassesStmt(finder, typeSpace, tryStmt.getBody(), toLoad);
+            this.enumKlassesStmt(finder, typeSpace, tryStmt.getBody(), toLoad);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -2610,32 +2520,32 @@ public class Java2DF {
                 if (varType instanceof DFKlass) {
                     toLoad.add((DFKlass)varType);
                 }
-                this.listKlassesStmt(finder, typeSpace, cc.getBody(), toLoad);
+                this.enumKlassesStmt(finder, typeSpace, cc.getBody(), toLoad);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.listKlassesStmt(finder, typeSpace, finBlock, toLoad);
+                this.enumKlassesStmt(finder, typeSpace, finBlock, toLoad);
             }
 
         } else if (ast instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)ast;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
 
         } else if (ast instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
 
         } else if (ast instanceof SuperConstructorInvocation) {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
         } else if (ast instanceof TypeDeclarationStatement) {
             // Inline classes are processed separately.
@@ -2647,7 +2557,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void listKlassesExpr(
+    private void enumKlassesExpr(
         DFTypeFinder finder, DFTypeSpace typeSpace,
         Expression ast, List<DFKlass> toLoad)
         throws UnsupportedSyntax, TypeNotFound {
@@ -2682,42 +2592,42 @@ public class Java2DF {
             PrefixExpression prefix = (PrefixExpression)ast;
             PrefixExpression.Operator op = prefix.getOperator();
             Expression operand = prefix.getOperand();
-            this.listKlassesExpr(finder, typeSpace, operand, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, operand, toLoad);
             if (op == PrefixExpression.Operator.INCREMENT ||
                 op == PrefixExpression.Operator.DECREMENT) {
-                this.listKlassesExpr(finder, typeSpace, operand, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, operand, toLoad);
             }
 
         } else if (ast instanceof PostfixExpression) {
             PostfixExpression postfix = (PostfixExpression)ast;
             PostfixExpression.Operator op = postfix.getOperator();
             Expression operand = postfix.getOperand();
-            this.listKlassesExpr(finder, typeSpace, operand, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, operand, toLoad);
             if (op == PostfixExpression.Operator.INCREMENT ||
                 op == PostfixExpression.Operator.DECREMENT) {
-                this.listKlassesExpr(finder, typeSpace, operand, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, operand, toLoad);
             }
 
         } else if (ast instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)ast;
             InfixExpression.Operator op = infix.getOperator();
             Expression loperand = infix.getLeftOperand();
-            this.listKlassesExpr(finder, typeSpace, loperand, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, loperand, toLoad);
             Expression roperand = infix.getRightOperand();
-            this.listKlassesExpr(finder, typeSpace, roperand, toLoad);
+            this.enumKlassesExpr(finder, typeSpace, roperand, toLoad);
 
         } else if (ast instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-            this.listKlassesExpr(finder, typeSpace, paren.getExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, paren.getExpression(), toLoad);
 
         } else if (ast instanceof Assignment) {
             Assignment assn = (Assignment)ast;
             Assignment.Operator op = assn.getOperator();
-            this.listKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), toLoad);
             if (op != Assignment.Operator.ASSIGN) {
-                this.listKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), toLoad);
+                this.enumKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), toLoad);
             }
-            this.listKlassesExpr(finder, typeSpace, assn.getRightHandSide(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, assn.getRightHandSide(), toLoad);
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
@@ -2729,7 +2639,7 @@ public class Java2DF {
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                    this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
                 }
             }
 
@@ -2737,29 +2647,29 @@ public class Java2DF {
             MethodInvocation invoke = (MethodInvocation)ast;
             Expression expr = invoke.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
             for (Expression arg :
                      (List<Expression>) invoke.arguments()) {
-                this.listKlassesExpr(finder, typeSpace, arg, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, arg, toLoad);
             }
 
         } else if (ast instanceof SuperMethodInvocation) {
             SuperMethodInvocation si = (SuperMethodInvocation)ast;
             for (Expression arg :
                      (List<Expression>) si.arguments()) {
-                this.listKlassesExpr(finder, typeSpace, arg, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, arg, toLoad);
             }
 
         } else if (ast instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)ast;
             for (Expression dim :
                      (List<Expression>) ac.dimensions()) {
-                this.listKlassesExpr(finder, typeSpace, dim, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, dim, toLoad);
             }
             ArrayInitializer init = ac.getInitializer();
             if (init != null) {
-                this.listKlassesExpr(finder, typeSpace, init, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, init, toLoad);
             }
             DFType type = finder.resolve(ac.getType().getElementType());
             if (type instanceof DFKlass) {
@@ -2770,18 +2680,18 @@ public class Java2DF {
             ArrayInitializer init = (ArrayInitializer)ast;
             for (Expression expr :
                      (List<Expression>) init.expressions()) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
 
         } else if (ast instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)ast;
-            this.listKlassesExpr(finder, typeSpace, aa.getArray(), toLoad);
-            this.listKlassesExpr(finder, typeSpace, aa.getIndex(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, aa.getArray(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, aa.getIndex(), toLoad);
 
         } else if (ast instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)ast;
             SimpleName fieldName = fa.getName();
-            this.listKlassesExpr(finder, typeSpace, fa.getExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, fa.getExpression(), toLoad);
 
         } else if (ast instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)ast;
@@ -2789,7 +2699,7 @@ public class Java2DF {
 
         } else if (ast instanceof CastExpression) {
             CastExpression cast = (CastExpression)ast;
-            this.listKlassesExpr(finder, typeSpace, cast.getExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, cast.getExpression(), toLoad);
             DFType type = finder.resolve(cast.getType());
             if (type instanceof DFKlass) {
                 toLoad.add((DFKlass)type);
@@ -2810,22 +2720,22 @@ public class Java2DF {
             }
             Expression expr = cstr.getExpression();
             if (expr != null) {
-                this.listKlassesExpr(finder, typeSpace, expr, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
             for (Expression arg :
                      (List<Expression>) cstr.arguments()) {
-                this.listKlassesExpr(finder, typeSpace, arg, toLoad);
+                this.enumKlassesExpr(finder, typeSpace, arg, toLoad);
             }
 
         } else if (ast instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)ast;
-            this.listKlassesExpr(finder, typeSpace, cond.getExpression(), toLoad);
-            this.listKlassesExpr(finder, typeSpace, cond.getThenExpression(), toLoad);
-            this.listKlassesExpr(finder, typeSpace, cond.getElseExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, cond.getExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, cond.getThenExpression(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, cond.getElseExpression(), toLoad);
 
         } else if (ast instanceof InstanceofExpression) {
             InstanceofExpression instof = (InstanceofExpression)ast;
-            this.listKlassesExpr(finder, typeSpace, instof.getLeftOperand(), toLoad);
+            this.enumKlassesExpr(finder, typeSpace, instof.getLeftOperand(), toLoad);
 
         } else {
             // LambdaExpression
@@ -2839,12 +2749,107 @@ public class Java2DF {
         }
     }
 
+    /// Top-level functions.
+
+    private DFRootTypeSpace _rootSpace;
+    private int _strict;
+    private List<Exporter> _exporters =
+        new ArrayList<Exporter>();
+    private DFGlobalVarScope _globalScope =
+        new DFGlobalVarScope();
+    private Map<String, DFFileScope> _fileScope =
+        new HashMap<String, DFFileScope>();
+    private Map<String, DFKlass[]> _klassList =
+        new HashMap<String, DFKlass[]>();
+
+    public Java2DF(
+        DFRootTypeSpace rootSpace, int strict)
+        throws IOException, TypeNotFound {
+        _rootSpace = rootSpace;
+        _strict = strict;
+        DFBuiltinTypes.initialize(rootSpace);
+    }
+
+    public void addExporter(Exporter exporter) {
+        _exporters.add(exporter);
+    }
+
+    public void removeExporter(Exporter exporter) {
+        _exporters.remove(exporter);
+    }
+
+    public void exportGraph(DFGraph graph) {
+        graph.cleanup();
+        for (Exporter exporter : _exporters) {
+            exporter.writeGraph(graph);
+        }
+    }
+
+    // Pass1: populate TypeSpaces.
+    @SuppressWarnings("unchecked")
+    public void buildTypeSpace(String key, CompilationUnit cunit) {
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFFileScope fileScope = new DFFileScope(_globalScope, key);
+        _fileScope.put(key, fileScope);
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.buildAbstTypeDecl(
+		    abstTypeDecl, null, fileScope);
+                Logger.debug("Pass1: created:", klass);
+	    } catch (UnsupportedSyntax e) {
+		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
+	    }
+	}
+    }
+
+    // Pass2: set references to external Klasses.
+    @SuppressWarnings("unchecked")
+    public void setTypeFinder(String key, CompilationUnit cunit) {
+	// Search path for types: ROOT -> java.lang -> package -> imports.
+        DFTypeFinder finder = new DFTypeFinder(_rootSpace);
+        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        finder = new DFTypeFinder(finder, packageSpace);
+	// Populate the import space.
+        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
+        for (ImportDeclaration importDecl :
+                 (List<ImportDeclaration>) cunit.imports()) {
+            Name name = importDecl.getName();
+	    if (importDecl.isOnDemand()) {
+		Logger.debug("Import:", name+".*");
+		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
+	    } else {
+		assert name.isQualifiedName();
+		try {
+		    DFKlass klass = _rootSpace.getKlass(name);
+		    Logger.debug("Import:", name);
+                    String id = ((QualifiedName)name).getName().getIdentifier();
+		    importSpace.addKlass(id, klass);
+		} catch (TypeNotFound e) {
+		    if (!importDecl.isStatic()) {
+			Logger.error("Import: Class not found:", e.name);
+		    }
+		}
+	    }
+        }
+	finder = new DFTypeFinder(finder, importSpace);
+	for (AbstractTypeDeclaration abstTypeDecl :
+		 (List<AbstractTypeDeclaration>) cunit.types()) {
+	    try {
+		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
+		klass.setBaseFinder(finder);
+	    } catch (TypeNotFound e) {
+	    }
+	}
+    }
+
     // Pass3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(String key, CompilationUnit cunit)
         throws TypeNotFound {
         // Process static imports.
-        DFModuleScope module = _moduleScope.get(key);
+        DFFileScope fileScope = _fileScope.get(key);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
             if (!importDecl.isStatic()) continue;
@@ -2854,12 +2859,12 @@ public class Java2DF {
                 if (importDecl.isOnDemand()) {
                     klass = _rootSpace.getKlass(name);
                     klass.load();
-                    module.importStatic(klass);
+                    fileScope.importStatic(klass);
                 } else {
                     QualifiedName qname = (QualifiedName)name;
                     klass = _rootSpace.getKlass(qname.getQualifier());
                     klass.load();
-                    module.importStatic(klass, qname.getName());
+                    fileScope.importStatic(klass, qname.getName());
                 }
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
@@ -2872,27 +2877,17 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-                if (klass.isGeneric()) continue;
-                loadConcreteKlasses(klass);
-		List<DFKlass> list = new ArrayList<DFKlass>();
-                list.add(klass);
-		klass.getKlassSpace().enumKlasses(list);
-		for (DFKlass klass1 : list) {
-		    if (klass1.isGeneric()) {
-			for (DFKlass pklass : klass1.getParamKlasses()) {
-			    pklass.load();
-			    klasses.add(pklass);
-			}
-		    } else {
-                        klass1.load();
-			klasses.add(klass1);
-		    }
-		}
+                loadUsedKlasses(klass);
+		klasses.add(klass);
+		klass.getKlassSpace().enumKlasses(klasses);
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
+	for (DFKlass klass : klasses) {
+	    klass.load();
+	}
         DFKlass[] a = new DFKlass[klasses.size()];
         klasses.toArray(a);
         _klassList.put(key, a);
@@ -2907,7 +2902,6 @@ public class Java2DF {
         // Build method scopes.
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
-                assert !klass.isGeneric();
                 DFMethod init = klass.getInitializer();
                 if (init != null) {
                     try {
@@ -2940,7 +2934,6 @@ public class Java2DF {
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
         for (DFKlass[] klasses : _klassList.values()) {
             for (DFKlass klass : klasses) {
-                assert !klass.isGeneric();
                 DFMethod init = klass.getInitializer();
                 if (init != null) {
                     try {
@@ -2955,7 +2948,6 @@ public class Java2DF {
                     }
                 }
                 for (DFMethod method : klass.getMethods()) {
-                    if (method.isGeneric()) continue;
                     try {
                         method.buildFrame();
                         queue.add(method);
@@ -3112,7 +3104,9 @@ public class Java2DF {
                 strict++;
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
-                System.err.println("usage: Java2DF [-v] [-S] [-i input] [-o output] [-C jar] [-p path] [path ...]");
+                System.err.println(
+		    "usage: Java2DF [-v] [-S] [-i input] [-o output]" +
+		    " [-C jar] [-p path] [path ...]");
                 System.exit(1);
                 return;
             } else {

@@ -70,7 +70,7 @@ public class DFMethod implements Comparable<DFMethod> {
         _methodType = methodType;
         if (_methodSpace != null) {
             for (DFKlass child : _methodSpace.getKlasses()) {
-                child.setBaseFinderRec(finder);
+                child.setBaseFinder(finder);
             }
         }
     }

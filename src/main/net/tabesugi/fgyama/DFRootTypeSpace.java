@@ -22,6 +22,18 @@ public class DFRootTypeSpace extends DFTypeSpace {
         _finder = new DFTypeFinder(this);
     }
 
+    public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
+        if (pkgDecl == null) {
+            return this;
+        } else {
+            return this.lookupSpace(pkgDecl.getName());
+        }
+    }
+
+    public DFTypeSpace lookupSpace(Name name) {
+        return this.lookupSpace(name.getFullyQualifiedName());
+    }
+
     @Override
     public String toString() {
         return ("<DFRootTypeSpace>");
