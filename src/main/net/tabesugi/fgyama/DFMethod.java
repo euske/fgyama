@@ -22,7 +22,6 @@ public class DFMethod implements Comparable<DFMethod> {
     private SortedSet<DFMethod> _callers =
         new TreeSet<DFMethod>();
 
-    private DFLocalVarScope _baseScope = null;
     private ASTNode _ast = null;
 
     private DFLocalVarScope _scope = null;
@@ -158,10 +157,6 @@ public class DFMethod implements Comparable<DFMethod> {
         return _finder;
     }
 
-    public void setBaseScope(DFLocalVarScope baseScope) {
-        _baseScope = baseScope;
-    }
-
     public void setTree(ASTNode ast) {
 	_ast = ast;
     }
@@ -169,6 +164,9 @@ public class DFMethod implements Comparable<DFMethod> {
         return _ast;
     }
 
+    public void setScope(DFLocalVarScope scope) {
+        _scope = scope;
+    }
     public DFLocalVarScope getScope() {
         return _scope;
     }
@@ -179,9 +177,8 @@ public class DFMethod implements Comparable<DFMethod> {
     public void buildScope()
         throws UnsupportedSyntax, TypeNotFound {
 	if (_ast == null) return;
-	assert _baseScope != null;
+	assert _scope != null;
 	DFTypeFinder finder = this.getFinder();
-        _scope = new DFLocalVarScope(_baseScope);
 	if (_ast instanceof MethodDeclaration) {
 	    _scope.buildMethodDecl(finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof Initializer) {

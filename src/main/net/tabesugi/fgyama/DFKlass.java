@@ -814,7 +814,7 @@ public class DFKlass extends DFType {
                     methodSpace, name, callStyle, mapTypes, finder,
                     new DFMethodType(argTypes, returnType));
 		if (decl.getBody() != null) {
-		    method.setBaseScope(this.getMethodScope(decl));
+		    method.setScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
 
@@ -833,7 +833,7 @@ public class DFKlass extends DFType {
 		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
                     null, finder,
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
-		_initializer.setBaseScope(this.getMethodScope(initializer));
+		_initializer.setScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);
 
             } else {

@@ -23,23 +23,6 @@ public class DFLocalVarScope extends DFVarScope {
         super(parent, name);
     }
 
-    // Copy constructor.
-    public DFLocalVarScope(DFLocalVarScope scope) {
-        super(scope);
-        copyFrom(scope);
-    }
-    public DFLocalVarScope(DFVarScope parent, DFLocalVarScope scope) {
-        super(parent, scope);
-        copyFrom(scope);
-    }
-    private void copyFrom(DFLocalVarScope scope) {
-        for (Map.Entry<String, DFLocalVarScope> e :
-                 scope._ast2child.entrySet()) {
-            DFLocalVarScope s = new DFLocalVarScope(this, e.getValue());
-            _ast2child.put(e.getKey(), s);
-        }
-    }
-
     public DFLocalVarScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
