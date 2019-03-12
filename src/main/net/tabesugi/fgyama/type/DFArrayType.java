@@ -48,6 +48,10 @@ public class DFArrayType extends DFType {
                 _ndims == ((DFArrayType)type)._ndims);
     }
 
+    public DFKlass getKlass() {
+        return DFBuiltinTypes.getArrayKlass();
+    }
+
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) return -1;

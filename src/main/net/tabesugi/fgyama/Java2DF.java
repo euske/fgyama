@@ -777,7 +777,7 @@ public class Java2DF {
 			    ctx, typeSpace, graph, finder, scope, frame,
 			    qname.getQualifier());
                         obj = ctx.getRValue();
-                        klass = finder.resolveKlass(obj.getNodeType());
+                        klass = obj.getNodeType().getKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
                         klass = finder.lookupKlass(qname.getQualifier());
@@ -956,7 +956,7 @@ public class Java2DF {
                 if (expr1 == null) {
                     // "method()"
                     obj = ctx.get(scope.lookupThis());
-                    klass = finder.resolveKlass(obj.getNodeType());
+                    klass = obj.getNodeType().getKlass();
                     callStyle = DFCallStyle.InstanceOrStatic;
                 } else {
                     callStyle = DFCallStyle.InstanceMethod;
@@ -973,7 +973,7 @@ public class Java2DF {
                         processExpression(
                             ctx, typeSpace, graph, finder, scope, frame, expr1);
                         obj = ctx.getRValue();
-                        klass = finder.resolveKlass(obj.getNodeType());
+                        klass = obj.getNodeType().getKlass();
                     }
                 }
                 List<DFNode> argList = new ArrayList<DFNode>();
@@ -1063,7 +1063,7 @@ public class Java2DF {
                 argList.toArray(args);
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
-                DFKlass klass = finder.resolveKlass(obj.getNodeType());
+                DFKlass klass = obj.getNodeType().getKlass();
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
                 DFMethod method;
@@ -1176,7 +1176,7 @@ public class Java2DF {
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, expr1);
                     obj = ctx.getRValue();
-                    klass = finder.resolveKlass(obj.getNodeType());
+                    klass = obj.getNodeType().getKlass();
                 }
                 SimpleName fieldName = fa.getName();
                 DFRef ref = klass.lookupField(fieldName);
@@ -1189,7 +1189,7 @@ public class Java2DF {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
-                DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBaseKlass();
+                DFKlass klass = obj.getNodeType().getKlass().getBaseKlass();
                 DFRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(graph, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -1218,7 +1218,7 @@ public class Java2DF {
 		    DFKlass anonKlass = typeSpace.getKlass(id);
 		    instKlass = anonKlass;
                 } else {
-                    instKlass = finder.resolveKlass(cstr.getType());
+                    instKlass = finder.resolve(cstr.getType()).getKlass();
                 }
                 Expression expr1 = cstr.getExpression();
                 DFNode obj = null;
@@ -1301,8 +1301,7 @@ public class Java2DF {
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
-                DFKlass klass = finder.resolveKlass(
-                    scope.lookupThis().getRefType());
+                DFKlass klass = scope.lookupThis().getRefType().getKlass();
                 DFTypeSpace anonSpace = new DFTypeSpace(null, id);
                 DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
                 assert body != null;
@@ -1327,8 +1326,7 @@ public class Java2DF {
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 // XXX TODO method ref
-                DFKlass klass = finder.resolveKlass(
-                    scope.lookupThis().getRefType());
+                DFKlass klass = scope.lookupThis().getRefType().getKlass();
                 DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
                 DFKlass anonKlass = new DFKlass(
                     "methodref", anonSpace, klass, scope);
@@ -1375,7 +1373,7 @@ public class Java2DF {
                         ctx, typeSpace, graph, finder, scope, frame,
 			qname.getQualifier());
                     obj = ctx.getRValue();
-                    klass = finder.resolveKlass(obj.getNodeType());
+                    klass = obj.getNodeType().getKlass();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
                     klass = finder.lookupKlass(qname.getQualifier());
@@ -1408,7 +1406,7 @@ public class Java2DF {
             processExpression(
                 ctx, typeSpace, graph, finder, scope, frame, expr1);
             DFNode obj = ctx.getRValue();
-            DFKlass klass = finder.resolveKlass(obj.getNodeType());
+            DFKlass klass = obj.getNodeType().getKlass();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
@@ -1418,7 +1416,7 @@ public class Java2DF {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFNode obj = ctx.get(scope.lookupThis());
-            DFKlass klass = finder.resolveKlass(obj.getNodeType()).getBaseKlass();
+            DFKlass klass = obj.getNodeType().getKlass().getBaseKlass();
             DFRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
@@ -1730,7 +1728,7 @@ public class Java2DF {
         DFKlass enumKlass = null;
         if (type instanceof DFKlass &&
             ((DFKlass)type).isEnum()) {
-            enumKlass = finder.resolveKlass(type);
+            enumKlass = type.getKlass();
         }
         DFVarScope switchScope = scope.getChildByAST(switchStmt);
         DFFrame switchFrame = frame.getChildByAST(switchStmt);

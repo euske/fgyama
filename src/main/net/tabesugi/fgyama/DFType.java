@@ -15,8 +15,12 @@ public abstract class DFType {
     public abstract boolean equals(DFType type);
     public abstract int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap);
 
+    public DFKlass getKlass() {
+        return null;
+    }
+
     public DFType parameterize(Map<DFMapType, DFType> typeMap) {
-        return this;
+        return DFBuiltinTypes.getObjectKlass();
     }
 
     public static DFType inferInfixType(

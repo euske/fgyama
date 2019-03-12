@@ -99,7 +99,8 @@ public class DFKlass extends DFType {
             assert mapTypes[i] != null;
             assert paramTypes[i] != null;
             mapTypeSpace.addKlass(
-                mapTypes[i].getTypeName(), (DFKlass)paramTypes[i]);
+                mapTypes[i].getTypeName(),
+                paramTypes[i].getKlass());
         }
         DFTypeFinder finder = genericKlass._baseFinder;
         assert finder != null;
@@ -121,6 +122,10 @@ public class DFKlass extends DFType {
 
     public boolean equals(DFType type) {
         return (this == type);
+    }
+
+    public DFKlass getKlass() {
+        return this;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
@@ -481,7 +486,7 @@ public class DFKlass extends DFType {
                 mapType.build(finder);
                 mapTypeSpace.addKlass(
                     mapType.getTypeName(),
-                    mapType.getBaseKlass());
+                    mapType.getKlass());
             }
             finder = new DFTypeFinder(finder, mapTypeSpace);
         }
@@ -643,7 +648,7 @@ public class DFKlass extends DFType {
             // Get superclass.
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
-                _baseKlass = finder.resolveKlass(superClass);
+                _baseKlass = finder.resolve(superClass).getKlass();
             } else {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
@@ -653,7 +658,7 @@ public class DFKlass extends DFType {
             List<Type> ifaces = typeDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-		DFKlass iface = finder.resolveKlass(ifaces.get(i));
+		DFKlass iface = finder.resolve(ifaces.get(i)).getKlass();
                 //Logger.info("DFKlass.build:", this, "implements", iface);
                 baseIfaces[i] = iface;
                 iface.load();
@@ -686,7 +691,7 @@ public class DFKlass extends DFType {
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-		DFKlass iface = finder.resolveKlass(ifaces.get(i));
+		DFKlass iface = finder.resolve(ifaces.get(i)).getKlass();
                 iface.load();
                 baseIfaces[i] = iface;
                 finder = finder.extend(iface);

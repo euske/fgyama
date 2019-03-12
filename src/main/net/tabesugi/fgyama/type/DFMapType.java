@@ -26,13 +26,13 @@ public class DFMapType extends DFType {
         return _name;
     }
 
-    public DFKlass getBaseKlass() {
-        // XXX every MapType is default to Object.
-        return DFBuiltinTypes.getObjectKlass();
-    }
-
     public boolean equals(DFType type) {
         return (this == type);
+    }
+
+    public DFKlass getKlass() {
+        // XXX every MapType is default to Object.
+        return DFBuiltinTypes.getObjectKlass();
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {

@@ -50,27 +50,32 @@ public class DFBasicType extends DFType {
         return (this == type);
     }
 
+    public DFKlass getKlass() {
+	if (_code == PrimitiveType.BYTE) {
+            return DFBuiltinTypes.getByteKlass();
+        } else if (_code == PrimitiveType.CHAR) {
+            return DFBuiltinTypes.getCharacterKlass();
+        } else if (_code == PrimitiveType.SHORT) {
+            return DFBuiltinTypes.getShortKlass();
+        } else if (_code == PrimitiveType.INT) {
+            return DFBuiltinTypes.getIntegerKlass();
+        } else if (_code == PrimitiveType.LONG) {
+            return DFBuiltinTypes.getLongKlass();
+        } else if (_code == PrimitiveType.FLOAT) {
+            return DFBuiltinTypes.getFloatKlass();
+        } else if (_code == PrimitiveType.DOUBLE) {
+            return DFBuiltinTypes.getDoubleKlass();
+        } else if (_code == PrimitiveType.BOOLEAN) {
+            return DFBuiltinTypes.getBooleanKlass();
+        } else {
+	    return null;
+        }
+    }
+
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	// Auto-unboxing.
-	if ((_code == PrimitiveType.BYTE &&
-	     type == DFBuiltinTypes.getByteKlass()) ||
-	    (_code == PrimitiveType.CHAR &&
-	     type == DFBuiltinTypes.getCharacterKlass()) ||
-	    (_code == PrimitiveType.SHORT &&
-	     type == DFBuiltinTypes.getShortKlass()) ||
-	    (_code == PrimitiveType.INT &&
-	     type == DFBuiltinTypes.getIntegerKlass()) ||
-	    (_code == PrimitiveType.LONG &&
-	     type == DFBuiltinTypes.getLongKlass()) ||
-	    (_code == PrimitiveType.FLOAT &&
-	     type == DFBuiltinTypes.getFloatKlass()) ||
-	    (_code == PrimitiveType.DOUBLE &&
-	     type == DFBuiltinTypes.getDoubleKlass()) ||
-	    (_code == PrimitiveType.BOOLEAN &&
-	     type == DFBuiltinTypes.getBooleanKlass())) {
-	    return 0;
-	}
         if (this == type) return 0;
+	if (this.getKlass() == type) return 0;
         if (!(type instanceof DFBasicType)) return -1;
         int rank = ((DFBasicType)type)._rank;
         if (this._rank == 0 || rank == 0) return -1;

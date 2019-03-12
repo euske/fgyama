@@ -186,25 +186,6 @@ public class DFTypeFinder {
         }
     }
 
-    public DFKlass resolveKlass(Type type)
-        throws TypeNotFound {
-        return this.resolveKlass(resolve(type));
-    }
-
-    public DFKlass resolveKlass(DFType type)
-        throws TypeNotFound {
-        if (type == null) {
-            // treat unknown class as Object.
-            return DFBuiltinTypes.getObjectKlass();
-        } else if (type instanceof DFArrayType) {
-            return DFBuiltinTypes.getArrayKlass();
-        } else if (type instanceof DFKlass) {
-            return (DFKlass)type;
-        } else {
-            throw new TypeNotFound(type.getTypeName());
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public DFType[] resolveArgs(MethodDeclaration decl)
         throws TypeNotFound {
