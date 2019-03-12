@@ -97,7 +97,9 @@ public class DFTypeFinder {
             return new DFArrayType(elemType, ndims);
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            return this.lookupKlass(stype.getName());
+            DFKlass klass = this.lookupKlass(stype.getName());
+            klass.load();
+            return klass;
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
@@ -108,12 +110,16 @@ public class DFTypeFinder {
             for (int i = 0; i < args.size(); i++) {
                 paramTypes[i] = this.resolve(args.get(i));
             }
-            return genericKlass.parameterize(paramTypes);
+            DFKlass paramKlass = genericKlass.parameterize(paramTypes);
+            paramKlass.load();
+            return paramKlass;
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
             DFTypeSpace space = klass.getKlassSpace();
-            return space.getKlass(qtype.getName());
+            DFKlass childKlass = space.getKlass(qtype.getName());
+            childKlass.load();
+            return childKlass;
         } else if (type instanceof UnionType) {
             // XXX only consider the first type.
             UnionType utype = (UnionType)type;

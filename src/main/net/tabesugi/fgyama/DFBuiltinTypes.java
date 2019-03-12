@@ -16,7 +16,6 @@ public class DFBuiltinTypes {
         File rtFile = new File(libDir, "rt.jar");
         rootSpace.loadJarFile(rtFile.getAbsolutePath());
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
-        DFTypeFinder finder = new DFTypeFinder(rootSpace);
         _object = java_lang.getKlass("Object");
         _class = java_lang.getKlass("Class");
         _enum = java_lang.getKlass("Enum");
