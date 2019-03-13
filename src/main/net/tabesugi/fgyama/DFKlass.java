@@ -187,6 +187,7 @@ public class DFKlass extends DFType {
         return _parentSpace.getFullName()+_name;
     }
 
+    @SuppressWarnings("unchecked")
     public void setMapTypes(List<TypeParameter> tps) {
         // Get type parameters.
         assert _mapTypes == null;
@@ -197,6 +198,7 @@ public class DFKlass extends DFType {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
                 _mapTypes[i] = new DFMapType(id);
+                _mapTypes[i].setTypeBounds(tp.typeBounds());
             }
         }
     }
@@ -481,6 +483,7 @@ public class DFKlass extends DFType {
         assert _ast != null || _jarPath != null;
         if (_mapTypes != null) {
             DFTypeSpace mapTypeSpace = new DFTypeSpace(null, _name);
+            finder = new DFTypeFinder(finder, mapTypeSpace);
             for (int i = 0; i < _mapTypes.length; i++) {
                 DFMapType mapType = _mapTypes[i];
                 mapType.build(finder);
@@ -488,7 +491,6 @@ public class DFKlass extends DFType {
                     mapType.getTypeName(),
                     mapType.getKlass());
             }
-            finder = new DFTypeFinder(finder, mapTypeSpace);
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {

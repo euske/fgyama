@@ -164,7 +164,9 @@ public class JNITypeParser {
 	    }
             DFMapType pt = new DFMapType(id);
             params.add(pt);
-	    pos = skipType(text, pos);
+	    i = skipType(text, pos);
+            pt.setTypeBounds(text.substring(pos, i));
+            pos = i;
         }
         pos++;
         if (params.size() == 0) return null;

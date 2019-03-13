@@ -13,6 +13,10 @@ public class DFMapType extends DFType {
 
     private String _name;
 
+    private DFKlass _klass = null;
+    private String _sig = null;
+    private List<Type> _ast = null;
+
     public DFMapType(String name) {
         _name = name;
     }
@@ -31,8 +35,7 @@ public class DFMapType extends DFType {
     }
 
     public DFKlass getKlass() {
-        // XXX every MapType is default to Object.
-        return DFBuiltinTypes.getObjectKlass();
+        return _klass;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
@@ -53,6 +56,29 @@ public class DFMapType extends DFType {
         }
     }
 
-    public void build(DFTypeFinder finder) {
+    public void setTypeBounds(String sig) {
+        assert _sig == null && _ast == null;
+        _sig = sig;
+    }
+
+    public void setTypeBounds(List<Type> ast) {
+        assert _sig == null && _ast == null;
+        _ast = ast;
+    }
+
+    public void build(DFTypeFinder finder)
+        throws TypeNotFound {
+        assert _sig == null || _ast == null;
+        if (_sig != null) {
+	    JNITypeParser parser = new JNITypeParser(_sig);
+            _klass = parser.getType(finder).getKlass();
+        } else if (_ast != null) {
+            for (Type type : _ast) {
+                _klass = finder.resolve(type).getKlass();
+                break;
+            }
+        } else {
+            _klass = DFBuiltinTypes.getObjectKlass();
+        }
     }
 }
