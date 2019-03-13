@@ -277,6 +277,7 @@ public class DFKlass extends DFType {
 
     public DFTypeFinder getFinder()
         throws TypeNotFound {
+        assert _built;
         return _baseFinder.extend(this);
     }
 
@@ -397,7 +398,8 @@ public class DFKlass extends DFType {
                 }
             }
         }
-        throw new MethodNotFound(name.getIdentifier(), argTypes);
+        String id = (name == null)? callStyle.toString() : name.getIdentifier();
+        throw new MethodNotFound(id, argTypes);
     }
 
     private DFRef addField(
@@ -561,6 +563,7 @@ public class DFKlass extends DFType {
 	}
         // Extend a TypeFinder for this klass.
         if (_parentKlass != null) {
+            _parentKlass.load();
             finder = finder.extend(_parentKlass);
         }
         finder = new DFTypeFinder(finder, _klassSpace);

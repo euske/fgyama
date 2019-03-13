@@ -12,13 +12,14 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFType {
 
     private String _name;
-
-    private DFKlass _klass = null;
+    private DFKlass _boundKlass;
+    
     private String _sig = null;
     private List<Type> _ast = null;
 
     public DFMapType(String name) {
         _name = name;
+        _boundKlass = DFBuiltinTypes.getObjectKlass();
     }
 
     @Override
@@ -35,7 +36,7 @@ public class DFMapType extends DFType {
     }
 
     public DFKlass getKlass() {
-        return _klass;
+        return _boundKlass;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
@@ -71,14 +72,12 @@ public class DFMapType extends DFType {
         assert _sig == null || _ast == null;
         if (_sig != null) {
 	    JNITypeParser parser = new JNITypeParser(_sig);
-            _klass = parser.getType(finder).getKlass();
+            _boundKlass = parser.getType(finder).getKlass();
         } else if (_ast != null) {
             for (Type type : _ast) {
-                _klass = finder.resolve(type).getKlass();
+                _boundKlass = finder.resolve(type).getKlass();
                 break;
             }
-        } else {
-            _klass = DFBuiltinTypes.getObjectKlass();
         }
     }
 }
