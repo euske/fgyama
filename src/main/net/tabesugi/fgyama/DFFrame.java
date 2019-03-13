@@ -186,7 +186,6 @@ public class DFFrame {
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-            // XXX Ignore modifiers.
             DFRef ref = scope.lookupArgument(i);
             this.addInputRef(ref);
             i++;

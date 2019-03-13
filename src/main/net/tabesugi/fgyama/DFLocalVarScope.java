@@ -91,7 +91,6 @@ public class DFLocalVarScope extends DFVarScope {
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-            // XXX Ignore modifiers.
             DFType argType = finder.resolve(decl.getType());
             if (decl.isVarargs()) {
                 argType = new DFArrayType(argType, 1);
@@ -134,7 +133,6 @@ public class DFLocalVarScope extends DFVarScope {
         } else if (ast instanceof VariableDeclarationStatement) {
             VariableDeclarationStatement varStmt =
                 (VariableDeclarationStatement)ast;
-            // XXX Ignore modifiers.
             DFType varType = finder.resolve(varStmt.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
@@ -226,7 +224,6 @@ public class DFLocalVarScope extends DFVarScope {
             this.buildExpr(finder, eForStmt.getExpression());
             DFLocalVarScope childScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
-            // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
 	    int ndims = decl.getExtraDimensions();
             childScope.addVar(decl.getName(),
@@ -260,7 +257,6 @@ public class DFLocalVarScope extends DFVarScope {
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
                 DFLocalVarScope catchScope = this.getChildByAST(cc);
-                // XXX Ignore modifiers.
                 DFType varType = finder.resolve(decl.getType());
 		int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
@@ -372,7 +368,6 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
-            // XXX Ignore modifiers.
             DFType varType = finder.resolve(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {

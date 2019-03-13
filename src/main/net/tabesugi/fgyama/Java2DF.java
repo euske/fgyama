@@ -1992,7 +1992,6 @@ public class Java2DF {
 
         if (stmt instanceof AssertStatement) {
 	    // "assert x;"
-            // XXX Ignore asserts.
 
         } else if (stmt instanceof Block) {
 	    // "{ ... }"
@@ -2136,20 +2135,90 @@ public class Java2DF {
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
-            // XXX Use MethodCallNode.
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
+            DFNode obj = ctx.get(scope.lookupThis());
+            List<DFNode> argList = new ArrayList<DFNode>();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) ci.arguments()) {
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, arg);
+                DFNode node = ctx.getRValue();
+                argList.add(node);
+                typeList.add(node.getNodeType());
+            }
+            DFNode[] args = new DFNode[argList.size()];
+            argList.toArray(args);
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
+            DFKlass klass = scope.lookupThis().getRefType().getKlass();
+            DFMethod constructor = klass.lookupMethod(
+                DFCallStyle.Constructor, null, argTypes);
+            DFMethod methods[] = new DFMethod[] { constructor };
+            MethodCallNode call = new MethodCallNode(
+                graph, scope, methods, ci, obj);
+            call.setArgs(args);
+            DFFrame frame1 = constructor.getFrame();
+            if (frame1 != null) {
+                for (DFRef ref : frame1.getInputRefs()) {
+                    if (ref.isLocal() || ref.isInternal()) continue;
+                    call.accept(ctx.get(ref), ref.getFullName());
+                }
+            }
+            if (frame1 != null) {
+                for (DFRef ref : frame1.getOutputRefs()) {
+                    if (ref.isLocal() || ref.isInternal()) continue;
+                    ctx.set(new UpdateNode(
+                                graph, scope, ref, ci, call));
+                }
+            }
+            if (call.exception != null) {
+                DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                frame.addExit(new DFExit(dstFrame, call.exception));
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
-            // XXX Use MethodCallNode.
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
+            DFNode obj = ctx.get(scope.lookupThis());
+            List<DFNode> argList = new ArrayList<DFNode>();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) sci.arguments()) {
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, arg);
+                DFNode node = ctx.getRValue();
+                argList.add(node);
+                typeList.add(node.getNodeType());
+            }
+            DFNode[] args = new DFNode[argList.size()];
+            argList.toArray(args);
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
+            DFKlass klass = obj.getNodeType().getKlass();
+            DFKlass baseKlass = klass.getBaseKlass();
+            assert baseKlass != null;
+            DFMethod constructor = baseKlass.lookupMethod(
+                DFCallStyle.Constructor, null, argTypes);
+            DFMethod methods[] = new DFMethod[] { constructor };
+            MethodCallNode call = new MethodCallNode(
+                graph, scope, methods, sci, obj);
+            call.setArgs(args);
+            DFFrame frame1 = constructor.getFrame();
+            if (frame1 != null) {
+                for (DFRef ref : frame1.getInputRefs()) {
+                    if (ref.isLocal() || ref.isInternal()) continue;
+                    call.accept(ctx.get(ref), ref.getFullName());
+                }
+            }
+            if (frame1 != null) {
+                for (DFRef ref : frame1.getOutputRefs()) {
+                    if (ref.isLocal() || ref.isInternal()) continue;
+                    ctx.set(new UpdateNode(
+                                graph, scope, ref, sci, call));
+                }
+            }
+            if (call.exception != null) {
+                DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                frame.addExit(new DFExit(dstFrame, call.exception));
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -2180,7 +2249,6 @@ public class Java2DF {
         if (parameters != null) {
             int i = 0;
             for (SingleVariableDeclaration decl : parameters) {
-                // XXX Ignore modifiers.
                 DFRef ref = scope.lookupArgument(i);
                 DFNode input = new InputNode(graph, scope, ref, decl);
                 ctx.set(input);

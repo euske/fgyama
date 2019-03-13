@@ -191,7 +191,6 @@ public class DFTypeSpace {
         assert ast != null;
 
         if (ast instanceof AssertStatement) {
-            // XXX Ignore asserts.
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
