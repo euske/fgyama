@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <file path="tests/basic_staticimport.java">
-    <method name="basic_staticimport" style="initializer">
+  <class name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
+    <method name="Lbasic_staticimport;" style="initializer">
       <ast length="94" start="69" type="55"/>
-      <scope name="basic_staticimport"/>
+      <scope name="Lbasic_staticimport;"/>
     </method>
     <method name="Lbasic_staticimport;.foo()V" style="static">
       <ast length="54" start="107" type="31"/>
-      <scope name="basic_staticimport.foo">
-        <scope name="basic_staticimport.foo.b0">
-          <node id="Nede5cb52_1" kind="ref" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;">
+      <scope name="Lbasic_staticimport;.foo">
+        <scope name="Lbasic_staticimport;.foo.b0">
+          <node id="Nede5cb52_1" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link src="Nede5cb52_2"/>
             <ast length="3" start="135" type="42"/>
           </node>
@@ -26,9 +26,9 @@
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>
-        <node flow="in" id="Nede5cb52_2" ref="@java/lang/System/.out" type="Ljava/io/PrintStream;"/>
+        <node flow="in" id="Nede5cb52_2" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node flow="in" id="Nede5cb52_3" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
     </method>
-  </file>
+  </class>
 </fgyama>
