@@ -2379,11 +2379,11 @@ public class Java2DF {
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
                 DFType fldType = finder.resolve(decl.getType());
+                if (fldType instanceof DFKlass) {
+                    toLoad.add((DFKlass)fldType);
+                }
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) decl.fragments()) {
-                    if (fldType instanceof DFKlass) {
-                        toLoad.add((DFKlass)fldType);
-                    }
                     Expression expr = frag.getInitializer();
                     if (expr != null) {
                         this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
@@ -2908,7 +2908,7 @@ public class Java2DF {
     // Pass3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(
-        String key, CompilationUnit cunit, List<DFKlass> klasses)
+        String key, CompilationUnit cunit, List<DFKlass> toplevel)
         throws TypeNotFound {
         // Process static imports.
         DFFileScope fileScope = _fileScope.get(key);
@@ -2939,7 +2939,7 @@ public class Java2DF {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
             try {
                 loadUsedKlasses(klass);
-		klass.enumKlasses(klasses);
+		toplevel.add(klass);
             } catch (TypeNotFound e) {
                 Logger.error("Pass3: TypeNotFound at", klass, "("+e.name+")");
                 if (0 < _strict) throw e;
@@ -2948,13 +2948,17 @@ public class Java2DF {
     }
 
     // Pass4: list all methods.
-    public void listMethods(List<DFKlass> klasses)
+    public List<DFKlass> listMethods(List<DFKlass> toplevel)
         throws TypeNotFound {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
+        List<DFKlass> allKlasses = new ArrayList<DFKlass>();
+        for (DFKlass klass : toplevel) {
+            klass.enumChildKlasses(allKlasses);
+        }
 
         // Build method scopes.
-        for (DFKlass klass : klasses) {
+        for (DFKlass klass : allKlasses) {
             DFMethod init = klass.getInitializer();
             if (init != null) {
                 try {
@@ -2984,7 +2988,7 @@ public class Java2DF {
 
         // Build call graphs.
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
-        for (DFKlass klass : klasses) {
+        for (DFKlass klass : allKlasses) {
             DFMethod init = klass.getInitializer();
             if (init != null) {
                 try {
@@ -3026,6 +3030,8 @@ public class Java2DF {
                 }
             }
         }
+
+        return allKlasses;
     }
 
     // Pass5: generate graphs for each method.
@@ -3187,17 +3193,17 @@ public class Java2DF {
             CompilationUnit cunit = srcs.get(path);
             converter.setTypeFinder(path, cunit);
         }
-        List<DFKlass> klasses = new ArrayList<DFKlass>();
+        List<DFKlass> toplevel = new ArrayList<DFKlass>();
         try {
             for (String path : files) {
                 Logger.info("Pass3:", path);
                 CompilationUnit cunit = srcs.get(path);
-                converter.loadKlasses(path, cunit, klasses);
+                converter.loadKlasses(path, cunit, toplevel);
             }
             Logger.info("Pass4.");
-            converter.listMethods(klasses);
-            for (DFKlass klass : klasses) {
-                //if (processed != null && !processed.contains(path)) continue;
+            List<DFKlass> allKlasses = converter.listMethods(toplevel);
+            for (DFKlass klass : allKlasses) {
+                if (processed != null && !processed.contains(klass.getTypeName())) continue;
                 Logger.info("Pass5:", klass);
                 converter.buildGraphs(klass);
             }
