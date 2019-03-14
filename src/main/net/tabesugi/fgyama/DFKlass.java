@@ -59,8 +59,8 @@ public class DFKlass extends DFType {
         _parentSpace = parentSpace;
         _parentKlass = parentKlass;
 	_parentScope = parentScope;
-        _klassSpace = _parentSpace.lookupSpace(name);
-        _klassScope = new DFKlassScope(_parentScope, name);
+        _klassSpace = _parentSpace.lookupSpace(_name);
+        _klassScope = new DFKlassScope(_parentScope, _name);
     }
 
     protected DFKlass(
@@ -74,20 +74,20 @@ public class DFKlass extends DFType {
 
     // Constructor for a parameterized klass.
     private DFKlass(
-        String name, DFKlass genericKlass,
-        DFType[] paramTypes) {
+        DFKlass genericKlass, DFType[] paramTypes) {
         assert genericKlass != null;
         assert paramTypes != null;
-        _name = name;
+        String subname = getParamNames(paramTypes);
+        _name = genericKlass._name;
         _parentSpace = genericKlass._parentSpace;
         _parentKlass = genericKlass._parentKlass;
         _parentScope = genericKlass._parentScope;
-        _klassSpace = _parentSpace.lookupSpace(name);
-        _klassScope = new DFKlassScope(_parentScope, name);
+        _klassSpace = _parentSpace.lookupSpace(subname);
+        _klassScope = new DFKlassScope(_parentScope, subname);
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _paramTypeSpace = new DFTypeSpace(null, _name);
+        _paramTypeSpace = new DFTypeSpace(null, subname);
         for (int i = 0; i < _paramTypes.length; i++) {
             DFMapType mapType = genericKlass._mapTypes[i];
             DFType paramType = _paramTypes[i];
@@ -221,7 +221,7 @@ public class DFKlass extends DFType {
         String name = getParamNames(paramTypes);
         DFKlass klass = _paramKlasses.get(name);
         if (klass == null) {
-            klass = new DFKlass(name, this, paramTypes);
+            klass = new DFKlass(this, paramTypes);
             _paramKlasses.put(name, klass);
         }
         return klass;
@@ -301,8 +301,11 @@ public class DFKlass extends DFType {
 
     public void enumChildKlasses(List<DFKlass> list) {
         list.add(this);
-        for (DFKlass child : _klassSpace.getKlasses()) {
-            child.enumChildKlasses(list);
+        for (DFKlass klass : _paramKlasses.values()) {
+            klass.enumChildKlasses(list);
+        }
+        for (DFKlass klass : _klassSpace.getKlasses()) {
+            klass.enumChildKlasses(list);
         }
     }
 

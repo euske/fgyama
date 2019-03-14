@@ -31,7 +31,7 @@ public class DFBuiltinTypes {
         _exception = java_lang.getKlass("Exception");
         _array = new ArrayKlass(java_lang, _object);
         _object.load();
-        //_class.load();
+        _class.load();
         //_enum.load();
         _string.load();
         _byte.load();
