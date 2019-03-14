@@ -28,8 +28,9 @@ public class DFKlass extends DFType {
 
     // These fields are set immediately.
     private ASTNode _ast = null;
-    private String _jarPath = null;
     private String _filePath = null;
+    private String _jarPath = null;
+    private String _entPath = null;
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
@@ -85,8 +86,9 @@ public class DFKlass extends DFType {
         _paramTypes = paramTypes;
 
         _ast = genericKlass._ast;
-        _jarPath = genericKlass._jarPath;
         _filePath = genericKlass._filePath;
+        _jarPath = genericKlass._jarPath;
+        _entPath = genericKlass._entPath;
 
         assert _mapTypes == null;
         DFMapType[] mapTypes = genericKlass._mapTypes;
@@ -227,15 +229,19 @@ public class DFKlass extends DFType {
         }
     }
 
-    public void setJarPath(String jarPath, String filePath) {
+    public void setJarPath(String jarPath, String entPath) {
         _jarPath = jarPath;
-        _filePath = filePath;
+        _entPath = entPath;
     }
 
-    public void setTree(ASTNode ast) {
+    public void setTree(String filePath, ASTNode ast) {
+        _filePath = filePath;
         _ast = ast;
     }
 
+    public String getFilePath() {
+        return _filePath;
+    }
     public ASTNode getTree() {
         return _ast;
     }
@@ -295,6 +301,13 @@ public class DFKlass extends DFType {
     public DFKlass[] getBaseIfaces() {
         assert _built;
         return _baseIfaces;
+    }
+
+    public void enumKlasses(List<DFKlass> list) {
+        list.add(this);
+        for (DFKlass child : _klassSpace.getKlasses()) {
+            child.enumKlasses(list);
+        }
     }
 
     public boolean isEnum() {
@@ -507,15 +520,15 @@ public class DFKlass extends DFType {
             try {
                 JarFile jarfile = new JarFile(_jarPath);
                 try {
-                    JarEntry je = jarfile.getJarEntry(_filePath);
+                    JarEntry je = jarfile.getJarEntry(_entPath);
                     InputStream strm = jarfile.getInputStream(je);
-                    JavaClass jklass = new ClassParser(strm, _filePath).parse();
+                    JavaClass jklass = new ClassParser(strm, _entPath).parse();
                     this.buildFromJKlass(finder, jklass);
                 } finally {
                     jarfile.close();
                 }
             } catch (IOException e) {
-                Logger.error("Error: Not found:", _jarPath+"/"+_filePath);
+                Logger.error("Error: Not found:", _jarPath+"/"+_entPath);
                 throw new TypeNotFound(this.getFullName());
             }
         }

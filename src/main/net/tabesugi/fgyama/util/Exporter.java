@@ -10,9 +10,7 @@ import java.util.*;
 abstract class Exporter {
 
     abstract public void close();
-    abstract public void startFile(String path);
-    abstract public void endFile();
-
-    abstract public void writeError(String funcName, String astName);
+    abstract public void startKlass(DFKlass klass);
+    abstract public void endKlass();
     abstract public void writeGraph(DFGraph graph);
 }

@@ -16,7 +16,7 @@ public class XmlExporter extends Exporter {
     public Document document;
 
     private Element _root;
-    private Element _file;
+    private Element _class;
 
     public XmlExporter() {
         try {
@@ -34,27 +34,23 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void startFile(String path) {
-        _file = this.document.createElement("file");
-        _file.setAttribute("path", path);
+    public void startKlass(DFKlass klass) {
+        assert _class == null;
+        _class = this.document.createElement("class");
+        _class.setAttribute("name", klass.getTypeName());
+        _class.setAttribute("path", klass.getFilePath());
     }
 
     @Override
-    public void endFile() {
-        _root.appendChild(_file);
-        _file = null;
-    }
-
-    @Override
-    public void writeError(String funcName, String astName) {
-        Element failure = this.document.createElement("error");
-        failure.setAttribute("func", funcName);
-        failure.setAttribute("ast", astName);
-        _file.appendChild(failure);
+    public void endKlass() {
+        assert _class != null;
+        _root.appendChild(_class);
+        _class = null;
     }
 
     @Override
     public void writeGraph(DFGraph graph) {
-        _file.appendChild(graph.toXML(this.document));
+        assert _class != null;
+        _class.appendChild(graph.toXML(this.document));
     }
 }

@@ -113,16 +113,9 @@ public class DFTypeSpace {
 	return klasses;
     }
 
-    public void enumKlasses(List<DFKlass> list) {
-        list.addAll(_id2klass.values());
-        for (DFTypeSpace child : _id2space.values()) {
-            child.enumKlasses(list);
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public DFKlass buildAbstTypeDecl(
-        AbstractTypeDeclaration abstTypeDecl,
+        String filePath, AbstractTypeDeclaration abstTypeDecl,
         DFKlass parentKlass, DFVarScope parentScope)
         throws UnsupportedSyntax {
         assert abstTypeDecl != null;
@@ -133,7 +126,7 @@ public class DFTypeSpace {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
-        klass.setTree(abstTypeDecl);
+        klass.setTree(filePath, abstTypeDecl);
 	return klass;
     }
 
@@ -145,6 +138,7 @@ public class DFTypeSpace {
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
 		this.buildAbstTypeDecl(
+                    klass.getFilePath(),
                     (AbstractTypeDeclaration)body,
                     klass, parentScope);
 	    } else if (body instanceof FieldDeclaration) {
@@ -344,6 +338,7 @@ public class DFTypeSpace {
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
             this.buildAbstTypeDecl(
+                klass.getFilePath(),
                 typeDeclStmt.getDeclaration(),
                 klass, parentScope);
 
@@ -472,7 +467,7 @@ public class DFTypeSpace {
             if (anonDecl != null) {
                 String id = "anon"+Utils.encodeASTNode(anonDecl);
                 DFKlass anonKlass = this.createKlass(klass, parentScope, id);
-                anonKlass.setTree(anonDecl);
+                anonKlass.setTree(klass.getFilePath(), anonDecl);
             }
 
         } else if (expr instanceof ConditionalExpression) {

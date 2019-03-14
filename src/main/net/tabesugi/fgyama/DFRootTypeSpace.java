@@ -56,9 +56,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
     private void addFile(JarFile jarFile, JarEntry jarEntry)
         throws IOException {
         String jarPath = jarFile.getName();
-        String filePath = jarEntry.getName();
-        if (!filePath.endsWith(".class")) return;
-        String s = filePath.substring(0, filePath.length()-6);
+        String entPath = jarEntry.getName();
+        if (!entPath.endsWith(".class")) return;
+        String s = entPath.substring(0, entPath.length()-6);
         int i = s.indexOf('$');
         String fullName = s.substring(0, (0 <= i)? i : s.length());
         int j = fullName.lastIndexOf('/');
@@ -77,9 +77,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
             finder = new DFTypeFinder(finder, space);
         }
         klass.setBaseFinder(finder);
-        klass.setJarPath(jarPath, filePath);
+        klass.setJarPath(jarPath, entPath);
         InputStream strm = jarFile.getInputStream(jarEntry);
-        JavaClass jklass = new ClassParser(strm, filePath).parse();
+        JavaClass jklass = new ClassParser(strm, entPath).parse();
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
         if (sig != null) {
             klass.setMapTypes(sig);

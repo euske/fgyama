@@ -46,13 +46,14 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
             _converter.setTypeFinder(javaPaths[i], cunit);
         }
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
-            _converter.loadKlasses(javaPaths[i], cunit);
+            _converter.loadKlasses(javaPaths[i], cunit, klasses);
         }
-        _converter.listMethods();
-        for (int i = 0; i < javaPaths.length; i++) {
-            _converter.buildGraphs(javaPaths[i]);
+        _converter.listMethods(klasses);
+        for (DFKlass klass : klasses) {
+            _converter.buildGraphs(klass);
         }
 	exporter.close();
         _converter.removeExporter(exporter);
