@@ -33,6 +33,8 @@ public class DFKlass extends DFType {
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
     private DFTypeSpace _mapTypeSpace = null;
+    private Map<String, DFKlass> _paramKlasses =
+        new TreeMap<String, DFKlass>();
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -57,7 +59,7 @@ public class DFKlass extends DFType {
         _parentSpace = parentSpace;
         _parentKlass = parentKlass;
 	_parentScope = parentScope;
-        _klassSpace = parentSpace.lookupSpace(name);
+        _klassSpace = _parentSpace.lookupSpace(name);
         _klassScope = new DFKlassScope(_parentScope, name);
     }
 
@@ -77,7 +79,7 @@ public class DFKlass extends DFType {
         assert genericKlass != null;
         assert paramTypes != null;
         _name = name;
-        _parentSpace = genericKlass._klassSpace;
+        _parentSpace = genericKlass._parentSpace;
         _parentKlass = genericKlass._parentKlass;
         _parentScope = genericKlass._parentScope;
         _klassSpace = _parentSpace.lookupSpace(name);
@@ -91,7 +93,9 @@ public class DFKlass extends DFType {
             DFType paramType = _paramTypes[i];
             assert mapType != null;
             assert paramType != null;
-            _paramTypeSpace.addKlass(mapType.getTypeName(), paramType.getKlass());
+            _paramTypeSpace.addKlass(
+                mapType.getTypeName(),
+                paramType.getKlass());
         }
 
         _ast = genericKlass._ast;
@@ -112,8 +116,11 @@ public class DFKlass extends DFType {
 
     public String getTypeName() {
         String name = "L"+_parentSpace.getSpaceName()+_name;
-        if (_mapTypes != null && 0 < _mapTypes.length) {
+        if (_mapTypes != null) {
             name = name + getParamNames(_mapTypes);
+        }
+        if (_paramTypes != null) {
+            name = name + getParamNames(_paramTypes);
         }
         return name+";";
     }
@@ -188,7 +195,6 @@ public class DFKlass extends DFType {
         assert _paramTypes == null;
         if (0 < tps.size()) {
             _mapTypes = new DFMapType[tps.size()];
-            _mapTypeSpace = new DFTypeSpace(null, _name);
             for (int i = 0; i < tps.size(); i++) {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
@@ -213,13 +219,12 @@ public class DFKlass extends DFType {
     public DFKlass parameterize(DFType[] paramTypes) {
         assert _mapTypes != null;
         String name = getParamNames(paramTypes);
-        try {
-            return _klassSpace.getKlass(name);
-        } catch (TypeNotFound e) {
-            DFKlass klass = new DFKlass(name, this, paramTypes);
-            _klassSpace.addKlass(name, klass);
-            return klass;
+        DFKlass klass = _paramKlasses.get(name);
+        if (klass == null) {
+            klass = new DFKlass(name, this, paramTypes);
+            _paramKlasses.put(name, klass);
         }
+        return klass;
     }
 
     public void setJarPath(String jarPath, String entPath) {
@@ -476,7 +481,8 @@ public class DFKlass extends DFType {
         assert _baseFinder != null;
         assert _ast != null || _jarPath != null;
         DFTypeFinder finder = _baseFinder;
-        if (_mapTypeSpace != null) {
+        if (_mapTypes != null) {
+            _mapTypeSpace = new DFTypeSpace(null, _name);
             for (int i = 0; i < _mapTypes.length; i++) {
                 DFMapType mapType = _mapTypes[i];
                 mapType.build(finder);
@@ -745,7 +751,7 @@ public class DFKlass extends DFType {
     private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
         _klassSpace.buildDecls(this, _klassScope, decls);
-        // Extend a TypeFinder for this klass.
+        // Extend a TypeFinder for the child klasses.
         if (_parentKlass != null) {
             finder = finder.extend(_parentKlass);
         }
