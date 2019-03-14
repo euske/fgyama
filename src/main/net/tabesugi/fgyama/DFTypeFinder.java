@@ -42,7 +42,6 @@ public class DFTypeFinder {
         throws TypeNotFound {
         DFTypeFinder finder = this;
         assert klass.getKlassSpace() != null;
-        finder = new DFTypeFinder(finder, klass.getKlassSpace());
         DFKlass baseKlass = klass.getBaseKlass();
         if (baseKlass != null) {
             baseKlass.load();
@@ -55,6 +54,7 @@ public class DFTypeFinder {
                 finder = finder.extend(iface);
             }
         }
+        finder = new DFTypeFinder(finder, klass.getKlassSpace());
         return finder;
     }
 

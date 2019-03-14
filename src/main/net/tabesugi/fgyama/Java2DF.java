@@ -2348,26 +2348,10 @@ public class Java2DF {
         if (klass.isBuilt()) return;
         //Logger.info("loadUsedKlasses:", klass);
         klass.load();
-        List<DFKlass> toLoad = new ArrayList<DFKlass>();
-        for (DFMethod method : klass.getMethods()) {
-            ASTNode ast = method.getTree();
-            if (ast == null) continue;
-            DFTypeFinder finder = method.getFinder();
-            DFTypeSpace typeSpace = method.getMethodSpace();
-            try {
-                if (ast instanceof MethodDeclaration) {
-                    MethodDeclaration methodDecl = (MethodDeclaration)ast;
-                    this.enumKlassesStmt(finder, typeSpace, methodDecl.getBody(), toLoad);
-                } else if (ast instanceof Initializer) {
-                    Initializer initializer = (Initializer)ast;
-                    this.enumKlassesStmt(finder, typeSpace, initializer.getBody(), toLoad);
-                }
-            } catch (UnsupportedSyntax e) {
-            }
-        }
         ASTNode ast = klass.getTree();
         DFTypeFinder finder = klass.getFinder();
         DFTypeSpace typeSpace = klass.getKlassSpace();
+        List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {
             if (ast instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
@@ -2410,21 +2394,22 @@ public class Java2DF {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
-                finder = new DFTypeFinder(finder, methodSpace);
+                DFTypeFinder finder2 = new DFTypeFinder(finder, methodSpace);
                 List<TypeParameter> tps = decl.typeParameters();
 		if (tps.size() == 0) {
-		    for (DFType argType : finder.resolveArgs(decl)) {
+		    for (DFType argType : finder2.resolveArgs(decl)) {
 			if (argType instanceof DFKlass) {
 			    toLoad.add((DFKlass)argType);
 			}
 		    }
 		    if (!decl.isConstructor()) {
-			DFType returnType = finder.resolve(decl.getReturnType2());
+			DFType returnType = finder2.resolve(decl.getReturnType2());
 			if (returnType instanceof DFKlass) {
 			    toLoad.add((DFKlass)returnType);
 			}
 		    }
 		}
+                this.enumKlassesStmt(finder2, methodSpace, decl.getBody(), toLoad);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -2437,6 +2422,8 @@ public class Java2DF {
                 }
 
             } else if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                this.enumKlassesStmt(finder, typeSpace, initializer.getBody(), toLoad);
 
             } else {
                 throw new UnsupportedSyntax(body);

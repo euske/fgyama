@@ -34,6 +34,7 @@ public class DFKlass extends DFType {
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
+    private DFTypeSpace _mapTypeSpace = null;
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -47,8 +48,8 @@ public class DFKlass extends DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initializer = null;
-    private List<DFRef> _fields = null;
-    private List<DFMethod> _methods = null;
+    private List<DFRef> _fields = new ArrayList<DFRef>();
+    private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
     public DFKlass(
         String name, DFTypeSpace parentSpace,
@@ -63,6 +64,14 @@ public class DFKlass extends DFType {
         if (_parentKlass != null) {
             _parentKlass._childKlasses.add(this);
         }
+    }
+
+    protected DFKlass(
+        String name, DFTypeSpace parentSpace,
+        DFKlass parentKlass, DFVarScope parentScope, DFKlass baseKlass) {
+        this(name, parentSpace, parentKlass, parentScope);
+        _baseKlass = baseKlass;
+        _built = true;
     }
 
     // Constructor for a parameterized klass.
@@ -192,6 +201,7 @@ public class DFKlass extends DFType {
         assert _paramTypes == null;
         if (0 < tps.size()) {
             _mapTypes = new DFMapType[tps.size()];
+            _mapTypeSpace = new DFTypeSpace(null, _name);
             for (int i = 0; i < tps.size(); i++) {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
@@ -269,31 +279,26 @@ public class DFKlass extends DFType {
     }
 
     public void setBaseFinder(DFTypeFinder finder) {
+        assert !_built;
         assert _baseFinder == null || _baseFinder == finder;
 	_baseFinder = finder;
-    }
-
-    public DFTypeFinder getBaseFinder() {
-        return _baseFinder;
     }
 
     public DFTypeFinder getFinder()
         throws TypeNotFound {
         assert _built;
-        return _baseFinder.extend(this);
+        DFTypeFinder finder = _baseFinder.extend(this);
+        if (_mapTypeSpace != null) {
+            finder = new DFTypeFinder(finder, _mapTypeSpace);
+        }
+        return finder;
     }
 
-    public void setBaseKlass(DFKlass baseKlass) {
-        _baseKlass = baseKlass;
-    }
     public DFKlass getBaseKlass() {
         assert _built;
         return _baseKlass;
     }
 
-    public void setBaseIfaces(DFKlass[] baseIfaces) {
-        _baseIfaces = baseIfaces;
-    }
     public DFKlass[] getBaseIfaces() {
         assert _built;
         return _baseIfaces;
@@ -411,7 +416,7 @@ public class DFKlass extends DFType {
         throw new MethodNotFound(id, argTypes);
     }
 
-    private DFRef addField(
+    protected DFRef addField(
         SimpleName name, boolean isStatic, DFType type) {
         return this.addField(name.getIdentifier(), isStatic, type);
     }
@@ -470,38 +475,26 @@ public class DFKlass extends DFType {
         return false;
     }
 
-    public void load()
-        throws TypeNotFound {
-        this.build(_baseFinder);
-    }
-
     public boolean isBuilt() {
         return _built;
     }
 
-    protected void setBuilt() {
-        assert !_built;
-        _built = true;
-        _fields = new ArrayList<DFRef>();
-        _methods =  new ArrayList<DFMethod>();
-    }
-
-    public void build(DFTypeFinder finder)
+    public void load()
         throws TypeNotFound {
         if (_built) return;
-        this.setBuilt();
-        assert finder != null;
+        _built = true;
+        assert _baseFinder != null;
         assert _ast != null || _jarPath != null;
+        DFTypeFinder finder = _baseFinder;
         if (_mapTypes != null) {
-            DFTypeSpace mapTypeSpace = new DFTypeSpace(null, _name);
-            finder = new DFTypeFinder(finder, mapTypeSpace);
             for (int i = 0; i < _mapTypes.length; i++) {
                 DFMapType mapType = _mapTypes[i];
                 mapType.build(finder);
-                mapTypeSpace.addKlass(
+                _mapTypeSpace.addKlass(
                     mapType.getTypeName(),
                     mapType.getKlass());
             }
+            finder = new DFTypeFinder(finder, _mapTypeSpace);
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {

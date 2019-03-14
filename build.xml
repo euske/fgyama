@@ -69,6 +69,7 @@
       <jvmarg value="-ea" />
       <arg value="-v" />
       <arg value="-v" />
+      <arg value="-S" />
       <arg value="-o" />
       <arg file="${out_graph}" />
       <arg file="${input}" />
