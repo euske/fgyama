@@ -46,14 +46,14 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     @Override
     public String toString() {
-        return ("<DFVarScope("+this.getFullName()+")>");
+        return ("<DFVarScope("+this.getScopeName()+")>");
     }
 
     public Element toXML(
 	Document document, DFNode[] nodes,
 	Set<DFNode> input, Set<DFNode> output) {
         Element elem = document.createElement("scope");
-        elem.setAttribute("name", this.getFullName());
+        elem.setAttribute("name", this.getScopeName());
         for (DFVarScope child : this.getChildren()) {
             elem.appendChild(child.toXML(document, nodes, input, output));
         }
@@ -66,11 +66,11 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return elem;
     }
 
-    public String getFullName() {
+    public String getScopeName() {
         if (_parent == null) {
             return _name;
         } else {
-            return _parent.getFullName()+"."+_name;
+            return _parent.getScopeName()+"."+_name;
         }
     }
 
@@ -164,7 +164,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
         dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
-        out.println(indent+this.getFullName()+" {");
+        out.println(indent+this.getScopeName()+" {");
         String i2 = indent + "  ";
         this.dumpContents(out, i2);
         for (DFVarScope scope : this.getChildren()) {

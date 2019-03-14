@@ -30,7 +30,7 @@ public class DFGraph {
 
     @Override
     public String toString() {
-        return ("<DFGraph("+_root.getFullName()+")>");
+        return ("<DFGraph("+_root.getScopeName()+")>");
     }
 
     public String getHash() {
@@ -38,7 +38,7 @@ public class DFGraph {
             if (_method != null) {
                 _hash = Utils.hashString(_method.getSignature());
             } else {
-                _hash = Utils.hashString(_root.getFullName());
+                _hash = Utils.hashString(_root.getScopeName());
             }
         }
         return _hash;
@@ -60,7 +60,7 @@ public class DFGraph {
 		elem.appendChild(ecaller);
 	    }
         } else {
-            elem.setAttribute("name", _root.getFullName());
+            elem.setAttribute("name", _root.getScopeName());
             elem.setAttribute("style", DFCallStyle.Initializer.toString());
         }
         if (_ast != null) {

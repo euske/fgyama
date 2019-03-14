@@ -57,9 +57,9 @@ public class DFRef implements Comparable<DFRef> {
 
     public String getFullName() {
         if (_scope instanceof DFLocalVarScope) {
-            return "$"+_scope.getFullName()+"/"+_name;
+            return "$"+_scope.getScopeName()+"/"+_name;
         } else if (_scope != null) {
-            return "@"+_scope.getFullName()+"/"+_name;
+            return "@"+_scope.getScopeName()+"/"+_name;
         } else {
             return _name;
         }

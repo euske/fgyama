@@ -111,11 +111,11 @@ public class DFKlass extends DFType {
 
     @Override
     public String toString() {
-        return ("<DFKlass("+this.getFullName()+")>");
+        return ("<DFKlass("+this.getTypeName()+")>");
     }
 
     public String getTypeName() {
-        String name = "L"+this.getFullName();
+        String name = "L"+_parentSpace.getSpaceName()+_name;
         if (_mapTypes != null && 0 < _mapTypes.length) {
             name = name + getParamNames(_mapTypes);
         }
@@ -183,10 +183,6 @@ public class DFKlass extends DFType {
             }
         }
         return -1;
-    }
-
-    public String getFullName() {
-        return _parentSpace.getFullName()+_name;
     }
 
     @SuppressWarnings("unchecked")
@@ -514,7 +510,7 @@ public class DFKlass extends DFType {
             } catch (UnsupportedSyntax e) {
                 String astName = e.ast.getClass().getName();
                 Logger.error("Error: Unsupported syntax:", e.name, "("+astName+")");
-                throw new TypeNotFound(this.getFullName());
+                throw new TypeNotFound(this.getTypeName());
             }
         } else if (_jarPath != null) {
             try {
@@ -529,7 +525,7 @@ public class DFKlass extends DFType {
                 }
             } catch (IOException e) {
                 Logger.error("Error: Not found:", _jarPath+"/"+_entPath);
-                throw new TypeNotFound(this.getFullName());
+                throw new TypeNotFound(this.getTypeName());
             }
         }
     }
@@ -885,8 +881,9 @@ public class DFKlass extends DFType {
             super(parent, id);
         }
 
-        public String getFullName() {
-            return DFKlass.this.getFullName();
+        @Override
+        public String getScopeName() {
+            return DFKlass.this.getTypeName();
         }
 
         public void build() {

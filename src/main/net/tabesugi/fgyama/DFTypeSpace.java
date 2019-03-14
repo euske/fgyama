@@ -30,14 +30,14 @@ public class DFTypeSpace {
 
     @Override
     public String toString() {
-        return ("<DFTypeSpace("+this.getFullName()+")>");
+        return ("<DFTypeSpace("+this.getSpaceName()+")>");
     }
 
-    public String getFullName() {
+    public String getSpaceName() {
         if (_parent == null) {
             return "";
         } else {
-            return _parent.getFullName()+_name+"/";
+            return _parent.getSpaceName()+_name+"/";
         }
     }
 
@@ -102,7 +102,7 @@ public class DFTypeSpace {
         }
         DFKlass klass = _id2klass.get(id);
         if (klass == null) {
-            throw new TypeNotFound(this.getFullName()+id);
+            throw new TypeNotFound(this.getSpaceName()+id);
         }
         return klass;
     }
@@ -508,7 +508,7 @@ public class DFTypeSpace {
         dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
-        out.println(indent+this.getFullName()+" {");
+        out.println(indent+this.getSpaceName()+" {");
         String i2 = indent + "  ";
         for (Map.Entry<String,DFKlass> e : _id2klass.entrySet()) {
             out.println(i2+"defined: "+e.getKey()+" "+e.getValue());
