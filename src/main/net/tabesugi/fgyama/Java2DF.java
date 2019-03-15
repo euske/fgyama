@@ -2268,7 +2268,7 @@ public class Java2DF {
             //frame.dump();
         } catch (MethodNotFound e) {
             e.setMethod(method);
-            Logger.error("MethodNotFound:", e.name+"("+Utils.join(", ", e.argTypes)+")");
+            Logger.error("MethodNotFound:", e.name+"("+Utils.join(e.argTypes)+")");
             throw e;
         } catch (EntityNotFound e) {
             e.setMethod(method);

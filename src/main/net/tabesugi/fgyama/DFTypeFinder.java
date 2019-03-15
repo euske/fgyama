@@ -35,7 +35,7 @@ public class DFTypeFinder {
             path.add(finder._space);
             finder = finder._next;
         }
-        return ("<DFTypeFinder: "+Utils.join(", ", path)+">");
+        return ("<DFTypeFinder: "+Utils.join(path)+">");
     }
 
     public DFTypeFinder extend(DFKlass klass)

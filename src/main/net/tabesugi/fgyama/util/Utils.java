@@ -19,6 +19,9 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Utils {
 
+    public static <T> String join(T[] a) {
+        return join(", ", a);
+    }
     public static <T> String join(String delim, T[] a) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < a.length; i++) {
@@ -31,6 +34,9 @@ public class Utils {
 	return b.toString();
     }
 
+    public static <T> String join(List<T> a) {
+        return join(", ", a);
+    }
     public static <T> String join(String delim, List<T> a) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < a.size(); i++) {
