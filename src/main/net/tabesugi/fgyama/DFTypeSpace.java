@@ -107,6 +107,12 @@ public class DFTypeSpace {
         return klass;
     }
 
+    public DFTypeSpace[] getChildSpaces() {
+	DFTypeSpace[] spaces = new DFTypeSpace[_id2space.size()];
+	_id2space.values().toArray(spaces);
+	return spaces;
+    }
+
     public DFKlass[] getKlasses() {
 	DFKlass[] klasses = new DFKlass[_id2klass.size()];
 	_id2klass.values().toArray(klasses);
@@ -127,6 +133,9 @@ public class DFTypeSpace {
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
         klass.setTree(filePath, abstTypeDecl);
+        klass.getKlassSpace().buildDecls(
+            klass, klass.getKlassScope(),
+            abstTypeDecl.bodyDeclarations());
 	return klass;
     }
 
@@ -468,6 +477,9 @@ public class DFTypeSpace {
                 String id = "anon"+Utils.encodeASTNode(anonDecl);
                 DFKlass anonKlass = this.createKlass(klass, parentScope, id);
                 anonKlass.setTree(klass.getFilePath(), anonDecl);
+                anonKlass.getKlassSpace().buildDecls(
+                    anonKlass, anonKlass.getKlassScope(),
+                    anonDecl.bodyDeclarations());
             }
 
         } else if (expr instanceof ConditionalExpression) {

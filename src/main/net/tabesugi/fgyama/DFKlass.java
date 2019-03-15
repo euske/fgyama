@@ -73,10 +73,13 @@ public class DFKlass extends DFType {
     }
 
     // Constructor for a parameterized klass.
+    @SuppressWarnings("unchecked")
     private DFKlass(
         DFKlass genericKlass, DFType[] paramTypes) {
         assert genericKlass != null;
         assert paramTypes != null;
+        // A parameterized Klass is NOT accessible from
+        // the parent namespace but it creates its own subspace.
         String subname = getParamNames(paramTypes);
         _name = genericKlass._name;
         _parentSpace = genericKlass._parentSpace;
@@ -104,6 +107,20 @@ public class DFKlass extends DFType {
         _entPath = genericKlass._entPath;
 
         _baseFinder = genericKlass._baseFinder;
+        // Recreate the entire subspace.
+        try {
+            if (_ast instanceof AbstractTypeDeclaration) {
+                _klassSpace.buildDecls(
+                    this, _klassScope,
+                    ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+            } else if (_ast instanceof AnonymousClassDeclaration) {
+                _klassSpace.buildDecls(
+                    this, _klassScope,
+                    ((AnonymousClassDeclaration)_ast).bodyDeclarations());
+            }
+            // XXX what to do with .jar classes?
+        } catch (UnsupportedSyntax e) {
+        }
 
         // not loaded yet!
         assert !_built;
@@ -201,6 +218,7 @@ public class DFKlass extends DFType {
                 _mapTypes[i] = new DFMapType(id);
                 _mapTypes[i].setTypeBounds(tp.typeBounds());
             }
+            _mapTypeSpace = createMapTypeSpace(_mapTypes);
         }
     }
 
@@ -208,6 +226,19 @@ public class DFKlass extends DFType {
         assert _mapTypes == null;
         assert _paramTypes == null;
         _mapTypes = JNITypeParser.getMapTypes(sig, _klassSpace);
+        if (_mapTypes != null) {
+            _mapTypeSpace = createMapTypeSpace(_mapTypes);
+        }
+    }
+
+    private DFTypeSpace createMapTypeSpace(DFMapType[] mapTypes) {
+        DFTypeSpace mapTypeSpace = new DFTypeSpace(null, _name);
+        for (int i = 0; i < mapTypes.length; i++) {
+            mapTypeSpace.addKlass(
+                mapTypes[i].getTypeName(),
+                DFBuiltinTypes.getObjectKlass());
+        }
+        return mapTypeSpace;
     }
 
     public boolean isGeneric() {
@@ -276,7 +307,7 @@ public class DFKlass extends DFType {
 	_baseFinder = finder;
     }
 
-    public DFTypeFinder getFinder()
+    public DFTypeFinder getInternalFinder()
         throws TypeNotFound {
         assert _built;
         DFTypeFinder finder = _baseFinder.extend(this);
@@ -300,12 +331,21 @@ public class DFKlass extends DFType {
     }
 
     public void enumChildKlasses(List<DFKlass> list) {
+        assert _built;
         list.add(this);
         for (DFKlass klass : _paramKlasses.values()) {
             klass.enumChildKlasses(list);
         }
         for (DFKlass klass : _klassSpace.getKlasses()) {
             klass.enumChildKlasses(list);
+        }
+        for (DFMethod method : _methods) {
+            DFTypeSpace methodSpace = method.getMethodSpace();
+            if (methodSpace != null) {
+                for (DFKlass klass : methodSpace.getKlasses()) {
+                    klass.enumChildKlasses(list);
+                }
+            }
         }
     }
 
@@ -481,11 +521,11 @@ public class DFKlass extends DFType {
         throws TypeNotFound {
         if (_built) return;
         _built = true;
-        assert _baseFinder != null;
+        if (_ast != null && _baseFinder==null) Logger.error("!!!", this);
         assert _ast != null || _jarPath != null;
+        assert _baseFinder != null;
         DFTypeFinder finder = _baseFinder;
         if (_mapTypes != null) {
-            _mapTypeSpace = new DFTypeSpace(null, _name);
             for (int i = 0; i < _mapTypes.length; i++) {
                 DFMapType mapType = _mapTypes[i];
                 mapType.build(finder);
@@ -753,9 +793,9 @@ public class DFKlass extends DFType {
     @SuppressWarnings("unchecked")
     private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
-        _klassSpace.buildDecls(this, _klassScope, decls);
         // Extend a TypeFinder for the child klasses.
         if (_parentKlass != null) {
+            _parentKlass.load();
             finder = finder.extend(_parentKlass);
         }
         finder = new DFTypeFinder(finder, _klassSpace);

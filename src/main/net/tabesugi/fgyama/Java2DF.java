@@ -2298,7 +2298,7 @@ public class Java2DF {
 	DFTypeSpace klassSpace = klass.getKlassSpace();
         DFGraph klassGraph = new DFGraph(klassScope, null, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
-        DFTypeFinder finder = klass.getFinder();
+        DFTypeFinder finder = klass.getInternalFinder();
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Inner classes are processed separately.
@@ -2349,17 +2349,11 @@ public class Java2DF {
         //Logger.info("loadUsedKlasses:", klass);
         klass.load();
         ASTNode ast = klass.getTree();
-        DFTypeFinder finder = klass.getFinder();
+        DFTypeFinder finder = klass.getInternalFinder();
         DFTypeSpace typeSpace = klass.getKlassSpace();
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {
-            if (ast instanceof AbstractTypeDeclaration) {
-                AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
-                this.enumKlassesDecls(finder, typeSpace, abstDecl.bodyDeclarations(), toLoad);
-            } else if (ast instanceof AnonymousClassDeclaration) {
-                AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
-                this.enumKlassesDecls(finder, typeSpace, anonDecl.bodyDeclarations(), toLoad);
-            }
+            this.enumKlassesDecls(finder, typeSpace, ast, toLoad);
         } catch (UnsupportedSyntax e) {
         }
         for (DFKlass klass1 : toLoad) {
@@ -2370,11 +2364,24 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void enumKlassesDecls(
         DFTypeFinder finder, DFTypeSpace typeSpace,
-        List<BodyDeclaration> decls, List<DFKlass> toLoad)
+        ASTNode ast, List<DFKlass> toLoad)
         throws UnsupportedSyntax, TypeNotFound {
+        List<BodyDeclaration> decls;
+        if (ast instanceof AbstractTypeDeclaration) {
+            AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
+            decls = abstDecl.bodyDeclarations();
+        } else if (ast instanceof AnonymousClassDeclaration) {
+            AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
+            decls = anonDecl.bodyDeclarations();
+        } else {
+            throw new UnsupportedSyntax(ast);
+        }
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
+                AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
+		DFKlass klass = typeSpace.getKlass(decl.getName());
+                toLoad.add(klass);
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
@@ -2600,8 +2607,11 @@ public class Java2DF {
                      (List<Expression>) sci.arguments()) {
                 this.enumKlassesExpr(finder, typeSpace, expr, toLoad);
             }
+
         } else if (ast instanceof TypeDeclarationStatement) {
-            // Inline classes are processed separately.
+            TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
+            this.enumKlassesDecls(
+                finder, typeSpace, decl.getDeclaration(), toLoad);
 
         } else {
             throw new UnsupportedSyntax(ast);
@@ -2899,10 +2909,20 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
 		DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
-		klass.setBaseFinder(finder);
+                klass.setBaseFinder(finder);
+                setTypeFinder(klass.getKlassSpace(), finder);
 	    } catch (TypeNotFound e) {
 	    }
 	}
+    }
+    private void setTypeFinder(DFTypeSpace typeSpace, DFTypeFinder finder) {
+        finder = new DFTypeFinder(finder, typeSpace);
+        for (DFKlass klass : typeSpace.getKlasses()) {
+            klass.setBaseFinder(finder);
+        }
+        for (DFTypeSpace childSpace : typeSpace.getChildSpaces()) {
+            setTypeFinder(childSpace, finder);
+        }
     }
 
     // Pass3: load class definitions and define parameterized Klasses.
