@@ -24,6 +24,7 @@ public class UnitTestDF extends XMLTestCase {
 	XMLUnit.setNormalize(true);
         if (_rootSpace == null) {
             _rootSpace = new DFRootTypeSpace();
+            DFBuiltinTypes.initialize(_rootSpace);
         }
         if (_converter == null) {
             _converter = new Java2DF(_rootSpace, 0);
@@ -46,7 +47,7 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
             _converter.setTypeFinder(javaPaths[i], cunit);
         }
-        List<DFKlass> klasses = new ArrayList<DFKlass>();
+        Set<DFKlass> klasses = new TreeSet<DFKlass>();
         for (int i = 0; i < javaPaths.length; i++) {
             CompilationUnit cunit = srcs.get(javaPaths[i]);
             _converter.loadKlasses(javaPaths[i], cunit, klasses);
