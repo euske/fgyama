@@ -64,6 +64,38 @@
         </scope>
       </scope>
     </method>
+    <method name="Lbasic_generics;.foo(Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;)Ljava/lang/Object;" style="static">
+      <ast length="65" start="500" type="31"/>
+      <scope name="Lbasic_generics;.foo">
+        <scope name="Lbasic_generics;.foo.b0">
+          <node id="N76d07b9_3" kind="ref" ref="$Lbasic_generics;.foo/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+            <link src="N76d07b9_2"/>
+            <ast length="1" start="555" type="42"/>
+          </node>
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get()Ljava/lang/Object;" id="N76d07b9_4" kind="call" type="Ljava/lang/Object;">
+            <link label="#this" src="N76d07b9_3"/>
+            <link label="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" src="N76d07b9_5"/>
+            <ast length="7" start="555" type="32"/>
+          </node>
+          <node id="N76d07b9_6" kind="assign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+            <link label="update" src="N76d07b9_4"/>
+            <ast length="7" start="555" type="32"/>
+          </node>
+          <node flow="out" id="N76d07b9_7" kind="output" ref="#return" type="Ljava/lang/Object;">
+            <link src="N76d07b9_4"/>
+            <ast length="15" start="548" type="41"/>
+          </node>
+        </scope>
+        <node flow="in" id="N76d07b9_1" kind="input" ref="#arg0" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+          <ast length="3" start="541" type="44"/>
+        </node>
+        <node id="N76d07b9_2" kind="assign" ref="$Lbasic_generics;.foo/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+          <link src="N76d07b9_1"/>
+          <ast length="3" start="541" type="44"/>
+        </node>
+        <node flow="in" id="N76d07b9_5" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;"/>
+      </scope>
+    </method>
   </class>
   <class name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="initializer">
@@ -109,6 +141,7 @@
       </scope>
     </method>
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get()Ljava/lang/Object;" style="instance">
+      <caller name="Lbasic_generics;.foo(Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;)Ljava/lang/Object;"/>
       <ast length="62" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get.b0">
