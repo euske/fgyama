@@ -1,48 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
-    <method name="Lbasic_poly_Foo;" style="initializer">
-      <ast length="108" start="0" type="55"/>
-      <scope name="Lbasic_poly_Foo;">
-        <node data="0" id="N884b6c4b_1" kind="const" type="I">
-          <ast length="1" start="35" type="34"/>
-        </node>
-        <node id="N884b6c4b_2" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
-          <link src="N884b6c4b_1"/>
-          <ast length="5" start="31" type="59"/>
-        </node>
-      </scope>
-    </method>
-    <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
-      <caller name="Lbasic_poly_Baa;.main()V"/>
-      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
-      <ast length="64" start="42" type="31"/>
-      <scope name="Lbasic_poly_Foo;.moo">
-        <scope name="Lbasic_poly_Foo;.moo.b0">
-          <node id="N172925c9_3" kind="ref" ref="$Lbasic_poly_Foo;.moo/$obj" type="Lbasic_poly_Foo;">
-            <link src="N172925c9_2"/>
-            <ast length="3" start="94" type="42"/>
-          </node>
-          <node id="N172925c9_4" kind="fieldref" ref="@Lbasic_poly_Foo;/.x" type="I">
-            <link src="N172925c9_5"/>
-            <link label="obj" src="N172925c9_3"/>
-            <ast length="5" start="94" type="40"/>
-          </node>
-          <node flow="out" id="N172925c9_6" kind="output" ref="#return" type="I">
-            <link src="N172925c9_4"/>
-            <ast length="13" start="87" type="41"/>
-          </node>
-        </scope>
-        <node flow="in" id="N172925c9_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
-          <ast length="18" start="57" type="44"/>
-        </node>
-        <node id="N172925c9_2" kind="assign" ref="$Lbasic_poly_Foo;.moo/$obj" type="Lbasic_poly_Foo;">
-          <link src="N172925c9_1"/>
-          <ast length="18" start="57" type="44"/>
-        </node>
-        <node flow="in" id="N172925c9_5" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-      </scope>
-    </method>
-  </class>
   <class name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
     <method name="Lbasic_poly_Baa;" style="initializer">
       <ast length="442" start="110" type="55"/>
@@ -249,6 +205,50 @@
           </node>
         </scope>
         <node flow="in" id="N98dd04bd_6" ref="@Lbasic_poly_Foo;/.x" type="I"/>
+      </scope>
+    </method>
+  </class>
+  <class name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
+    <method name="Lbasic_poly_Foo;" style="initializer">
+      <ast length="108" start="0" type="55"/>
+      <scope name="Lbasic_poly_Foo;">
+        <node data="0" id="N884b6c4b_1" kind="const" type="I">
+          <ast length="1" start="35" type="34"/>
+        </node>
+        <node id="N884b6c4b_2" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <link src="N884b6c4b_1"/>
+          <ast length="5" start="31" type="59"/>
+        </node>
+      </scope>
+    </method>
+    <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
+      <caller name="Lbasic_poly_Baa;.main()V"/>
+      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
+      <ast length="64" start="42" type="31"/>
+      <scope name="Lbasic_poly_Foo;.moo">
+        <scope name="Lbasic_poly_Foo;.moo.b0">
+          <node id="N172925c9_3" kind="ref" ref="$Lbasic_poly_Foo;.moo/$obj" type="Lbasic_poly_Foo;">
+            <link src="N172925c9_2"/>
+            <ast length="3" start="94" type="42"/>
+          </node>
+          <node id="N172925c9_4" kind="fieldref" ref="@Lbasic_poly_Foo;/.x" type="I">
+            <link src="N172925c9_5"/>
+            <link label="obj" src="N172925c9_3"/>
+            <ast length="5" start="94" type="40"/>
+          </node>
+          <node flow="out" id="N172925c9_6" kind="output" ref="#return" type="I">
+            <link src="N172925c9_4"/>
+            <ast length="13" start="87" type="41"/>
+          </node>
+        </scope>
+        <node flow="in" id="N172925c9_1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
+          <ast length="18" start="57" type="44"/>
+        </node>
+        <node id="N172925c9_2" kind="assign" ref="$Lbasic_poly_Foo;.moo/$obj" type="Lbasic_poly_Foo;">
+          <link src="N172925c9_1"/>
+          <ast length="18" start="57" type="44"/>
+        </node>
+        <node flow="in" id="N172925c9_5" ref="@Lbasic_poly_Foo;/.x" type="I"/>
       </scope>
     </method>
   </class>
