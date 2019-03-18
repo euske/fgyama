@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 
 //  DFTypeSpace
 //
-public class DFTypeSpace {
+public class DFTypeSpace implements Comparable<DFTypeSpace> {
 
     private DFTypeSpace _parent;
     private String _name;
@@ -33,9 +33,25 @@ public class DFTypeSpace {
         return ("<DFTypeSpace("+this.getSpaceName()+")>");
     }
 
+    @Override
+    public int compareTo(DFTypeSpace space) {
+        if (this == space) return 0;
+        if (_parent != null) {
+            if (space._parent != null) {
+                int x = _parent.compareTo(space._parent);
+                if (x != 0) return x;
+            } else {
+                return +1;
+            }
+        } else if (space._parent != null) {
+            return -1;
+        }
+        return _name.compareTo(space._name);
+    }
+
     public String getSpaceName() {
         if (_parent == null) {
-            return "";
+            return _name+"/";
         } else {
             return _parent.getSpaceName()+_name+"/";
         }
@@ -105,12 +121,6 @@ public class DFTypeSpace {
             throw new TypeNotFound(this.getSpaceName()+id);
         }
         return klass;
-    }
-
-    public DFTypeSpace[] getChildSpaces() {
-	DFTypeSpace[] spaces = new DFTypeSpace[_id2space.size()];
-	_id2space.values().toArray(spaces);
-	return spaces;
     }
 
     public DFKlass[] getKlasses() {

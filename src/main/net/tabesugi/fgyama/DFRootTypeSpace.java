@@ -39,6 +39,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
         return ("<DFRootTypeSpace>");
     }
 
+    @Override
+    public String getSpaceName() {
+        return "";
+    }
+    
     public void loadJarFile(String jarPath)
         throws IOException {
         Logger.info("Loading:", jarPath);

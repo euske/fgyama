@@ -76,6 +76,7 @@ public class DFMethod implements Comparable<DFMethod> {
 
     @Override
     public int compareTo(DFMethod method) {
+        if (this == method) return 0;
         return _name.compareTo(method._name);
     }
 
