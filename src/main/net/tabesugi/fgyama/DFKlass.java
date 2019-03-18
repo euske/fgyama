@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFKlass
 //
-public class DFKlass extends DFType {
+public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
@@ -80,7 +80,7 @@ public class DFKlass extends DFType {
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
         // the parent namespace but it creates its own subspace.
-        String subname = getParamNames(paramTypes);
+        String subname = getParamName(paramTypes);
         _name = genericKlass._name;
         _parentSpace = genericKlass._parentSpace;
         _parentKlass = genericKlass._parentKlass;
@@ -131,13 +131,21 @@ public class DFKlass extends DFType {
         return ("<DFKlass("+this.getTypeName()+")>");
     }
 
+    @Override
+    public int compareTo(DFKlass klass) {
+        if (this == klass) return 0;
+        int x = _parentSpace.compareTo(klass._parentSpace);
+        if (x != 0) return x;
+        return getTypeName().compareTo(klass.getTypeName());
+    }
+
     public String getTypeName() {
         String name = "L"+_parentSpace.getSpaceName()+_name;
         if (_mapTypes != null) {
-            name = name + getParamNames(_mapTypes);
+            name = name + getParamName(_mapTypes);
         }
         if (_paramTypes != null) {
-            name = name + getParamNames(_paramTypes);
+            name = name + getParamName(_paramTypes);
         }
         return name+";";
     }
@@ -232,7 +240,8 @@ public class DFKlass extends DFType {
     }
 
     private DFTypeSpace createMapTypeSpace(DFMapType[] mapTypes) {
-        DFTypeSpace mapTypeSpace = new DFTypeSpace(null, _name);
+        DFTypeSpace mapTypeSpace = new DFTypeSpace(
+            null, getParamName(mapTypes));
         for (int i = 0; i < mapTypes.length; i++) {
             mapTypeSpace.addKlass(
                 mapTypes[i].getTypeName(),
@@ -249,7 +258,7 @@ public class DFKlass extends DFType {
 
     public DFKlass parameterize(DFType[] paramTypes) {
         assert _mapTypes != null;
-        String name = getParamNames(paramTypes);
+        String name = getParamName(paramTypes);
         DFKlass klass = _paramKlasses.get(name);
         if (klass == null) {
             klass = new DFKlass(this, paramTypes);
@@ -328,25 +337,6 @@ public class DFKlass extends DFType {
     public DFKlass[] getBaseIfaces() {
         assert _built;
         return _baseIfaces;
-    }
-
-    public void enumChildKlasses(List<DFKlass> list) {
-        assert _built;
-        list.add(this);
-        for (DFKlass klass : _paramKlasses.values()) {
-            klass.enumChildKlasses(list);
-        }
-        for (DFKlass klass : _klassSpace.getKlasses()) {
-            klass.enumChildKlasses(list);
-        }
-        for (DFMethod method : _methods) {
-            DFTypeSpace methodSpace = method.getMethodSpace();
-            if (methodSpace != null) {
-                for (DFKlass klass : methodSpace.getKlasses()) {
-                    klass.enumChildKlasses(list);
-                }
-            }
-        }
     }
 
     public boolean isEnum() {
@@ -521,14 +511,22 @@ public class DFKlass extends DFType {
         throws TypeNotFound {
         if (_built) return;
         _built = true;
-        if (_ast != null && _baseFinder==null) Logger.error("!!!", this);
+        if (_parentKlass != null) {
+            _parentKlass.load();
+        }
+        if (_baseFinder == null) Logger.error("!!!", this);
         assert _ast != null || _jarPath != null;
         assert _baseFinder != null;
         DFTypeFinder finder = _baseFinder;
         if (_mapTypes != null) {
             for (int i = 0; i < _mapTypes.length; i++) {
                 DFMapType mapType = _mapTypes[i];
-                mapType.build(finder);
+                try {
+                    // This might cause TypeNotFound 
+                    // for a recursive type.
+                    mapType.build(finder);
+                } catch (TypeNotFound e) {
+                }
                 _mapTypeSpace.addKlass(
                     mapType.getTypeName(),
                     mapType.getKlass());
@@ -795,15 +793,15 @@ public class DFKlass extends DFType {
         throws UnsupportedSyntax, TypeNotFound {
         // Extend a TypeFinder for the child klasses.
         if (_parentKlass != null) {
-            _parentKlass.load();
             finder = finder.extend(_parentKlass);
         }
         finder = new DFTypeFinder(finder, _klassSpace);
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
+                // Child klasses are loaded independently.
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-                // Do nothing for a child klass.
-                // (They will be loaded/built independently.)
+		DFKlass klass = _klassSpace.getKlass(decl.getName());
+                klass.setBaseFinder(finder);
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
@@ -855,6 +853,9 @@ public class DFKlass extends DFType {
 		    method.setScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
+                for (DFKlass klass : methodSpace.getKlasses()) {
+                    klass.setBaseFinder(finder);
+                }
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -873,6 +874,9 @@ public class DFKlass extends DFType {
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
 		_initializer.setScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);
+                for (DFKlass klass : methodSpace.getKlasses()) {
+                    klass.setBaseFinder(finder);
+                }
 
             } else {
                 throw new UnsupportedSyntax(body);
@@ -880,7 +884,7 @@ public class DFKlass extends DFType {
         }
     }
 
-    private static String getParamNames(DFType[] paramTypes) {
+    private static String getParamName(DFType[] paramTypes) {
         StringBuilder b = new StringBuilder();
         for (DFType type : paramTypes) {
             if (0 < b.length()) {
