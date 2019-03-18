@@ -37,20 +37,20 @@ public class UnitTestDF extends XMLTestCase {
         _converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
-        for (int i = 0; i < javaPaths.length; i++) {
-            System.err.println("compareXml: "+javaPaths[i]+", "+xmlPath);
-            CompilationUnit cunit = Utils.parseFile(javaPaths[i]);
-            srcs.put(javaPaths[i], cunit);
-            _converter.buildTypeSpace(javaPaths[i], cunit);
+        for (String javaPath : javaPaths) {
+            System.err.println("compareXml: "+javaPath+", "+xmlPath);
+            CompilationUnit cunit = Utils.parseFile(javaPath);
+            srcs.put(javaPath, cunit);
+            _converter.buildTypeSpace(javaPath, cunit);
         }
-        for (int i = 0; i < javaPaths.length; i++) {
-            CompilationUnit cunit = srcs.get(javaPaths[i]);
-            _converter.setTypeFinder(javaPaths[i], cunit);
+        for (String javaPath : javaPaths) {
+            CompilationUnit cunit = srcs.get(javaPath);
+            _converter.setTypeFinder(javaPath, cunit);
         }
         Set<DFKlass> klasses = new TreeSet<DFKlass>();
-        for (int i = 0; i < javaPaths.length; i++) {
-            CompilationUnit cunit = srcs.get(javaPaths[i]);
-            _converter.loadKlasses(javaPaths[i], cunit, klasses);
+        for (String javaPath : javaPaths) {
+            CompilationUnit cunit = srcs.get(javaPath);
+            _converter.loadKlasses(javaPath, cunit, klasses);
         }
         _converter.listMethods(klasses);
         for (DFKlass klass : klasses) {

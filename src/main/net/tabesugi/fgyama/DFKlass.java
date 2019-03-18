@@ -242,9 +242,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private DFTypeSpace createMapTypeSpace(DFMapType[] mapTypes) {
         DFTypeSpace mapTypeSpace = new DFTypeSpace(
             null, getParamName(mapTypes));
-        for (int i = 0; i < mapTypes.length; i++) {
+        for (DFMapType mapType : mapTypes) {
             mapTypeSpace.addKlass(
-                mapTypes[i].getTypeName(),
+                mapType.getTypeName(),
                 DFBuiltinTypes.getObjectKlass());
         }
         return mapTypeSpace;
@@ -519,10 +519,10 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert _baseFinder != null;
         DFTypeFinder finder = _baseFinder;
         if (_mapTypes != null) {
-            for (int i = 0; i < _mapTypes.length; i++) {
-                DFMapType mapType = _mapTypes[i];
+            finder = new DFTypeFinder(finder, _mapTypeSpace);
+            for (DFMapType mapType : _mapTypes) {
                 try {
-                    // This might cause TypeNotFound 
+                    // This might cause TypeNotFound
                     // for a recursive type.
                     mapType.build(finder);
                 } catch (TypeNotFound e) {
@@ -531,7 +531,6 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                     mapType.getTypeName(),
                     mapType.getKlass());
             }
-            finder = new DFTypeFinder(finder, _mapTypeSpace);
         }
         if (_paramTypeSpace != null) {
             finder = new DFTypeFinder(finder, _paramTypeSpace);
@@ -633,7 +632,19 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 mapTypes = JNITypeParser.getMapTypes(sig, methodSpace);
-                if (mapTypes != null) continue; // XXX
+                if (mapTypes != null) {
+                    DFTypeSpace mapTypeSpace = createMapTypeSpace(mapTypes);
+                    finder = new DFTypeFinder(finder, mapTypeSpace);
+                    for (DFMapType mapType : mapTypes) {
+                        try {
+                            mapType.build(finder);
+                        } catch (TypeNotFound e) {
+                        }
+                        mapTypeSpace.addKlass(
+                            mapType.getTypeName(),
+                            mapType.getKlass());
+                    }
+                }
 		JNITypeParser parser = new JNITypeParser(sig);
 		finder = new DFTypeFinder(finder, methodSpace);
 		methodType = (DFMethodType)parser.getType(finder);
@@ -829,9 +840,20 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                         TypeParameter tp = tps.get(i);
                         String id2 = tp.getName().getIdentifier();
                         mapTypes[i] = new DFMapType(id2);
+                        mapTypes[i].setTypeBounds(tp.typeBounds());
+                    }
+                    DFTypeSpace mapTypeSpace = createMapTypeSpace(mapTypes);
+                    finder = new DFTypeFinder(finder, mapTypeSpace);
+                    for (DFMapType mapType : mapTypes) {
+                        try {
+                            mapType.build(finder);
+                        } catch (TypeNotFound e) {
+                        }
+                        mapTypeSpace.addKlass(
+                            mapType.getTypeName(),
+                            mapType.getKlass());
                     }
                 }
-                if (mapTypes != null) continue; // XXX
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
                 String name;

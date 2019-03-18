@@ -13,7 +13,7 @@ public class DFMapType extends DFType {
 
     private String _name;
     private DFKlass _boundKlass;
-    
+
     private String _sig = null;
     private List<Type> _ast = null;
 
@@ -24,7 +24,13 @@ public class DFMapType extends DFType {
 
     @Override
     public String toString() {
-        return ("<DFMapType("+_name+")>");
+        if (_sig != null) {
+            return ("<DFMapType("+_name+":"+_sig+")>");
+        } else if (_ast != null) {
+            return ("<DFMapType("+_name+":"+_ast+")>");
+        } else {
+            return ("<DFMapType("+_name+")>");
+        }
     }
 
     public String getTypeName() {
