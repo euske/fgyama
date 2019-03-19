@@ -525,6 +525,37 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static DFMapType[] getMapTypes(List<TypeParameter> tps) {
+        if (tps.size() == 0) return null;
+        DFMapType[] mapTypes = new DFMapType[tps.size()];
+        for (int i = 0; i < tps.size(); i++) {
+            TypeParameter tp = tps.get(i);
+            String id = tp.getName().getIdentifier();
+            mapTypes[i] = new DFMapType(id);
+            mapTypes[i].setTypeBounds(tp.typeBounds());
+        }
+        return mapTypes;
+    }
+
+    public static DFTypeSpace createMapTypeSpace(DFMapType[] mapTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFMapType mapType : mapTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(mapType.getTypeName());
+        }
+        DFTypeSpace mapTypeSpace = new DFTypeSpace(
+            null, "{"+b.toString()+"}");
+        for (DFMapType mapType : mapTypes) {
+            mapTypeSpace.addKlass(
+                mapType.getTypeName(),
+                DFBuiltinTypes.getObjectKlass());
+        }
+        return mapTypeSpace;
+    }
+
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");

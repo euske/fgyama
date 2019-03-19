@@ -199,6 +199,23 @@ public class DFTypeFinder {
         return argTypes;
     }
 
+    public DFTypeFinder resolveMapTypeSpace(
+        DFTypeSpace mapTypeSpace, DFMapType[] mapTypes) {
+        DFTypeFinder finder = new DFTypeFinder(this, mapTypeSpace);
+        for (DFMapType mapType : mapTypes) {
+            try {
+                // This might cause TypeNotFound
+                // for a recursive type.
+                mapType.build(finder);
+            } catch (TypeNotFound e) {
+            }
+            mapTypeSpace.addKlass(
+                mapType.getTypeName(),
+                mapType.getKlass());
+        }
+        return finder;
+    }
+
     // dump: for debugging.
     public void dump() {
         dump(System.err, 0);

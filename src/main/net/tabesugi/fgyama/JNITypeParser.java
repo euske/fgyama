@@ -151,7 +151,7 @@ public class JNITypeParser {
         _pos++;
     }
 
-    public static DFMapType[] getMapTypes(String text, DFTypeSpace typeSpace) {
+    public static DFMapType[] getMapTypes(String text) {
 	int pos = 0;
         if (text.charAt(pos) != '<') return null;
         pos++;

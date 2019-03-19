@@ -2412,33 +2412,32 @@ public class Java2DF {
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
                 DFTypeFinder finder2 = new DFTypeFinder(finder, methodSpace);
-                List<TypeParameter> tps = decl.typeParameters();
-		if (tps.size() == 0) {
-                    try {
-                        for (DFType argType : finder2.resolveArgs(decl)) {
-                            if (argType instanceof DFKlass) {
-                                enumKlasses((DFKlass)argType, klasses);
-                            }
-                        }
-                        if (!decl.isConstructor()) {
-                            DFType returnType = finder2.resolve(
-                                decl.getReturnType2());
-                            if (returnType instanceof DFKlass) {
-                                enumKlasses((DFKlass)returnType, klasses);
-                            }
-                        }
-		    } catch (TypeNotFound e) {
-                        e.setAst(decl);
-                        if (0 < _strict) throw e;
-                    }
-		}
+                DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
                 try {
-                    this.enumKlassesStmt(
-                        finder2, methodSpace, decl.getBody(), klasses);
+                    if (mapTypes != null) {
+                        DFTypeSpace mapTypeSpace =
+                            DFTypeSpace.createMapTypeSpace(mapTypes);
+                        finder2 = finder2.resolveMapTypeSpace(
+                            mapTypeSpace, mapTypes);
+                    }
+                    for (DFType argType : finder2.resolveArgs(decl)) {
+                        if (argType instanceof DFKlass) {
+                            enumKlasses((DFKlass)argType, klasses);
+                        }
+                    }
+                    if (!decl.isConstructor()) {
+                        DFType returnType = finder2.resolve(
+                            decl.getReturnType2());
+                        if (returnType instanceof DFKlass) {
+                            enumKlasses((DFKlass)returnType, klasses);
+                        }
+                    }
                 } catch (TypeNotFound e) {
                     e.setAst(decl);
                     if (0 < _strict) throw e;
-                }
+		}
+                this.enumKlassesStmt(
+                    finder2, methodSpace, decl.getBody(), klasses);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
