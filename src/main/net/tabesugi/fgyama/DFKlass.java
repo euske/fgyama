@@ -284,11 +284,22 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert _baseFinder == null || _baseFinder == finder;
 	_baseFinder = finder;
     }
+    
+    public DFTypeFinder getBaseFinder()
+        throws TypeNotFound {
+        if (_parentKlass != null) {
+            return _parentKlass.getBaseFinder();
+        } else {
+            assert _baseFinder != null;
+            DFTypeFinder finder = _baseFinder.extend(this);
+            return new DFTypeFinder(finder, _klassSpace);
+        }
+    }
 
     public DFTypeFinder getInternalFinder()
         throws TypeNotFound {
         assert _built;
-        DFTypeFinder finder = _baseFinder.extend(this);
+        DFTypeFinder finder = this.getBaseFinder().extend(this);
         if (_mapTypeSpace != null) {
             finder = new DFTypeFinder(finder, _mapTypeSpace);
         }
@@ -483,10 +494,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         if (_parentKlass != null) {
             _parentKlass.load();
         }
-        if (_baseFinder == null) Logger.error("!!!", this);
+        DFTypeFinder finder = this.getBaseFinder();
+        if (finder == null) Logger.error("!!!", this, _parentKlass);
         assert _ast != null || _jarPath != null;
-        assert _baseFinder != null;
-        DFTypeFinder finder = _baseFinder;
         if (_mapTypeSpace != null) {
             assert _mapTypes != null;
             finder = finder.resolveMapTypeSpace(_mapTypeSpace, _mapTypes);
@@ -760,9 +770,6 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Child klasses are loaded independently.
-                AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-		DFKlass klass = _klassSpace.getKlass(decl.getName());
-                klass.setBaseFinder(finder);
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;

@@ -2436,8 +2436,10 @@ public class Java2DF {
                     e.setAst(decl);
                     if (0 < _strict) throw e;
 		}
-                this.enumKlassesStmt(
-                    finder2, methodSpace, decl.getBody(), klasses);
+                if (decl.getBody() != null) {
+                    this.enumKlassesStmt(
+                        finder2, methodSpace, decl.getBody(), klasses);
+                }
 
             } else if (body instanceof EnumConstantDeclaration) {
 
