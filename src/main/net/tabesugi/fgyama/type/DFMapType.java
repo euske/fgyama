@@ -47,19 +47,17 @@ public class DFMapType extends DFType {
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         assert !(type instanceof DFMapType);
-        if (typeMap.get(this) == null) {
-            typeMap.put(this, type);
-            return 0;
-        } else {
-            return typeMap.get(this).canConvertFrom(type, typeMap);
+        if (typeMap == null) {
+            return _boundKlass.canConvertFrom(type, typeMap);
         }
-    }
-
-    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
-        if (typeMap.containsKey(this)) {
-            return typeMap.get(this);
+        DFType self = typeMap.get(this);
+        if (self == null) {
+            int dist = _boundKlass.canConvertFrom(type, typeMap);
+            if (dist < 0) return -1;
+            typeMap.put(this, type);
+            return dist;
         } else {
-            return this;
+            return self.canConvertFrom(type, typeMap);
         }
     }
 

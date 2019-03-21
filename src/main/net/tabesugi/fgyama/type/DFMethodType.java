@@ -89,18 +89,4 @@ public class DFMethodType extends DFType {
         }
         return b.toString();
     }
-
-    public DFMethodType parameterize(Map<DFMapType, DFType> typeMap) {
-        DFType returnType = _returnType.parameterize(typeMap);
-        boolean changed = (_returnType != returnType);
-        DFType[] argTypes = new DFType[_argTypes.length];
-        for (int i = 0; i < _argTypes.length; i++) {
-            argTypes[i] = _argTypes[i].parameterize(typeMap);
-            changed = changed || (_argTypes[i] != argTypes[i]);
-        }
-        if (changed) {
-            return new DFMethodType(argTypes, returnType);
-        }
-        return this;
-    }
 }

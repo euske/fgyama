@@ -19,10 +19,6 @@ public abstract class DFType {
         return null;
     }
 
-    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
-        return DFBuiltinTypes.getObjectKlass();
-    }
-
     public static DFType inferInfixType(
         DFType left, InfixExpression.Operator op, DFType right) {
         if (op == InfixExpression.Operator.EQUALS ||

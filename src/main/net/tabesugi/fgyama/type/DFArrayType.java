@@ -21,14 +21,6 @@ public class DFArrayType extends DFType {
         _ndims = ndims;
     }
 
-    public DFType parameterize(Map<DFMapType, DFType> typeMap) {
-        if (typeMap.containsKey(_elemType)) {
-            return new DFArrayType(typeMap.get(_elemType), _ndims);
-        } else {
-            return this;
-        }
-    }
-
     @Override
     public String toString() {
         return ("<DFArrayType("+this.getTypeName()+")>");
