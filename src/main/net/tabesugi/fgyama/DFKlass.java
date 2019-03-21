@@ -168,15 +168,19 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (this == klass) return 0;
-        if (_genericKlass != null && klass._genericKlass != null) {
+        if (_genericKlass == klass || klass._genericKlass == this) {
             // A<T> isSubclassOf B<S>?
-            if (_paramTypes.length != klass._paramTypes.length) return -1;
-            // A isSubclassOf B?
-            int dist = _genericKlass.isSubclassOf(klass._genericKlass, typeMap);
-            if (dist < 0) return -1;
-            for (int i = 0; i < _paramTypes.length; i++) {
-                // T isSubclassOf S? -> S canConvertFrom T?
-                int d = klass._paramTypes[i].canConvertFrom(_paramTypes[i], typeMap);
+            // types0: T
+            DFType[] types0 = (_mapTypes != null)? _mapTypes : _paramTypes;
+            assert types0 != null;
+            // types1: S
+            DFType[] types1 = (klass._mapTypes != null)? klass._mapTypes : klass._paramTypes;
+            assert types1 != null;
+            assert types0.length == types1.length;
+            // T isSubclassOf S? -> S canConvertFrom T?
+            int dist = 0;
+            for (int i = 0; i < types0.length; i++) {
+                int d = types1[i].canConvertFrom(types0[i], typeMap);
                 if (d < 0) return -1;
                 dist += d;
             }
