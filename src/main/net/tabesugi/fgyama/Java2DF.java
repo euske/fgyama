@@ -700,7 +700,8 @@ class DFFileScope extends DFVarScope {
 	int bestDist = -1;
 	DFMethod bestMethod = null;
 	for (DFMethod method : _methods) {
-	    int dist = method.canAccept(id, argTypes);
+            if (!id.equals(method.getName())) continue;
+	    int dist = method.canAccept(argTypes);
 	    if (dist < 0) continue;
 	    if (bestDist < 0 || dist < bestDist) {
 		bestDist = dist;

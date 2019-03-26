@@ -168,7 +168,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (this == klass) return 0;
-        if (_genericKlass == klass || klass._genericKlass == this) {
+        if (_genericKlass == klass || klass._genericKlass == this ||
+            (_genericKlass != null && _genericKlass == klass._genericKlass)) {
             // A<T> isSubclassOf B<S>?
             // types0: T
             DFType[] types0 = (_mapTypes != null)? _mapTypes : _paramTypes;
@@ -284,7 +285,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert _baseFinder == null || _baseFinder == finder;
 	_baseFinder = finder;
     }
-    
+
     public DFTypeFinder getBaseFinder()
         throws TypeNotFound {
         if (_parentKlass != null) {
@@ -382,7 +383,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                   (callStyle == DFCallStyle.InstanceOrStatic &&
                    (callStyle1 == DFCallStyle.InstanceMethod ||
                     callStyle1 == DFCallStyle.StaticMethod)))) continue;
-            int dist = method1.canAccept(id, argTypes);
+            if (id != null && !id.equals(method1.getName())) continue;
+            int dist = method1.canAccept(argTypes);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
                 bestDist = dist;

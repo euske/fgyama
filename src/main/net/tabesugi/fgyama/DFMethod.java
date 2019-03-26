@@ -89,6 +89,10 @@ public class DFMethod implements Comparable<DFMethod> {
         return (_mapTypes != null);
     }
 
+    public String getName() {
+        return _name;
+    }
+
     public String getSignature() {
         String name;
         if (_klass != null) {
@@ -111,8 +115,7 @@ public class DFMethod implements Comparable<DFMethod> {
         return _methodType.getReturnType();
     }
 
-    public int canAccept(String name, DFType[] argTypes) {
-        if (name != null && !_name.equals(name)) return -1;
+    public int canAccept(DFType[] argTypes) {
         Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
         return _methodType.canAccept(argTypes, typeMap);
     }
