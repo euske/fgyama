@@ -19,6 +19,15 @@ public abstract class DFType {
         return null;
     }
 
+    public static DFType inferPrefixType(
+        DFType type, PrefixExpression.Operator op) {
+        if (op == PrefixExpression.Operator.NOT) {
+            return DFBasicType.BOOLEAN;
+        } else {
+            return type;
+        }
+    }
+
     public static DFType inferInfixType(
         DFType left, InfixExpression.Operator op, DFType right) {
         if (op == InfixExpression.Operator.EQUALS ||
@@ -34,8 +43,9 @@ public abstract class DFType {
                    (left == DFBuiltinTypes.getStringKlass() ||
                     right == DFBuiltinTypes.getStringKlass())) {
             return DFBuiltinTypes.getStringKlass();
-        } else if (left == null || right == null) {
-            return (left == null)? right : left;
+        } else if (left instanceof DFUnknownType ||
+                   right instanceof DFUnknownType) {
+            return (left instanceof DFUnknownType)? right : left;
         } else if (0 <= left.canConvertFrom(right, null)) {
             return left;
         } else {

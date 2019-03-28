@@ -145,9 +145,9 @@ class PrefixNode extends ProgNode {
     public PrefixExpression.Operator op;
 
     public PrefixNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, PrefixExpression.Operator op) {
-        super(graph, scope, (ref != null)? ref.getRefType() : null, ref, ast);
+        super(graph, scope, type, ref, ast);
         this.op = op;
     }
 
@@ -264,7 +264,7 @@ class CaseNode extends ProgNode {
     public CaseNode(
         DFGraph graph, DFVarScope scope,
         ASTNode ast) {
-        super(graph, scope, null, null, ast);
+        super(graph, scope, DFUnknownType.UNKNOWN, null, ast);
     }
 
     @Override
@@ -374,9 +374,9 @@ class JoinNode extends ProgNode {
     public boolean recvFalse = false;
 
     public JoinNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, DFNode cond) {
-        super(graph, scope, (ref != null)? ref.getRefType() : null, ref, ast);
+        super(graph, scope, type, ref, ast);
         this.accept(cond, "cond");
     }
 
@@ -854,26 +854,28 @@ public class Java2DF {
                 Expression operand = prefix.getOperand();
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, operand);
+                DFNode value = ctx.getRValue();
                 if (op == PrefixExpression.Operator.INCREMENT ||
                     op == PrefixExpression.Operator.DECREMENT) {
 		    // "++x"
                     processAssignment(
                         ctx, typeSpace, graph, finder, scope, frame, operand);
                     DFNode assign = ctx.getLValue();
-                    DFNode value = new PrefixNode(
-                        graph, scope, assign.getRef(),
-                        expr, op);
-                    value.accept(ctx.getRValue());
-                    assign.accept(value);
+                    DFRef ref = assign.getRef();
+                    DFNode node = new PrefixNode(
+                        graph, scope, ref.getRefType(), ref, expr, op);
+                    node.accept(ctx.getRValue());
+                    assign.accept(node);
                     ctx.set(assign);
-                    ctx.setRValue(value);
+                    ctx.setRValue(node);
                 } else {
-		    // "!a"
-                    DFNode value = new PrefixNode(
-                        graph, scope, null,
-                        expr, op);
-                    value.accept(ctx.getRValue());
-                    ctx.setRValue(value);
+		    // "!a", "+a", "-a", "~a"
+                    DFType type = DFType.inferPrefixType(
+                        value.getNodeType(), op);
+                    DFNode node = new PrefixNode(
+                        graph, scope, type, null, expr, op);
+                    node.accept(value);
+                    ctx.setRValue(node);
                 }
 
             } else if (expr instanceof PostfixExpression) {
@@ -1006,8 +1008,9 @@ public class Java2DF {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
-                            klass, null, id, DFCallStyle.InstanceMethod,
-                            null, finder, new DFMethodType(argTypes, null));
+                            klass, null, id,
+                            DFCallStyle.InstanceMethod, null, finder,
+                            new DFMethodType(argTypes, DFUnknownType.UNKNOWN));
                         Logger.error("Fallback method:", klass, ":", fallback);
                         method = fallback;
                     }
@@ -1079,8 +1082,9 @@ public class Java2DF {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        baseKlass, null, id, DFCallStyle.InstanceMethod,
-                        null, finder, new DFMethodType(argTypes, null));
+                        baseKlass, null, id,
+                        DFCallStyle.InstanceMethod, null, finder,
+                        new DFMethodType(argTypes, DFUnknownType.UNKNOWN));
                     Logger.error("Fallback method:", baseKlass, ":", fallback);
                     method = fallback;
                 }
@@ -1281,7 +1285,8 @@ public class Java2DF {
                     ctx, typeSpace, graph, finder, scope, frame,
 		    cond.getElseExpression());
                 DFNode falseValue = ctx.getRValue();
-                JoinNode join = new JoinNode(graph, scope, null, expr, condValue);
+                JoinNode join = new JoinNode(
+                    graph, scope, trueValue.getNodeType(), null, expr, condValue);
                 join.recv(true, trueValue);
                 join.recv(false, falseValue);
                 ctx.setRValue(join);
@@ -1652,7 +1657,8 @@ public class Java2DF {
 
         // Attach a JoinNode to each variable.
         for (DFRef ref : outRefs) {
-            JoinNode join = new JoinNode(graph, scope, ref, ifStmt, condValue);
+            JoinNode join = new JoinNode(
+                graph, scope, ref.getRefType(), ref, ifStmt, condValue);
             if (thenCtx != null) {
                 DFNode dst = thenCtx.get(ref);
                 if (dst != null) {
@@ -1675,8 +1681,9 @@ public class Java2DF {
         if (thenFrame != null) {
             for (DFExit exit : thenFrame.getExits()) {
                 DFNode node = exit.getNode();
+                DFRef ref = node.getRef();
                 JoinNode join = new JoinNode(
-                    graph, scope, node.getRef(), null, condValue);
+                    graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(true, node);
                 frame.addExit(exit.wrap(join));
             }
@@ -1685,8 +1692,9 @@ public class Java2DF {
         if (elseFrame != null) {
             for (DFExit exit : elseFrame.getExits()) {
                 DFNode node = exit.getNode();
+                DFRef ref = node.getRef();
                 JoinNode join = new JoinNode(
-                    graph, scope, node.getRef(), null, condValue);
+                    graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(false, node);
                 frame.addExit(exit.wrap(join));
             }
@@ -1707,7 +1715,8 @@ public class Java2DF {
         for (DFRef ref : frame.getOutputRefs()) {
             DFNode dst = caseCtx.get(ref);
             if (dst != null) {
-                JoinNode join = new JoinNode(graph, scope, ref, apt, caseNode);
+                JoinNode join = new JoinNode(
+                    graph, scope, ref.getRefType(), ref, apt, caseNode);
                 join.recv(true, dst);
                 join.close(ctx.get(ref));
                 ctx.set(join);

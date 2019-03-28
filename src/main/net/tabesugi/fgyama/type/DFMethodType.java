@@ -15,6 +15,7 @@ public class DFMethodType extends DFType {
     private DFType _returnType;
 
     public DFMethodType(DFType[] argTypes, DFType returnType) {
+        assert returnType != null;
         _argTypes = argTypes;
         _returnType = returnType;
     }

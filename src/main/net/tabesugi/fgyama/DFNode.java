@@ -25,6 +25,9 @@ public class DFNode implements Comparable<DFNode> {
         new ArrayList<DFNode>();
 
     public DFNode(DFGraph graph, DFVarScope scope, DFType type, DFRef ref) {
+        assert graph != null;
+        assert scope != null;
+        assert type != null;
         _graph = graph;
         _id = graph.addNode(this);
         _scope = scope;
@@ -52,9 +55,7 @@ public class DFNode implements Comparable<DFNode> {
         if (this.getData() != null) {
             elem.setAttribute("data", this.getData());
         }
-        if (_type != null) {
-            elem.setAttribute("type", _type.getTypeName());
-        }
+        elem.setAttribute("type", _type.getTypeName());
         if (_ref != null) {
             elem.setAttribute("ref", _ref.getFullName());
             boolean fin = (input != null && input.contains(this));
@@ -121,7 +122,7 @@ public class DFNode implements Comparable<DFNode> {
         assert node != null;
         assert _input == null;
         _input = node;
-        if (_type == null) {
+        if (_type instanceof DFUnknownType) {
             _type = node.getNodeType();
         }
         node._outputs.add(this);
