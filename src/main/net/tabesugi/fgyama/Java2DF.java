@@ -3007,7 +3007,7 @@ public class Java2DF {
                     fileScope.importStatic(klass, qname.getName());
                 }
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")");
+                Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")", e.finder);
                 if (0 < _strict) throw e;
             }
         }
@@ -3018,7 +3018,7 @@ public class Java2DF {
             try {
                 enumKlasses(klass, klasses);
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at", klass, "("+e.name+")");
+                Logger.error("Pass3: TypeNotFound at", klass, "("+e.name+")", e.finder);
                 if (0 < _strict) throw e;
             }
         }

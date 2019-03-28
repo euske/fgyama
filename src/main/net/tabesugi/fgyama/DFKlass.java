@@ -177,10 +177,10 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             // types1: S
             DFType[] types1 = (klass._mapTypes != null)? klass._mapTypes : klass._paramTypes;
             assert types1 != null;
-            assert types0.length == types1.length;
+            //assert types0.length == types1.length;
             // T isSubclassOf S? -> S canConvertFrom T?
             int dist = 0;
-            for (int i = 0; i < types0.length; i++) {
+            for (int i = 0; i < Math.min(types0.length, types1.length); i++) {
                 int d = types1[i].canConvertFrom(types0[i], typeMap);
                 if (d < 0) return -1;
                 dist += d;
@@ -282,7 +282,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public void setBaseFinder(DFTypeFinder finder) {
         assert !_built;
-        assert _baseFinder == null || _baseFinder == finder;
+        //assert _baseFinder == null || _baseFinder == finder;
 	_baseFinder = finder;
     }
 

@@ -60,28 +60,29 @@ public class DFTypeFinder {
 
     public DFKlass lookupKlass(Name name)
         throws TypeNotFound {
-        try {
-            return _space.getKlass(name);
-        } catch (TypeNotFound e) {
-            if (_next != null) {
-                return _next.lookupKlass(name);
-            } else {
-                throw new TypeNotFound(name.getFullyQualifiedName());
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            try {
+                return finder._space.getKlass(name);
+            } catch (TypeNotFound e) {
+                finder = finder._next;
             }
         }
+        throw new TypeNotFound(name.getFullyQualifiedName(), this);
     }
 
     public DFKlass lookupKlass(String name)
         throws TypeNotFound {
-        try {
-            return _space.getKlass(name.replace('$', '.'));
-        } catch (TypeNotFound e) {
-            if (_next != null) {
-                return _next.lookupKlass(name);
-            } else {
-                throw new TypeNotFound(name);
+        name = name.replace('$', '.');
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            try {
+                return finder._space.getKlass(name);
+            } catch (TypeNotFound e) {
+                finder = finder._next;
             }
         }
+        throw new TypeNotFound(name, this);
     }
 
     @SuppressWarnings("unchecked")
