@@ -76,7 +76,7 @@
       <ast length="56" start="295" type="31"/>
       <scope name="Ldom/meep/basic_names;.meh">
         <scope name="Ldom/meep/basic_names;.meh.b0">
-          <node data="Ldom/meep/basic_names;.m33p()?" id="N6f0d605c_2" kind="call">
+          <node data="Ldom/meep/basic_names;.m33p()?" id="N6f0d605c_2" kind="call" type="?">
             <link label="#this" src="N6f0d605c_1"/>
             <ast length="6" start="323" type="32"/>
           </node>

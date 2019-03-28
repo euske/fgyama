@@ -27,7 +27,7 @@
             <link src="Ne96a6cc2_2"/>
             <ast length="5" start="175" type="42"/>
           </node>
-          <node data="Ldom/meep/multi_xref1;.foo()?" id="Ne96a6cc2_4" kind="call">
+          <node data="Ldom/meep/multi_xref1;.foo()?" id="Ne96a6cc2_4" kind="call" type="?">
             <link label="#this" src="Ne96a6cc2_3"/>
             <ast length="11" start="175" type="32"/>
           </node>

@@ -47,7 +47,7 @@
           <node data="3" id="Nce57b47f_13" kind="const" type="I">
             <ast length="1" start="105" type="34"/>
           </node>
-          <node data="Lbasic_ops;.moo(II)?" id="Nce57b47f_14" kind="call">
+          <node data="Lbasic_ops;.moo(II)?" id="Nce57b47f_14" kind="call" type="?">
             <link label="#arg0" src="Nce57b47f_12"/>
             <link label="#arg1" src="Nce57b47f_13"/>
             <link label="#this" src="Nce57b47f_11"/>
