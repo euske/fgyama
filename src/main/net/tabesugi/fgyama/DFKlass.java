@@ -228,6 +228,18 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public DFKlass parameterize(DFType[] paramTypes) {
         assert _mapTypes != null;
+        assert paramTypes.length <= _mapTypes.length;
+        if (paramTypes.length < _mapTypes.length) {
+            DFType[] types = new DFType[_mapTypes.length];
+            for (int i = 0; i < _mapTypes.length; i++) {
+                if (i < paramTypes.length) {
+                    types[i] = paramTypes[i];
+                } else {
+                    types[i] = _mapTypes[i].getKlass();
+                }
+            }
+            paramTypes = types;
+        }
         String name = getParamName(paramTypes);
         DFKlass klass = _paramKlasses.get(name);
         if (klass == null) {
@@ -286,6 +298,21 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 	_baseFinder = finder;
     }
 
+    public DFTypeFinder addFinders(DFTypeFinder finder)
+        throws TypeNotFound {
+        assert _built;
+        if (_baseKlass != null) {
+            finder = _baseKlass.addFinders(finder);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                finder = iface.addFinders(finder);
+            }
+        }
+        finder = finder.extend(_klassSpace);
+        return finder;
+    }
+
     public DFTypeFinder getBaseFinder()
         throws TypeNotFound {
         if (_parentKlass != null) {
@@ -307,21 +334,6 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         if (_paramTypeSpace != null) {
             finder = finder.extend(_paramTypeSpace);
         }
-        return finder;
-    }
-
-    public DFTypeFinder addFinders(DFTypeFinder finder)
-        throws TypeNotFound {
-        assert _built;
-        if (_baseKlass != null) {
-            finder = _baseKlass.addFinders(finder);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                finder = iface.addFinders(finder);
-            }
-        }
-        finder = finder.extend(_klassSpace);
         return finder;
     }
 

@@ -13,60 +13,69 @@ import org.w3c.dom.*;
 public class DFTypeFinder {
 
     private DFTypeSpace _space;
-    private DFTypeFinder _next = null;
+    private DFTypeFinder[] _nexts = null;
 
     public DFTypeFinder(DFTypeSpace space) {
         assert space != null;
         _space = space;
     }
 
-    public DFTypeFinder(DFTypeSpace space, DFTypeFinder next) {
+    public DFTypeFinder(DFTypeSpace space, DFTypeFinder[] nexts) {
         assert space != null;
-        assert next != null;
+        assert nexts != null;
         _space = space;
-        _next = next;
+        _nexts = nexts;
     }
 
     public DFTypeFinder extend(DFTypeSpace space) {
-        return new DFTypeFinder(space, this);
+        return new DFTypeFinder(space, new DFTypeFinder[] { this });
     }
 
     @Override
     public String toString() {
         List<DFTypeSpace> path = new ArrayList<DFTypeSpace>();
-        DFTypeFinder finder = this;
-        while (finder != null) {
-            path.add(finder._space);
-            finder = finder._next;
-        }
+        this.toString(path);
         return ("<DFTypeFinder: "+Utils.join(path)+">");
+    }
+    private void toString(List<DFTypeSpace> path) {
+        path.add(_space);
+        if (_nexts != null) {
+            for (DFTypeFinder next : _nexts) {
+                next.toString(path);
+            }
+        }
     }
 
     public DFKlass lookupKlass(Name name)
         throws TypeNotFound {
-        DFTypeFinder finder = this;
-        while (finder != null) {
-            try {
-                return finder._space.getKlass(name);
-            } catch (TypeNotFound e) {
-                finder = finder._next;
-            }
-        }
-        throw new TypeNotFound(name.getFullyQualifiedName(), this);
+        return this.lookupKlass(name.getFullyQualifiedName());
     }
 
     public DFKlass lookupKlass(String name)
         throws TypeNotFound {
         name = name.replace('$', '.');
-        DFTypeFinder finder = this;
-        while (finder != null) {
-            try {
-                return finder._space.getKlass(name);
-            } catch (TypeNotFound e) {
-                finder = finder._next;
-            }
+        try {
+            return this.lookupKlassRec(name);
+        } catch (TypeNotFound e) {
+            throw new TypeNotFound(name, this);
         }
-        throw new TypeNotFound(name, this);
+    }
+
+    private DFKlass lookupKlassRec(String name)
+        throws TypeNotFound {
+        try {
+            return _space.getKlass(name);
+        } catch (TypeNotFound e) {
+            if (_nexts != null) {
+                for (DFTypeFinder next : _nexts) {
+                    try {
+                        return next.lookupKlassRec(name);
+                    } catch (TypeNotFound ee) {
+                    }
+                }
+            }
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -186,7 +195,8 @@ public class DFTypeFinder {
 
     public DFTypeFinder resolveMapTypeSpace(
         DFTypeSpace mapTypeSpace, DFMapType[] mapTypes) {
-        DFTypeFinder finder = new DFTypeFinder(mapTypeSpace, this);
+        DFTypeFinder finder = new DFTypeFinder(
+            mapTypeSpace, new DFTypeFinder[] { this });
         for (DFMapType mapType : mapTypes) {
             try {
                 // This might cause TypeNotFound
@@ -199,16 +209,5 @@ public class DFTypeFinder {
                 mapType.getKlass());
         }
         return finder;
-    }
-
-    // dump: for debugging.
-    public void dump() {
-        dump(System.err, 0);
-    }
-    public void dump(PrintStream out, int index) {
-        out.println("  "+index+": "+_space);
-        if (_next != null) {
-            _next.dump(out, index+1);
-        }
     }
 }
