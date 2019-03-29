@@ -43,7 +43,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     public String getSpaceName() {
         return "";
     }
-    
+
     public void loadJarFile(String jarPath)
         throws IOException {
         Logger.info("Loading:", jarPath);
@@ -79,7 +79,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
             String name = s.substring(i0, (0 <= i)? i : s.length());
             space = klass.getKlassSpace();
             klass = space.createKlass(klass, klass.getKlassScope(), name);
-            finder = new DFTypeFinder(finder, space);
+            finder = finder.extend(space);
         }
         klass.setBaseFinder(finder);
         klass.setJarPath(jarPath, entPath);

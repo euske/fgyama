@@ -2421,7 +2421,7 @@ public class Java2DF {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
-                DFTypeFinder finder2 = new DFTypeFinder(finder, methodSpace);
+                DFTypeFinder finder2 = finder.extend(methodSpace);
                 DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
                 try {
                     if (mapTypes != null) {
@@ -2956,9 +2956,9 @@ public class Java2DF {
     public void setTypeFinder(String key, CompilationUnit cunit) {
 	// Search path for types: ROOT -> java.lang -> package -> imports.
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
-        finder = new DFTypeFinder(finder, _rootSpace.lookupSpace("java.lang"));
+        finder = finder.extend(_rootSpace.lookupSpace("java.lang"));
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        finder = new DFTypeFinder(finder, packageSpace);
+        finder = finder.extend(packageSpace);
 	// Populate the import space.
         DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
         for (ImportDeclaration importDecl :
@@ -2966,7 +2966,7 @@ public class Java2DF {
             Name name = importDecl.getName();
 	    if (importDecl.isOnDemand()) {
 		Logger.debug("Import:", name+".*");
-		finder = new DFTypeFinder(finder, _rootSpace.lookupSpace(name));
+		finder = finder.extend(_rootSpace.lookupSpace(name));
 	    } else {
 		assert name.isQualifiedName();
 		try {
@@ -2981,7 +2981,7 @@ public class Java2DF {
 		}
 	    }
         }
-	finder = new DFTypeFinder(finder, importSpace);
+	finder = finder.extend(importSpace);
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {

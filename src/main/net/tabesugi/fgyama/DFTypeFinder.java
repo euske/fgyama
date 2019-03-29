@@ -12,19 +12,23 @@ import org.w3c.dom.*;
 //
 public class DFTypeFinder {
 
-    private DFTypeFinder _next = null;
     private DFTypeSpace _space;
+    private DFTypeFinder _next = null;
 
     public DFTypeFinder(DFTypeSpace space) {
         assert space != null;
         _space = space;
     }
 
-    public DFTypeFinder(DFTypeFinder next, DFTypeSpace space) {
-        assert next != null;
+    public DFTypeFinder(DFTypeSpace space, DFTypeFinder next) {
         assert space != null;
-        _next = next;
+        assert next != null;
         _space = space;
+        _next = next;
+    }
+
+    public DFTypeFinder extend(DFTypeSpace space) {
+        return new DFTypeFinder(space, this);
     }
 
     @Override
@@ -36,26 +40,6 @@ public class DFTypeFinder {
             finder = finder._next;
         }
         return ("<DFTypeFinder: "+Utils.join(path)+">");
-    }
-
-    public DFTypeFinder extend(DFKlass klass)
-        throws TypeNotFound {
-        DFTypeFinder finder = this;
-        assert klass.getKlassSpace() != null;
-        DFKlass baseKlass = klass.getBaseKlass();
-        if (baseKlass != null) {
-            baseKlass.load();
-            finder = finder.extend(baseKlass);
-        }
-        DFKlass[] baseIfaces = klass.getBaseIfaces();
-        if (baseIfaces != null) {
-            for (DFKlass iface : baseIfaces) {
-                iface.load();
-                finder = finder.extend(iface);
-            }
-        }
-        finder = new DFTypeFinder(finder, klass.getKlassSpace());
-        return finder;
     }
 
     public DFKlass lookupKlass(Name name)
@@ -202,7 +186,7 @@ public class DFTypeFinder {
 
     public DFTypeFinder resolveMapTypeSpace(
         DFTypeSpace mapTypeSpace, DFMapType[] mapTypes) {
-        DFTypeFinder finder = new DFTypeFinder(this, mapTypeSpace);
+        DFTypeFinder finder = new DFTypeFinder(mapTypeSpace, this);
         for (DFMapType mapType : mapTypes) {
             try {
                 // This might cause TypeNotFound

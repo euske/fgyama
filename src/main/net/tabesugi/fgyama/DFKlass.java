@@ -292,21 +292,36 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             return _parentKlass.getBaseFinder();
         } else {
             assert _baseFinder != null;
-            DFTypeFinder finder = _baseFinder.extend(this);
-            return new DFTypeFinder(finder, _klassSpace);
+            DFTypeFinder finder = this.addFinders(_baseFinder);
+            return finder.extend(_klassSpace);
         }
     }
 
     public DFTypeFinder getInternalFinder()
         throws TypeNotFound {
         assert _built;
-        DFTypeFinder finder = this.getBaseFinder().extend(this);
+        DFTypeFinder finder = this.addFinders(this.getBaseFinder());
         if (_mapTypeSpace != null) {
-            finder = new DFTypeFinder(finder, _mapTypeSpace);
+            finder = finder.extend(_mapTypeSpace);
         }
         if (_paramTypeSpace != null) {
-            finder = new DFTypeFinder(finder, _paramTypeSpace);
+            finder = finder.extend(_paramTypeSpace);
         }
+        return finder;
+    }
+
+    public DFTypeFinder addFinders(DFTypeFinder finder)
+        throws TypeNotFound {
+        assert _built;
+        if (_baseKlass != null) {
+            finder = _baseKlass.addFinders(finder);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                finder = iface.addFinders(finder);
+            }
+        }
+        finder = finder.extend(_klassSpace);
         return finder;
     }
 
@@ -504,7 +519,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             finder = finder.resolveMapTypeSpace(_mapTypeSpace, _mapTypes);
         }
         if (_paramTypeSpace != null) {
-            finder = new DFTypeFinder(finder, _paramTypeSpace);
+            finder = finder.extend(_paramTypeSpace);
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {
@@ -543,14 +558,14 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _baseKlass = (DFKlass)parser.getType(finder);
             _baseKlass.load();
-	    finder = finder.extend(_baseKlass);
+	    finder = _baseKlass.addFinders(finder);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
 		DFKlass iface = (DFKlass)parser.getType(finder);
 		if (iface == null) break;
                 iface.load();
 		ifaces.add(iface);
-		finder = finder.extend(iface);
+		finder = iface.addFinders(finder);
 	    }
 	    _baseIfaces = new DFKlass[ifaces.size()];
 	    ifaces.toArray(_baseIfaces);
@@ -559,7 +574,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
 		_baseKlass = finder.lookupKlass(superClass);
                 _baseKlass.load();
-		finder = finder.extend(_baseKlass);
+		finder = _baseKlass.addFinders(finder);
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
 	    if (ifaces != null) {
@@ -568,7 +583,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 		    DFKlass iface = finder.lookupKlass(ifaces[i]);
                     iface.load();
 		    baseIfaces[i] = iface;
-		    finder = finder.extend(iface);
+		    finder = iface.addFinders(finder);
 		}
 		_baseIfaces = baseIfaces;
 	    }
@@ -576,9 +591,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         // Extend a TypeFinder for this klass.
         if (_parentKlass != null) {
             _parentKlass.load();
-            finder = finder.extend(_parentKlass);
+            finder = _parentKlass.addFinders(finder);
         }
-        finder = new DFTypeFinder(finder, _klassSpace);
+        finder = finder.extend(_klassSpace);
         // Define fields.
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
@@ -608,7 +623,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                     finder = finder.resolveMapTypeSpace(mapTypeSpace, mapTypes);
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
-		finder = new DFTypeFinder(finder, methodSpace);
+		finder = finder.extend(methodSpace);
 		methodType = (DFMethodType)parser.getType(finder);
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
@@ -673,7 +688,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
             _baseKlass.load();
-            finder = finder.extend(_baseKlass);
+            finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
@@ -682,7 +697,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                 //Logger.info("DFKlass.build:", this, "implements", iface);
                 baseIfaces[i] = iface;
                 iface.load();
-                finder = finder.extend(iface);
+                finder = iface.addFinders(finder);
             }
             _baseIfaces = baseIfaces;
             this.buildDecls(finder, typeDecl.bodyDeclarations());
@@ -702,7 +717,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.parameterize(new DFType[] { this });
             _baseKlass.load();
-            finder = finder.extend(_baseKlass);
+            finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
@@ -710,7 +725,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 		DFKlass iface = finder.resolve(ifaces.get(i)).getKlass();
                 iface.load();
                 baseIfaces[i] = iface;
-                finder = finder.extend(iface);
+                finder = iface.addFinders(finder);
             }
             _baseIfaces = baseIfaces;
             // Get constants.
@@ -737,7 +752,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             _baseKlass.load();
-            finder = finder.extend(_baseKlass);
+            finder = _baseKlass.addFinders(finder);
             this.buildDecls(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
@@ -753,7 +768,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             _baseKlass.load();
-            finder = finder.extend(_baseKlass);
+            finder = _baseKlass.addFinders(finder);
             this.buildDecls(finder, anonDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(anonDecl);
@@ -766,9 +781,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         throws UnsupportedSyntax, TypeNotFound {
         // Extend a TypeFinder for the child klasses.
         if (_parentKlass != null) {
-            finder = finder.extend(_parentKlass);
+            finder = _parentKlass.addFinders(finder);
         }
-        finder = new DFTypeFinder(finder, _klassSpace);
+        finder = finder.extend(_klassSpace);
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Child klasses are loaded independently.
@@ -790,7 +805,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = "method"+Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
-                finder = new DFTypeFinder(finder, methodSpace);
+                finder = finder.extend(methodSpace);
                 List<TypeParameter> tps = decl.typeParameters();
                 DFMapType[] mapTypes = null;
                 if (0 < tps.size()) {
