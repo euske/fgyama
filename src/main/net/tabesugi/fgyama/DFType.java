@@ -16,7 +16,7 @@ public abstract class DFType {
     public abstract int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap);
 
     public DFKlass getKlass() {
-        return null;
+        return DFBuiltinTypes.getObjectKlass();
     }
 
     public static DFType inferPrefixType(

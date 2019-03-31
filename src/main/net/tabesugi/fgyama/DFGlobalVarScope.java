@@ -26,21 +26,15 @@ public class DFGlobalVarScope extends DFVarScope {
 
     public DFRef lookupArray(DFType type) {
         DFRef ref;
+        DFType elemType = DFUnknownType.UNKNOWN;
         if (type instanceof DFArrayType) {
-            DFType elemType = ((DFArrayType)type).getElemType();
-	    String id = elemType.getTypeName();
-	    ref = _id2ref.get(id);
-	    if (ref == null) {
-		ref = new DFElemRef(this, id, elemType);
-		_id2ref.put(id, ref);
-	    }
-        } else {
-	    String id = "?";
-	    ref = _id2ref.get(id);
-	    if (ref == null) {
-		ref = new DFElemRef(this, id, null);
-		_id2ref.put(id, ref);
-	    }
+            elemType = ((DFArrayType)type).getElemType();
+        }
+        String id = elemType.getTypeName();
+        ref = _id2ref.get(id);
+        if (ref == null) {
+            ref = new DFElemRef(this, id, elemType);
+            _id2ref.put(id, ref);
         }
         return ref;
     }

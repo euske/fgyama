@@ -2355,12 +2355,12 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
         throws TypeNotFound {
+        klass.load();
         ASTNode ast = klass.getTree();
         if (ast == null) return;
         if (klasses.contains(klass)) return;
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
-        klass.load();
         DFTypeFinder finder = klass.getInternalFinder();
         DFTypeSpace typeSpace = klass.getKlassSpace();
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
@@ -2773,7 +2773,13 @@ public class Java2DF {
         } else if (ast instanceof MethodInvocation) {
             MethodInvocation invoke = (MethodInvocation)ast;
             Expression expr = invoke.getExpression();
-            if (expr != null) {
+            if (expr instanceof Name) {
+                try {
+                    DFKlass klass = finder.lookupKlass((Name)expr);
+                    enumKlasses(klass, klasses);
+                } catch (TypeNotFound e) {
+                }
+            } else if (expr != null) {
                 this.enumKlassesExpr(finder, typeSpace, expr, klasses);
             }
             for (Expression arg :

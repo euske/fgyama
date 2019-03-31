@@ -606,7 +606,7 @@ public class DFFrame {
 		    method1.addCaller(method);
 		    return method1.getReturnType();
 		} catch (MethodNotFound e) {
-		    return null;
+		    return DFUnknownType.UNKNOWN;
 		}
 
 	    } else if (expr instanceof SuperMethodInvocation) {
@@ -630,7 +630,7 @@ public class DFFrame {
 		    method1.addCaller(method);
 		    return method1.getReturnType();
 		} catch (MethodNotFound e) {
-		    return null;
+		    return DFUnknownType.UNKNOWN;
 		}
 
 	    } else if (expr instanceof ArrayCreation) {
