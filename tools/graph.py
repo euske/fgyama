@@ -199,7 +199,7 @@ def parse_graph(gid, egraph, src=None):
         ntype = enode.get('type')
         flow = enode.get('flow')
         node = DFNode(graph, nid, name, scope, kind, ref, data, ntype, flow)
-        for e in enode.getchildren():
+        for e in enode:
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
                             int(e.get('start')),
@@ -218,7 +218,7 @@ def parse_graph(gid, egraph, src=None):
         scope = DFScope(graph, sid, sname, parent)
         sid += 1
         graph.scopes[sname] = scope
-        for elem in escope.getchildren():
+        for elem in escope:
             if elem.tag == 'scope':
                 (sid,child) = parse_scope(sid, elem, scope)
             elif elem.tag == 'node':
@@ -228,7 +228,7 @@ def parse_graph(gid, egraph, src=None):
                 scope.nodes.append(node)
         return (sid,scope)
 
-    for e in egraph.getchildren():
+    for e in egraph:
         if e.tag == 'ast':
             graph.ast = (
                 int(e.get('type')),
@@ -251,10 +251,10 @@ def parse_graph(gid, egraph, src=None):
 ##
 def load_graphs(fp, gid=0):
     root = ElementTree(file=fp).getroot()
-    for efile in root.getchildren():
-        if efile.tag != 'file': continue
+    for efile in root:
+        if efile.tag != 'class': continue
         path = efile.get('path')
-        for egraph in efile.getchildren():
+        for egraph in efile:
             if egraph.tag != 'method': continue
             if gid is not None:
                 gid += 1

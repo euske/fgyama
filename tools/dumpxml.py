@@ -9,8 +9,8 @@ def attrib(e):
 
 def dump(output, elem, indent=''):
     output.write(indent)
-    children = elem.getchildren()
     tag = re.sub(r'{[^}]*}', '', elem.tag)
+    children = list(elem)
     if children:
         output.write('<%s%s>\n' % (tag, attrib(elem)))
         for e in children:
