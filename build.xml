@@ -10,8 +10,8 @@
   <property name="testsDir" location="tests" />
 
   <property name="input" location="${testsDir}/basic_return.java" />
+  <property name="output" location="${tmpDir}/out.graph" />
   <property name="out_xml" location="${tmpDir}/out.xml" />
-  <property name="out_graph" location="${tmpDir}/out.graph" />
   <property name="out_html" location="${tmpDir}/out.html" />
 
   <path id="build.classpath">
@@ -71,7 +71,7 @@
       <arg value="-v" />
       <arg value="-S" />
       <arg value="-o" />
-      <arg file="${out_graph}" />
+      <arg file="${output}" />
       <arg file="${input}" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
@@ -83,7 +83,7 @@
       <arg value="-H" />
       <arg value="-o" />
       <arg file="${out_html}" />
-      <arg file="${out_graph}" />
+      <arg file="${output}" />
     </exec>
   </target>
 
