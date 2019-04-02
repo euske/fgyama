@@ -3,50 +3,30 @@ import sys
 from graph import get_graphs
 
 IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output', 'begin', 'repeat'])
-def getfeatforw(label, node):
-    assert label is not None
-    if node.kind in IGNORED:
-        return None
-    elif node.kind == 'assignop' and node.data == '=':
-        return None
-    elif node.kind in ('join','end') and label != 'cond':
-        return None
-    elif node.ref == '#exception':
-        return None
-    elif node.data is None:
-        return '%s:%s' % (label, node.kind)
-    elif node.kind == 'call':
-        (data,_,_) = node.data.partition(' ')
-        return '%s:%s:%s' % (label, node.kind, data)
-    else:
-        return '%s:%s:%s' % (label, node.kind, node.data)
 
-def getfeatback(node, label):
-    assert label is not None
-    if node.kind in IGNORED:
+def getfeat_forw(n0, label, n1):
+    if n0.kind in IGNORED:
         return None
-    elif node.kind == 'assignop' and node.data == '=':
+    elif n0.kind == 'assignop' and n0.data == '=':
         return None
-    elif node.kind in ('join','end') and label != 'cond':
+    elif n0.kind in ('join','end') and label != 'cond':
         return None
-    elif node.ref == '#exception':
+    elif n0.ref == '#exception':
         return None
-    elif node.data is None:
-        return '%s:%s' % (node.kind, label)
-    elif node.kind == 'call':
-        (data,_,_) = node.data.partition(' ')
-        return '%s:%s:%s' % (node.kind, data, label)
+    elif n0.data is None:
+        return '%s:%s' % (label, n0.kind)
+    elif n0.kind == 'call':
+        (data,_,_) = n0.data.partition(' ')
+        return '%s:%s:%s' % (label, n0.kind, data)
     else:
-        return '%s:%s:%s' % (node.kind, node.data, label)
+        return '%s:%s:%s' % (label, n0.kind, n0.data)
 
-def skiplink(label, node):
-    if label == '':
-        return False
-    if label.startswith('_'):
-        return True
-    if label in ('update',):
-        return True
-    return False
+def getfeat_back(n0, label, n1):
+    if n0.kind == 'call':
+        (data,_,_) = n0.data.partition(' ')
+        return '%s:%s:%s' % (label, n0.kind, data)
+    else:
+        return '%s:%s:%s' % (label, n0.kind, n0.data)
 
 
 ##  Cons
@@ -236,18 +216,43 @@ def main(argv):
         (_,loc,length) = node.ast
         return (fid, loc, length)
 
+    def enum_forw(vtx, prev0=None):
+        if prev0 is not None and maxlen < len(prev0): return
+        for (label,v) in vtx.outputs:
+            prev = prev0
+            feat = getfeat_forw(vtx.node, label, v.node)
+            if feat is not None:
+                prev = Cons((feat, v.node), prev0)
+                yield prev
+            for z in enum_forw(v, prev):
+                yield z
+        return
+
+    def enum_back(vtx, prev0=None):
+        if prev0 is not None and maxlen < len(prev0): return
+        for (label,v) in vtx.inputs:
+            prev = prev0
+            feat = getfeat_back(v.node, label, vtx.node)
+            if feat is not None:
+                prev = Cons((feat, v.node), prev0)
+                yield prev
+            for z in enum_forw(v, prev):
+                yield z
+        return
+
     for graph in graphs:
+        dbg.write('# gid: %r\n' % graph.name)
         for node in graph:
             if node.kind not in ('ref','assign'): continue
             if not node.ref.startswith('@'): continue
-            print('#', node.ref)
+            fp.write('+REF %s\n' % node.ref)
             if node.kind == 'ref':
-                d = +1
+                a = enum_forw(vtxs[node])
                 k = 'FORW'
             else:
-                d = -1
+                a = enum_back(vtxs[node])
                 k = 'BACK'
-            for feats in vtxs[node].enum(d):
+            for feats in a:
                 if feats is None: continue
                 a = list(feats)
                 a.append((node.kind, node))
