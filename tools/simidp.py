@@ -108,7 +108,7 @@ def main(argv):
     def usage():
         print('usage: %s [-o output] [-H] [-B basedir] [-c encoding] '
               '[-t threshold] [-n minproj] [-m maxresults] [-M maxlength] '
-              'out.idf ...' % argv[0])
+              'out.idp ...' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'o:HB:c:t:n:m:M:')
@@ -150,10 +150,10 @@ def main(argv):
                 if k == '+SOURCE':
                     (fid,name) = eval(v)
                     srcmap[fid] = name
-                elif k == '+FUNC':
+                elif k == '+ITEM':
                     (func,src) = eval(v)
                     funcmap[func] = (path,src)
-                elif k == '+FORW':
+                elif k in ('+FORW','+BACK'):
                     assert func is not None
                     usedfuncs.add(func)
                     nents += 1
@@ -161,7 +161,7 @@ def main(argv):
                     tree = root
                     locs = [ loc for (_,loc) in feats ]
                     for (i,(feat,_)) in enumerate(feats):
-                        if i == 0: continue
+                        #if i == 0: continue
                         if feat not in featfreq:
                             featfreq[feat] = 0
                         featfreq[feat] += 1

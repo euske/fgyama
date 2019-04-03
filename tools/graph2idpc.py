@@ -244,7 +244,7 @@ def main(argv):
                 src = (fid, loc, length)
         dbg.write('# gid: %r\n' % gid)
         data = (gid, src)
-        fp.write('+FUNC %r\n' % (data,))
+        fp.write('+ITEM %r\n' % (data,))
         for funcall in nodes:
             caller = funcall.graph.name
             dbg.write('#   at %r\n' % caller)
