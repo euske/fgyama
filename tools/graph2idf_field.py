@@ -2,27 +2,27 @@
 import sys
 from graph import get_graphs
 
-IGNORED = frozenset([None, 'ref', 'assign', 'input', 'output', 'begin', 'repeat'])
+IGNORED = frozenset([
+    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    'input', 'output', 'begin', 'repeat'])
 
 def getfeat_forw(n0, label, n1):
+    if n1.kind in IGNORED:
+        return None
+    elif n1.data is None:
+        return '%s:%s' % (label, n1.kind)
+    elif n1.kind == 'call':
+        (data,_,_) = n1.data.partition(' ')
+        return '%s:%s:%s' % (label, n1.kind, data)
+    else:
+        return '%s:%s:%s' % (label, n1.kind, n1.data)
+
+def getfeat_back(n0, label, n1):
     if n0.kind in IGNORED:
-        return None
-    elif n0.kind == 'assignop' and n0.data == '=':
-        return None
-    elif n0.kind in ('join','end') and label != 'cond':
-        return None
-    elif n0.ref == '#exception':
         return None
     elif n0.data is None:
         return '%s:%s' % (label, n0.kind)
     elif n0.kind == 'call':
-        (data,_,_) = n0.data.partition(' ')
-        return '%s:%s:%s' % (label, n0.kind, data)
-    else:
-        return '%s:%s:%s' % (label, n0.kind, n0.data)
-
-def getfeat_back(n0, label, n1):
-    if n0.kind == 'call':
         (data,_,_) = n0.data.partition(' ')
         return '%s:%s:%s' % (label, n0.kind, data)
     else:
@@ -76,7 +76,7 @@ class IPVertex:
         return ('<IPVertex(%d)>' % (self.vid))
 
     def connect(self, label, output):
-        #print('# connect: %r %s %r' % (self, label, output))
+        #print('# connect: %r-%s-%r' % (self, label, output))
         #assert output is not self
         assert isinstance(label, str)
         assert isinstance(output, IPVertex)
@@ -113,7 +113,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxlen = 50
+    maxlen = 5
     mincall = 2
     maxoverride = 1
     maxfanout = 100
@@ -155,6 +155,7 @@ def main(argv):
     # Enumerate caller/callee relationships.
     funcalls = {}
     def addcall(x, y): # (caller, callee)
+        dbg.write('# addcall %r: %r\n' % (x.graph.name, y))
         if y in funcalls:
             a = funcalls[y]
         else:
@@ -178,31 +179,34 @@ def main(argv):
             vtx = vtxs[node]
         else:
             vtx = vtxs[node] = IPVertex(node)
+            dbg.write('# getvtx %r: %s(%r)\n' % (vtx, node.kind, node.data))
         return vtx
     for graph in graphs:
-        for n0 in graph:
-            if n0.kind in ('call', 'new'):
-                funcs = n0.data.split(' ')
+        for node in graph:
+            if node.kind in ('call', 'new'):
+                funcs = node.data.split(' ')
                 for gid in funcs[:maxoverride]:
                     if gid not in gid2graph: continue
                     graph = gid2graph[gid]
-                    for n2 in graph.ins:
-                        label = n2.ref
-                        if label in n0.inputs:
-                            getvtx(n0.inputs[label]).connect(label, getvtx(n2))
+                    for n1 in graph.ins:
+                        label = n1.ref
+                        if label in node.inputs:
+                            getvtx(node.inputs[label]).connect(label, getvtx(n1))
                     outputs = {}
-                    for (label,n1) in n0.outputs:
+                    for (label,n1) in node.outputs:
                         if label == '':
                             outputs['#return'] = n1
                         elif label == 'update':
                             outputs[n1.ref] = n1
-                    for n2 in graph.outs:
-                        label = n2.ref
-                        if label in outputs:
-                            getvtx(n2).connect(label, getvtx(outputs[label]))
-            v0 = getvtx(n0)
-            for (label,n1) in n0.outputs:
-                v0.connect(label, getvtx(n1))
+                    for n1 in graph.outs:
+                        for (label,n2) in node.outputs:
+                            if label == 'update' and n1.ref == n2.ref:
+                                getvtx(n1).connect(label, getvtx(n2))
+                            elif n1.ref == '#return':
+                                getvtx(n1).connect(label, getvtx(n2))
+            vtx = getvtx(node)
+            for (label,n1) in node.outputs:
+                vtx.connect(label, getvtx(n1))
 
     print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
           (len(srcmap), len(graphs),
@@ -216,37 +220,43 @@ def main(argv):
         (_,loc,length) = node.ast
         return (fid, loc, length)
 
-    def enum_forw(vtx, prev0=None):
-        if prev0 is not None and maxlen < len(prev0): return
+    def enum_forw(vtx, feats0=None, chain=None):
+        if feats0 is not None and maxlen < len(feats0): return
+        if chain is not None and vtx in chain: return
+        chain = Cons(vtx, chain)
         for (label,v) in vtx.outputs:
-            prev = prev0
-            feat = getfeat_forw(vtx.node, label, v.node)
-            if feat is not None:
-                prev = Cons((feat, v.node), prev0)
-                yield prev
-            for z in enum_forw(v, prev):
+            feats = feats0
+            feat1 = getfeat_forw(vtx.node, label, v.node)
+            if feat1 is not None:
+                feats = Cons((feat1, v.node), feats0)
+                yield feats
+            for z in enum_forw(v, feats, chain):
                 yield z
         return
 
-    def enum_back(vtx, prev0=None):
-        if prev0 is not None and maxlen < len(prev0): return
+    def enum_back(vtx, feats0=None, chain=None):
+        if feats0 is not None and maxlen < len(feats0): return
+        if chain is not None and vtx in chain: return
+        chain = Cons(vtx, chain)
         for (label,v) in vtx.inputs:
-            prev = prev0
-            feat = getfeat_back(v.node, label, vtx.node)
-            if feat is not None:
-                prev = Cons((feat, v.node), prev0)
-                yield prev
-            for z in enum_forw(v, prev):
+            feats = feats0
+            feat1 = getfeat_back(v.node, label, vtx.node)
+            if feat1 is not None:
+                feats = Cons((feat1, v.node), feats0)
+                yield feats
+            for z in enum_back(v, feats, chain):
                 yield z
         return
 
+    nents = 0
     for graph in graphs:
         dbg.write('# gid: %r\n' % graph.name)
         for node in graph:
-            if node.kind not in ('ref','assign'): continue
+            if node.kind not in ('ref','fieldref','assign','fieldassign'): continue
             if not node.ref.startswith('@'): continue
-            fp.write('+REF %s\n' % node.ref)
-            if node.kind == 'ref':
+            data = (node.ref, getsrc(node))
+            fp.write('+ITEM %r\n' % (data,))
+            if node.kind in ('ref','fieldref'):
                 a = enum_forw(vtxs[node])
                 k = 'FORW'
             else:
@@ -259,6 +269,8 @@ def main(argv):
                 a.reverse()
                 data = [ (feat,getsrc(n)) for (feat,n) in a ]
                 fp.write('+%s %r\n' % (k, data,))
+                nents += 1
+    print('Ents: %r' % nents, file=sys.stderr)
 
     if fp is not sys.stdout:
         fp.close()
