@@ -88,12 +88,15 @@ class IDFBuilder:
         return
 
     # Get a source.
-    def getsrc(self, node):
+    def getsrc(self, node, resolve=True):
         if node.ast is None: return None
-        src = node.graph.src
-        fid = self.srcmap[src]
+        name = node.graph.src
         (_,loc,length) = node.ast
-        return (fid, loc, length)
+        if resolve:
+            fid = self.srcmap[name]
+            return (fid, loc, length)
+        else:
+            return (name, loc, length)
 
     # Register a funcall.
     def addcall(self, x, y): # (caller, callee)
