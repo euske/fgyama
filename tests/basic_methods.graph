@@ -59,7 +59,7 @@
             <link label="@Lbasic_methods;/.x" src="N929107f2_3"/>
             <ast length="6" start="372" type="32"/>
           </node>
-          <node flow="out" id="N929107f2_13" kind="assign" ref="@Lbasic_methods;/.x" type="I">
+          <node flow="out" id="N929107f2_13" kind="update" ref="@Lbasic_methods;/.x" type="I">
             <link label="update" src="N929107f2_12"/>
             <ast length="6" start="372" type="32"/>
           </node>

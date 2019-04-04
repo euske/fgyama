@@ -62,11 +62,11 @@
             <link label="@Lbasic_funcs;/.z" src="Nf2e83a28_14"/>
             <ast length="6" start="199" type="32"/>
           </node>
-          <node id="Nf2e83a28_15" kind="assign" ref="@Lbasic_funcs;/.y" type="I">
+          <node id="Nf2e83a28_15" kind="update" ref="@Lbasic_funcs;/.y" type="I">
             <link label="update" src="Nf2e83a28_12"/>
             <ast length="6" start="199" type="32"/>
           </node>
-          <node flow="out" id="Nf2e83a28_16" kind="assign" ref="@Lbasic_funcs;/.z" type="I">
+          <node flow="out" id="Nf2e83a28_16" kind="update" ref="@Lbasic_funcs;/.z" type="I">
             <link label="update" src="Nf2e83a28_12"/>
             <ast length="6" start="199" type="32"/>
           </node>
@@ -114,7 +114,7 @@
               <link label="@Lbasic_funcs;/.y" src="Ndd66d29_30"/>
               <ast length="5" start="337" type="32"/>
             </node>
-            <node id="Ndd66d29_13" kind="assign" ref="@Lbasic_funcs;/.y" type="I">
+            <node id="Ndd66d29_13" kind="update" ref="@Lbasic_funcs;/.y" type="I">
               <link label="update" src="Ndd66d29_11"/>
               <ast length="5" start="337" type="32"/>
             </node>
@@ -143,11 +143,11 @@
               <link label="@Lbasic_funcs;/.z" src="Ndd66d29_3"/>
               <ast length="8" start="380" type="32"/>
             </node>
-            <node id="Ndd66d29_24" kind="assign" ref="@Lbasic_funcs;/.y" type="I">
+            <node id="Ndd66d29_24" kind="update" ref="@Lbasic_funcs;/.y" type="I">
               <link label="update" src="Ndd66d29_21"/>
               <ast length="8" start="380" type="32"/>
             </node>
-            <node id="Ndd66d29_25" kind="assign" ref="@Lbasic_funcs;/.z" type="I">
+            <node id="Ndd66d29_25" kind="update" ref="@Lbasic_funcs;/.z" type="I">
               <link label="update" src="Ndd66d29_21"/>
               <ast length="8" start="380" type="32"/>
             </node>

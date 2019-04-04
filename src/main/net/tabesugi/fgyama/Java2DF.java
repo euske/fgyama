@@ -555,6 +555,11 @@ class UpdateNode extends SingleAssignNode {
         super(graph, scope, ref, ast);
         this.accept(call, "update");
     }
+
+    @Override
+    public String getKind() {
+        return "update";
+    }
 }
 
 // CreateObjectNode

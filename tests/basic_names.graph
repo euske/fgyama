@@ -105,11 +105,11 @@
             <link label="@Ljava/lang/System;/.out" src="Ne9ca43ba_7"/>
             <ast length="10" start="451" type="32"/>
           </node>
-          <node id="Ne9ca43ba_9" kind="assign" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <node id="Ne9ca43ba_9" kind="update" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link label="update" src="Ne9ca43ba_6"/>
             <ast length="10" start="451" type="32"/>
           </node>
-          <node id="Ne9ca43ba_10" kind="assign" ref="@Ldom/meep/basic_names;/.y" type="I">
+          <node id="Ne9ca43ba_10" kind="update" ref="@Ldom/meep/basic_names;/.y" type="I">
             <link label="update" src="Ne9ca43ba_6"/>
             <ast length="10" start="451" type="32"/>
           </node>

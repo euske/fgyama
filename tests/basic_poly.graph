@@ -77,7 +77,7 @@
             <link label="@Lbasic_poly_Foo;/.x" src="N98dd04bd_6"/>
             <ast length="8" start="349" type="32"/>
           </node>
-          <node id="N98dd04bd_7" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="N98dd04bd_7" kind="update" ref="@Lbasic_poly_Foo;/.x" type="I">
             <link label="update" src="N98dd04bd_5"/>
             <ast length="8" start="349" type="32"/>
           </node>
@@ -110,7 +110,7 @@
             <link label="@Lbasic_poly_Foo;/.x" src="N98dd04bd_7"/>
             <ast length="8" start="420" type="32"/>
           </node>
-          <node id="N98dd04bd_15" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="N98dd04bd_15" kind="update" ref="@Lbasic_poly_Foo;/.x" type="I">
             <link label="update" src="N98dd04bd_14"/>
             <ast length="8" start="420" type="32"/>
           </node>
@@ -136,7 +136,7 @@
             <link label="@Lbasic_poly_Foo;/.x" src="N98dd04bd_15"/>
             <ast length="8" start="442" type="32"/>
           </node>
-          <node id="N98dd04bd_21" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="N98dd04bd_21" kind="update" ref="@Lbasic_poly_Foo;/.x" type="I">
             <link label="update" src="N98dd04bd_20"/>
             <ast length="8" start="442" type="32"/>
           </node>
@@ -169,7 +169,7 @@
             <link label="@Lbasic_poly_Foo;/.x" src="N98dd04bd_21"/>
             <ast length="8" start="513" type="32"/>
           </node>
-          <node id="N98dd04bd_29" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="N98dd04bd_29" kind="update" ref="@Lbasic_poly_Foo;/.x" type="I">
             <link label="update" src="N98dd04bd_28"/>
             <ast length="8" start="513" type="32"/>
           </node>
@@ -195,7 +195,7 @@
             <link label="@Lbasic_poly_Foo;/.x" src="N98dd04bd_29"/>
             <ast length="8" start="535" type="32"/>
           </node>
-          <node id="N98dd04bd_35" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="N98dd04bd_35" kind="update" ref="@Lbasic_poly_Foo;/.x" type="I">
             <link label="update" src="N98dd04bd_34"/>
             <ast length="8" start="535" type="32"/>
           </node>
