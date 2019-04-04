@@ -1042,7 +1042,7 @@ public class Java2DF {
                     for (DFMethod method1 : methods) {
                         DFFrame frame1 = method1.getFrame();
                         if (frame1 == null) continue;
-                        refs.addAll(frame1.getInputRefs());
+                        refs.addAll(frame1.getOutputRefs());
                     }
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isInternal()) continue;
