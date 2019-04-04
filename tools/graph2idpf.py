@@ -8,7 +8,9 @@ IGNORED = frozenset([
     'input', 'output', 'begin', 'repeat'])
 
 def getfeat(n0, label, n1):
-    if n0.kind in IGNORED:
+    if label.startswith('_'):
+        return None
+    elif n0.kind in IGNORED:
         if label:
             return '%s:' % label
         else:
@@ -58,7 +60,7 @@ def main(argv):
               '[-M maxoverrides] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:m:n:M:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:m:M:')
     except getopt.GetoptError:
         return usage()
     debug = 0

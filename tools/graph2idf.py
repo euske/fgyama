@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graph import get_graphs
+from graph import DFGraph, get_graphs
 
 
 ##  Cons
@@ -90,7 +90,10 @@ class IDFBuilder:
     # Get a source.
     def getsrc(self, node, resolve=True):
         if node.ast is None: return None
-        name = node.graph.src
+        if isinstance(node, DFGraph):
+            name = node.src
+        else:
+            name = node.graph.src
         (_,loc,length) = node.ast
         if resolve:
             fid = self.srcmap[name]
