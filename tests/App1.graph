@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="LApp1;" path="/home/euske/work/r/fgyama/tests/App1.java">
+  <class name="LApp1;" path="tests/App1.java">
     <method name="LApp1;" style="initializer">
       <ast length="257" start="1636" type="55"/>
       <scope name="LApp1;"/>
@@ -292,7 +292,7 @@
       </scope>
     </method>
   </class>
-  <class name="LDB;" path="/home/euske/work/r/fgyama/tests/App1.java">
+  <class name="LDB;" path="tests/App1.java">
     <method name="LDB;" style="initializer">
       <ast length="759" start="875" type="55"/>
       <scope name="LDB;">
@@ -795,7 +795,7 @@
       </scope>
     </method>
   </class>
-  <class name="LListy&lt;LRecord;&gt;;" path="/home/euske/work/r/fgyama/tests/App1.java">
+  <class name="LListy&lt;LRecord;&gt;;" path="tests/App1.java">
     <method name="LListy&lt;LRecord;&gt;;" style="initializer">
       <ast length="698" start="175" type="55"/>
       <scope name="LListy&lt;LRecord;&gt;;">
@@ -1196,7 +1196,7 @@
       </scope>
     </method>
   </class>
-  <class name="LListy&lt;T&gt;;" path="/home/euske/work/r/fgyama/tests/App1.java">
+  <class name="LListy&lt;T&gt;;" path="tests/App1.java">
     <method name="LListy&lt;T&gt;;" style="initializer">
       <ast length="698" start="175" type="55"/>
       <scope name="LListy&lt;T&gt;;">
@@ -1594,7 +1594,7 @@
       </scope>
     </method>
   </class>
-  <class name="LRecord;" path="/home/euske/work/r/fgyama/tests/App1.java">
+  <class name="LRecord;" path="tests/App1.java">
     <method name="LRecord;" style="initializer">
       <ast length="154" start="19" type="55"/>
       <scope name="LRecord;">
