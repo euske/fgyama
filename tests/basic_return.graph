@@ -26,38 +26,42 @@
             <link label="#this" src="N41f01687_7"/>
             <ast length="8" start="190" type="32"/>
           </node>
-          <node id="N41f01687_12" kind="assign" ref="$Lbasic_return;.foo.b0/$d" type="I">
-            <link src="N41f01687_11"/>
+          <node id="N41f01687_12" kind="receive" type="?">
+            <link label="return" src="N41f01687_11"/>
+            <ast length="8" start="190" type="32"/>
+          </node>
+          <node id="N41f01687_13" kind="assign" ref="$Lbasic_return;.foo.b0/$d" type="I">
+            <link src="N41f01687_12"/>
             <ast length="12" start="186" type="59"/>
           </node>
-          <node id="N41f01687_13" kind="ref" ref="$Lbasic_return;.foo/$a" type="I">
+          <node id="N41f01687_14" kind="ref" ref="$Lbasic_return;.foo/$a" type="I">
             <link src="N41f01687_2"/>
             <ast length="1" start="232" type="42"/>
           </node>
-          <node data="-" id="N41f01687_14" kind="prefix" type="I">
-            <link src="N41f01687_13"/>
+          <node data="-" id="N41f01687_15" kind="prefix" type="I">
+            <link src="N41f01687_14"/>
             <ast length="2" start="231" type="38"/>
           </node>
-          <node id="N41f01687_15" kind="ref" ref="$Lbasic_return;.foo.b0/$d" type="I">
-            <link src="N41f01687_12"/>
+          <node id="N41f01687_16" kind="ref" ref="$Lbasic_return;.foo.b0/$d" type="I">
+            <link src="N41f01687_13"/>
             <ast length="1" start="237" type="42"/>
           </node>
-          <node id="N41f01687_16" kind="ref" ref="$Lbasic_return;.foo/$c" type="I">
+          <node id="N41f01687_17" kind="ref" ref="$Lbasic_return;.foo/$c" type="I">
             <link src="N41f01687_6"/>
             <ast length="1" start="241" type="42"/>
           </node>
-          <node data="*" id="N41f01687_17" kind="infix" type="I">
-            <link label="L" src="N41f01687_15"/>
-            <link label="R" src="N41f01687_16"/>
+          <node data="*" id="N41f01687_18" kind="infix" type="I">
+            <link label="L" src="N41f01687_16"/>
+            <link label="R" src="N41f01687_17"/>
             <ast length="5" start="237" type="27"/>
           </node>
-          <node data="+" id="N41f01687_18" kind="infix" type="I">
-            <link label="L" src="N41f01687_14"/>
-            <link label="R" src="N41f01687_17"/>
+          <node data="+" id="N41f01687_19" kind="infix" type="I">
+            <link label="L" src="N41f01687_15"/>
+            <link label="R" src="N41f01687_18"/>
             <ast length="12" start="230" type="27"/>
           </node>
-          <node flow="out" id="N41f01687_19" kind="output" ref="#return" type="I">
-            <link src="N41f01687_18"/>
+          <node flow="out" id="N41f01687_20" kind="output" ref="#return" type="I">
+            <link src="N41f01687_19"/>
             <ast length="20" start="223" type="41"/>
           </node>
         </scope>
