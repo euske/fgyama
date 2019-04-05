@@ -546,19 +546,20 @@ class MethodCallNode extends CallNode {
     }
 }
 
-// UpdateNode:
-class UpdateNode extends SingleAssignNode {
+// ReceiveNode:
+class ReceiveNode extends ProgNode {
 
-    public UpdateNode(
+    public ReceiveNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, CallNode call) {
-        super(graph, scope, ref, ast);
-        this.accept(call, "update");
+        ASTNode ast, CallNode call, String label) {
+        super(graph, scope, (ref != null)? ref.getRefType() : call.getNodeType(),
+              ref, ast);
+        this.accept(call, label);
     }
 
     @Override
     public String getKind() {
-        return "update";
+        return "receive";
     }
 }
 
@@ -1036,7 +1037,8 @@ public class Java2DF {
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
-                ctx.setRValue(call);
+                ctx.setRValue(new ReceiveNode(
+                                  graph, scope, null, invoke, call, "return"));
                 {
                     SortedSet<DFRef> refs = new TreeSet<DFRef>();
                     for (DFMethod method1 : methods) {
@@ -1046,8 +1048,8 @@ public class Java2DF {
                     }
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new UpdateNode(
-                                    graph, scope, ref, invoke, call));
+                        ctx.set(new ReceiveNode(
+                                    graph, scope, ref, invoke, call, "update"));
                     }
                 }
                 if (call.exception != null) {
@@ -1104,12 +1106,13 @@ public class Java2DF {
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
-                ctx.setRValue(call);
+                ctx.setRValue(new ReceiveNode(
+                                  graph, scope, null, sinvoke, call, "return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new UpdateNode(
-                                    graph, scope, ref, sinvoke, call));
+                        ctx.set(new ReceiveNode(
+                                    graph, scope, ref, sinvoke, call, "update"));
                     }
                 }
                 if (call.exception != null) {
@@ -1262,12 +1265,13 @@ public class Java2DF {
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
-                ctx.setRValue(call);
+                ctx.setRValue(new ReceiveNode(
+                                  graph, scope, null, cstr, call, "return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
-                        ctx.set(new UpdateNode(
-                                    graph, scope, ref, cstr, call));
+                        ctx.set(new ReceiveNode(
+                                    graph, scope, ref, cstr, call, "update"));
                     }
                 }
                 if (call.exception != null) {
@@ -2182,8 +2186,8 @@ public class Java2DF {
             if (frame1 != null) {
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal() || ref.isInternal()) continue;
-                    ctx.set(new UpdateNode(
-                                graph, scope, ref, ci, call));
+                    ctx.set(new ReceiveNode(
+                                graph, scope, ref, ci, call, "update"));
                 }
             }
             if (call.exception != null) {
@@ -2227,8 +2231,8 @@ public class Java2DF {
             if (frame1 != null) {
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal() || ref.isInternal()) continue;
-                    ctx.set(new UpdateNode(
-                                graph, scope, ref, sci, call));
+                    ctx.set(new ReceiveNode(
+                                graph, scope, ref, sci, call, "update"));
                 }
             }
             if (call.exception != null) {
