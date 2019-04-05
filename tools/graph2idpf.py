@@ -5,31 +5,32 @@ from graph2idf import Cons, IDFBuilder
 
 IGNORED = frozenset([
     None, 'ref', 'fieldref', 'assign', 'fieldassign',
-    'input', 'output', 'begin', 'repeat'])
+    'input', 'output'])
 
 def getfeat(n0, label, n1):
-    if label.startswith('_'):
+    if n1.kind == 'receive':
         return None
-    elif n0.kind in IGNORED:
+    elif n1.kind in IGNORED:
         if label:
             return '%s:' % label
         else:
             return None
-    elif n0.data is None:
-        return '%s:%s' % (label, n0.kind)
-    elif n0.kind == 'call':
-        (data,_,_) = n0.data.partition(' ')
-        return '%s:%s:%s' % (label, n0.kind, data)
+    elif n1.data is None:
+        return '%s:%s' % (label, n1.kind)
+    elif n1.kind == 'call':
+        (data,_,_) = n1.data.partition(' ')
+        return '%s:%s:%s' % (label, n1.kind, data)
     else:
-        return '%s:%s:%s' % (label, n0.kind, n0.data)
+        return '%s:%s:%s' % (label, n1.kind, n1.data)
 
 def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
     if feats0 is not None and maxlen < len(feats0): return
     if chain is not None and vtx in chain: return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.outputs:
+        if label.startswith('_'): continue
         feats = feats0
-        feat1 = getfeat(v.node, label, vtx.node)
+        feat1 = getfeat(vtx.node, label, v.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats
@@ -42,8 +43,9 @@ def enum_back(vtx, feats0=None, chain=None, maxlen=5):
     if chain is not None and vtx in chain: return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.inputs:
+        if label.startswith('_'): continue
         feats = feats0
-        feat1 = getfeat(v.node, label, vtx.node)
+        feat1 = getfeat(vtx.node, label, v.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats

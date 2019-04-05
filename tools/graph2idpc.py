@@ -5,32 +5,37 @@ from graph2idf import Cons, IDFBuilder
 
 IGNORED = frozenset([
     None, 'ref', 'fieldref', 'assign', 'fieldassign',
-    'input', 'output', 'begin', 'repeat'])
+    'input', 'output'])
+
+def is_funcall(n):
+    return n.kind in ('call', 'new')
 
 def getfeat(n0, label, n1):
-    if label.startswith('_'):
+    if n1.kind == 'receive':
         return None
-    elif n0.kind in IGNORED:
+    elif n1.kind in IGNORED:
         if label:
             return '%s:' % label
         else:
             return None
-    elif n0.data is None:
-        return '%s:%s' % (label, n0.kind)
-    elif n0.kind == 'call':
-        (data,_,_) = n0.data.partition(' ')
-        return '%s:%s:%s' % (label, n0.kind, data)
+    elif n1.data is None:
+        return '%s:%s' % (label, n1.kind)
+    elif is_funcall(n1):
+        (data,_,_) = n1.data.partition(' ')
+        return '%s:%s:%s' % (label, n1.kind, data)
     else:
-        return '%s:%s:%s' % (label, n0.kind, n0.data)
+        return '%s:%s:%s' % (label, n1.kind, n1.data)
 
 def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
-    if feats0 is not None and maxlen < len(feats0): return
     if chain is not None and vtx in chain: return
+    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.outputs:
-        if vtx.node.kind == 'call' and label == 'update': continue
+        if label.startswith('_'): continue
+        if is_funcall(v.node) and not label.startswith('#arg'): continue
+        if v.node.kind == 'receive' and label != 'return': continue
         feats = feats0
-        feat1 = getfeat(v.node, label, vtx.node)
+        feat1 = getfeat(vtx.node, label, v.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats
@@ -39,13 +44,15 @@ def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
     return
 
 def enum_back(vtx, feats0=None, chain=None, maxlen=5):
-    if feats0 is not None and maxlen < len(feats0): return
     if chain is not None and vtx in chain: return
+    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.inputs:
-        if vtx.node.kind == 'call' and not label.startswith('#arg'): continue
+        if label.startswith('_'): continue
+        if is_funcall(vtx.node) and not label.startswith('#arg'): continue
+        if vtx.node.kind == 'receive' and label != 'return': continue
         feats = feats0
-        feat1 = getfeat(v.node, label, vtx.node)
+        feat1 = getfeat(vtx.node, label, v.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats
@@ -112,14 +119,15 @@ def main(argv):
         for node in nodes:
             caller = node.graph.name
             dbg.write('#   at %r\n' % caller)
-            for feats in enum_back(builder.vtxs[node], maxlen=maxlen):
+            vtx = builder.vtxs[node]
+            for feats in enum_back(vtx, maxlen=maxlen):
                 a = list(feats)
                 a.append(('call', node))
                 a.reverse()
                 data = [ (feat, builder.getsrc(n)) for (feat,n) in a ]
                 fp.write('+BACK %r\n' % (data,))
                 nents += 1
-            for feats in enum_forw(builder.vtxs[node], maxlen=maxlen):
+            for feats in enum_forw(vtx, maxlen=maxlen):
                 a = list(feats)
                 a.append(('return', node))
                 a.reverse()
