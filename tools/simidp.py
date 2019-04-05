@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 from math import log
-from srcdb import SourceDB
+from srcdb import SourceDB, SourceAnnot
+from srcdb import q, show_html_headers
 
 
 ##  FeatTree
@@ -36,71 +37,6 @@ class FeatTree:
         t.matches[key] = value
         return t
 
-
-def q(s):
-    return (s.replace('&','&amp;')
-            .replace('>','&gt;')
-            .replace('<','&lt;')
-            .replace('"','&quot;'))
-
-def show_html_headers(fp):
-    fp.write('''<html>
-<style>
-pre { margin: 1em; border: 1px solid gray;}
-h2 { border-bottom: 2px solid black; color: red; }
-h3 { border-bottom: 1px solid black; }
-.src { font-size: 75%; font-weight: bold; margin: 1em; }
-.p1 { background:#ffff00; color:black; }
-.p2 { background:#00ffff; color:black; }
-.p3 { background:#88ff88; color:black; }
-.p4 { background:#ff88ff; color:black; }
-.p5 { background:#8888ff; color:black; }
-.p6 { background:#ff0000; color:white; }
-.p7 { background:#008800; color:white; }
-.p8 { background:#0000ff; color:white; }
-.p9 { background:#004488; color:white; }
-.p10 { background:#884400; color:white; }
-</style>
-<script>
-function toggle(id) {
-  let e = document.getElementById(id);
-  e.hidden = !e.hidden;
-}
-</script>
-<body>
-<h1>Results</h1>
-''')
-    return
-
-def show_html(fp, src, url, ranges, ncontext=3):
-    def astart(nid):
-        return '<span class="p%s">' % nid
-    def aend(anno):
-        return '</span>'
-    def abody(annos, s):
-        return q(s.replace('\n',''))
-    fp.write('<div class=src><a href="%s">%s</a></div>\n' % (q(url), src.name))
-    fp.write('<pre>\n')
-    for (lineno,s) in src.show(
-            ranges, astart=astart, aend=aend, abody=abody, ncontext=ncontext):
-        if lineno is None:
-            fp.write('     '+s+'\n')
-        else:
-            lineno += 1
-            fp.write('<a href="%s#L%d">%5d</a>:%s\n' %
-                     (q(url), lineno, lineno, s))
-    fp.write('</pre>\n')
-    return
-
-def show_text(fp, src, ranges, ncontext=3):
-    fp.write('# %s\n' % src.name)
-    for (lineno,line) in src.show(ranges, ncontext=ncontext):
-        if lineno is None:
-            fp.write(line.rstrip()+'\n')
-        else:
-            fp.write('%4d: %s\n' % (lineno, line.rstrip()))
-    fp.write('\n')
-    return
 
 def main(argv):
     import fileinput
@@ -213,7 +149,9 @@ def main(argv):
     else:
         fp = open(output, 'w')
     if html:
+        fp.write('<html>')
         show_html_headers(fp)
+        fp.write('<body><h1>Results</h1>')
     mid = 0
     for (score,tree) in results:
         feats = list(tree.getpath())
@@ -234,17 +172,12 @@ def main(argv):
             if srcdb is None: continue
             if html:
                 fp.write('<div class=result hidden id="M%d">\n' % mid)
-            nodes = {}
+            annot = SourceAnnot(srcdb)
             def add(loc, i, maxlength):
                 (fid,start,length) = loc
                 name = srcmap[fid]
                 length = min(length, maxlength)
-                src = srcdb.get(name)
-                if src in nodes:
-                    a = nodes[src]
-                else:
-                    a = nodes[src] = []
-                a.append((start, start+length, i))
+                annot.add(name, start, start+length, i)
                 return
             (_,loc) = funcmap[func]
             if loc is not None:
@@ -252,13 +185,11 @@ def main(argv):
             for loc in locs:
                 if loc is not None:
                     add(loc, i+1, sys.maxsize)
-            for (src,ranges) in nodes.items():
-                if html:
-                    show_html(fp, src, src.name, ranges)
-                else:
-                    show_text(fp, src, ranges)
             if html:
+                annot.show_html(fp)
                 fp.write('</div>\n')
+            else:
+                annot.show_text(fp)
         if html:
             fp.write('<hr>\n')
         else:
