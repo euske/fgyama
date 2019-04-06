@@ -25,9 +25,8 @@ abstract class ProgNode extends DFNode {
     }
 
     @Override
-    public Element toXML(
-	Document document, Set<DFNode> input, Set<DFNode> output) {
-        Element elem = super.toXML(document, input, output);
+    public Element toXML(Document document) {
+        Element elem = super.toXML(document);
         if (_ast != null) {
             Element east = document.createElement("ast");
             east.setAttribute("type", Integer.toString(_ast.getNodeType()));
@@ -2278,12 +2277,27 @@ public class Java2DF {
                 i++;
             }
         }
+        for (DFRef ref : frame.getInputRefs()) {
+            if (ref.isLocal() || ref.isInternal()) continue;
+            DFNode input = new InputNode(graph, scope, ref, null);
+            ctx.set(input);
+        }
+        {
+            DFRef ref = scope.lookupThis();
+            DFNode input = new InputNode(graph, scope, ref, null);
+            ctx.set(input);
+        }
 
         try {
             // Process the function body.
             processStatement(
                 ctx, methodSpace, graph, finder, scope, frame, body);
             frame.close(ctx);
+            for (DFRef ref : frame.getOutputRefs()) {
+                if (ref.isLocal() || ref.isInternal()) continue;
+                DFNode output = new OutputNode(graph, scope, ref, null);
+                output.accept(ctx.get(ref));
+            }
             //frame.dump();
         } catch (MethodNotFound e) {
             e.setMethod(method);

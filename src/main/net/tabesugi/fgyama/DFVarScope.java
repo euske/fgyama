@@ -49,17 +49,15 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return ("<DFVarScope("+this.getScopeName()+")>");
     }
 
-    public Element toXML(
-	Document document, DFNode[] nodes,
-	Set<DFNode> input, Set<DFNode> output) {
+    public Element toXML(Document document, DFNode[] nodes) {
         Element elem = document.createElement("scope");
         elem.setAttribute("name", this.getScopeName());
         for (DFVarScope child : this.getChildren()) {
-            elem.appendChild(child.toXML(document, nodes, input, output));
+            elem.appendChild(child.toXML(document, nodes));
         }
         for (DFNode node : nodes) {
             if (node.getScope() == this) {
-		Element e = node.toXML(document, input, output);
+		Element e = node.toXML(document);
                 elem.appendChild(e);
             }
         }

@@ -45,8 +45,7 @@ public class DFNode implements Comparable<DFNode> {
         return _id - node._id;
     }
 
-    public Element toXML(
-	Document document, Set<DFNode> input, Set<DFNode> output) {
+    public Element toXML(Document document) {
         Element elem = document.createElement("node");
         elem.setAttribute("id", this.getNodeId());
         if (this.getKind() != null) {
@@ -58,15 +57,6 @@ public class DFNode implements Comparable<DFNode> {
         elem.setAttribute("type", _type.getTypeName());
         if (_ref != null) {
             elem.setAttribute("ref", _ref.getFullName());
-            boolean fin = (input != null && input.contains(this));
-            boolean fout = (output != null && output.contains(this));
-            if (fin && fout) {
-                elem.setAttribute("flow", "both");
-            } else if (fin) {
-                elem.setAttribute("flow", "in");
-            } else if (fout) {
-                elem.setAttribute("flow", "out");
-	    }
         }
         for (DFLink link : this.getLinks()) {
             elem.appendChild(link.toXML(document));
