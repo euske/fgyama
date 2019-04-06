@@ -8,8 +8,8 @@
       <ast length="54" start="107" type="31"/>
       <scope name="Lbasic_staticimport;.foo">
         <scope name="Lbasic_staticimport;.foo.b0">
-          <node id="Nede5cb52_1" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
-            <link src="Nede5cb52_2"/>
+          <node id="Nede5cb52_3" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+            <link src="Nede5cb52_1"/>
             <ast length="3" start="135" type="42"/>
           </node>
           <node data="1" id="Nede5cb52_4" kind="const" type="I">
@@ -17,7 +17,7 @@
           </node>
           <node data="Ljava/lang/Math;.sin(D)D" id="Nede5cb52_5" kind="call" type="D">
             <link label="#arg0" src="Nede5cb52_4"/>
-            <link label="#this" src="Nede5cb52_3"/>
+            <link label="#this" src="Nede5cb52_2"/>
             <ast length="6" start="147" type="32"/>
           </node>
           <node id="Nede5cb52_6" kind="receive" type="D">
@@ -26,7 +26,7 @@
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
             <link label="#arg0" src="Nede5cb52_6"/>
-            <link label="#this" src="Nede5cb52_1"/>
+            <link label="#this" src="Nede5cb52_3"/>
             <ast length="19" start="135" type="32"/>
           </node>
           <node id="Nede5cb52_8" kind="receive" type="V">
@@ -34,8 +34,8 @@
             <ast length="19" start="135" type="32"/>
           </node>
         </scope>
-        <node flow="in" id="Nede5cb52_2" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node flow="in" id="Nede5cb52_3" ref="#this" type="Lbasic_staticimport;"/>
+        <node id="Nede5cb52_1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="Nede5cb52_2" kind="input" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
     </method>
   </class>

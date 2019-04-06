@@ -60,33 +60,33 @@
             <link label="R" src="N41f01687_18"/>
             <ast length="12" start="230" type="27"/>
           </node>
-          <node flow="out" id="N41f01687_20" kind="output" ref="#return" type="I">
+          <node id="N41f01687_20" kind="output" ref="#return" type="I">
             <link src="N41f01687_19"/>
             <ast length="20" start="223" type="41"/>
           </node>
         </scope>
-        <node flow="in" id="N41f01687_1" kind="input" ref="#arg0" type="I">
+        <node id="N41f01687_1" kind="input" ref="#arg0" type="I">
           <ast length="5" start="126" type="44"/>
         </node>
         <node id="N41f01687_2" kind="assign" ref="$Lbasic_return;.foo/$a" type="I">
           <link src="N41f01687_1"/>
           <ast length="5" start="126" type="44"/>
         </node>
-        <node flow="in" id="N41f01687_3" kind="input" ref="#arg1" type="I">
+        <node id="N41f01687_3" kind="input" ref="#arg1" type="I">
           <ast length="5" start="133" type="44"/>
         </node>
         <node id="N41f01687_4" kind="assign" ref="$Lbasic_return;.foo/$b" type="I">
           <link src="N41f01687_3"/>
           <ast length="5" start="133" type="44"/>
         </node>
-        <node flow="in" id="N41f01687_5" kind="input" ref="#arg2" type="I">
+        <node id="N41f01687_5" kind="input" ref="#arg2" type="I">
           <ast length="5" start="140" type="44"/>
         </node>
         <node id="N41f01687_6" kind="assign" ref="$Lbasic_return;.foo/$c" type="I">
           <link src="N41f01687_5"/>
           <ast length="5" start="140" type="44"/>
         </node>
-        <node flow="in" id="N41f01687_7" ref="#this" type="Lbasic_return;"/>
+        <node id="N41f01687_7" kind="input" ref="#this" type="Lbasic_return;"/>
       </scope>
     </method>
   </class>
