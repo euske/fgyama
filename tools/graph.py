@@ -116,7 +116,7 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, graph, nid, name, scope, kind, ref, data, ntype, flow):
+    def __init__(self, graph, nid, name, scope, kind, ref, data, ntype):
         self.graph = graph
         self.nid = nid
         self.name = name
@@ -125,7 +125,6 @@ class DFNode:
         self.ref = ref
         self.data = data
         self.ntype = ntype
-        self.flow = flow
         self.ast = None
         self.inputs = {}
         self.outputs = []
@@ -197,8 +196,7 @@ def parse_graph(gid, egraph, src=None):
         ref = enode.get('ref')
         data = enode.get('data')
         ntype = enode.get('type')
-        flow = enode.get('flow')
-        node = DFNode(graph, nid, name, scope, kind, ref, data, ntype, flow)
+        node = DFNode(graph, nid, name, scope, kind, ref, data, ntype)
         for e in enode:
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -240,9 +238,9 @@ def parse_graph(gid, egraph, src=None):
             graph.callers.append(e.get('name'))
 
     for node in graph.nodes.values():
-        if node.flow in ('in', 'both'):
+        if node.kind == 'input':
             graph.ins.append(node)
-        if node.flow in ('out', 'both'):
+        elif node.kind == 'output':
             graph.outs.append(node)
     return graph.fixate()
 
@@ -307,7 +305,6 @@ CREATE TABLE DFNode (
     Ref TEXT,
     Data TEXT,
     Type TEXT,
-    Flow TEXT
 );
 CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
 
@@ -357,8 +354,8 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
                     node.ast)
                 aid = cur.lastrowid
             cur.execute(
-                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?,?);',
-                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype, node.flow))
+                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
+                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
             nid = cur.lastrowid
             node.nid = nid
             return nid
@@ -414,11 +411,11 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type,Flow FROM DFNode WHERE Gid=?;',
+            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
             (gid,))
-        for (nid,sid,aid,kind,ref,data,ntype,flow) in list(rows):
+        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(graph, nid, nid, scope, kind, ref, data, ntype, flow)
+            node = DFNode(graph, nid, nid, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))

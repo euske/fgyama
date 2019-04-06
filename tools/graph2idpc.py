@@ -1,14 +1,11 @@
 #!/usr/bin/env python
 import sys
-from graph2idf import Cons, IDFBuilder
+from graph2idf import is_funcall, Cons, IDFBuilder
 
 
 IGNORED = frozenset([
     None, 'ref', 'fieldref', 'assign', 'fieldassign',
     'input', 'output'])
-
-def is_funcall(n):
-    return n.kind in ('call', 'new')
 
 def getfeat(n0, label, n1):
     if n1.kind == 'receive':
