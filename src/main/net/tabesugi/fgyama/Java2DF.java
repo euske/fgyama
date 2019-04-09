@@ -411,13 +411,31 @@ class JoinNode extends ProgNode {
     }
 }
 
+// LoopNode
+class LoopNode extends ProgNode {
+
+    public String loopId;
+
+    public LoopNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, String loopId) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.loopId = loopId;
+    }
+
+    @Override
+    public String getData() {
+        return this.loopId;
+    }
+}
+
 // LoopBeginNode
-class LoopBeginNode extends ProgNode {
+class LoopBeginNode extends LoopNode {
 
     public LoopBeginNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode enter) {
-        super(graph, scope, ref.getRefType(), ref, ast);
+        ASTNode ast, String loopId, DFNode enter) {
+        super(graph, scope, ref, ast, loopId);
         this.accept(enter, "enter");
     }
 
@@ -436,12 +454,12 @@ class LoopBeginNode extends ProgNode {
 }
 
 // LoopEndNode
-class LoopEndNode extends ProgNode {
+class LoopEndNode extends LoopNode {
 
     public LoopEndNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode cond) {
-        super(graph, scope, ref.getRefType(), ref, ast);
+        ASTNode ast, String loopId, DFNode cond) {
+        super(graph, scope, ref, ast, loopId);
         this.accept(cond, "cond");
     }
 
@@ -456,12 +474,12 @@ class LoopEndNode extends ProgNode {
 }
 
 // LoopRepeatNode
-class LoopRepeatNode extends ProgNode {
+class LoopRepeatNode extends LoopNode {
 
     public LoopRepeatNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
+        ASTNode ast, String loopId) {
+        super(graph, scope, ref, ast, loopId);
     }
 
     @Override
@@ -1473,6 +1491,7 @@ public class Java2DF {
         DFFrame loopFrame, DFContext loopCtx, boolean preTest)
         throws UnsupportedSyntax {
 
+        String loopId = Utils.encodeASTNode(ast);
         // Add four nodes for each loop variable.
         Map<DFRef, LoopBeginNode> begins =
             new HashMap<DFRef, LoopBeginNode>();
@@ -1483,9 +1502,12 @@ public class Java2DF {
         DFRef[] loopRefs = loopCtx.getChanged();
         for (DFRef ref : loopRefs) {
             DFNode src = ctx.get(ref);
-            LoopBeginNode begin = new LoopBeginNode(graph, scope, ref, ast, src);
-            LoopRepeatNode repeat = new LoopRepeatNode(graph, scope, ref, ast);
-            LoopEndNode end = new LoopEndNode(graph, scope, ref, ast, condValue);
+            LoopBeginNode begin = new LoopBeginNode(
+                graph, scope, ref, ast, loopId, src);
+            LoopRepeatNode repeat = new LoopRepeatNode(
+                graph, scope, ref, ast, loopId);
+            LoopEndNode end = new LoopEndNode(
+                graph, scope, ref, ast, loopId, condValue);
             begin.setEnd(end);
             end.setBegin(begin);
             begins.put(ref, begin);
