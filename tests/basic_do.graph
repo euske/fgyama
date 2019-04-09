@@ -47,33 +47,33 @@
               <link label="R" src="N907a03ac_15"/>
               <ast length="5" start="111" type="27"/>
             </node>
-            <node id="N907a03ac_17" kind="begin" ref="$Lbasic_do;.foo/$x" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_17" kind="begin" ref="$Lbasic_do;.foo/$x" type="I">
               <link label="_end" src="N907a03ac_19"/>
               <link label="enter" src="N907a03ac_2"/>
               <link label="repeat" src="N907a03ac_18"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="N907a03ac_18" kind="repeat" ref="$Lbasic_do;.foo/$x" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_18" kind="repeat" ref="$Lbasic_do;.foo/$x" type="I">
               <link label="_loop" src="N907a03ac_19"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="N907a03ac_19" kind="end" ref="$Lbasic_do;.foo/$x" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_19" kind="end" ref="$Lbasic_do;.foo/$x" type="I">
               <link src="N907a03ac_6"/>
               <link label="_begin" src="N907a03ac_17"/>
               <link label="cond" src="N907a03ac_16"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="N907a03ac_20" kind="begin" ref="$Lbasic_do;.foo.b0/$n" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_20" kind="begin" ref="$Lbasic_do;.foo.b0/$n" type="I">
               <link label="_end" src="N907a03ac_22"/>
               <link label="enter" src="N907a03ac_5"/>
               <link label="repeat" src="N907a03ac_21"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="N907a03ac_21" kind="repeat" ref="$Lbasic_do;.foo.b0/$n" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_21" kind="repeat" ref="$Lbasic_do;.foo.b0/$n" type="I">
               <link label="_loop" src="N907a03ac_22"/>
               <ast length="45" start="73" type="19"/>
             </node>
-            <node id="N907a03ac_22" kind="end" ref="$Lbasic_do;.foo.b0/$n" type="I">
+            <node data=":AST:19:73:45" id="N907a03ac_22" kind="end" ref="$Lbasic_do;.foo.b0/$n" type="I">
               <link src="N907a03ac_10"/>
               <link label="_begin" src="N907a03ac_20"/>
               <link label="cond" src="N907a03ac_16"/>

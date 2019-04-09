@@ -32,17 +32,17 @@
               <link src="Nde8be711_7"/>
               <ast length="1" start="90" type="42"/>
             </node>
-            <node id="Nde8be711_13" kind="begin" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
+            <node data=":AST:70:77:33" id="Nde8be711_13" kind="begin" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
               <link label="_end" src="Nde8be711_15"/>
               <link label="enter" src="Nde8be711_5"/>
               <link label="repeat" src="Nde8be711_9"/>
               <ast length="33" start="77" type="70"/>
             </node>
-            <node id="Nde8be711_14" kind="repeat" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
+            <node data=":AST:70:77:33" id="Nde8be711_14" kind="repeat" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
               <link label="_loop" src="Nde8be711_15"/>
               <ast length="33" start="77" type="70"/>
             </node>
-            <node id="Nde8be711_15" kind="end" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
+            <node data=":AST:70:77:33" id="Nde8be711_15" kind="end" ref="$Lbasic_xfor;.foo.b0/$s" type="I">
               <link src="Nde8be711_13"/>
               <link label="_begin" src="Nde8be711_13"/>
               <link label="cond" src="Nde8be711_7"/>
