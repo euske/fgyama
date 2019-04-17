@@ -36,9 +36,7 @@ public class XmlExporter extends Exporter {
     @Override
     public void startKlass(DFKlass klass) {
         assert _class == null;
-        _class = this.document.createElement("class");
-        _class.setAttribute("name", klass.getTypeName());
-        _class.setAttribute("path", klass.getFilePath());
+        _class = klass.toXML(this.document);
     }
 
     @Override

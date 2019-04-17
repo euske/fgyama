@@ -8,6 +8,7 @@ import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
+import org.w3c.dom.*;
 
 
 //  DFKlass
@@ -137,6 +138,26 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         int x = _parentSpace.compareTo(klass._parentSpace);
         if (x != 0) return x;
         return getTypeName().compareTo(klass.getTypeName());
+    }
+
+    public Element toXML(Document document) {
+        Element elem = document.createElement("class");
+        elem.setAttribute("path", this.getFilePath());
+        elem.setAttribute("name", this.getTypeName());
+        if (_baseKlass != null) {
+            elem.setAttribute("extends", _baseKlass.getTypeName());
+        }
+        if (_baseIfaces != null && 0 < _baseIfaces.length) {
+            StringBuilder b = new StringBuilder();
+            for (DFKlass iface : _baseIfaces) {
+                if (0 < b.length()) {
+                    b.append(" ");
+                }
+                b.append(iface.getTypeName());
+            }
+            elem.setAttribute("implements", b.toString());
+        }
+        return elem;
     }
 
     public String getTypeName() {
