@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Ldom/meep/basic_names;" path="tests/basic_names.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
     <method name="Ldom/meep/basic_names;" style="initializer">
       <ast length="451" start="19" type="55"/>
       <scope name="Ldom/meep/basic_names;">
@@ -153,13 +153,13 @@
       </scope>
     </method>
   </class>
-  <class name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
     <method name="Ldom/meep/basic_names/Bar;" style="initializer">
       <ast length="12" start="44" type="55"/>
       <scope name="Ldom/meep/basic_names/Bar;"/>
     </method>
   </class>
-  <class name="Ldom/meep/basic_names/method:AST:31:79:210/Baz;" path="tests/basic_names.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/method:AST:31:79:210/Baz;" path="tests/basic_names.java">
     <method name="Ldom/meep/basic_names/method:AST:31:79:210/Baz;" style="initializer">
       <ast length="67" start="144" type="55"/>
       <scope name="Ldom/meep/basic_names/method:AST:31:79:210/Baz;">

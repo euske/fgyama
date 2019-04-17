@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="LE;" path="tests/basic_enum.java">
+  <class extends="Ljava/lang/Enum&lt;LE;&gt;;" name="LE;" path="tests/basic_enum.java">
     <method name="LE;" style="initializer">
       <ast length="102" start="0" type="71"/>
       <scope name="LE;">
@@ -46,7 +46,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_enum;" path="tests/basic_enum.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_enum;" path="tests/basic_enum.java">
     <method name="Lbasic_enum;" style="initializer">
       <ast length="190" start="104" type="55"/>
       <scope name="Lbasic_enum;"/>

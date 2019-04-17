@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_assign;" path="tests/basic_assign.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_assign;" path="tests/basic_assign.java">
     <method name="Lbasic_assign;" style="initializer">
       <ast length="144" start="0" type="55"/>
       <scope name="Lbasic_assign;"/>

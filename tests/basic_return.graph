@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_return;" path="tests/basic_return.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_return;" path="tests/basic_return.java">
     <method name="Lbasic_return;" style="initializer">
       <ast length="205" start="46" type="55"/>
       <scope name="Lbasic_return;"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_methods;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
     <method name="Lbasic_methods;" style="initializer">
       <ast length="452" start="0" type="55"/>
       <scope name="Lbasic_methods;">
@@ -112,7 +112,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_methods/A;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/A;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/A;" style="initializer">
       <ast length="84" start="34" type="55"/>
       <scope name="Lbasic_methods/A;"/>
@@ -134,7 +134,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;" style="initializer">
       <ast length="52" start="173" type="1"/>
       <scope name="Lbasic_methods/method:AST:31:139:246/anon:AST:1:173:52;"/>
@@ -155,7 +155,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_methods/method:AST:31:139:246/moo;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/method:AST:31:139:246/moo;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/method:AST:31:139:246/moo;" style="initializer">
       <ast length="68" start="228" type="55"/>
       <scope name="Lbasic_methods/method:AST:31:139:246/moo;"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_exception;" path="tests/basic_exception.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_exception;" path="tests/basic_exception.java">
     <method name="Lbasic_exception;" style="initializer">
       <ast length="433" start="0" type="55"/>
       <scope name="Lbasic_exception;"/>
@@ -149,7 +149,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_exception/A;" path="tests/basic_exception.java">
+  <class extends="Ljava/lang/Exception;" name="Lbasic_exception/A;" path="tests/basic_exception.java">
     <method name="Lbasic_exception/A;" style="initializer">
       <ast length="61" start="36" type="55"/>
       <scope name="Lbasic_exception/A;">

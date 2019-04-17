@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_xfor;" path="tests/basic_efor.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_xfor;" path="tests/basic_efor.java">
     <method name="Lbasic_xfor;" style="initializer">
       <ast length="129" start="0" type="55"/>
       <scope name="Lbasic_xfor;"/>

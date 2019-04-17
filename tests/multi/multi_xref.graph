@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
     <method name="Ldom/dood/multi_xref3;" style="initializer">
       <ast length="147" start="48" type="55"/>
       <scope name="Ldom/dood/multi_xref3;">
@@ -44,7 +44,7 @@
       </scope>
     </method>
   </class>
-  <class name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
     <method name="Ldom/meep/multi_xref1;" style="initializer">
       <ast length="237" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref1;">
@@ -144,7 +144,7 @@
       </scope>
     </method>
   </class>
-  <class name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
     <method name="Ldom/meep/multi_xref2;" style="initializer">
       <ast length="278" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref2;">
@@ -268,7 +268,7 @@
       </scope>
     </method>
   </class>
-  <class name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
     <method name="Ldom/meep/multi_xref1/baa;" style="initializer">
       <ast length="34" start="75" type="55"/>
       <scope name="Ldom/meep/multi_xref1/baa;">

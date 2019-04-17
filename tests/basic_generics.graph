@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_generics;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics;" path="tests/basic_generics.java">
     <method name="Lbasic_generics;" style="initializer">
       <ast length="567" start="0" type="55"/>
       <scope name="Lbasic_generics;"/>
@@ -108,7 +108,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="initializer">
       <ast length="259" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
@@ -210,7 +210,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="initializer">
       <ast length="259" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -313,7 +313,7 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_generics/Moo&lt;T&gt;;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo&lt;T&gt;;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/Moo&lt;T&gt;;" style="initializer">
       <ast length="259" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;">
@@ -414,25 +414,25 @@
       </scope>
     </method>
   </class>
-  <class name="Lbasic_generics/&lt;Ljava/lang/Integer;&gt;/Baa;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/&lt;Ljava/lang/Integer;&gt;/Baa;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/&lt;Ljava/lang/Integer;&gt;/Baa;" style="initializer">
       <ast length="13" start="275" type="55"/>
       <scope name="Lbasic_generics/&lt;Ljava/lang/Integer;&gt;/Baa;"/>
     </method>
   </class>
-  <class name="Lbasic_generics/&lt;Ljava/lang/Object;&gt;/Baa;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/&lt;Ljava/lang/Object;&gt;/Baa;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/&lt;Ljava/lang/Object;&gt;/Baa;" style="initializer">
       <ast length="13" start="275" type="55"/>
       <scope name="Lbasic_generics/&lt;Ljava/lang/Object;&gt;/Baa;"/>
     </method>
   </class>
-  <class name="Lbasic_generics/&lt;Ljava/lang/String;&gt;/Baa;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/&lt;Ljava/lang/String;&gt;/Baa;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/&lt;Ljava/lang/String;&gt;/Baa;" style="initializer">
       <ast length="13" start="275" type="55"/>
       <scope name="Lbasic_generics/&lt;Ljava/lang/String;&gt;/Baa;"/>
     </method>
   </class>
-  <class name="Lbasic_generics/Moo/Baa;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo/Baa;" path="tests/basic_generics.java">
     <method name="Lbasic_generics/Moo/Baa;" style="initializer">
       <ast length="13" start="275" type="55"/>
       <scope name="Lbasic_generics/Moo/Baa;"/>

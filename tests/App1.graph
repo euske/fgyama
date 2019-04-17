@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="LApp1;" path="tests/App1.java">
+  <class extends="Ljava/lang/Object;" name="LApp1;" path="tests/App1.java">
     <method name="LApp1;" style="initializer">
       <ast length="257" start="1636" type="55"/>
       <scope name="LApp1;"/>
@@ -101,17 +101,17 @@
               <link src="N66b1f4b2_53"/>
               <ast length="3" start="1794" type="37"/>
             </node>
-            <node id="N66b1f4b2_55" kind="begin" ref="$LApp1;.main.b0.for0/$i" type="I">
+            <node data=":AST:24:1761:124" id="N66b1f4b2_55" kind="begin" ref="$LApp1;.main.b0.for0/$i" type="I">
               <link label="_end" src="N66b1f4b2_57"/>
               <link label="enter" src="N66b1f4b2_25"/>
               <link label="repeat" src="N66b1f4b2_52"/>
               <ast length="124" start="1761" type="24"/>
             </node>
-            <node id="N66b1f4b2_56" kind="repeat" ref="$LApp1;.main.b0.for0/$i" type="I">
+            <node data=":AST:24:1761:124" id="N66b1f4b2_56" kind="repeat" ref="$LApp1;.main.b0.for0/$i" type="I">
               <link label="_loop" src="N66b1f4b2_57"/>
               <ast length="124" start="1761" type="24"/>
             </node>
-            <node id="N66b1f4b2_57" kind="end" ref="$LApp1;.main.b0.for0/$i" type="I">
+            <node data=":AST:24:1761:124" id="N66b1f4b2_57" kind="end" ref="$LApp1;.main.b0.for0/$i" type="I">
               <link src="N66b1f4b2_55"/>
               <link label="_begin" src="N66b1f4b2_55"/>
               <link label="cond" src="N66b1f4b2_32"/>
@@ -185,7 +185,7 @@
       </scope>
     </method>
   </class>
-  <class name="LDB;" path="tests/App1.java">
+  <class extends="Ljava/lang/Object;" name="LDB;" path="tests/App1.java">
     <method name="LDB;" style="initializer">
       <ast length="759" start="875" type="55"/>
       <scope name="LDB;">
@@ -379,65 +379,65 @@
                 <ast length="11" start="1361" type="32"/>
               </node>
             </scope>
-            <node id="N9d0793b7_62" kind="begin" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_62" kind="begin" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
               <link label="_end" src="N9d0793b7_64"/>
               <link label="enter" src="N9d0793b7_3"/>
               <link label="repeat" src="N9d0793b7_58"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_63" kind="repeat" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_63" kind="repeat" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
               <link label="_loop" src="N9d0793b7_64"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_64" kind="end" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_64" kind="end" ref="%:Ljava/lang/Object;" type="Ljava/lang/Object;">
               <link src="N9d0793b7_62"/>
               <link label="_begin" src="N9d0793b7_62"/>
               <link label="cond" src="N9d0793b7_15"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_65" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_65" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <link label="_end" src="N9d0793b7_67"/>
               <link label="enter" src="N9d0793b7_4"/>
               <link label="repeat" src="N9d0793b7_59"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_66" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_66" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <link label="_loop" src="N9d0793b7_67"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_67" kind="end" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_67" kind="end" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <link src="N9d0793b7_65"/>
               <link label="_begin" src="N9d0793b7_65"/>
               <link label="cond" src="N9d0793b7_15"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_68" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_68" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <link label="_end" src="N9d0793b7_70"/>
               <link label="enter" src="N9d0793b7_5"/>
               <link label="repeat" src="N9d0793b7_60"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_69" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_69" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <link label="_loop" src="N9d0793b7_70"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_70" kind="end" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":AST:61:1069:314" id="N9d0793b7_70" kind="end" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <link src="N9d0793b7_68"/>
               <link label="_begin" src="N9d0793b7_68"/>
               <link label="cond" src="N9d0793b7_15"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_71" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_71" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <link label="_end" src="N9d0793b7_73"/>
               <link label="enter" src="N9d0793b7_6"/>
               <link label="repeat" src="N9d0793b7_61"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_72" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_72" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <link label="_loop" src="N9d0793b7_73"/>
               <ast length="314" start="1069" type="61"/>
             </node>
-            <node id="N9d0793b7_73" kind="end" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":AST:61:1069:314" id="N9d0793b7_73" kind="end" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <link src="N9d0793b7_71"/>
               <link label="_begin" src="N9d0793b7_71"/>
               <link label="cond" src="N9d0793b7_15"/>
@@ -627,33 +627,33 @@
               <link src="N7e88f15a_46"/>
               <ast length="3" start="1466" type="37"/>
             </node>
-            <node id="N7e88f15a_49" kind="begin" ref="#return" type="Ljava/lang/String;">
+            <node data=":AST:24:1435:170" id="N7e88f15a_49" kind="begin" ref="#return" type="Ljava/lang/String;">
               <link label="_end" src="N7e88f15a_51"/>
               <link label="enter" src="N7e88f15a_48"/>
               <link label="repeat" src="N7e88f15a_41"/>
               <ast length="170" start="1435" type="24"/>
             </node>
-            <node id="N7e88f15a_50" kind="repeat" ref="#return" type="Ljava/lang/String;">
+            <node data=":AST:24:1435:170" id="N7e88f15a_50" kind="repeat" ref="#return" type="Ljava/lang/String;">
               <link label="_loop" src="N7e88f15a_51"/>
               <ast length="170" start="1435" type="24"/>
             </node>
-            <node id="N7e88f15a_51" kind="end" ref="#return" type="Ljava/lang/String;">
+            <node data=":AST:24:1435:170" id="N7e88f15a_51" kind="end" ref="#return" type="Ljava/lang/String;">
               <link src="N7e88f15a_49"/>
               <link label="_begin" src="N7e88f15a_49"/>
               <link label="cond" src="N7e88f15a_19"/>
               <ast length="170" start="1435" type="24"/>
             </node>
-            <node id="N7e88f15a_52" kind="begin" ref="$LDB;.get.b0.for0/$i" type="I">
+            <node data=":AST:24:1435:170" id="N7e88f15a_52" kind="begin" ref="$LDB;.get.b0.for0/$i" type="I">
               <link label="_end" src="N7e88f15a_54"/>
               <link label="enter" src="N7e88f15a_11"/>
               <link label="repeat" src="N7e88f15a_45"/>
               <ast length="170" start="1435" type="24"/>
             </node>
-            <node id="N7e88f15a_53" kind="repeat" ref="$LDB;.get.b0.for0/$i" type="I">
+            <node data=":AST:24:1435:170" id="N7e88f15a_53" kind="repeat" ref="$LDB;.get.b0.for0/$i" type="I">
               <link label="_loop" src="N7e88f15a_54"/>
               <ast length="170" start="1435" type="24"/>
             </node>
-            <node id="N7e88f15a_54" kind="end" ref="$LDB;.get.b0.for0/$i" type="I">
+            <node data=":AST:24:1435:170" id="N7e88f15a_54" kind="end" ref="$LDB;.get.b0.for0/$i" type="I">
               <link src="N7e88f15a_52"/>
               <link label="_begin" src="N7e88f15a_52"/>
               <link label="cond" src="N7e88f15a_19"/>
@@ -686,7 +686,7 @@
       </scope>
     </method>
   </class>
-  <class name="LListy&lt;LRecord;&gt;;" path="tests/App1.java">
+  <class extends="Ljava/lang/Object;" name="LListy&lt;LRecord;&gt;;" path="tests/App1.java">
     <method name="LListy&lt;LRecord;&gt;;" style="initializer">
       <ast length="698" start="175" type="55"/>
       <scope name="LListy&lt;LRecord;&gt;;">
@@ -786,17 +786,17 @@
                   <link src="N89cb9bf8_47"/>
                   <ast length="3" start="513" type="37"/>
                 </node>
-                <node id="N89cb9bf8_49" kind="begin" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N89cb9bf8_49" kind="begin" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link label="_end" src="N89cb9bf8_51"/>
                   <link label="enter" src="N89cb9bf8_31"/>
                   <link label="repeat" src="N89cb9bf8_46"/>
                   <ast length="88" start="489" type="24"/>
                 </node>
-                <node id="N89cb9bf8_50" kind="repeat" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N89cb9bf8_50" kind="repeat" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link label="_loop" src="N89cb9bf8_51"/>
                   <ast length="88" start="489" type="24"/>
                 </node>
-                <node id="N89cb9bf8_51" kind="end" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N89cb9bf8_51" kind="end" ref="$LListy&lt;LRecord;&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link src="N89cb9bf8_49"/>
                   <link label="_begin" src="N89cb9bf8_49"/>
                   <link label="cond" src="N89cb9bf8_36"/>
@@ -1102,7 +1102,7 @@
       </scope>
     </method>
   </class>
-  <class name="LListy&lt;T&gt;;" path="tests/App1.java">
+  <class extends="Ljava/lang/Object;" name="LListy&lt;T&gt;;" path="tests/App1.java">
     <method name="LListy&lt;T&gt;;" style="initializer">
       <ast length="698" start="175" type="55"/>
       <scope name="LListy&lt;T&gt;;">
@@ -1201,17 +1201,17 @@
                   <link src="N6844343a_47"/>
                   <ast length="3" start="513" type="37"/>
                 </node>
-                <node id="N6844343a_49" kind="begin" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N6844343a_49" kind="begin" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link label="_end" src="N6844343a_51"/>
                   <link label="enter" src="N6844343a_31"/>
                   <link label="repeat" src="N6844343a_46"/>
                   <ast length="88" start="489" type="24"/>
                 </node>
-                <node id="N6844343a_50" kind="repeat" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N6844343a_50" kind="repeat" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link label="_loop" src="N6844343a_51"/>
                   <ast length="88" start="489" type="24"/>
                 </node>
-                <node id="N6844343a_51" kind="end" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
+                <node data=":AST:24:489:88" id="N6844343a_51" kind="end" ref="$LListy&lt;T&gt;;.add.b0.b0.b0.for0/$i" type="I">
                   <link src="N6844343a_49"/>
                   <link label="_begin" src="N6844343a_49"/>
                   <link label="cond" src="N6844343a_36"/>
@@ -1515,7 +1515,7 @@
       </scope>
     </method>
   </class>
-  <class name="LRecord;" path="tests/App1.java">
+  <class extends="Ljava/lang/Object;" name="LRecord;" path="tests/App1.java">
     <method name="LRecord;" style="initializer">
       <ast length="154" start="19" type="55"/>
       <scope name="LRecord;">

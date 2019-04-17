@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
     <method name="Lbasic_staticimport;" style="initializer">
       <ast length="94" start="69" type="55"/>
       <scope name="Lbasic_staticimport;"/>

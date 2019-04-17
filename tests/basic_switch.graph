@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_switch;" path="tests/basic_switch.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_switch;" path="tests/basic_switch.java">
     <method name="Lbasic_switch;" style="initializer">
       <ast length="187" start="0" type="55"/>
       <scope name="Lbasic_switch;"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class name="Lbasic_ops;" path="tests/basic_ops.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_ops;" path="tests/basic_ops.java">
     <method name="Lbasic_ops;" style="initializer">
       <ast length="188" start="0" type="55"/>
       <scope name="Lbasic_ops;"/>
