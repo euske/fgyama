@@ -17,7 +17,7 @@ public class DFRef implements Comparable<DFRef> {
     private DFType _type;
 
     public DFRef(DFVarScope scope, String name, DFType type) {
-        assert 2 <= name.length();
+        assert 1 <= name.length();
         assert scope != null || name.startsWith("#");
         _scope = scope;
         _name = name;

@@ -30,7 +30,7 @@
           <node data="0" id="Nf2e83a28_9" kind="const" type="I">
             <ast length="1" start="142" type="34"/>
           </node>
-          <node id="Nf2e83a28_10" kind="arrayref" ref="%:Ljava/lang/String;" type="Ljava/lang/String;">
+          <node id="Nf2e83a28_10" kind="arrayref" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
             <link label="array" src="Nf2e83a28_8"/>
             <link label="index" src="Nf2e83a28_9"/>
             <ast length="7" start="137" type="2"/>
@@ -103,7 +103,7 @@
           <link src="Nf2e83a28_1"/>
           <ast length="13" start="101" type="44"/>
         </node>
-        <node id="Nf2e83a28_3" kind="input" ref="%:Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="Nf2e83a28_3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
         <node id="Nf2e83a28_4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="Nf2e83a28_5" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
         <node id="Nf2e83a28_6" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>

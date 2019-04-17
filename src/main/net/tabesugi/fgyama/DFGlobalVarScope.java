@@ -41,7 +41,7 @@ public class DFGlobalVarScope extends DFVarScope {
 
     private class DFElemRef extends DFRef {
         public DFElemRef(DFVarScope scope, String name, DFType type) {
-            super(scope, ":"+name, type);
+            super(scope, name, type);
         }
 
         public String getFullName() {
