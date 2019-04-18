@@ -103,7 +103,10 @@ def main(argv):
             #print('doit', vtx.node)
             doit(r, vtx)
             for (node1,chains) in r.items():
+                done = []
                 for chain in chains:
+                    if chain in done: continue
+                    done.append(chain)
                     if chain is None:
                         a = []
                     else:

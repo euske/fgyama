@@ -1,31 +1,26 @@
 #!/usr/bin/env python
 import sys
-from graph2idf import Cons, IDFBuilder
+from graph2idf import is_funcall, Cons, IDFBuilder
 
 
 IGNORED = frozenset([
     None, 'ref', 'fieldref', 'assign', 'fieldassign',
-    'input', 'output'])
+    'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):
-    if n1.kind == 'receive':
+    if n1.kind in IGNORED:
         return None
-    elif n1.kind in IGNORED:
-        if label:
-            return '%s:' % label
-        else:
-            return None
     elif n1.data is None:
         return '%s:%s' % (label, n1.kind)
-    elif n1.kind == 'call':
+    elif is_funcall(n1):
         (data,_,_) = n1.data.partition(' ')
         return '%s:%s:%s' % (label, n1.kind, data)
     else:
         return '%s:%s:%s' % (label, n1.kind, n1.data)
 
 def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
-    if feats0 is not None and maxlen < len(feats0): return
     if chain is not None and vtx in chain: return
+    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.outputs:
         if label.startswith('_'): continue
@@ -39,13 +34,13 @@ def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
     return
 
 def enum_back(vtx, feats0=None, chain=None, maxlen=5):
-    if feats0 is not None and maxlen < len(feats0): return
     if chain is not None and vtx in chain: return
+    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.inputs:
         if label.startswith('_'): continue
         feats = feats0
-        feat1 = getfeat(vtx.node, label, v.node)
+        feat1 = getfeat(v.node, label, vtx.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats
@@ -85,7 +80,7 @@ def main(argv):
     else:
         dbg = fp
 
-    builder = IDFBuilder(maxoverrides=maxoverrides, dbg=dbg)
+    builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
         builder.load(path, fp)

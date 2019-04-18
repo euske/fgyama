@@ -5,16 +5,11 @@ from graph2idf import is_funcall, Cons, IDFBuilder
 
 IGNORED = frozenset([
     None, 'ref', 'fieldref', 'assign', 'fieldassign',
-    'input', 'output'])
+    'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):
-    if n1.kind == 'receive':
+    if n1.kind in IGNORED:
         return None
-    elif n1.kind in IGNORED:
-        if label:
-            return '%s:' % label
-        else:
-            return None
     elif n1.data is None:
         return '%s:%s' % (label, n1.kind)
     elif is_funcall(n1):
@@ -49,7 +44,7 @@ def enum_back(vtx, feats0=None, chain=None, maxlen=5):
         if is_funcall(vtx.node) and not label.startswith('#arg'): continue
         if vtx.node.kind == 'receive' and label != 'return': continue
         feats = feats0
-        feat1 = getfeat(vtx.node, label, v.node)
+        feat1 = getfeat(v.node, label, vtx.node)
         if feat1 is not None:
             feats = Cons((feat1, v.node), feats0)
             yield feats
@@ -91,7 +86,7 @@ def main(argv):
     else:
         dbg = fp
 
-    builder = IDFBuilder(maxoverrides=maxoverrides, dbg=dbg)
+    builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
         builder.load(path, fp)

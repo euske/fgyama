@@ -124,7 +124,7 @@ def main(argv):
             traverse(st, score1)
         return
     traverse(root)
-    totals = { items: sum( s for (s,_) in v ) for (items,v) in links.items() }
+    totals = { items: max( s for (s,_) in v ) for (items,v) in links.items() }
 
     # Form clusters.
     class Cluster:
