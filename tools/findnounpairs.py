@@ -118,7 +118,7 @@ def main(argv):
             annot.show_text(fp)
         return
 
-    for vtx in builder.vtxs.values():
+    for vtx in builder:
         node0 = vtx.node
         if node0.kind == 'ref' and is_ref(node0.ref):
             r = {}

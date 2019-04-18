@@ -80,7 +80,7 @@ def main(argv):
             if label.startswith('_'): continue
             add(v1, n, v0, chain)
         return
-    for vtx in builder.vtxs.values():
+    for vtx in builder:
         if not vtx.inputs:
             add(vtx)
 
