@@ -29,6 +29,14 @@ class Cons:
             c = c.cdr
         return
 
+    def __eq__(self, c1):
+        c0 = self
+        while c0 is not c1:
+            if c0 is None or c1 is None: return False
+            if c0.car != c1.car: return False
+            (c0,c1) = (c0.cdr, c1.cdr)
+        return True
+
     def __contains__(self, obj0):
         for obj in self:
             if obj is obj0: return True

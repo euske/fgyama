@@ -71,10 +71,10 @@ def main(argv):
 
     # Index features.
     srcmap = {}
-    funcmap = {}
-    usedfuncs = set()
+    itemmap = {}
+    useditems = set()
     featfreq = {}
-    func = None
+    item = None
     nents = 0
     root = FeatTree()
     for path in args:
@@ -87,11 +87,11 @@ def main(argv):
                     (fid,name) = eval(v)
                     srcmap[fid] = name
                 elif k == '+ITEM':
-                    (func,src) = eval(v)
-                    funcmap[func] = (path,src)
+                    (item,src) = eval(v)
+                    itemmap[item] = (path,src)
                 elif k in ('+FORW','+BACK'):
-                    assert func is not None
-                    usedfuncs.add(func)
+                    assert item is not None
+                    useditems.add(item)
                     nents += 1
                     feats = eval(v)
                     tree = root
@@ -101,47 +101,80 @@ def main(argv):
                         if feat not in featfreq:
                             featfreq[feat] = 0
                         featfreq[feat] += 1
-                        tree = tree.add(feat, func, (locs,i+1))
+                        tree = tree.add(feat, item, (locs,i+1))
     #
     featall = sum(featfreq.values())
-    print('Read: %d ents, %d sources, %d funcs, %d feats (all: %d)' %
-          (nents, len(srcmap), len(usedfuncs), len(featfreq), featall),
+    print('Read: %d ents, %d sources, %d items, %d feats (all: %d)' %
+          (nents, len(srcmap), len(useditems), len(featfreq), featall),
           file=sys.stderr)
     featscore = {}
     for (k,v) in featfreq.items():
         featscore[k] = log(featall/v)
 
     # Discover similars.
-    results = {}
+    links = {}
     def traverse(tree, score0=0):
         for (feat,st) in tree.getchildren():
             score1 = score0 + featscore.get(feat, 0)
             if threshold <= score1 and 2 <= len(st.matches):
-                funcs = tuple(sorted(st.matches.keys()))
-                if funcs in results:
-                    (maxscore,maxlocs) = results[funcs]
-                    if maxscore < score1:
-                        results[funcs] = (score1, st)
-                else:
-                    results[funcs] = (score1, st)
+                items = tuple(sorted(st.matches.keys()))
+                if items not in links:
+                    links[items] = []
+                links[items].append((score1, st))
             traverse(st, score1)
         return
     traverse(root)
+    totals = { items: sum( s for (s,_) in v ) for (items,v) in links.items() }
+
+    # Form clusters.
+    class Cluster:
+        def __init__(self, items):
+            self.items = items
+            self.locs = set()
+            return
+        def add(self, item):
+            self.items.append(item)
+            return self
+        def merge(self, c):
+            if c is not self:
+                self.items.extend(c.items)
+                self.locs.update(c.locs)
+            return self
+        def addloc(self, loc):
+            self.locs.add(loc)
+            return
+    clusters = {}
+    pairs = sorted(totals.items(), key=lambda x:x[1], reverse=True)
+    if 0 < maxresults:
+        pairs = pairs[:maxresults]
+    for (items,total) in pairs:
+        for (i,k1) in enumerate(items):
+            for k2 in items[i+1:]:
+                if k1 in clusters and k2 in clusters:
+                    c = clusters[k1].merge(clusters[k2])
+                    for k2 in c.items:
+                        clusters[k2] = c
+                elif k1 in clusters:
+                    c = clusters[k1].add(k2)
+                elif k2 in clusters:
+                    c = clusters[k2].add(k2)
+                else:
+                    c = clusters[k1] = clusters[k2] = Cluster([k1,k2])
+                for (_,loc) in links[items]:
+                    c.addloc(loc)
 
     # Remove clusters from a single project.
-    for funcs in list(results.keys()):
+    for items in list(links.keys()):
         a = set()
-        for func in funcs:
-            (proj,loc) = funcmap[func]
+        for item in items:
+            (proj,loc) = itemmap[item]
             if loc is not None:
                 a.add(proj)
         if len(a) < minproj:
-            del results[funcs]
+            del links[items]
 
-    results = sorted(results.values(), key=lambda x:x[0], reverse=True)
-    if 0 < maxresults:
-        results = results[:maxresults]
-    print('Results: %d' % len(results), file=sys.stderr)
+    results = sorted(links.items(), key=lambda x:totals[x[0]], reverse=True)
+    print('Cluster: %d' % len(results), file=sys.stderr)
 
     # Output results.
     if output is None:
@@ -153,43 +186,44 @@ def main(argv):
         show_html_headers(fp)
         fp.write('<body><h1>Results</h1>')
     mid = 0
-    for (score,tree) in results:
-        feats = list(tree.getpath())
-        feats.reverse()
-        if html:
-            fp.write('<h2>[%.3f] <code>%s</code> (%d)</h2>\n' %
-                     (score, q(repr(feats)), len(tree.matches)))
-        else:
-            fp.write('! %.3f %r %d\n' % (score, feats, len(tree.matches)))
-        for (func,(locs,n)) in tree.matches.items():
-            locs = locs[:n]
+    for (_,trees) in results:
+        for (score,tree) in sorted(trees, key=lambda x:x[0], reverse=True):
+            feats = list(tree.getpath())
+            feats.reverse()
             if html:
+                fp.write('<h2>[%.3f] <code>%s</code> (%d)</h2>\n' %
+                         (score, q(repr(feats)), len(tree.matches)))
+            else:
+                fp.write('! %.3f %r %d\n' % (score, feats, len(tree.matches)))
+            for (item,(locs,n)) in tree.matches.items():
                 mid += 1
-                fp.write('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
-                         '<code>%s</code></h3>\n' % (mid, mid, q(func)))
-            else:
-                fp.write('+ %s\n' % func)
-            if srcdb is None: continue
-            if html:
-                fp.write('<div class=result hidden id="M%d">\n' % mid)
-            annot = SourceAnnot(srcdb)
-            def add(loc, i, maxlength):
-                (fid,start,length) = loc
-                name = srcmap[fid]
-                length = min(length, maxlength)
-                annot.add(name, start, start+length, i)
-                return
-            (_,loc) = funcmap[func]
-            if loc is not None:
-                add(loc, 0, maxlength)
-            for loc in locs:
+                if html:
+                    fp.write('<h3><a href="#M%d" onclick="toggle(\'M%d\');">[+]</a> '
+                             '<code>%s</code></h3>\n' % (mid, mid, q(item)))
+                else:
+                    fp.write('+ %s\n' % item)
+                if srcdb is None: continue
+                if html:
+                    fp.write('<div class=result hidden id="M%d">\n' % mid)
+                annot = SourceAnnot(srcdb)
+                def add(loc, i, maxlength):
+                    (fid,start,length) = loc
+                    name = srcmap[fid]
+                    length = min(length, maxlength)
+                    annot.add(name, start, start+length, i)
+                    return
+                (_,loc) = itemmap[item]
                 if loc is not None:
-                    add(loc, i+1, sys.maxsize)
-            if html:
-                annot.show_html(fp)
-                fp.write('</div>\n')
-            else:
-                annot.show_text(fp)
+                    add(loc, 0, maxlength)
+                for loc in locs[:n]:
+                    if loc is not None:
+                        add(loc, i+1, sys.maxsize)
+                if html:
+                    annot.show_html(fp)
+                    fp.write('</div>\n')
+                else:
+                    annot.show_text(fp)
+            break
         if html:
             fp.write('<hr>\n')
         else:
