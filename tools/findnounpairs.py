@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import sys
 import re
+from srcdb import SourceDB, SourceAnnot
 from graph2idf import Cons, IDFBuilder, is_funcall
 
 IGNORED = frozenset([
-    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    None, 'ref', 'assign',
     'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):
@@ -39,17 +40,21 @@ def main(argv):
               '[-m maxlen] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:M:m:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:M:c:B:m:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     output = None
     maxoverrides = 1
+    encoding = None
+    srcdb = None
     maxlen = 5
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': output = v
         elif k == '-M': maxoverrides = int(v)
+        elif k == '-c': encoding = v
+        elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-m': maxlen = int(v)
     if not args: return usage()
 
@@ -96,6 +101,23 @@ def main(argv):
                 doit(r, v, n, Cons((feat, n), chain), length+1)
         return
 
+    def put(node0, node1, chain):
+        n0 = getnoun(node0.ref)
+        n1 = getnoun(node1.ref)
+        if n0 is None or n1 is None or n0 == n1: return
+        fp.write('+ %s %s %s\n' % (n0, n1, ' '.join( k for (k,_) in chain )))
+        if srcdb is not None:
+            annot = SourceAnnot(srcdb)
+            chain.insert(0, (None,node0))
+            chain.append((None,node1))
+            for (i,(_,n)) in enumerate(chain):
+                src = builder.getsrc(n, False)
+                if src is None: continue
+                (name,start,length) = src
+                annot.add(name, start, start+length, i)
+            annot.show_text(fp)
+        return
+
     for vtx in builder.vtxs.values():
         node0 = vtx.node
         if node0.kind == 'ref' and is_ref(node0.ref):
@@ -112,10 +134,7 @@ def main(argv):
                     else:
                         a = list(chain)
                         a.reverse()
-                    n0 = getnoun(node0.ref)
-                    n1 = getnoun(node1.ref)
-                    if n0 is not None and n1 is not None and n0 != n1:
-                        fp.write('%s %s %s\n' % (n0, n1, ' '.join( f for (f,_) in a )))
+                        put(node0, node1, a)
 
     if fp is not sys.stdout:
         fp.close()
