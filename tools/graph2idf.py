@@ -87,7 +87,7 @@ class IDFBuilder:
 
     # List all the vertexes.
     def __iter__(self):
-        return self.vtxs.values()
+        return iter(self.vtxs.values())
 
     # Load graphs.
     def load(self, path, fp=None):
