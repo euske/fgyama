@@ -2986,7 +2986,8 @@ public class Java2DF {
 
     // Pass1: populate TypeSpaces.
     @SuppressWarnings("unchecked")
-    public void buildTypeSpace(String key, CompilationUnit cunit) {
+    public void buildTypeSpace(String key, CompilationUnit cunit)
+        throws UnsupportedSyntax {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
@@ -2995,9 +2996,11 @@ public class Java2DF {
 	    try {
 		DFKlass klass = packageSpace.buildAbstTypeDecl(
 		    key, abstTypeDecl, null, fileScope);
-                Logger.debug("Pass1: created:", klass);
+                Logger.debug("Pass1: Created:", klass);
 	    } catch (UnsupportedSyntax e) {
-		Logger.error("Pass1: Unsupported at", key, e.name, "("+e.getAstName()+")");
+		Logger.error("Pass1: UnsupportedSyntax at",
+                             key, e.name, "("+e.getAstName()+")");
+                if (0 < _strict) throw e;
 	    }
 	}
     }
@@ -3067,7 +3070,6 @@ public class Java2DF {
                     fileScope.importStatic(klass, qname.getName());
                 }
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at", key, "("+e.name+")", e.finder);
                 if (0 < _strict) throw e;
             }
         }
@@ -3078,7 +3080,6 @@ public class Java2DF {
             try {
                 enumKlasses(klass, klasses);
             } catch (TypeNotFound e) {
-                Logger.error("Pass3: TypeNotFound at", klass, "("+e.name+")", e.finder);
                 if (0 < _strict) throw e;
             }
         }
@@ -3086,7 +3087,7 @@ public class Java2DF {
 
     // Pass4: list all methods.
     public void listMethods(Set<DFKlass> klasses)
-        throws TypeNotFound {
+        throws UnsupportedSyntax, TypeNotFound {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
 
@@ -3097,11 +3098,8 @@ public class Java2DF {
                 try {
                     init.buildScope();
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass4: Unsupported at", klass,
-                                 e.name, "("+e.getAstName()+")");
-                } catch (EntityNotFound e) {
-                    Logger.error("Pass4: EntityNotFound at", klass,
-                                 "("+e.name+")");
+                    if (0 < _strict) throw e;
+                } catch (TypeNotFound e) {
                     if (0 < _strict) throw e;
                 }
             }
@@ -3109,11 +3107,8 @@ public class Java2DF {
                 try {
                     method.buildScope();
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass4: Unsupported at", klass,
-                                 e.name, "("+e.getAstName()+")");
-                } catch (EntityNotFound e) {
-                    Logger.error("Pass4: EntityNotFound at", klass,
-                                 "("+e.name+")");
+                    if (0 < _strict) throw e;
+                } catch (TypeNotFound e) {
                     if (0 < _strict) throw e;
                 }
             }
@@ -3127,11 +3122,8 @@ public class Java2DF {
                 try {
                     init.buildFrame();
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass4: Unsupported at", klass,
-                                 e.name, "("+e.getAstName()+")");
+                    if (0 < _strict) throw e;
                 } catch (EntityNotFound e) {
-                    Logger.error("Pass4: EntityNotFound at", klass,
-                                 "("+e.name+")");
                     if (0 < _strict) throw e;
                 }
             }
@@ -3140,11 +3132,8 @@ public class Java2DF {
                     method.buildFrame();
                     queue.add(method);
                 } catch (UnsupportedSyntax e) {
-                    Logger.error("Pass4: Unsupported at", klass,
-                                 e.name, "("+e.getAstName()+")");
+                    if (0 < _strict) throw e;
                 } catch (EntityNotFound e) {
-                    Logger.error("Pass4: EntityNotFound at", klass,
-                                 "("+e.name+")");
                     if (0 < _strict) throw e;
                 }
             }
@@ -3168,17 +3157,14 @@ public class Java2DF {
     // Pass5: generate graphs for each method.
     @SuppressWarnings("unchecked")
     public void buildGraphs(DFKlass klass)
-        throws EntityNotFound {
-        startKlass(klass);
+        throws UnsupportedSyntax, EntityNotFound {
+        this.startKlass(klass);
         try {
             DFGraph graph = processKlassBody(klass);
-            exportGraph(graph);
+            this.exportGraph(graph);
         } catch (UnsupportedSyntax e) {
-            Logger.error("Pass5: Unsupported at", klass,
-                         e.name, "("+e.getAstName()+")");
+            if (0 < _strict) throw e;
         } catch (EntityNotFound e) {
-            Logger.error("Pass5: EntityNotFound at", klass,
-                         "("+e.name+")");
             if (0 < _strict) throw e;
         }
         DFMethod init = klass.getInitializer();
@@ -3188,13 +3174,10 @@ public class Java2DF {
                 DFGraph graph = processMethod(
                     init, initializer,
                     initializer.getBody(), null);
-                exportGraph(graph);
+                this.exportGraph(graph);
             } catch (UnsupportedSyntax e) {
-                Logger.error("Pass5: Unsupported at", klass,
-                             e.name, "("+e.getAstName()+")");
+                if (0 < _strict) throw e;
             } catch (EntityNotFound e) {
-                Logger.error("Pass5: EntityNotFound at", klass,
-                             "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
@@ -3206,18 +3189,15 @@ public class Java2DF {
                     DFGraph graph = processMethod(
                         method, methodDecl,
                         methodDecl.getBody(), methodDecl.parameters());
-                    exportGraph(graph);
+                    this.exportGraph(graph);
                 }
             } catch (UnsupportedSyntax e) {
-                Logger.error("Pass5: Unsupported at", klass,
-                             e.name, "("+e.getAstName()+")");
+                if (0 < _strict) throw e;
             } catch (EntityNotFound e) {
-                Logger.error("Pass5: EntityNotFound at", klass,
-                             "("+e.name+")");
                 if (0 < _strict) throw e;
             }
         }
-        endKlass();
+        this.endKlass();
     }
 
     /**
@@ -3226,7 +3206,7 @@ public class Java2DF {
      * Usage: java Java2DF [-o output] input.java ...
      */
     public static void main(String[] args)
-        throws IOException {
+        throws IOException, UnsupportedSyntax, EntityNotFound {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
@@ -3305,8 +3285,6 @@ public class Java2DF {
 
         // Process files.
         Java2DF converter = new Java2DF(rootSpace, strict);
-        XmlExporter exporter = new XmlExporter();
-        converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
         for (String path : files) {
@@ -3316,7 +3294,10 @@ public class Java2DF {
                 srcs.put(path, cunit);
                 converter.buildTypeSpace(path, cunit);
             } catch (IOException e) {
-                System.err.println("Cannot open input file: "+path);
+                Logger.error("Pass1: IOException at "+path);
+                throw e;
+	    } catch (UnsupportedSyntax e) {
+                throw e;
             }
         }
         for (String path : files) {
@@ -3325,22 +3306,49 @@ public class Java2DF {
             converter.setTypeFinder(path, cunit);
         }
         Set<DFKlass> klasses = new TreeSet<DFKlass>();
-        try {
-            for (String path : files) {
-                Logger.info("Pass3:", path);
-                CompilationUnit cunit = srcs.get(path);
+        for (String path : files) {
+            Logger.info("Pass3:", path);
+            CompilationUnit cunit = srcs.get(path);
+            try {
                 converter.loadKlasses(path, cunit, klasses);
+            } catch (TypeNotFound e) {
+                Logger.error("Pass3: TypeNotFound at", path,
+                             "("+e.name+", method="+e.method+
+                             ", ast="+e.ast+", finder="+e.finder+")");
+                throw e;
             }
-            Logger.info("Pass4.");
+        }
+        Logger.info("Pass4.");
+        try {
             converter.listMethods(klasses);
-            for (DFKlass klass : klasses) {
-                if (processed != null && !processed.contains(klass.getTypeName())) continue;
-                Logger.info("Pass5:", klass);
+        } catch (UnsupportedSyntax e) {
+            Logger.error("Pass4: UnsupportedSyntax",
+                         e.name, "("+e.getAstName()+")");
+            throw e;
+        } catch (TypeNotFound e) {
+            Logger.error("Pass4: TypeNotFound",
+                         "("+e.name+", method="+e.method+
+                         ", ast="+e.ast+", finder="+e.finder+")");
+            throw e;
+        }
+
+        XmlExporter exporter = new XmlExporter();
+        converter.addExporter(exporter);
+        for (DFKlass klass : klasses) {
+            if (processed != null && !processed.contains(klass.getTypeName())) continue;
+            Logger.info("Pass5:", klass);
+            try {
                 converter.buildGraphs(klass);
+            } catch (UnsupportedSyntax e) {
+                Logger.error("Pass5: Unsupported at", klass,
+                             e.name, "("+e.getAstName()+")");
+                throw e;
+            } catch (EntityNotFound e) {
+                Logger.error("Pass5: EntityNotFound at", klass,
+                             "("+e.name+", method="+e.method+
+                             ", ast="+e.ast+")");
+                throw e;
             }
-        } catch (EntityNotFound e) {
-            e.printStackTrace();
-            Logger.error("EntityNotFound: "+e.name+", method="+e.method+", ast="+e.ast);
         }
         exporter.close();
 
