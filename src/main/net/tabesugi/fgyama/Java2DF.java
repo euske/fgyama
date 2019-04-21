@@ -702,8 +702,8 @@ class DFFileScope extends DFVarScope {
     private List<DFMethod> _methods =
 	new ArrayList<DFMethod>();
 
-    public DFFileScope(DFVarScope parent, String path) {
-	super(parent, "["+path+"]");
+    public DFFileScope(DFVarScope outer, String path) {
+	super(outer, "["+path+"]");
     }
 
     @Override
@@ -1611,10 +1611,10 @@ public class Java2DF {
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	Block block)
         throws UnsupportedSyntax, EntityNotFound {
-        DFVarScope childScope = scope.getChildByAST(block);
+        DFVarScope innerScope = scope.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
             processStatement(
-                ctx, typeSpace, graph, finder, childScope, frame, cstmt);
+                ctx, typeSpace, graph, finder, innerScope, frame, cstmt);
         }
     }
 
@@ -2338,7 +2338,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private DFGraph processKlassBody(DFKlass klass)
         throws UnsupportedSyntax, EntityNotFound {
-        // lookup base/child klasses.
+        // lookup base/inner klasses.
         ASTNode ast = klass.getTree();
         List<BodyDeclaration> decls;
         if (ast instanceof AbstractTypeDeclaration) {

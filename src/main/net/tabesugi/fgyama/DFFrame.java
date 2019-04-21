@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     private String _label;
-    private DFFrame _parent;
+    private DFFrame _outer;
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
@@ -37,10 +37,10 @@ public class DFFrame {
         this(label, null);
     }
 
-    public DFFrame(String label, DFFrame parent) {
+    public DFFrame(String label, DFFrame outer) {
         assert label != null;
         _label = label;
-        _parent = parent;
+        _outer = outer;
     }
 
     @Override
@@ -58,10 +58,6 @@ public class DFFrame {
         return _label;
     }
 
-    public DFFrame getParent() {
-        return _parent;
-    }
-
     public DFFrame getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
@@ -72,21 +68,21 @@ public class DFFrame {
         DFFrame frame = this;
         while (frame != null) {
             if (frame.getLabel().equals(label)) break;
-            frame = frame.getParent();
+            frame = frame._outer;
         }
         return frame;
     }
 
-    public boolean expandRefs(DFFrame childFrame) {
+    public boolean expandRefs(DFFrame innerFrame) {
         boolean added = false;
-        for (DFRef ref : childFrame._inputRefs) {
+        for (DFRef ref : innerFrame._inputRefs) {
             if (ref.isLocal() || ref.isInternal()) continue;
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
                 added = true;
             }
         }
-        for (DFRef ref : childFrame._outputRefs) {
+        for (DFRef ref : innerFrame._outputRefs) {
             if (ref.isLocal() || ref.isInternal()) continue;
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
@@ -104,13 +100,13 @@ public class DFFrame {
         _outputRefs.add(ref);
     }
 
-    private void expandLocalRefs(DFFrame childFrame) {
-        _inputRefs.addAll(childFrame._inputRefs);
-        _outputRefs.addAll(childFrame._outputRefs);
+    private void expandLocalRefs(DFFrame innerFrame) {
+        _inputRefs.addAll(innerFrame._inputRefs);
+        _outputRefs.addAll(innerFrame._outputRefs);
     }
 
-    private void removeRefs(DFVarScope childScope) {
-        for (DFRef ref : childScope.getRefs()) {
+    private void removeRefs(DFVarScope innerScope) {
+        for (DFRef ref : innerScope.getRefs()) {
             _inputRefs.remove(ref);
             _outputRefs.remove(ref);
         }
@@ -212,13 +208,13 @@ public class DFFrame {
 
         } else if (stmt instanceof Block) {
 	    // "{ ... }"
-            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
             Block block = (Block)stmt;
             for (Statement cstmt :
                      (List<Statement>) block.statements()) {
-                this.buildStmt(finder, method, childScope, cstmt);
+                this.buildStmt(finder, method, innerScope, cstmt);
             }
-            this.removeRefs(childScope);
+            this.removeRefs(innerScope);
 
         } else if (stmt instanceof EmptyStatement) {
 
@@ -267,8 +263,8 @@ public class DFFrame {
                 enumKlass = type.getKlass();
                 enumKlass.load();
             }
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
@@ -280,15 +276,15 @@ public class DFFrame {
                             DFRef ref = enumKlass.lookupField((SimpleName)expr);
                             this.addInputRef(ref);
                         } else {
-                            childFrame.buildExpr(finder, method, childScope, expr);
+                            innerFrame.buildExpr(finder, method, innerScope, expr);
                         }
                     }
                 } else {
-                    childFrame.buildStmt(finder, method, childScope, cstmt);
+                    innerFrame.buildStmt(finder, method, innerScope, cstmt);
                 }
             }
-            childFrame.removeRefs(childScope);
-            this.expandLocalRefs(childFrame);
+            innerFrame.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
@@ -297,51 +293,51 @@ public class DFFrame {
         } else if (stmt instanceof WhileStatement) {
 	    // "while (c) { ... }"
             WhileStatement whileStmt = (WhileStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.buildExpr(finder, method, scope, whileStmt.getExpression());
-            childFrame.buildStmt(finder, method, childScope, whileStmt.getBody());
-            childFrame.removeRefs(childScope);
-            this.expandLocalRefs(childFrame);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            innerFrame.buildExpr(finder, method, scope, whileStmt.getExpression());
+            innerFrame.buildStmt(finder, method, innerScope, whileStmt.getBody());
+            innerFrame.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof DoStatement) {
 	    // "do { ... } while (c);"
             DoStatement doStmt = (DoStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.buildStmt(finder, method, childScope, doStmt.getBody());
-            childFrame.buildExpr(finder, method, scope, doStmt.getExpression());
-            childFrame.removeRefs(childScope);
-            this.expandLocalRefs(childFrame);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            innerFrame.buildStmt(finder, method, innerScope, doStmt.getBody());
+            innerFrame.buildExpr(finder, method, scope, doStmt.getExpression());
+            innerFrame.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof ForStatement) {
 	    // "for (i = 0; i < 10; i++) { ... }"
             ForStatement forStmt = (ForStatement)stmt;
-            DFVarScope childScope = scope.getChildByAST(stmt);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
             for (Expression init : (List<Expression>) forStmt.initializers()) {
-                this.buildExpr(finder, method, childScope, init);
+                this.buildExpr(finder, method, innerScope, init);
             }
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                childFrame.buildExpr(finder, method, childScope, expr);
+                innerFrame.buildExpr(finder, method, innerScope, expr);
             }
-            childFrame.buildStmt(finder, method, childScope, forStmt.getBody());
+            innerFrame.buildStmt(finder, method, innerScope, forStmt.getBody());
             for (Expression update : (List<Expression>) forStmt.updaters()) {
-                childFrame.buildExpr(finder, method, childScope, update);
+                innerFrame.buildExpr(finder, method, innerScope, update);
             }
-            childFrame.removeRefs(childScope);
-            this.expandLocalRefs(childFrame);
+            innerFrame.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
 	    // "for (x : array) { ... }"
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.buildExpr(finder, method, scope, eForStmt.getExpression());
-            DFVarScope childScope = scope.getChildByAST(stmt);
-            DFFrame childFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            childFrame.buildStmt(finder, method, childScope, eForStmt.getBody());
-            childFrame.removeRefs(childScope);
-            this.expandLocalRefs(childFrame);
+            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
+            innerFrame.buildStmt(finder, method, innerScope, eForStmt.getBody());
+            innerFrame.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof ReturnStatement) {
 	    // "return 42;"
@@ -363,9 +359,9 @@ public class DFFrame {
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             SimpleName labelName = labeledStmt.getLabel();
             String label = labelName.getIdentifier();
-            DFFrame childFrame = this.addChild(label, stmt);
-            childFrame.buildStmt(finder, method, scope, labeledStmt.getBody());
-            this.expandLocalRefs(childFrame);
+            DFFrame innerFrame = this.addChild(label, stmt);
+            innerFrame.buildStmt(finder, method, scope, labeledStmt.getBody());
+            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"

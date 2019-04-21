@@ -15,12 +15,12 @@ public class DFLocalVarScope extends DFVarScope {
     private SortedMap<String, DFLocalVarScope> _ast2child =
         new TreeMap<String, DFLocalVarScope>();
 
-    protected DFLocalVarScope(DFVarScope parent, String name) {
-        super(parent, name);
+    protected DFLocalVarScope(DFVarScope outer, String name) {
+        super(outer, name);
     }
 
-    public DFLocalVarScope(DFVarScope parent, SimpleName name) {
-        super(parent, name);
+    public DFLocalVarScope(DFVarScope outer, SimpleName name) {
+        super(outer, name);
     }
 
     public DFLocalVarScope getChildByAST(ASTNode ast) {
@@ -122,10 +122,10 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                childScope.buildStmt(finder, stmt);
+                innerScope.buildStmt(finder, stmt);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -170,12 +170,12 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             Expression expr = switchStmt.getExpression();
-            childScope.buildExpr(finder, expr);
+            innerScope.buildExpr(finder, expr);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                childScope.buildStmt(finder, stmt);
+                innerScope.buildStmt(finder, stmt);
             }
 
         } else if (ast instanceof SwitchCase) {
@@ -189,47 +189,47 @@ public class DFLocalVarScope extends DFVarScope {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
             this.buildExpr(finder, expr);
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             Statement stmt = whileStmt.getBody();
-            childScope.buildStmt(finder, stmt);
+            innerScope.buildStmt(finder, stmt);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             Statement stmt = doStmt.getBody();
-            childScope.buildStmt(finder, stmt);
+            innerScope.buildStmt(finder, stmt);
             Expression expr = doStmt.getExpression();
-            childScope.buildExpr(finder, expr);
+            innerScope.buildExpr(finder, expr);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                childScope.buildExpr(finder, init);
+                innerScope.buildExpr(finder, init);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                childScope.buildExpr(finder, expr);
+                innerScope.buildExpr(finder, expr);
             }
             Statement stmt = forStmt.getBody();
-            childScope.buildStmt(finder, stmt);
+            innerScope.buildStmt(finder, stmt);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                childScope.buildExpr(finder, update);
+                innerScope.buildExpr(finder, update);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             this.buildExpr(finder, eForStmt.getExpression());
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFType varType = finder.resolve(decl.getType());
 	    int ndims = decl.getExtraDimensions();
-            childScope.addVar(decl.getName(),
+            innerScope.addVar(decl.getName(),
 			      (ndims != 0)? new DFArrayType(varType, ndims) : varType);
             Statement stmt = eForStmt.getBody();
-            childScope.buildStmt(finder, stmt);
+            innerScope.buildStmt(finder, stmt);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -247,12 +247,12 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            DFLocalVarScope childScope = this.getChildByAST(ast);
+            DFLocalVarScope innerScope = this.getChildByAST(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                childScope.buildExpr(finder, decl);
+                innerScope.buildExpr(finder, decl);
             }
-            childScope.buildStmt(finder, tryStmt.getBody());
+            innerScope.buildStmt(finder, tryStmt.getBody());
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();

@@ -13,35 +13,35 @@ import org.w3c.dom.*;
 //
 public class DFVarScope implements Comparable<DFVarScope> {
 
-    private DFVarScope _parent;
+    private DFVarScope _outer;
     private String _name;
 
     private Map<String, DFRef> _id2ref =
         new HashMap<String, DFRef>();
 
     protected DFVarScope(String name) {
-        _parent = null;
+        _outer = null;
         _name = name;
     }
 
-    protected DFVarScope(DFVarScope parent, String name) {
-        _parent = parent;
+    protected DFVarScope(DFVarScope outer, String name) {
+        _outer = outer;
         _name = name;
     }
 
-    public DFVarScope(DFVarScope parent, SimpleName name) {
-        this(parent, name.getIdentifier());
+    public DFVarScope(DFVarScope outer, SimpleName name) {
+        this(outer, name.getIdentifier());
     }
 
     @Override
     public int compareTo(DFVarScope scope) {
         if (scope == null) return +1;
         if (scope == this) return 0;
-        if (scope._parent == _parent) {
+        if (scope._outer == _outer) {
             return _name.compareTo(scope._name);
         }
-        if (_parent == null) return -1;
-        return _parent.compareTo(scope._parent);
+        if (_outer == null) return -1;
+        return _outer.compareTo(scope._outer);
     }
 
     @Override
@@ -65,10 +65,10 @@ public class DFVarScope implements Comparable<DFVarScope> {
     }
 
     public String getScopeName() {
-        if (_parent == null) {
+        if (_outer == null) {
             return _name;
         } else {
-            return _parent.getScopeName()+"."+_name;
+            return _outer.getScopeName()+"."+_name;
         }
     }
 
@@ -95,8 +95,8 @@ public class DFVarScope implements Comparable<DFVarScope> {
     }
 
     public DFRef lookupThis() {
-        assert _parent != null;
-        return _parent.lookupThis();
+        assert _outer != null;
+        return _outer.lookupThis();
     }
 
     protected DFRef lookupVar1(String id)
@@ -109,38 +109,38 @@ public class DFVarScope implements Comparable<DFVarScope> {
         try {
             return this.lookupVar1(name.getIdentifier());
         } catch (VariableNotFound e) {
-            if (_parent == null) throw e;
-            return _parent.lookupVar(name);
+            if (_outer == null) throw e;
+            return _outer.lookupVar(name);
         }
     }
 
     public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
-	if (_parent == null) throw new MethodNotFound(name.getIdentifier(), argTypes);
-	return _parent.lookupStaticMethod(name, argTypes);
+	if (_outer == null) throw new MethodNotFound(name.getIdentifier(), argTypes);
+	return _outer.lookupStaticMethod(name, argTypes);
     }
 
     public DFRef lookupArgument(int index)
         throws VariableNotFound {
-        assert _parent != null;
-        return _parent.lookupArgument(index);
+        assert _outer != null;
+        return _outer.lookupArgument(index);
     }
 
     public DFRef lookupReturn()
         throws VariableNotFound {
-        assert _parent != null;
-        return _parent.lookupReturn();
+        assert _outer != null;
+        return _outer.lookupReturn();
     }
 
     public DFRef lookupException()
         throws VariableNotFound {
-        assert _parent != null;
-        return _parent.lookupException();
+        assert _outer != null;
+        return _outer.lookupException();
     }
 
     public DFRef lookupArray(DFType type) {
-        assert _parent != null;
-        return _parent.lookupArray(type);
+        assert _outer != null;
+        return _outer.lookupArray(type);
     }
 
     public DFRef[] getRefs() {

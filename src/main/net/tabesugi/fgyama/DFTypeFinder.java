@@ -111,9 +111,9 @@ public class DFTypeFinder {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
             DFTypeSpace space = klass.getKlassSpace();
-            DFKlass childKlass = space.getKlass(qtype.getName());
-            childKlass.load();
-            return childKlass;
+            DFKlass innerKlass = space.getKlass(qtype.getName());
+            innerKlass.load();
+            return innerKlass;
         } else if (type instanceof UnionType) {
             // XXX only consider the first type.
             UnionType utype = (UnionType)type;

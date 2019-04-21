@@ -17,9 +17,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
-    private DFTypeSpace _parentSpace;
-    private DFKlass _parentKlass;
-    private DFVarScope _parentScope;
+    private DFTypeSpace _typeSpace;
+    private DFKlass _outerKlass;
+    private DFVarScope _outerScope;
     private DFTypeSpace _klassSpace;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes =
@@ -54,21 +54,21 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
     public DFKlass(
-        String name, DFTypeSpace parentSpace,
-        DFKlass parentKlass, DFVarScope parentScope) {
+        String name, DFTypeSpace typeSpace,
+        DFKlass outerKlass, DFVarScope outerScope) {
         _name = name;
-        _parentSpace = parentSpace;
-        _parentKlass = parentKlass;
-	_parentScope = parentScope;
-        _klassSpace = _parentSpace.lookupSpace(_name);
-        _klassScope = new DFKlassScope(_parentScope, _name);
+        _typeSpace = typeSpace;
+        _outerKlass = outerKlass;
+	_outerScope = outerScope;
+        _klassSpace = _typeSpace.lookupSpace(_name);
+        _klassScope = new DFKlassScope(_outerScope, _name);
     }
 
     protected DFKlass(
-        String name, DFTypeSpace parentSpace,
-        DFKlass parentKlass, DFVarScope parentScope,
+        String name, DFTypeSpace typeSpace,
+        DFKlass outerKlass, DFVarScope outerScope,
         DFKlass baseKlass) {
-        this(name, parentSpace, parentKlass, parentScope);
+        this(name, typeSpace, outerKlass, outerScope);
         _baseKlass = baseKlass;
         _built = true;
     }
@@ -80,14 +80,14 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert genericKlass != null;
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
-        // the parent namespace but it creates its own subspace.
+        // the outer namespace but it creates its own subspace.
         String subname = getParamName(paramTypes);
         _name = genericKlass._name;
-        _parentSpace = genericKlass._parentSpace;
-        _parentKlass = genericKlass._parentKlass;
-        _parentScope = genericKlass._parentScope;
-        _klassSpace = _parentSpace.lookupSpace(subname);
-        _klassScope = new DFKlassScope(_parentScope, subname);
+        _typeSpace = genericKlass._typeSpace;
+        _outerKlass = genericKlass._outerKlass;
+        _outerScope = genericKlass._outerScope;
+        _klassSpace = _typeSpace.lookupSpace(subname);
+        _klassScope = new DFKlassScope(_outerScope, subname);
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
@@ -135,7 +135,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     @Override
     public int compareTo(DFKlass klass) {
         if (this == klass) return 0;
-        int x = _parentSpace.compareTo(klass._parentSpace);
+        int x = _typeSpace.compareTo(klass._typeSpace);
         if (x != 0) return x;
         return getTypeName().compareTo(klass.getTypeName());
     }
@@ -161,7 +161,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     }
 
     public String getTypeName() {
-        String name = "L"+_parentSpace.getSpaceName()+_name;
+        String name = "L"+_typeSpace.getSpaceName()+_name;
         if (_mapTypes != null) {
             name = name + getParamName(_mapTypes);
         }
@@ -243,7 +243,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public boolean isGeneric() {
         if (_mapTypes != null) return true;
-        if (_parentKlass != null) return _parentKlass.isGeneric();
+        if (_outerKlass != null) return _outerKlass.isGeneric();
         return false;
     }
 
@@ -291,8 +291,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         return _name;
     }
 
-    public DFKlass getParentKlass() {
-        return _parentKlass;
+    public DFKlass getOuterKlass() {
+        return _outerKlass;
     }
 
     public DFTypeSpace getKlassSpace() {
@@ -336,8 +336,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     public DFTypeFinder getBaseFinder()
         throws TypeNotFound {
-        if (_parentKlass != null) {
-            return _parentKlass.getBaseFinder();
+        if (_outerKlass != null) {
+            return _outerKlass.getBaseFinder();
         } else {
             assert _baseFinder != null;
             DFTypeFinder finder = this.addFinders(_baseFinder);
@@ -450,9 +450,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         if (method != null) {
             return method;
         }
-        if (_parentKlass != null) {
+        if (_outerKlass != null) {
             try {
-                return _parentKlass.lookupMethod(callStyle, name, argTypes);
+                return _outerKlass.lookupMethod(callStyle, name, argTypes);
             } catch (MethodNotFound e) {
             }
         }
@@ -501,7 +501,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private DFMethod addMethod(DFMethod method) {
         //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
-        // override the parent methods.
+        // override the outer methods.
         if (_baseKlass != null) {
             _baseKlass.overrideMethod(method);
         }
@@ -541,11 +541,11 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         throws TypeNotFound {
         if (_built) return;
         _built = true;
-        if (_parentKlass != null) {
-            _parentKlass.load();
+        if (_outerKlass != null) {
+            _outerKlass.load();
         }
         DFTypeFinder finder = this.getBaseFinder();
-        if (finder == null) Logger.error("!!!", this, _parentKlass);
+        if (finder == null) Logger.error("!!!", this, _outerKlass);
         assert _ast != null || _jarPath != null;
         if (_mapTypeSpace != null) {
             assert _mapTypes != null;
@@ -622,9 +622,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 	    }
 	}
         // Extend a TypeFinder for this klass.
-        if (_parentKlass != null) {
-            _parentKlass.load();
-            finder = _parentKlass.addFinders(finder);
+        if (_outerKlass != null) {
+            _outerKlass.load();
+            finder = _outerKlass.addFinders(finder);
         }
         finder = finder.extend(_klassSpace);
         // Define fields.
@@ -813,8 +813,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
         // Extend a TypeFinder for the child klasses.
-        if (_parentKlass != null) {
-            finder = _parentKlass.addFinders(finder);
+        if (_outerKlass != null) {
+            finder = _outerKlass.addFinders(finder);
         }
         finder = finder.extend(_klassSpace);
         for (BodyDeclaration body : decls) {
@@ -920,8 +920,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
         private DFRef _this;
 
-        public DFKlassScope(DFVarScope parent, String id) {
-            super(parent, id);
+        public DFKlassScope(DFVarScope outer, String id) {
+            super(outer, id);
             _this = this.addRef("#this", DFKlass.this, null);
         }
 
