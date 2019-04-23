@@ -1,8 +1,19 @@
 #!/usr/bin/env python
 import sys
+import re
 from srcdb import SourceDB, SourceAnnot
 from graph2idf import is_funcall, Cons, IDFBuilder
 
+
+WORD1 = re.compile(r'[A-Z]?[a-z]+$')
+WORD2 = re.compile(r'[A-Z]+$')
+def getnoun(name):
+    if name[-1].islower():
+        return WORD1.search(name).group(0).lower()
+    elif name[-1].isupper():
+        return WORD2.search(name).group(0).lower()
+    else:
+        return None
 
 def enum(vtx, ref0, refs, chain=None, level=0):
     if chain is not None and vtx in chain: return
@@ -23,7 +34,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-c encoding] [-B basedir] [-m maxlen] '
+        print('usage: %s [-d] [-o output] [-c encoding] [-B basedir] [-m maxpaths] '
               '[-M maxoverrides] [graph ...]' % argv[0])
         return 100
     try:
@@ -31,7 +42,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxlen = 5
+    maxpaths = 100
     maxoverrides = 1
     encoding = None
     srcdb = None
@@ -41,7 +52,7 @@ def main(argv):
         elif k == '-o': output = v
         elif k == '-c': encoding = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
-        elif k == '-m': maxlen = int(v)
+        elif k == '-m': maxpaths = int(v)
         elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
 
@@ -67,43 +78,45 @@ def main(argv):
           file=sys.stderr)
 
     mdist = {}
-    mprev = {}
-    def add(v0, n=0, prev=None, chain=None):
+    def tracein(v0, dist=(0,0), prev=None, chain=None):
         if chain is not None and v0 in chain: return
-        if v0 in mdist and n <= mdist[v0]: return
+        if v0 in mdist and dist <= mdist[v0][0]: return
         chain = Cons(v0, chain)
-        mdist[v0] = n
-        mprev[v0] = prev
+        mdist[v0] = (dist, prev)
+        (a,n) = dist
         if v0.node.kind == 'assign':
-            n += 1
+            a += 1
+        n += 1
+        dist = (a,n)
         for (label,v1) in v0.outputs:
             if label.startswith('_'): continue
-            add(v1, n, v0, chain)
+            if v1.node.kind == 'output': continue
+            tracein(v1, dist, v0, chain)
         return
     for vtx in builder:
         if not vtx.inputs:
-            add(vtx)
+            tracein(vtx)
 
-    maxdist = max(mdist.values())
-    print(maxdist)
-    for (vtx,dist) in mdist.items():
-        if dist < maxdist: continue
+    vtxs = sorted(mdist.items(), key=lambda x:x[1][0], reverse=True)
+    for (vtx,(dist,_)) in vtxs[:maxpaths]:
         nodes = []
         while vtx is not None:
-            assert vtx in mprev
+            assert vtx in mdist
             nodes.append(vtx.node)
-            vtx = mprev[vtx]
+            (_,vtx) = mdist[vtx]
         nodes = [ n for n in nodes if n.kind == 'assign' ]
         nodes.reverse()
-        print('#', ' '.join( n.ref for n in nodes ))
-        if srcdb is not None:
-            for (i,n) in enumerate(nodes):
+        print('+PATH', dist, ' '.join( getnoun(n.ref) for n in nodes ))
+        for (i,n) in enumerate(nodes):
+            print('#', n.ref)
+            if srcdb is not None:
                 src = builder.getsrc(n, False)
                 if src is None: continue
                 (name,start,length) = src
                 annot = SourceAnnot(srcdb)
                 annot.add(name, start, start+length, i)
                 annot.show_text(fp)
+        print()
 
     if fp is not sys.stdout:
         fp.close()

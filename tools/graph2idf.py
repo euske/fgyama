@@ -174,3 +174,36 @@ class IDFBuilder:
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
         return
+
+# main
+def main(argv):
+    import fileinput
+    import getopt
+    def usage():
+        print('usage: %s [-d] [-M maxoverrides] [graph ...]' % argv[0])
+        return 100
+    try:
+        (opts, args) = getopt.getopt(argv[1:], 'dM:')
+    except getopt.GetoptError:
+        return usage()
+    debug = 0
+    maxoverrides = 1
+    for (k, v) in opts:
+        if k == '-d': debug += 1
+        elif k == '-M': maxoverrides = int(v)
+    if not args: return usage()
+
+    builder = IDFBuilder(maxoverrides=maxoverrides)
+    for path in args:
+        print('Loading: %r...' % path, file=sys.stderr)
+        builder.load(path)
+
+    builder.run()
+    print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
+          (len(builder.srcmap), len(builder.graphs),
+           sum( len(a) for a in builder.funcalls.values() ),
+           len(builder.vtxs)),
+          file=sys.stderr)
+    return 0
+
+if __name__ == '__main__': sys.exit(main(sys.argv))
