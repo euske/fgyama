@@ -42,6 +42,13 @@ class Cons:
             if obj is obj0: return True
         return False
 
+    @classmethod
+    def fromseq(self, seq):
+        c = None
+        for x in seq:
+            c = Cons(x, c)
+        return c
+
 
 ##  IPVertex (Inter-Procedural Vertex)
 ##  (why vertex? because calling this another "node" is confusing!)
@@ -163,13 +170,12 @@ class IDFBuilder:
                                 self.getvtx(node.inputs[label]).connect(
                                     label, self.getvtx(n1))
                         for n1 in graph.outs:
+                            vtx1 = self.getvtx(n1)
                             for (label,n2) in node.outputs:
                                 if label == 'update' and n1.ref == n2.ref:
-                                    self.getvtx(n1).connect(
-                                        label, self.getvtx(n2))
+                                    vtx.connect(label, self.getvtx(n2))
                                 elif n1.ref == '#return':
-                                    self.getvtx(n1).connect(
-                                        label, self.getvtx(n2))
+                                    vtx.connect(label, self.getvtx(n2))
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))

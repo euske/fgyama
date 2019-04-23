@@ -42,7 +42,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxpaths = 100
+    maxpaths = 10
     maxoverrides = 1
     encoding = None
     srcdb = None
@@ -77,8 +77,7 @@ def main(argv):
            len(builder.vtxs)),
           file=sys.stderr)
 
-    mdist = {}
-    def tracein(v0, dist=(0,0), prev=None, chain=None):
+    def tracein(mdist, v0, dist=(0,0), prev=None, chain=None):
         if chain is not None and v0 in chain: return
         if v0 in mdist and dist <= mdist[v0][0]: return
         chain = Cons(v0, chain)
@@ -91,21 +90,52 @@ def main(argv):
         for (label,v1) in v0.outputs:
             if label.startswith('_'): continue
             if v1.node.kind == 'output': continue
-            tracein(v1, dist, v0, chain)
+            tracein(mdist, v1, dist, v0, chain)
         return
+
+    def traceout(mdist, nexts, v0, dist=(0,0), prev=None, chain=None):
+        if chain is not None and v0 in chain: return
+        if v0 in mdist and dist <= mdist[v0][0]: return
+        chain = Cons(v0, chain)
+        mdist[v0] = (dist, prev)
+        (a,n) = dist
+        if v0.node.kind == 'assign':
+            a += 1
+        n += 1
+        dist = (a,n)
+        if v0.node.kind == 'output':
+            assert nexts is not None
+            caller = nexts.car
+            nexts = nexts.cdr
+            for (label,v1) in v0.outputs:
+                if label.startswith('_'): continue
+                if v1.node.kind == 'input': continue
+                if v1.node.graph is not caller: continue
+                traceout(mdist, nexts, v1, dist, v0, chain)
+        else:
+            for (label,v1) in v0.outputs:
+                if label.startswith('_'): continue
+                if v1.node.kind == 'input': continue
+                traceout(mdist, nexts, v1, dist, v0, chain)
+        return
+
+    mdist = {}
     for vtx in builder:
         if not vtx.inputs:
-            tracein(vtx)
-
+            tracein(mdist, vtx)
     vtxs = sorted(mdist.items(), key=lambda x:x[1][0], reverse=True)
-    for (vtx,(dist,_)) in vtxs[:maxpaths]:
+    for (vtx0,(dist,_)) in vtxs[:maxpaths]:
         nodes = []
+        vtx = vtx0
         while vtx is not None:
             assert vtx in mdist
             nodes.append(vtx.node)
             (_,vtx) = mdist[vtx]
-        nodes = [ n for n in nodes if n.kind == 'assign' ]
         nodes.reverse()
+        nexts = Cons.fromseq( n.graph for n in nodes if n.kind == 'input' )
+        mdist2 = {}
+        traceout(mdist2, nexts, vtx0)
+        nodes = [ n for n in nodes if n.kind == 'assign' ]
         print('+PATH', dist, ' '.join( getnoun(n.ref) for n in nodes ))
         for (i,n) in enumerate(nodes):
             print('#', n.ref)
