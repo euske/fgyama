@@ -715,7 +715,7 @@ public class DFFrame {
 		    cstr.getAnonymousClassDeclaration();
 		DFType instType;
 		if (anonDecl != null) {
-		    String id = "anon"+Utils.encodeASTNode(anonDecl);
+		    String id = Utils.encodeASTNode(anonDecl);
 		    DFTypeSpace methodSpace = method.getMethodSpace();
 		    instType = methodSpace.getKlass(id);
 		} else {

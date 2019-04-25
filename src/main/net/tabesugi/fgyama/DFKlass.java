@@ -304,7 +304,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     }
 
     public void putMethodScope(ASTNode ast, DFLocalVarScope scope) {
-        _methodScopes.put(Utils.encodeASTNode(ast), scope);
+	String key = Utils.encodeASTNode(ast);
+        _methodScopes.put(key, scope);
     }
 
     private DFLocalVarScope getMethodScope(ASTNode ast) {
@@ -836,7 +837,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
-                String id = "method"+Utils.encodeASTNode(decl);
+                String id = Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
                 finder = finder.extend(methodSpace);
                 List<TypeParameter> tps = decl.typeParameters();

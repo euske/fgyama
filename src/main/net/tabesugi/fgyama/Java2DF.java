@@ -1244,7 +1244,7 @@ public class Java2DF {
                 DFKlass instKlass;
                 if (anonDecl != null) {
                     // Anonymous classes are processed separately.
-                    String id = "anon"+Utils.encodeASTNode(anonDecl);
+                    String id = Utils.encodeASTNode(anonDecl);
 		    DFKlass anonKlass = typeSpace.getKlass(id);
 		    instKlass = anonKlass;
                 } else {
@@ -2464,7 +2464,7 @@ public class Java2DF {
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
-                String id = "method"+Utils.encodeASTNode(decl);
+                String id = Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
                 DFTypeFinder finder2 = finder.extend(methodSpace);
                 DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
@@ -2899,7 +2899,7 @@ public class Java2DF {
             try {
                 DFType instType;
                 if (anonDecl != null) {
-                    String id = "anon"+Utils.encodeASTNode(anonDecl);
+                    String id = Utils.encodeASTNode(anonDecl);
                     instType = typeSpace.getKlass(id);
                 } else {
                     instType = finder.resolve(cstr.getType());

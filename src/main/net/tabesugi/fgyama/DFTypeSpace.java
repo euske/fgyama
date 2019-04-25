@@ -173,10 +173,10 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
                 MethodDeclaration methodDecl = (MethodDeclaration)body;
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
-                    String id = "method"+Utils.encodeASTNode(methodDecl);
+                    String id = Utils.encodeASTNode(methodDecl);
                     DFTypeSpace methodSpace = this.lookupSpace(id);
                     DFLocalVarScope scope = new DFLocalVarScope(
-                        outerScope, methodDecl.getName());
+                        outerScope, id);
                     klass.putMethodScope(methodDecl, scope);
                     methodSpace.buildStmt(stmt, klass, scope);
                 }
@@ -207,7 +207,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFLocalVarScope innerScope = outerScope.addChild("b", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
                 this.buildStmt(stmt, klass, innerScope);
@@ -249,7 +249,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild("switch", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             this.buildExpr(switchStmt.getExpression(), klass, innerScope);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
@@ -266,20 +266,20 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             this.buildExpr(whileStmt.getExpression(), klass, outerScope);
-            DFLocalVarScope innerScope = outerScope.addChild("while", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             Statement stmt = whileStmt.getBody();
             this.buildStmt(stmt, klass, innerScope);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild("do", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             Statement stmt = doStmt.getBody();
             this.buildStmt(stmt, klass, innerScope);
             this.buildExpr(doStmt.getExpression(), klass, innerScope);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild("for", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 this.buildExpr(init, klass, innerScope);
@@ -298,7 +298,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             this.buildExpr(eForStmt.getExpression(), klass, outerScope);
-            DFLocalVarScope innerScope = outerScope.addChild("efor", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             this.buildStmt(eForStmt.getBody(), klass, innerScope);
 
         } else if (ast instanceof BreakStatement) {
@@ -317,7 +317,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild("try", ast);
+            DFLocalVarScope innerScope = outerScope.addChild(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 this.buildExpr(decl, klass, innerScope);
@@ -325,7 +325,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
             this.buildStmt(tryStmt.getBody(), klass, innerScope);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                DFLocalVarScope catchScope = outerScope.addChild("catch", cc);
+                DFLocalVarScope catchScope = outerScope.addChild(cc);
                 this.buildStmt(cc.getBody(), klass, catchScope);
             }
             Block finBlock = tryStmt.getFinally();
@@ -484,7 +484,7 @@ public class DFTypeSpace implements Comparable<DFTypeSpace> {
             AnonymousClassDeclaration anonDecl =
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
-                String id = "anon"+Utils.encodeASTNode(anonDecl);
+                String id = Utils.encodeASTNode(anonDecl);
                 DFKlass anonKlass = this.createKlass(klass, outerScope, id);
                 anonKlass.setTree(klass.getFilePath(), anonDecl);
                 anonKlass.getKlassSpace().buildDecls(
