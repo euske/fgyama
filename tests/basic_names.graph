@@ -1,153 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
     <method name="Ldom/meep/basic_names;" style="initializer">
-      <ast length="451" start="19" type="55"/>
+      <ast end="470" start="19" type="55"/>
       <scope name="Ldom/meep/basic_names;">
         <node data="123" id="Nd0f69117_1" kind="const" type="I">
-          <ast length="3" start="69" type="34"/>
+          <ast end="72" start="69" type="34"/>
         </node>
         <node id="Nd0f69117_2" kind="assign" ref="@Ldom/meep/basic_names;/.y" type="I">
           <link src="Nd0f69117_1"/>
-          <ast length="7" start="65" type="59"/>
+          <ast end="72" start="65" type="59"/>
         </node>
       </scope>
     </method>
     <method name="Ldom/meep/basic_names;.doit()V" style="instance">
       <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
-      <ast length="210" start="79" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:79:210">
-        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:79:210.:Block:98:191">
+      <ast end="289" start="79" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:79:289">
+        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:79:289.:Block:98:289">
           <node id="Na7c7a6e8_4" kind="fieldref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link src="Na7c7a6e8_1"/>
-            <ast length="10" start="108" type="40"/>
+            <ast end="118" start="108" type="40"/>
           </node>
           <node data="Foo!" id="Na7c7a6e8_5" kind="const" type="Ljava/lang/String;">
-            <ast length="6" start="127" type="45"/>
+            <ast end="133" start="127" type="45"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="Na7c7a6e8_6" kind="call" type="V">
             <link label="#arg0" src="Na7c7a6e8_5"/>
             <link label="#this" src="Na7c7a6e8_4"/>
-            <ast length="26" start="108" type="32"/>
+            <ast end="134" start="108" type="32"/>
           </node>
           <node id="Na7c7a6e8_7" kind="receive" type="V">
             <link label="return" src="Na7c7a6e8_6"/>
-            <ast length="26" start="108" type="32"/>
+            <ast end="134" start="108" type="32"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Na7c7a6e8_8" kind="new" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
-            <ast length="9" start="230" type="14"/>
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Na7c7a6e8_8" kind="new" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
+            <ast end="239" start="230" type="14"/>
           </node>
-          <node id="Na7c7a6e8_9" kind="receive" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
+          <node id="Na7c7a6e8_9" kind="receive" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
             <link label="return" src="Na7c7a6e8_8"/>
-            <ast length="9" start="230" type="14"/>
+            <ast end="239" start="230" type="14"/>
           </node>
-          <node id="Na7c7a6e8_10" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:210.:Block:98:191/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
+          <node id="Na7c7a6e8_10" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:289.:Block:98:289/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
             <link src="Na7c7a6e8_9"/>
-            <ast length="15" start="224" type="59"/>
+            <ast end="239" start="224" type="59"/>
           </node>
-          <node id="Na7c7a6e8_11" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:210.:Block:98:191/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
+          <node id="Na7c7a6e8_11" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:289.:Block:98:289/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
             <link src="Na7c7a6e8_10"/>
-            <ast length="3" start="249" type="42"/>
+            <ast end="252" start="249" type="42"/>
           </node>
-          <node id="Na7c7a6e8_12" kind="fieldassign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
+          <node id="Na7c7a6e8_12" kind="fieldassign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
             <link src="Na7c7a6e8_15"/>
             <link label="obj" src="Na7c7a6e8_11"/>
-            <ast length="5" start="249" type="40"/>
+            <ast end="254" start="249" type="40"/>
           </node>
           <node id="Na7c7a6e8_13" kind="ref" ref="#this" type="Ldom/meep/basic_names;">
             <link src="Na7c7a6e8_3"/>
-            <ast length="4" start="257" type="52"/>
+            <ast end="261" start="257" type="52"/>
           </node>
           <node id="Na7c7a6e8_14" kind="fieldref" ref="@Ldom/meep/basic_names;/.y" type="I">
             <link src="Na7c7a6e8_2"/>
             <link label="obj" src="Na7c7a6e8_13"/>
-            <ast length="6" start="257" type="22"/>
+            <ast end="263" start="257" type="22"/>
           </node>
-          <node data="=" id="Na7c7a6e8_15" kind="assignop" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
+          <node data="=" id="Na7c7a6e8_15" kind="assignop" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
             <link label="R" src="Na7c7a6e8_14"/>
-            <ast length="14" start="249" type="7"/>
+            <ast end="263" start="249" type="7"/>
           </node>
-          <node id="Na7c7a6e8_16" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:210.:Block:98:191/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
+          <node id="Na7c7a6e8_16" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:289.:Block:98:289/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
             <link src="Na7c7a6e8_10"/>
-            <ast length="3" start="273" type="42"/>
+            <ast end="276" start="273" type="42"/>
           </node>
-          <node data="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;.moo()V" id="Na7c7a6e8_17" kind="call" type="V">
+          <node data="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.moo()V" id="Na7c7a6e8_17" kind="call" type="V">
             <link label="#this" src="Na7c7a6e8_16"/>
-            <ast length="9" start="273" type="32"/>
+            <ast end="282" start="273" type="32"/>
           </node>
           <node id="Na7c7a6e8_18" kind="receive" type="V">
             <link label="return" src="Na7c7a6e8_17"/>
-            <ast length="9" start="273" type="32"/>
+            <ast end="282" start="273" type="32"/>
           </node>
         </scope>
         <node id="Na7c7a6e8_1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="Na7c7a6e8_2" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
         <node id="Na7c7a6e8_3" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="Na7c7a6e8_19" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
+        <node id="Na7c7a6e8_19" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
           <link src="Na7c7a6e8_12"/>
         </node>
       </scope>
     </method>
     <method name="Ldom/meep/basic_names;.meh()V" style="instance">
-      <ast length="56" start="295" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:295:56">
-        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:295:56.:Block:313:38">
+      <ast end="351" start="295" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:295:351">
+        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:295:351.:Block:313:351">
           <node data="Ldom/meep/basic_names;.m33p()?" id="N6f0d605c_2" kind="call" type="?">
             <link label="#this" src="N6f0d605c_1"/>
-            <ast length="6" start="323" type="32"/>
+            <ast end="329" start="323" type="32"/>
           </node>
           <node id="N6f0d605c_3" kind="receive" type="?">
             <link label="return" src="N6f0d605c_2"/>
-            <ast length="6" start="323" type="32"/>
+            <ast end="329" start="323" type="32"/>
           </node>
         </scope>
         <node id="N6f0d605c_1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
       </scope>
     </method>
     <method name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" style="static">
-      <ast length="111" start="357" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:357:111">
-        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:357:111.:Block:396:72">
+      <ast end="468" start="357" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:MethodDeclaration:357:468">
+        <scope name="Ldom/meep/basic_names;.:MethodDeclaration:357:468.:Block:396:468">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Ne9ca43ba_6" kind="new" type="Ldom/meep/basic_names;">
-            <ast length="17" start="424" type="14"/>
+            <ast end="441" start="424" type="14"/>
           </node>
           <node id="Ne9ca43ba_7" kind="receive" type="Ldom/meep/basic_names;">
             <link label="return" src="Ne9ca43ba_6"/>
-            <ast length="17" start="424" type="14"/>
+            <ast end="441" start="424" type="14"/>
           </node>
-          <node id="Ne9ca43ba_8" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:111.:Block:396:72/$foo" type="Ldom/meep/basic_names;">
+          <node id="Ne9ca43ba_8" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:468.:Block:396:468/$foo" type="Ldom/meep/basic_names;">
             <link src="Ne9ca43ba_7"/>
-            <ast length="23" start="418" type="59"/>
+            <ast end="441" start="418" type="59"/>
           </node>
-          <node id="Ne9ca43ba_9" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:111.:Block:396:72/$foo" type="Ldom/meep/basic_names;">
+          <node id="Ne9ca43ba_9" kind="ref" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:468.:Block:396:468/$foo" type="Ldom/meep/basic_names;">
             <link src="Ne9ca43ba_8"/>
-            <ast length="3" start="451" type="42"/>
+            <ast end="454" start="451" type="42"/>
           </node>
           <node data="Ldom/meep/basic_names;.doit()V" id="Ne9ca43ba_10" kind="call" type="V">
             <link label="#this" src="Ne9ca43ba_9"/>
             <link label="@Ldom/meep/basic_names;/.y" src="Ne9ca43ba_4"/>
             <link label="@Ljava/lang/System;/.out" src="Ne9ca43ba_3"/>
-            <ast length="10" start="451" type="32"/>
+            <ast end="461" start="451" type="32"/>
           </node>
           <node id="Ne9ca43ba_11" kind="receive" type="V">
             <link label="return" src="Ne9ca43ba_10"/>
-            <ast length="10" start="451" type="32"/>
+            <ast end="461" start="451" type="32"/>
           </node>
-          <node id="Ne9ca43ba_12" kind="receive" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
+          <node id="Ne9ca43ba_12" kind="receive" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
             <link label="update" src="Ne9ca43ba_10"/>
-            <ast length="10" start="451" type="32"/>
+            <ast end="461" start="451" type="32"/>
           </node>
         </scope>
         <node id="Ne9ca43ba_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
-          <ast length="13" start="381" type="44"/>
+          <ast end="394" start="381" type="44"/>
         </node>
-        <node id="Ne9ca43ba_2" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:111/$args" type="[Ljava/lang/String;">
+        <node id="Ne9ca43ba_2" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:468/$args" type="[Ljava/lang/String;">
           <link src="Ne9ca43ba_1"/>
-          <ast length="13" start="381" type="44"/>
+          <ast end="394" start="381" type="44"/>
         </node>
         <node id="Ne9ca43ba_3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="Ne9ca43ba_4" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
         <node id="Ne9ca43ba_5" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="Ne9ca43ba_13" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
+        <node id="Ne9ca43ba_13" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
           <link src="Ne9ca43ba_12"/>
         </node>
       </scope>
@@ -155,27 +155,27 @@
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
     <method name="Ldom/meep/basic_names/Bar;" style="initializer">
-      <ast length="12" start="44" type="55"/>
+      <ast end="56" start="44" type="55"/>
       <scope name="Ldom/meep/basic_names/Bar;"/>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;" path="tests/basic_names.java">
-    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;" style="initializer">
-      <ast length="67" start="144" type="55"/>
-      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;">
-        <node data="uninitialized" id="N67ca2046_1" kind="const" type="@null"/>
-        <node id="N67ca2046_2" kind="assign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;/.x" type="I">
-          <link src="N67ca2046_1"/>
-          <ast length="1" start="172" type="59"/>
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;" path="tests/basic_names.java">
+    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;" style="initializer">
+      <ast end="211" start="144" type="55"/>
+      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
+        <node data="uninitialized" id="Ne9715ca4_1" kind="const" type="@null"/>
+        <node id="Ne9715ca4_2" kind="assign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
+          <link src="Ne9715ca4_1"/>
+          <ast end="173" start="172" type="59"/>
         </node>
       </scope>
     </method>
-    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;.moo()V" style="instance">
+    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.moo()V" style="instance">
       <caller name="Ldom/meep/basic_names;.doit()V"/>
-      <ast length="14" start="187" type="31"/>
-      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;.:MethodDeclaration:187:14">
-        <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;.:MethodDeclaration:187:14.:Block:198:3"/>
-        <node id="Nefd247f0_1" kind="input" ref="#this" type="Ldom/meep/basic_names/:MethodDeclaration:79:210/Baz;"/>
+      <ast end="201" start="187" type="31"/>
+      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.:MethodDeclaration:187:201">
+        <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.:MethodDeclaration:187:201.:Block:198:201"/>
+        <node id="N7f7e05d2_1" kind="input" ref="#this" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;"/>
       </scope>
     </method>
   </class>

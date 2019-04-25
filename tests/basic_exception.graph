@@ -1,108 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_exception;" path="tests/basic_exception.java">
     <method name="Lbasic_exception;" style="initializer">
-      <ast length="433" start="0" type="55"/>
+      <ast end="433" start="0" type="55"/>
       <scope name="Lbasic_exception;"/>
     </method>
     <method name="Lbasic_exception;.foo()V" style="instance">
-      <ast length="233" start="103" type="31"/>
-      <scope name="Lbasic_exception;.:MethodDeclaration:103:233">
-        <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215">
-          <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:216:47">
-            <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:216:47.:Block:228:35">
-              <node id="N707c57b4_16" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+      <ast end="336" start="103" type="31"/>
+      <scope name="Lbasic_exception;.:MethodDeclaration:103:336">
+        <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336">
+          <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263">
+            <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263.:Block:228:263">
+              <node id="N707c57b4_16" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link src="N707c57b4_20"/>
-                <ast length="1" start="242" type="42"/>
+                <ast end="243" start="242" type="42"/>
               </node>
-              <node id="N707c57b4_17" kind="ref" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:216:47/$e" type="Lbasic_exception/A;">
+              <node id="N707c57b4_17" kind="ref" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263/$e" type="Lbasic_exception/A;">
                 <link src="N707c57b4_15"/>
-                <ast length="1" start="246" type="42"/>
+                <ast end="247" start="246" type="42"/>
               </node>
               <node id="N707c57b4_18" kind="fieldref" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;">
                 <link src="N707c57b4_2"/>
                 <link label="obj" src="N707c57b4_17"/>
-                <ast length="6" start="246" type="40"/>
+                <ast end="252" start="246" type="40"/>
               </node>
-              <node data="=" id="N707c57b4_20" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+              <node data="=" id="N707c57b4_20" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link label="R" src="N707c57b4_18"/>
-                <ast length="10" start="242" type="7"/>
+                <ast end="252" start="242" type="7"/>
               </node>
             </scope>
-            <node id="N707c57b4_15" kind="catch" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:216:47/$e" type="Lbasic_exception/A;">
+            <node id="N707c57b4_15" kind="catch" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263/$e" type="Lbasic_exception/A;">
               <link src="N707c57b4_14"/>
-              <ast length="3" start="223" type="44"/>
+              <ast end="226" start="223" type="44"/>
             </node>
           </scope>
-          <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:264:66">
-            <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:264:66.:Block:284:46">
+          <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:264:330">
+            <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:264:330.:Block:284:330">
               <node id="N707c57b4_22" kind="fieldref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <link src="N707c57b4_1"/>
-                <ast length="10" start="298" type="40"/>
+                <ast end="308" start="298" type="40"/>
               </node>
-              <node id="N707c57b4_24" kind="ref" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:264:66/$e" type="Ljava/lang/Exception;">
+              <node id="N707c57b4_24" kind="ref" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:264:330/$e" type="Ljava/lang/Exception;">
                 <link src="N707c57b4_21"/>
-                <ast length="1" start="317" type="42"/>
+                <ast end="318" start="317" type="42"/>
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="N707c57b4_25" kind="call" type="V">
                 <link label="#arg0" src="N707c57b4_24"/>
                 <link label="#this" src="N707c57b4_22"/>
-                <ast length="21" start="298" type="32"/>
+                <ast end="319" start="298" type="32"/>
               </node>
               <node id="N707c57b4_26" kind="receive" type="V">
                 <link label="return" src="N707c57b4_25"/>
-                <ast length="21" start="298" type="32"/>
+                <ast end="319" start="298" type="32"/>
               </node>
             </scope>
-            <node id="N707c57b4_21" kind="catch" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:CatchClause:264:66/$e" type="Ljava/lang/Exception;">
+            <node id="N707c57b4_21" kind="catch" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:264:330/$e" type="Ljava/lang/Exception;">
               <link src="N707c57b4_14"/>
-              <ast length="11" start="271" type="44"/>
+              <ast end="282" start="271" type="44"/>
             </node>
-            <node id="N707c57b4_28" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;"/>
+            <node id="N707c57b4_28" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;"/>
           </scope>
-          <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:TryStatement:156:174">
-            <scope name="Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215.:TryStatement:156:174.:Block:160:55">
-              <node id="N707c57b4_6" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+          <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330">
+            <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330.:Block:160:215">
+              <node id="N707c57b4_6" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link src="N707c57b4_10"/>
-                <ast length="1" start="174" type="42"/>
+                <ast end="175" start="174" type="42"/>
               </node>
               <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="N707c57b4_8" kind="call" type="Ljava/lang/String;">
                 <link label="#this" src="N707c57b4_3"/>
-                <ast length="5" start="178" type="32"/>
+                <ast end="183" start="178" type="32"/>
               </node>
               <node id="N707c57b4_9" kind="receive" type="Ljava/lang/String;">
                 <link label="return" src="N707c57b4_8"/>
-                <ast length="5" start="178" type="32"/>
+                <ast end="183" start="178" type="32"/>
               </node>
-              <node data="=" id="N707c57b4_10" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+              <node data="=" id="N707c57b4_10" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link label="R" src="N707c57b4_9"/>
-                <ast length="9" start="174" type="7"/>
+                <ast end="183" start="174" type="7"/>
               </node>
-              <node id="N707c57b4_11" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+              <node id="N707c57b4_11" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link src="N707c57b4_13"/>
-                <ast length="1" start="197" type="42"/>
+                <ast end="198" start="197" type="42"/>
               </node>
               <node data="b" id="N707c57b4_12" kind="const" type="Ljava/lang/String;">
-                <ast length="3" start="201" type="45"/>
+                <ast end="204" start="201" type="45"/>
               </node>
-              <node data="=" id="N707c57b4_13" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+              <node data="=" id="N707c57b4_13" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
                 <link label="R" src="N707c57b4_12"/>
-                <ast length="7" start="197" type="7"/>
+                <ast end="204" start="197" type="7"/>
               </node>
             </scope>
             <node id="N707c57b4_14" ref="#exception" type="Ljava/lang/Exception;"/>
           </scope>
           <node data="null" id="N707c57b4_4" kind="const" type="@null">
-            <ast length="4" start="142" type="33"/>
+            <ast end="146" start="142" type="33"/>
           </node>
-          <node id="N707c57b4_5" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+          <node id="N707c57b4_5" kind="assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
             <link src="N707c57b4_4"/>
-            <ast length="8" start="138" type="59"/>
+            <ast end="146" start="138" type="59"/>
           </node>
-          <node id="N707c57b4_27" kind="join" ref="$Lbasic_exception;.:MethodDeclaration:103:233.:Block:121:215/$x" type="Ljava/lang/String;">
+          <node id="N707c57b4_27" kind="join" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
             <link src="N707c57b4_11"/>
             <link label="Lbasic_exception/A;" src="N707c57b4_16"/>
             <link label="Ljava/lang/Exception;" src="N707c57b4_28"/>
-            <ast length="174" start="156" type="54"/>
+            <ast end="330" start="156" type="54"/>
           </node>
         </scope>
         <node id="N707c57b4_1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
@@ -112,36 +112,36 @@
     </method>
     <method name="Lbasic_exception;.moo()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_exception;.foo()V"/>
-      <ast length="89" start="342" type="31"/>
-      <scope name="Lbasic_exception;.:MethodDeclaration:342:89">
-        <scope name="Lbasic_exception;.:MethodDeclaration:342:89.:Block:371:60">
+      <ast end="431" start="342" type="31"/>
+      <scope name="Lbasic_exception;.:MethodDeclaration:342:431">
+        <scope name="Lbasic_exception;.:MethodDeclaration:342:431.:Block:371:431">
           <node data="true" id="N3204ac33_2" kind="const" type="Z">
-            <ast length="4" start="385" type="9"/>
+            <ast end="389" start="385" type="9"/>
           </node>
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N3204ac33_3" kind="new" type="Lbasic_exception/A;">
-            <ast length="7" start="397" type="14"/>
+            <ast end="404" start="397" type="14"/>
           </node>
           <node id="N3204ac33_4" kind="receive" type="Lbasic_exception/A;">
             <link label="return" src="N3204ac33_3"/>
-            <ast length="7" start="397" type="14"/>
+            <ast end="404" start="397" type="14"/>
           </node>
           <node id="N3204ac33_5" kind="throw" ref="#exception" type="Ljava/lang/Exception;">
             <link src="N3204ac33_4"/>
-            <ast length="14" start="391" type="53"/>
+            <ast end="405" start="391" type="53"/>
           </node>
           <node id="N3204ac33_6" kind="join" ref="#exception" type="Ljava/lang/Exception;">
             <link label="cond" src="N3204ac33_2"/>
             <link label="false" src="N3204ac33_8"/>
             <link label="true" src="N3204ac33_7"/>
-            <ast length="24" start="381" type="25"/>
+            <ast end="405" start="381" type="25"/>
           </node>
           <node id="N3204ac33_7" ref="#exception" type="Ljava/lang/Exception;"/>
           <node data="a" id="N3204ac33_9" kind="const" type="Ljava/lang/String;">
-            <ast length="3" start="421" type="45"/>
+            <ast end="424" start="421" type="45"/>
           </node>
           <node id="N3204ac33_10" kind="output" ref="#return" type="Ljava/lang/String;">
             <link src="N3204ac33_9"/>
-            <ast length="11" start="414" type="41"/>
+            <ast end="425" start="414" type="41"/>
           </node>
         </scope>
         <node id="N3204ac33_1" kind="input" ref="#this" type="Lbasic_exception;"/>
@@ -151,12 +151,12 @@
   </class>
   <class extends="Ljava/lang/Exception;" name="Lbasic_exception/A;" path="tests/basic_exception.java">
     <method name="Lbasic_exception/A;" style="initializer">
-      <ast length="61" start="36" type="55"/>
+      <ast end="97" start="36" type="55"/>
       <scope name="Lbasic_exception/A;">
         <node data="uninitialized" id="Nd9b72797_1" kind="const" type="@null"/>
         <node id="Nd9b72797_2" kind="assign" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;">
           <link src="Nd9b72797_1"/>
-          <ast length="4" start="86" type="59"/>
+          <ast end="90" start="86" type="59"/>
         </node>
       </scope>
     </method>

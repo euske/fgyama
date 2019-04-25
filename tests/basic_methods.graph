@@ -1,83 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
     <method name="Lbasic_methods;" style="initializer">
-      <ast length="452" start="0" type="55"/>
+      <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;">
         <node data="0" id="N6dabe706_1" kind="const" type="I">
-          <ast length="1" start="132" type="34"/>
+          <ast end="133" start="132" type="34"/>
         </node>
         <node id="N6dabe706_2" kind="assign" ref="@Lbasic_methods;/.x" type="I">
           <link src="N6dabe706_1"/>
-          <ast length="5" start="128" type="59"/>
+          <ast end="133" start="128" type="59"/>
         </node>
       </scope>
     </method>
     <method name="Lbasic_methods;.fa()V" style="instance">
-      <ast length="246" start="139" type="31"/>
-      <scope name="Lbasic_methods;.:MethodDeclaration:139:246">
-        <scope name="Lbasic_methods;.:MethodDeclaration:139:246.:Block:156:229">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_3" kind="new" type="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;">
-            <ast length="60" start="165" type="14"/>
+      <ast end="385" start="139" type="31"/>
+      <scope name="Lbasic_methods;.:MethodDeclaration:139:385">
+        <scope name="Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_3" kind="new" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;">
+            <ast end="225" start="165" type="14"/>
           </node>
-          <node id="N929107f2_4" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;">
+          <node id="N929107f2_4" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;">
             <link label="return" src="N929107f2_3"/>
-            <ast length="60" start="165" type="14"/>
+            <ast end="225" start="165" type="14"/>
           </node>
-          <node id="N929107f2_5" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:246.:Block:156:229/$a" type="Lbasic_methods/A;">
+          <node id="N929107f2_5" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$a" type="Lbasic_methods/A;">
             <link src="N929107f2_4"/>
-            <ast length="64" start="161" type="59"/>
+            <ast end="225" start="161" type="59"/>
           </node>
           <node id="N929107f2_6" kind="assign" ref="@Lbasic_methods;/.x" type="I">
             <link src="N929107f2_9"/>
-            <ast length="1" start="305" type="42"/>
+            <ast end="306" start="305" type="42"/>
           </node>
           <node data="Lbasic_methods;.fb()I" id="N929107f2_7" kind="call" type="I">
             <link label="#this" src="N929107f2_2"/>
-            <ast length="4" start="309" type="32"/>
+            <ast end="313" start="309" type="32"/>
           </node>
           <node id="N929107f2_8" kind="receive" type="I">
             <link label="return" src="N929107f2_7"/>
-            <ast length="4" start="309" type="32"/>
+            <ast end="313" start="309" type="32"/>
           </node>
           <node data="=" id="N929107f2_9" kind="assignop" ref="@Lbasic_methods;/.x" type="I">
             <link label="R" src="N929107f2_8"/>
-            <ast length="8" start="305" type="7"/>
+            <ast end="313" start="305" type="7"/>
           </node>
-          <node id="N929107f2_10" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:139:246.:Block:156:229/$a" type="Lbasic_methods/A;">
+          <node id="N929107f2_10" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$a" type="Lbasic_methods/A;">
             <link src="N929107f2_5"/>
-            <ast length="1" start="323" type="42"/>
+            <ast end="324" start="323" type="42"/>
           </node>
           <node data="Lbasic_methods/A;.toString()Ljava/lang/String;" id="N929107f2_11" kind="call" type="Ljava/lang/String;">
             <link label="#this" src="N929107f2_10"/>
-            <ast length="12" start="323" type="32"/>
+            <ast end="335" start="323" type="32"/>
           </node>
           <node id="N929107f2_12" kind="receive" type="Ljava/lang/String;">
             <link label="return" src="N929107f2_11"/>
-            <ast length="12" start="323" type="32"/>
+            <ast end="335" start="323" type="32"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_13" kind="new" type="Lbasic_methods/:MethodDeclaration:139:246/moo;">
-            <ast length="9" start="353" type="14"/>
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_13" kind="new" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
+            <ast end="362" start="353" type="14"/>
           </node>
-          <node id="N929107f2_14" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:246/moo;">
+          <node id="N929107f2_14" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
             <link label="return" src="N929107f2_13"/>
-            <ast length="9" start="353" type="14"/>
+            <ast end="362" start="353" type="14"/>
           </node>
-          <node id="N929107f2_15" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:246.:Block:156:229/$c" type="Lbasic_methods/:MethodDeclaration:139:246/moo;">
+          <node id="N929107f2_15" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$c" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
             <link src="N929107f2_14"/>
-            <ast length="13" start="349" type="59"/>
+            <ast end="362" start="349" type="59"/>
           </node>
-          <node id="N929107f2_16" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:139:246.:Block:156:229/$c" type="Lbasic_methods/:MethodDeclaration:139:246/moo;">
+          <node id="N929107f2_16" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$c" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
             <link src="N929107f2_15"/>
-            <ast length="1" start="372" type="42"/>
+            <ast end="373" start="372" type="42"/>
           </node>
-          <node data="Lbasic_methods/:MethodDeclaration:139:246/moo;.fc()I" id="N929107f2_17" kind="call" type="I">
+          <node data="Lbasic_methods/:MethodDeclaration:139:385/moo;.fc()I" id="N929107f2_17" kind="call" type="I">
             <link label="#this" src="N929107f2_16"/>
             <link label="@Lbasic_methods;/.x" src="N929107f2_6"/>
-            <ast length="6" start="372" type="32"/>
+            <ast end="378" start="372" type="32"/>
           </node>
           <node id="N929107f2_18" kind="receive" type="I">
             <link label="return" src="N929107f2_17"/>
-            <ast length="6" start="372" type="32"/>
+            <ast end="378" start="372" type="32"/>
           </node>
         </scope>
         <node id="N929107f2_1" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
@@ -89,23 +89,23 @@
     </method>
     <method name="Lbasic_methods;.fb()I" style="static">
       <caller name="Lbasic_methods;.fa()V"/>
-      <ast length="60" start="390" type="31"/>
-      <scope name="Lbasic_methods;.:MethodDeclaration:390:60">
-        <scope name="Lbasic_methods;.:MethodDeclaration:390:60.:Block:413:37">
+      <ast end="450" start="390" type="31"/>
+      <scope name="Lbasic_methods;.:MethodDeclaration:390:450">
+        <scope name="Lbasic_methods;.:MethodDeclaration:390:450.:Block:413:450">
           <node data="0" id="N92917c44_2" kind="const" type="I">
-            <ast length="1" start="424" type="34"/>
+            <ast end="425" start="424" type="34"/>
           </node>
-          <node id="N92917c44_3" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:390:60.:Block:413:37/$a" type="I">
+          <node id="N92917c44_3" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:390:450.:Block:413:450/$a" type="I">
             <link src="N92917c44_2"/>
-            <ast length="5" start="420" type="59"/>
+            <ast end="425" start="420" type="59"/>
           </node>
-          <node id="N92917c44_4" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:390:60.:Block:413:37/$a" type="I">
+          <node id="N92917c44_4" kind="ref" ref="$Lbasic_methods;.:MethodDeclaration:390:450.:Block:413:450/$a" type="I">
             <link src="N92917c44_3"/>
-            <ast length="1" start="442" type="42"/>
+            <ast end="443" start="442" type="42"/>
           </node>
           <node id="N92917c44_5" kind="output" ref="#return" type="I">
             <link src="N92917c44_4"/>
-            <ast length="9" start="435" type="41"/>
+            <ast end="444" start="435" type="41"/>
           </node>
         </scope>
         <node id="N92917c44_1" kind="input" ref="#this" type="Lbasic_methods;"/>
@@ -114,73 +114,73 @@
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods/A;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/A;" style="initializer">
-      <ast length="84" start="34" type="55"/>
+      <ast end="118" start="34" type="55"/>
       <scope name="Lbasic_methods/A;"/>
     </method>
     <method name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
-      <ast length="60" start="52" type="31"/>
-      <scope name="Lbasic_methods/A;.:MethodDeclaration:52:60">
-        <scope name="Lbasic_methods/A;.:MethodDeclaration:52:60.:Block:77:35">
+      <ast end="112" start="52" type="31"/>
+      <scope name="Lbasic_methods/A;.:MethodDeclaration:52:112">
+        <scope name="Lbasic_methods/A;.:MethodDeclaration:52:112.:Block:77:112">
           <node data="A" id="N4ac72551_2" kind="const" type="Ljava/lang/String;">
-            <ast length="3" start="98" type="45"/>
+            <ast end="101" start="98" type="45"/>
           </node>
           <node id="N4ac72551_3" kind="output" ref="#return" type="Ljava/lang/String;">
             <link src="N4ac72551_2"/>
-            <ast length="11" start="91" type="41"/>
+            <ast end="102" start="91" type="41"/>
           </node>
         </scope>
         <node id="N4ac72551_1" kind="input" ref="#this" type="Lbasic_methods/A;"/>
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;" path="tests/basic_methods.java">
-    <method name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;" style="initializer">
-      <ast length="52" start="173" type="1"/>
-      <scope name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;"/>
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;" path="tests/basic_methods.java">
+    <method name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;" style="initializer">
+      <ast end="225" start="173" type="1"/>
+      <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;"/>
     </method>
-    <method name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;.toString()Ljava/lang/String;" style="instance">
-      <ast length="42" start="180" type="31"/>
-      <scope name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;.:MethodDeclaration:180:42">
-        <scope name="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;.:MethodDeclaration:180:42.:Block:205:17">
-          <node data="AAA" id="Na9e01f3a_2" kind="const" type="Ljava/lang/String;">
-            <ast length="5" start="214" type="45"/>
+    <method name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.toString()Ljava/lang/String;" style="instance">
+      <ast end="222" start="180" type="31"/>
+      <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.:MethodDeclaration:180:222">
+        <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.:MethodDeclaration:180:222.:Block:205:222">
+          <node data="AAA" id="N53ad3190_2" kind="const" type="Ljava/lang/String;">
+            <ast end="219" start="214" type="45"/>
           </node>
-          <node id="Na9e01f3a_3" kind="output" ref="#return" type="Ljava/lang/String;">
-            <link src="Na9e01f3a_2"/>
-            <ast length="13" start="207" type="41"/>
+          <node id="N53ad3190_3" kind="output" ref="#return" type="Ljava/lang/String;">
+            <link src="N53ad3190_2"/>
+            <ast end="220" start="207" type="41"/>
           </node>
         </scope>
-        <node id="Na9e01f3a_1" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:246/:AnonymousClassDeclaration:173:52;"/>
+        <node id="N53ad3190_1" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;"/>
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:246/moo;" path="tests/basic_methods.java">
-    <method name="Lbasic_methods/:MethodDeclaration:139:246/moo;" style="initializer">
-      <ast length="68" start="228" type="55"/>
-      <scope name="Lbasic_methods/:MethodDeclaration:139:246/moo;"/>
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:385/moo;" path="tests/basic_methods.java">
+    <method name="Lbasic_methods/:MethodDeclaration:139:385/moo;" style="initializer">
+      <ast end="296" start="228" type="55"/>
+      <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;"/>
     </method>
-    <method name="Lbasic_methods/:MethodDeclaration:139:246/moo;.fc()I" style="instance">
+    <method name="Lbasic_methods/:MethodDeclaration:139:385/moo;.fc()I" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
-      <ast length="48" start="245" type="31"/>
-      <scope name="Lbasic_methods/:MethodDeclaration:139:246/moo;.:MethodDeclaration:245:48">
-        <scope name="Lbasic_methods/:MethodDeclaration:139:246/moo;.:MethodDeclaration:245:48.:Block:261:32">
-          <node id="N7ef6748a_3" kind="ref" ref="#this" type="Lbasic_methods;">
-            <link src="N7ef6748a_2"/>
-            <ast length="18" start="270" type="52"/>
+      <ast end="293" start="245" type="31"/>
+      <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.:MethodDeclaration:245:293">
+        <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.:MethodDeclaration:245:293.:Block:261:293">
+          <node id="N132eb2ce_3" kind="ref" ref="#this" type="Lbasic_methods;">
+            <link src="N132eb2ce_2"/>
+            <ast end="288" start="270" type="52"/>
           </node>
-          <node id="N7ef6748a_4" kind="fieldref" ref="@Lbasic_methods;/.x" type="I">
-            <link src="N7ef6748a_1"/>
-            <link label="obj" src="N7ef6748a_3"/>
-            <ast length="20" start="270" type="22"/>
+          <node id="N132eb2ce_4" kind="fieldref" ref="@Lbasic_methods;/.x" type="I">
+            <link src="N132eb2ce_1"/>
+            <link label="obj" src="N132eb2ce_3"/>
+            <ast end="290" start="270" type="22"/>
           </node>
-          <node id="N7ef6748a_5" kind="output" ref="#return" type="I">
-            <link src="N7ef6748a_4"/>
-            <ast length="28" start="263" type="41"/>
+          <node id="N132eb2ce_5" kind="output" ref="#return" type="I">
+            <link src="N132eb2ce_4"/>
+            <ast end="291" start="263" type="41"/>
           </node>
         </scope>
-        <node id="N7ef6748a_1" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
-        <node id="N7ef6748a_2" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:246/moo;"/>
+        <node id="N132eb2ce_1" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
+        <node id="N132eb2ce_2" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:385/moo;"/>
       </scope>
     </method>
   </class>

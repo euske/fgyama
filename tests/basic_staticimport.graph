@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
     <method name="Lbasic_staticimport;" style="initializer">
-      <ast length="94" start="69" type="55"/>
+      <ast end="163" start="69" type="55"/>
       <scope name="Lbasic_staticimport;"/>
     </method>
     <method name="Lbasic_staticimport;.foo()V" style="static">
-      <ast length="54" start="107" type="31"/>
-      <scope name="Lbasic_staticimport;.:MethodDeclaration:107:54">
-        <scope name="Lbasic_staticimport;.:MethodDeclaration:107:54.:Block:132:29">
+      <ast end="161" start="107" type="31"/>
+      <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161">
+        <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161.:Block:132:161">
           <node id="Nede5cb52_3" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link src="Nede5cb52_1"/>
-            <ast length="3" start="135" type="42"/>
+            <ast end="138" start="135" type="42"/>
           </node>
           <node data="1" id="Nede5cb52_4" kind="const" type="I">
-            <ast length="1" start="151" type="34"/>
+            <ast end="152" start="151" type="34"/>
           </node>
           <node data="Ljava/lang/Math;.sin(D)D" id="Nede5cb52_5" kind="call" type="D">
             <link label="#arg0" src="Nede5cb52_4"/>
             <link label="#this" src="Nede5cb52_2"/>
-            <ast length="6" start="147" type="32"/>
+            <ast end="153" start="147" type="32"/>
           </node>
           <node id="Nede5cb52_6" kind="receive" type="D">
             <link label="return" src="Nede5cb52_5"/>
-            <ast length="6" start="147" type="32"/>
+            <ast end="153" start="147" type="32"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
             <link label="#arg0" src="Nede5cb52_6"/>
             <link label="#this" src="Nede5cb52_3"/>
-            <ast length="19" start="135" type="32"/>
+            <ast end="154" start="135" type="32"/>
           </node>
           <node id="Nede5cb52_8" kind="receive" type="V">
             <link label="return" src="Nede5cb52_7"/>
-            <ast length="19" start="135" type="32"/>
+            <ast end="154" start="135" type="32"/>
           </node>
         </scope>
         <node id="Nede5cb52_1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>

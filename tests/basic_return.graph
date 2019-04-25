@@ -1,90 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_return;" path="tests/basic_return.java">
     <method name="Lbasic_return;" style="initializer">
-      <ast length="205" start="46" type="55"/>
+      <ast end="251" start="46" type="55"/>
       <scope name="Lbasic_return;"/>
     </method>
     <method name="Lbasic_return;.foo(III)I" style="static">
-      <ast length="145" start="104" type="31"/>
-      <scope name="Lbasic_return;.:MethodDeclaration:104:145">
-        <scope name="Lbasic_return;.:MethodDeclaration:104:145.:Block:147:102">
-          <node id="N41f01687_8" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:145/$a" type="I">
+      <ast end="249" start="104" type="31"/>
+      <scope name="Lbasic_return;.:MethodDeclaration:104:249">
+        <scope name="Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249">
+          <node id="N41f01687_8" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
             <link src="N41f01687_2"/>
-            <ast length="1" start="192" type="42"/>
+            <ast end="193" start="192" type="42"/>
           </node>
-          <node id="N41f01687_9" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:145/$b" type="I">
+          <node id="N41f01687_9" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:249/$b" type="I">
             <link src="N41f01687_4"/>
-            <ast length="1" start="196" type="42"/>
+            <ast end="197" start="196" type="42"/>
           </node>
           <node data="+" id="N41f01687_10" kind="infix" type="I">
             <link label="L" src="N41f01687_8"/>
             <link label="R" src="N41f01687_9"/>
-            <ast length="5" start="192" type="27"/>
+            <ast end="197" start="192" type="27"/>
           </node>
           <node data="Lbasic_return;.f(I)?" id="N41f01687_11" kind="call" type="?">
             <link label="#arg0" src="N41f01687_10"/>
             <link label="#this" src="N41f01687_7"/>
-            <ast length="8" start="190" type="32"/>
+            <ast end="198" start="190" type="32"/>
           </node>
           <node id="N41f01687_12" kind="receive" type="?">
             <link label="return" src="N41f01687_11"/>
-            <ast length="8" start="190" type="32"/>
+            <ast end="198" start="190" type="32"/>
           </node>
-          <node id="N41f01687_13" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:145.:Block:147:102/$d" type="I">
+          <node id="N41f01687_13" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
             <link src="N41f01687_12"/>
-            <ast length="12" start="186" type="59"/>
+            <ast end="198" start="186" type="59"/>
           </node>
-          <node id="N41f01687_14" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:145/$a" type="I">
+          <node id="N41f01687_14" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
             <link src="N41f01687_2"/>
-            <ast length="1" start="232" type="42"/>
+            <ast end="233" start="232" type="42"/>
           </node>
           <node data="-" id="N41f01687_15" kind="prefix" type="I">
             <link src="N41f01687_14"/>
-            <ast length="2" start="231" type="38"/>
+            <ast end="233" start="231" type="38"/>
           </node>
-          <node id="N41f01687_16" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:145.:Block:147:102/$d" type="I">
+          <node id="N41f01687_16" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
             <link src="N41f01687_13"/>
-            <ast length="1" start="237" type="42"/>
+            <ast end="238" start="237" type="42"/>
           </node>
-          <node id="N41f01687_17" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:145/$c" type="I">
+          <node id="N41f01687_17" kind="ref" ref="$Lbasic_return;.:MethodDeclaration:104:249/$c" type="I">
             <link src="N41f01687_6"/>
-            <ast length="1" start="241" type="42"/>
+            <ast end="242" start="241" type="42"/>
           </node>
           <node data="*" id="N41f01687_18" kind="infix" type="I">
             <link label="L" src="N41f01687_16"/>
             <link label="R" src="N41f01687_17"/>
-            <ast length="5" start="237" type="27"/>
+            <ast end="242" start="237" type="27"/>
           </node>
           <node data="+" id="N41f01687_19" kind="infix" type="I">
             <link label="L" src="N41f01687_15"/>
             <link label="R" src="N41f01687_18"/>
-            <ast length="12" start="230" type="27"/>
+            <ast end="242" start="230" type="27"/>
           </node>
           <node id="N41f01687_20" kind="output" ref="#return" type="I">
             <link src="N41f01687_19"/>
-            <ast length="20" start="223" type="41"/>
+            <ast end="243" start="223" type="41"/>
           </node>
         </scope>
         <node id="N41f01687_1" kind="input" ref="#arg0" type="I">
-          <ast length="5" start="126" type="44"/>
+          <ast end="131" start="126" type="44"/>
         </node>
-        <node id="N41f01687_2" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:145/$a" type="I">
+        <node id="N41f01687_2" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
           <link src="N41f01687_1"/>
-          <ast length="5" start="126" type="44"/>
+          <ast end="131" start="126" type="44"/>
         </node>
         <node id="N41f01687_3" kind="input" ref="#arg1" type="I">
-          <ast length="5" start="133" type="44"/>
+          <ast end="138" start="133" type="44"/>
         </node>
-        <node id="N41f01687_4" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:145/$b" type="I">
+        <node id="N41f01687_4" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:249/$b" type="I">
           <link src="N41f01687_3"/>
-          <ast length="5" start="133" type="44"/>
+          <ast end="138" start="133" type="44"/>
         </node>
         <node id="N41f01687_5" kind="input" ref="#arg2" type="I">
-          <ast length="5" start="140" type="44"/>
+          <ast end="145" start="140" type="44"/>
         </node>
-        <node id="N41f01687_6" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:145/$c" type="I">
+        <node id="N41f01687_6" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:249/$c" type="I">
           <link src="N41f01687_5"/>
-          <ast length="5" start="140" type="44"/>
+          <ast end="145" start="140" type="44"/>
         </node>
         <node id="N41f01687_7" kind="input" ref="#this" type="Lbasic_return;"/>
       </scope>
