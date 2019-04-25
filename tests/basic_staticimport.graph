@@ -6,8 +6,8 @@
     </method>
     <method name="Lbasic_staticimport;.foo()V" style="static">
       <ast length="54" start="107" type="31"/>
-      <scope name="Lbasic_staticimport;.foo">
-        <scope name="Lbasic_staticimport;.foo.b0">
+      <scope name="Lbasic_staticimport;.:MethodDeclaration:107:54">
+        <scope name="Lbasic_staticimport;.:MethodDeclaration:107:54.:Block:132:29">
           <node id="Nede5cb52_3" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link src="Nede5cb52_1"/>
             <ast length="3" start="135" type="42"/>

@@ -14,8 +14,8 @@
     </method>
     <method name="Ldom/dood/multi_xref3;.baa()V" style="instance">
       <ast length="79" start="114" type="31"/>
-      <scope name="Ldom/dood/multi_xref3;.baa">
-        <scope name="Ldom/dood/multi_xref3;.baa.b0">
+      <scope name="Ldom/dood/multi_xref3;.:MethodDeclaration:114:79">
+        <scope name="Ldom/dood/multi_xref3;.:MethodDeclaration:114:79.:Block:132:61">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Ne96a6cc2_2" kind="new" type="Ldom/meep/multi_xref1;">
             <ast length="17" start="155" type="14"/>
           </node>
@@ -23,11 +23,11 @@
             <link label="return" src="Ne96a6cc2_2"/>
             <ast length="17" start="155" type="14"/>
           </node>
-          <node id="Ne96a6cc2_4" kind="assign" ref="$Ldom/dood/multi_xref3;.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Ne96a6cc2_4" kind="assign" ref="$Ldom/dood/multi_xref3;.:MethodDeclaration:114:79.:Block:132:61/$xref1" type="Ldom/meep/multi_xref1;">
             <link src="Ne96a6cc2_3"/>
             <ast length="25" start="147" type="59"/>
           </node>
-          <node id="Ne96a6cc2_5" kind="ref" ref="$Ldom/dood/multi_xref3;.baa.b0/$xref1" type="Ldom/meep/multi_xref1;">
+          <node id="Ne96a6cc2_5" kind="ref" ref="$Ldom/dood/multi_xref3;.:MethodDeclaration:114:79.:Block:132:61/$xref1" type="Ldom/meep/multi_xref1;">
             <link src="Ne96a6cc2_4"/>
             <ast length="5" start="175" type="42"/>
           </node>
@@ -58,8 +58,8 @@
     <method name="Ldom/meep/multi_xref1;.moo()V" style="instance">
       <caller name="Ldom/meep/multi_xref2;.foo()V"/>
       <ast length="139" start="115" type="31"/>
-      <scope name="Ldom/meep/multi_xref1;.moo">
-        <scope name="Ldom/meep/multi_xref1;.moo.b0">
+      <scope name="Ldom/meep/multi_xref1;.:MethodDeclaration:115:139">
+        <scope name="Ldom/meep/multi_xref1;.:MethodDeclaration:115:139.:Block:133:121">
           <node id="N2082c4f8_6" kind="ref" ref="#this" type="Ldom/meep/multi_xref1;">
             <link src="N2082c4f8_5"/>
             <ast length="4" start="136" type="52"/>
@@ -158,8 +158,8 @@
     <method name="Ldom/meep/multi_xref2;.foo()V" style="instance">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast length="164" start="75" type="31"/>
-      <scope name="Ldom/meep/multi_xref2;.foo">
-        <scope name="Ldom/meep/multi_xref2;.foo.b0">
+      <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:75:164">
+        <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146">
           <node id="Na8d547a0_6" kind="ref" ref="#this" type="Ldom/meep/multi_xref2;">
             <link src="Na8d547a0_5"/>
             <ast length="4" start="96" type="52"/>
@@ -208,7 +208,7 @@
             <link label="update" src="Na8d547a0_12"/>
             <ast length="11" start="129" type="32"/>
           </node>
-          <node id="Na8d547a0_17" kind="ref" ref="$Ldom/meep/multi_xref2;.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;">
+          <node id="Na8d547a0_17" kind="ref" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146/$zzz" type="Ldom/meep/multi_xref1/baa;">
             <link src="Na8d547a0_18"/>
             <ast length="3" start="187" type="42"/>
           </node>
@@ -217,11 +217,11 @@
             <link label="obj" src="Na8d547a0_17"/>
             <ast length="7" start="187" type="40"/>
           </node>
-          <node id="Na8d547a0_20" kind="assign" ref="$Ldom/meep/multi_xref2;.foo.b0/$b" type="I">
+          <node id="Na8d547a0_20" kind="assign" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146/$b" type="I">
             <link src="Na8d547a0_19"/>
             <ast length="11" start="183" type="59"/>
           </node>
-          <node id="Na8d547a0_21" kind="assign" ref="$Ldom/meep/multi_xref2;.foo.b0/$b" type="I">
+          <node id="Na8d547a0_21" kind="assign" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146/$b" type="I">
             <link src="Na8d547a0_23"/>
             <ast length="1" start="204" type="42"/>
           </node>
@@ -229,7 +229,7 @@
             <link src="Na8d547a0_14"/>
             <ast length="24" start="208" type="40"/>
           </node>
-          <node data="=" id="Na8d547a0_23" kind="assignop" ref="$Ldom/meep/multi_xref2;.foo.b0/$b" type="I">
+          <node data="=" id="Na8d547a0_23" kind="assignop" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146/$b" type="I">
             <link label="R" src="Na8d547a0_22"/>
             <ast length="28" start="204" type="7"/>
           </node>
@@ -239,7 +239,7 @@
         <node id="Na8d547a0_3" kind="input" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
         <node id="Na8d547a0_4" kind="input" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
         <node id="Na8d547a0_5" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
-        <node id="Na8d547a0_18" ref="$Ldom/meep/multi_xref2;.foo.b0/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
+        <node id="Na8d547a0_18" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:164.:Block:93:146/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
         <node id="Na8d547a0_24" kind="output" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
           <link src="Na8d547a0_14"/>
         </node>
@@ -254,8 +254,8 @@
     <method name="Ldom/meep/multi_xref2;.bam()I" style="static">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast length="50" start="245" type="31"/>
-      <scope name="Ldom/meep/multi_xref2;.bam">
-        <scope name="Ldom/meep/multi_xref2;.bam.b0">
+      <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:245:50">
+        <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:245:50.:Block:269:26">
           <node data="42" id="Na13bb34b_2" kind="const" type="I">
             <ast length="2" start="286" type="34"/>
           </node>
