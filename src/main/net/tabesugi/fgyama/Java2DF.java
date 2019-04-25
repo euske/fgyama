@@ -29,9 +29,11 @@ abstract class ProgNode extends DFNode {
         Element elem = super.toXML(document);
         if (_ast != null) {
             Element east = document.createElement("ast");
+            int start = _ast.getStartPosition();
+            int end = start + _ast.getLength();
             east.setAttribute("type", Integer.toString(_ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(_ast.getStartPosition()));
-            east.setAttribute("length", Integer.toString(_ast.getLength()));
+            east.setAttribute("start", Integer.toString(start));
+            east.setAttribute("end", Integer.toString(end));
             elem.appendChild(east);
         }
         return elem;

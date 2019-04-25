@@ -195,8 +195,9 @@ public class Utils {
     }
 
     public static String encodeASTNode(ASTNode node) {
-        return (":"+getASTNodeTypeName(node.getNodeType())+":"+
-                node.getStartPosition()+":"+node.getLength());
+        int start = node.getStartPosition();
+        int end = start + node.getLength();
+        return (":"+getASTNodeTypeName(node.getNodeType())+":"+start+":"+end);
     }
 
     public static String getASTNodeTypeName(int type) {
