@@ -207,10 +207,10 @@ def main(argv):
                     fp.write('<div class=result hidden id="M%d">\n' % mid)
                 annot = SourceAnnot(srcdb)
                 def add(loc, i, maxlength):
-                    (fid,start,length) = loc
+                    (fid,start,end) = loc
                     name = srcmap[fid]
-                    length = min(length, maxlength)
-                    annot.add(name, start, start+length, i)
+                    end = min(end, start+maxlength)
+                    annot.add(name, start, end, i)
                     return
                 (_,loc) = itemmap[item]
                 if loc is not None:

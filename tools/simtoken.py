@@ -91,9 +91,9 @@ def main(argv):
             if graph.style == 'initializer': continue
             if graph.src is None: continue
             if graph.ast is None: continue
-            (_,loc,length) = graph.ast
+            (_,start,end) = graph.ast
             src = srcdb.get(graph.src)
-            text = src.data[loc:loc+length]
+            text = src.data[start:end]
             c = {}
             for t in gettokens(text):
                 if t not in c:
@@ -159,9 +159,9 @@ def main(argv):
             if not verbose: continue
             if graph.src is None or graph.ast is None: continue
             src = srcdb.get(graph.src)
-            (_,loc,length) = graph.ast
+            (_,start,end) = graph.ast
             fp.write('# %s\n' % graph.src)
-            ranges = [(loc, loc+length, 0)]
+            ranges = [(start, end, 0)]
             for (lineno,line) in src.show(ranges):
                 if lineno is None:
                     fp.write(line.rstrip()+'\n')

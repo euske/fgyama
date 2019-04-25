@@ -117,12 +117,12 @@ class IDFBuilder:
             name = node.src
         else:
             name = node.graph.src
-        (_,loc,length) = node.ast
+        (_,start,end) = node.ast
         if resolve:
             fid = self.srcmap[name]
-            return (fid, loc, length)
+            return (fid, start, end)
         else:
-            return (name, loc, length)
+            return (name, start, end)
 
     # Register a funcall.
     def addcall(self, x, y): # (caller, callee)

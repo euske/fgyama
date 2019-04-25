@@ -61,10 +61,10 @@ class DFGraph:
         egraph.set('name', self.name)
         if self.ast is not None:
             east = Element('ast')
-            (astype,astart,alength) = self.ast
+            (astype,astart,aend) = self.ast
             east.set('type', str(astype))
             east.set('start', str(astart))
-            east.set('length', str(alength))
+            east.set('end', str(aend))
             egraph.append(east)
         if self.src is not None:
             egraph.set('src', self.src)
@@ -147,10 +147,10 @@ class DFNode:
             enode.set('type', self.ntype)
         if self.ast is not None:
             east = Element('ast')
-            (astype,astart,alength) = self.ast
+            (astype,astart,aend) = self.ast
             east.set('type', str(astype))
             east.set('start', str(astart))
-            east.set('length', str(alength))
+            east.set('end', str(aend))
             enode.append(east)
         for (label,src) in self.inputs.items():
             elink = Element('link')
@@ -201,7 +201,7 @@ def parse_graph(gid, egraph, src=None):
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
                             int(e.get('start')),
-                            int(e.get('length')))
+                            int(e.get('end')))
             elif e.tag == 'link':
                 label = e.get('label', '')
                 src = e.get('src')
@@ -231,7 +231,7 @@ def parse_graph(gid, egraph, src=None):
             graph.ast = (
                 int(e.get('type')),
                 int(e.get('start')),
-                int(e.get('length')))
+                int(e.get('end')))
         elif e.tag == 'scope':
             (_,graph.root) = parse_scope(1, e)
         elif e.tag == 'caller':

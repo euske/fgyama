@@ -60,10 +60,6 @@ def main(argv):
         fp = sys.stdout
     else:
         fp = open(output, 'w')
-    if 0 < debug:
-        dbg = sys.stderr
-    else:
-        dbg = fp
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
@@ -139,9 +135,9 @@ def main(argv):
             if srcdb is not None:
                 src = builder.getsrc(n, False)
                 if src is None: continue
-                (name,start,length) = src
+                (name,start,end) = src
                 annot = SourceAnnot(srcdb)
-                annot.add(name, start, start+length, i)
+                annot.add(name, start, end, i)
                 annot.show_text(fp)
         print()
 
