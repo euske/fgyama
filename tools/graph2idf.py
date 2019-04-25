@@ -163,19 +163,19 @@ class IDFBuilder:
                     funcs = node.data.split(' ')
                     for gid in funcs[:self.maxoverrides]:
                         if gid not in self.gid2graph: continue
-                        graph = self.gid2graph[gid]
-                        for n1 in graph.ins:
+                        func = self.gid2graph[gid]
+                        for n1 in func.ins:
                             label = n1.ref
                             if label in node.inputs:
                                 self.getvtx(node.inputs[label]).connect(
                                     label, self.getvtx(n1))
-                        for n1 in graph.outs:
+                        for n1 in func.outs:
                             vtx1 = self.getvtx(n1)
                             for (label,n2) in node.outputs:
                                 if label == 'update' and n1.ref == n2.ref:
-                                    vtx.connect(label, self.getvtx(n2))
-                                elif n1.ref == '#return':
-                                    vtx.connect(label, self.getvtx(n2))
+                                    vtx1.connect(label, self.getvtx(n2))
+                                elif label == 'return':
+                                    vtx1.connect(label, self.getvtx(n2))
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))

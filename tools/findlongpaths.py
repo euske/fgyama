@@ -13,7 +13,7 @@ def getnoun(name):
     elif name[-1].isupper():
         return WORD2.search(name).group(0).lower()
     else:
-        return None
+        return '?'
 
 def enum(vtx, ref0, refs, chain=None, level=0):
     if chain is not None and vtx in chain: return
@@ -42,7 +42,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxpaths = 10
+    maxpaths = 100
     maxoverrides = 1
     encoding = None
     srcdb = None
@@ -77,11 +77,11 @@ def main(argv):
            len(builder.vtxs)),
           file=sys.stderr)
 
-    def tracein(mdist, v0, dist=(0,0), prev=None, chain=None):
+    def tracein(mdist, v0, dist=(0,0), chain=None):
         if chain is not None and v0 in chain: return
         if v0 in mdist and dist <= mdist[v0][0]: return
         chain = Cons(v0, chain)
-        mdist[v0] = (dist, prev)
+        mdist[v0] = (dist, chain)
         (a,n) = dist
         if v0.node.kind == 'assign':
             a += 1
@@ -90,14 +90,14 @@ def main(argv):
         for (label,v1) in v0.outputs:
             if label.startswith('_'): continue
             if v1.node.kind == 'output': continue
-            tracein(mdist, v1, dist, v0, chain)
+            tracein(mdist, v1, dist, chain)
         return
 
-    def traceout(mdist, nexts, v0, dist=(0,0), prev=None, chain=None):
+    def traceout(mdist, nexts, v0, dist=(0,0), chain=None):
         if chain is not None and v0 in chain: return
         if v0 in mdist and dist <= mdist[v0][0]: return
         chain = Cons(v0, chain)
-        mdist[v0] = (dist, prev)
+        mdist[v0] = (dist, chain)
         (a,n) = dist
         if v0.node.kind == 'assign':
             a += 1
@@ -111,32 +111,29 @@ def main(argv):
                 if label.startswith('_'): continue
                 if v1.node.kind == 'input': continue
                 if v1.node.graph is not caller: continue
-                traceout(mdist, nexts, v1, dist, v0, chain)
+                traceout(mdist, nexts, v1, dist, chain)
         else:
             for (label,v1) in v0.outputs:
                 if label.startswith('_'): continue
                 if v1.node.kind == 'input': continue
-                traceout(mdist, nexts, v1, dist, v0, chain)
+                traceout(mdist, nexts, v1, dist, chain)
         return
 
     mdist = {}
     for vtx in builder:
-        if not vtx.inputs:
+        if not vtx.inputs and vtx.node.kind == 'input':
             tracein(mdist, vtx)
+    for (vtx0,(dist0,chain0)) in list(mdist.items()):
+        inputs = [ vtx.node for vtx in chain0 if vtx.node.kind == 'input' ]
+        nexts = Cons.fromseq( n.graph for n in reversed(inputs) )
+        if nexts.cdr is None: continue
+        traceout(mdist, nexts.cdr, vtx0, dist=dist0, chain=chain0)
+
     vtxs = sorted(mdist.items(), key=lambda x:x[1][0], reverse=True)
-    for (vtx0,(dist,_)) in vtxs[:maxpaths]:
-        nodes = []
-        vtx = vtx0
-        while vtx is not None:
-            assert vtx in mdist
-            nodes.append(vtx.node)
-            (_,vtx) = mdist[vtx]
-        nodes.reverse()
-        nexts = Cons.fromseq( n.graph for n in nodes if n.kind == 'input' )
-        mdist2 = {}
-        traceout(mdist2, nexts, vtx0)
-        nodes = [ n for n in nodes if n.kind == 'assign' ]
-        print('+PATH', dist, ' '.join( getnoun(n.ref) for n in nodes ))
+    for (vtx1,(dist1,chain1)) in vtxs[:maxpaths]:
+        nodes = [ vtx.node for vtx in chain1 if vtx.node.kind == 'assign' ]
+        nodes = list(reversed(nodes))
+        print('+PATH', dist1, ' '.join( getnoun(n.ref) for n in nodes ))
         for (i,n) in enumerate(nodes):
             print('#', n.ref)
             if srcdb is not None:
