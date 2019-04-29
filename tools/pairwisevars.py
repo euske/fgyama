@@ -16,6 +16,9 @@ def getfeat(label, n1):
     else:
         return '%s:%s:%s' % (label, n1.kind, n1.data)
 
+def is_ref(ref):
+    return not (ref is None or ref.startswith('#') or ref.startswith('%'))
+
 # main
 def main(argv):
     import fileinput
@@ -61,27 +64,34 @@ def main(argv):
             if v0 is v1: return True
         return False
 
-    def trace(mdist, ref0, v1, chain=None):
+    def trace(mchain, ref0, v1, chain):
         ref1 = v1.node.ref
-        if ref1 is not None and not ref1.startswith('#') and ref1 != ref0:
+        if is_ref(ref1) and ref1 != ref0:
             p = (ref0,ref1)
-            if p not in mdist or chain.length < mdist[p].length:
-                mdist[p] = chain
+            if p not in mchain or chain.length < mchain[p].length:
+                mchain[p] = chain
         else:
             for (label,v2) in v1.outputs:
                 if label.startswith('_'): continue
                 if exists(v2, chain): continue
-                trace(mdist, ref0, v2, Cons((label,v2), chain))
+                trace(mchain, ref0, v2, Cons((label,v2), chain))
         return
 
-    mdist = {}
-    for vtx in builder:
+    mchain = {}
+    for (i,vtx) in enumerate(builder):
         ref = vtx.node.ref
-        if ref is not None and not ref.startswith('#'):
-            trace(mdist, ref, vtx)
+        if is_ref(ref):
+            trace(mchain, ref, vtx, Cons((None,vtx)))
+        if (i % 1000) == 0:
+            sys.stderr.write('(%d/%d)\n' % (i,len(builder)))
+            sys.stderr.flush()
 
-    for ((ref0,ref1),chain) in mdist.items():
-        print(ref0, ref1, ' '.join( getfeat(label, v.node) for (label,v) in chain ))
+    for ((ref0,ref1),chain) in mchain.items():
+        chain = list(chain)
+        chain.reverse()
+        assert chain[0][1].node.ref == ref0
+        assert chain[-1][1].node.ref == ref1
+        print(ref0, ref1, ' '.join( getfeat(label, v.node) for (label,v) in chain[1:] ))
 
     if fp is not sys.stdout:
         fp.close()

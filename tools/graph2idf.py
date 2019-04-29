@@ -92,6 +92,9 @@ class IDFBuilder:
         self.vtxs = {}
         return
 
+    def __len__(self):
+        return len(self.vtxs)
+
     # List all the vertexes.
     def __iter__(self):
         return iter(self.vtxs.values())
