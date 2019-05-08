@@ -4,11 +4,13 @@ import re
 from graph2idf import is_funcall, Cons, IDFBuilder
 
 IGNORED = frozenset([
-    None, 'ref', 'assign',
+    None, 'ref', 'assign', 'receive',
     'begin', 'end', 'repeat'])
 
 def getfeat(label, n1):
-    if n1.data is None:
+    if n1.kind in IGNORED:
+        return None
+    elif n1.data is None:
         return '%s:%s' % (label, n1.kind)
     elif is_funcall(n1):
         (data,_,_) = n1.data.partition(' ')
@@ -91,7 +93,12 @@ def main(argv):
         chain.reverse()
         assert chain[0][1].node.ref == ref0
         assert chain[-1][1].node.ref == ref1
-        print(ref0, ref1, ' '.join( getfeat(label, v.node) for (label,v) in chain[1:] ))
+        feats = []
+        for (label,v) in chain[1:]:
+            f = getfeat(label, v.node)
+            if f is not None:
+                feats.append(f)
+        fp.write('%s %s %s\n' % (ref0, ref1, ' '.join(feats)))
 
     if fp is not sys.stdout:
         fp.close()
