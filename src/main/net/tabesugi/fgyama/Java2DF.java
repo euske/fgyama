@@ -1057,7 +1057,7 @@ public class Java2DF {
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, invoke, call, "return"));
+                                  graph, scope, null, invoke, call, "#return"));
                 {
                     SortedSet<DFRef> refs = new TreeSet<DFRef>();
                     for (DFMethod method1 : methods) {
@@ -1068,7 +1068,7 @@ public class Java2DF {
                     for (DFRef ref : refs) {
                         if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, invoke, call, "update"));
+                                    graph, scope, ref, invoke, call, ref.getFullName()));
                     }
                 }
                 if (call.exception != null) {
@@ -1126,12 +1126,12 @@ public class Java2DF {
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, sinvoke, call, "return"));
+                                  graph, scope, null, sinvoke, call, "#return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, sinvoke, call, "update"));
+                                    graph, scope, ref, sinvoke, call, ref.getFullName()));
                     }
                 }
                 if (call.exception != null) {
@@ -1285,12 +1285,12 @@ public class Java2DF {
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, cstr, call, "return"));
+                                  graph, scope, null, cstr, call, "#return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal() || ref.isInternal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, cstr, call, "update"));
+                                    graph, scope, ref, cstr, call, ref.getFullName()));
                     }
                 }
                 if (call.exception != null) {
@@ -2210,7 +2210,7 @@ public class Java2DF {
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal() || ref.isInternal()) continue;
                     ctx.set(new ReceiveNode(
-                                graph, scope, ref, ci, call, "update"));
+                                graph, scope, ref, ci, call, ref.getFullName()));
                 }
             }
             if (call.exception != null) {
@@ -2255,7 +2255,7 @@ public class Java2DF {
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal() || ref.isInternal()) continue;
                     ctx.set(new ReceiveNode(
-                                graph, scope, ref, sci, call, "update"));
+                                graph, scope, ref, sci, call, ref.getFullName()));
                 }
             }
             if (call.exception != null) {
