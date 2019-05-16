@@ -81,11 +81,11 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
-        String subname = getParamName(paramTypes);
         _name = genericKlass._name;
         _typeSpace = genericKlass._typeSpace;
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
+        String subname = _name + getParamName(paramTypes);
         _klassSpace = _typeSpace.lookupSpace(subname);
         _klassScope = new DFKlassScope(_outerScope, subname);
 
