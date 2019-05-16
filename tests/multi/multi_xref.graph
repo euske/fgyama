@@ -20,7 +20,7 @@
             <ast end="172" start="155" type="14"/>
           </node>
           <node id="Ne96a6cc2_3" kind="receive" type="Ldom/meep/multi_xref1;">
-            <link label="return" src="Ne96a6cc2_2"/>
+            <link label="#return" src="Ne96a6cc2_2"/>
             <ast end="172" start="155" type="14"/>
           </node>
           <node id="Ne96a6cc2_4" kind="assign" ref="$Ldom/dood/multi_xref3;.:MethodDeclaration:114:193.:Block:132:193/$xref1" type="Ldom/meep/multi_xref1;">
@@ -36,7 +36,7 @@
             <ast end="186" start="175" type="32"/>
           </node>
           <node id="Ne96a6cc2_7" kind="receive" type="?">
-            <link label="return" src="Ne96a6cc2_6"/>
+            <link label="#return" src="Ne96a6cc2_6"/>
             <ast end="186" start="175" type="32"/>
           </node>
         </scope>
@@ -73,7 +73,7 @@
             <ast end="166" start="149" type="14"/>
           </node>
           <node id="N2082c4f8_9" kind="receive" type="Ldom/meep/multi_xref2;">
-            <link label="return" src="N2082c4f8_8"/>
+            <link label="#return" src="N2082c4f8_8"/>
             <ast end="166" start="149" type="14"/>
           </node>
           <node data="=" id="N2082c4f8_10" kind="assignop" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
@@ -93,26 +93,26 @@
             <ast end="180" start="169" type="32"/>
           </node>
           <node id="N2082c4f8_13" kind="receive" type="V">
-            <link label="return" src="N2082c4f8_12"/>
+            <link label="#return" src="N2082c4f8_12"/>
             <ast end="180" start="169" type="32"/>
           </node>
           <node id="N2082c4f8_14" kind="receive" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
-            <link label="update" src="N2082c4f8_12"/>
+            <link label="@Ldom/dood/multi_xref3;/.boo" src="N2082c4f8_12"/>
             <ast end="180" start="169" type="32"/>
           </node>
           <node id="N2082c4f8_15" kind="receive" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
-            <link label="update" src="N2082c4f8_12"/>
+            <link label="@Ldom/meep/multi_xref1;/.xref2" src="N2082c4f8_12"/>
             <ast end="180" start="169" type="32"/>
           </node>
           <node id="N2082c4f8_16" kind="receive" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
-            <link label="update" src="N2082c4f8_12"/>
+            <link label="@Ldom/meep/multi_xref2;/.xref1" src="N2082c4f8_12"/>
             <ast end="180" start="169" type="32"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.bam()I" id="N2082c4f8_17" kind="call" type="I">
             <ast end="207" start="190" type="32"/>
           </node>
           <node id="N2082c4f8_18" kind="receive" type="I">
-            <link label="return" src="N2082c4f8_17"/>
+            <link label="#return" src="N2082c4f8_17"/>
             <ast end="207" start="190" type="32"/>
           </node>
           <node id="N2082c4f8_19" kind="fieldassign" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
@@ -173,7 +173,7 @@
             <ast end="126" start="109" type="14"/>
           </node>
           <node id="Na8d547a0_9" kind="receive" type="Ldom/meep/multi_xref1;">
-            <link label="return" src="Na8d547a0_8"/>
+            <link label="#return" src="Na8d547a0_8"/>
             <ast end="126" start="109" type="14"/>
           </node>
           <node data="=" id="Na8d547a0_10" kind="assignop" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
@@ -193,19 +193,19 @@
             <ast end="140" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_13" kind="receive" type="V">
-            <link label="return" src="Na8d547a0_12"/>
+            <link label="#return" src="Na8d547a0_12"/>
             <ast end="140" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_14" kind="receive" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
-            <link label="update" src="Na8d547a0_12"/>
+            <link label="@Ldom/dood/multi_xref3;/.boo" src="Na8d547a0_12"/>
             <ast end="140" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_15" kind="receive" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
-            <link label="update" src="Na8d547a0_12"/>
+            <link label="@Ldom/meep/multi_xref1;/.xref2" src="Na8d547a0_12"/>
             <ast end="140" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_16" kind="receive" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
-            <link label="update" src="Na8d547a0_12"/>
+            <link label="@Ldom/meep/multi_xref2;/.xref1" src="Na8d547a0_12"/>
             <ast end="140" start="129" type="32"/>
           </node>
           <node id="Na8d547a0_17" kind="ref" ref="$Ldom/meep/multi_xref2;.:MethodDeclaration:75:239.:Block:93:239/$zzz" type="Ldom/meep/multi_xref1/baa;">

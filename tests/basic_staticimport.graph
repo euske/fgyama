@@ -21,7 +21,7 @@
             <ast end="153" start="147" type="32"/>
           </node>
           <node id="Nede5cb52_6" kind="receive" type="D">
-            <link label="return" src="Nede5cb52_5"/>
+            <link label="#return" src="Nede5cb52_5"/>
             <ast end="153" start="147" type="32"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
@@ -30,7 +30,7 @@
             <ast end="154" start="135" type="32"/>
           </node>
           <node id="Nede5cb52_8" kind="receive" type="V">
-            <link label="return" src="Nede5cb52_7"/>
+            <link label="#return" src="Nede5cb52_7"/>
             <ast end="154" start="135" type="32"/>
           </node>
         </scope>

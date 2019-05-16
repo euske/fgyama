@@ -20,7 +20,7 @@
             <ast end="219" start="205" type="48"/>
           </node>
           <node id="Ndd5e2105_7" kind="receive" type="I">
-            <link label="return" src="Ndd5e2105_6"/>
+            <link label="#return" src="Ndd5e2105_6"/>
             <ast end="219" start="205" type="48"/>
           </node>
           <node id="Ndd5e2105_8" kind="ref" ref="$Lbasic_poly_Baa;.:MethodDeclaration:160:250/$obj" type="Lbasic_poly_Foo;">
@@ -64,7 +64,7 @@
             <ast end="331" start="311" type="14"/>
           </node>
           <node id="N98dd04bd_4" kind="receive" type="Lbasic_poly_Foo;">
-            <link label="return" src="N98dd04bd_3"/>
+            <link label="#return" src="N98dd04bd_3"/>
             <ast end="331" start="311" type="14"/>
           </node>
           <node id="N98dd04bd_5" kind="assign" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$a" type="Lbasic_poly_Foo;">
@@ -86,7 +86,7 @@
             <ast end="357" start="349" type="32"/>
           </node>
           <node id="N98dd04bd_9" kind="receive" type="I">
-            <link label="return" src="N98dd04bd_8"/>
+            <link label="#return" src="N98dd04bd_8"/>
             <ast end="357" start="349" type="32"/>
           </node>
           <node id="N98dd04bd_10" kind="assign" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$x" type="I">
@@ -97,7 +97,7 @@
             <ast end="406" start="386" type="14"/>
           </node>
           <node id="N98dd04bd_12" kind="receive" type="Lbasic_poly_Baa;">
-            <link label="return" src="N98dd04bd_11"/>
+            <link label="#return" src="N98dd04bd_11"/>
             <ast end="406" start="386" type="14"/>
           </node>
           <node id="N98dd04bd_13" kind="assign" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$b" type="Lbasic_poly_Foo;">
@@ -123,7 +123,7 @@
             <ast end="428" start="420" type="32"/>
           </node>
           <node id="N98dd04bd_18" kind="receive" type="I">
-            <link label="return" src="N98dd04bd_17"/>
+            <link label="#return" src="N98dd04bd_17"/>
             <ast end="428" start="420" type="32"/>
           </node>
           <node data="=" id="N98dd04bd_19" kind="assignop" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$x" type="I">
@@ -149,7 +149,7 @@
             <ast end="450" start="442" type="32"/>
           </node>
           <node id="N98dd04bd_24" kind="receive" type="I">
-            <link label="return" src="N98dd04bd_23"/>
+            <link label="#return" src="N98dd04bd_23"/>
             <ast end="450" start="442" type="32"/>
           </node>
           <node data="=" id="N98dd04bd_25" kind="assignop" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$x" type="I">
@@ -160,7 +160,7 @@
             <ast end="499" start="479" type="14"/>
           </node>
           <node id="N98dd04bd_27" kind="receive" type="Lbasic_poly_Baa;">
-            <link label="return" src="N98dd04bd_26"/>
+            <link label="#return" src="N98dd04bd_26"/>
             <ast end="499" start="479" type="14"/>
           </node>
           <node id="N98dd04bd_28" kind="assign" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$c" type="Lbasic_poly_Baa;">
@@ -186,7 +186,7 @@
             <ast end="521" start="513" type="32"/>
           </node>
           <node id="N98dd04bd_33" kind="receive" type="I">
-            <link label="return" src="N98dd04bd_32"/>
+            <link label="#return" src="N98dd04bd_32"/>
             <ast end="521" start="513" type="32"/>
           </node>
           <node data="=" id="N98dd04bd_34" kind="assignop" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$x" type="I">
@@ -212,7 +212,7 @@
             <ast end="543" start="535" type="32"/>
           </node>
           <node id="N98dd04bd_39" kind="receive" type="I">
-            <link label="return" src="N98dd04bd_38"/>
+            <link label="#return" src="N98dd04bd_38"/>
             <ast end="543" start="535" type="32"/>
           </node>
           <node data="=" id="N98dd04bd_40" kind="assignop" ref="$Lbasic_poly_Baa;.:MethodDeclaration:256:550.:Block:282:550/$x" type="I">

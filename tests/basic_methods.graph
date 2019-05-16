@@ -20,7 +20,7 @@
             <ast end="225" start="165" type="14"/>
           </node>
           <node id="N929107f2_4" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;">
-            <link label="return" src="N929107f2_3"/>
+            <link label="#return" src="N929107f2_3"/>
             <ast end="225" start="165" type="14"/>
           </node>
           <node id="N929107f2_5" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$a" type="Lbasic_methods/A;">
@@ -36,7 +36,7 @@
             <ast end="313" start="309" type="32"/>
           </node>
           <node id="N929107f2_8" kind="receive" type="I">
-            <link label="return" src="N929107f2_7"/>
+            <link label="#return" src="N929107f2_7"/>
             <ast end="313" start="309" type="32"/>
           </node>
           <node data="=" id="N929107f2_9" kind="assignop" ref="@Lbasic_methods;/.x" type="I">
@@ -52,14 +52,14 @@
             <ast end="335" start="323" type="32"/>
           </node>
           <node id="N929107f2_12" kind="receive" type="Ljava/lang/String;">
-            <link label="return" src="N929107f2_11"/>
+            <link label="#return" src="N929107f2_11"/>
             <ast end="335" start="323" type="32"/>
           </node>
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="N929107f2_13" kind="new" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
             <ast end="362" start="353" type="14"/>
           </node>
           <node id="N929107f2_14" kind="receive" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
-            <link label="return" src="N929107f2_13"/>
+            <link label="#return" src="N929107f2_13"/>
             <ast end="362" start="353" type="14"/>
           </node>
           <node id="N929107f2_15" kind="assign" ref="$Lbasic_methods;.:MethodDeclaration:139:385.:Block:156:385/$c" type="Lbasic_methods/:MethodDeclaration:139:385/moo;">
@@ -76,7 +76,7 @@
             <ast end="378" start="372" type="32"/>
           </node>
           <node id="N929107f2_18" kind="receive" type="I">
-            <link label="return" src="N929107f2_17"/>
+            <link label="#return" src="N929107f2_17"/>
             <ast end="378" start="372" type="32"/>
           </node>
         </scope>

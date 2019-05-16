@@ -30,14 +30,14 @@
             <ast end="134" start="108" type="32"/>
           </node>
           <node id="Na7c7a6e8_7" kind="receive" type="V">
-            <link label="return" src="Na7c7a6e8_6"/>
+            <link label="#return" src="Na7c7a6e8_6"/>
             <ast end="134" start="108" type="32"/>
           </node>
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="Na7c7a6e8_8" kind="new" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
             <ast end="239" start="230" type="14"/>
           </node>
           <node id="Na7c7a6e8_9" kind="receive" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
-            <link label="return" src="Na7c7a6e8_8"/>
+            <link label="#return" src="Na7c7a6e8_8"/>
             <ast end="239" start="230" type="14"/>
           </node>
           <node id="Na7c7a6e8_10" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:79:289.:Block:98:289/$baz" type="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
@@ -75,7 +75,7 @@
             <ast end="282" start="273" type="32"/>
           </node>
           <node id="Na7c7a6e8_18" kind="receive" type="V">
-            <link label="return" src="Na7c7a6e8_17"/>
+            <link label="#return" src="Na7c7a6e8_17"/>
             <ast end="282" start="273" type="32"/>
           </node>
         </scope>
@@ -96,7 +96,7 @@
             <ast end="329" start="323" type="32"/>
           </node>
           <node id="N6f0d605c_3" kind="receive" type="?">
-            <link label="return" src="N6f0d605c_2"/>
+            <link label="#return" src="N6f0d605c_2"/>
             <ast end="329" start="323" type="32"/>
           </node>
         </scope>
@@ -111,7 +111,7 @@
             <ast end="441" start="424" type="14"/>
           </node>
           <node id="Ne9ca43ba_7" kind="receive" type="Ldom/meep/basic_names;">
-            <link label="return" src="Ne9ca43ba_6"/>
+            <link label="#return" src="Ne9ca43ba_6"/>
             <ast end="441" start="424" type="14"/>
           </node>
           <node id="Ne9ca43ba_8" kind="assign" ref="$Ldom/meep/basic_names;.:MethodDeclaration:357:468.:Block:396:468/$foo" type="Ldom/meep/basic_names;">
@@ -129,11 +129,11 @@
             <ast end="461" start="451" type="32"/>
           </node>
           <node id="Ne9ca43ba_11" kind="receive" type="V">
-            <link label="return" src="Ne9ca43ba_10"/>
+            <link label="#return" src="Ne9ca43ba_10"/>
             <ast end="461" start="451" type="32"/>
           </node>
           <node id="Ne9ca43ba_12" kind="receive" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
-            <link label="update" src="Ne9ca43ba_10"/>
+            <link label="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" src="Ne9ca43ba_10"/>
             <ast end="461" start="451" type="32"/>
           </node>
         </scope>

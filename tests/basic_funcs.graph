@@ -48,7 +48,7 @@
             <ast end="181" start="162" type="32"/>
           </node>
           <node id="Nf2e83a28_14" kind="receive" type="I">
-            <link label="return" src="Nf2e83a28_13"/>
+            <link label="#return" src="Nf2e83a28_13"/>
             <ast end="181" start="162" type="32"/>
           </node>
           <node id="Nf2e83a28_15" kind="assign" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$b" type="I">
@@ -67,11 +67,11 @@
             <ast end="205" start="199" type="32"/>
           </node>
           <node id="Nf2e83a28_18" kind="receive" type="I">
-            <link label="return" src="Nf2e83a28_17"/>
+            <link label="#return" src="Nf2e83a28_17"/>
             <ast end="205" start="199" type="32"/>
           </node>
           <node id="Nf2e83a28_19" kind="receive" ref="@Lbasic_funcs;/.z" type="I">
-            <link label="update" src="Nf2e83a28_17"/>
+            <link label="@Lbasic_funcs;/.z" src="Nf2e83a28_17"/>
             <ast end="205" start="199" type="32"/>
           </node>
           <node id="Nf2e83a28_20" kind="assign" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$c" type="I">
@@ -92,7 +92,7 @@
             <ast end="236" start="215" type="32"/>
           </node>
           <node id="Nf2e83a28_24" kind="receive" type="V">
-            <link label="return" src="Nf2e83a28_23"/>
+            <link label="#return" src="Nf2e83a28_23"/>
             <ast end="236" start="215" type="32"/>
           </node>
         </scope>
@@ -126,12 +126,12 @@
               <ast end="342" start="337" type="32"/>
             </node>
             <node id="Ndd66d29_15" kind="receive" type="I">
-              <link label="return" src="Ndd66d29_13"/>
+              <link label="#return" src="Ndd66d29_13"/>
               <ast end="342" start="337" type="32"/>
             </node>
             <node id="Ndd66d29_16" kind="receive" ref="@Lbasic_funcs;/.z" type="I">
               <link src="Ndd66d29_6"/>
-              <link label="update" src="Ndd66d29_13"/>
+              <link label="@Lbasic_funcs;/.z" src="Ndd66d29_13"/>
               <ast end="342" start="337" type="32"/>
             </node>
             <node id="Ndd66d29_17" kind="output" ref="#return" type="I">
@@ -160,11 +160,11 @@
               <ast end="388" start="380" type="32"/>
             </node>
             <node id="Ndd66d29_26" kind="receive" type="I">
-              <link label="return" src="Ndd66d29_23"/>
+              <link label="#return" src="Ndd66d29_23"/>
               <ast end="388" start="380" type="32"/>
             </node>
             <node id="Ndd66d29_27" kind="receive" ref="@Lbasic_funcs;/.z" type="I">
-              <link label="update" src="Ndd66d29_23"/>
+              <link label="@Lbasic_funcs;/.z" src="Ndd66d29_23"/>
               <ast end="388" start="380" type="32"/>
             </node>
             <node data="2" id="Ndd66d29_28" kind="const" type="I">

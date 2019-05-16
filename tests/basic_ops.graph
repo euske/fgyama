@@ -54,7 +54,7 @@
             <ast end="107" start="98" type="32"/>
           </node>
           <node id="Nce57b47f_16" kind="receive" type="?">
-            <link label="return" src="Nce57b47f_15"/>
+            <link label="#return" src="Nce57b47f_15"/>
             <ast end="107" start="98" type="32"/>
           </node>
           <node data="=" id="Nce57b47f_17" kind="assignop" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">

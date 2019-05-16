@@ -49,7 +49,7 @@
                 <ast end="319" start="298" type="32"/>
               </node>
               <node id="N707c57b4_26" kind="receive" type="V">
-                <link label="return" src="N707c57b4_25"/>
+                <link label="#return" src="N707c57b4_25"/>
                 <ast end="319" start="298" type="32"/>
               </node>
             </scope>
@@ -70,7 +70,7 @@
                 <ast end="183" start="178" type="32"/>
               </node>
               <node id="N707c57b4_9" kind="receive" type="Ljava/lang/String;">
-                <link label="return" src="N707c57b4_8"/>
+                <link label="#return" src="N707c57b4_8"/>
                 <ast end="183" start="178" type="32"/>
               </node>
               <node data="=" id="N707c57b4_10" kind="assignop" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
@@ -122,7 +122,7 @@
             <ast end="404" start="397" type="14"/>
           </node>
           <node id="N3204ac33_4" kind="receive" type="Lbasic_exception/A;">
-            <link label="return" src="N3204ac33_3"/>
+            <link label="#return" src="N3204ac33_3"/>
             <ast end="404" start="397" type="14"/>
           </node>
           <node id="N3204ac33_5" kind="throw" ref="#exception" type="Ljava/lang/Exception;">

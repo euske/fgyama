@@ -27,7 +27,7 @@
             <ast end="198" start="190" type="32"/>
           </node>
           <node id="N41f01687_12" kind="receive" type="?">
-            <link label="return" src="N41f01687_11"/>
+            <link label="#return" src="N41f01687_11"/>
             <ast end="198" start="190" type="32"/>
           </node>
           <node id="N41f01687_13" kind="assign" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
