@@ -9,11 +9,11 @@ import java.util.*;
 //
 public class DFBuiltinTypes {
 
-    public static void initialize(DFRootTypeSpace rootSpace)
+    public static void initialize(DFRootTypeCollection rootSpace)
         throws IOException, TypeNotFound {
         // Note: some of the built-in classes are self-referential
         // that cannot be automatically loaded. So create them manually.
-        DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
+        DFTypeCollection java_lang = rootSpace.lookupSpace("java.lang");
         _object = java_lang.createKlass(null, null, "Object");
         _class = java_lang.createKlass(null, null, "Class");
         _enum = java_lang.createKlass(null, null, "Enum");
@@ -48,7 +48,7 @@ public class DFBuiltinTypes {
     }
 
     private static class ArrayKlass extends DFKlass {
-        public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
+        public ArrayKlass(DFTypeCollection typeSpace, DFKlass baseKlass) {
             super("_Array", typeSpace, null, null, baseKlass);
             this.addField("length", false, DFBasicType.INT);
         }

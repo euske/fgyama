@@ -17,10 +17,10 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
-    private DFTypeSpace _typeSpace;
+    private DFTypeCollection _typeSpace;
     private DFKlass _outerKlass;
     private DFVarScope _outerScope;
-    private DFTypeSpace _klassSpace;
+    private DFTypeCollection _klassSpace;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes =
         new HashMap<String, DFLocalVarScope>();
@@ -33,14 +33,14 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
-    private DFTypeSpace _mapTypeSpace = null;
+    private DFTypeCollection _mapTypeSpace = null;
     private Map<String, DFKlass> _paramKlasses =
         new TreeMap<String, DFKlass>();
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private DFType[] _paramTypes = null;
-    private DFTypeSpace _paramTypeSpace = null;
+    private DFTypeCollection _paramTypeSpace = null;
 
     // This field is available after setBaseFinder(). (Pass2)
     private DFTypeFinder _baseFinder = null;
@@ -54,7 +54,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
     public DFKlass(
-        String name, DFTypeSpace typeSpace,
+        String name, DFTypeCollection typeSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
         _name = name;
         _typeSpace = typeSpace;
@@ -65,7 +65,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     }
 
     protected DFKlass(
-        String name, DFTypeSpace typeSpace,
+        String name, DFTypeCollection typeSpace,
         DFKlass outerKlass, DFVarScope outerScope,
         DFKlass baseKlass) {
         this(name, typeSpace, outerKlass, outerScope);
@@ -91,7 +91,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _paramTypeSpace = new DFTypeSpace(null, subname);
+        _paramTypeSpace = new DFTypeCollection(null, subname);
         for (int i = 0; i < _paramTypes.length; i++) {
             DFMapType mapType = genericKlass._mapTypes[i];
             DFType paramType = _paramTypes[i];
@@ -226,9 +226,9 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         // Get type parameters.
         assert _mapTypes == null;
         assert _paramTypes == null;
-        _mapTypes = DFTypeSpace.getMapTypes(tps);
+        _mapTypes = DFTypeCollection.getMapTypes(tps);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
+            _mapTypeSpace = DFTypeCollection.createMapTypeSpace(_mapTypes);
         }
     }
 
@@ -237,7 +237,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert _paramTypes == null;
         _mapTypes = JNITypeParser.getMapTypes(sig);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
+            _mapTypeSpace = DFTypeCollection.createMapTypeSpace(_mapTypes);
         }
     }
 
@@ -295,7 +295,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         return _outerKlass;
     }
 
-    public DFTypeSpace getKlassSpace() {
+    public DFTypeCollection getKlassSpace() {
         return _klassSpace;
     }
 
@@ -490,7 +490,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     }
 
     private DFMethod addMethod(
-        DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
+        DFTypeCollection methodSpace, String id, DFCallStyle callStyle,
         DFMapType[] mapTypes, DFTypeFinder finder,
         DFMethodType methodType) {
         return this.addMethod(
@@ -647,13 +647,13 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             if (meth.isPrivate()) continue;
             sig = Utils.getJKlassSignature(meth.getAttributes());
 	    DFMethodType methodType;
-            DFTypeSpace methodSpace = new DFTypeSpace(_klassSpace, meth.getName());
+            DFTypeCollection methodSpace = new DFTypeCollection(_klassSpace, meth.getName());
             DFMapType[] mapTypes = null;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 mapTypes = JNITypeParser.getMapTypes(sig);
                 if (mapTypes != null) {
-                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
+                    DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
                     finder = finder.resolveMapTypeSpace(mapTypeSpace, mapTypes);
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
@@ -838,7 +838,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFTypeSpace methodSpace = _klassSpace.lookupSpace(id);
+                DFTypeCollection methodSpace = _klassSpace.lookupSpace(id);
                 finder = finder.extend(methodSpace);
                 List<TypeParameter> tps = decl.typeParameters();
                 DFMapType[] mapTypes = null;
@@ -850,7 +850,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                         mapTypes[i] = new DFMapType(id2);
                         mapTypes[i].setTypeBounds(tp.typeBounds());
                     }
-                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
+                    DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
                     finder = finder.resolveMapTypeSpace(mapTypeSpace, mapTypes);
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
@@ -888,7 +888,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFTypeSpace methodSpace = _klassSpace.lookupSpace("<clinit>");
+                DFTypeCollection methodSpace = _klassSpace.lookupSpace("<clinit>");
                 _initializer = new DFMethod(
 		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
                     null, finder,

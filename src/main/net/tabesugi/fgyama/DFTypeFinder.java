@@ -194,7 +194,7 @@ public class DFTypeFinder {
     }
 
     public DFTypeFinder resolveMapTypeSpace(
-        DFTypeSpace mapTypeSpace, DFMapType[] mapTypes) {
+        DFTypeCollection mapTypeSpace, DFMapType[] mapTypes) {
         DFTypeFinder finder = new DFTypeFinder(
             mapTypeSpace, new DFTypeFinder[] { this });
         for (DFMapType mapType : mapTypes) {

@@ -1336,7 +1336,7 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFKlass klass = scope.lookupThis().getRefType().getKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace(null, id);
+                DFTypeCollection anonSpace = new DFTypeCollection(null, id);
                 DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
                 assert body != null;
                 if (body instanceof Statement) {
@@ -1361,7 +1361,7 @@ public class Java2DF {
                 MethodReference mref = (MethodReference)expr;
                 // XXX TODO method ref
                 DFKlass klass = scope.lookupThis().getRefType().getKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
+                DFTypeCollection anonSpace = new DFTypeCollection(null, "MethodRef");
                 DFKlass anonKlass = new DFKlass(
                     "methodref", anonSpace, klass, scope);
                 DFMethod constructor = anonKlass.lookupMethod(
@@ -2469,11 +2469,11 @@ public class Java2DF {
                 String id = Utils.encodeASTNode(decl);
                 DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
                 DFTypeFinder finder2 = finder.extend(methodSpace);
-                DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
+                DFMapType[] mapTypes = DFTypeCollection.getMapTypes(decl.typeParameters());
                 try {
                     if (mapTypes != null) {
-                        DFTypeSpace mapTypeSpace =
-                            DFTypeSpace.createMapTypeSpace(mapTypes);
+                        DFTypeCollection mapTypeSpace =
+                            DFTypeCollection.createMapTypeSpace(mapTypes);
                         finder2 = finder2.resolveMapTypeSpace(
                             mapTypeSpace, mapTypes);
                     }
@@ -2946,7 +2946,7 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    private DFRootTypeSpace _rootSpace;
+    private DFRootTypeCollection _rootSpace;
     private int _strict;
     private List<Exporter> _exporters =
         new ArrayList<Exporter>();
@@ -2956,7 +2956,7 @@ public class Java2DF {
         new HashMap<String, DFFileScope>();
 
     public Java2DF(
-        DFRootTypeSpace rootSpace, int strict) {
+        DFRootTypeCollection rootSpace, int strict) {
         _rootSpace = rootSpace;
         _strict = strict;
     }
@@ -2990,7 +2990,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildTypeSpace(String key, CompilationUnit cunit)
         throws UnsupportedSyntax {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeCollection packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
 	for (AbstractTypeDeclaration abstTypeDecl :
@@ -3013,10 +3013,10 @@ public class Java2DF {
 	// Search path for types: ROOT -> java.lang -> package -> imports.
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = finder.extend(_rootSpace.lookupSpace("java.lang"));
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeCollection packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         finder = finder.extend(packageSpace);
 	// Populate the import space.
-        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
+        DFTypeCollection importSpace = new DFTypeCollection(null, "import:"+key);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
             Name name = importDecl.getName();
@@ -3075,7 +3075,7 @@ public class Java2DF {
                 if (0 < _strict) throw e;
             }
         }
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeCollection packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
             DFKlass klass = packageSpace.getKlass(abstTypeDecl.getName());
@@ -3218,7 +3218,7 @@ public class Java2DF {
         int strict = 0;
         Logger.LogLevel = 0;
 
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
+        DFRootTypeCollection rootSpace = new DFRootTypeCollection();
         try {
             DFBuiltinTypes.initialize(rootSpace);
         } catch (TypeNotFound e) {

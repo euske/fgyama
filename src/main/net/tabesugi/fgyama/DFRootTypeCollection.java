@@ -11,18 +11,18 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFRootTypeSpace
+//  DFRootTypeCollection
 //
-public class DFRootTypeSpace extends DFTypeSpace {
+public class DFRootTypeCollection extends DFTypeCollection {
 
     private DFTypeFinder _finder;
 
-    public DFRootTypeSpace() {
+    public DFRootTypeCollection() {
         super(null, "ROOT");
         _finder = new DFTypeFinder(this);
     }
 
-    public DFTypeSpace lookupSpace(PackageDeclaration pkgDecl) {
+    public DFTypeCollection lookupSpace(PackageDeclaration pkgDecl) {
         if (pkgDecl == null) {
             return this;
         } else {
@@ -30,13 +30,13 @@ public class DFRootTypeSpace extends DFTypeSpace {
         }
     }
 
-    public DFTypeSpace lookupSpace(Name name) {
+    public DFTypeCollection lookupSpace(Name name) {
         return this.lookupSpace(name.getFullyQualifiedName());
     }
 
     @Override
     public String toString() {
-        return ("<DFRootTypeSpace>");
+        return ("<DFRootTypeCollection>");
     }
 
     @Override
@@ -67,9 +67,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
         int i = s.indexOf('$');
         String fullName = s.substring(0, (0 <= i)? i : s.length());
         int j = fullName.lastIndexOf('/');
-        DFTypeSpace space = this.lookupSpace(fullName.substring(0, j).replace('/', '.'));
+	String spaceName = fullName.substring(0, j).replace('/', '.');
+	String klassName = fullName.substring(j+1);
+        DFTypeCollection space = this.lookupSpace(spaceName);
         // Create a top-level klass.
-        DFKlass klass = space.createKlass(null, null, fullName.substring(j+1));
+        DFKlass klass = space.createKlass(null, null, klassName);
         DFTypeFinder finder = _finder;
         while (0 <= i) {
             // Create inner klasses.
