@@ -17,7 +17,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
-    private DFTypeCollection _typeSpace;
+    private DFTypeSpace _outerSpace;
     private DFKlass _outerKlass;
     private DFVarScope _outerScope;
     private DFTypeCollection _klassSpace;
@@ -54,21 +54,21 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
 
     public DFKlass(
-        String name, DFTypeCollection typeSpace,
+        String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
         _name = name;
-        _typeSpace = typeSpace;
+        _outerSpace = outerSpace;
         _outerKlass = outerKlass;
 	_outerScope = outerScope;
-        _klassSpace = _typeSpace.lookupSpace(_name);
+        _klassSpace = new DFTypeCollection(_outerSpace, _name);
         _klassScope = new DFKlassScope(_outerScope, _name);
     }
 
     protected DFKlass(
-        String name, DFTypeCollection typeSpace,
+        String name, DFTypeCollection outerSpace,
         DFKlass outerKlass, DFVarScope outerScope,
         DFKlass baseKlass) {
-        this(name, typeSpace, outerKlass, outerScope);
+        this(name, outerSpace, outerKlass, outerScope);
         _baseKlass = baseKlass;
         _built = true;
     }
@@ -82,11 +82,11 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
         _name = genericKlass._name;
-        _typeSpace = genericKlass._typeSpace;
+        _outerSpace = genericKlass._outerSpace;
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
         String subname = _name + getParamName(paramTypes);
-        _klassSpace = _typeSpace.lookupSpace(subname);
+        _klassSpace = new DFTypeCollection(_outerSpace, subname);
         _klassScope = new DFKlassScope(_outerScope, subname);
 
         _genericKlass = genericKlass;
@@ -135,7 +135,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     @Override
     public int compareTo(DFKlass klass) {
         if (this == klass) return 0;
-        int x = _typeSpace.compareTo(klass._typeSpace);
+        int x = _outerSpace.compareTo(klass._outerSpace);
         if (x != 0) return x;
         return getTypeName().compareTo(klass.getTypeName());
     }
@@ -161,7 +161,7 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
     }
 
     public String getTypeName() {
-        String name = "L"+_typeSpace.getSpaceName()+_name;
+        String name = "L"+_outerSpace.getSpaceName()+_name;
         if (_mapTypes != null) {
             name = name + getParamName(_mapTypes);
         }

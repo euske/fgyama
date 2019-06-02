@@ -9,6 +9,9 @@ import org.eclipse.jdt.core.dom.*;
 //
 interface DFTypeSpace {
 
+    int compareTo(DFTypeSpace space);
+    String getSpaceName();
+
     DFTypeSpace lookupSpace(SimpleName name);
     DFTypeSpace lookupSpace(String id);
 

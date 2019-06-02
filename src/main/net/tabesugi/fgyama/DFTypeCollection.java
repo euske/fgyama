@@ -13,9 +13,9 @@ import org.w3c.dom.*;
 
 //  DFTypeCollection
 //
-public class DFTypeCollection implements DFTypeSpace, Comparable<DFTypeCollection> {
+public class DFTypeCollection implements DFTypeSpace {
 
-    private DFTypeCollection _outer;
+    private DFTypeSpace _outer;
     private String _name;
 
     private SortedMap<String, DFTypeCollection> _id2space =
@@ -23,7 +23,7 @@ public class DFTypeCollection implements DFTypeSpace, Comparable<DFTypeCollectio
     private SortedMap<String, DFKlass> _id2klass =
         new TreeMap<String, DFKlass>();
 
-    public DFTypeCollection(DFTypeCollection outer, String name) {
+    public DFTypeCollection(DFTypeSpace outer, String name) {
         _outer = outer;
         _name = name;
     }
@@ -34,19 +34,21 @@ public class DFTypeCollection implements DFTypeSpace, Comparable<DFTypeCollectio
     }
 
     @Override
-    public int compareTo(DFTypeCollection space) {
+    public int compareTo(DFTypeSpace space) {
         if (this == space) return 0;
+	if (!(space instanceof DFTypeCollection)) return -1;
+	DFTypeCollection coll = (DFTypeCollection)space;
         if (_outer != null) {
-            if (space._outer != null) {
-                int x = _outer.compareTo(space._outer);
+            if (coll._outer != null) {
+                int x = _outer.compareTo(coll._outer);
                 if (x != 0) return x;
             } else {
                 return +1;
             }
-        } else if (space._outer != null) {
+        } else if (coll._outer != null) {
             return -1;
         }
-        return _name.compareTo(space._name);
+        return _name.compareTo(coll._name);
     }
 
     public String getSpaceName() {
