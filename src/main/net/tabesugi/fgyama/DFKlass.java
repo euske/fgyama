@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 
 //  DFKlass
 //
-public class DFKlass implements DFType, Comparable<DFKlass> {
+public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
@@ -56,6 +56,7 @@ public class DFKlass implements DFType, Comparable<DFKlass> {
     public DFKlass(
         String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
+	super(outerSpace, name);
         _name = name;
         _outerSpace = outerSpace;
         _outerKlass = outerKlass;
@@ -77,6 +78,7 @@ public class DFKlass implements DFType, Comparable<DFKlass> {
     @SuppressWarnings("unchecked")
     private DFKlass(
         DFKlass genericKlass, DFType[] paramTypes) {
+	super(genericKlass._outerSpace, genericKlass._name);
         assert genericKlass != null;
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
