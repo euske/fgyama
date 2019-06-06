@@ -550,7 +550,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
         assert _ast != null || _jarPath != null;
         if (_mapTypeSpace != null) {
             assert _mapTypes != null;
-            finder = finder.resolveMapTypeSpace(_mapTypeSpace, _mapTypes);
+	    finder = new DFTypeFinder(_mapTypeSpace, finder);
+	    _mapTypeSpace.buildMapTypes(finder, _mapTypes);
         }
         if (_paramTypeSpace != null) {
             finder = new DFTypeFinder(_paramTypeSpace, finder);
@@ -654,7 +655,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                 mapTypes = JNITypeParser.getMapTypes(sig);
                 if (mapTypes != null) {
                     DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
-                    finder = finder.resolveMapTypeSpace(mapTypeSpace, mapTypes);
+		    finder = new DFTypeFinder(mapTypeSpace, finder);
+		    mapTypeSpace.buildMapTypes(finder, mapTypes);
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
 		finder = new DFTypeFinder(methodSpace, finder);
@@ -851,7 +853,8 @@ public class DFKlass extends DFType implements Comparable<DFKlass> {
                         mapTypes[i].setTypeBounds(tp.typeBounds());
                     }
                     DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
-                    finder = finder.resolveMapTypeSpace(mapTypeSpace, mapTypes);
+		    finder = new DFTypeFinder(mapTypeSpace, finder);
+		    mapTypeSpace.buildMapTypes(finder, mapTypes);
                 }
                 DFType[] argTypes = finder.resolveArgs(decl);
                 DFType returnType;
