@@ -527,7 +527,7 @@ public class DFFrame {
                     finder, method, scope, infix.getLeftOperand());
 		DFType right = this.buildExpr(
                     finder, method, scope, infix.getRightOperand());
-		return DFType.inferInfixType(left, op, right);
+		return Java2DF.inferInfixType(left, op, right);
 
 	    } else if (expr instanceof ParenthesizedExpression) {
 		// "(expr)"
