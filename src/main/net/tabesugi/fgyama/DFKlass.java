@@ -18,7 +18,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
-    private DFKlass _outerKlass;
+    private DFKlass _outerKlass; // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
     private DFKlassScope _klassScope;
     private Map<String, DFLocalVarScope> _methodScopes =
@@ -56,7 +56,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     public DFKlass(
         String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
-	super(outerSpace, name);
+	super(name, outerSpace);
         _name = name;
         _outerSpace = outerSpace;
         _outerKlass = outerKlass;
@@ -77,7 +77,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private DFKlass(
         DFKlass genericKlass, DFType[] paramTypes) {
-	super(genericKlass._outerSpace, genericKlass._name + getParamName(paramTypes));
+	super(genericKlass._name + getParamName(paramTypes), genericKlass._outerSpace);
         assert genericKlass != null;
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
@@ -91,7 +91,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _paramTypeSpace = new DFTypeSpace(null, subname);
+        _paramTypeSpace = new DFTypeSpace(subname);
         for (int i = 0; i < _paramTypes.length; i++) {
             DFMapType mapType = genericKlass._mapTypes[i];
             DFType paramType = _paramTypes[i];
@@ -661,10 +661,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return _ast;
     }
 
-    public String getKlassName() {
-        return _name;
-    }
-
     public DFKlass getOuterKlass() {
         return _outerKlass;
     }
@@ -1018,7 +1014,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             if (meth.isPrivate()) continue;
             sig = Utils.getJKlassSignature(meth.getAttributes());
 	    DFMethodType methodType;
-            DFTypeSpace methodSpace = new DFTypeSpace(this, meth.getName());
+            DFTypeSpace methodSpace = new DFTypeSpace(meth.getName(), this);
             DFMapType[] mapTypes = null;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);

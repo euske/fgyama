@@ -749,7 +749,7 @@ public class DFFrame {
 		LambdaExpression lambda = (LambdaExpression)expr;
 		String id = "lambda";
 		ASTNode body = lambda.getBody();
-		DFTypeSpace anonSpace = new DFTypeSpace(null, id);
+		DFTypeSpace anonSpace = new DFTypeSpace(id);
 		DFKlass klass = scope.lookupThis().getRefType().getKlass();
 		DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
 		if (body instanceof Statement) {

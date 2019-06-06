@@ -3,9 +3,6 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import java.util.jar.*;
-import org.apache.bcel.*;
-import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
@@ -15,17 +12,21 @@ import org.w3c.dom.*;
 //
 public class DFTypeSpace {
 
-    private DFTypeSpace _outer;
     private String _name;
+    private DFTypeSpace _outerSpace;
 
     private SortedMap<String, DFTypeSpace> _id2space =
         new TreeMap<String, DFTypeSpace>();
     private SortedMap<String, DFKlass> _id2klass =
         new TreeMap<String, DFKlass>();
 
-    public DFTypeSpace(DFTypeSpace outer, String name) {
-        _outer = outer;
+    public DFTypeSpace(String name, DFTypeSpace outerSpace) {
         _name = name;
+        _outerSpace = outerSpace;
+    }
+
+    public DFTypeSpace(String name) {
+	this(name, null);
     }
 
     @Override
@@ -36,24 +37,24 @@ public class DFTypeSpace {
     public int compareTo(DFTypeSpace space) {
         if (this == space) return 0;
 	if (!(space instanceof DFTypeSpace)) return -1;
-        if (_outer != null) {
-            if (space._outer != null) {
-                int x = _outer.compareTo(space._outer);
+        if (_outerSpace != null) {
+            if (space._outerSpace != null) {
+                int x = _outerSpace.compareTo(space._outerSpace);
                 if (x != 0) return x;
             } else {
                 return +1;
             }
-        } else if (space._outer != null) {
+        } else if (space._outerSpace != null) {
             return -1;
         }
         return _name.compareTo(space._name);
     }
 
     public String getSpaceName() {
-        if (_outer == null) {
+        if (_outerSpace == null) {
             return _name+"/";
         } else {
-            return _outer.getSpaceName()+_name+"/";
+            return _outerSpace.getSpaceName()+_name+"/";
         }
     }
 
@@ -71,7 +72,7 @@ public class DFTypeSpace {
         if (klass != null) return klass;
         DFTypeSpace space = _id2space.get(id);
         if (space == null) {
-            space = new DFTypeSpace(this, id);
+            space = new DFTypeSpace(id, this);
             _id2space.put(id, space);
             //Logger.info("DFTypeSpace.addChild:", this, ":", id);
         }
@@ -177,8 +178,7 @@ public class DFTypeSpace {
             }
             b.append(mapType.getTypeName());
         }
-        DFTypeSpace mapTypeSpace = new DFTypeSpace(
-            null, "{"+b.toString()+"}");
+        DFTypeSpace mapTypeSpace = new DFTypeSpace("{"+b.toString()+"}");
         for (DFMapType mapType : mapTypes) {
             mapTypeSpace.addKlass(
                 mapType.getTypeName(),

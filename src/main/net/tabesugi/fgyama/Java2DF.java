@@ -1370,7 +1370,7 @@ public class Java2DF {
                 String id = "lambda";
                 ASTNode body = lambda.getBody();
                 DFKlass klass = scope.lookupThis().getRefType().getKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace(null, id);
+                DFTypeSpace anonSpace = new DFTypeSpace(id);
                 DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
                 assert body != null;
                 if (body instanceof Statement) {
@@ -1395,7 +1395,7 @@ public class Java2DF {
                 MethodReference mref = (MethodReference)expr;
                 // XXX TODO method ref
                 DFKlass klass = scope.lookupThis().getRefType().getKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace(null, "MethodRef");
+                DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
                 DFKlass anonKlass = new DFKlass(
                     "methodref", anonSpace, klass, scope);
                 DFMethod constructor = anonKlass.lookupMethod(
@@ -3050,7 +3050,7 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         finder = new DFTypeFinder(packageSpace, finder);
 	// Populate the import space.
-        DFTypeSpace importSpace = new DFTypeSpace(null, "import:"+key);
+        DFTypeSpace importSpace = new DFTypeSpace("import:"+key);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) cunit.imports()) {
             Name name = importDecl.getName();

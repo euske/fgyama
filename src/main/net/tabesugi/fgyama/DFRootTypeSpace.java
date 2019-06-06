@@ -18,7 +18,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     private DFTypeFinder _finder;
 
     public DFRootTypeSpace() {
-        super(null, "ROOT");
+        super("ROOT");
         _finder = new DFTypeFinder(this);
     }
 
