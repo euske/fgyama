@@ -198,6 +198,18 @@ public class DFTypeCollection implements DFTypeSpace {
 	}
     }
 
+    public void buildMapTypes(DFTypeFinder finder, DFMapType[] mapTypes) {
+        for (DFMapType mapType : mapTypes) {
+            try {
+                // This might cause TypeNotFound
+                // for a recursive type.
+                mapType.build(finder);
+            } catch (TypeNotFound e) {
+            }
+            this.addKlass(mapType.getTypeName(), mapType.getKlass());
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void buildStmt(
         Statement ast,

@@ -2474,8 +2474,8 @@ public class Java2DF {
                     if (mapTypes != null) {
                         DFTypeCollection mapTypeSpace =
                             DFTypeCollection.createMapTypeSpace(mapTypes);
-                        finder2 = finder2.resolveMapTypeSpace(
-                            mapTypeSpace, mapTypes);
+			finder2 = new DFTypeFinder(mapTypeSpace, finder2);
+                        mapTypeSpace.buildMapTypes(finder, mapTypes);
                     }
                     for (DFType argType : finder2.resolveArgs(decl)) {
                         if (argType instanceof DFKlass) {
