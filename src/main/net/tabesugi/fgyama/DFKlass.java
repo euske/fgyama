@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 
 //  DFKlass
 //
-public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKlass> {
+public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;
@@ -33,14 +33,14 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
-    private DFTypeCollection _mapTypeSpace = null;
+    private DFTypeSpace _mapTypeSpace = null;
     private Map<String, DFKlass> _paramKlasses =
         new TreeMap<String, DFKlass>();
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private DFType[] _paramTypes = null;
-    private DFTypeCollection _paramTypeSpace = null;
+    private DFTypeSpace _paramTypeSpace = null;
 
     // This field is available after setBaseFinder(). (Pass2)
     private DFTypeFinder _baseFinder = null;
@@ -65,7 +65,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
     }
 
     protected DFKlass(
-        String name, DFTypeCollection outerSpace,
+        String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope,
         DFKlass baseKlass) {
         this(name, outerSpace, outerKlass, outerScope);
@@ -91,7 +91,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _paramTypeSpace = new DFTypeCollection(null, subname);
+        _paramTypeSpace = new DFTypeSpace(null, subname);
         for (int i = 0; i < _paramTypes.length; i++) {
             DFMapType mapType = genericKlass._mapTypes[i];
             DFType paramType = _paramTypes[i];
@@ -221,9 +221,9 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
         // Get type parameters.
         assert _mapTypes == null;
         assert _paramTypes == null;
-        _mapTypes = DFTypeCollection.getMapTypes(tps);
+        _mapTypes = DFTypeSpace.getMapTypes(tps);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeCollection.createMapTypeSpace(_mapTypes);
+            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
         }
     }
 
@@ -232,7 +232,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
         assert _paramTypes == null;
         _mapTypes = JNITypeParser.getMapTypes(sig);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeCollection.createMapTypeSpace(_mapTypes);
+            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
         }
     }
 
@@ -303,7 +303,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
                     String id = Utils.encodeASTNode(methodDecl);
-                    DFTypeCollection methodSpace = this.lookupSpace(id);
+                    DFTypeSpace methodSpace = this.lookupSpace(id);
                     DFLocalVarScope scope = new DFLocalVarScope(
                         _klassScope, id);
                     this.putMethodScope(methodDecl, scope);
@@ -328,7 +328,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
     @SuppressWarnings("unchecked")
     private void buildStmt(
         Statement ast,
-        DFTypeCollection space, DFLocalVarScope outerScope)
+        DFTypeSpace space, DFLocalVarScope outerScope)
         throws UnsupportedSyntax {
         assert ast != null;
 
@@ -499,7 +499,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
     @SuppressWarnings("unchecked")
     private void buildExpr(
         Expression expr,
-        DFTypeCollection space, DFVarScope outerScope)
+        DFTypeSpace space, DFVarScope outerScope)
         throws UnsupportedSyntax {
         assert expr != null;
 
@@ -666,7 +666,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
         return _outerKlass;
     }
 
-    public DFTypeCollection getKlassSpace() {
+    public DFTypeSpace getKlassSpace() {
         return this;
     }
 
@@ -861,7 +861,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
     }
 
     private DFMethod addMethod(
-        DFTypeCollection methodSpace, String id, DFCallStyle callStyle,
+        DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
         DFMapType[] mapTypes, DFTypeFinder finder,
         DFMethodType methodType) {
         return this.addMethod(
@@ -1019,13 +1019,13 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
             if (meth.isPrivate()) continue;
             sig = Utils.getJKlassSignature(meth.getAttributes());
 	    DFMethodType methodType;
-            DFTypeCollection methodSpace = new DFTypeCollection(this, meth.getName());
+            DFTypeSpace methodSpace = new DFTypeSpace(this, meth.getName());
             DFMapType[] mapTypes = null;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 mapTypes = JNITypeParser.getMapTypes(sig);
                 if (mapTypes != null) {
-                    DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
+                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
 		    finder = new DFTypeFinder(mapTypeSpace, finder);
 		    mapTypeSpace.buildMapTypes(finder, mapTypes);
                 }
@@ -1211,7 +1211,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFTypeCollection methodSpace = this.lookupSpace(id);
+                DFTypeSpace methodSpace = this.lookupSpace(id);
                 finder = new DFTypeFinder(methodSpace, finder);
                 List<TypeParameter> tps = decl.typeParameters();
                 DFMapType[] mapTypes = null;
@@ -1223,7 +1223,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
                         mapTypes[i] = new DFMapType(id2);
                         mapTypes[i].setTypeBounds(tp.typeBounds());
                     }
-                    DFTypeCollection mapTypeSpace = DFTypeCollection.createMapTypeSpace(mapTypes);
+                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
 		    finder = new DFTypeFinder(mapTypeSpace, finder);
 		    mapTypeSpace.buildMapTypes(finder, mapTypes);
                 }
@@ -1262,7 +1262,7 @@ public class DFKlass extends DFTypeCollection implements DFType, Comparable<DFKl
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFTypeCollection methodSpace = this.lookupSpace("<clinit>");
+                DFTypeSpace methodSpace = this.lookupSpace("<clinit>");
                 _initializer = new DFMethod(
 		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
                     null, finder,

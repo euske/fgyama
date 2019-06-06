@@ -13,7 +13,7 @@ public class UnitTestDF extends XMLTestCase {
 
     public static final String TESTDATA = "tests";
 
-    private static DFRootTypeCollection _rootSpace = null;
+    private static DFRootTypeSpace _rootSpace = null;
     private static Java2DF _converter = null;
 
     public UnitTestDF(String name)
@@ -23,7 +23,7 @@ public class UnitTestDF extends XMLTestCase {
 	XMLUnit.setIgnoreWhitespace(true);
 	XMLUnit.setNormalize(true);
         if (_rootSpace == null) {
-            _rootSpace = new DFRootTypeCollection();
+            _rootSpace = new DFRootTypeSpace();
             DFBuiltinTypes.initialize(_rootSpace);
         }
         if (_converter == null) {
