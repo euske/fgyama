@@ -2386,7 +2386,7 @@ public class Java2DF {
         }
         DFVarScope klassScope = klass.getKlassScope();
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
-	DFTypeSpace klassSpace = klass.getKlassSpace();
+	DFTypeSpace klassSpace = klass;
         DFGraph klassGraph = new DFGraph(klassScope, null, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
         DFTypeFinder finder = klass.getInternalFinder();
@@ -2443,7 +2443,7 @@ public class Java2DF {
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
         DFTypeFinder finder = klass.getInternalFinder();
-        DFTypeSpace typeSpace = klass.getKlassSpace();
+        DFTypeSpace typeSpace = klass;
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {
             this.enumKlassesDecls(finder, typeSpace, ast, klasses);

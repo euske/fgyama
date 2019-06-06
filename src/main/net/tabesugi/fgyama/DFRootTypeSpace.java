@@ -79,7 +79,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-            space = klass.getKlassSpace();
+            space = klass;
             klass = space.createKlass(klass, klass.getKlassScope(), name);
             finder = new DFTypeFinder(space, finder);
         }

@@ -285,10 +285,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	throws UnsupportedSyntax {
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
+                AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
 		this.buildAbstTypeDecl(
-                    this.getFilePath(),
-                    (AbstractTypeDeclaration)body,
+                    this.getFilePath(), abstTypeDecl,
                     this, _klassScope);
+
 	    } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
@@ -298,6 +299,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                         this.buildExpr(init, this, _klassScope);
                     }
                 }
+
 	    } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration methodDecl = (MethodDeclaration)body;
                 Statement stmt = methodDecl.getBody();
@@ -309,8 +311,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     this.putMethodScope(methodDecl, scope);
                     this.buildStmt(stmt, methodSpace, scope);
                 }
+
 	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
 		;
+
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
                 Statement stmt = initializer.getBody();
@@ -486,8 +490,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
             space.buildAbstTypeDecl(
-                this.getFilePath(),
-                typeDeclStmt.getDeclaration(),
+                this.getFilePath(), typeDeclStmt.getDeclaration(),
                 this, outerScope);
 
         } else {
@@ -664,10 +667,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     public DFKlass getOuterKlass() {
         return _outerKlass;
-    }
-
-    public DFTypeSpace getKlassSpace() {
-        return this;
     }
 
     public DFVarScope getKlassScope() {

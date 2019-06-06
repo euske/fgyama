@@ -68,9 +68,7 @@ public class DFTypeSpace {
             return space.lookupSpace(id.substring(i+1));
         }
         DFKlass klass = _id2klass.get(id);
-        if (klass != null) {
-            return klass.getKlassSpace();
-        }
+        if (klass != null) return klass;
         DFTypeSpace space = _id2space.get(id);
         if (space == null) {
             space = new DFTypeSpace(this, id);
