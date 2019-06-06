@@ -6,7 +6,7 @@ import java.util.*;
 
 //  DFUnknownType
 //
-public class DFUnknownType extends DFType {
+public class DFUnknownType implements DFType {
 
     private DFUnknownType() {
     }
@@ -22,6 +22,10 @@ public class DFUnknownType extends DFType {
 
     public boolean equals(DFType type) {
         return false;
+    }
+
+    public DFKlass getKlass() {
+        return DFBuiltinTypes.getObjectKlass();
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {

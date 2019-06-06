@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 
 //  DFKlass
 //
-public class DFKlass extends DFType implements Comparable<DFKlass> {
+public class DFKlass implements DFType, Comparable<DFKlass> {
 
     // These fields are available upon construction.
     private String _name;

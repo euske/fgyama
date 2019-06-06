@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMapType
 //
-public class DFMapType extends DFType {
+public class DFMapType implements DFType {
 
     private String _name;
     private DFKlass _boundKlass;

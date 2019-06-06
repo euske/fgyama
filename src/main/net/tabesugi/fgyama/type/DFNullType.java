@@ -6,7 +6,7 @@ import java.util.*;
 
 //  DFNullType
 //
-public class DFNullType extends DFType {
+public class DFNullType implements DFType {
 
     private DFNullType() {
     }
@@ -22,6 +22,10 @@ public class DFNullType extends DFType {
 
     public boolean equals(DFType type) {
         return (type instanceof DFNullType);
+    }
+
+    public DFKlass getKlass() {
+        return DFBuiltinTypes.getObjectKlass();
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {

@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMethodType
 //
-public class DFMethodType extends DFType {
+public class DFMethodType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
@@ -34,6 +34,10 @@ public class DFMethodType extends DFType {
             if (!_argTypes[i].equals(mtype._argTypes[i])) return false;
         }
         return true;
+    }
+
+    public DFKlass getKlass() {
+        return null;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
