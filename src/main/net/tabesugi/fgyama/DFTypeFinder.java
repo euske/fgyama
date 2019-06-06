@@ -13,22 +13,17 @@ import org.w3c.dom.*;
 public class DFTypeFinder {
 
     private DFTypeSpace _space;
-    private DFTypeFinder[] _nexts = null;
+    private DFTypeFinder _next = null;
 
     public DFTypeFinder(DFTypeSpace space) {
         assert space != null;
         _space = space;
     }
 
-    public DFTypeFinder(DFTypeSpace space, DFTypeFinder[] nexts) {
+    public DFTypeFinder(DFTypeSpace space, DFTypeFinder next) {
         assert space != null;
-        assert nexts != null;
         _space = space;
-        _nexts = nexts;
-    }
-
-    public DFTypeFinder extend(DFTypeSpace space) {
-        return new DFTypeFinder(space, new DFTypeFinder[] { this });
+        _next = next;
     }
 
     @Override
@@ -39,10 +34,8 @@ public class DFTypeFinder {
     }
     private void toString(List<DFTypeSpace> path) {
         path.add(_space);
-        if (_nexts != null) {
-            for (DFTypeFinder next : _nexts) {
-                next.toString(path);
-            }
+        if (_next != null) {
+	    _next.toString(path);
         }
     }
 
@@ -66,12 +59,10 @@ public class DFTypeFinder {
         try {
             return _space.getKlass(name);
         } catch (TypeNotFound e) {
-            if (_nexts != null) {
-                for (DFTypeFinder next : _nexts) {
-                    try {
-                        return next.lookupKlassRec(name);
-                    } catch (TypeNotFound ee) {
-                    }
+            if (_next != null) {
+		try {
+		    return _next.lookupKlassRec(name);
+		} catch (TypeNotFound ee) {
                 }
             }
             throw e;
@@ -195,8 +186,7 @@ public class DFTypeFinder {
 
     public DFTypeFinder resolveMapTypeSpace(
         DFTypeCollection mapTypeSpace, DFMapType[] mapTypes) {
-        DFTypeFinder finder = new DFTypeFinder(
-            mapTypeSpace, new DFTypeFinder[] { this });
+        DFTypeFinder finder = new DFTypeFinder(mapTypeSpace, this);
         for (DFMapType mapType : mapTypes) {
             try {
                 // This might cause TypeNotFound

@@ -81,7 +81,7 @@ public class DFRootTypeCollection extends DFTypeCollection {
             String name = s.substring(i0, (0 <= i)? i : s.length());
             space = klass.getKlassSpace();
             klass = space.createKlass(klass, klass.getKlassScope(), name);
-            finder = finder.extend(space);
+            finder = new DFTypeFinder(space, finder);
         }
         klass.setBaseFinder(finder);
         klass.setJarPath(jarPath, entPath);
