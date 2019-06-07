@@ -686,43 +686,53 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	_baseFinder = finder;
     }
 
-    public DFTypeFinder addFinders(DFTypeFinder finder)
+    public DFTypeFinder getFinder()
         throws TypeNotFound {
-        assert _built;
+        DFTypeFinder finder;
+        if (_outerKlass != null) {
+            finder = _outerKlass.getFinder();
+        } else {
+            finder = _baseFinder;
+        }
+        assert finder != null;
+        return new DFTypeFinder(this, finder);
+    }
+
+    public DFKlass getKlass(String id)
+        throws TypeNotFound {
+        if (_mapTypeSpace != null) {
+            try {
+                return _mapTypeSpace.getKlass(id);
+            } catch (TypeNotFound e) {
+            }
+        }
+        if (_paramTypeSpace != null) {
+            try {
+                return _paramTypeSpace.getKlass(id);
+            } catch (TypeNotFound e) {
+            }
+        }
+        try {
+            return super.getKlass(id);
+        } catch (TypeNotFound e) {
+        }
         if (_baseKlass != null) {
-            finder = _baseKlass.addFinders(finder);
+            try {
+                return _baseKlass.getKlass(id);
+            } catch (TypeNotFound e) {
+            }
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                finder = iface.addFinders(finder);
+                if (iface != null) {
+                    try {
+                        return iface.getKlass(id);
+                    } catch (TypeNotFound e) {
+                    }
+                }
             }
         }
-        finder = new DFTypeFinder(this, finder);
-        return finder;
-    }
-
-    public DFTypeFinder getBaseFinder()
-        throws TypeNotFound {
-        if (_outerKlass != null) {
-            return _outerKlass.getBaseFinder();
-        } else {
-            assert _baseFinder != null;
-            DFTypeFinder finder = this.addFinders(_baseFinder);
-            return new DFTypeFinder(this, finder);
-        }
-    }
-
-    public DFTypeFinder getInternalFinder()
-        throws TypeNotFound {
-        assert _built;
-        DFTypeFinder finder = this.addFinders(this.getBaseFinder());
-        if (_mapTypeSpace != null) {
-            finder = new DFTypeFinder(_mapTypeSpace, finder);
-        }
-        if (_paramTypeSpace != null) {
-            finder = new DFTypeFinder(_paramTypeSpace, finder);
-        }
-        return finder;
+        throw new TypeNotFound(this.getSpaceName()+id);
     }
 
     public DFKlass getBaseKlass() {
@@ -911,7 +921,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         if (_outerKlass != null) {
             _outerKlass.load();
         }
-        DFTypeFinder finder = this.getBaseFinder();
+        DFTypeFinder finder = this.getFinder();
         if (finder == null) Logger.error("!!!", this, _outerKlass);
         assert _ast != null || _jarPath != null;
         if (_mapTypeSpace != null) {
@@ -959,40 +969,37 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _baseKlass = (DFKlass)parser.getType(finder);
             _baseKlass.load();
-	    finder = _baseKlass.addFinders(finder);
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
 	    for (;;) {
 		DFKlass iface = (DFKlass)parser.getType(finder);
 		if (iface == null) break;
-                iface.load();
 		ifaces.add(iface);
-		finder = iface.addFinders(finder);
 	    }
 	    _baseIfaces = new DFKlass[ifaces.size()];
 	    ifaces.toArray(_baseIfaces);
+            for (DFKlass iface : _baseIfaces) {
+                iface.load();
+            }
         } else {
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
 		_baseKlass = finder.lookupKlass(superClass);
                 _baseKlass.load();
-		finder = _baseKlass.addFinders(finder);
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
 	    if (ifaces != null) {
-                DFKlass[] baseIfaces = new DFKlass[ifaces.length];
+                _baseIfaces = new DFKlass[ifaces.length];
 		for (int i = 0; i < ifaces.length; i++) {
-		    DFKlass iface = finder.lookupKlass(ifaces[i]);
-                    iface.load();
-		    baseIfaces[i] = iface;
-		    finder = iface.addFinders(finder);
+		    _baseIfaces[i] = finder.lookupKlass(ifaces[i]);
 		}
-		_baseIfaces = baseIfaces;
+                for (DFKlass iface : _baseIfaces) {
+                    iface.load();
+                }
 	    }
 	}
         // Extend a TypeFinder for this klass.
         if (_outerKlass != null) {
             _outerKlass.load();
-            finder = _outerKlass.addFinders(finder);
         }
         finder = new DFTypeFinder(this, finder);
         // Define fields.
@@ -1090,18 +1097,15 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
             _baseKlass.load();
-            finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = typeDecl.superInterfaceTypes();
-            DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
+            _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-		DFKlass iface = finder.resolve(ifaces.get(i)).getKlass();
-                //Logger.info("DFKlass.build:", this, "implements", iface);
-                baseIfaces[i] = iface;
-                iface.load();
-                finder = iface.addFinders(finder);
+                _baseIfaces[i] = finder.resolve(ifaces.get(i)).getKlass();
             }
-            _baseIfaces = baseIfaces;
+            for (DFKlass iface : _baseIfaces) {
+                iface.load();
+            }
             this.buildDecls(finder, typeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(typeDecl);
@@ -1119,17 +1123,15 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
             _baseKlass = enumKlass.parameterize(new DFType[] { this });
             _baseKlass.load();
-            finder = _baseKlass.addFinders(finder);
             // Get interfaces.
             List<Type> ifaces = enumDecl.superInterfaceTypes();
-            DFKlass[] baseIfaces = new DFKlass[ifaces.size()];
+            _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-		DFKlass iface = finder.resolve(ifaces.get(i)).getKlass();
-                iface.load();
-                baseIfaces[i] = iface;
-                finder = iface.addFinders(finder);
+                _baseIfaces[i] = finder.resolve(ifaces.get(i)).getKlass();
             }
-            _baseIfaces = baseIfaces;
+            for (DFKlass iface : _baseIfaces) {
+                iface.load();
+            }
             // Get constants.
             for (EnumConstantDeclaration econst :
                      (List<EnumConstantDeclaration>) enumDecl.enumConstants()) {
@@ -1154,7 +1156,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             _baseKlass.load();
-            finder = _baseKlass.addFinders(finder);
             this.buildDecls(finder, annotTypeDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(annotTypeDecl);
@@ -1170,7 +1171,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             _baseKlass.load();
-            finder = _baseKlass.addFinders(finder);
             this.buildDecls(finder, anonDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(anonDecl);
@@ -1182,9 +1182,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private void buildDecls(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws UnsupportedSyntax, TypeNotFound {
         // Extend a TypeFinder for the child klasses.
-        if (_outerKlass != null) {
-            finder = _outerKlass.addFinders(finder);
-        }
         finder = new DFTypeFinder(this, finder);
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {

@@ -2389,7 +2389,7 @@ public class Java2DF {
 	DFTypeSpace klassSpace = klass;
         DFGraph klassGraph = new DFGraph(klassScope, null, ast);
         DFContext klassCtx = new DFContext(klassGraph, klassScope);
-        DFTypeFinder finder = klass.getInternalFinder();
+        DFTypeFinder finder = klass.getFinder();
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Inner classes are processed separately.
@@ -2442,7 +2442,7 @@ public class Java2DF {
         if (klasses.contains(klass)) return;
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
-        DFTypeFinder finder = klass.getInternalFinder();
+        DFTypeFinder finder = klass.getFinder();
         DFTypeSpace typeSpace = klass;
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {

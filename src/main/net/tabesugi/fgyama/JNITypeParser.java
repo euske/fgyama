@@ -73,7 +73,7 @@ public class JNITypeParser {
                     } else if (c3 == '.') {
                         _pos++;
                         i = _pos;
-                        finder = klass.addFinders(finder);
+                        finder = new DFTypeFinder(klass, finder);
                     } else {
                         assert false; // ???
                     }
