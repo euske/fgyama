@@ -2432,7 +2432,6 @@ public class Java2DF {
         return klassGraph;
     }
 
-    @SuppressWarnings("unchecked")
     private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
         throws TypeNotFound {
         klass.load();
@@ -2444,33 +2443,41 @@ public class Java2DF {
         DFTypeFinder finder = klass.getFinder();
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {
-            this.enumKlassesDecls(finder, klass, ast, klasses);
+            this.enumKlassesDecl(finder, klass, ast, klasses);
         } catch (UnsupportedSyntax e) {
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void enumKlassesDecls(
-        DFTypeFinder finder, DFTypeSpace typeSpace,
+    private void enumKlassesDecl(
+        DFTypeFinder finder, DFKlass klass,
         ASTNode ast, Set<DFKlass> klasses)
         throws UnsupportedSyntax, TypeNotFound {
-        List<BodyDeclaration> decls;
         if (ast instanceof AbstractTypeDeclaration) {
             AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
-            decls = abstDecl.bodyDeclarations();
+            this.enumKlassesDecls(
+                finder, klass, abstDecl.bodyDeclarations(), klasses);
         } else if (ast instanceof AnonymousClassDeclaration) {
             AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
-            decls = anonDecl.bodyDeclarations();
+            this.enumKlassesDecls(
+                finder, klass, anonDecl.bodyDeclarations(), klasses);
         } else {
             throw new UnsupportedSyntax(ast);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enumKlassesDecls(
+        DFTypeFinder finder, DFKlass klass,
+        List<BodyDeclaration> decls, Set<DFKlass> klasses)
+        throws UnsupportedSyntax, TypeNotFound {
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
                 try {
-                    DFKlass klass = typeSpace.getKlass(decl.getName());
-                    enumKlasses(klass, klasses);
+                    DFKlass innerKlass = klass.getKlass(decl.getName());
+                    enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
                     e.setAst(decl);
                     if (0 < _strict) throw e;
@@ -2492,14 +2499,14 @@ public class Java2DF {
                          (List<VariableDeclarationFragment>) decl.fragments()) {
                     Expression expr = frag.getInitializer();
                     if (expr != null) {
-                        this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                        this.enumKlassesExpr(finder, klass, expr, klasses);
                     }
                 }
 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFMethod method = ((DFKlass)typeSpace).getMethod(id);
+                DFMethod method = klass.getMethod(id);
                 DFTypeFinder finder2 = method.getFinder();
                 try {
                     DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
@@ -2548,7 +2555,7 @@ public class Java2DF {
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
                 this.enumKlassesStmt(
-                    finder, typeSpace, initializer.getBody(), klasses);
+                    finder, klass, initializer.getBody(), klasses);
 
             } else {
                 throw new UnsupportedSyntax(body);
@@ -2558,7 +2565,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void enumKlassesStmt(
-        DFTypeFinder finder, DFTypeSpace typeSpace,
+        DFTypeFinder finder, DFTypeSpace klass,
         Statement ast, Set<DFKlass> klasses)
         throws UnsupportedSyntax, TypeNotFound {
         assert ast != null;
@@ -2569,7 +2576,7 @@ public class Java2DF {
             Block block = (Block)ast;
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
-                this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+                this.enumKlassesStmt(finder, klass, stmt, klasses);
             }
 
         } else if (ast instanceof EmptyStatement) {
@@ -2590,83 +2597,83 @@ public class Java2DF {
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                    this.enumKlassesExpr(finder, klass, expr, klasses);
                 }
             }
 
         } else if (ast instanceof ExpressionStatement) {
             ExpressionStatement exprStmt = (ExpressionStatement)ast;
             Expression expr = exprStmt.getExpression();
-            this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+            this.enumKlassesExpr(finder, klass, expr, klasses);
 
         } else if (ast instanceof ReturnStatement) {
             ReturnStatement returnStmt = (ReturnStatement)ast;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof IfStatement) {
             IfStatement ifStmt = (IfStatement)ast;
             Expression expr = ifStmt.getExpression();
-            this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+            this.enumKlassesExpr(finder, klass, expr, klasses);
             Statement thenStmt = ifStmt.getThenStatement();
-            this.enumKlassesStmt(finder, typeSpace, thenStmt, klasses);
+            this.enumKlassesStmt(finder, klass, thenStmt, klasses);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                this.enumKlassesStmt(finder, typeSpace, elseStmt, klasses);
+                this.enumKlassesStmt(finder, klass, elseStmt, klasses);
             }
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
             Expression expr = switchStmt.getExpression();
-            this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+            this.enumKlassesExpr(finder, klass, expr, klasses);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
-                this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+                this.enumKlassesStmt(finder, klass, stmt, klasses);
             }
 
         } else if (ast instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)ast;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
-            this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+            this.enumKlassesExpr(finder, klass, expr, klasses);
             Statement stmt = whileStmt.getBody();
-            this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+            this.enumKlassesStmt(finder, klass, stmt, klasses);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
             Statement stmt = doStmt.getBody();
-            this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+            this.enumKlassesStmt(finder, klass, stmt, klasses);
             Expression expr = doStmt.getExpression();
-            this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+            this.enumKlassesExpr(finder, klass, expr, klasses);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
-                this.enumKlassesExpr(finder, typeSpace, init, klasses);
+                this.enumKlassesExpr(finder, klass, init, klasses);
             }
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
             Statement stmt = forStmt.getBody();
-            this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+            this.enumKlassesStmt(finder, klass, stmt, klasses);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
-                this.enumKlassesExpr(finder, typeSpace, update, klasses);
+                this.enumKlassesExpr(finder, klass, update, klasses);
             }
 
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
-            this.enumKlassesExpr(finder, typeSpace, eForStmt.getExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, eForStmt.getExpression(), klasses);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             try {
                 DFType varType = finder.resolve(decl.getType());
@@ -2678,7 +2685,7 @@ public class Java2DF {
                 if (0 < _strict) throw e;
             }
             Statement stmt = eForStmt.getBody();
-            this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+            this.enumKlassesStmt(finder, klass, stmt, klasses);
 
         } else if (ast instanceof BreakStatement) {
 
@@ -2687,20 +2694,20 @@ public class Java2DF {
         } else if (ast instanceof LabeledStatement) {
             LabeledStatement labeledStmt = (LabeledStatement)ast;
             Statement stmt = labeledStmt.getBody();
-            this.enumKlassesStmt(finder, typeSpace, stmt, klasses);
+            this.enumKlassesStmt(finder, klass, stmt, klasses);
 
         } else if (ast instanceof SynchronizedStatement) {
             SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
-            this.enumKlassesExpr(finder, typeSpace, syncStmt.getExpression(), klasses);
-            this.enumKlassesStmt(finder, typeSpace, syncStmt.getBody(), klasses);
+            this.enumKlassesExpr(finder, klass, syncStmt.getExpression(), klasses);
+            this.enumKlassesStmt(finder, klass, syncStmt.getBody(), klasses);
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                this.enumKlassesExpr(finder, typeSpace, decl, klasses);
+                this.enumKlassesExpr(finder, klass, decl, klasses);
             }
-            this.enumKlassesStmt(finder, typeSpace, tryStmt.getBody(), klasses);
+            this.enumKlassesStmt(finder, klass, tryStmt.getBody(), klasses);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -2713,38 +2720,39 @@ public class Java2DF {
                     e.setAst(decl);
                     if (0 < _strict) throw e;
                 }
-                this.enumKlassesStmt(finder, typeSpace, cc.getBody(), klasses);
+                this.enumKlassesStmt(finder, klass, cc.getBody(), klasses);
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
-                this.enumKlassesStmt(finder, typeSpace, finBlock, klasses);
+                this.enumKlassesStmt(finder, klass, finBlock, klasses);
             }
 
         } else if (ast instanceof ThrowStatement) {
             ThrowStatement throwStmt = (ThrowStatement)ast;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof ConstructorInvocation) {
             ConstructorInvocation ci = (ConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof SuperConstructorInvocation) {
             SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
-            this.enumKlassesDecls(
-                finder, typeSpace, decl.getDeclaration(), klasses);
+            AbstractTypeDeclaration abstDecl = decl.getDeclaration();
+            DFKlass innerKlass = klass.getKlass(abstDecl.getName());
+            this.enumKlassesDecl(finder, innerKlass, decl, klasses);
 
         } else {
             throw new UnsupportedSyntax(ast);
@@ -2754,7 +2762,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void enumKlassesExpr(
-        DFTypeFinder finder, DFTypeSpace typeSpace,
+        DFTypeFinder finder, DFTypeSpace klass,
         Expression ast, Set<DFKlass> klasses)
         throws UnsupportedSyntax, TypeNotFound {
         assert ast != null;
@@ -2769,8 +2777,8 @@ public class Java2DF {
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
-                    DFKlass klass = finder.lookupKlass(name);
-                    enumKlasses(klass, klasses);
+                    DFKlass innerKlass = finder.lookupKlass(name);
+                    enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
                     e.setAst(name);
                     if (0 < _strict) throw e;
@@ -2793,42 +2801,42 @@ public class Java2DF {
             PrefixExpression prefix = (PrefixExpression)ast;
             PrefixExpression.Operator op = prefix.getOperator();
             Expression operand = prefix.getOperand();
-            this.enumKlassesExpr(finder, typeSpace, operand, klasses);
+            this.enumKlassesExpr(finder, klass, operand, klasses);
             if (op == PrefixExpression.Operator.INCREMENT ||
                 op == PrefixExpression.Operator.DECREMENT) {
-                this.enumKlassesExpr(finder, typeSpace, operand, klasses);
+                this.enumKlassesExpr(finder, klass, operand, klasses);
             }
 
         } else if (ast instanceof PostfixExpression) {
             PostfixExpression postfix = (PostfixExpression)ast;
             PostfixExpression.Operator op = postfix.getOperator();
             Expression operand = postfix.getOperand();
-            this.enumKlassesExpr(finder, typeSpace, operand, klasses);
+            this.enumKlassesExpr(finder, klass, operand, klasses);
             if (op == PostfixExpression.Operator.INCREMENT ||
                 op == PostfixExpression.Operator.DECREMENT) {
-                this.enumKlassesExpr(finder, typeSpace, operand, klasses);
+                this.enumKlassesExpr(finder, klass, operand, klasses);
             }
 
         } else if (ast instanceof InfixExpression) {
             InfixExpression infix = (InfixExpression)ast;
             InfixExpression.Operator op = infix.getOperator();
             Expression loperand = infix.getLeftOperand();
-            this.enumKlassesExpr(finder, typeSpace, loperand, klasses);
+            this.enumKlassesExpr(finder, klass, loperand, klasses);
             Expression roperand = infix.getRightOperand();
-            this.enumKlassesExpr(finder, typeSpace, roperand, klasses);
+            this.enumKlassesExpr(finder, klass, roperand, klasses);
 
         } else if (ast instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-            this.enumKlassesExpr(finder, typeSpace, paren.getExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, paren.getExpression(), klasses);
 
         } else if (ast instanceof Assignment) {
             Assignment assn = (Assignment)ast;
             Assignment.Operator op = assn.getOperator();
-            this.enumKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), klasses);
+            this.enumKlassesExpr(finder, klass, assn.getLeftHandSide(), klasses);
             if (op != Assignment.Operator.ASSIGN) {
-                this.enumKlassesExpr(finder, typeSpace, assn.getLeftHandSide(), klasses);
+                this.enumKlassesExpr(finder, klass, assn.getLeftHandSide(), klasses);
             }
-            this.enumKlassesExpr(finder, typeSpace, assn.getRightHandSide(), klasses);
+            this.enumKlassesExpr(finder, klass, assn.getRightHandSide(), klasses);
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
@@ -2845,7 +2853,7 @@ public class Java2DF {
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
-                    this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                    this.enumKlassesExpr(finder, klass, expr, klasses);
                 }
             }
 
@@ -2854,34 +2862,34 @@ public class Java2DF {
             Expression expr = invoke.getExpression();
             if (expr instanceof Name) {
                 try {
-                    DFKlass klass = finder.lookupKlass((Name)expr);
-                    enumKlasses(klass, klasses);
+                    DFKlass innerKlass = finder.lookupKlass((Name)expr);
+                    enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
                 }
             } else if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
             for (Expression arg :
                      (List<Expression>) invoke.arguments()) {
-                this.enumKlassesExpr(finder, typeSpace, arg, klasses);
+                this.enumKlassesExpr(finder, klass, arg, klasses);
             }
 
         } else if (ast instanceof SuperMethodInvocation) {
             SuperMethodInvocation si = (SuperMethodInvocation)ast;
             for (Expression arg :
                      (List<Expression>) si.arguments()) {
-                this.enumKlassesExpr(finder, typeSpace, arg, klasses);
+                this.enumKlassesExpr(finder, klass, arg, klasses);
             }
 
         } else if (ast instanceof ArrayCreation) {
             ArrayCreation ac = (ArrayCreation)ast;
             for (Expression dim :
                      (List<Expression>) ac.dimensions()) {
-                this.enumKlassesExpr(finder, typeSpace, dim, klasses);
+                this.enumKlassesExpr(finder, klass, dim, klasses);
             }
             ArrayInitializer init = ac.getInitializer();
             if (init != null) {
-                this.enumKlassesExpr(finder, typeSpace, init, klasses);
+                this.enumKlassesExpr(finder, klass, init, klasses);
             }
             try {
                 DFType type = finder.resolve(ac.getType().getElementType());
@@ -2897,18 +2905,18 @@ public class Java2DF {
             ArrayInitializer init = (ArrayInitializer)ast;
             for (Expression expr :
                      (List<Expression>) init.expressions()) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
 
         } else if (ast instanceof ArrayAccess) {
             ArrayAccess aa = (ArrayAccess)ast;
-            this.enumKlassesExpr(finder, typeSpace, aa.getArray(), klasses);
-            this.enumKlassesExpr(finder, typeSpace, aa.getIndex(), klasses);
+            this.enumKlassesExpr(finder, klass, aa.getArray(), klasses);
+            this.enumKlassesExpr(finder, klass, aa.getIndex(), klasses);
 
         } else if (ast instanceof FieldAccess) {
             FieldAccess fa = (FieldAccess)ast;
             SimpleName fieldName = fa.getName();
-            this.enumKlassesExpr(finder, typeSpace, fa.getExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, fa.getExpression(), klasses);
 
         } else if (ast instanceof SuperFieldAccess) {
             SuperFieldAccess sfa = (SuperFieldAccess)ast;
@@ -2916,7 +2924,7 @@ public class Java2DF {
 
         } else if (ast instanceof CastExpression) {
             CastExpression cast = (CastExpression)ast;
-            this.enumKlassesExpr(finder, typeSpace, cast.getExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, cast.getExpression(), klasses);
             try {
                 DFType type = finder.resolve(cast.getType());
                 if (type instanceof DFKlass) {
@@ -2934,7 +2942,7 @@ public class Java2DF {
                 DFType instType;
                 if (anonDecl != null) {
                     String id = Utils.encodeASTNode(anonDecl);
-                    instType = typeSpace.getKlass(id);
+                    instType = klass.getKlass(id);
                 } else {
                     instType = finder.resolve(cstr.getType());
                 }
@@ -2947,22 +2955,22 @@ public class Java2DF {
             }
             Expression expr = cstr.getExpression();
             if (expr != null) {
-                this.enumKlassesExpr(finder, typeSpace, expr, klasses);
+                this.enumKlassesExpr(finder, klass, expr, klasses);
             }
             for (Expression arg :
                      (List<Expression>) cstr.arguments()) {
-                this.enumKlassesExpr(finder, typeSpace, arg, klasses);
+                this.enumKlassesExpr(finder, klass, arg, klasses);
             }
 
         } else if (ast instanceof ConditionalExpression) {
             ConditionalExpression cond = (ConditionalExpression)ast;
-            this.enumKlassesExpr(finder, typeSpace, cond.getExpression(), klasses);
-            this.enumKlassesExpr(finder, typeSpace, cond.getThenExpression(), klasses);
-            this.enumKlassesExpr(finder, typeSpace, cond.getElseExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, cond.getExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, cond.getThenExpression(), klasses);
+            this.enumKlassesExpr(finder, klass, cond.getElseExpression(), klasses);
 
         } else if (ast instanceof InstanceofExpression) {
             InstanceofExpression instof = (InstanceofExpression)ast;
-            this.enumKlassesExpr(finder, typeSpace, instof.getLeftOperand(), klasses);
+            this.enumKlassesExpr(finder, klass, instof.getLeftOperand(), klasses);
 
         } else {
             // LambdaExpression
