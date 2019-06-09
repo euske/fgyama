@@ -1067,8 +1067,8 @@ public class Java2DF {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
-                            klass, null, id,
-                            DFCallStyle.InstanceMethod, null, finder,
+                            klass, id, DFCallStyle.InstanceMethod, null);
+                        fallback.setMethodType(
                             new DFMethodType(argTypes, DFUnknownType.UNKNOWN));
                         Logger.error("Fallback method:", klass, ":", fallback);
                         method = fallback;
@@ -1142,8 +1142,8 @@ public class Java2DF {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        baseKlass, null, id,
-                        DFCallStyle.InstanceMethod, null, finder,
+                        baseKlass, id, DFCallStyle.InstanceMethod, null);
+                    fallback.setMethodType(
                         new DFMethodType(argTypes, DFUnknownType.UNKNOWN));
                     Logger.error("Fallback method:", baseKlass, ":", fallback);
                     method = fallback;
@@ -2318,7 +2318,6 @@ public class Java2DF {
         assert scope != null;
         DFFrame frame = method.getFrame();
         assert frame != null;
-        DFTypeSpace methodSpace = method.getMethodSpace();
         DFGraph graph = new DFGraph(scope, method, ast);
         DFContext ctx = new DFContext(graph, scope);
         DFTypeFinder finder = method.getFinder();
@@ -2349,7 +2348,7 @@ public class Java2DF {
         try {
             // Process the function body.
             processStatement(
-                ctx, methodSpace, graph, finder, scope, frame, body);
+                ctx, method, graph, finder, scope, frame, body);
             frame.close(ctx);
             for (DFRef ref : frame.getOutputRefs()) {
                 if (ref.isLocal() || ref.isInternal()) continue;
@@ -2443,10 +2442,9 @@ public class Java2DF {
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
         DFTypeFinder finder = klass.getFinder();
-        DFTypeSpace typeSpace = klass;
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
         try {
-            this.enumKlassesDecls(finder, typeSpace, ast, klasses);
+            this.enumKlassesDecls(finder, klass, ast, klasses);
         } catch (UnsupportedSyntax e) {
         }
     }
@@ -2501,15 +2499,15 @@ public class Java2DF {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFTypeSpace methodSpace = typeSpace.lookupSpace(id);
-                DFTypeFinder finder2 = new DFTypeFinder(methodSpace, finder);
-                DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
+                DFMethod method = ((DFKlass)typeSpace).getMethod(id);
+                DFTypeFinder finder2 = method.getFinder();
                 try {
+                    DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
                     if (mapTypes != null) {
                         DFTypeSpace mapTypeSpace =
                             DFTypeSpace.createMapTypeSpace(mapTypes);
-			finder2 = new DFTypeFinder(mapTypeSpace, finder2);
-                        mapTypeSpace.buildMapTypes(finder, mapTypes);
+                        finder2 = new DFTypeFinder(mapTypeSpace, finder2);
+                        mapTypeSpace.buildMapTypes(finder2, mapTypes);
                     }
                     for (DFType argType : finder2.resolveArgs(decl)) {
                         if (argType instanceof DFKlass) {
@@ -2529,7 +2527,7 @@ public class Java2DF {
 		}
                 if (decl.getBody() != null) {
                     this.enumKlassesStmt(
-                        finder2, methodSpace, decl.getBody(), klasses);
+                        finder2, method, decl.getBody(), klasses);
                 }
 
             } else if (body instanceof EnumConstantDeclaration) {

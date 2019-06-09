@@ -9,22 +9,23 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMethod
 //
-public class DFMethod implements Comparable<DFMethod> {
+public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     private DFKlass _klass;
-    private DFTypeSpace _methodSpace;
     private String _name;
     private DFCallStyle _callStyle;
-    private DFMapType[] _mapTypes;
-    private DFTypeFinder _finder;
-    private DFMethodType _methodType;
+    private DFLocalVarScope _scope;
+
+    private DFTypeFinder _finder = null;
+    private DFMapType[] _mapTypes = null;
+    private DFTypeSpace _mapTypeSpace = null;
+    private DFMethodType _methodType = null;
 
     private SortedSet<DFMethod> _callers =
         new TreeSet<DFMethod>();
 
     private ASTNode _ast = null;
 
-    private DFLocalVarScope _scope = null;
     private DFFrame _frame = null;
 
     // List of subclass' methods overriding this method.
@@ -56,16 +57,26 @@ public class DFMethod implements Comparable<DFMethod> {
     }
 
     public DFMethod(
-        DFKlass klass, DFTypeSpace methodSpace,
-        String name, DFCallStyle callStyle,
-        DFMapType[] mapTypes, DFTypeFinder finder,
-        DFMethodType methodType) {
+        DFKlass klass, String name, DFCallStyle callStyle,
+        DFLocalVarScope scope) {
+        super(name, klass);
         _klass = klass;
-        _methodSpace = methodSpace;
         _name = name;
         _callStyle = callStyle;
+        _scope = scope;
+    }
+
+    public void setFinder(DFTypeFinder finder) {
+        _finder = new DFTypeFinder(this, finder);
+    }
+
+    public void setMapTypes(DFMapType[] mapTypes) {
         _mapTypes = mapTypes;
-        _finder = finder;
+        _mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
+        _mapTypeSpace.buildMapTypes(_finder, mapTypes);
+    }
+
+    public void setMethodType(DFMethodType methodType) {
         _methodType = methodType;
     }
 
@@ -107,12 +118,19 @@ public class DFMethod implements Comparable<DFMethod> {
         return _callStyle;
     }
 
-    public DFTypeSpace getMethodSpace() {
-        return _methodSpace;
-    }
-
     public DFType getReturnType() {
         return _methodType.getReturnType();
+    }
+
+    public DFKlass getKlass(String id)
+        throws TypeNotFound {
+        if (_mapTypeSpace != null) {
+            try {
+                return _mapTypeSpace.getKlass(id);
+            } catch (TypeNotFound e) {
+            }
+        }
+        return super.getKlass(id);
     }
 
     public int canAccept(DFType[] argTypes) {
@@ -164,9 +182,6 @@ public class DFMethod implements Comparable<DFMethod> {
         return _ast;
     }
 
-    public void setScope(DFLocalVarScope scope) {
-        _scope = scope;
-    }
     public DFLocalVarScope getScope() {
         return _scope;
     }

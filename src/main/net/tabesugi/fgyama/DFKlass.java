@@ -21,8 +21,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private DFKlass _outerKlass; // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
     private DFKlassScope _klassScope;
-    private Map<String, DFLocalVarScope> _methodScopes =
-        new HashMap<String, DFLocalVarScope>();
 
     // These fields are set immediately.
     private ASTNode _ast = null;
@@ -52,6 +50,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private DFMethod _initializer = null;
     private List<DFRef> _fields = new ArrayList<DFRef>();
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
+    private Map<String, DFMethod> _id2method =
+        new HashMap<String, DFMethod>();
 
     public DFKlass(
         String name, DFTypeSpace outerSpace,
@@ -302,14 +302,23 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration methodDecl = (MethodDeclaration)body;
+                String id = Utils.encodeASTNode(methodDecl);
+                String name;
+                DFCallStyle callStyle;
+                if (methodDecl.isConstructor()) {
+                    name = "<init>";
+                    callStyle = DFCallStyle.Constructor;
+                } else {
+                    name = methodDecl.getName().getIdentifier();
+                    callStyle = (isStatic(methodDecl))?
+                        DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
+                }
+                DFLocalVarScope scope = new DFLocalVarScope(_klassScope, id);
+                DFMethod method = new DFMethod(this, name, callStyle, scope);
+                this.addMethod(method, id);
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
-                    String id = Utils.encodeASTNode(methodDecl);
-                    DFTypeSpace methodSpace = this.lookupSpace(id);
-                    DFLocalVarScope scope = new DFLocalVarScope(
-                        _klassScope, id);
-                    this.putMethodScope(methodDecl, scope);
-                    this.buildStmt(stmt, methodSpace, scope);
+                    this.buildStmt(stmt, method, scope);
                 }
 
 	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
@@ -317,11 +326,13 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
+                DFLocalVarScope scope = new DFLocalVarScope(_klassScope, "<clinit>");
+                _initializer = new DFMethod(
+		    this, "<clinit>", DFCallStyle.Initializer, scope);
                 Statement stmt = initializer.getBody();
-                DFLocalVarScope scope = new DFLocalVarScope(
-                    _klassScope, "<clinit>");
-                this.putMethodScope(initializer, scope);
-                this.buildStmt(stmt, this, scope);
+                if (stmt != null) {
+                    this.buildStmt(stmt, _initializer, scope);
+                }
 
 	    } else {
 		throw new UnsupportedSyntax(body);
@@ -669,17 +680,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return _klassScope;
     }
 
-    public void putMethodScope(ASTNode ast, DFLocalVarScope scope) {
-	String key = Utils.encodeASTNode(ast);
-        _methodScopes.put(key, scope);
-    }
-
-    private DFLocalVarScope getMethodScope(ASTNode ast) {
-	String key = Utils.encodeASTNode(ast);
-        assert _methodScopes.containsKey(key);
-        return _methodScopes.get(key);
-    }
-
     public void setBaseFinder(DFTypeFinder finder) {
         assert !_built;
         //assert _baseFinder == null || _baseFinder == finder;
@@ -865,17 +865,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return ref;
     }
 
-    private DFMethod addMethod(
-        DFTypeSpace methodSpace, String id, DFCallStyle callStyle,
-        DFMapType[] mapTypes, DFTypeFinder finder,
-        DFMethodType methodType) {
-        return this.addMethod(
-            new DFMethod(
-                this, methodSpace, id, callStyle,
-                mapTypes, finder, methodType));
+    public DFMethod getMethod(String key) {
+        return _id2method.get(key);
     }
 
-    private DFMethod addMethod(DFMethod method) {
+    private DFMethod addMethod(DFMethod method, String key) {
         //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
         // override the outer methods.
@@ -886,6 +880,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             for (DFKlass iface : _baseIfaces) {
                 iface.overrideMethod(method);
             }
+        }
+        if (key != null) {
+            _id2method.put(key, method);
         }
         return method;
     }
@@ -1020,29 +1017,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
             sig = Utils.getJKlassSignature(meth.getAttributes());
-	    DFMethodType methodType;
-            DFTypeSpace methodSpace = new DFTypeSpace(meth.getName(), this);
-            DFMapType[] mapTypes = null;
-	    if (sig != null) {
-                //Logger.info("meth:", meth.getName(), sig);
-                mapTypes = JNITypeParser.getMapTypes(sig);
-                if (mapTypes != null) {
-                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
-		    finder = new DFTypeFinder(mapTypeSpace, finder);
-		    mapTypeSpace.buildMapTypes(finder, mapTypes);
-                }
-		JNITypeParser parser = new JNITypeParser(sig);
-		finder = new DFTypeFinder(methodSpace, finder);
-		methodType = (DFMethodType)parser.getType(finder);
-	    } else {
-		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
-		DFType[] argTypes = new DFType[args.length];
-		for (int i = 0; i < args.length; i++) {
-		    argTypes[i] = finder.resolve(args[i]);
-		}
-		DFType returnType = finder.resolve(meth.getReturnType());
-		methodType = new DFMethodType(argTypes, returnType);
-	    }
+            String name = meth.getName();
             DFCallStyle callStyle;
             if (meth.getName().equals("<init>")) {
                 callStyle = DFCallStyle.Constructor;
@@ -1051,9 +1026,26 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else {
                 callStyle = DFCallStyle.InstanceMethod;
             }
-            this.addMethod(
-                methodSpace, meth.getName(), callStyle,
-                mapTypes, finder, methodType);
+            DFMethod method = new DFMethod(this, name, callStyle, null);
+            method.setFinder(finder);
+	    if (sig != null) {
+                //Logger.info("meth:", meth.getName(), sig);
+                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
+                if (mapTypes != null) {
+                    method.setMapTypes(mapTypes);
+                }
+		JNITypeParser parser = new JNITypeParser(sig);
+		method.setMethodType((DFMethodType)parser.getType(method.getFinder()));
+	    } else {
+		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
+		DFType[] argTypes = new DFType[args.length];
+		for (int i = 0; i < args.length; i++) {
+		    argTypes[i] = finder.resolve(args[i]);
+		}
+		DFType returnType = finder.resolve(meth.getReturnType());
+		method.setMethodType(new DFMethodType(argTypes, returnType));
+	    }
+            this.addMethod(method, null);
         }
     }
 
@@ -1138,9 +1130,12 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 this.addField(econst.getName(), true, this);
             }
             // Enum has a special method "values()".
-            this.addMethod(
-                null, "values", DFCallStyle.InstanceMethod, null, finder,
+            DFMethod method = new DFMethod(
+                this, "values", DFCallStyle.InstanceMethod, null);
+            method.setFinder(finder);
+            method.setMethodType(
                 new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
+            this.addMethod(method, null);
             this.buildDecls(finder, enumDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
             e.setAst(enumDecl);
@@ -1203,45 +1198,33 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFTypeSpace methodSpace = this.lookupSpace(id);
-                finder = new DFTypeFinder(methodSpace, finder);
+                DFMethod method = this.getMethod(id);
+                method.setFinder(finder);
                 List<TypeParameter> tps = decl.typeParameters();
-                DFMapType[] mapTypes = null;
                 if (0 < tps.size()) {
-                    mapTypes = new DFMapType[tps.size()];
+                    DFMapType[] mapTypes = new DFMapType[tps.size()];
                     for (int i = 0; i < tps.size(); i++) {
                         TypeParameter tp = tps.get(i);
                         String id2 = tp.getName().getIdentifier();
                         mapTypes[i] = new DFMapType(id2);
                         mapTypes[i].setTypeBounds(tp.typeBounds());
                     }
-                    DFTypeSpace mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
-		    finder = new DFTypeFinder(mapTypeSpace, finder);
-		    mapTypeSpace.buildMapTypes(finder, mapTypes);
+                    method.setMapTypes(mapTypes);
                 }
-                DFType[] argTypes = finder.resolveArgs(decl);
+                DFTypeFinder finder2 = method.getFinder();
+                DFType[] argTypes = finder2.resolveArgs(decl);
                 DFType returnType;
-                String name;
-                DFCallStyle callStyle;
                 if (decl.isConstructor()) {
                     returnType = this;
-                    name = "<init>";
-                    callStyle = DFCallStyle.Constructor;
                 } else {
-                    returnType = finder.resolve(decl.getReturnType2());
-                    name = decl.getName().getIdentifier();
-                    callStyle = (isStatic(decl))?
-                        DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
+                    returnType = finder2.resolve(decl.getReturnType2());
                 }
-                DFMethod method = this.addMethod(
-                    methodSpace, name, callStyle, mapTypes, finder,
-                    new DFMethodType(argTypes, returnType));
+                method.setMethodType(new DFMethodType(argTypes, returnType));
 		if (decl.getBody() != null) {
-		    method.setScope(this.getMethodScope(decl));
 		    method.setTree(decl);
 		}
-                for (DFKlass klass : methodSpace.getKlasses()) {
-                    klass.setBaseFinder(finder);
+                for (DFKlass klass : method.getKlasses()) {
+                    klass.setBaseFinder(finder2);
                 }
 
             } else if (body instanceof EnumConstantDeclaration) {
@@ -1254,14 +1237,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFTypeSpace methodSpace = this.lookupSpace("<clinit>");
-                _initializer = new DFMethod(
-		    this, methodSpace, "<clinit>", DFCallStyle.Initializer,
-                    null, finder,
+                _initializer.setFinder(finder);
+                _initializer.setMethodType(
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
-		_initializer.setScope(this.getMethodScope(initializer));
 		_initializer.setTree(initializer);
-                for (DFKlass klass : methodSpace.getKlasses()) {
+                for (DFKlass klass : _initializer.getKlasses()) {
                     klass.setBaseFinder(finder);
                 }
 
