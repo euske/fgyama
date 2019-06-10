@@ -56,7 +56,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @Override
     public String toString() {
-        return ("<DFMethod("+this.getSignature()+">");
+        return ("<DFMethod("+this.getSpaceName()+") "+this.getSignature()+">");
     }
 
     @Override
@@ -85,7 +85,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         } else {
             name = "!"+_name;
         }
-        return name + _methodType.getTypeName();
+        if (_methodType != null) {
+            name += _methodType.getTypeName();
+        }
+        return name;
     }
 
     public DFCallStyle getCallStyle() {

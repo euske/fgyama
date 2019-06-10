@@ -153,7 +153,7 @@ public class DFTypeSpace {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
-        klass.setTree(filePath, abstTypeDecl);
+        klass.setKlassTree(filePath, abstTypeDecl);
 	return klass;
     }
 

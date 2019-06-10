@@ -2752,7 +2752,7 @@ public class Java2DF {
             TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
             AbstractTypeDeclaration abstDecl = decl.getDeclaration();
             DFKlass innerKlass = klass.getKlass(abstDecl.getName());
-            this.enumKlassesDecl(finder, innerKlass, decl, klasses);
+            this.enumKlasses(innerKlass, klasses);
 
         } else {
             throw new UnsupportedSyntax(ast);

@@ -268,7 +268,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         _entPath = entPath;
     }
 
-    public void setTree(String filePath, ASTNode ast) {
+    public void setKlassTree(String filePath, ASTNode ast) {
         _filePath = filePath;
         _ast = ast;
 	try {
@@ -636,7 +636,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             if (anonDecl != null) {
                 String id = Utils.encodeASTNode(anonDecl);
                 DFKlass anonKlass = space.createKlass(this, outerScope, id);
-                anonKlass.setTree(this.getFilePath(), anonDecl);
+                anonKlass.setKlassTree(this.getFilePath(), anonDecl);
             }
 
         } else if (expr instanceof ConditionalExpression) {
