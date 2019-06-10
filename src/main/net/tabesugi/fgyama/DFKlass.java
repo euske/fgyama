@@ -885,6 +885,20 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return method;
     }
 
+    public void overrideMethods() {
+        // override the methods.
+        for (DFMethod method : _methods) {
+            if (_baseKlass != null) {
+                _baseKlass.overrideMethod(method);
+            }
+            if (_baseIfaces != null) {
+                for (DFKlass iface : _baseIfaces) {
+                    iface.overrideMethod(method);
+                }
+            }
+        }
+    }
+
     private void overrideMethod(DFMethod method1) {
         for (DFMethod method0 : getMethods()) {
             if (method0.equals(method1)) {
@@ -950,17 +964,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } catch (IOException e) {
                 Logger.error("Error: Not found:", _jarPath+"/"+_entPath);
                 throw new TypeNotFound(this.getTypeName());
-            }
-        }
-        // override the methods.
-        for (DFMethod method : _methods) {
-            if (_baseKlass != null) {
-                _baseKlass.overrideMethod(method);
-            }
-            if (_baseIfaces != null) {
-                for (DFKlass iface : _baseIfaces) {
-                    iface.overrideMethod(method);
-                }
             }
         }
     }

@@ -3135,6 +3135,7 @@ public class Java2DF {
 
         // Build method scopes.
         for (DFKlass klass : klasses) {
+            klass.overrideMethods();
             DFMethod init = klass.getInitializer();
             if (init != null) {
                 try {
