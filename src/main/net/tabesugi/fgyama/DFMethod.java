@@ -25,41 +25,15 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         new TreeSet<DFMethod>();
 
     private ASTNode _ast = null;
-
     private DFFrame _frame = null;
 
     // List of subclass' methods overriding this method.
     private List<DFMethod> _overrides = new ArrayList<DFMethod>();
 
-    private class DFOverride implements Comparable<DFOverride> {
-
-	public DFMethod method;
-	public int level;
-
-	public DFOverride(DFMethod method, int level) {
-	    this.method = method;
-	    this.level = level;
-	}
-
-	@Override
-	public String toString() {
-	    return ("<DFOverride: "+this.method+" ("+this.level+")>");
-	}
-
-	@Override
-	public int compareTo(DFOverride override) {
-	    if (this.level != override.level) {
-		return override.level - this.level;
-	    } else {
-		return this.method.compareTo(override.method);
-	    }
-	}
-    }
-
     public DFMethod(
-        DFKlass klass, String name, DFCallStyle callStyle,
-        DFLocalVarScope scope) {
-        super(name, klass);
+        DFKlass klass, String id, DFCallStyle callStyle,
+        String name, DFLocalVarScope scope) {
+        super(id, klass);
         _klass = klass;
         _name = name;
         _callStyle = callStyle;
@@ -224,5 +198,31 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // XXX ignore EntityNotFound for now
             Logger.error("Entity not found:", e.name, "ast="+e.ast, "method="+this);
         }
+    }
+
+    // DFOverride
+    private class DFOverride implements Comparable<DFOverride> {
+
+	public DFMethod method;
+	public int level;
+
+	public DFOverride(DFMethod method, int level) {
+	    this.method = method;
+	    this.level = level;
+	}
+
+	@Override
+	public String toString() {
+	    return ("<DFOverride: "+this.method+" ("+this.level+")>");
+	}
+
+	@Override
+	public int compareTo(DFOverride override) {
+	    if (this.level != override.level) {
+		return override.level - this.level;
+	    } else {
+		return this.method.compareTo(override.method);
+	    }
+	}
     }
 }

@@ -314,7 +314,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                         DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 }
                 DFLocalVarScope scope = new DFLocalVarScope(_klassScope, id);
-                DFMethod method = new DFMethod(this, name, callStyle, scope);
+                DFMethod method = new DFMethod(this, id, callStyle, name, scope);
                 this.addMethod(method, id);
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
@@ -328,7 +328,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		Initializer initializer = (Initializer)body;
                 DFLocalVarScope scope = new DFLocalVarScope(_klassScope, "<clinit>");
                 _initializer = new DFMethod(
-		    this, "<clinit>", DFCallStyle.Initializer, scope);
+		    this, "<clinit>", DFCallStyle.Initializer, "<clinit>", scope);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
                     this.buildStmt(stmt, _initializer, scope);
@@ -1028,7 +1028,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else {
                 callStyle = DFCallStyle.InstanceMethod;
             }
-            DFMethod method = new DFMethod(this, name, callStyle, null);
+            DFMethod method = new DFMethod(this, name, callStyle, name, null);
             method.setFinder(finder);
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
@@ -1133,7 +1133,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             }
             // Enum has a special method "values()".
             DFMethod method = new DFMethod(
-                this, "values", DFCallStyle.InstanceMethod, null);
+                this, "values", DFCallStyle.InstanceMethod, "values", null);
             method.setFinder(finder);
             method.setMethodType(
                 new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
