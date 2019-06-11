@@ -57,7 +57,7 @@ public class DFTypeFinder {
     private DFKlass lookupKlassRec(String name)
         throws TypeNotFound {
         try {
-            return _space.getKlass(name);
+            return _space.getType(name).toKlass();
         } catch (TypeNotFound e) {
             if (_next != null) {
 		try {
@@ -101,7 +101,7 @@ public class DFTypeFinder {
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
-            DFKlass innerKlass = klass.getKlass(qtype.getName());
+            DFKlass innerKlass = klass.getType(qtype.getName()).toKlass();
             innerKlass.load();
             return innerKlass;
         } else if (type instanceof UnionType) {

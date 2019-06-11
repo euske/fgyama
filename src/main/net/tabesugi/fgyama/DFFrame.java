@@ -716,7 +716,7 @@ public class DFFrame {
 		DFType instType;
 		if (anonDecl != null) {
 		    String id = Utils.encodeASTNode(anonDecl);
-		    instType = method.getKlass(id);
+		    instType = method.getType(id);
 		} else {
 		    instType = finder.resolve(cstr.getType());
 		}

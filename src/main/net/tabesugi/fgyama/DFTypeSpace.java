@@ -103,17 +103,17 @@ public class DFTypeSpace {
         return klass;
     }
 
-    public DFKlass getKlass(Name name)
+    public DFType getType(Name name)
         throws TypeNotFound {
-        return this.getKlass(name.getFullyQualifiedName());
+        return this.getType(name.getFullyQualifiedName());
     }
-    public DFKlass getKlass(String id)
+    public DFType getType(String id)
         throws TypeNotFound {
-        //Logger.info("DFTypeSpace.getKlass:", this, ":", id);
+        //Logger.info("DFTypeSpace.getType:", this, ":", id);
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-            return space.getKlass(id.substring(i+1));
+            return space.getType(id.substring(i+1));
         }
         DFKlass klass = _id2klass.get(id);
         if (klass == null) {

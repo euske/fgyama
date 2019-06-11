@@ -703,25 +703,25 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return new DFTypeFinder(this, finder);
     }
 
-    public DFKlass getKlass(String id)
+    public DFType getType(String id)
         throws TypeNotFound {
         if (_mapTypeSpace != null) {
             try {
-                return _mapTypeSpace.getKlass(id);
+                return _mapTypeSpace.getType(id);
             } catch (TypeNotFound e) {
             }
         }
         if (_paramTypeMap != null) {
             DFType type = _paramTypeMap.get(id);
-            if (type != null) return type.toKlass();
+            if (type != null) return type;
         }
         try {
-            return super.getKlass(id);
+            return super.getType(id);
         } catch (TypeNotFound e) {
         }
         if (_baseKlass != null) {
             try {
-                return _baseKlass.getKlass(id);
+                return _baseKlass.getType(id);
             } catch (TypeNotFound e) {
             }
         }
@@ -729,7 +729,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             for (DFKlass iface : _baseIfaces) {
                 if (iface != null) {
                     try {
-                        return iface.getKlass(id);
+                        return iface.getType(id);
                     } catch (TypeNotFound e) {
                     }
                 }

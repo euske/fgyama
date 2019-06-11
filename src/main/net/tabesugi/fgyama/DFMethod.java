@@ -99,15 +99,15 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _methodType.getReturnType();
     }
 
-    public DFKlass getKlass(String id)
+    public DFType getType(String id)
         throws TypeNotFound {
         if (_mapTypeSpace != null) {
             try {
-                return _mapTypeSpace.getKlass(id);
+                return _mapTypeSpace.getType(id);
             } catch (TypeNotFound e) {
             }
         }
-        return super.getKlass(id);
+        return super.getType(id);
     }
 
     public int canAccept(DFType[] argTypes) {
