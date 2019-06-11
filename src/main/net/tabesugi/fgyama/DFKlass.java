@@ -37,7 +37,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private DFType[] _paramTypes = null;
-    private DFTypeSpace _paramTypeSpace = null;
+    private Map<String, DFType> _paramTypeMap = null;
 
     // This field is available after setBaseFinder(). (Pass2)
     private DFTypeFinder _baseFinder = null;
@@ -90,15 +90,13 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        _paramTypeSpace = new DFTypeSpace(subname);
+        _paramTypeMap = new HashMap<String, DFType>();
         for (int i = 0; i < _paramTypes.length; i++) {
             DFMapType mapType = genericKlass._mapTypes[i];
             DFType paramType = _paramTypes[i];
             assert mapType != null;
             assert paramType != null;
-            _paramTypeSpace.addKlass(
-                mapType.getTypeName(),
-                paramType.getKlass());
+            _paramTypeMap.put(mapType.getTypeName(), paramType);
         }
 
         _ast = genericKlass._ast;
@@ -713,11 +711,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } catch (TypeNotFound e) {
             }
         }
-        if (_paramTypeSpace != null) {
-            try {
-                return _paramTypeSpace.getKlass(id);
-            } catch (TypeNotFound e) {
-            }
+        if (_paramTypeMap != null) {
+            DFType type = _paramTypeMap.get(id);
+            if (type != null) return type.getKlass();
         }
         try {
             return super.getKlass(id);
@@ -935,11 +931,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         assert _ast != null || _jarPath != null;
         if (_mapTypeSpace != null) {
             assert _mapTypes != null;
-	    finder = new DFTypeFinder(_mapTypeSpace, finder);
 	    _mapTypeSpace.buildMapTypes(finder, _mapTypes);
-        }
-        if (_paramTypeSpace != null) {
-            finder = new DFTypeFinder(_paramTypeSpace, finder);
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {

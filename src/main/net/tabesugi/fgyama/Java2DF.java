@@ -2509,13 +2509,6 @@ public class Java2DF {
                 DFMethod method = klass.getMethod(id);
                 DFTypeFinder finder2 = method.getFinder();
                 try {
-                    DFMapType[] mapTypes = DFTypeSpace.getMapTypes(decl.typeParameters());
-                    if (mapTypes != null) {
-                        DFTypeSpace mapTypeSpace =
-                            DFTypeSpace.createMapTypeSpace(mapTypes);
-                        finder2 = new DFTypeFinder(mapTypeSpace, finder2);
-                        mapTypeSpace.buildMapTypes(finder2, mapTypes);
-                    }
                     for (DFType argType : finder2.resolveArgs(decl)) {
                         if (argType instanceof DFKlass) {
                             enumKlasses((DFKlass)argType, klasses);
