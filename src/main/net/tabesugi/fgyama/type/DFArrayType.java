@@ -40,7 +40,7 @@ public class DFArrayType implements DFType {
                 _ndims == ((DFArrayType)type)._ndims);
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return DFBuiltinTypes.getArrayKlass();
     }
 

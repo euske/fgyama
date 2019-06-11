@@ -15,6 +15,6 @@ interface DFType {
     boolean equals(DFType type);
     int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap);
 
-    DFKlass getKlass();
+    DFKlass toKlass();
 
 }

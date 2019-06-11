@@ -50,7 +50,7 @@ public class DFBasicType implements DFType {
         return (this == type);
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
 	if (_code == PrimitiveType.BYTE) {
             return DFBuiltinTypes.getByteKlass();
         } else if (_code == PrimitiveType.CHAR) {
@@ -75,7 +75,7 @@ public class DFBasicType implements DFType {
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	// Auto-unboxing.
         if (this == type) return 0;
-	if (this.getKlass() == type) return 0;
+	if (this.toKlass() == type) return 0;
         if (!(type instanceof DFBasicType)) return -1;
         int rank = ((DFBasicType)type)._rank;
         if (this._rank == 0 || rank == 0) return -1;

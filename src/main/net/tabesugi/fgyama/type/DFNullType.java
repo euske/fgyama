@@ -24,7 +24,7 @@ public class DFNullType implements DFType {
         return (type instanceof DFNullType);
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return DFBuiltinTypes.getObjectKlass();
     }
 

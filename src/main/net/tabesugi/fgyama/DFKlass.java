@@ -166,13 +166,13 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return (this == type);
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return this;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
-        DFKlass klass = type.getKlass();
+        DFKlass klass = type.toKlass();
         if (klass == null) return -1;
         // type is-a this.
         return klass.isSubclassOf(this, typeMap);
@@ -247,7 +247,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 if (i < paramTypes.length) {
                     types[i] = paramTypes[i];
                 } else {
-                    types[i] = _mapTypes[i].getKlass();
+                    types[i] = _mapTypes[i].toKlass();
                 }
             }
             paramTypes = types;
@@ -713,7 +713,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
         if (_paramTypeMap != null) {
             DFType type = _paramTypeMap.get(id);
-            if (type != null) return type.getKlass();
+            if (type != null) return type.toKlass();
         }
         try {
             return super.getKlass(id);
@@ -1088,7 +1088,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             // Get superclass.
             Type superClass = typeDecl.getSuperclassType();
             if (superClass != null) {
-                _baseKlass = finder.resolve(superClass).getKlass();
+                _baseKlass = finder.resolve(superClass).toKlass();
             } else {
                 _baseKlass = DFBuiltinTypes.getObjectKlass();
             }
@@ -1097,7 +1097,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             List<Type> ifaces = typeDecl.superInterfaceTypes();
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-                _baseIfaces[i] = finder.resolve(ifaces.get(i)).getKlass();
+                _baseIfaces[i] = finder.resolve(ifaces.get(i)).toKlass();
             }
             for (DFKlass iface : _baseIfaces) {
                 iface.load();
@@ -1123,7 +1123,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             List<Type> ifaces = enumDecl.superInterfaceTypes();
             _baseIfaces = new DFKlass[ifaces.size()];
             for (int i = 0; i < ifaces.size(); i++) {
-                _baseIfaces[i] = finder.resolve(ifaces.get(i)).getKlass();
+                _baseIfaces[i] = finder.resolve(ifaces.get(i)).toKlass();
             }
             for (DFKlass iface : _baseIfaces) {
                 iface.load();

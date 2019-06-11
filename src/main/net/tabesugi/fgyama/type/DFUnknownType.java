@@ -24,7 +24,7 @@ public class DFUnknownType implements DFType {
         return false;
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return DFBuiltinTypes.getObjectKlass();
     }
 

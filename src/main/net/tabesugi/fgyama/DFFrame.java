@@ -260,7 +260,7 @@ public class DFFrame {
             DFKlass enumKlass = null;
             if (type instanceof DFKlass &&
                 ((DFKlass)type).isEnum()) {
-                enumKlass = type.getKlass();
+                enumKlass = type.toKlass();
                 enumKlass.load();
             }
             DFVarScope innerScope = scope.getChildByAST(stmt);
@@ -446,7 +446,7 @@ public class DFFrame {
 			DFType type = this.buildExpr(
                             finder, method, scope, qname.getQualifier());
 			if (type == null) return type;
-			klass = type.getKlass();
+			klass = type.toKlass();
 		    } catch (EntityNotFound e) {
 			// Turned out it's a class variable.
 			klass = finder.lookupKlass(qname.getQualifier());
@@ -568,7 +568,7 @@ public class DFFrame {
                     // "method()"
 		    DFRef ref = scope.lookupThis();
 		    this.addInputRef(ref);
-		    klass = ref.getRefType().getKlass();
+		    klass = ref.getRefType().toKlass();
                     callStyle = DFCallStyle.InstanceOrStatic;
 		} else {
 		    callStyle = DFCallStyle.InstanceMethod;
@@ -584,7 +584,7 @@ public class DFFrame {
                         // "expr.method()"
 			DFType type = this.buildExpr(finder, method, scope, expr1);
 			if (type == null) return type;
-			klass = type.getKlass();
+			klass = type.toKlass();
 		    }
 		}
                 klass.load();
@@ -616,7 +616,7 @@ public class DFFrame {
 		}
 		DFType[] argTypes = new DFType[typeList.size()];
 		typeList.toArray(argTypes);
-		DFKlass klass = scope.lookupThis().getRefType().getKlass();
+		DFKlass klass = scope.lookupThis().getRefType().toKlass();
                 klass.load();
 		DFKlass baseKlass = klass.getBaseKlass();
                 baseKlass.load();
@@ -680,7 +680,7 @@ public class DFFrame {
 		if (klass == null) {
 		    DFType type = this.buildExpr(finder, method, scope, expr1);
 		    if (type == null) return type;
-		    klass = type.getKlass();
+		    klass = type.toKlass();
 		}
                 klass.load();
 		SimpleName fieldName = fa.getName();
@@ -692,7 +692,7 @@ public class DFFrame {
 		// "super.baa"
 		SuperFieldAccess sfa = (SuperFieldAccess)expr;
 		SimpleName fieldName = sfa.getName();
-		DFKlass klass = scope.lookupThis().getRefType().getKlass().getBaseKlass();
+		DFKlass klass = scope.lookupThis().getRefType().toKlass().getBaseKlass();
                 klass.load();
 		DFRef ref = klass.lookupField(fieldName);
 		this.addInputRef(ref);
@@ -749,7 +749,7 @@ public class DFFrame {
 		String id = "lambda";
 		ASTNode body = lambda.getBody();
 		DFTypeSpace anonSpace = new DFTypeSpace(id);
-		DFKlass klass = scope.lookupThis().getRefType().getKlass();
+		DFKlass klass = scope.lookupThis().getRefType().toKlass();
 		DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
 		if (body instanceof Statement) {
 		    // XXX TODO Statement lambda
@@ -798,7 +798,7 @@ public class DFFrame {
                     DFType type = this.buildExpr(
                         finder, method, scope, qname.getQualifier());
                     if (type == null) return;
-                    klass = type.getKlass();
+                    klass = type.toKlass();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
                     klass = finder.lookupKlass(qname.getQualifier());
@@ -833,7 +833,7 @@ public class DFFrame {
             if (klass == null) {
                 DFType type = this.buildExpr(finder, method, scope, expr1);
                 if (type == null) return;
-                klass = type.getKlass();
+                klass = type.toKlass();
             }
             klass.load();
             SimpleName fieldName = fa.getName();
@@ -844,7 +844,7 @@ public class DFFrame {
 	    // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = scope.lookupThis().getRefType().getKlass().getBaseKlass();
+            DFKlass klass = scope.lookupThis().getRefType().toKlass().getBaseKlass();
             klass.load();
             DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);

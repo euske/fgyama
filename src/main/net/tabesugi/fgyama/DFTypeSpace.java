@@ -136,7 +136,7 @@ public class DFTypeSpace {
                 mapType.build(finder);
             } catch (TypeNotFound e) {
             }
-            this.addKlass(mapType.getTypeName(), mapType.getKlass());
+            this.addKlass(mapType.getTypeName(), mapType.toKlass());
         }
     }
 

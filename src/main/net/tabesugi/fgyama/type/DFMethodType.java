@@ -36,7 +36,7 @@ public class DFMethodType implements DFType {
         return true;
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return null;
     }
 

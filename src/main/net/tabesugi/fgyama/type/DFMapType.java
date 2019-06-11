@@ -41,7 +41,7 @@ public class DFMapType implements DFType {
         return (this == type);
     }
 
-    public DFKlass getKlass() {
+    public DFKlass toKlass() {
         return _boundKlass;
     }
 
@@ -76,10 +76,10 @@ public class DFMapType implements DFType {
         assert _sig == null || _ast == null;
         if (_sig != null) {
 	    JNITypeParser parser = new JNITypeParser(_sig);
-            _boundKlass = parser.getType(finder).getKlass();
+            _boundKlass = parser.getType(finder).toKlass();
         } else if (_ast != null) {
             for (Type type : _ast) {
-                _boundKlass = finder.resolve(type).getKlass();
+                _boundKlass = finder.resolve(type).toKlass();
                 break;
             }
         }
