@@ -440,17 +440,17 @@ public class DFFrame {
 		    ref = scope.lookupVar((SimpleName)name);
 		} else {
 		    QualifiedName qname = (QualifiedName)name;
-		    DFKlass klass;
+                    DFType type;
 		    try {
 			// Try assuming it's a variable access.
-			DFType type = this.buildExpr(
+			type = this.buildExpr(
                             finder, method, scope, qname.getQualifier());
 			if (type == null) return type;
-			klass = type.toKlass();
 		    } catch (EntityNotFound e) {
 			// Turned out it's a class variable.
-			klass = finder.lookupKlass(qname.getQualifier());
+			type = finder.lookupType(qname.getQualifier());
 		    }
+		    DFKlass klass = type.toKlass();
                     klass.load();
 		    SimpleName fieldName = qname.getName();
 		    ref = klass.lookupField(fieldName);
@@ -464,8 +464,7 @@ public class DFFrame {
 		Name name = thisExpr.getQualifier();
 		DFRef ref;
 		if (name != null) {
-		    DFKlass klass = finder.lookupKlass(name);
-                    klass.load();
+		    DFKlass klass = finder.lookupType(name).toKlass();
 		    ref = klass.getKlassScope().lookupThis();
 		} else {
 		    ref = scope.lookupThis();
@@ -575,7 +574,7 @@ public class DFFrame {
 		    if (expr1 instanceof Name) {
                         // "ClassName.method()"
 			try {
-			    klass = finder.lookupKlass((Name)expr1);
+			    klass = finder.lookupType((Name)expr1).toKlass();
 			    callStyle = DFCallStyle.StaticMethod;
 			} catch (TypeNotFound e) {
 			}
@@ -670,18 +669,18 @@ public class DFFrame {
 		// "(expr).foo"
 		FieldAccess fa = (FieldAccess)expr;
 		Expression expr1 = fa.getExpression();
-		DFKlass klass = null;
+                DFType type = null;
 		if (expr1 instanceof Name) {
 		    try {
-			klass = finder.lookupKlass((Name)expr1);
+			type = finder.lookupType((Name)expr1);
 		    } catch (TypeNotFound e) {
 		    }
 		}
-		if (klass == null) {
-		    DFType type = this.buildExpr(finder, method, scope, expr1);
+		if (type == null) {
+		    type = this.buildExpr(finder, method, scope, expr1);
 		    if (type == null) return type;
-		    klass = type.toKlass();
 		}
+		DFKlass klass = type.toKlass();
                 klass.load();
 		SimpleName fieldName = fa.getName();
 		DFRef ref = klass.lookupField(fieldName);
@@ -792,17 +791,17 @@ public class DFFrame {
                 ref = scope.lookupVar((SimpleName)name);
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFKlass klass;
+                DFType type;
                 try {
                     // Try assuming it's a variable access.
-                    DFType type = this.buildExpr(
+                    type = this.buildExpr(
                         finder, method, scope, qname.getQualifier());
                     if (type == null) return;
-                    klass = type.toKlass();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    klass = finder.lookupKlass(qname.getQualifier());
+                    type = finder.lookupType(qname.getQualifier());
                 }
+                DFKlass klass = type.toKlass();
                 klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.lookupField(fieldName);
@@ -823,18 +822,18 @@ public class DFFrame {
 	    // "(expr).foo"
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFKlass klass = null;
+            DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    klass = finder.lookupKlass((Name)expr1);
+                    type = finder.lookupType((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }
-            if (klass == null) {
-                DFType type = this.buildExpr(finder, method, scope, expr1);
+            if (type == null) {
+                type = this.buildExpr(finder, method, scope, expr1);
                 if (type == null) return;
-                klass = type.toKlass();
             }
+            DFKlass klass = type.toKlass();
             klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.lookupField(fieldName);

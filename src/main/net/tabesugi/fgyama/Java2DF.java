@@ -840,7 +840,7 @@ public class Java2DF {
                         klass = obj.getNodeType().toKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
-                        klass = finder.lookupKlass(qname.getQualifier());
+                        klass = finder.lookupType(qname.getQualifier()).toKlass();
                     }
                     SimpleName fieldName = qname.getName();
                     DFRef ref = klass.lookupField(fieldName);
@@ -855,7 +855,7 @@ public class Java2DF {
                 Name name = thisExpr.getQualifier();
                 DFRef ref;
                 if (name != null) {
-                    DFKlass klass = finder.lookupKlass(name);
+                    DFKlass klass = finder.lookupType(name).toKlass();
                     ref = klass.getKlassScope().lookupThis();
                 } else {
                     ref = scope.lookupThis();
@@ -1014,30 +1014,31 @@ public class Java2DF {
                 Expression expr1 = invoke.getExpression();
                 DFCallStyle callStyle;
                 DFNode obj = null;
-                DFKlass klass = null;
+                DFType type = null;
                 if (expr1 == null) {
                     // "method()"
                     obj = ctx.get(scope.lookupThis());
-                    klass = obj.getNodeType().toKlass();
+                    type = obj.getNodeType();
                     callStyle = DFCallStyle.InstanceOrStatic;
                 } else {
                     callStyle = DFCallStyle.InstanceMethod;
                     if (expr1 instanceof Name) {
                         // "ClassName.method()"
                         try {
-                            klass = finder.lookupKlass((Name)expr1);
+                            type = finder.lookupType((Name)expr1);
                             callStyle = DFCallStyle.StaticMethod;
                         } catch (TypeNotFound e) {
                         }
                     }
-                    if (klass == null) {
+                    if (type == null) {
                         // "expr.method()"
                         processExpression(
                             ctx, typeSpace, graph, finder, scope, frame, expr1);
                         obj = ctx.getRValue();
-                        klass = obj.getNodeType().toKlass();
+                        type = obj.getNodeType();
                     }
                 }
+                DFKlass klass = type.toKlass();
                 List<DFNode> argList = new ArrayList<DFNode>();
                 List<DFType> typeList = new ArrayList<DFType>();
                 for (Expression arg : (List<Expression>) invoke.arguments()) {
@@ -1231,19 +1232,20 @@ public class Java2DF {
                 FieldAccess fa = (FieldAccess)expr;
                 Expression expr1 = fa.getExpression();
                 DFNode obj = null;
-                DFKlass klass = null;
+                DFType type = null;
                 if (expr1 instanceof Name) {
                     try {
-                        klass = finder.lookupKlass((Name)expr1);
+                        type = finder.lookupType((Name)expr1);
                     } catch (TypeNotFound e) {
                     }
                 }
-                if (klass == null) {
+                if (type == null) {
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, expr1);
                     obj = ctx.getRValue();
-                    klass = obj.getNodeType().toKlass();
+                    type = obj.getNodeType();
                 }
+                DFKlass klass = type.toKlass();
                 SimpleName fieldName = fa.getName();
                 DFRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(graph, scope, ref, fa, obj);
@@ -1434,18 +1436,19 @@ public class Java2DF {
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
-                DFKlass klass;
+                DFType type = null;
                 try {
                     // Try assuming it's a variable access.
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame,
 			qname.getQualifier());
                     obj = ctx.getRValue();
-                    klass = obj.getNodeType().toKlass();
+                    type = obj.getNodeType();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    klass = finder.lookupKlass(qname.getQualifier());
+                    type = finder.lookupType(qname.getQualifier());
                 }
+                DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
                 DFRef ref = klass.lookupField(fieldName);
                 ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
@@ -2770,7 +2773,7 @@ public class Java2DF {
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
-                    DFKlass innerKlass = finder.lookupKlass(name);
+                    DFKlass innerKlass = finder.lookupType(name).toKlass();
                     enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
                     e.setAst(name);
@@ -2855,7 +2858,7 @@ public class Java2DF {
             Expression expr = invoke.getExpression();
             if (expr instanceof Name) {
                 try {
-                    DFKlass innerKlass = finder.lookupKlass((Name)expr);
+                    DFKlass innerKlass = finder.lookupType((Name)expr).toKlass();
                     enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
                 }

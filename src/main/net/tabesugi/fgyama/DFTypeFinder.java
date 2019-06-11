@@ -39,29 +39,29 @@ public class DFTypeFinder {
         }
     }
 
-    public DFKlass lookupKlass(Name name)
+    public DFType lookupType(Name name)
         throws TypeNotFound {
-        return this.lookupKlass(name.getFullyQualifiedName());
+        return this.lookupType(name.getFullyQualifiedName());
     }
 
-    public DFKlass lookupKlass(String name)
+    public DFType lookupType(String name)
         throws TypeNotFound {
         name = name.replace('$', '.');
         try {
-            return this.lookupKlassRec(name);
+            return this.lookupTypeRec(name);
         } catch (TypeNotFound e) {
             throw new TypeNotFound(name, this);
         }
     }
 
-    private DFKlass lookupKlassRec(String name)
+    private DFType lookupTypeRec(String name)
         throws TypeNotFound {
         try {
-            return _space.getType(name).toKlass();
+            return _space.getType(name);
         } catch (TypeNotFound e) {
             if (_next != null) {
 		try {
-		    return _next.lookupKlassRec(name);
+		    return _next.lookupTypeRec(name);
 		} catch (TypeNotFound ee) {
                 }
             }
@@ -82,9 +82,11 @@ public class DFTypeFinder {
             return new DFArrayType(elemType, ndims);
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            DFKlass klass = this.lookupKlass(stype.getName());
-            klass.load();
-            return klass;
+            DFType klassType = this.lookupType(stype.getName());
+            if (klassType instanceof DFKlass) {
+                ((DFKlass)klassType).load();
+            }
+            return klassType;
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             List<Type> args = (List<Type>) ptype.typeArguments();
@@ -163,7 +165,7 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            return this.lookupKlass(className);
+            return this.lookupType(className);
         } else {
             // ???
             throw new TypeNotFound(type.toString());

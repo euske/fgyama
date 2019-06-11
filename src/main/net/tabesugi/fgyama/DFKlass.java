@@ -984,14 +984,14 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         } else {
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
-		_baseKlass = finder.lookupKlass(superClass);
+		_baseKlass = finder.lookupType(superClass).toKlass();
                 _baseKlass.load();
 	    }
 	    String[] ifaces = jklass.getInterfaceNames();
 	    if (ifaces != null) {
                 _baseIfaces = new DFKlass[ifaces.length];
 		for (int i = 0; i < ifaces.length; i++) {
-		    _baseIfaces[i] = finder.lookupKlass(ifaces[i]);
+		    _baseIfaces[i] = finder.lookupType(ifaces[i]).toKlass();
 		}
                 for (DFKlass iface : _baseIfaces) {
                     iface.load();

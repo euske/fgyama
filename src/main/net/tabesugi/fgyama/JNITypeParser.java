@@ -59,11 +59,11 @@ public class JNITypeParser {
                 if (c2 == ';') {
                     String name = _text.substring(_pos, i);
 		    _pos = i+1;
-                    return finder.lookupKlass(name.replace('/','.'));
+                    return finder.lookupType(name.replace('/','.'));
 		} else if (c2 == '<') {
                     String name = _text.substring(_pos, i);
 		    _pos = i;
-		    DFKlass klass = finder.lookupKlass(name.replace('/','.'));
+		    DFKlass klass = finder.lookupType(name.replace('/','.')).toKlass();
                     DFType[] paramTypes = this.getTypes(finder, '<', '>');
                     klass = klass.parameterize(paramTypes);
                     char c3 = _text.charAt(_pos);
@@ -86,7 +86,7 @@ public class JNITypeParser {
                 if (_text.charAt(i) == ';') {
                     String name = _text.substring(_pos, i);
                     _pos = i+1;
-		    return finder.lookupKlass(name);
+		    return finder.lookupType(name);
                 }
             }
             break;
