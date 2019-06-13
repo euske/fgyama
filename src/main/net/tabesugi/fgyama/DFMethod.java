@@ -45,6 +45,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public void setMapTypes(DFMapType[] mapTypes) {
+	assert _finder != null;
         _mapTypes = mapTypes;
         _mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
         _mapTypeSpace.buildMapTypes(_finder, mapTypes);
