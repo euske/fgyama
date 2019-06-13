@@ -1369,12 +1369,7 @@ public class Java2DF {
             } else if (expr instanceof LambdaExpression) {
 		// "x -> { ... }"
                 LambdaExpression lambda = (LambdaExpression)expr;
-                String id = "lambda";
                 ASTNode body = lambda.getBody();
-                DFKlass klass = scope.lookupThis().getRefType().toKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace(id);
-                DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
-                assert body != null;
                 if (body instanceof Statement) {
                     // XXX TODO Statement lambda
                 } else if (body instanceof Expression) {
@@ -1382,11 +1377,8 @@ public class Java2DF {
                 } else {
                     throw new UnsupportedSyntax(body);
                 }
-                DFMethod constructor = anonKlass.lookupMethod(
-                    DFCallStyle.Constructor, null, null);
-                CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, anonKlass, constructor, lambda, null);
-                ctx.setRValue(call);
+		// XXX TODO
+                ctx.setRValue(new DFNode(graph, scope,  DFUnknownType.UNKNOWN, null));
 
             } else if (expr instanceof MethodReference) {
                 // MethodReference

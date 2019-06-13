@@ -745,11 +745,7 @@ public class DFFrame {
 	    } else if (expr instanceof LambdaExpression) {
 		// "x -> { ... }"
 		LambdaExpression lambda = (LambdaExpression)expr;
-		String id = "lambda";
 		ASTNode body = lambda.getBody();
-		DFTypeSpace anonSpace = new DFTypeSpace(id);
-		DFKlass klass = scope.lookupThis().getRefType().toKlass();
-		DFKlass anonKlass = new DFKlass(id, anonSpace, klass, scope);
 		if (body instanceof Statement) {
 		    // XXX TODO Statement lambda
 		} else if (body instanceof Expression) {
@@ -757,7 +753,7 @@ public class DFFrame {
 		} else {
 		    throw new UnsupportedSyntax(body);
 		}
-		return anonKlass;
+		return DFUnknownType.UNKNOWN;
 
 	    } else if (expr instanceof MethodReference) {
 		// MethodReference
