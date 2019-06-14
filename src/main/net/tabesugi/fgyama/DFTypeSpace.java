@@ -122,12 +122,6 @@ public class DFTypeSpace {
         return klass;
     }
 
-    public DFKlass[] getKlasses() {
-	DFKlass[] klasses = new DFKlass[_id2klass.size()];
-	_id2klass.values().toArray(klasses);
-	return klasses;
-    }
-
     public void buildMapTypes(DFTypeFinder finder, DFMapType[] mapTypes) {
         for (DFMapType mapType : mapTypes) {
             try {

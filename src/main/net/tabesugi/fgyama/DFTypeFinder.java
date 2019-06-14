@@ -47,26 +47,15 @@ public class DFTypeFinder {
     public DFType lookupType(String name)
         throws TypeNotFound {
         name = name.replace('$', '.');
-        try {
-            return this.lookupTypeRec(name);
-        } catch (TypeNotFound e) {
-            throw new TypeNotFound(name, this);
-        }
-    }
-
-    private DFType lookupTypeRec(String name)
-        throws TypeNotFound {
-        try {
-            return _space.getType(name);
-        } catch (TypeNotFound e) {
-            if (_next != null) {
-		try {
-		    return _next.lookupTypeRec(name);
-		} catch (TypeNotFound ee) {
-                }
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            try {
+                return finder._space.getType(name);
+            } catch (TypeNotFound e) {
+                finder = finder._next;
             }
-            throw e;
         }
+        throw new TypeNotFound(name, this);
     }
 
     @SuppressWarnings("unchecked")

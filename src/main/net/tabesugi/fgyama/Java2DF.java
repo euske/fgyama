@@ -3070,7 +3070,7 @@ public class Java2DF {
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
 		DFKlass klass = packageSpace.getType(abstTypeDecl.getName()).toKlass();
-                klass.setBaseFinder(finder);
+                klass.setFinder(finder);
 	    } catch (TypeNotFound e) {
 	    }
 	}

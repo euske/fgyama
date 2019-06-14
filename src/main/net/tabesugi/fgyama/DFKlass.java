@@ -39,8 +39,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private DFType[] _paramTypes = null;
     private Map<String, DFType> _paramTypeMap = null;
 
-    // This field is available after setBaseFinder(). (Pass2)
-    private DFTypeFinder _baseFinder = null;
+    // This field is available after setFinder(). (Pass2)
+    private DFTypeFinder _finder = null;
 
     // The following fields are available after the klass is loaded.
     private boolean _built = false;
@@ -104,7 +104,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         _jarPath = genericKlass._jarPath;
         _entPath = genericKlass._entPath;
 
-        _baseFinder = genericKlass._baseFinder;
+        _finder = genericKlass._finder;
         // Recreate the entire subspace.
 	// XXX what to do with .jar classes?
 	if (_ast != null) {
@@ -677,30 +677,23 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return _ast;
     }
 
-    public DFKlass getOuterKlass() {
-        return _outerKlass;
-    }
-
     public DFVarScope getKlassScope() {
         return _klassScope;
     }
 
-    public void setBaseFinder(DFTypeFinder finder) {
+    public void setFinder(DFTypeFinder finder) {
         assert !_built;
-        //assert _baseFinder == null || _baseFinder == finder;
-	_baseFinder = finder;
+        //assert _finder == null || _finder == finder;
+	_finder = new DFTypeFinder(this, finder);
     }
 
-    public DFTypeFinder getFinder()
-        throws TypeNotFound {
-        DFTypeFinder finder;
+    public DFTypeFinder getFinder() {
         if (_outerKlass != null) {
-            finder = _outerKlass.getFinder();
+            assert _finder == null;
+            return new DFTypeFinder(this, _outerKlass.getFinder());
         } else {
-            finder = _baseFinder;
+            return _finder;
         }
-        assert finder != null;
-        return new DFTypeFinder(this, finder);
     }
 
     public DFType getType(String id)
@@ -1227,9 +1220,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		if (decl.getBody() != null) {
 		    method.setTree(decl);
 		}
-                for (DFKlass klass : method.getKlasses()) {
-                    klass.setBaseFinder(finder2);
-                }
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -1245,9 +1235,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 _initializer.setMethodType(
 		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
 		_initializer.setTree(initializer);
-                for (DFKlass klass : _initializer.getKlasses()) {
-                    klass.setBaseFinder(finder);
-                }
 
             } else {
                 throw new UnsupportedSyntax(body);
