@@ -122,18 +122,6 @@ public class DFTypeSpace {
         return klass;
     }
 
-    public void buildMapTypes(DFTypeFinder finder, DFMapType[] mapTypes) {
-        for (DFMapType mapType : mapTypes) {
-            try {
-                // This might cause TypeNotFound
-                // for a recursive type.
-                mapType.build(finder);
-            } catch (TypeNotFound e) {
-            }
-            this.addKlass(mapType.getTypeName(), mapType.toKlass());
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public DFKlass buildAbstTypeDecl(
         String filePath, AbstractTypeDeclaration abstTypeDecl,
@@ -162,23 +150,6 @@ public class DFTypeSpace {
             mapTypes[i].setTypeBounds(tp.typeBounds());
         }
         return mapTypes;
-    }
-
-    public static DFTypeSpace createMapTypeSpace(DFMapType[] mapTypes) {
-        StringBuilder b = new StringBuilder();
-        for (DFMapType mapType : mapTypes) {
-            if (0 < b.length()) {
-                b.append(",");
-            }
-            b.append(mapType.getTypeName());
-        }
-        DFTypeSpace mapTypeSpace = new DFTypeSpace("{"+b.toString()+"}");
-        for (DFMapType mapType : mapTypes) {
-            mapTypeSpace.addKlass(
-                mapType.getTypeName(),
-                DFBuiltinTypes.getObjectKlass());
-        }
-        return mapTypeSpace;
     }
 
     // dump: for debugging.

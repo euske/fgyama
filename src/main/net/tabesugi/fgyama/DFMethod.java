@@ -18,7 +18,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     private DFTypeFinder _finder = null;
     private DFMapType[] _mapTypes = null;
-    private DFTypeSpace _mapTypeSpace = null;
+    private Map<String, DFType> _mapTypeMap = null;
     private DFMethodType _methodType = null;
 
     private SortedSet<DFMethod> _callers =
@@ -44,11 +44,15 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _finder = new DFTypeFinder(this, finder);
     }
 
-    public void setMapTypes(DFMapType[] mapTypes) {
+    public void setMapTypes(DFMapType[] mapTypes)
+        throws TypeNotFound {
 	assert _finder != null;
         _mapTypes = mapTypes;
-        _mapTypeSpace = DFTypeSpace.createMapTypeSpace(mapTypes);
-        _mapTypeSpace.buildMapTypes(_finder, mapTypes);
+        _mapTypeMap = new HashMap<String, DFType>();
+        for (DFMapType mapType : _mapTypes) {
+            mapType.build(_finder);
+            _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+        }
     }
 
     public void setMethodType(DFMethodType methodType) {
@@ -102,11 +106,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public DFType getType(String id)
         throws TypeNotFound {
-        if (_mapTypeSpace != null) {
-            try {
-                return _mapTypeSpace.getType(id);
-            } catch (TypeNotFound e) {
-            }
+        if (_mapTypeMap != null) {
+            DFType type = _mapTypeMap.get(id);
+            if (type != null) return type;
         }
         return super.getType(id);
     }

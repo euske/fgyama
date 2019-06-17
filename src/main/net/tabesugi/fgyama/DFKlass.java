@@ -30,7 +30,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
-    private DFTypeSpace _mapTypeSpace = null;
+    private Map<String, DFType> _mapTypeMap = null;
     private Map<String, DFKlass> _paramKlasses =
         new TreeMap<String, DFKlass>();
 
@@ -225,7 +225,12 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         assert _paramTypes == null;
         _mapTypes = DFTypeSpace.getMapTypes(tps);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
+            _mapTypeMap = new HashMap<String, DFType>();
+            for (DFMapType mapType : _mapTypes) {
+                _mapTypeMap.put(
+                    mapType.getTypeName(),
+                    DFBuiltinTypes.getObjectKlass());
+            }
         }
     }
 
@@ -234,7 +239,12 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         assert _paramTypes == null;
         _mapTypes = JNITypeParser.getMapTypes(sig);
         if (_mapTypes != null) {
-            _mapTypeSpace = DFTypeSpace.createMapTypeSpace(_mapTypes);
+            _mapTypeMap = new HashMap<String, DFType>();
+            for (DFMapType mapType : _mapTypes) {
+                _mapTypeMap.put(
+                    mapType.getTypeName(),
+                    DFBuiltinTypes.getObjectKlass());
+            }
         }
     }
 
@@ -704,11 +714,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     public DFType getType(String id)
         throws TypeNotFound {
-        if (_mapTypeSpace != null) {
-            try {
-                return _mapTypeSpace.getType(id);
-            } catch (TypeNotFound e) {
-            }
+        if (_mapTypeMap != null) {
+            DFType type = _mapTypeMap.get(id);
+            if (type != null) return type;
         }
         if (_paramTypeMap != null) {
             DFType type = _paramTypeMap.get(id);
@@ -928,9 +936,12 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         DFTypeFinder finder = this.getFinder();
         if (finder == null) Logger.error("!!!", this, _outerKlass);
         assert _ast != null || _jarPath != null;
-        if (_mapTypeSpace != null) {
+        if (_mapTypeMap != null) {
             assert _mapTypes != null;
-	    _mapTypeSpace.buildMapTypes(finder, _mapTypes);
+            for (DFMapType mapType : _mapTypes) {
+                mapType.build(finder);
+                _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+            }
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {
@@ -1261,8 +1272,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     protected void dumpContents(PrintStream out, String indent) {
         super.dumpContents(out, indent);
-        if (_mapTypeSpace != null) {
-            _mapTypeSpace.dump(out, indent);
+        if (_mapTypeMap != null) {
+            for (Map.Entry<String,DFType> e : _mapTypeMap.entrySet()) {
+                out.println(indent+"map: "+e.getKey()+" "+e.getValue());
+            }
         }
         if (_paramTypeMap != null) {
             for (Map.Entry<String,DFType> e : _paramTypeMap.entrySet()) {
