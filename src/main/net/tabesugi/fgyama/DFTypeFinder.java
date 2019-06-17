@@ -173,4 +173,17 @@ public class DFTypeFinder {
         types.toArray(argTypes);
         return argTypes;
     }
+
+    // dump: for debugging.
+    public void dump() {
+        dump(System.err);
+    }
+    public void dump(PrintStream out) {
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            finder._space.dump(out, "  ");
+            finder = finder._next;
+            out.println();
+        }
+    }
 }

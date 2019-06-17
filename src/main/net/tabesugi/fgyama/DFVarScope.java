@@ -170,7 +170,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
         out.println(indent+"}");
     }
-    public void dumpContents(PrintStream out, String indent) {
+    protected void dumpContents(PrintStream out, String indent) {
         for (DFRef ref : _id2ref.values()) {
             out.println(indent+"defined: "+ref);
         }

@@ -106,13 +106,19 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
         _finder = genericKlass._finder;
         // Recreate the entire subspace.
-	// XXX what to do with .jar classes?
 	if (_ast != null) {
 	    try {
 		this.buildSpace(_ast);
 	    } catch (UnsupportedSyntax e) {
 	    }
-	}
+	} else {
+            // XXX what to do with .jar classes?
+            // for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
+            //     String id = e.getKey();
+            //     DFKlass klass = e.getValue();
+            //     this.addKlass(id, klass.parameterize(paramTypes));
+            // }
+        }
 
         // not loaded yet!
         assert !_built;
@@ -1253,6 +1259,31 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return "<"+b.toString()+">";
     }
 
+    protected void dumpContents(PrintStream out, String indent) {
+        super.dumpContents(out, indent);
+        if (_mapTypeSpace != null) {
+            _mapTypeSpace.dump(out, indent);
+        }
+        if (_paramTypeMap != null) {
+            for (Map.Entry<String,DFType> e : _paramTypeMap.entrySet()) {
+                out.println(indent+"param: "+e.getKey()+" "+e.getValue());
+            }
+        }
+        if (_genericKlass != null) {
+            _genericKlass.dump(out, indent);
+        }
+        if (_baseKlass != null) {
+            _baseKlass.dump(out, indent);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                if (iface != null) {
+                    iface.dump(out, indent);
+                }
+            }
+        }
+    }
+
     // DFKlassScope
     private class DFKlassScope extends DFVarScope {
 
@@ -1286,7 +1317,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
 
         // dumpContents (for debugging)
-        public void dumpContents(PrintStream out, String indent) {
+        protected void dumpContents(PrintStream out, String indent) {
             super.dumpContents(out, indent);
             for (DFMethod method : DFKlass.this.getMethods()) {
                 out.println(indent+"defined: "+method);

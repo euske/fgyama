@@ -188,12 +188,16 @@ public class DFTypeSpace {
     public void dump(PrintStream out, String indent) {
         out.println(indent+this.getSpaceName()+" {");
         String i2 = indent + "  ";
-        for (Map.Entry<String,DFKlass> e : _id2klass.entrySet()) {
-            out.println(i2+"defined: "+e.getKey()+" "+e.getValue());
-        }
+        this.dumpContents(out, i2);
         for (DFTypeSpace space : _id2space.values()) {
             space.dump(out, i2);
         }
         out.println(indent+"}");
+    }
+
+    protected void dumpContents(PrintStream out, String indent) {
+        for (Map.Entry<String,DFKlass> e : _id2klass.entrySet()) {
+            out.println(indent+"defined: "+e.getKey()+" "+e.getValue());
+        }
     }
 }

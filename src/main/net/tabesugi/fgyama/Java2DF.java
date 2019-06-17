@@ -3346,6 +3346,9 @@ public class Java2DF {
                 Logger.error("Pass3: TypeNotFound at", path,
                              "("+e.name+", method="+e.method+
                              ", ast="+e.ast+", finder="+e.finder+")");
+                if (e.finder != null) {
+                    e.finder.dump();
+                }
                 throw e;
             }
         }
