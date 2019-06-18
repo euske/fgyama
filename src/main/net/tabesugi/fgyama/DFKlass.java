@@ -113,11 +113,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    }
 	} else {
             // XXX what to do with .jar classes?
-            // for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
-            //     String id = e.getKey();
-            //     DFKlass klass = e.getValue();
-            //     this.addKlass(id, klass.parameterize(paramTypes));
-            // }
+	    for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
+		String id = e.getKey();
+		DFKlass klass = e.getValue();
+		this.addKlass(id, klass);
+	    }
         }
 
         // not loaded yet!
@@ -246,12 +246,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     DFBuiltinTypes.getObjectKlass());
             }
         }
-    }
-
-    public boolean isGeneric() {
-        if (_mapTypes != null) return true;
-        if (_outerKlass != null) return _outerKlass.isGeneric();
-        return false;
     }
 
     public DFKlass parameterize(DFType[] paramTypes) {

@@ -103,6 +103,10 @@ public class DFTypeSpace {
         return klass;
     }
 
+    protected Set<Map.Entry<String, DFKlass>> getKlasses() {
+	return _id2klass.entrySet();
+    }
+
     public DFType getType(Name name)
         throws TypeNotFound {
         return this.getType(name.getFullyQualifiedName());

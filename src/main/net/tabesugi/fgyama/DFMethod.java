@@ -75,10 +75,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _methodType.equals(method._methodType);
     }
 
-    public boolean isGeneric() {
-        return (_mapTypes != null);
-    }
-
     public String getName() {
         return _name;
     }
