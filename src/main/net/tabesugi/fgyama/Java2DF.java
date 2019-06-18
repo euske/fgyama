@@ -3024,8 +3024,9 @@ public class Java2DF {
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
-		DFKlass klass = packageSpace.buildAbstTypeDecl(
-		    key, abstTypeDecl, null, fileScope);
+		DFKlass klass = packageSpace.buildTypeFromTree(
+                    key, abstTypeDecl, null, fileScope);
+                klass.setKlassTree(key, abstTypeDecl);
                 Logger.debug("Pass1: Created:", klass);
 	    } catch (UnsupportedSyntax e) {
 		Logger.error("Pass1: UnsupportedSyntax at",

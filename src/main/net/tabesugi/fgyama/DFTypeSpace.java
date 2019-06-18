@@ -123,7 +123,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public DFKlass buildAbstTypeDecl(
+    public DFKlass buildTypeFromTree(
         String filePath, AbstractTypeDeclaration abstTypeDecl,
         DFKlass outerKlass, DFVarScope outerScope)
         throws UnsupportedSyntax {
@@ -135,7 +135,6 @@ public class DFTypeSpace {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
-        klass.setKlassTree(filePath, abstTypeDecl);
 	return klass;
     }
 
