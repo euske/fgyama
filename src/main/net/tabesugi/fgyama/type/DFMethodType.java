@@ -13,6 +13,7 @@ public class DFMethodType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
+    private DFType[] _exceptions;
 
     public DFMethodType(DFType[] argTypes, DFType returnType) {
         assert returnType != null;
@@ -93,5 +94,9 @@ public class DFMethodType implements DFType {
             b.append(_returnType.getTypeName());
         }
         return b.toString();
+    }
+
+    public void setExceptions(DFType[] exceptions) {
+        _exceptions = exceptions;
     }
 }

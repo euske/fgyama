@@ -1041,6 +1041,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             }
             DFMethod method = new DFMethod(this, sig, callStyle, name, null);
             method.setFinder(finder);
+            DFMethodType methodType;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
@@ -1048,7 +1049,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     method.setMapTypes(mapTypes);
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
-		method.setMethodType((DFMethodType)parser.getType(method.getFinder()));
+                methodType = (DFMethodType)parser.getType(method.getFinder());
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
 		DFType[] argTypes = new DFType[args.length];
@@ -1056,8 +1057,18 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		    argTypes[i] = finder.resolve(args[i]);
 		}
 		DFType returnType = finder.resolve(meth.getReturnType());
-		method.setMethodType(new DFMethodType(argTypes, returnType));
+                methodType = new DFMethodType(argTypes, returnType);
 	    }
+            ExceptionTable excTable = meth.getExceptionTable();
+            if (excTable != null) {
+                String[] excNames = excTable.getExceptionNames();
+                DFType[] exceptions = new DFType[excNames.length];
+                for (int i = 0; i < excNames.length; i++) {
+                    exceptions[i] = finder.lookupType(excNames[i]);
+                }
+                methodType.setExceptions(exceptions);
+            }
+            method.setMethodType(methodType);
             this.addMethod(method, null);
         }
     }
@@ -1232,7 +1243,16 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 } else {
                     returnType = finder2.resolve(decl.getReturnType2());
                 }
-                method.setMethodType(new DFMethodType(argTypes, returnType));
+                DFMethodType methodType = new DFMethodType(argTypes, returnType);
+                List<Type> excs = decl.thrownExceptionTypes();
+                if (0 < excs.size()) {
+                    DFType[] exceptions = new DFType[excs.size()];
+                    for (int i = 0; i < excs.size(); i++) {
+                        exceptions[i] = finder.resolve(excs.get(i));
+                    }
+                    methodType.setExceptions(exceptions);
+                }
+                method.setMethodType(methodType);
 		if (decl.getBody() != null) {
 		    method.setTree(decl);
 		}
