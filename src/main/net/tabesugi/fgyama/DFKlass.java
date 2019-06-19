@@ -341,9 +341,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
+                String id = Utils.encodeASTNode(initializer);
                 DFLocalVarScope scope = new DFLocalVarScope(_klassScope, "<clinit>");
                 _initializer = new DFMethod(
-		    this, "<clinit>", DFCallStyle.Initializer, "<clinit>", scope);
+		    this, id, DFCallStyle.Initializer, "<clinit>", scope);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, _initializer, scope);
@@ -1038,7 +1039,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else {
                 callStyle = DFCallStyle.InstanceMethod;
             }
-            DFMethod method = new DFMethod(this, name, callStyle, name, null);
+            DFMethod method = new DFMethod(this, sig, callStyle, name, null);
             method.setFinder(finder);
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);

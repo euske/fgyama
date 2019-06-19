@@ -92,7 +92,6 @@ Coding style:
 
 TODOs:
 ------
-  * getKlass() should be getType().
   * DFMethodType should have an Exception field.
   * Merge DFGraph and DFMethod.
   * Handle consecutive SwitchCases.
