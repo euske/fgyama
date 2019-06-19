@@ -934,7 +934,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         if (_mapTypeMap != null) {
             assert _mapTypes != null;
             for (DFMapType mapType : _mapTypes) {
-                mapType.build(finder);
+                try {
+                    mapType.build(finder);
+                } catch (TypeNotFound e) {
+                }
                 _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
             }
         }

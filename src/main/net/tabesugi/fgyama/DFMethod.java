@@ -44,13 +44,15 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _finder = new DFTypeFinder(this, finder);
     }
 
-    public void setMapTypes(DFMapType[] mapTypes)
-        throws TypeNotFound {
+    public void setMapTypes(DFMapType[] mapTypes) {
 	assert _finder != null;
         _mapTypes = mapTypes;
         _mapTypeMap = new HashMap<String, DFType>();
         for (DFMapType mapType : _mapTypes) {
-            mapType.build(_finder);
+            try {
+                mapType.build(_finder);
+            } catch (TypeNotFound e) {
+            }
             _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
         }
     }
