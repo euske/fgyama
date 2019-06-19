@@ -599,7 +599,7 @@ public class DFFrame {
 		    DFMethod method1 = klass.lookupMethod(
 			callStyle, invoke.getName(), argTypes);
 		    method1.addCaller(method);
-		    return method1.getReturnType();
+		    return method1.getFuncType().getReturnType();
 		} catch (MethodNotFound e) {
 		    return DFUnknownType.UNKNOWN;
 		}
@@ -623,7 +623,7 @@ public class DFFrame {
 		    DFMethod method1 = baseKlass.lookupMethod(
 			DFCallStyle.InstanceMethod, sinvoke.getName(), argTypes);
 		    method1.addCaller(method);
-		    return method1.getReturnType();
+		    return method1.getFuncType().getReturnType();
 		} catch (MethodNotFound e) {
 		    return DFUnknownType.UNKNOWN;
 		}

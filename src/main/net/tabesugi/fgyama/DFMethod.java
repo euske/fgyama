@@ -98,8 +98,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _callStyle;
     }
 
-    public DFType getReturnType() {
-        return _funcType.getReturnType();
+    public DFFunctionType getFuncType() {
+        return _funcType;
     }
 
     public DFType getType(String id)

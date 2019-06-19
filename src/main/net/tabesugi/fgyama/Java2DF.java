@@ -545,7 +545,7 @@ class MethodCallNode extends CallNode {
     public MethodCallNode(
         DFGraph graph, DFVarScope scope, DFMethod[] methods,
         ASTNode ast, DFNode obj) {
-        super(graph, scope, methods[0].getReturnType(), null, ast);
+        super(graph, scope, methods[0].getFuncType().getReturnType(), null, ast);
         if (obj != null) {
             this.accept(obj, "#this");
         }
@@ -2982,6 +2982,8 @@ public class Java2DF {
         new DFGlobalVarScope();
     private Map<String, DFFileScope> _fileScope =
         new HashMap<String, DFFileScope>();
+    private Map<String, DFKlass[]> _fileKlasses =
+        new HashMap<String, DFKlass[]>();
 
     public Java2DF(
         DFRootTypeSpace rootSpace, int strict) {
@@ -3021,6 +3023,7 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
+        List<DFKlass> klassList = new ArrayList<DFKlass>();
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    try {
@@ -3028,12 +3031,16 @@ public class Java2DF {
                     key, abstTypeDecl, null, fileScope);
                 klass.setKlassTree(key, abstTypeDecl);
                 Logger.debug("Pass1: Created:", klass);
+                klassList.add(klass);
 	    } catch (UnsupportedSyntax e) {
 		Logger.error("Pass1: UnsupportedSyntax at",
                              key, e.name, "("+e.getAstName()+")");
                 if (0 < _strict) throw e;
 	    }
 	}
+        DFKlass[] klasses = new DFKlass[klassList.size()];
+        klassList.toArray(klasses);
+        _fileKlasses.put(key, klasses);
     }
 
     // Pass2: set references to external Klasses.
@@ -3067,13 +3074,8 @@ public class Java2DF {
 	    }
         }
 	finder = new DFTypeFinder(importSpace, finder);
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.getType(abstTypeDecl.getName()).toKlass();
-                klass.setFinder(finder);
-	    } catch (TypeNotFound e) {
-	    }
+        for (DFKlass klass : _fileKlasses.get(key)) {
+            klass.setFinder(finder);
 	}
     }
 
@@ -3104,10 +3106,7 @@ public class Java2DF {
                 if (0 < _strict) throw e;
             }
         }
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-	for (AbstractTypeDeclaration abstTypeDecl :
-		 (List<AbstractTypeDeclaration>) cunit.types()) {
-            DFKlass klass = packageSpace.getType(abstTypeDecl.getName()).toKlass();
+        for (DFKlass klass : _fileKlasses.get(key)) {
             try {
                 enumKlasses(klass, klasses);
             } catch (TypeNotFound e) {

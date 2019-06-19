@@ -13,7 +13,7 @@ public class DFFunctionType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
-    private DFType[] _exceptions;
+    private DFType[] _exceptions = new DFType[] {};
 
     public DFFunctionType(DFType[] argTypes, DFType returnType) {
         assert returnType != null;
@@ -33,6 +33,10 @@ public class DFFunctionType implements DFType {
         if (_argTypes.length != mtype._argTypes.length) return false;
         for (int i = 0; i < _argTypes.length; i++) {
             if (!_argTypes[i].equals(mtype._argTypes[i])) return false;
+        }
+        if (_exceptions.length != mtype._exceptions.length) return false;
+        for (int i = 0; i < _exceptions.length; i++) {
+            if (!_exceptions[i].equals(mtype._exceptions[i])) return false;
         }
         return true;
     }
