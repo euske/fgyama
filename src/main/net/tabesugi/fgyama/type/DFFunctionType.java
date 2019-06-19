@@ -7,15 +7,15 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFMethodType
+//  DFFunctionType
 //
-public class DFMethodType implements DFType {
+public class DFFunctionType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
     private DFType[] _exceptions;
 
-    public DFMethodType(DFType[] argTypes, DFType returnType) {
+    public DFFunctionType(DFType[] argTypes, DFType returnType) {
         assert returnType != null;
         _argTypes = argTypes;
         _returnType = returnType;
@@ -23,12 +23,12 @@ public class DFMethodType implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFMethodType("+this.getTypeName()+")>");
+        return ("<DFFunctionType("+this.getTypeName()+")>");
     }
 
     public boolean equals(DFType type) {
-        if (!(type instanceof DFMethodType)) return false;
-        DFMethodType mtype = (DFMethodType)type;
+        if (!(type instanceof DFFunctionType)) return false;
+        DFFunctionType mtype = (DFFunctionType)type;
         if (_returnType != null && !_returnType.equals(mtype._returnType)) return false;
         if (_argTypes.length != mtype._argTypes.length) return false;
         for (int i = 0; i < _argTypes.length; i++) {
@@ -42,8 +42,8 @@ public class DFMethodType implements DFType {
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
-        if (!(type instanceof DFMethodType)) return -1;
-        DFMethodType mtype = (DFMethodType)type;
+        if (!(type instanceof DFFunctionType)) return -1;
+        DFFunctionType mtype = (DFFunctionType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
 	if (dist < 0) return -1;
         if (_returnType != null && mtype._returnType != null) {

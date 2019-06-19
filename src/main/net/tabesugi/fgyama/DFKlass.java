@@ -1041,7 +1041,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             }
             DFMethod method = new DFMethod(this, sig, callStyle, name, null);
             method.setFinder(finder);
-            DFMethodType methodType;
+            DFFunctionType funcType;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
                 DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
@@ -1049,7 +1049,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     method.setMapTypes(mapTypes);
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
-                methodType = (DFMethodType)parser.getType(method.getFinder());
+                funcType = (DFFunctionType)parser.getType(method.getFinder());
 	    } else {
 		org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
 		DFType[] argTypes = new DFType[args.length];
@@ -1057,7 +1057,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		    argTypes[i] = finder.resolve(args[i]);
 		}
 		DFType returnType = finder.resolve(meth.getReturnType());
-                methodType = new DFMethodType(argTypes, returnType);
+                funcType = new DFFunctionType(argTypes, returnType);
 	    }
             ExceptionTable excTable = meth.getExceptionTable();
             if (excTable != null) {
@@ -1066,9 +1066,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 for (int i = 0; i < excNames.length; i++) {
                     exceptions[i] = finder.lookupType(excNames[i]);
                 }
-                methodType.setExceptions(exceptions);
+                funcType.setExceptions(exceptions);
             }
-            method.setMethodType(methodType);
+            method.setFuncType(funcType);
             this.addMethod(method, null);
         }
     }
@@ -1157,8 +1157,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             DFMethod method = new DFMethod(
                 this, "values", DFCallStyle.InstanceMethod, "values", null);
             method.setFinder(finder);
-            method.setMethodType(
-                new DFMethodType(new DFType[] {}, new DFArrayType(this, 1)));
+            method.setFuncType(
+                new DFFunctionType(new DFType[] {}, new DFArrayType(this, 1)));
             this.addMethod(method, null);
             this.buildMembers(finder, enumDecl.bodyDeclarations());
         } catch (TypeNotFound e) {
@@ -1243,16 +1243,16 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 } else {
                     returnType = finder2.resolve(decl.getReturnType2());
                 }
-                DFMethodType methodType = new DFMethodType(argTypes, returnType);
+                DFFunctionType funcType = new DFFunctionType(argTypes, returnType);
                 List<Type> excs = decl.thrownExceptionTypes();
                 if (0 < excs.size()) {
                     DFType[] exceptions = new DFType[excs.size()];
                     for (int i = 0; i < excs.size(); i++) {
                         exceptions[i] = finder.resolve(excs.get(i));
                     }
-                    methodType.setExceptions(exceptions);
+                    funcType.setExceptions(exceptions);
                 }
-                method.setMethodType(methodType);
+                method.setFuncType(funcType);
 		if (decl.getBody() != null) {
 		    method.setTree(decl);
 		}
@@ -1268,8 +1268,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
                 _initializer.setFinder(finder);
-                _initializer.setMethodType(
-		    new DFMethodType(new DFType[] {}, DFBasicType.VOID));
+                _initializer.setFuncType(
+		    new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
 		_initializer.setTree(initializer);
 
             } else {

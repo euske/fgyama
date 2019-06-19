@@ -19,7 +19,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     private DFTypeFinder _finder = null;
     private DFMapType[] _mapTypes = null;
     private Map<String, DFType> _mapTypeMap = null;
-    private DFMethodType _methodType = null;
+    private DFFunctionType _funcType = null;
 
     private SortedSet<DFMethod> _callers =
         new TreeSet<DFMethod>();
@@ -57,8 +57,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
-    public void setMethodType(DFMethodType methodType) {
-        _methodType = methodType;
+    public void setFuncType(DFFunctionType funcType) {
+        _funcType = funcType;
     }
 
     @Override
@@ -74,7 +74,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public boolean equals(DFMethod method) {
         if (!_name.equals(method._name)) return false;
-        return _methodType.equals(method._methodType);
+        return _funcType.equals(method._funcType);
     }
 
     public String getName() {
@@ -88,8 +88,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         } else {
             name = "!"+_name;
         }
-        if (_methodType != null) {
-            name += _methodType.getTypeName();
+        if (_funcType != null) {
+            name += _funcType.getTypeName();
         }
         return name;
     }
@@ -99,7 +99,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public DFType getReturnType() {
-        return _methodType.getReturnType();
+        return _funcType.getReturnType();
     }
 
     public DFType getType(String id)
@@ -113,7 +113,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public int canAccept(DFType[] argTypes) {
         Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
-        return _methodType.canAccept(argTypes, typeMap);
+        return _funcType.canAccept(argTypes, typeMap);
     }
 
     public void addOverride(DFMethod method) {
