@@ -10,7 +10,7 @@ import java.util.*;
 public class DFBuiltinTypes {
 
     public static void initialize(DFRootTypeSpace rootSpace)
-        throws IOException, InvalidSyntax, TypeNotFound {
+        throws IOException, InvalidSyntax {
         // Note: some of the built-in classes are self-referential
         // that cannot be automatically loaded. So create them manually.
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");

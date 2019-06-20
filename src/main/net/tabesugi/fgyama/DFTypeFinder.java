@@ -161,17 +161,25 @@ public class DFTypeFinder {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public DFType[] resolveArgs(MethodDeclaration decl)
-        throws InvalidSyntax, TypeNotFound {
-        List<DFType> types = new ArrayList<DFType>();
-        for (SingleVariableDeclaration varDecl :
-                 (List<SingleVariableDeclaration>) decl.parameters()) {
-            types.add(this.resolve(varDecl.getType()));
-        }
-        DFType[] argTypes = new DFType[types.size()];
-        types.toArray(argTypes);
-        return argTypes;
+    public DFType resolveSafe(Type type)
+        throws InvalidSyntax {
+	try {
+	    return this.resolve(type);
+	} catch (TypeNotFound e) {
+	    e.setAst(type);
+	    Logger.error("TypeNotFound", e.name);
+	    return DFUnknownType.UNKNOWN;
+	}
+    }
+
+    public DFType resolveSafe(org.apache.bcel.generic.Type type)
+        throws InvalidSyntax {
+	try {
+	    return this.resolve(type);
+	} catch (TypeNotFound e) {
+	    Logger.error("TypeNotFound", e.name);
+	    return DFUnknownType.UNKNOWN;
+	}
     }
 
     // dump: for debugging.

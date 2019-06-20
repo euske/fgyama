@@ -81,17 +81,21 @@ public class DFLocalVarScope extends DFVarScope {
     @SuppressWarnings("unchecked")
     public void buildMethodDecl(
         DFTypeFinder finder, MethodDeclaration methodDecl)
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
         //Logger.info("DFLocalVarScope.build:", this);
         Type returnType = methodDecl.getReturnType2();
-        DFType type = ((returnType == null)?
-                       DFBasicType.VOID : finder.resolve(returnType));
+        DFType type;
+	if (returnType == null) {
+	    type = DFBasicType.VOID;
+	} else {
+	    type = finder.resolveSafe(returnType);
+	}
         this.addRef("#return", type, null);
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-            DFType argType = finder.resolve(decl.getType());
+            DFType argType = finder.resolveSafe(decl.getType());
             if (decl.isVarargs()) {
                 argType = new DFArrayType(argType, 1);
             }
@@ -108,14 +112,14 @@ public class DFLocalVarScope extends DFVarScope {
 
     public void buildInitializer(
         DFTypeFinder finder, Initializer initializer)
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         this.buildStmt(finder, initializer.getBody());
     }
 
     @SuppressWarnings("unchecked")
     private void buildStmt(DFTypeFinder finder, Statement ast)
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
         assert ast != null;
 
         if (ast instanceof AssertStatement) {
@@ -133,7 +137,7 @@ public class DFLocalVarScope extends DFVarScope {
         } else if (ast instanceof VariableDeclarationStatement) {
             VariableDeclarationStatement varStmt =
                 (VariableDeclarationStatement)ast;
-            DFType varType = finder.resolve(varStmt.getType());
+            DFType varType = finder.resolveSafe(varStmt.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
 		int ndims = frag.getExtraDimensions();
@@ -224,7 +228,7 @@ public class DFLocalVarScope extends DFVarScope {
             this.buildExpr(finder, eForStmt.getExpression());
             DFLocalVarScope innerScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
-            DFType varType = finder.resolve(decl.getType());
+            DFType varType = finder.resolveSafe(decl.getType());
 	    int ndims = decl.getExtraDimensions();
             innerScope.addVar(decl.getName(),
 			      (ndims != 0)? new DFArrayType(varType, ndims) : varType);
@@ -257,7 +261,7 @@ public class DFLocalVarScope extends DFVarScope {
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
                 DFLocalVarScope catchScope = this.getChildByAST(cc);
-                DFType varType = finder.resolve(decl.getType());
+		DFType varType = finder.resolveSafe(decl.getType());
 		int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     varType = new DFArrayType(varType, ndims);
@@ -303,7 +307,7 @@ public class DFLocalVarScope extends DFVarScope {
      */
     @SuppressWarnings("unchecked")
     private void buildExpr(DFTypeFinder finder, Expression ast)
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
         assert ast != null;
 
         if (ast instanceof Annotation) {
@@ -367,7 +371,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
-            DFType varType = finder.resolve(decl.getType());
+	    DFType varType = finder.resolveSafe(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 DFType vt = varType;
@@ -474,7 +478,7 @@ public class DFLocalVarScope extends DFVarScope {
      */
     @SuppressWarnings("unchecked")
     private void buildAssignment(DFTypeFinder finder, Expression ast)
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
         assert ast != null;
 
         if (ast instanceof Name) {

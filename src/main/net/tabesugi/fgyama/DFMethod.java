@@ -50,10 +50,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _mapTypes = mapTypes;
         _mapTypeMap = new HashMap<String, DFType>();
         for (DFMapType mapType : _mapTypes) {
-            try {
-                mapType.build(_finder);
-            } catch (TypeNotFound e) {
-            }
+	    mapType.build(_finder);
             _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
         }
     }
@@ -169,7 +166,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public void buildScope()
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
 	DFTypeFinder finder = this.getFinder();
@@ -184,7 +181,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public void buildFrame()
-        throws InvalidSyntax, TypeNotFound {
+        throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
 	DFTypeFinder finder = this.getFinder();

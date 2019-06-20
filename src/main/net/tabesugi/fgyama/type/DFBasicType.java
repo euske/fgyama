@@ -105,8 +105,7 @@ public class DFBasicType implements DFType {
     public static final DFBasicType VOID =
         new DFBasicType(PrimitiveType.VOID, 0);
 
-    public static DFBasicType getType(PrimitiveType.Code code)
-        throws TypeNotFound {
+    public static DFBasicType getType(PrimitiveType.Code code) {
 	if (code == PrimitiveType.BYTE) {
 	    return BYTE;
 	} else if (code == PrimitiveType.CHAR) {
@@ -123,10 +122,8 @@ public class DFBasicType implements DFType {
 	    return DOUBLE;
 	} else if (code == PrimitiveType.BOOLEAN) {
 	    return BOOLEAN;
-	} else if (code == PrimitiveType.VOID) {
-	    return VOID;
 	} else {
-	    throw new TypeNotFound(code.toString());
+	    return VOID;
 	}
     }
 }
