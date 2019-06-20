@@ -1389,14 +1389,8 @@ public class Java2DF {
                 MethodReference mref = (MethodReference)expr;
                 // XXX TODO method ref
                 DFKlass klass = scope.lookupThis().getRefType().toKlass();
-                DFTypeSpace anonSpace = new DFTypeSpace("MethodRef");
-                DFKlass anonKlass = new DFKlass(
-                    "methodref", anonSpace, klass, scope);
-                DFMethod constructor = anonKlass.lookupMethod(
-                    DFCallStyle.Constructor, null, null);
-                CreateObjectNode call = new CreateObjectNode(
-                    graph, scope, anonKlass, constructor, mref, null);
-                ctx.setRValue(call);
+		// XXX TODO
+                ctx.setRValue(new DFNode(graph, scope,  DFUnknownType.UNKNOWN, null));
 
             } else {
                 // ???
