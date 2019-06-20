@@ -60,7 +60,7 @@ public class DFTypeFinder {
 
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return DFBasicType.getType(ptype.getPrimitiveTypeCode());
@@ -163,7 +163,7 @@ public class DFTypeFinder {
 
     @SuppressWarnings("unchecked")
     public DFType[] resolveArgs(MethodDeclaration decl)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         List<DFType> types = new ArrayList<DFType>();
         for (SingleVariableDeclaration varDecl :
                  (List<SingleVariableDeclaration>) decl.parameters()) {

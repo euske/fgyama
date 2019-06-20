@@ -81,7 +81,7 @@ public class DFLocalVarScope extends DFVarScope {
     @SuppressWarnings("unchecked")
     public void buildMethodDecl(
         DFTypeFinder finder, MethodDeclaration methodDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         //Logger.info("DFLocalVarScope.build:", this);
         Type returnType = methodDecl.getReturnType2();
         DFType type = ((returnType == null)?
@@ -108,14 +108,14 @@ public class DFLocalVarScope extends DFVarScope {
 
     public void buildInitializer(
         DFTypeFinder finder, Initializer initializer)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
         this.buildStmt(finder, initializer.getBody());
     }
 
     @SuppressWarnings("unchecked")
     private void buildStmt(DFTypeFinder finder, Statement ast)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert ast != null;
 
         if (ast instanceof AssertStatement) {
@@ -294,8 +294,7 @@ public class DFLocalVarScope extends DFVarScope {
             // Inline classes are processed separately.
 
         } else {
-            throw new UnsupportedSyntax(ast);
-
+            // XXX Unsupported.
         }
     }
 
@@ -304,7 +303,7 @@ public class DFLocalVarScope extends DFVarScope {
      */
     @SuppressWarnings("unchecked")
     private void buildExpr(DFTypeFinder finder, Expression ast)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert ast != null;
 
         if (ast instanceof Annotation) {
@@ -466,8 +465,7 @@ public class DFLocalVarScope extends DFVarScope {
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            throw new UnsupportedSyntax(ast);
-
+            // XXX Unsupported.
         }
     }
 
@@ -476,7 +474,7 @@ public class DFLocalVarScope extends DFVarScope {
      */
     @SuppressWarnings("unchecked")
     private void buildAssignment(DFTypeFinder finder, Expression ast)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert ast != null;
 
         if (ast instanceof Name) {
@@ -496,8 +494,7 @@ public class DFLocalVarScope extends DFVarScope {
             SimpleName fieldName = sfa.getName();
 
         } else {
-            throw new UnsupportedSyntax(ast);
-
+            // XXX Unsupported.
         }
     }
 }

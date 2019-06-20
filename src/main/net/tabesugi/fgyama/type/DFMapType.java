@@ -72,7 +72,7 @@ public class DFMapType implements DFType {
     }
 
     public void build(DFTypeFinder finder)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert _sig == null || _ast == null;
         if (_sig != null) {
 	    JNITypeParser parser = new JNITypeParser(_sig);

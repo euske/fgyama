@@ -75,7 +75,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     // Constructor for a parameterized klass.
     @SuppressWarnings("unchecked")
     private DFKlass(
-        DFKlass genericKlass, DFType[] paramTypes) {
+        DFKlass genericKlass, DFType[] paramTypes)
+	throws InvalidSyntax {
 	super(genericKlass._name + getParamName(paramTypes), genericKlass._outerSpace);
         assert genericKlass != null;
         assert paramTypes != null;
@@ -107,10 +108,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         _finder = genericKlass._finder;
         // Recreate the entire subspace.
 	if (_ast != null) {
-	    try {
-		this.buildTypeFromDecls(_ast);
-	    } catch (UnsupportedSyntax e) {
-	    }
+	    this.buildTypeFromDecls(_ast);
 	} else {
             // XXX what to do with .jar classes?
 	    for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
@@ -248,7 +246,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
     }
 
-    public DFKlass parameterize(DFType[] paramTypes) {
+    public DFKlass parameterize(DFType[] paramTypes)
+	throws InvalidSyntax {
         assert _mapTypes != null;
         assert paramTypes.length <= _mapTypes.length;
         if (paramTypes.length < _mapTypes.length) {
@@ -276,18 +275,16 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         _entPath = entPath;
     }
 
-    public void setKlassTree(String filePath, ASTNode ast) {
+    public void setKlassTree(String filePath, ASTNode ast)
+	throws InvalidSyntax {
         _filePath = filePath;
         _ast = ast;
-	try {
-	    this.buildTypeFromDecls(ast);
-	} catch (UnsupportedSyntax e) {
-	}
+	this.buildTypeFromDecls(ast);
     }
 
     @SuppressWarnings("unchecked")
     private void buildTypeFromDecls(ASTNode ast)
-	throws UnsupportedSyntax {
+	throws InvalidSyntax {
 
         List<BodyDeclaration> decls;
         if (ast instanceof AbstractTypeDeclaration) {
@@ -295,7 +292,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         } else if (ast instanceof AnonymousClassDeclaration) {
             decls = ((AnonymousClassDeclaration)ast).bodyDeclarations();
         } else {
-            throw new UnsupportedSyntax(ast);
+            throw new InvalidSyntax(ast);
         }
 
         for (BodyDeclaration body : decls) {
@@ -351,7 +348,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 }
 
 	    } else {
-		throw new UnsupportedSyntax(body);
+		throw new InvalidSyntax(body);
 	    }
 	}
     }
@@ -360,7 +357,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private void buildTypeFromStmt(
         Statement ast,
         DFTypeSpace space, DFLocalVarScope outerScope)
-        throws UnsupportedSyntax {
+        throws InvalidSyntax {
         assert ast != null;
 
         if (ast instanceof AssertStatement) {
@@ -522,7 +519,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             klass.setKlassTree(path, abstTypeDecl);
 
         } else {
-            throw new UnsupportedSyntax(ast);
+            throw new InvalidSyntax(ast);
 
         }
     }
@@ -531,7 +528,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private void buildTypeFromExpr(
         Expression expr,
         DFTypeSpace space, DFVarScope outerScope)
-        throws UnsupportedSyntax {
+        throws InvalidSyntax {
         assert expr != null;
 
         if (expr instanceof Annotation) {
@@ -665,7 +662,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             } else if (body instanceof Expression) {
                 // XXX TODO Expresssion lambda
             } else {
-                throw new UnsupportedSyntax(body);
+                throw new InvalidSyntax(body);
             }
 
         } else if (expr instanceof MethodReference) {
@@ -674,11 +671,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            throw new UnsupportedSyntax(expr);
+            // XXX Unsupported.
 
         } else {
             // ???
-            throw new UnsupportedSyntax(expr);
+            throw new InvalidSyntax(expr);
         }
     }
 
@@ -923,7 +920,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     }
 
     public void load()
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         if (_built) return;
         _built = true;
         if (_outerKlass != null) {
@@ -944,13 +941,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
         // a generic class is only referred to, but not built.
         if (_ast != null) {
-            try {
-                this.buildMembersFromTree(finder, _ast);
-            } catch (UnsupportedSyntax e) {
-                String astName = e.ast.getClass().getName();
-                Logger.error("Error: Unsupported syntax:", e.name, "("+astName+")");
-                throw new TypeNotFound(this.getTypeName());
-            }
+	    this.buildMembersFromTree(finder, _ast);
         } else if (_jarPath != null) {
             try {
                 JarFile jarfile = new JarFile(_jarPath);
@@ -970,7 +961,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     }
 
     private void buildMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         //Logger.info("DFKlass.buildMembersFromJKlass:", this, finder);
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
@@ -1075,7 +1066,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     @SuppressWarnings("unchecked")
     protected void buildMembersFromTree(DFTypeFinder finder, ASTNode ast)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         //Logger.info("DFKlass.buildMembersFromTree:", this, finder);
         if (ast instanceof AbstractTypeDeclaration) {
             this.buildMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
@@ -1087,7 +1078,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     private void buildMembersFromAbstTypeDecl(
         DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         if (abstTypeDecl instanceof TypeDeclaration) {
             this.buildMembersFromTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
 
@@ -1102,7 +1093,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembersFromTypeDecl(
         DFTypeFinder finder, TypeDeclaration typeDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         // Load base klasses/interfaces.
         try {
             // Get superclass.
@@ -1132,7 +1123,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembersFromEnumDecl(
         DFTypeFinder finder, EnumDeclaration enumDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         // Load base klasses/interfaces.
         try {
             // Get superclass.
@@ -1170,7 +1161,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembersFromAnnotTypeDecl(
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         try {
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -1185,7 +1176,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembersFromAnonDecl(
         DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         try {
             // Get superclass.
             _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -1199,7 +1190,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     @SuppressWarnings("unchecked")
     private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         // Extend a TypeFinder for the child klasses.
         finder = new DFTypeFinder(this, finder);
         for (BodyDeclaration body : decls) {
@@ -1273,7 +1264,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		_initializer.setTree(initializer);
 
             } else {
-                throw new UnsupportedSyntax(body);
+                throw new InvalidSyntax(body);
             }
         }
     }

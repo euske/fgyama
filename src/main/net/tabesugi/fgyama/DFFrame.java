@@ -178,7 +178,7 @@ public class DFFrame {
     public void buildMethodDecl(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         MethodDeclaration methodDecl)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
@@ -192,7 +192,7 @@ public class DFFrame {
     public void buildInitializer(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Initializer initializer)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         this.buildStmt(finder, method, scope, initializer.getBody());
     }
 
@@ -200,7 +200,7 @@ public class DFFrame {
     private void buildStmt(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Statement stmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -288,7 +288,7 @@ public class DFFrame {
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
-            throw new UnsupportedSyntax(stmt);
+            throw new InvalidSyntax(stmt);
 
         } else if (stmt instanceof WhileStatement) {
 	    // "while (c) { ... }"
@@ -415,7 +415,7 @@ public class DFFrame {
             // Inline classes are processed separately.
 
         } else {
-            throw new UnsupportedSyntax(stmt);
+            throw new InvalidSyntax(stmt);
 
         }
     }
@@ -424,7 +424,7 @@ public class DFFrame {
     private DFType buildExpr(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Expression expr)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert expr != null;
 
         try {
@@ -751,7 +751,7 @@ public class DFFrame {
 		} else if (body instanceof Expression) {
 		    // XXX TODO Expresssion lambda
 		} else {
-		    throw new UnsupportedSyntax(body);
+		    throw new InvalidSyntax(body);
 		}
 		return DFUnknownType.UNKNOWN;
 
@@ -761,11 +761,12 @@ public class DFFrame {
 		//  ExpressionMethodReference
 		//  SuperMethodReference
 		//  TypeMethodReference
-		throw new UnsupportedSyntax(expr);
+		// XXX Unsupported.
+		return DFUnknownType.UNKNOWN;
 
 	    } else {
 		// ???
-		throw new UnsupportedSyntax(expr);
+		throw new InvalidSyntax(expr);
 	    }
         } catch (EntityNotFound e) {
             e.setAst(expr);
@@ -776,7 +777,7 @@ public class DFFrame {
     private void buildAssignment(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Expression expr)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert expr != null;
 
         if (expr instanceof Name) {
@@ -845,7 +846,7 @@ public class DFFrame {
             this.addOutputRef(ref);
 
         } else {
-            throw new UnsupportedSyntax(expr);
+            throw new InvalidSyntax(expr);
         }
     }
 

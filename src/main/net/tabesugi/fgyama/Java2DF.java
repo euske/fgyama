@@ -812,7 +812,7 @@ public class Java2DF {
     private void processExpression(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame, Expression expr)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert expr != null;
 
         try {
@@ -1375,7 +1375,7 @@ public class Java2DF {
                 } else if (body instanceof Expression) {
                     // XXX TODO Expresssion lambda
                 } else {
-                    throw new UnsupportedSyntax(body);
+                    throw new InvalidSyntax(body);
                 }
 		// XXX TODO
                 ctx.setRValue(new DFNode(graph, scope,  DFUnknownType.UNKNOWN, null));
@@ -1400,7 +1400,7 @@ public class Java2DF {
 
             } else {
                 // ???
-                throw new UnsupportedSyntax(expr);
+                throw new InvalidSyntax(expr);
             }
         } catch (EntityNotFound e) {
             e.setAst(expr);
@@ -1416,7 +1416,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
         Expression expr)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert expr != null;
 
         if (expr instanceof Name) {
@@ -1484,7 +1484,7 @@ public class Java2DF {
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
         } else {
-            throw new UnsupportedSyntax(expr);
+            throw new InvalidSyntax(expr);
         }
     }
 
@@ -1495,7 +1495,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	List<VariableDeclarationFragment> frags)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
 
         for (VariableDeclarationFragment frag : frags) {
             DFRef ref = scope.lookupVar(frag.getName());
@@ -1520,7 +1520,7 @@ public class Java2DF {
         DFContext ctx, DFGraph graph, DFVarScope scope,
         DFFrame frame, ASTNode ast, DFNode condValue,
         DFFrame loopFrame, DFContext loopCtx, boolean preTest)
-        throws UnsupportedSyntax {
+        throws InvalidSyntax {
 
         String loopId = Utils.encodeASTNode(ast);
         // Add four nodes for each loop variable.
@@ -1641,7 +1641,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	Block block)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         DFVarScope innerScope = scope.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
             processStatement(
@@ -1654,7 +1654,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	VariableDeclarationStatement varStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         processVariableDeclaration(
             ctx, typeSpace, graph, finder, scope, frame,
             varStmt.fragments());
@@ -1664,7 +1664,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	ExpressionStatement exprStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         processExpression(
             ctx, typeSpace, graph, finder, scope, frame,
             exprStmt.getExpression());
@@ -1674,7 +1674,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	IfStatement ifStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         processExpression(
 	    ctx, typeSpace, graph, finder, scope, frame,
             ifStmt.getExpression());
@@ -1790,7 +1790,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	SwitchStatement switchStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         processExpression(
             ctx, typeSpace, graph, finder, scope, frame,
             switchStmt.getExpression());
@@ -1840,7 +1840,7 @@ public class Java2DF {
             } else {
                 if (caseCtx == null) {
                     // no "case" statement.
-                    throw new UnsupportedSyntax(stmt);
+                    throw new InvalidSyntax(stmt);
                 }
                 processStatement(
                     caseCtx, typeSpace, graph, finder, switchScope,
@@ -1859,7 +1859,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	WhileStatement whileStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(whileStmt);
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
@@ -1880,7 +1880,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	DoStatement doStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(doStmt);
         DFFrame loopFrame = frame.getChildByAST(doStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
@@ -1902,7 +1902,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	ForStatement forStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         DFVarScope loopScope = scope.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         for (Expression init : (List<Expression>) forStmt.initializers()) {
@@ -1937,7 +1937,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
 	DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	EnhancedForStatement eForStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
         processExpression(
             ctx, typeSpace, graph, finder, scope, frame, expr);
@@ -1965,7 +1965,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	TryStatement tryStmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         SortedSet<DFRef> outRefs = new TreeSet<DFRef>();
 
         DFVarScope tryScope = scope.getChildByAST(tryStmt);
@@ -2058,7 +2058,7 @@ public class Java2DF {
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	Statement stmt)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -2098,7 +2098,7 @@ public class Java2DF {
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
-            throw new UnsupportedSyntax(stmt);
+            throw new InvalidSyntax(stmt);
 
         } else if (stmt instanceof WhileStatement) {
 	    // "while (c) { ... }"
@@ -2297,7 +2297,7 @@ public class Java2DF {
             // Inline classes are processed separately.
 
         } else {
-            throw new UnsupportedSyntax(stmt);
+            throw new InvalidSyntax(stmt);
         }
     }
 
@@ -2308,7 +2308,7 @@ public class Java2DF {
     private DFGraph processMethod(
         DFMethod method, ASTNode ast,
         Statement body, List<SingleVariableDeclaration> parameters)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         DFVarScope scope = method.getScope();
         assert scope != null;
         DFFrame frame = method.getFrame();
@@ -2367,7 +2367,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private DFGraph processKlassBody(DFKlass klass)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         // lookup base/inner klasses.
         ASTNode ast = klass.getTree();
         List<BodyDeclaration> decls;
@@ -2376,7 +2376,7 @@ public class Java2DF {
         } else if (ast instanceof AnonymousClassDeclaration) {
             decls = ((AnonymousClassDeclaration)ast).bodyDeclarations();
         } else {
-            throw new UnsupportedSyntax(ast);
+            throw new InvalidSyntax(ast);
         }
         DFVarScope klassScope = klass.getKlassScope();
         DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
@@ -2421,14 +2421,14 @@ public class Java2DF {
             } else if (body instanceof Initializer) {
 
             } else {
-                throw new UnsupportedSyntax(body);
+                throw new InvalidSyntax(body);
             }
         }
         return klassGraph;
     }
 
     private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         klass.load();
         ASTNode ast = klass.getTree();
         if (ast == null) return;
@@ -2437,17 +2437,14 @@ public class Java2DF {
         klasses.add(klass);
         DFTypeFinder finder = klass.getFinder();
         List<DFKlass> toLoad = new ArrayList<DFKlass>();
-        try {
-            this.enumKlassesDecl(finder, klass, ast, klasses);
-        } catch (UnsupportedSyntax e) {
-        }
+	this.enumKlassesDecl(finder, klass, ast, klasses);
     }
 
     @SuppressWarnings("unchecked")
     private void enumKlassesDecl(
         DFTypeFinder finder, DFKlass klass,
         ASTNode ast, Set<DFKlass> klasses)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         if (ast instanceof AbstractTypeDeclaration) {
             AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
             this.enumKlassesDecls(
@@ -2457,7 +2454,7 @@ public class Java2DF {
             this.enumKlassesDecls(
                 finder, klass, anonDecl.bodyDeclarations(), klasses);
         } else {
-            throw new UnsupportedSyntax(ast);
+            throw new InvalidSyntax(ast);
         }
     }
 
@@ -2465,7 +2462,7 @@ public class Java2DF {
     private void enumKlassesDecls(
         DFTypeFinder finder, DFKlass klass,
         List<BodyDeclaration> decls, Set<DFKlass> klasses)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -2546,7 +2543,7 @@ public class Java2DF {
                     finder, klass, initializer.getBody(), klasses);
 
             } else {
-                throw new UnsupportedSyntax(body);
+                throw new InvalidSyntax(body);
             }
         }
     }
@@ -2555,7 +2552,7 @@ public class Java2DF {
     private void enumKlassesStmt(
         DFTypeFinder finder, DFTypeSpace klass,
         Statement ast, Set<DFKlass> klasses)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert ast != null;
 
         if (ast instanceof AssertStatement) {
@@ -2743,7 +2740,7 @@ public class Java2DF {
             this.enumKlasses(innerKlass, klasses);
 
         } else {
-            throw new UnsupportedSyntax(ast);
+            throw new InvalidSyntax(ast);
 
         }
     }
@@ -2752,7 +2749,7 @@ public class Java2DF {
     private void enumKlassesExpr(
         DFTypeFinder finder, DFTypeSpace klass,
         Expression ast, Set<DFKlass> klasses)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         assert ast != null;
 
         if (ast instanceof Annotation) {
@@ -2967,7 +2964,7 @@ public class Java2DF {
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            throw new UnsupportedSyntax(ast);
+            // XXX Unsupported.
 
         }
     }
@@ -3019,24 +3016,18 @@ public class Java2DF {
     // Pass1: populate TypeSpaces.
     @SuppressWarnings("unchecked")
     public void buildTypeSpace(String key, CompilationUnit cunit)
-        throws UnsupportedSyntax {
+        throws InvalidSyntax {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
         List<DFKlass> klassList = new ArrayList<DFKlass>();
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    try {
-		DFKlass klass = packageSpace.buildTypeFromTree(
-                    key, abstTypeDecl, null, fileScope);
-                klass.setKlassTree(key, abstTypeDecl);
-                Logger.debug("Pass1: Created:", klass);
-                klassList.add(klass);
-	    } catch (UnsupportedSyntax e) {
-		Logger.error("Pass1: UnsupportedSyntax at",
-                             key, e.name, "("+e.getAstName()+")");
-                if (0 < _strict) throw e;
-	    }
+	    DFKlass klass = packageSpace.buildTypeFromTree(
+		key, abstTypeDecl, null, fileScope);
+	    klass.setKlassTree(key, abstTypeDecl);
+	    Logger.debug("Pass1: Created:", klass);
+	    klassList.add(klass);
 	}
         DFKlass[] klasses = new DFKlass[klassList.size()];
         klassList.toArray(klasses);
@@ -3083,7 +3074,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void loadKlasses(
         String key, CompilationUnit cunit, Set<DFKlass> klasses)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         // Process static imports.
         DFFileScope fileScope = _fileScope.get(key);
         for (ImportDeclaration importDecl :
@@ -3117,7 +3108,7 @@ public class Java2DF {
 
     // Pass4: list all methods.
     public void listMethods(Set<DFKlass> klasses)
-        throws UnsupportedSyntax, TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
 
@@ -3128,8 +3119,6 @@ public class Java2DF {
             if (init != null) {
                 try {
                     init.buildScope();
-                } catch (UnsupportedSyntax e) {
-                    if (0 < _strict) throw e;
                 } catch (TypeNotFound e) {
                     if (0 < _strict) throw e;
                 }
@@ -3137,8 +3126,6 @@ public class Java2DF {
             for (DFMethod method : klass.getMethods()) {
                 try {
                     method.buildScope();
-                } catch (UnsupportedSyntax e) {
-                    if (0 < _strict) throw e;
                 } catch (TypeNotFound e) {
                     if (0 < _strict) throw e;
                 }
@@ -3152,8 +3139,6 @@ public class Java2DF {
             if (init != null) {
                 try {
                     init.buildFrame();
-                } catch (UnsupportedSyntax e) {
-                    if (0 < _strict) throw e;
                 } catch (EntityNotFound e) {
                     if (0 < _strict) throw e;
                 }
@@ -3162,8 +3147,6 @@ public class Java2DF {
                 try {
                     method.buildFrame();
                     queue.add(method);
-                } catch (UnsupportedSyntax e) {
-                    if (0 < _strict) throw e;
                 } catch (EntityNotFound e) {
                     if (0 < _strict) throw e;
                 }
@@ -3188,13 +3171,11 @@ public class Java2DF {
     // Pass5: generate graphs for each method.
     @SuppressWarnings("unchecked")
     public void buildGraphs(DFKlass klass)
-        throws UnsupportedSyntax, EntityNotFound {
+        throws InvalidSyntax, EntityNotFound {
         this.startKlass(klass);
         try {
             DFGraph graph = processKlassBody(klass);
             this.exportGraph(graph);
-        } catch (UnsupportedSyntax e) {
-            if (0 < _strict) throw e;
         } catch (EntityNotFound e) {
             if (0 < _strict) throw e;
         }
@@ -3206,8 +3187,6 @@ public class Java2DF {
                     init, initializer,
                     initializer.getBody(), null);
                 this.exportGraph(graph);
-            } catch (UnsupportedSyntax e) {
-                if (0 < _strict) throw e;
             } catch (EntityNotFound e) {
                 if (0 < _strict) throw e;
             }
@@ -3222,8 +3201,6 @@ public class Java2DF {
                         methodDecl.getBody(), methodDecl.parameters());
                     this.exportGraph(graph);
                 }
-            } catch (UnsupportedSyntax e) {
-                if (0 < _strict) throw e;
             } catch (EntityNotFound e) {
                 if (0 < _strict) throw e;
             }
@@ -3237,7 +3214,7 @@ public class Java2DF {
      * Usage: java Java2DF [-o output] input.java ...
      */
     public static void main(String[] args)
-        throws IOException, UnsupportedSyntax, EntityNotFound {
+        throws IOException, InvalidSyntax, EntityNotFound {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
@@ -3327,7 +3304,7 @@ public class Java2DF {
             } catch (IOException e) {
                 Logger.error("Pass1: IOException at "+path);
                 throw e;
-	    } catch (UnsupportedSyntax e) {
+	    } catch (InvalidSyntax e) {
                 throw e;
             }
         }
@@ -3355,10 +3332,6 @@ public class Java2DF {
         Logger.info("Pass4.");
         try {
             converter.listMethods(klasses);
-        } catch (UnsupportedSyntax e) {
-            Logger.error("Pass4: UnsupportedSyntax",
-                         e.name, "("+e.getAstName()+")");
-            throw e;
         } catch (TypeNotFound e) {
             Logger.error("Pass4: TypeNotFound",
                          "("+e.name+", method="+e.method+
@@ -3373,10 +3346,6 @@ public class Java2DF {
             Logger.info("Pass5:", klass);
             try {
                 converter.buildGraphs(klass);
-            } catch (UnsupportedSyntax e) {
-                Logger.error("Pass5: Unsupported at", klass,
-                             e.name, "("+e.getAstName()+")");
-                throw e;
             } catch (EntityNotFound e) {
                 Logger.error("Pass5: EntityNotFound at", klass,
                              "("+e.name+", method="+e.method+

@@ -129,8 +129,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public DFKlass buildTypeFromTree(
         String filePath, AbstractTypeDeclaration abstTypeDecl,
-        DFKlass outerKlass, DFVarScope outerScope)
-        throws UnsupportedSyntax {
+        DFKlass outerKlass, DFVarScope outerScope) {
         assert abstTypeDecl != null;
         //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
         DFKlass klass = this.createKlass(

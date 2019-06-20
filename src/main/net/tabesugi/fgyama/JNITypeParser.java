@@ -21,7 +21,7 @@ public class JNITypeParser {
     }
 
     public DFType getType(DFTypeFinder finder)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
 	if (_text.length() <= _pos) return null;
 	//Logger.info("  getType:", _text.substring(_pos), "finder="+finder);
         switch (_text.charAt(_pos)) {
@@ -122,7 +122,7 @@ public class JNITypeParser {
     }
 
     private DFType[] getTypes(DFTypeFinder finder, char start, char end)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
 	assert _text.charAt(_pos) == start;
         _pos++;
         List<DFType> types = new ArrayList<DFType>();

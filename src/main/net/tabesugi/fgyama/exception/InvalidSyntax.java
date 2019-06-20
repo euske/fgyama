@@ -5,16 +5,16 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  UnsupportedSyntax
+//  InvalidSyntax
 //
-public class UnsupportedSyntax extends Exception {
+public class InvalidSyntax extends Exception {
 
     private static final long serialVersionUID = 1L;
 
     public ASTNode ast;
     public String name = null;
 
-    public UnsupportedSyntax(ASTNode ast) {
+    public InvalidSyntax(ASTNode ast) {
         assert ast != null;
         this.ast = ast;
     }
