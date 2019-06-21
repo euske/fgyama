@@ -508,13 +508,15 @@ class IterNode extends ProgNode {
 // CallNode
 abstract class CallNode extends ProgNode {
 
+    public DFFunctionType funcType;
     public DFNode[] args;
     public DFNode exception;
 
     public CallNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast) {
+        ASTNode ast, DFFunctionType funcType) {
         super(graph, scope, type, ref, ast);
+        this.funcType = funcType;
         this.args = null;
         this.exception = null;
     }
@@ -541,7 +543,8 @@ class MethodCallNode extends CallNode {
     public MethodCallNode(
         DFGraph graph, DFVarScope scope, DFMethod[] methods,
         ASTNode ast, DFNode obj) {
-        super(graph, scope, methods[0].getFuncType().getReturnType(), null, ast);
+        super(graph, scope, methods[0].getFuncType().getReturnType(), null,
+              ast, methods[0].getFuncType());
         if (obj != null) {
             this.accept(obj, "#this");
         }
@@ -586,7 +589,8 @@ class CreateObjectNode extends CallNode {
     public CreateObjectNode(
         DFGraph graph, DFVarScope scope, DFType type, DFMethod constructor,
         ASTNode ast, DFNode obj) {
-        super(graph, scope, type, null, ast);
+        super(graph, scope, type, null,
+              ast, constructor.getFuncType());
         if (obj != null) {
             this.accept(obj, "#this");
         }
