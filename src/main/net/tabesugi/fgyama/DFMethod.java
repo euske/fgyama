@@ -182,7 +182,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public void buildFrame()
         throws InvalidSyntax {
-	if (_ast == null) return;
+	if (_ast == null) {
+            _frame = new DFFrame(DFFrame.ANONYMOUS);
+            return;
+        }
 	assert _scope != null;
 	DFTypeFinder finder = this.getFinder();
         _frame = new DFFrame(DFFrame.RETURNABLE);

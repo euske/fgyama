@@ -298,6 +298,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         DFLocalVarScope initScope = new DFLocalVarScope(_klassScope, "<clinit>");
         _initMethod = new DFMethod(
             this, "<clinit>", DFCallStyle.Initializer, "<clinit>", initScope);
+        _initMethod.setFuncType(
+            new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
 
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
@@ -1224,8 +1226,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
-        // Extend a TypeFinder for the child klasses.
-        finder = new DFTypeFinder(this, finder);
+
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Child klasses are loaded independently.
@@ -1282,9 +1283,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     funcType.setExceptions(exceptions);
                 }
                 method.setFuncType(funcType);
-		if (decl.getBody() != null) {
-		    method.setTree(decl);
-		}
+                method.setTree(decl);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -1296,10 +1295,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                _initMethod.setFinder(finder);
-                _initMethod.setFuncType(
-		    new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
-		_initMethod.setTree(initializer);
+                _initMethod.setTree(initializer);
 
             } else {
                 throw new InvalidSyntax(body);

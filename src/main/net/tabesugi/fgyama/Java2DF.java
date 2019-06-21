@@ -2310,18 +2310,18 @@ public class Java2DF {
         DFGraph graph = new DFGraph(scope, method, ast);
         DFContext ctx = new DFContext(graph, scope);
         DFTypeFinder finder = method.getFinder();
-        if (parameters != null) {
-            int i = 0;
-            for (SingleVariableDeclaration decl : parameters) {
-                DFRef ref = scope.lookupArgument(i);
-                DFNode input = new InputNode(graph, scope, ref, decl);
-                ctx.set(input);
-                DFNode assign = new SingleAssignNode(
-                    graph, scope, scope.lookupVar(decl.getName()), decl);
-                assign.accept(input);
-                ctx.set(assign);
-                i++;
-            }
+
+        // Setup inputs.
+        int i = 0;
+        for (SingleVariableDeclaration decl : parameters) {
+            DFRef ref = scope.lookupArgument(i);
+            DFNode input = new InputNode(graph, scope, ref, decl);
+            ctx.set(input);
+            DFNode assign = new SingleAssignNode(
+                graph, scope, scope.lookupVar(decl.getName()), decl);
+            assign.accept(input);
+            ctx.set(assign);
+            i++;
         }
         for (DFRef ref : frame.getInputRefs()) {
             if (ref.isLocal() || ref.isInternal()) continue;
@@ -2334,17 +2334,10 @@ public class Java2DF {
             ctx.set(input);
         }
 
+        // Process the function body.
         try {
-            // Process the function body.
             processStatement(
                 ctx, method, graph, finder, scope, frame, body);
-            frame.close(ctx);
-            for (DFRef ref : frame.getOutputRefs()) {
-                if (ref.isLocal() || ref.isInternal()) continue;
-                DFNode output = new OutputNode(graph, scope, ref, null);
-                output.accept(ctx.get(ref));
-            }
-            //frame.dump();
         } catch (MethodNotFound e) {
             e.setMethod(method);
             Logger.error("MethodNotFound:", e.name+"("+Utils.join(e.argTypes)+")");
@@ -2354,6 +2347,15 @@ public class Java2DF {
             Logger.error("EntityNotFound:", e.name);
             throw e;
         }
+
+        // Cleanup.
+        frame.close(ctx);
+        for (DFRef ref : frame.getOutputRefs()) {
+            if (ref.isLocal() || ref.isInternal()) continue;
+            DFNode output = new OutputNode(graph, scope, ref, null);
+            output.accept(ctx.get(ref));
+        }
+        //frame.dump();
 
         Logger.debug("Success:", method.getSignature());
         return graph;
@@ -2372,12 +2374,16 @@ public class Java2DF {
         } else {
             throw new InvalidSyntax(ast);
         }
-        DFVarScope klassScope = klass.getKlassScope();
-        DFFrame klassFrame = new DFFrame(DFFrame.ANONYMOUS);
-	DFTypeSpace klassSpace = klass;
-        DFGraph klassGraph = new DFGraph(klassScope, null, ast);
-        DFContext klassCtx = new DFContext(klassGraph, klassScope);
+        DFMethod method = klass.getInitMethod();
+        DFVarScope scope = method.getScope();
+        if (scope == null) {
+            scope = klass.getKlassScope();
+        }
+        DFFrame frame = method.getFrame();
+        DFGraph graph = new DFGraph(scope, method, ast);
+        DFContext ctx = new DFContext(graph, scope);
         DFTypeFinder finder = klass.getFinder();
+
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Inner classes are processed separately.
@@ -2391,18 +2397,18 @@ public class Java2DF {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         processExpression(
-                            klassCtx, klassSpace, klassGraph, finder,
-                            klassScope, klassFrame, init);
-                        value = klassCtx.getRValue();
+                            ctx, method, graph, finder,
+                            scope, frame, init);
+                        value = ctx.getRValue();
                     }
                     if (value == null) {
                         // uninitialized field: default = null.
                         value = new ConstNode(
-                            klassGraph, klassScope,
+                            graph, scope,
                             DFNullType.NULL, null, "uninitialized");
                     }
                     DFNode assign = new SingleAssignNode(
-                        klassGraph, klassScope, ref, frag);
+                        graph, scope, ref, frag);
                     assign.accept(value);
                 }
 
@@ -2413,12 +2419,18 @@ public class Java2DF {
             } else if (body instanceof AnnotationTypeMemberDeclaration) {
 
             } else if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                processStatement(
+                    ctx, method, graph, finder, scope, frame,
+                    initializer.getBody());
 
             } else {
                 throw new InvalidSyntax(body);
             }
         }
-        return klassGraph;
+        frame.close(ctx);
+
+        return graph;
     }
 
     private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
@@ -3105,28 +3117,15 @@ public class Java2DF {
         } catch (EntityNotFound e) {
             if (0 < _strict) throw e;
         }
-        DFMethod init = klass.getInitMethod();
-        Initializer initializer = (Initializer)init.getTree();
-        if (initializer != null) {
+        for (DFMethod method : klass.getMethods()) {
+            if (method.getTree() == null) continue;
+            MethodDeclaration methodDecl = (MethodDeclaration)method.getTree();
+            if (methodDecl.getBody() == null) continue;
             try {
                 DFGraph graph = processMethod(
-                    init, initializer,
-                    initializer.getBody(), null);
+                    method, methodDecl,
+                    methodDecl.getBody(), methodDecl.parameters());
                 this.exportGraph(graph);
-            } catch (EntityNotFound e) {
-                if (0 < _strict) throw e;
-            }
-        }
-        for (DFMethod method : klass.getMethods()) {
-            if (method.getFrame() == null) continue;
-            MethodDeclaration methodDecl = (MethodDeclaration)method.getTree();
-            try {
-                if (methodDecl.getBody() != null) {
-                    DFGraph graph = processMethod(
-                        method, methodDecl,
-                        methodDecl.getBody(), methodDecl.parameters());
-                    this.exportGraph(graph);
-                }
             } catch (EntityNotFound e) {
                 if (0 < _strict) throw e;
             }
