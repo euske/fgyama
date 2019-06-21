@@ -27,7 +27,7 @@ public class UnitTestDF extends XMLTestCase {
             DFBuiltinTypes.initialize(_rootSpace);
         }
         if (_converter == null) {
-            _converter = new Java2DF(_rootSpace, 0);
+            _converter = new Java2DF(_rootSpace);
         }
     }
 
@@ -54,7 +54,7 @@ public class UnitTestDF extends XMLTestCase {
         }
         _converter.listMethods(klasses);
         for (DFKlass klass : klasses) {
-            _converter.buildGraphs(klass);
+            _converter.buildGraphs(klass, false);
         }
 	exporter.close();
         _converter.removeExporter(exporter);

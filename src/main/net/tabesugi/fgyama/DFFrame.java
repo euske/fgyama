@@ -179,6 +179,7 @@ public class DFFrame {
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         MethodDeclaration methodDecl)
         throws InvalidSyntax, EntityNotFound {
+        if (methodDecl.getBody() == null) return;
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
@@ -505,7 +506,8 @@ public class DFFrame {
 		    op == PrefixExpression.Operator.DECREMENT) {
 		    this.buildAssignment(finder, method, scope, operand);
 		}
-		return this.buildExpr(finder, method, scope, operand);
+		return DFNode.inferPrefixType(
+                    this.buildExpr(finder, method, scope, operand), op);
 
 	    } else if (expr instanceof PostfixExpression) {
 		// "y--"
@@ -526,7 +528,7 @@ public class DFFrame {
                     finder, method, scope, infix.getLeftOperand());
 		DFType right = this.buildExpr(
                     finder, method, scope, infix.getRightOperand());
-		return Java2DF.inferInfixType(left, op, right);
+		return DFNode.inferInfixType(left, op, right);
 
 	    } else if (expr instanceof ParenthesizedExpression) {
 		// "(expr)"

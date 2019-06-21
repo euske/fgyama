@@ -110,7 +110,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	if (_ast != null) {
 	    this.buildTypeFromDecls(_ast);
 	} else {
-            // XXX what to do with .jar classes?
+            // In case of a .jar class, refer to the same inner classes.
 	    for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
 		String id = e.getKey();
 		DFKlass klass = e.getValue();
@@ -1226,6 +1226,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @SuppressWarnings("unchecked")
     private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
+        _initMethod.setFinder(finder);
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {

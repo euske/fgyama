@@ -83,6 +83,7 @@ public class DFLocalVarScope extends DFVarScope {
         DFTypeFinder finder, MethodDeclaration methodDecl)
         throws InvalidSyntax {
         //Logger.info("DFLocalVarScope.build:", this);
+        if (methodDecl.getBody() == null) return;
         Type returnType = methodDecl.getReturnType2();
         DFType type;
 	if (returnType == null) {
