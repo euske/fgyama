@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_exception;" path="tests/basic_exception.java">
-    <method name="Lbasic_exception;" style="initializer">
+    <method name="Lbasic_exception;.&lt;clinit&gt;()V" style="initializer">
       <ast end="433" start="0" type="55"/>
-      <scope name="Lbasic_exception;"/>
+      <scope name="Lbasic_exception;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_exception;.foo()V" style="instance">
       <ast end="336" start="103" type="31"/>
@@ -150,12 +150,12 @@
     </method>
   </class>
   <class extends="Ljava/lang/Exception;" name="Lbasic_exception/A;" path="tests/basic_exception.java">
-    <method name="Lbasic_exception/A;" style="initializer">
+    <method name="Lbasic_exception/A;.&lt;clinit&gt;()V" style="initializer">
       <ast end="97" start="36" type="55"/>
-      <scope name="Lbasic_exception/A;">
-        <node data="uninitialized" id="Nd9b72797_1" kind="const" type="@null"/>
-        <node id="Nd9b72797_2" kind="assign" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;">
-          <link src="Nd9b72797_1"/>
+      <scope name="Lbasic_exception/A;.&lt;clinit&gt;">
+        <node data="uninitialized" id="N13dd455_1" kind="const" type="@null"/>
+        <node id="N13dd455_2" kind="assign" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;">
+          <link src="N13dd455_1"/>
           <ast end="90" start="86" type="59"/>
         </node>
       </scope>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_for;" path="tests/basic_for.java">
-    <method name="Lbasic_for;" style="initializer">
+    <method name="Lbasic_for;.&lt;clinit&gt;()V" style="initializer">
       <ast end="141" start="0" type="55"/>
-      <scope name="Lbasic_for;"/>
+      <scope name="Lbasic_for;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_for;.foo(I)I" style="static">
       <ast end="139" start="30" type="31"/>

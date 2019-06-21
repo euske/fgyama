@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
-    <method name="Ldom/dood/multi_xref3;" style="initializer">
+    <method name="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" style="initializer">
       <ast end="195" start="48" type="55"/>
-      <scope name="Ldom/dood/multi_xref3;">
-        <node data="100" id="Ndf8f4c3f_1" kind="const" type="I">
+      <scope name="Ldom/dood/multi_xref3;.&lt;clinit&gt;">
+        <node data="100" id="Nf5fc3cfd_1" kind="const" type="I">
           <ast end="107" start="104" type="34"/>
         </node>
-        <node id="Ndf8f4c3f_2" kind="assign" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
-          <link src="Ndf8f4c3f_1"/>
+        <node id="Nf5fc3cfd_2" kind="assign" ref="@Ldom/dood/multi_xref3;/.boo" type="I">
+          <link src="Nf5fc3cfd_1"/>
           <ast end="107" start="98" type="59"/>
         </node>
       </scope>
@@ -45,12 +45,12 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
-    <method name="Ldom/meep/multi_xref1;" style="initializer">
+    <method name="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" style="initializer">
       <ast end="256" start="19" type="55"/>
-      <scope name="Ldom/meep/multi_xref1;">
-        <node data="uninitialized" id="Nf9a8bc3e_1" kind="const" type="@null"/>
-        <node id="Nf9a8bc3e_2" kind="assign" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
-          <link src="Nf9a8bc3e_1"/>
+      <scope name="Ldom/meep/multi_xref1;.&lt;clinit&gt;">
+        <node data="uninitialized" id="N16eaa67c_1" kind="const" type="@null"/>
+        <node id="N16eaa67c_2" kind="assign" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
+          <link src="N16eaa67c_1"/>
           <ast end="68" start="63" type="59"/>
         </node>
       </scope>
@@ -145,12 +145,12 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
-    <method name="Ldom/meep/multi_xref2;" style="initializer">
+    <method name="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" style="initializer">
       <ast end="297" start="19" type="55"/>
-      <scope name="Ldom/meep/multi_xref2;">
-        <node data="uninitialized" id="Nf9a8bc5d_1" kind="const" type="@null"/>
-        <node id="Nf9a8bc5d_2" kind="assign" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
-          <link src="Nf9a8bc5d_1"/>
+      <scope name="Ldom/meep/multi_xref2;.&lt;clinit&gt;">
+        <node data="uninitialized" id="Nf8c8701b_1" kind="const" type="@null"/>
+        <node id="Nf8c8701b_2" kind="assign" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
+          <link src="Nf8c8701b_1"/>
           <ast end="68" start="63" type="59"/>
         </node>
       </scope>
@@ -269,12 +269,12 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
-    <method name="Ldom/meep/multi_xref1/baa;" style="initializer">
+    <method name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="109" start="75" type="55"/>
-      <scope name="Ldom/meep/multi_xref1/baa;">
-        <node data="uninitialized" id="N41d957ab_1" kind="const" type="@null"/>
-        <node id="N41d957ab_2" kind="assign" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I">
-          <link src="N41d957ab_1"/>
+      <scope name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;">
+        <node data="uninitialized" id="N79d48669_1" kind="const" type="@null"/>
+        <node id="N79d48669_2" kind="assign" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I">
+          <link src="N79d48669_1"/>
           <ast end="102" start="99" type="59"/>
         </node>
       </scope>

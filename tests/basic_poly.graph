@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Lbasic_poly_Foo;" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
-    <method name="Lbasic_poly_Baa;" style="initializer">
+    <method name="Lbasic_poly_Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="552" start="110" type="55"/>
-      <scope name="Lbasic_poly_Baa;"/>
+      <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>
@@ -226,14 +226,14 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
-    <method name="Lbasic_poly_Foo;" style="initializer">
+    <method name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="108" start="0" type="55"/>
-      <scope name="Lbasic_poly_Foo;">
-        <node data="0" id="N884b6c4b_1" kind="const" type="I">
+      <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">
+        <node data="0" id="Nf3acab09_1" kind="const" type="I">
           <ast end="36" start="35" type="34"/>
         </node>
-        <node id="N884b6c4b_2" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
-          <link src="N884b6c4b_1"/>
+        <node id="Nf3acab09_2" kind="assign" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <link src="Nf3acab09_1"/>
           <ast end="36" start="31" type="59"/>
         </node>
       </scope>

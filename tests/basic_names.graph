@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
-    <method name="Ldom/meep/basic_names;" style="initializer">
+    <method name="Ldom/meep/basic_names;.&lt;clinit&gt;()V" style="initializer">
       <ast end="470" start="19" type="55"/>
-      <scope name="Ldom/meep/basic_names;">
-        <node data="123" id="Nd0f69117_1" kind="const" type="I">
+      <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
+        <node data="123" id="N112afdd5_1" kind="const" type="I">
           <ast end="72" start="69" type="34"/>
         </node>
-        <node id="Nd0f69117_2" kind="assign" ref="@Ldom/meep/basic_names;/.y" type="I">
-          <link src="Nd0f69117_1"/>
+        <node id="N112afdd5_2" kind="assign" ref="@Ldom/meep/basic_names;/.y" type="I">
+          <link src="N112afdd5_1"/>
           <ast end="72" start="65" type="59"/>
         </node>
       </scope>
@@ -154,18 +154,18 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
-    <method name="Ldom/meep/basic_names/Bar;" style="initializer">
+    <method name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;()V" style="initializer">
       <ast end="56" start="44" type="55"/>
-      <scope name="Ldom/meep/basic_names/Bar;"/>
+      <scope name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;" path="tests/basic_names.java">
-    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;" style="initializer">
+    <method name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.&lt;clinit&gt;()V" style="initializer">
       <ast end="211" start="144" type="55"/>
-      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;">
-        <node data="uninitialized" id="Ne9715ca4_1" kind="const" type="@null"/>
-        <node id="Ne9715ca4_2" kind="assign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
-          <link src="Ne9715ca4_1"/>
+      <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.&lt;clinit&gt;">
+        <node data="uninitialized" id="N86f7dde2_1" kind="const" type="@null"/>
+        <node id="N86f7dde2_2" kind="assign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
+          <link src="N86f7dde2_1"/>
           <ast end="173" start="172" type="59"/>
         </node>
       </scope>

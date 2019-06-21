@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_break;" path="tests/basic_break.java">
-    <method name="Lbasic_break;" style="initializer">
+    <method name="Lbasic_break;.&lt;clinit&gt;()V" style="initializer">
       <ast end="137" start="0" type="55"/>
-      <scope name="Lbasic_break;"/>
+      <scope name="Lbasic_break;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_break;.foo(I)V" style="static">
       <ast end="135" start="32" type="31"/>

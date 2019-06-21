@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Enum&lt;LE;&gt;;" name="LE;" path="tests/basic_enum.java">
-    <method name="LE;" style="initializer">
+    <method name="LE;.&lt;clinit&gt;()V" style="initializer">
       <ast end="102" start="0" type="71"/>
-      <scope name="LE;">
-        <node data="uninitialized" id="N125e2_1" kind="const" type="@null"/>
-        <node id="N125e2_2" kind="assign" ref="@LE;/.x" type="I">
-          <link src="N125e2_1"/>
+      <scope name="LE;.&lt;clinit&gt;">
+        <node data="uninitialized" id="Ne2ddba20_1" kind="const" type="@null"/>
+        <node id="Ne2ddba20_2" kind="assign" ref="@LE;/.x" type="I">
+          <link src="Ne2ddba20_1"/>
           <ast end="50" start="49" type="59"/>
         </node>
       </scope>
@@ -47,9 +47,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_enum;" path="tests/basic_enum.java">
-    <method name="Lbasic_enum;" style="initializer">
+    <method name="Lbasic_enum;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="104" type="55"/>
-      <scope name="Lbasic_enum;"/>
+      <scope name="Lbasic_enum;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_enum;.foo()V" style="static">
       <ast end="292" start="134" type="31"/>

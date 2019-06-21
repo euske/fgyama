@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_funcs;" path="tests/basic_funcs.java">
-    <method name="Lbasic_funcs;" style="initializer">
+    <method name="Lbasic_funcs;.&lt;clinit&gt;()V" style="initializer">
       <ast end="479" start="0" type="55"/>
-      <scope name="Lbasic_funcs;">
-        <node data="0" id="N3ad53769_1" kind="const" type="I">
+      <scope name="Lbasic_funcs;.&lt;clinit&gt;">
+        <node data="0" id="Nfa38b927_1" kind="const" type="I">
           <ast end="48" start="47" type="34"/>
         </node>
-        <node id="N3ad53769_2" kind="assign" ref="@Lbasic_funcs;/.y" type="I">
-          <link src="N3ad53769_1"/>
+        <node id="Nfa38b927_2" kind="assign" ref="@Lbasic_funcs;/.y" type="I">
+          <link src="Nfa38b927_1"/>
           <ast end="48" start="43" type="59"/>
         </node>
-        <node data="0" id="N3ad53769_3" kind="const" type="I">
+        <node data="0" id="Nfa38b927_3" kind="const" type="I">
           <ast end="70" start="69" type="34"/>
         </node>
-        <node id="N3ad53769_4" kind="assign" ref="@Lbasic_funcs;/.z" type="I">
-          <link src="N3ad53769_3"/>
+        <node id="Nfa38b927_4" kind="assign" ref="@Lbasic_funcs;/.z" type="I">
+          <link src="Nfa38b927_3"/>
           <ast end="70" start="65" type="59"/>
         </node>
       </scope>
