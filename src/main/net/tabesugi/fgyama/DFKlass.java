@@ -300,6 +300,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             this, "<clinit>", DFCallStyle.Initializer, "<clinit>", initScope);
         _initMethod.setFuncType(
             new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
+        _initMethod.setTree(ast);
 
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
@@ -345,9 +346,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
+                String id = Utils.encodeASTNode(initializer);
+                DFLocalVarScope innerScope = initScope.addChild(body);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
-                    this.buildTypeFromStmt(stmt, _initMethod, initScope);
+                    this.buildTypeFromStmt(stmt, _initMethod, innerScope);
                 }
 
 	    } else {
@@ -1295,8 +1298,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 this.addField(decl.getName(), isStatic(decl), type);
 
             } else if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                _initMethod.setTree(initializer);
 
             } else {
                 throw new InvalidSyntax(body);

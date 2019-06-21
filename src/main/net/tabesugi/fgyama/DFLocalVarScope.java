@@ -111,11 +111,17 @@ public class DFLocalVarScope extends DFVarScope {
         this.buildStmt(finder, methodDecl.getBody());
     }
 
-    public void buildInitializer(
-        DFTypeFinder finder, Initializer initializer)
+    public void buildBodyDecls(
+        DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
-        this.buildStmt(finder, initializer.getBody());
+        for (BodyDeclaration body : decls) {
+            if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                DFLocalVarScope innerScope = this.getChildByAST(body);
+                innerScope.buildStmt(finder, initializer.getBody());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

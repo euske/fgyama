@@ -194,11 +194,17 @@ public class DFFrame {
         this.buildStmt(finder, method, scope, methodDecl.getBody());
     }
 
-    public void buildInitializer(
+    public void buildBodyDecls(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
-        Initializer initializer)
+        List<BodyDeclaration> decls)
         throws InvalidSyntax {
-        this.buildStmt(finder, method, scope, initializer.getBody());
+        for (BodyDeclaration body : decls) {
+            if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                DFLocalVarScope innerScope = scope.getChildByAST(body);
+                this.buildStmt(finder, method, innerScope, initializer.getBody());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

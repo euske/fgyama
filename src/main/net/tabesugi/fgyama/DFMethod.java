@@ -845,20 +845,24 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _frame;
     }
 
+    @SuppressWarnings("unchecked")
     public void buildScope()
         throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
 	if (_ast instanceof MethodDeclaration) {
 	    _scope.buildMethodDecl(_finder, (MethodDeclaration)_ast);
-	} else if (_ast instanceof Initializer) {
-	    _scope.buildInitializer(_finder, (Initializer)_ast);
+	} else if (_ast instanceof AbstractTypeDeclaration) {
+	    _scope.buildBodyDecls(_finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+        } else if (_ast instanceof AnonymousClassDeclaration) {
+            _scope.buildBodyDecls(_finder, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
 	}  else {
 	    throw new InvalidSyntax(_ast);
 	}
         //_scope.dump();
     }
 
+    @SuppressWarnings("unchecked")
     public void buildFrame()
         throws InvalidSyntax {
 	if (_ast == null) return;
@@ -867,9 +871,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         if (_ast instanceof MethodDeclaration) {
             _frame.buildMethodDecl(
                 _finder, this, _scope, (MethodDeclaration)_ast);
-        } else if (_ast instanceof Initializer) {
-            _frame.buildInitializer(
-                _finder, this, _scope, (Initializer)_ast);
+	} else if (_ast instanceof AbstractTypeDeclaration) {
+            _frame.buildBodyDecls(
+                _finder, this, _scope, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+        } else if (_ast instanceof AnonymousClassDeclaration) {
+            _frame.buildBodyDecls(
+                _finder, this, _scope, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
         }  else {
             throw new InvalidSyntax(_ast);
         }
@@ -2507,8 +2514,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
+                DFVarScope innerScope = _scope.getChildByAST(body);
                 processStatement(
-                    ctx, this, graph, _finder, _scope, _frame,
+                    ctx, this, graph, _finder, innerScope, _frame,
                     initializer.getBody());
 
             } else {
