@@ -46,7 +46,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private boolean _built = false;
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
-    private DFMethod _initializer = null;
+    private DFMethod _initMethod = null;
     private List<DFRef> _fields = new ArrayList<DFRef>();
     private List<DFMethod> _methods = new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
@@ -295,11 +295,16 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             throw new InvalidSyntax(ast);
         }
 
+        DFLocalVarScope initScope = new DFLocalVarScope(_klassScope, "<clinit>");
+        _initMethod = new DFMethod(
+            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", initScope);
+
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                 String path = this.getFilePath();
-		DFKlass klass = this.buildTypeFromTree(path, abstTypeDecl, this, _klassScope);
+		DFKlass klass = this.buildTypeFromTree(
+                    path, abstTypeDecl, this, _klassScope);
                 klass.setKlassTree(path, abstTypeDecl);
 
 	    } else if (body instanceof FieldDeclaration) {
@@ -338,13 +343,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
-                String id = Utils.encodeASTNode(initializer);
-                DFLocalVarScope scope = new DFLocalVarScope(_klassScope, "<clinit>");
-                _initializer = new DFMethod(
-		    this, id, DFCallStyle.Initializer, "<clinit>", scope);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
-                    this.buildTypeFromStmt(stmt, _initializer, scope);
+                    this.buildTypeFromStmt(stmt, _initMethod, initScope);
                 }
 
 	    } else {
@@ -755,9 +756,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 DFBuiltinTypes.getEnumKlass());
     }
 
-    public DFMethod getInitializer() {
+    public DFMethod getInitMethod() {
         assert _built;
-        return _initializer;
+        return _initMethod;
     }
 
     protected DFRef lookupField(String id)
@@ -1295,10 +1296,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                _initializer.setFinder(finder);
-                _initializer.setFuncType(
+                _initMethod.setFinder(finder);
+                _initMethod.setFuncType(
 		    new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
-		_initializer.setTree(initializer);
+		_initMethod.setTree(initializer);
 
             } else {
                 throw new InvalidSyntax(body);

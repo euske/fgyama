@@ -3061,10 +3061,8 @@ public class Java2DF {
         // Build method scopes.
         for (DFKlass klass : klasses) {
             klass.overrideMethods();
-            DFMethod init = klass.getInitializer();
-            if (init != null) {
-		init.buildScope();
-            }
+            DFMethod init = klass.getInitMethod();
+            init.buildScope();
             for (DFMethod method : klass.getMethods()) {
 		method.buildScope();
             }
@@ -3073,10 +3071,8 @@ public class Java2DF {
         // Build call graphs.
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
         for (DFKlass klass : klasses) {
-            DFMethod init = klass.getInitializer();
-            if (init != null) {
-		init.buildFrame();
-            }
+            DFMethod init = klass.getInitMethod();
+            init.buildFrame();
             for (DFMethod method : klass.getMethods()) {
 		method.buildFrame();
 		queue.add(method);
@@ -3109,10 +3105,10 @@ public class Java2DF {
         } catch (EntityNotFound e) {
             if (0 < _strict) throw e;
         }
-        DFMethod init = klass.getInitializer();
-        if (init != null) {
+        DFMethod init = klass.getInitMethod();
+        Initializer initializer = (Initializer)init.getTree();
+        if (initializer != null) {
             try {
-                Initializer initializer = (Initializer)init.getTree();
                 DFGraph graph = processMethod(
                     init, initializer,
                     initializer.getBody(), null);
