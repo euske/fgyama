@@ -93,9 +93,8 @@ Coding style:
 TODOs:
 ------
   * DFMethodType should have an Exception field.
-  * Merge DFGraph and DFMethod.
-  * Handle consecutive SwitchCases.
   * Lambdas.
   * Method references.
+  * Handle consecutive SwitchCases.
   * Java language spec.: https://docs.oracle.com/javase/specs/
   * Moar unittests.

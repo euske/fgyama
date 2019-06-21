@@ -3,101 +3,15 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
 //  DFGraph
 //
-public class DFGraph {
+interface DFGraph {
 
-    private DFVarScope _root;
-    private DFMethod _method;
-    private ASTNode _ast;
+    String getHash();
+    Element toXML(Document document);
+    int addNode(DFNode node);
 
-    private String _hash = null;
-    private List<DFNode> _nodes =
-        new ArrayList<DFNode>();
-
-    // DFGraph for a method.
-    public DFGraph(
-        DFVarScope root, DFMethod method, ASTNode ast) {
-        _root = root;
-        _method = method;
-        _ast = ast;
-    }
-
-    @Override
-    public String toString() {
-        return ("<DFGraph("+_root.getScopeName()+")>");
-    }
-
-    public String getHash() {
-        if (_hash == null) {
-            if (_method != null) {
-                _hash = Utils.hashString(_method.getSignature());
-            } else {
-                _hash = Utils.hashString(_root.getScopeName());
-            }
-        }
-        return _hash;
-    }
-
-    public Element toXML(Document document) {
-        Element elem = document.createElement("method");
-        if (_method != null) {
-            elem.setAttribute("name", _method.getSignature());
-            elem.setAttribute("style", _method.getCallStyle().toString());
-	    for (DFMethod caller : _method.getCallers()) {
-		Element ecaller = document.createElement("caller");
-		ecaller.setAttribute("name", caller.getSignature());
-		elem.appendChild(ecaller);
-	    }
-        } else {
-            elem.setAttribute("name", _root.getScopeName());
-            elem.setAttribute("style", DFCallStyle.Initializer.toString());
-        }
-        if (_ast != null) {
-            Element east = document.createElement("ast");
-            int start = _ast.getStartPosition();
-            int end = start + _ast.getLength();
-            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(start));
-            east.setAttribute("end", Integer.toString(end));
-            elem.appendChild(east);
-        }
-        DFNode[] nodes = new DFNode[_nodes.size()];
-        _nodes.toArray(nodes);
-        Arrays.sort(nodes);
-        elem.appendChild(_root.toXML(document, nodes));
-        return elem;
-    }
-
-    public int addNode(DFNode node) {
-        _nodes.add(node);
-        return _nodes.size();
-    }
-
-    public void cleanup() {
-        Set<DFNode> removed = new HashSet<DFNode>();
-        for (DFNode node : _nodes) {
-            if (node.getKind() == null && node.purge()) {
-                removed.add(node);
-            }
-        }
-        // Do not remove input/output nodes.
-        if (_method != null) {
-	    DFFrame frame = _method.getFrame();
-	    for (DFNode node : frame.getInputNodes()) {
-		removed.remove(node);
-	    }
-	    for (DFNode node : frame.getOutputNodes()) {
-		removed.remove(node);
-	    }
-	}
-        for (DFNode node : removed) {
-            _nodes.remove(node);
-        }
-    }
 }

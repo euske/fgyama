@@ -609,7 +609,6 @@ public class Java2DF {
     }
 
     private void exportGraph(DFGraph graph) {
-        graph.cleanup();
         for (Exporter exporter : _exporters) {
             exporter.writeGraph(graph);
         }

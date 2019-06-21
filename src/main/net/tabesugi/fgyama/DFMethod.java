@@ -694,7 +694,7 @@ class CatchJoin extends SingleAssignNode {
 
 //  DFMethod
 //
-public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
+public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMethod> {
 
     private DFKlass _klass;
     private String _name;
@@ -2392,6 +2392,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
+    private void processInitializer(
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
+        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+	Initializer initializer)
+        throws InvalidSyntax, EntityNotFound {
+        DFVarScope innerScope = scope.getChildByAST(initializer);
+        processStatement(
+            ctx, typeSpace, graph, finder, innerScope, frame,
+            initializer.getBody());
+    }
+
     /**
      * Performs dataflow analysis for a given method.
      */
@@ -2405,7 +2416,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         MethodDeclaration methodDecl = (MethodDeclaration)_ast;
         if (methodDecl.getBody() == null) return null;
 
-        DFGraph graph = new DFGraph(_scope, this, _ast);
+        DFGraph graph = this;
         DFContext ctx = new DFContext(graph, _scope);
 
         // Setup inputs.
@@ -2455,27 +2466,29 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
         }
-        return graph;
+
+        this.cleanup();
+        return this;
     }
 
     @SuppressWarnings("unchecked")
     public DFGraph processKlassBody()
         throws InvalidSyntax, EntityNotFound {
         // lookup base/inner klasses.
-        ASTNode ast = _klass.getTree();
+        assert _ast != null;
         List<BodyDeclaration> decls;
-        if (ast instanceof AbstractTypeDeclaration) {
-            decls = ((AbstractTypeDeclaration)ast).bodyDeclarations();
-        } else if (ast instanceof AnonymousClassDeclaration) {
-            decls = ((AnonymousClassDeclaration)ast).bodyDeclarations();
+        if (_ast instanceof AbstractTypeDeclaration) {
+            decls = ((AbstractTypeDeclaration)_ast).bodyDeclarations();
+        } else if (_ast instanceof AnonymousClassDeclaration) {
+            decls = ((AnonymousClassDeclaration)_ast).bodyDeclarations();
         } else {
-            throw new InvalidSyntax(ast);
+            throw new InvalidSyntax(_ast);
         }
 
         assert _scope != null;
         assert _frame != null;
         assert _finder != null;
-        DFGraph graph = new DFGraph(_scope, this, ast);
+        DFGraph graph = this;
         DFContext ctx = new DFContext(graph, _scope);
 
         for (BodyDeclaration body : decls) {
@@ -2514,10 +2527,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFVarScope innerScope = _scope.getChildByAST(body);
-                processStatement(
-                    ctx, this, graph, _finder, innerScope, _frame,
-                    initializer.getBody());
+                processInitializer(
+                    ctx, this, graph, _finder, _scope, _frame,
+                    initializer);
 
             } else {
                 throw new InvalidSyntax(body);
@@ -2525,6 +2537,71 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
         _frame.close(ctx);
 
-        return graph;
+        this.cleanup();
+        return this;
+    }
+
+    // DFGraph methods.
+
+    private String _hash = null;
+
+    public String getHash() {
+        if (_hash == null) {
+            _hash = Utils.hashString(this.getSignature());
+        }
+        return _hash;
+    }
+
+    private List<DFNode> _nodes =
+        new ArrayList<DFNode>();
+
+    public int addNode(DFNode node) {
+        _nodes.add(node);
+        return _nodes.size();
+    }
+
+    public void cleanup() {
+        Set<DFNode> removed = new HashSet<DFNode>();
+        for (DFNode node : _nodes) {
+            if (node.getKind() == null && node.purge()) {
+                removed.add(node);
+            }
+        }
+        // Do not remove input/output nodes.
+        DFFrame frame = this.getFrame();
+        for (DFNode node : frame.getInputNodes()) {
+            removed.remove(node);
+        }
+        for (DFNode node : frame.getOutputNodes()) {
+            removed.remove(node);
+        }
+        for (DFNode node : removed) {
+            _nodes.remove(node);
+        }
+    }
+
+    public Element toXML(Document document) {
+        Element elem = document.createElement("method");
+        elem.setAttribute("name", this.getSignature());
+        elem.setAttribute("style", _callStyle.toString());
+        for (DFMethod caller : _callers) {
+            Element ecaller = document.createElement("caller");
+            ecaller.setAttribute("name", caller.getSignature());
+            elem.appendChild(ecaller);
+        }
+        if (_ast != null) {
+            Element east = document.createElement("ast");
+            int start = _ast.getStartPosition();
+            int end = start + _ast.getLength();
+            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
+            east.setAttribute("start", Integer.toString(start));
+            east.setAttribute("end", Integer.toString(end));
+            elem.appendChild(east);
+        }
+        DFNode[] nodes = new DFNode[_nodes.size()];
+        _nodes.toArray(nodes);
+        Arrays.sort(nodes);
+        elem.appendChild(_scope.toXML(document, nodes));
+        return elem;
     }
 }
