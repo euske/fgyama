@@ -178,13 +178,17 @@ public class DFFrame {
     public void buildMethodDecl(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         MethodDeclaration methodDecl)
-        throws InvalidSyntax, EntityNotFound {
+        throws InvalidSyntax {
         if (methodDecl.getBody() == null) return;
         int i = 0;
         for (SingleVariableDeclaration decl :
                  (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-            DFRef ref = scope.lookupArgument(i);
-            this.addInputRef(ref);
+            try {
+                DFRef ref = scope.lookupArgument(i);
+                this.addInputRef(ref);
+            } catch (VariableNotFound e) {
+                Logger.error("VariableNotFound", e.name);
+            }
             i++;
         }
         this.buildStmt(finder, method, scope, methodDecl.getBody());
@@ -193,7 +197,7 @@ public class DFFrame {
     public void buildInitializer(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Initializer initializer)
-        throws InvalidSyntax, EntityNotFound {
+        throws InvalidSyntax {
         this.buildStmt(finder, method, scope, initializer.getBody());
     }
 
@@ -201,7 +205,7 @@ public class DFFrame {
     private void buildStmt(
         DFTypeFinder finder, DFMethod method, DFVarScope scope,
         Statement stmt)
-        throws InvalidSyntax, EntityNotFound {
+        throws InvalidSyntax {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -225,23 +229,35 @@ public class DFFrame {
                 (VariableDeclarationStatement)stmt;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                DFRef ref = scope.lookupVar(frag.getName());
-                this.addOutputRef(ref);
-                Expression init = frag.getInitializer();
-                if (init != null) {
-                    this.buildExpr(finder, method, scope, init);
+                try {
+                    DFRef ref = scope.lookupVar(frag.getName());
+                    this.addOutputRef(ref);
+                    Expression init = frag.getInitializer();
+                    if (init != null) {
+                        this.buildExpr(finder, method, scope, init);
+                    }
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
                 }
             }
 
         } else if (stmt instanceof ExpressionStatement) {
 	    // "foo();"
             ExpressionStatement exprStmt = (ExpressionStatement)stmt;
-            this.buildExpr(finder, method, scope, exprStmt.getExpression());
+            try {
+                this.buildExpr(finder, method, scope, exprStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
 
         } else if (stmt instanceof IfStatement) {
 	    // "if (c) { ... } else { ... }"
             IfStatement ifStmt = (IfStatement)stmt;
-            this.buildExpr(finder, method, scope, ifStmt.getExpression());
+            try {
+                this.buildExpr(finder, method, scope, ifStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
             thenFrame.buildStmt(finder, method, scope, thenStmt);
@@ -256,8 +272,14 @@ public class DFFrame {
         } else if (stmt instanceof SwitchStatement) {
 	    // "switch (x) { case 0: ...; }"
             SwitchStatement switchStmt = (SwitchStatement)stmt;
-            DFType type = this.buildExpr(
-                finder, method, scope, switchStmt.getExpression());
+            DFType type;
+            try {
+                type = this.buildExpr(
+                    finder, method, scope, switchStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+                type = DFUnknownType.UNKNOWN;
+            }
             DFKlass enumKlass = null;
             if (type instanceof DFKlass &&
                 ((DFKlass)type).isEnum()) {
@@ -272,12 +294,16 @@ public class DFFrame {
                     SwitchCase switchCase = (SwitchCase)cstmt;
                     Expression expr = switchCase.getExpression();
                     if (expr != null) {
-                        if (enumKlass != null && expr instanceof SimpleName) {
-                            // special treatment for enum.
-                            DFRef ref = enumKlass.lookupField((SimpleName)expr);
-                            this.addInputRef(ref);
-                        } else {
-                            innerFrame.buildExpr(finder, method, innerScope, expr);
+                        try {
+                            if (enumKlass != null && expr instanceof SimpleName) {
+                                // special treatment for enum.
+                                DFRef ref = enumKlass.lookupField((SimpleName)expr);
+                                this.addInputRef(ref);
+                            } else {
+                                innerFrame.buildExpr(finder, method, innerScope, expr);
+                            }
+                        } catch (EntityNotFound e) {
+                            Logger.error("EntityNotFound", e.name);
                         }
                     }
                 } else {
@@ -296,7 +322,11 @@ public class DFFrame {
             WhileStatement whileStmt = (WhileStatement)stmt;
             DFVarScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            innerFrame.buildExpr(finder, method, scope, whileStmt.getExpression());
+            try {
+                innerFrame.buildExpr(finder, method, scope, whileStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
             innerFrame.buildStmt(finder, method, innerScope, whileStmt.getBody());
             innerFrame.removeRefs(innerScope);
             this.expandLocalRefs(innerFrame);
@@ -307,7 +337,11 @@ public class DFFrame {
             DFVarScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(finder, method, innerScope, doStmt.getBody());
-            innerFrame.buildExpr(finder, method, scope, doStmt.getExpression());
+            try {
+                innerFrame.buildExpr(finder, method, scope, doStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
             innerFrame.removeRefs(innerScope);
             this.expandLocalRefs(innerFrame);
 
@@ -316,16 +350,28 @@ public class DFFrame {
             ForStatement forStmt = (ForStatement)stmt;
             DFVarScope innerScope = scope.getChildByAST(stmt);
             for (Expression init : (List<Expression>) forStmt.initializers()) {
-                this.buildExpr(finder, method, innerScope, init);
+                try {
+                    this.buildExpr(finder, method, innerScope, init);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             Expression expr = forStmt.getExpression();
             if (expr != null) {
-                innerFrame.buildExpr(finder, method, innerScope, expr);
+                try {
+                    innerFrame.buildExpr(finder, method, innerScope, expr);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
             innerFrame.buildStmt(finder, method, innerScope, forStmt.getBody());
             for (Expression update : (List<Expression>) forStmt.updaters()) {
-                innerFrame.buildExpr(finder, method, innerScope, update);
+                try {
+                    innerFrame.buildExpr(finder, method, innerScope, update);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
             innerFrame.removeRefs(innerScope);
             this.expandLocalRefs(innerFrame);
@@ -333,7 +379,11 @@ public class DFFrame {
         } else if (stmt instanceof EnhancedForStatement) {
 	    // "for (x : array) { ... }"
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
-            this.buildExpr(finder, method, scope, eForStmt.getExpression());
+            try {
+                this.buildExpr(finder, method, scope, eForStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
             DFVarScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(finder, method, innerScope, eForStmt.getBody());
@@ -345,9 +395,17 @@ public class DFFrame {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
-                this.buildExpr(finder, method, scope, expr);
+                try {
+                    this.buildExpr(finder, method, scope, expr);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
-            this.addOutputRef(scope.lookupReturn());
+            try {
+                this.addOutputRef(scope.lookupReturn());
+            } catch (VariableNotFound e) {
+                Logger.error("VariableNotFound", e.name);
+            }
 
         } else if (stmt instanceof BreakStatement) {
 	    // "break;"
@@ -367,7 +425,11 @@ public class DFFrame {
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-            this.buildExpr(finder, method, scope, syncStmt.getExpression());
+            try {
+                this.buildExpr(finder, method, scope, syncStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
             this.buildStmt(finder, method, scope, syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
@@ -394,21 +456,37 @@ public class DFFrame {
         } else if (stmt instanceof ThrowStatement) {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
-            this.buildExpr(finder, method, scope, throwStmt.getExpression());
-            this.addOutputRef(scope.lookupException());
+            try {
+                this.buildExpr(finder, method, scope, throwStmt.getExpression());
+            } catch (EntityNotFound e) {
+                Logger.error("EntityNotFound", e.name);
+            }
+            try {
+                this.addOutputRef(scope.lookupException());
+            } catch (VariableNotFound e) {
+                Logger.error("VariableNotFound", e.name);
+            }
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) ci.arguments()) {
-                this.buildExpr(finder, method, scope, arg);
+                try {
+                    this.buildExpr(finder, method, scope, arg);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression arg : (List<Expression>) sci.arguments()) {
-                this.buildExpr(finder, method, scope, arg);
+                try {
+                    this.buildExpr(finder, method, scope, arg);
+                } catch (EntityNotFound e) {
+                    Logger.error("EntityNotFound", e.name);
+                }
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {

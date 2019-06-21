@@ -864,19 +864,14 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	if (_ast == null) return;
 	assert _scope != null;
         assert _frame != null;
-        try {
-	    if (_ast instanceof MethodDeclaration) {
-		_frame.buildMethodDecl(
-                    _finder, this, _scope, (MethodDeclaration)_ast);
-	    } else if (_ast instanceof Initializer) {
-		_frame.buildInitializer(
-                    _finder, this, _scope, (Initializer)_ast);
-	    }  else {
-		throw new InvalidSyntax(_ast);
-	    }
-        } catch (EntityNotFound e) {
-            // XXX ignore EntityNotFound for now
-            Logger.error("Entity not found:", e.name, "ast="+e.ast, "method="+this);
+        if (_ast instanceof MethodDeclaration) {
+            _frame.buildMethodDecl(
+                _finder, this, _scope, (MethodDeclaration)_ast);
+        } else if (_ast instanceof Initializer) {
+            _frame.buildInitializer(
+                _finder, this, _scope, (Initializer)_ast);
+        }  else {
+            throw new InvalidSyntax(_ast);
         }
     }
 
