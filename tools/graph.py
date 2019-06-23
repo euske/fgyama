@@ -496,17 +496,35 @@ def main(argv):
     import getopt
     from xml.etree.cElementTree import dump
     def usage():
-        print('usage: %s [file ...]' % argv[0])
+        print('usage: %s [-d] [file ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], '')
+        (opts, args) = getopt.getopt(argv[1:], 'd')
     except getopt.GetoptError:
         return usage()
+    debug = 0
+    for (k, v) in opts:
+        if k == '-d': debug += 1
     if not args: return usage()
 
+    nclasses = 0
+    ngraphs = 0
+    nnodes = 0
     for path in args:
         for graph in get_graphs(path):
-            dump(graph.toxml())
+            ngraphs += 1
+            nnodes += len(graph.nodes)
+            if debug:
+                dump(graph.toxml())
+        with open(path) as fp:
+            root = ElementTree(file=fp).getroot()
+            for efile in root:
+                if efile.tag == 'class':
+                    nclasses += 1
+
+    print('nclasses:', nclasses)
+    print('ngraphs:', ngraphs)
+    print('nnodes:', nnodes)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

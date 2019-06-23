@@ -5,15 +5,15 @@ from srcdb import SourceDB, SourceAnnot
 from graph2idf import Cons, IDFBuilder, is_funcall
 
 IGNORED = frozenset([
-    None, 'ref', 'assign',
-    'begin', 'end', 'repeat'])
+    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    'input', 'output', 'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):
-    if n1.data is None:
-        return '%s:%s' % (label, n1.kind)
-    elif is_funcall(n1):
+    if is_funcall(n1):
         (data,_,_) = n1.data.partition(' ')
         return '%s:%s:%s' % (label, n1.kind, data)
+    elif n1.data is None:
+        return '%s:%s' % (label, n1.kind)
     else:
         return '%s:%s:%s' % (label, n1.kind, n1.data)
 
