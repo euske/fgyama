@@ -930,6 +930,10 @@ public class DFFrame {
             DFRef ref = klass.lookupField(fieldName);
             this.addOutputRef(ref);
 
+        } else if (expr instanceof ParenthesizedExpression) {
+	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    this.buildAssignment(finder, method, scope, paren.getExpression());
+
         } else {
             throw new InvalidSyntax(expr);
         }

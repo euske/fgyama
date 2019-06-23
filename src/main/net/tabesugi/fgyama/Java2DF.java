@@ -886,8 +886,12 @@ public class Java2DF {
 	    converter.loadKlasses(path, cunit, klasses);
         }
         Logger.info("Pass4.");
-	converter.listMethods(klasses);
-
+	try {
+	    converter.listMethods(klasses);
+	} catch (InvalidSyntax e) {
+	    Logger.error("InvalidSyntax:", e.ast);
+	    throw e;
+	}
         XmlExporter exporter = new XmlExporter();
         converter.addExporter(exporter);
         for (DFKlass klass : klasses) {

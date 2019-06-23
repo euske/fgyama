@@ -508,6 +508,10 @@ public class DFLocalVarScope extends DFVarScope {
             SuperFieldAccess sfa = (SuperFieldAccess)ast;
             SimpleName fieldName = sfa.getName();
 
+        } else if (ast instanceof ParenthesizedExpression) {
+	    ParenthesizedExpression paren = (ParenthesizedExpression)ast;
+	    this.buildAssignment(finder, paren.getExpression());
+
         } else {
             throw new InvalidSyntax(ast);
         }

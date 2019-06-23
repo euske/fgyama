@@ -1575,6 +1575,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFRef ref = klass.lookupField(fieldName);
             ctx.setLValue(new FieldAssignNode(graph, scope, ref, expr, obj));
 
+	} else if (expr instanceof ParenthesizedExpression) {
+	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    processAssignment(
+		ctx, typeSpace, graph, finder, scope, frame,
+		paren.getExpression());
+
         } else {
             throw new InvalidSyntax(expr);
         }
