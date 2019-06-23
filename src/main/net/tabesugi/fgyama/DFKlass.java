@@ -664,20 +664,18 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             LambdaExpression lambda = (LambdaExpression)expr;
             ASTNode body = lambda.getBody();
             if (body instanceof Statement) {
-                // XXX TODO Statement lambda
             } else if (body instanceof Expression) {
-                // XXX TODO Expresssion lambda
             } else {
                 throw new InvalidSyntax(body);
             }
+	    // XXX TODO LambdaExpression
 
         } else if (expr instanceof MethodReference) {
-            // MethodReference
             //  CreationReference
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            // XXX Unsupported.
+            // XXX TODO MethodReference
 
         } else {
             // ???

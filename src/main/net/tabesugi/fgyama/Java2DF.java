@@ -581,15 +581,18 @@ public class Java2DF {
             InstanceofExpression instof = (InstanceofExpression)ast;
             this.enumKlassesExpr(finder, klass, instof.getLeftOperand(), klasses);
 
-        } else {
-            // LambdaExpression
-            // MethodReference
+        } else if (ast instanceof LambdaExpression) {
+            // XXX TODO LambdaExpression
+
+        } else if (ast instanceof MethodReference) {
             //  CreationReference
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            // XXX Unsupported.
+	    // XXX TODO MethodReference
 
+        } else {
+	    throw new InvalidSyntax(ast);
         }
     }
 

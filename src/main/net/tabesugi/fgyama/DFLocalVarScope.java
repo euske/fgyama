@@ -305,7 +305,7 @@ public class DFLocalVarScope extends DFVarScope {
             // Inline classes are processed separately.
 
         } else {
-            // XXX Unsupported.
+            throw new InvalidSyntax(ast);
         }
     }
 
@@ -469,14 +469,18 @@ public class DFLocalVarScope extends DFVarScope {
             InstanceofExpression instof = (InstanceofExpression)ast;
             this.buildExpr(finder, instof.getLeftOperand());
 
-        } else {
-            // LambdaExpression
-            // MethodReference
+        } else if (ast instanceof LambdaExpression) {
+            // XXX TODO LambdaExpression
+
+        } else if (ast instanceof MethodReference) {
             //  CreationReference
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            // XXX Unsupported.
+            // XXX TODO MethodReference
+
+	} else {
+            throw new InvalidSyntax(ast);
         }
     }
 
@@ -505,7 +509,7 @@ public class DFLocalVarScope extends DFVarScope {
             SimpleName fieldName = sfa.getName();
 
         } else {
-            // XXX Unsupported.
+            throw new InvalidSyntax(ast);
         }
     }
 }

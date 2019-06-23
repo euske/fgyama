@@ -833,12 +833,11 @@ public class DFFrame {
 		LambdaExpression lambda = (LambdaExpression)expr;
 		ASTNode body = lambda.getBody();
 		if (body instanceof Statement) {
-		    // XXX TODO Statement lambda
 		} else if (body instanceof Expression) {
-		    // XXX TODO Expresssion lambda
 		} else {
 		    throw new InvalidSyntax(body);
 		}
+		// XXX TODO LambdaExpression
 		return DFUnknownType.UNKNOWN;
 
 	    } else if (expr instanceof MethodReference) {
@@ -847,7 +846,7 @@ public class DFFrame {
 		//  ExpressionMethodReference
 		//  SuperMethodReference
 		//  TypeMethodReference
-		// XXX Unsupported.
+		// XXX TODO MethodReference
 		return DFUnknownType.UNKNOWN;
 
 	    } else {

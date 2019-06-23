@@ -93,6 +93,7 @@ Coding style:
 TODOs:
 ------
   * DFMethodType should have an Exception field.
+  * Vararg methods matching.
   * Lambdas.
   * Method references.
   * Handle consecutive SwitchCases.
