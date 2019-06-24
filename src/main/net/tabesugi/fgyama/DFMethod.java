@@ -1326,6 +1326,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFNode index = ctx.getRValue();
                 DFNode node = new ArrayRefNode(
                     graph, scope, ref, aa, array, index);
+                node.accept(ctx.get(ref));
                 ctx.setRValue(node);
 
             } else if (expr instanceof FieldAccess) {
