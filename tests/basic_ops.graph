@@ -116,6 +116,7 @@
             <ast end="167" start="166" type="34"/>
           </node>
           <node id="Nce57b47f_32" kind="arrayref" ref="%I" type="I">
+            <link src="Nce57b47f_26"/>
             <link label="array" src="Nce57b47f_30"/>
             <link label="index" src="Nce57b47f_31"/>
             <ast end="168" start="164" type="2"/>

@@ -31,6 +31,7 @@
             <ast end="143" start="142" type="34"/>
           </node>
           <node id="Nf2e83a28_10" kind="arrayref" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
+            <link src="Nf2e83a28_3"/>
             <link label="array" src="Nf2e83a28_8"/>
             <link label="index" src="Nf2e83a28_9"/>
             <ast end="144" start="137" type="2"/>
