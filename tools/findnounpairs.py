@@ -5,17 +5,13 @@ from srcdb import SourceDB, SourceAnnot
 from graph2idf import Cons, IDFBuilder, is_funcall
 
 IGNORED = frozenset([
-    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    None, 'ref', 'assign',
     'input', 'output', 'begin', 'end', 'repeat'])
 
-def getfeat(n0, label, n1):
-    if is_funcall(n1):
-        (data,_,_) = n1.data.partition(' ')
-        return '%s:%s:%s' % (label, n1.kind, data)
-    elif n1.data is None:
-        return '%s:%s' % (label, n1.kind)
-    else:
-        return '%s:%s:%s' % (label, n1.kind, n1.data)
+AUGMENTED = frozenset([
+    'call', 'infix',
+    'arrayref', 'fieldref',
+    'arrayassign', 'fieldassign'])
 
 WORD1 = re.compile(r'[A-Z]?[a-z]+$')
 WORD2 = re.compile(r'[A-Z]+$')
@@ -26,6 +22,37 @@ def getnoun(name):
         return WORD2.search(name).group(0).lower()
     else:
         return None
+
+def getfeat1(label, n):
+    if is_funcall(n):
+        (data,_,_) = n.data.partition(' ')
+        return '%s:%s:%s' % (label, n.kind, data)
+    elif n.data is None:
+        return '%s:%s' % (label, n.kind)
+    else:
+        return '%s:%s:%s' % (label, n.kind, n.data)
+
+def getfeat2(label, n):
+    if is_funcall(n):
+        (data,_,_) = n.data.partition(' ')
+        return '%s:%s:%s' % (label, n.kind, data)
+    elif n.kind in ('ref','fieldref','assign','fieldassign'):
+        return '%s:%s:%s' % (label, n.kind, getnoun(n.ref))
+    elif n.kind in ('infix','const'):
+        return '%s:%s:%s' % (label, n.kind, n.data)
+    else:
+        return None
+
+def getfeats(n0, label, n1):
+    f1 = getfeat1(label, n1)
+    feats = [f1]
+    if n1.kind in AUGMENTED:
+        for (k,n2) in n1.inputs.items():
+            if k != label:
+                f2 = getfeat2(k, n2)
+                if f2 is not None:
+                    feats.append(f1+'|'+f2)
+    return feats
 
 def is_ref(ref):
     return not (ref is None or ref.startswith('#') or ref.startswith('%'))
@@ -85,7 +112,7 @@ def main(argv):
         if maxlen < length: return
         node = vtx.node
         #print('  '*length, node.kind, node.ref, node.data)
-        if node.kind == 'assign' and is_ref(node.ref):
+        if node.kind in ('assign','fieldassign') and is_ref(node.ref):
             if node in r:
                 chains = r[node]
             else:
@@ -100,10 +127,11 @@ def main(argv):
                 trace(r, v, chain, length+1)
             else:
                 if chain is None:
-                    feat = getfeat(None, label, n)
+                    feats = getfeats(None, label, n)
                 else:
-                    feat = getfeat(chain.car, label, n)
-                trace(r, v, Cons((feat, n), chain), length+1)
+                    feats = getfeats(chain.car, label, n)
+                for feat in feats:
+                    trace(r, v, Cons((feat, n), chain), length+1)
         return
 
     def put(node0, node1, chain):
@@ -126,7 +154,7 @@ def main(argv):
     key2pair = {}
     for vtx in builder:
         node0 = vtx.node
-        if node0.kind == 'ref' and is_ref(node0.ref):
+        if node0.kind in ('ref','fieldref') and is_ref(node0.ref):
             r = {}
             #print('trace', vtx.node)
             trace(r, vtx)
