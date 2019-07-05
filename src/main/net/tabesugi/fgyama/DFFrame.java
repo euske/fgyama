@@ -579,6 +579,7 @@ public class DFFrame {
                 finder, method, scope, infix.getLeftOperand());
             DFType right = this.buildExpr(
                 finder, method, scope, infix.getRightOperand());
+            if (left == null || right == null) return null;
             return DFNode.inferInfixType(left, op, right);
 
         } else if (expr instanceof ParenthesizedExpression) {

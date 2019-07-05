@@ -1390,8 +1390,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (anonDecl != null) {
                     // Anonymous classes are processed separately.
                     String id = Utils.encodeASTNode(anonDecl);
-		    DFKlass anonKlass = typeSpace.getType(id).toKlass();
-		    instKlass = anonKlass;
+		    DFType anonType = typeSpace.getType(id);
+                    if (anonType == null) {
+                        throw new TypeNotFound(id);
+                    }
+		    instKlass = anonType.toKlass();
                 } else {
                     instKlass = finder.resolve(cstr.getType()).toKlass();
                 }

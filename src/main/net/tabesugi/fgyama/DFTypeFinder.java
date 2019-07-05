@@ -90,7 +90,11 @@ public class DFTypeFinder {
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
-            DFKlass innerKlass = klass.getType(qtype.getName()).toKlass();
+            DFType innerType = klass.getType(qtype.getName());
+            if (innerType == null) {
+                throw new TypeNotFound(qtype.toString(), this);
+            }
+            DFKlass innerKlass = innerType.toKlass();
             innerKlass.load();
             return innerKlass;
         } else if (type instanceof UnionType) {

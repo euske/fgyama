@@ -542,8 +542,8 @@ public class Java2DF {
         } else if (ast instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
             AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
-	    DFType instType;
             try {
+                DFType instType;
                 if (anonDecl != null) {
                     String id = Utils.encodeASTNode(anonDecl);
                     instType = klass.getType(id);
@@ -554,7 +554,6 @@ public class Java2DF {
                     enumKlasses((DFKlass)instType, klasses);
                 }
             } catch (TypeNotFound e) {
-		instType = DFUnknownType.UNKNOWN;
             }
             Expression expr = cstr.getExpression();
             if (expr != null) {
@@ -903,6 +902,7 @@ public class Java2DF {
         }
         exporter.close();
 
+        Logger.info("Exporting XML...");
         Utils.printXml(output, exporter.document);
         output.close();
     }
