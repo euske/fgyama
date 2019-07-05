@@ -709,37 +709,31 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
     }
 
-    public DFType getType(String id)
-        throws TypeNotFound {
+    public DFType getType(String id) {
+        DFType type;
         if (_mapTypeMap != null) {
-            DFType type = _mapTypeMap.get(id);
+            type = _mapTypeMap.get(id);
             if (type != null) return type;
         }
         if (_paramTypeMap != null) {
-            DFType type = _paramTypeMap.get(id);
+            type = _paramTypeMap.get(id);
             if (type != null) return type;
         }
-        try {
-            return super.getType(id);
-        } catch (TypeNotFound e) {
-        }
+        type = super.getType(id);
+        if (type != null) return type;
         if (_baseKlass != null) {
-            try {
-                return _baseKlass.getType(id);
-            } catch (TypeNotFound e) {
-            }
+            type = _baseKlass.getType(id);
+            if (type != null) return type;
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
                 if (iface != null) {
-                    try {
-                        return iface.getType(id);
-                    } catch (TypeNotFound e) {
-                    }
+                    type = iface.getType(id);
+                    if (type != null) return type;
                 }
             }
         }
-        throw new TypeNotFound(this.getSpaceName()+id);
+        return null;
     }
 
     public DFKlass getBaseKlass() {

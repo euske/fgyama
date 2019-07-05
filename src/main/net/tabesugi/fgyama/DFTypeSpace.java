@@ -107,23 +107,17 @@ public class DFTypeSpace {
 	return _id2klass.entrySet();
     }
 
-    public DFType getType(Name name)
-        throws TypeNotFound {
+    public DFType getType(Name name) {
         return this.getType(name.getFullyQualifiedName());
     }
-    public DFType getType(String id)
-        throws TypeNotFound {
+    public DFType getType(String id) {
         //Logger.info("DFTypeSpace.getType:", this, ":", id);
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
             return space.getType(id.substring(i+1));
         }
-        DFKlass klass = _id2klass.get(id);
-        if (klass == null) {
-            throw new TypeNotFound(this.getSpaceName()+id);
-        }
-        return klass;
+        return _id2klass.get(id);
     }
 
     @SuppressWarnings("unchecked")

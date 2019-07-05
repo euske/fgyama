@@ -134,11 +134,9 @@ public class Java2DF {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-		try {
-		    DFKlass innerKlass = klass.getType(decl.getName()).toKlass();
-		    enumKlasses(innerKlass, klasses);
-		} catch (TypeNotFound e) {
-		    Logger.error("TypeNotFound", e.name);
+                DFType innerType = klass.getType(decl.getName());
+                if (innerType != null) {
+		    enumKlasses(innerType.toKlass(), klasses);
 		}
 
             } else if (body instanceof FieldDeclaration) {
@@ -372,11 +370,9 @@ public class Java2DF {
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
             AbstractTypeDeclaration abstDecl = decl.getDeclaration();
-	    try {
-		DFKlass innerKlass = klass.getType(abstDecl.getName()).toKlass();
-		this.enumKlasses(innerKlass, klasses);
-	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+            DFType innerType = klass.getType(abstDecl.getName());
+            if (innerType != null) {
+                this.enumKlasses(innerType.toKlass(), klasses);
 	    }
 
         } else {
@@ -405,7 +401,6 @@ public class Java2DF {
                     DFKlass innerKlass = finder.lookupType(name).toKlass();
                     enumKlasses(innerKlass, klasses);
                 } catch (TypeNotFound e) {
-		    Logger.error("TypeNotFound", e.name);
                 }
             }
 
@@ -559,7 +554,6 @@ public class Java2DF {
                     enumKlasses((DFKlass)instType, klasses);
                 }
             } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
 		instType = DFUnknownType.UNKNOWN;
             }
             Expression expr = cstr.getExpression();
@@ -666,14 +660,14 @@ public class Java2DF {
 		finder = new DFTypeFinder(_rootSpace.lookupSpace(name), finder);
 	    } else {
 		assert name.isQualifiedName();
-		try {
-		    DFKlass klass = _rootSpace.getType(name).toKlass();
+                DFType type = _rootSpace.getType(name);
+                if (type != null) {
 		    Logger.debug("Import:", name);
                     String id = ((QualifiedName)name).getName().getIdentifier();
-		    importSpace.addKlass(id, klass);
-		} catch (TypeNotFound e) {
+		    importSpace.addKlass(id, type.toKlass());
+		} else {
 		    if (!importDecl.isStatic()) {
-			Logger.error("Import: Class not found:", e.name);
+			Logger.error("Import: Class not found:", name);
 		    }
 		}
 	    }
@@ -695,19 +689,21 @@ public class Java2DF {
                  (List<ImportDeclaration>) cunit.imports()) {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
-            try {
-                if (importDecl.isOnDemand()) {
-		    DFKlass klass = _rootSpace.getType(name).toKlass();
+            if (importDecl.isOnDemand()) {
+                DFType type = _rootSpace.getType(name);
+                if (type != null) {
+                    DFKlass klass = type.toKlass();
                     klass.load();
                     fileScope.importStatic(klass);
-                } else {
-                    QualifiedName qname = (QualifiedName)name;
-                    DFKlass klass = _rootSpace.getType(qname.getQualifier()).toKlass();
+                }
+            } else {
+                QualifiedName qname = (QualifiedName)name;
+                DFType type = _rootSpace.getType(qname.getQualifier());
+                if (type != null) {
+                    DFKlass klass = type.toKlass();
                     klass.load();
                     fileScope.importStatic(klass, qname.getName());
                 }
-            } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
             }
         }
         for (DFKlass klass : _fileKlasses.get(key)) {

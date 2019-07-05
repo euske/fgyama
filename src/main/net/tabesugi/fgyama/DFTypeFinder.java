@@ -49,11 +49,9 @@ public class DFTypeFinder {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
         while (finder != null) {
-            try {
-                return finder._space.getType(name);
-            } catch (TypeNotFound e) {
-                finder = finder._next;
-            }
+            DFType type = finder._space.getType(name);
+            if (type != null) return type;
+            finder = finder._next;
         }
         throw new TypeNotFound(name, this);
     }

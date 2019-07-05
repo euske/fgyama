@@ -790,8 +790,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _funcType;
     }
 
-    public DFType getType(String id)
-        throws TypeNotFound {
+    public DFType getType(String id) {
         if (_mapTypeMap != null) {
             DFType type = _mapTypeMap.get(id);
             if (type != null) return type;
