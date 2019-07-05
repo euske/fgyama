@@ -99,7 +99,7 @@ def main(argv):
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
-        builder.load(path)
+        builder.load(path, fp)
 
     builder.run()
     print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
@@ -112,12 +112,12 @@ def main(argv):
         if maxlen < length: return
         node = vtx.node
         #print('  '*length, node.kind, node.ref, node.data)
-        if node.kind in ('assign','fieldassign') and is_ref(node.ref):
-            if node in r:
-                chains = r[node]
-            else:
-                chains = r[node] = []
-            chains.append(chain)
+        if node in r:
+            chains = r[node]
+        else:
+            chains = r[node] = set()
+        if chain in chains: return
+        chains.add(chain)
         for (label,v) in vtx.outputs:
             if label.startswith('_'): continue
             n = v.node
@@ -127,17 +127,22 @@ def main(argv):
                 trace(r, v, chain, length+1)
             else:
                 if chain is None:
-                    feats = getfeats(None, label, n)
+                    n0 = None
                 else:
-                    feats = getfeats(chain.car, label, n)
-                for feat in feats:
+                    n0 = chain.car
+                for feat in getfeats(n0, label, n):
                     trace(r, v, Cons((feat, n), chain), length+1)
         return
 
     def put(node0, node1, chain):
-        n0 = getnoun(node0.ref)
-        n1 = getnoun(node1.ref)
+        n0 = node0.ref
+        n1 = node1.ref
         if n0 is None or n1 is None or n0 == n1: return
+        nodes = [node0,node1] + [ n for (_,n) in chain ]
+        def f(x):
+            if x is None: return 'None'
+            return '%d:%d:%d' % x
+        fp.write('+NODES %s\n' % (' '.join( f(builder.getsrc(n)) for n in nodes )))
         fp.write('+PAIR %s %s %s\n' % (n0, n1, ' '.join( k for (k,_) in chain )))
         if srcdb is not None:
             annot = SourceAnnot(srcdb)
@@ -159,23 +164,20 @@ def main(argv):
             #print('trace', vtx.node)
             trace(r, vtx)
             for (node1,chains) in r.items():
-                done = []
+                if (node1.kind not in ('assign','fieldassign') or
+                    not is_ref(node1.ref)): continue
                 for chain in chains:
-                    if chain in done: continue
-                    done.append(chain)
-                    if chain is None:
-                        a = []
-                    else:
-                        a = list(chain)
-                        a.reverse()
-                        put(node0, node1, a)
-                        if grouping:
-                            key = tuple( k for (k,_) in a )
-                            if key in key2pair:
-                                p = key2pair[key]
-                            else:
-                                p = key2pair[key] = []
-                            p.append((node0,node1))
+                    if chain is None: continue
+                    a = list(chain)
+                    a.reverse()
+                    put(node0, node1, a)
+                    if grouping:
+                        key = tuple( k for (k,_) in a )
+                        if key in key2pair:
+                            p = key2pair[key]
+                        else:
+                            p = key2pair[key] = []
+                        p.append((node0,node1))
     if grouping:
         for (key,pairs) in key2pair.items():
             if len(pairs) < 2: continue

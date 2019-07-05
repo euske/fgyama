@@ -22,6 +22,9 @@ class Cons:
     def __len__(self):
         return self.length
 
+    def __hash__(self):
+        return id(self)
+
     def __iter__(self):
         c = self
         while c is not None:
