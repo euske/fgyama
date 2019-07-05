@@ -187,7 +187,9 @@ public class DFFrame {
                 DFRef ref = scope.lookupArgument(i);
                 this.addInputRef(ref);
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildMethodDecl: VariableNotFound (arg)",
+                    this, e.name, decl);
             }
             i++;
         }
@@ -239,7 +241,9 @@ public class DFFrame {
                     DFRef ref = scope.lookupVar(frag.getName());
                     this.addOutputRef(ref);
                 } catch (VariableNotFound e) {
-                    Logger.error("VariableNotFound", e.name);
+                    Logger.error(
+                        "DFFrame.buildStmt: VariableNotFound (decl)",
+                        this, e.name, frag);
                 }
                 Expression init = frag.getInitializer();
                 if (init != null) {
@@ -295,7 +299,9 @@ public class DFFrame {
                                 DFRef ref = enumKlass.lookupField((SimpleName)expr);
                                 this.addInputRef(ref);
                             } catch (VariableNotFound e) {
-                                Logger.error("VariableNotFound", e.name);
+                                Logger.error(
+                                    "DFFrame.buildStmt: VariableNotFound (switch)",
+                                    this, e.name, expr);
                             }
                         } else {
                             innerFrame.buildExpr(finder, method, innerScope, expr);
@@ -371,7 +377,9 @@ public class DFFrame {
             try {
                 this.addOutputRef(scope.lookupReturn());
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildStmt: VariableNotFound (return)",
+                    this, e.name);
             }
 
         } else if (stmt instanceof BreakStatement) {
@@ -423,7 +431,9 @@ public class DFFrame {
             try {
                 this.addOutputRef(scope.lookupException());
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildStmt: VariableNotFound (throw)",
+                    this, e.name);
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
@@ -487,7 +497,7 @@ public class DFFrame {
                     ref = klass.lookupField(fieldName);
                 }
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                //Logger.error("VariableNotFound", e.name);
                 return null;
             }
             this.addInputRef(ref);
@@ -503,7 +513,9 @@ public class DFFrame {
                     DFType type = finder.lookupType(name);
                     ref = type.toKlass().getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
-                    Logger.error("TypeNotFound", e.name);
+                    Logger.error(
+                        "DFFrame.buildExpr: TypeNotFound (this)",
+                        this, e.name, expr);
                     return null;
                 }
             } else {
@@ -598,7 +610,9 @@ public class DFFrame {
                         this.buildExpr(finder, method, scope, init);
                     }
                 } catch (VariableNotFound e) {
-                    Logger.error("VariableNotFound", e.name);
+                    Logger.error(
+                        "DFFrame.buildExpr: VariableNotFound (decl)",
+                        this, e.name, frag);
                 }
             }
             return null; // XXX what type?
@@ -688,7 +702,9 @@ public class DFFrame {
                 type.toKlass().load();
                 return type;
             } catch (TypeNotFound e) {
-                Logger.error("TypeNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (array)",
+                    this, e.name, expr);
                 return null;
             }
 
@@ -736,7 +752,9 @@ public class DFFrame {
                 this.addInputRef(ref);
                 return ref.getRefType();
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildExpr: VariableNotFound (fieldref)",
+                    this, e.name, expr);
                 return null;
             }
 
@@ -751,7 +769,9 @@ public class DFFrame {
                 this.addInputRef(ref);
                 return ref.getRefType();
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildExpr: VariableNotFound (superfieldref)",
+                    this, e.name, expr);
                 return null;
             }
 
@@ -764,7 +784,9 @@ public class DFFrame {
                 type.toKlass().load();
                 return type;
             } catch (TypeNotFound e) {
-                Logger.error("TypeNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (cast)",
+                    this, e.name, expr);
                 return null;
             }
 
@@ -782,7 +804,9 @@ public class DFFrame {
                 try {
                     instType = finder.resolve(cstr.getType());
                 } catch (TypeNotFound e) {
-                    Logger.error("TypeNotFound", e.name);
+                    Logger.error(
+                        "DFFrame.buildExpr: TypeNotFound (new)",
+                        this, e.name, expr);
                     return null;
                 }
             }
@@ -866,7 +890,7 @@ public class DFFrame {
                     ref = klass.lookupField(fieldName);
                 }
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                //Logger.error("VariableNotFound", e.name);
                 return;
             }
             this.addOutputRef(ref);
@@ -903,7 +927,9 @@ public class DFFrame {
                 DFRef ref = klass.lookupField(fieldName);
                 this.addOutputRef(ref);
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildAssigmnent: VariableNotFound (fieldassign)",
+                    this, e.name, expr);
             }
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -916,7 +942,9 @@ public class DFFrame {
                 DFRef ref = klass.lookupField(fieldName);
                 this.addOutputRef(ref);
             } catch (VariableNotFound e) {
-                Logger.error("VariableNotFound", e.name);
+                Logger.error(
+                    "DFFrame.buildAssigmnent: VariableNotFound (superfieldassign)",
+                    this, e.name, expr);
             }
 
         } else if (expr instanceof ParenthesizedExpression) {

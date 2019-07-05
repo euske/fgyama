@@ -1175,7 +1175,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                             klass, id, DFCallStyle.InstanceMethod, id, null);
                         fallback.setFuncType(
                             new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
-                        Logger.error("Fallback method:", klass, ":", fallback);
+                        Logger.error(
+                            "DFMethod.processExpression: MethodNotFound",
+                            this, klass, expr);
+                        Logger.info("Fallback method:", klass, ":", fallback);
                         method = fallback;
                     }
                 }
@@ -1246,7 +1249,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         baseKlass, id, DFCallStyle.InstanceMethod, id, null);
                     fallback.setFuncType(
                         new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
-                    Logger.error("Fallback method:", baseKlass, ":", fallback);
+                    Logger.error(
+                        "DFMethod.processExpression: MethodNotFound",
+                        this, baseKlass, expr);
+                    Logger.info("Fallback method:", baseKlass, ":", fallback);
                     method = fallback;
                 }
                 DFMethod methods[] = new DFMethod[] { method };
@@ -2457,11 +2463,15 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 methodDecl.getBody());
         } catch (MethodNotFound e) {
             e.setMethod(this);
-            Logger.error("MethodNotFound:", e.name+"("+Utils.join(e.argTypes)+")");
+            Logger.error(
+                "DFMethod.processMethod: MethodNotFound",
+                this, e.name+"("+Utils.join(e.argTypes)+")");
             throw e;
         } catch (EntityNotFound e) {
             e.setMethod(this);
-            Logger.error("EntityNotFound:", e.name);
+            Logger.error(
+                "DFMethod.processMethod: EntityNotFound",
+                this, e.name);
             throw e;
         }
 

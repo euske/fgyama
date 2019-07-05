@@ -165,7 +165,7 @@ public class DFTypeFinder {
 	    return this.resolve(type);
 	} catch (TypeNotFound e) {
 	    e.setAst(type);
-	    Logger.error("TypeNotFound", e.name);
+	    Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
 	    return DFUnknownType.UNKNOWN;
 	}
     }
@@ -175,7 +175,7 @@ public class DFTypeFinder {
 	try {
 	    return this.resolve(type);
 	} catch (TypeNotFound e) {
-	    Logger.error("TypeNotFound", e.name);
+	    Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
 	    return DFUnknownType.UNKNOWN;
 	}
     }

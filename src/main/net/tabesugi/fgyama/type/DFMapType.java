@@ -85,7 +85,9 @@ public class DFMapType implements DFType {
 		}
 	    }
 	} catch (TypeNotFound e) {
-	    Logger.error("TypeNotFound", e.name);
+	    Logger.error(
+                "DFMapType.build: TypeNotFound",
+                this, e.name, _sig, _ast);
 	}
     }
 }

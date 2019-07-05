@@ -926,7 +926,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             _outerKlass.load();
         }
         DFTypeFinder finder = this.getFinder();
-        if (finder == null) Logger.error("!!!", this, _outerKlass);
+        assert finder != null;
         assert _ast != null || _jarPath != null;
         if (_mapTypeMap != null) {
             assert _mapTypes != null;
@@ -950,7 +950,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     jarfile.close();
                 }
             } catch (IOException e) {
-                Logger.error("File Not found:", _jarPath+"/"+_entPath);
+                Logger.error(
+                    "DFKlass.load: IOException",
+                    this, _jarPath+"/"+_entPath);
             }
         }
     }
@@ -969,7 +971,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    try {
 		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+		Logger.error(
+                    "DFKlass.buildMemberFromJKlass: TypeNotFound (baseKlass)",
+                    this, e.name, sig);
 	    }
 	    _baseKlass.load();
 	    List<DFKlass> ifaces = new ArrayList<DFKlass>();
@@ -978,7 +982,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		try {
 		    iface = parser.resolveType(finder);
 		} catch (TypeNotFound e) {
-		    Logger.error("TypeNotFound", e.name);
+		    Logger.error(
+                        "DFKlass.buildMemberFromJKlass: TypeNotFound (iface)",
+                        this, e.name, sig);
 		}
 		if (iface == null) break;
 		ifaces.add(iface.toKlass());
@@ -995,7 +1001,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		try {
 		    _baseKlass = finder.lookupType(superClass).toKlass();
 		} catch (TypeNotFound e) {
-		    Logger.error("TypeNotFound", e.name);
+		    Logger.error(
+                        "DFKlass.buildMemberFromJKlass: TypeNotFound (baseKlass)",
+                        this, e.name);
 		}
 	    }
 	    _baseKlass.load();
@@ -1007,7 +1015,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		    try {
 			iface = finder.lookupType(ifaces[i]).toKlass();
 		    } catch (TypeNotFound e) {
-			Logger.error("TypeNotFound", e.name);
+			Logger.error(
+                            "DFKlass.buildMemberFromJKlass: TypeNotFound (iface)",
+                            this, e.name);
 		    }
 		    _baseIfaces[i] = iface;
 		}
@@ -1035,7 +1045,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		    type = finder.resolve(fld.getType());
 		}
 	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+		Logger.error(
+                    "DFKlass.buildMemberFromJKlass: TypeNotFound (field)",
+                    this, e.name, sig);
 		type = DFUnknownType.UNKNOWN;
 	    }
 	    this.addField(fld.getName(), fld.isStatic(), type);
@@ -1066,7 +1078,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		try {
 		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
 		} catch (TypeNotFound e) {
-		    Logger.error("TypeNotFound", e.name);
+		    Logger.error(
+                        "DFKlass.buildMemberFromJKlass: TypeNotFound (method)",
+                        this, e.name, sig);
 		    continue;
 		}
 	    } else {
@@ -1087,7 +1101,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		    try {
 			type = finder.lookupType(excNames[i]);
 		    } catch (TypeNotFound e) {
-			Logger.error("TypeNotFound", e.name);
+			Logger.error(
+                            "DFKlass.buildMemberFromJKlass: TypeNotFound (exception)",
+                            this, e.name);
 			type = DFUnknownType.UNKNOWN;
 		    }
 		    exceptions[i] = type;
@@ -1137,7 +1153,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    try {
 		_baseKlass = finder.resolve(superClass).toKlass();
 	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+		Logger.error(
+                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
+                    this, e.name);
 	    }
 	}
 	_baseKlass.load();
@@ -1149,7 +1167,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    try {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+		Logger.error(
+                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (iface)",
+                    this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
 	}
@@ -1176,7 +1196,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    try {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
-		Logger.error("TypeNotFound", e.name);
+		Logger.error(
+                    "DFKlass.buildMembersFromEnumDecl: TypeNotFound (iface)",
+                    this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
 	}

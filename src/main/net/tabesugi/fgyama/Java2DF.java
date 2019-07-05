@@ -885,7 +885,6 @@ public class Java2DF {
 	try {
 	    converter.listMethods(klasses);
 	} catch (InvalidSyntax e) {
-	    Logger.error("InvalidSyntax:", e.ast);
 	    throw e;
 	}
         XmlExporter exporter = new XmlExporter();
