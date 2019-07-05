@@ -967,7 +967,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    JNITypeParser parser = new JNITypeParser(sig);
 	    _baseKlass = DFBuiltinTypes.getObjectKlass();
 	    try {
-		_baseKlass = parser.getType(finder).toKlass();
+		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error("TypeNotFound", e.name);
 	    }
@@ -976,7 +976,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 	    for (;;) {
 		DFType iface = DFBuiltinTypes.getObjectKlass();
 		try {
-		    iface = parser.getType(finder);
+		    iface = parser.resolveType(finder);
 		} catch (TypeNotFound e) {
 		    Logger.error("TypeNotFound", e.name);
 		}
@@ -1030,7 +1030,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 		if (sig != null) {
 		    //Logger.info("fld:", fld.getName(), sig);
 		    JNITypeParser parser = new JNITypeParser(sig);
-		    type = parser.getType(finder);
+		    type = parser.resolveType(finder);
 		} else {
 		    type = finder.resolve(fld.getType());
 		}
@@ -1064,7 +1064,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 }
 		JNITypeParser parser = new JNITypeParser(sig);
 		try {
-		    funcType = (DFFunctionType)parser.getType(method.getFinder());
+		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
 		} catch (TypeNotFound e) {
 		    Logger.error("TypeNotFound", e.name);
 		    continue;

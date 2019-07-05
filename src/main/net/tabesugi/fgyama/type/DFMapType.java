@@ -77,7 +77,7 @@ public class DFMapType implements DFType {
 	try {
 	    if (_sig != null) {
 		JNITypeParser parser = new JNITypeParser(_sig);
-		_boundKlass = parser.getType(finder).toKlass();
+		_boundKlass = parser.resolveType(finder).toKlass();
 	    } else if (_ast != null) {
 		for (Type type : _ast) {
 		    _boundKlass = finder.resolve(type).toKlass();

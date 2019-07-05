@@ -20,10 +20,10 @@ public class JNITypeParser {
         skipMapTypes();
     }
 
-    public DFType getType(DFTypeFinder finder)
+    public DFType resolveType(DFTypeFinder finder)
         throws InvalidSyntax, TypeNotFound {
 	if (_text.length() <= _pos) return null;
-	//Logger.info("  getType:", _text.substring(_pos), "finder="+finder);
+	//Logger.info("  resolveType:", _text.substring(_pos), "finder="+finder);
         switch (_text.charAt(_pos)) {
         case 'B':
             _pos++;
@@ -64,7 +64,7 @@ public class JNITypeParser {
                     String name = _text.substring(_pos, i);
 		    _pos = i;
 		    DFKlass klass = finder.lookupType(name.replace('/','.')).toKlass();
-                    DFType[] paramTypes = this.getTypes(finder, '<', '>');
+                    DFType[] paramTypes = this.resolveTypes(finder, '<', '>');
                     klass = klass.parameterize(paramTypes);
                     char c3 = _text.charAt(_pos);
                     if (c3 == ';') {
@@ -95,25 +95,25 @@ public class JNITypeParser {
                 if (_text.charAt(i) != '[') {
                     int ndims = i-_pos;
                     _pos = i;
-                    DFType elemType = this.getType(finder);
+                    DFType elemType = this.resolveType(finder);
                     return new DFArrayType(elemType, ndims);
                 }
             }
             break;
         case '+':
             _pos++;
-            return this.getType(finder);
+            return this.resolveType(finder);
         case '-':
             _pos++;
             // XXX Treat lowerbound class as Object.
-            this.getType(finder);
+            this.resolveType(finder);
             return DFBuiltinTypes.getObjectKlass();
         case '*':
             _pos++;
             return DFBuiltinTypes.getObjectKlass();
         case '(':
-            DFType[] argTypes = this.getTypes(finder, '(', ')');
-            DFType returnType = this.getType(finder);
+            DFType[] argTypes = this.resolveTypes(finder, '(', ')');
+            DFType returnType = this.resolveType(finder);
             return new DFFunctionType(argTypes, returnType);
         default:
             break;
@@ -121,13 +121,13 @@ public class JNITypeParser {
         throw new TypeNotFound(_text.substring(_pos));
     }
 
-    private DFType[] getTypes(DFTypeFinder finder, char start, char end)
+    private DFType[] resolveTypes(DFTypeFinder finder, char start, char end)
         throws InvalidSyntax, TypeNotFound {
 	assert _text.charAt(_pos) == start;
         _pos++;
         List<DFType> types = new ArrayList<DFType>();
         while (_text.charAt(_pos) != end) {
-            types.add(this.getType(finder));
+            types.add(this.resolveType(finder));
         }
         _pos++;
         DFType[] a = new DFType[types.size()];
