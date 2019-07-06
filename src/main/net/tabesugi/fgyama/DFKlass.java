@@ -44,6 +44,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     // The following fields are available after the klass is loaded.
     private boolean _built = false;
+    private boolean _interface = false;
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
@@ -139,6 +140,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         Element elem = document.createElement("class");
         elem.setAttribute("path", this.getFilePath());
         elem.setAttribute("name", this.getTypeName());
+        elem.setAttribute("interface", Boolean.toString(_interface));
         if (_baseKlass != null) {
             elem.setAttribute("extends", _baseKlass.getTypeName());
         }
@@ -172,6 +174,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
     public DFKlass toKlass() {
         return this;
+    }
+
+    public boolean isInterface() {
+        return _interface;
     }
 
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
@@ -960,6 +966,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private void buildMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws InvalidSyntax {
         //Logger.info("DFKlass.buildMembersFromJKlass:", this, finder);
+        _interface = jklass.isInterface();
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
 	if (this == DFBuiltinTypes.getObjectKlass()) {
@@ -1145,6 +1152,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private void buildMembersFromTypeDecl(
         DFTypeFinder finder, TypeDeclaration typeDecl)
         throws InvalidSyntax {
+        _interface = typeDecl.isInterface();
         // Load base klasses/interfaces.
 	// Get superclass.
 	_baseKlass = DFBuiltinTypes.getObjectKlass();
