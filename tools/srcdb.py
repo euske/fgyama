@@ -157,7 +157,12 @@ class SourceDB:
     def __init__(self, basedir, encoding=None):
         self.basedir = basedir
         self.encoding = encoding
+        self.srcmap = {}
         self._cache = {}
+        return
+
+    def register(self, fid, name):
+        self.srcmap[fid] = name
         return
 
     def get(self, name):
@@ -232,6 +237,11 @@ class SourceAnnot:
         else:
             a = self.nodes[src] = []
         a.append((start, end, anno))
+        return
+
+    def addbyfid(self, fid, start, end, anno=None):
+        name = self.srcdb.srcmap[fid]
+        self.add(name, start, end, anno=anno)
         return
 
     def show_html(self, fp=sys.stdout, furl=q, ncontext=3):

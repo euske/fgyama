@@ -121,6 +121,7 @@ def main(argv):
         for (label,v) in vtx.outputs:
             if label.startswith('_'): continue
             n = v.node
+            if n.kind == 'call' and not label.startswith('#'): continue
             if n.kind in ('receive',):
                 trace(r, v, chain, length)
             elif n.kind in IGNORED:
