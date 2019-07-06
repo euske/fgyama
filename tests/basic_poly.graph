@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Lbasic_poly_Foo;" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
+  <class extends="Lbasic_poly_Foo;" interface="false" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
     <method name="Lbasic_poly_Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="552" start="110" type="55"/>
       <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
@@ -225,7 +225,7 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
     <method name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="108" start="0" type="55"/>
       <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">

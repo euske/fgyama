@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods;" path="tests/basic_methods.java">
     <method name="Lbasic_methods;.&lt;clinit&gt;()V" style="initializer">
       <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;.&lt;clinit&gt;">
@@ -112,7 +112,7 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods/A;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/A;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/A;.&lt;clinit&gt;()V" style="initializer">
       <ast end="118" start="34" type="55"/>
       <scope name="Lbasic_methods/A;.&lt;clinit&gt;"/>
@@ -134,7 +134,7 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;()V" style="initializer">
       <ast end="225" start="173" type="1"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;"/>
@@ -155,7 +155,7 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:MethodDeclaration:139:385/moo;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:MethodDeclaration:139:385/moo;" path="tests/basic_methods.java">
     <method name="Lbasic_methods/:MethodDeclaration:139:385/moo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="296" start="228" type="55"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.&lt;clinit&gt;"/>

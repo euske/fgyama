@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" name="Lbasic_funcs;" path="tests/basic_funcs.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_funcs;" path="tests/basic_funcs.java">
     <method name="Lbasic_funcs;.&lt;clinit&gt;()V" style="initializer">
       <ast end="479" start="0" type="55"/>
       <scope name="Lbasic_funcs;.&lt;clinit&gt;">
