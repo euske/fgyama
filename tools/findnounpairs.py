@@ -5,7 +5,7 @@ from srcdb import SourceDB, SourceAnnot
 from graph2idf import Cons, IDFBuilder, is_funcall
 
 IGNORED = frozenset([
-    None, 'ref', 'assign',
+    None, 'ref', 'assign', 'receive',
     'input', 'output', 'begin', 'end', 'repeat'])
 
 AUGMENTED = frozenset([
@@ -76,11 +76,13 @@ def main(argv):
     encoding = None
     srcdb = None
     maxlen = 5
+    maxchains = 32
     grouping = False
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': output = v
         elif k == '-M': maxoverrides = int(v)
+        elif k == '-C': maxchains = int(v)
         elif k == '-c': encoding = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-m': maxlen = int(v)
@@ -108,31 +110,31 @@ def main(argv):
            len(builder.vtxs)),
           file=sys.stderr)
 
-    def trace(r, vtx, chain=None, length=0):
-        if maxlen < length: return
-        node = vtx.node
-        #print('  '*length, node.kind, node.ref, node.data)
-        if node in r:
-            chains = r[node]
+    def trace(r, vtx0, srcs=None, chain=None):
+        if chain is not None and maxlen <= len(chain): return
+        n0 = vtx0.node
+        if srcs is not None and n0 in srcs: return
+        srcs = Cons(n0, srcs)
+        #print('  '*level, n0.name, n0.kind, n0.ref, n0.data)
+        if n0 in r:
+            chains = r[n0]
         else:
-            chains = r[node] = set()
-        if chain in chains: return
-        chains.add(chain)
-        for (label,v) in vtx.outputs:
+            chains = r[n0] = []
+        if maxchains <= len(chains): return
+        chains.append(chain)
+        for (label,vtx1) in vtx0.outputs:
             if label.startswith('_'): continue
-            n = v.node
-            if n.kind == 'call' and not label.startswith('#'): continue
-            if n.kind in ('receive',):
-                trace(r, v, chain, length)
-            elif n.kind in IGNORED:
-                trace(r, v, chain, length+1)
+            n1 = vtx1.node
+            if n1.kind == 'call' and not label.startswith('#'): continue
+            if n1.kind in IGNORED:
+                trace(r, vtx1, srcs, chain)
             else:
                 if chain is None:
                     n0 = None
                 else:
                     n0 = chain.car
-                for feat in getfeats(n0, label, n):
-                    trace(r, v, Cons((feat, n), chain), length+1)
+                for feat in getfeats(n0, label, n1):
+                    trace(r, vtx1, srcs, Cons((feat, n1), chain))
         return
 
     def put(node0, node1, chain):
