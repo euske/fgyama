@@ -116,10 +116,9 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, graph, nid, name, scope, kind, ref, data, ntype):
+    def __init__(self, graph, nid, scope, kind, ref, data, ntype):
         self.graph = graph
         self.nid = nid
-        self.name = name
         self.scope = scope
         self.kind = kind
         self.ref = ref
@@ -132,11 +131,11 @@ class DFNode:
 
     def __repr__(self):
         return ('<DFNode(%s): kind=%s, ref=%r, data=%r, ntype=%r, inputs=%r>' %
-                (self.name, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
+                (self.nid, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
 
     def toxml(self):
         enode = Element('node')
-        enode.set('id', self.name)
+        enode.set('id', self.nid)
         if self.kind is not None:
             enode.set('kind', self.kind)
         if self.data is not None:
@@ -189,14 +188,14 @@ def parse_graph(gid, egraph, src=None):
     style = egraph.get('style')
     graph = DFGraph(gid, gname, style, src)
 
-    def parse_node(nid, scope, enode):
+    def parse_node(scope, enode):
         assert enode.tag == 'node'
-        name = enode.get('id')
+        nid = enode.get('id')
         kind = enode.get('kind')
         ref = enode.get('ref')
         data = enode.get('data')
         ntype = enode.get('type')
-        node = DFNode(graph, nid, name, scope, kind, ref, data, ntype)
+        node = DFNode(graph, nid, scope, kind, ref, data, ntype)
         for e in enode:
             if e.tag == 'ast':
                 node.ast = (int(e.get('type')),
@@ -220,9 +219,8 @@ def parse_graph(gid, egraph, src=None):
             if elem.tag == 'scope':
                 (sid,child) = parse_scope(sid, elem, scope)
             elif elem.tag == 'node':
-                nid = len(graph.nodes)+1
-                node = parse_node(nid, scope, elem)
-                graph.nodes[node.name] = node
+                node = parse_node(scope, elem)
+                graph.nodes[node.nid] = node
                 scope.nodes.append(node)
         return (sid,scope)
 
@@ -304,7 +302,7 @@ CREATE TABLE DFNode (
     Kind TEXT,
     Ref TEXT,
     Data TEXT,
-    Type TEXT,
+    Type TEXT
 );
 CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
 
@@ -360,28 +358,29 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             node.nid = nid
             return nid
 
-        def store_scope(scope, parent=0):
+        def store_scope(nids, scope, parent=0):
             cur.execute(
                 'INSERT INTO DFScope VALUES (NULL,?,?,?);',
                 (gid, parent, scope.name))
             sid = cur.lastrowid
             scope.sid = sid
             for node in scope.nodes:
-                store_node(sid, node)
+                nids[node] = store_node(sid, node)
             for child in scope.children:
-                store_scope(child, sid)
+                store_scope(nids, child, sid)
             return
 
-        def store_link(node, src, label):
+        def store_link(nids, node, src, label):
             cur.execute(
                 'INSERT INTO DFLink VALUES (NULL,?,?,?);',
-                (node.nid, src.nid, label))
+                (nids[node], nids[src], label))
             return
 
-        store_scope(graph.root)
+        nids = {}
+        store_scope(nids, graph.root)
         for node in graph:
             for (label,src) in node.inputs.items():
-                store_link(node, src, label)
+                store_link(nids, node, src, label)
         return gid
 
     # fetch_graph
@@ -415,7 +414,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             (gid,))
         for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(graph, nid, nid, scope, kind, ref, data, ntype)
+            node = DFNode(graph, nid, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))

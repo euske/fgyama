@@ -2,7 +2,7 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graph import DFGraph, DFNode
+from graph import DFGraph
 from graph import get_graphs
 
 def q(s):
