@@ -8,11 +8,11 @@
       <ast end="161" start="107" type="31"/>
       <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161">
         <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161.:Block:132:161">
-          <node id="Nede5cb52_3" kind="ref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <node id="Nede5cb52_3" kind="ref_var" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <link src="Nede5cb52_1"/>
             <ast end="138" start="135" type="42"/>
           </node>
-          <node data="1" id="Nede5cb52_4" kind="const" type="I">
+          <node data="1" id="Nede5cb52_4" kind="value" type="I">
             <ast end="152" start="151" type="34"/>
           </node>
           <node data="Ljava/lang/Math;.sin(D)D" id="Nede5cb52_5" kind="call" type="D">

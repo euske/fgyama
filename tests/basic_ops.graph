@@ -8,43 +8,43 @@
       <ast end="186" start="30" type="31"/>
       <scope name="Lbasic_ops;.:MethodDeclaration:30:186">
         <scope name="Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186">
-          <node id="Nce57b47f_5" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186/$x" type="I">
+          <node id="Nce57b47f_5" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186/$x" type="I">
             <link src="Nce57b47f_2"/>
             <ast end="71" start="70" type="42"/>
           </node>
-          <node data="1" id="Nce57b47f_6" kind="const" type="I">
+          <node data="1" id="Nce57b47f_6" kind="value" type="I">
             <ast end="75" start="74" type="34"/>
           </node>
-          <node data="+" id="Nce57b47f_7" kind="infix" type="I">
+          <node data="+" id="Nce57b47f_7" kind="op_infix" type="I">
             <link label="L" src="Nce57b47f_5"/>
             <link label="R" src="Nce57b47f_6"/>
             <ast end="75" start="70" type="27"/>
           </node>
-          <node id="Nce57b47f_8" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_8" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_7"/>
             <ast end="75" start="66" type="59"/>
           </node>
-          <node id="Nce57b47f_9" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_9" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_11"/>
             <ast end="86" start="85" type="42"/>
           </node>
-          <node data="2" id="Nce57b47f_10" kind="const" type="I">
+          <node data="2" id="Nce57b47f_10" kind="value" type="I">
             <ast end="91" start="90" type="34"/>
           </node>
-          <node data="*=" id="Nce57b47f_11" kind="assignop" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node data="*=" id="Nce57b47f_11" kind="op_assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link label="L" src="Nce57b47f_8"/>
             <link label="R" src="Nce57b47f_10"/>
             <ast end="91" start="85" type="7"/>
           </node>
-          <node id="Nce57b47f_12" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_12" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_17"/>
             <ast end="95" start="94" type="42"/>
           </node>
-          <node id="Nce57b47f_13" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_13" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_9"/>
             <ast end="103" start="102" type="42"/>
           </node>
-          <node data="3" id="Nce57b47f_14" kind="const" type="I">
+          <node data="3" id="Nce57b47f_14" kind="value" type="I">
             <ast end="106" start="105" type="34"/>
           </node>
           <node data="Lbasic_ops;.moo(II)?" id="Nce57b47f_15" kind="call" type="?">
@@ -57,14 +57,14 @@
             <link label="#return" src="Nce57b47f_15"/>
             <ast end="107" start="98" type="32"/>
           </node>
-          <node data="=" id="Nce57b47f_17" kind="assignop" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node data="=" id="Nce57b47f_17" kind="op_assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link label="R" src="Nce57b47f_16"/>
             <ast end="107" start="94" type="7"/>
           </node>
-          <node data="10" id="Nce57b47f_18" kind="const" type="I">
+          <node data="10" id="Nce57b47f_18" kind="value" type="I">
             <ast end="130" start="128" type="34"/>
           </node>
-          <node data="44" id="Nce57b47f_19" kind="const" type="I">
+          <node data="44" id="Nce57b47f_19" kind="value" type="I">
             <ast end="136" start="134" type="34"/>
           </node>
           <node data="3" id="Nce57b47f_20" kind="valueset" type="I">
@@ -73,59 +73,59 @@
             <link label="value2" src="Nce57b47f_22"/>
             <ast end="146" start="132" type="4"/>
           </node>
-          <node data="55" id="Nce57b47f_21" kind="const" type="I">
+          <node data="55" id="Nce57b47f_21" kind="value" type="I">
             <ast end="140" start="138" type="34"/>
           </node>
-          <node data="66" id="Nce57b47f_22" kind="const" type="I">
+          <node data="66" id="Nce57b47f_22" kind="value" type="I">
             <ast end="144" start="142" type="34"/>
           </node>
-          <node id="Nce57b47f_23" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
+          <node id="Nce57b47f_23" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
             <link src="Nce57b47f_20"/>
             <ast end="146" start="116" type="59"/>
           </node>
-          <node id="Nce57b47f_24" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
+          <node id="Nce57b47f_24" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
             <link src="Nce57b47f_23"/>
             <ast end="150" start="149" type="42"/>
           </node>
-          <node data="1" id="Nce57b47f_25" kind="const" type="I">
+          <node data="1" id="Nce57b47f_25" kind="value" type="I">
             <ast end="152" start="151" type="34"/>
           </node>
-          <node id="Nce57b47f_26" kind="arrayassign" ref="%I" type="I">
+          <node id="Nce57b47f_26" kind="assign_array" ref="%I" type="I">
             <link src="Nce57b47f_28"/>
             <link label="array" src="Nce57b47f_24"/>
             <link label="index" src="Nce57b47f_25"/>
             <ast end="153" start="149" type="2"/>
           </node>
-          <node id="Nce57b47f_27" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_27" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_12"/>
             <ast end="157" start="156" type="42"/>
           </node>
-          <node data="=" id="Nce57b47f_28" kind="assignop" ref="%I" type="I">
+          <node data="=" id="Nce57b47f_28" kind="op_assign" ref="%I" type="I">
             <link label="R" src="Nce57b47f_27"/>
             <ast end="157" start="149" type="7"/>
           </node>
-          <node id="Nce57b47f_29" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_29" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_33"/>
             <ast end="161" start="160" type="42"/>
           </node>
-          <node id="Nce57b47f_30" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
+          <node id="Nce57b47f_30" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$a" type="[I">
             <link src="Nce57b47f_23"/>
             <ast end="165" start="164" type="42"/>
           </node>
-          <node data="2" id="Nce57b47f_31" kind="const" type="I">
+          <node data="2" id="Nce57b47f_31" kind="value" type="I">
             <ast end="167" start="166" type="34"/>
           </node>
-          <node id="Nce57b47f_32" kind="arrayref" ref="%I" type="I">
+          <node id="Nce57b47f_32" kind="ref_array" ref="%I" type="I">
             <link src="Nce57b47f_26"/>
             <link label="array" src="Nce57b47f_30"/>
             <link label="index" src="Nce57b47f_31"/>
             <ast end="168" start="164" type="2"/>
           </node>
-          <node data="=" id="Nce57b47f_33" kind="assignop" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node data="=" id="Nce57b47f_33" kind="op_assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link label="R" src="Nce57b47f_32"/>
             <ast end="168" start="160" type="7"/>
           </node>
-          <node id="Nce57b47f_34" kind="ref" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
+          <node id="Nce57b47f_34" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
             <link src="Nce57b47f_29"/>
             <ast end="179" start="178" type="42"/>
           </node>
@@ -137,7 +137,7 @@
         <node id="Nce57b47f_1" kind="input" ref="#arg0" type="I">
           <ast end="57" start="52" type="44"/>
         </node>
-        <node id="Nce57b47f_2" kind="assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186/$x" type="I">
+        <node id="Nce57b47f_2" kind="assign_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186/$x" type="I">
           <link src="Nce57b47f_1"/>
           <ast end="57" start="52" type="44"/>
         </node>

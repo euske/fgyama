@@ -8,7 +8,7 @@
       <ast end="494" start="300" type="31"/>
       <scope name="Lbasic_generics;.:MethodDeclaration:300:494">
         <scope name="Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494">
-          <node data="moo" id="Nb2004d57_3" kind="const" type="Ljava/lang/String;">
+          <node data="moo" id="Nb2004d57_3" kind="value" type="Ljava/lang/String;">
             <ast end="375" start="370" type="45"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="Nb2004d57_4" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
@@ -23,11 +23,11 @@
             <link label="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" src="Nb2004d57_4"/>
             <ast end="376" start="354" type="14"/>
           </node>
-          <node id="Nb2004d57_7" kind="assign" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_7" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_5"/>
             <ast end="376" start="348" type="59"/>
           </node>
-          <node id="Nb2004d57_8" kind="ref" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_8" kind="ref_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_7"/>
             <ast end="400" start="397" type="42"/>
           </node>
@@ -48,11 +48,11 @@
             <link label="#return" src="Nb2004d57_11"/>
             <ast end="420" start="397" type="32"/>
           </node>
-          <node id="Nb2004d57_13" kind="assign" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$b" type="Ljava/lang/String;">
+          <node id="Nb2004d57_13" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$b" type="Ljava/lang/String;">
             <link src="Nb2004d57_12"/>
             <ast end="420" start="393" type="59"/>
           </node>
-          <node id="Nb2004d57_14" kind="ref" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_14" kind="ref_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_7"/>
             <ast end="451" start="448" type="42"/>
           </node>
@@ -65,7 +65,7 @@
             <link label="#return" src="Nb2004d57_15"/>
             <ast end="458" start="448" type="32"/>
           </node>
-          <node id="Nb2004d57_17" kind="assign" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nb2004d57_17" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nb2004d57_16"/>
             <ast end="458" start="442" type="59"/>
           </node>
@@ -78,7 +78,7 @@
       <ast end="565" start="500" type="31"/>
       <scope name="Lbasic_generics;.:MethodDeclaration:500:565">
         <scope name="Lbasic_generics;.:MethodDeclaration:500:565.:Block:546:565">
-          <node id="N76d07b9_5" kind="ref" ref="$Lbasic_generics;.:MethodDeclaration:500:565/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+          <node id="N76d07b9_5" kind="ref_var" ref="$Lbasic_generics;.:MethodDeclaration:500:565/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
             <link src="N76d07b9_2"/>
             <ast end="556" start="555" type="42"/>
           </node>
@@ -99,7 +99,7 @@
         <node id="N76d07b9_1" kind="input" ref="#arg0" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
           <ast end="544" start="541" type="44"/>
         </node>
-        <node id="N76d07b9_2" kind="assign" ref="$Lbasic_generics;.:MethodDeclaration:500:565/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+        <node id="N76d07b9_2" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:500:565/$x" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
           <link src="N76d07b9_1"/>
           <ast end="544" start="541" type="44"/>
         </node>
@@ -112,8 +112,8 @@
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;">
-        <node data="uninitialized" id="N9316219c_1" kind="const" type="@null"/>
-        <node id="N9316219c_2" kind="assign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+        <node data="uninitialized" id="N9316219c_1" kind="value" type="@null"/>
+        <node id="N9316219c_2" kind="assign_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
           <link src="N9316219c_1"/>
           <ast end="69" start="68" type="59"/>
         </node>
@@ -123,20 +123,20 @@
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124.:Block:89:124">
-          <node id="Nb9469f45_4" kind="ref" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
+          <node id="Nb9469f45_4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
             <link src="Nb9469f45_3"/>
             <ast end="107" start="103" type="52"/>
           </node>
-          <node id="Nb9469f45_5" kind="fieldassign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="Nb9469f45_5" kind="assign_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
             <link src="Nb9469f45_7"/>
             <link label="obj" src="Nb9469f45_4"/>
             <ast end="109" start="103" type="22"/>
           </node>
-          <node id="Nb9469f45_6" kind="ref" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
+          <node id="Nb9469f45_6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
             <link src="Nb9469f45_2"/>
             <ast end="113" start="112" type="42"/>
           </node>
-          <node data="=" id="Nb9469f45_7" kind="assignop" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <node data="=" id="Nb9469f45_7" kind="op_assign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
             <link label="R" src="Nb9469f45_6"/>
             <ast end="113" start="103" type="7"/>
           </node>
@@ -144,7 +144,7 @@
         <node id="Nb9469f45_1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
           <ast end="87" start="84" type="44"/>
         </node>
-        <node id="Nb9469f45_2" kind="assign" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
+        <node id="Nb9469f45_2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
           <link src="Nb9469f45_1"/>
           <ast end="87" start="84" type="44"/>
         </node>
@@ -159,15 +159,15 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196.:Block:142:196">
-          <node id="Nc16d9623_3" kind="ref" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="Nc16d9623_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
             <link src="Nc16d9623_1"/>
             <ast end="163" start="162" type="42"/>
           </node>
-          <node id="Nc16d9623_4" kind="assign" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
+          <node id="Nc16d9623_4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
             <link src="Nc16d9623_3"/>
             <ast end="163" start="158" type="59"/>
           </node>
-          <node id="Nc16d9623_5" kind="ref" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
+          <node id="Nc16d9623_5" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
             <link src="Nc16d9623_4"/>
             <ast end="185" start="184" type="42"/>
           </node>
@@ -184,7 +184,7 @@
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:206:265">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:206:265.:Block:220:265">
-          <node id="Ndcce2d24_3" kind="ref" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="Ndcce2d24_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
             <link src="Ndcce2d24_1"/>
             <ast end="253" start="252" type="42"/>
           </node>
@@ -214,8 +214,8 @@
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;">
-        <node data="uninitialized" id="N9159e68a_1" kind="const" type="@null"/>
-        <node id="N9159e68a_2" kind="assign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+        <node data="uninitialized" id="N9159e68a_1" kind="value" type="@null"/>
+        <node id="N9159e68a_2" kind="assign_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
           <link src="N9159e68a_1"/>
           <ast end="69" start="68" type="59"/>
         </node>
@@ -225,20 +225,20 @@
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124.:Block:89:124">
-          <node id="Nccef36d7_4" kind="ref" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="Nccef36d7_4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <link src="Nccef36d7_3"/>
             <ast end="107" start="103" type="52"/>
           </node>
-          <node id="Nccef36d7_5" kind="fieldassign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="Nccef36d7_5" kind="assign_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <link src="Nccef36d7_7"/>
             <link label="obj" src="Nccef36d7_4"/>
             <ast end="109" start="103" type="22"/>
           </node>
-          <node id="Nccef36d7_6" kind="ref" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/String;">
+          <node id="Nccef36d7_6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/String;">
             <link src="Nccef36d7_2"/>
             <ast end="113" start="112" type="42"/>
           </node>
-          <node data="=" id="Nccef36d7_7" kind="assignop" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node data="=" id="Nccef36d7_7" kind="op_assign" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <link label="R" src="Nccef36d7_6"/>
             <ast end="113" start="103" type="7"/>
           </node>
@@ -246,7 +246,7 @@
         <node id="Nccef36d7_1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="87" start="84" type="44"/>
         </node>
-        <node id="Nccef36d7_2" kind="assign" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/String;">
+        <node id="Nccef36d7_2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/String;">
           <link src="Nccef36d7_1"/>
           <ast end="87" start="84" type="44"/>
         </node>
@@ -261,15 +261,15 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196.:Block:142:196">
-          <node id="N74be437f_3" kind="ref" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="N74be437f_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <link src="N74be437f_1"/>
             <ast end="163" start="162" type="42"/>
           </node>
-          <node id="N74be437f_4" kind="assign" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/String;">
+          <node id="N74be437f_4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/String;">
             <link src="N74be437f_3"/>
             <ast end="163" start="158" type="59"/>
           </node>
-          <node id="N74be437f_5" kind="ref" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/String;">
+          <node id="N74be437f_5" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/String;">
             <link src="N74be437f_4"/>
             <ast end="185" start="184" type="42"/>
           </node>
@@ -287,7 +287,7 @@
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:206:265">
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:206:265.:Block:220:265">
-          <node id="Na71b8b64_3" kind="ref" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="Na71b8b64_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <link src="Na71b8b64_1"/>
             <ast end="253" start="252" type="42"/>
           </node>
@@ -317,8 +317,8 @@
     <method name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;">
-        <node data="uninitialized" id="Nb98670aa_1" kind="const" type="@null"/>
-        <node id="Nb98670aa_2" kind="assign" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
+        <node data="uninitialized" id="Nb98670aa_1" kind="value" type="@null"/>
+        <node id="Nb98670aa_2" kind="assign_var" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
           <link src="Nb98670aa_1"/>
           <ast end="69" start="68" type="59"/>
         </node>
@@ -328,20 +328,20 @@
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124">
         <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124.:Block:89:124">
-          <node id="N9e053133_4" kind="ref" ref="#this" type="Lbasic_generics/Moo&lt;T&gt;;">
+          <node id="N9e053133_4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;T&gt;;">
             <link src="N9e053133_3"/>
             <ast end="107" start="103" type="52"/>
           </node>
-          <node id="N9e053133_5" kind="fieldassign" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="N9e053133_5" kind="assign_field" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
             <link src="N9e053133_7"/>
             <link label="obj" src="N9e053133_4"/>
             <ast end="109" start="103" type="22"/>
           </node>
-          <node id="N9e053133_6" kind="ref" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
+          <node id="N9e053133_6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
             <link src="N9e053133_2"/>
             <ast end="113" start="112" type="42"/>
           </node>
-          <node data="=" id="N9e053133_7" kind="assignop" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
+          <node data="=" id="N9e053133_7" kind="op_assign" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
             <link label="R" src="N9e053133_6"/>
             <ast end="113" start="103" type="7"/>
           </node>
@@ -349,7 +349,7 @@
         <node id="N9e053133_1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
           <ast end="87" start="84" type="44"/>
         </node>
-        <node id="N9e053133_2" kind="assign" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
+        <node id="N9e053133_2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124/$x" type="Ljava/lang/Object;">
           <link src="N9e053133_1"/>
           <ast end="87" start="84" type="44"/>
         </node>
@@ -363,15 +363,15 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196">
         <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196.:Block:142:196">
-          <node id="N3a09c031_3" kind="ref" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="N3a09c031_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
             <link src="N3a09c031_1"/>
             <ast end="163" start="162" type="42"/>
           </node>
-          <node id="N3a09c031_4" kind="assign" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
+          <node id="N3a09c031_4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
             <link src="N3a09c031_3"/>
             <ast end="163" start="158" type="59"/>
           </node>
-          <node id="N3a09c031_5" kind="ref" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
+          <node id="N3a09c031_5" kind="ref_var" ref="$Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196.:Block:142:196/$y" type="Ljava/lang/Object;">
             <link src="N3a09c031_4"/>
             <ast end="185" start="184" type="42"/>
           </node>
@@ -388,7 +388,7 @@
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:206:265">
         <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:206:265.:Block:220:265">
-          <node id="N7e389356_3" kind="ref" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
+          <node id="N7e389356_3" kind="ref_var" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
             <link src="N7e389356_1"/>
             <ast end="253" start="252" type="42"/>
           </node>
