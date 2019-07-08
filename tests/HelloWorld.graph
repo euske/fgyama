@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="/home/euske/work/r/fgyama/tests/HelloWorld.java">
+  <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="HelloWorld.java">
     <method name="LHelloWorld;.&lt;clinit&gt;()V" style="initializer">
       <ast end="123" start="0" type="55"/>
       <scope name="LHelloWorld;.&lt;clinit&gt;"/>

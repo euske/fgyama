@@ -29,11 +29,11 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
           <ast end="121" start="30" type="31"/>
           <scope name="LHelloWorld;.:MethodDeclaration:30:121">
             <scope name="LHelloWorld;.:MethodDeclaration:30:121.:Block:69:121">
-              <node id="N654a8762_5" kind="fieldref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+              <node id="N654a8762_5" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <link src="N654a8762_3"/>
                 <ast end="89" start="79" type="40"/>
               </node>
-              <node data="Hello, World!" id="N654a8762_6" kind="const" type="Ljava/lang/String;">
+              <node data="Hello, World!" id="N654a8762_6" kind="value" type="Ljava/lang/String;">
                 <ast end="113" start="98" type="45"/>
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="N654a8762_7" kind="call" type="V">
@@ -49,7 +49,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
             <node id="N654a8762_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
               <ast end="67" start="54" type="44"/>
             </node>
-            <node id="N654a8762_2" kind="assign" ref="$LHelloWorld;.:MethodDeclaration:30:121/$args" type="[Ljava/lang/String;">
+            <node id="N654a8762_2" kind="assign_var" ref="$LHelloWorld;.:MethodDeclaration:30:121/$args" type="[Ljava/lang/String;">
               <link src="N654a8762_1"/>
               <ast end="67" start="54" type="44"/>
             </node>
