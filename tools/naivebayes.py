@@ -53,6 +53,7 @@ class NaiveBayes:
     def get(self, feats, n=0):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
+        assert feats
         keyp = {}
         keys = {}
         for f in feats:
@@ -67,7 +68,10 @@ class NaiveBayes:
                 if k not in keyp:
                     keyp[k] = self.kprob[k]
                 keyp[k] += v - self.kprob[k]
-        a = [ (k,p) for (k,p) in keyp.items() if keys[k] == len(feats) ]
+        assert keyp
+        a = [ (k,math.exp(p)) for (k,p) in keyp.items() ]
+        z = sum( p for (_,p) in a )
+        a = [ (k,p/z) for (k,p) in a if keys[k] == len(feats) ]
         a.sort(key=lambda x:x[1], reverse=True)
         if n:
             a = a[:n]
