@@ -79,7 +79,7 @@ def main(argv):
         chain = Cons(v0, chain)
         mdist[v0] = (dist, chain)
         (a,n) = dist
-        if v0.node.kind == 'assign':
+        if v0.node.kind == 'assign_var':
             a += 1
         n += 1
         dist = (a,n)
@@ -95,7 +95,7 @@ def main(argv):
         chain = Cons(v0, chain)
         mdist[v0] = (dist, chain)
         (a,n) = dist
-        if v0.node.kind == 'assign':
+        if v0.node.kind == 'assign_var':
             a += 1
         n += 1
         dist = (a,n)
@@ -127,7 +127,7 @@ def main(argv):
 
     vtxs = sorted(mdist.items(), key=lambda x:x[1][0], reverse=True)
     for (vtx1,(dist1,chain1)) in vtxs[:maxpaths]:
-        nodes = [ vtx.node for vtx in chain1 if vtx.node.kind == 'assign' ]
+        nodes = [ vtx.node for vtx in chain1 if vtx.node.kind == 'assign_var' ]
         nodes = list(reversed(nodes))
         print('+PATH', dist1, ' '.join( getnoun(n.ref) for n in nodes ))
         for (i,n) in enumerate(nodes):

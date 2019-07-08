@@ -4,7 +4,7 @@ from graph2idf import is_funcall, Cons, IDFBuilder
 
 
 IGNORED = frozenset([
-    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    None, 'ref_var', 'ref_field', 'assign_var', 'assign_field',
     'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):
@@ -96,11 +96,11 @@ def main(argv):
     for graph in builder.graphs:
         dbg.write('# gid: %r\n' % graph.name)
         for node in graph:
-            if node.kind not in ('ref','fieldref','assign','fieldassign'): continue
+            if node.kind not in ('ref_var','ref_field','assign_var','assign_field'): continue
             if not node.ref.startswith('@'): continue
             data = (node.ref, builder.getsrc(node))
             fp.write('+ITEM %r\n' % (data,))
-            if node.kind in ('ref','fieldref'):
+            if node.kind in ('ref_var','ref_field'):
                 enum = enum_forw
                 k = 'FORW'
             else:

@@ -4,8 +4,8 @@ import re
 from graph2idf import is_funcall, Cons, IDFBuilder
 
 IGNORED = frozenset([
-    None, 'ref', 'assign', 'receive',
-    'begin', 'end', 'repeat'])
+    None, 'ref_var', 'assign_var',
+    'receive', 'begin', 'end', 'repeat'])
 
 def getfeat(label, n1):
     if n1.kind in IGNORED:

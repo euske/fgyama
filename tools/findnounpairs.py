@@ -4,14 +4,17 @@ import re
 from srcdb import SourceDB, SourceAnnot
 from graph2idf import Cons, IDFBuilder, is_funcall
 
+REFS = frozenset(['ref_var', 'ref_field'])
+ASSIGNS = frozenset(['assign_var', 'assign_field'])
+
 IGNORED = frozenset([
-    None, 'ref', 'assign', 'receive',
-    'input', 'output', 'begin', 'end', 'repeat'])
+    None, 'ref_var', 'assign_var',
+    'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
 AUGMENTED = frozenset([
-    'call', 'infix',
-    'arrayref', 'fieldref',
-    'arrayassign', 'fieldassign'])
+    'call', 'op_infix',
+    'ref_array', 'ref_field',
+    'assign_array', 'assign_field'])
 
 WORD1 = re.compile(r'[A-Z]?[a-z]+$')
 WORD2 = re.compile(r'[A-Z]+$')
@@ -23,10 +26,25 @@ def getnoun(name):
     else:
         return None
 
+def gettypenoun(name):
+    if name.endswith(';'):
+        return getnoun(name[:-1])
+    else:
+        return name
+
+def getmethodnoun(name):
+    assert '(' in name
+    (name,_,_) = name.partition('(')
+    if name.endswith(';.<init>'):
+        name = name[:-8]
+    return getnoun(name)
+
 def getfeat1(label, n):
     if is_funcall(n):
         (data,_,_) = n.data.partition(' ')
-        return '%s:%s:%s' % (label, n.kind, data)
+        return '%s:%s:%s' % (label, n.kind, getmethodnoun(data))
+    elif n.kind in ('op_typecast', 'op_typecheck'):
+        return '%s:%s:%s' % (label, n.kind, gettypenoun(n.data))
     elif n.data is None:
         return '%s:%s' % (label, n.kind)
     else:
@@ -36,14 +54,19 @@ def getfeat2(label, n):
     if is_funcall(n):
         (data,_,_) = n.data.partition(' ')
         return '%s:%s:%s' % (label, n.kind, data)
-    elif n.kind in ('ref','fieldref','assign','fieldassign'):
+    elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):
         return '%s:%s:%s' % (label, n.kind, getnoun(n.ref))
-    elif n.kind in ('infix','const'):
+    elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
+        return '%s:%s:STRING' % (label, n.kind)
+    elif n.kind in ('op_typecast', 'op_typecheck'):
+        return '%s:%s:%s' % (label, n.kind, gettypenoun(n.data))
+    elif n.kind in ('op_infix', 'value'):
         return '%s:%s:%s' % (label, n.kind, n.data)
     else:
         return None
 
 def getfeats(n0, label, n1):
+    if n1.kind in IGNORED: return []
     f1 = getfeat1(label, n1)
     feats = [f1]
     if n1.kind in AUGMENTED:
@@ -112,29 +135,30 @@ def main(argv):
 
     def trace(r, vtx0, srcs=None, chain=None):
         if chain is not None and maxlen <= len(chain): return
-        n0 = vtx0.node
-        if srcs is not None and n0 in srcs: return
-        srcs = Cons(n0, srcs)
-        #print('  '*level, n0.name, n0.kind, n0.ref, n0.data)
-        if n0 in r:
-            chains = r[n0]
+        node = vtx0.node
+        if srcs is not None and node in srcs: return
+        srcs = Cons(node, srcs)
+        #print('  '*level, node.name, node.kind, node.ref, node.data)
+        if node in r:
+            chains = r[node]
         else:
-            chains = r[n0] = []
+            chains = r[node] = []
         if maxchains <= len(chains): return
         chains.append(chain)
+        if chain is None:
+            n0 = None
+        else:
+            n0 = chain.car
         for (label,vtx1) in vtx0.outputs:
             if label.startswith('_'): continue
             n1 = vtx1.node
             if n1.kind == 'call' and not label.startswith('#'): continue
-            if n1.kind in IGNORED:
-                trace(r, vtx1, srcs, chain)
-            else:
-                if chain is None:
-                    n0 = None
-                else:
-                    n0 = chain.car
-                for feat in getfeats(n0, label, n1):
+            feats = getfeats(n0, label, n1)
+            if feats:
+                for feat in feats:
                     trace(r, vtx1, srcs, Cons((feat, n1), chain))
+            else:
+                trace(r, vtx1, srcs, chain)
         return
 
     def put(node0, node1, chain):
@@ -162,12 +186,12 @@ def main(argv):
     key2pair = {}
     for vtx in builder:
         node0 = vtx.node
-        if node0.kind in ('ref','fieldref') and is_ref(node0.ref):
+        if node0.kind in REFS and is_ref(node0.ref):
             r = {}
             #print('trace', vtx.node)
             trace(r, vtx)
             for (node1,chains) in r.items():
-                if (node1.kind not in ('assign','fieldassign') or
+                if (node1.kind not in ASSIGNS or
                     not is_ref(node1.ref)): continue
                 for chain in chains:
                     if chain is None: continue

@@ -4,7 +4,7 @@ from graph2idf import is_funcall, Cons, IDFBuilder
 
 
 IGNORED = frozenset([
-    None, 'ref', 'fieldref', 'assign', 'fieldassign',
+    None, 'ref_var', 'ref_field', 'assign_var', 'assign_field',
     'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
 def getfeat(n0, label, n1):

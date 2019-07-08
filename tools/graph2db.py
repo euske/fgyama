@@ -8,7 +8,7 @@ from graph import GraphDB, get_graphs
 
 # get_nodekey
 def get_nodekey(node):
-    if node.kind in (None, 'assign', 'ref'):
+    if node.kind in (None, 'assign_var', 'ref_var'):
         return None
     else:
         return node.kind+':'+(node.data or '')

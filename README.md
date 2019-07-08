@@ -81,7 +81,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 | assign_field |                     |
 | ------------ | ------------------- |
 | call         | Method IDs          |
-| new          | Constructor ID      |
+| new          | Method ID           |
 | input        |                     |
 | output       |                     |
 | receive      |                     |

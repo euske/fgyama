@@ -30,9 +30,9 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         elif node.kind in ('input','output','receive'):
             styles = {'shape': 'box',
                       'label': '%s (%s)' % (node.kind, node.ref)}
-        elif node.data is not None:
+        elif node.kind.startswith('op_'):
             styles = {'shape': 'box', 'fontname':'courier',
-                      'label': node.data}
+                      'label': (node.data or '')}
         else:
             styles = {'label': node.ref}
         if highlight is not None and node.nid in highlight:
