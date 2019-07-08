@@ -2,86 +2,100 @@
 
 FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
-Prerequisites:
---------------
+## Prerequisites:
 
   * Java/Ant
   * Eclipse JDT (automatically downloaded)
   * Graphviz http://graphviz.org/
 
-How to Build:
--------------
+## How to Build:
 
     $ ant get-deps clean build
 
-How to Run:
------------
+## How to Run:
 
-    $ ./run.sh net.tabesugi.fgyama.Java2DF Class1.java Class2.java ... > out.xml
-    $ python tools/graph2gv.py out.xml > out.gv
+    $ ./run.sh net.tabesugi.fgyama.Java2DF Class1.java Class2.java ... > out.graph
+    $ python tools/graph2gv.py out.graph > out.gv
 
-Output XML format:
-------------------
+## Output XML format:
 
-    <fgyama>
-      <file path="HelloWorld.java">
-        <graph name="LHelloWorld;.main([Ljava/lang/String;)V" style="static">
-          <ast length="84" start="28" type="31"/>
-          <scope name="HelloWorld.main">
-            <node id="NHelloWorld.main.b0_3" kind="fieldref"
-                  type="Ljava/io/PrintStream;" ref="java/lang/System/.out">
-              <link src="NHelloWorld.main_4"/>
-              <ast length="10" start="73" type="40"/>
+    <?xml version="1.0" encoding="UTF-8"?><fgyama>
+      <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="HelloWorld.java">
+        <method name="LHelloWorld;.&lt;clinit&gt;()V" style="initializer">
+          <ast end="123" start="0" type="55"/>
+          <scope name="LHelloWorld;.&lt;clinit&gt;"/>
+        </method>
+        <method name="LHelloWorld;.main([Ljava/lang/String;)V" style="static">
+          <ast end="121" start="30" type="31"/>
+          <scope name="LHelloWorld;.:MethodDeclaration:30:121">
+            <scope name="LHelloWorld;.:MethodDeclaration:30:121.:Block:69:121">
+              <node id="N654a8762_5" kind="fieldref" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+                <link src="N654a8762_3"/>
+                <ast end="89" start="79" type="40"/>
+              </node>
+              <node data="Hello, World!" id="N654a8762_6" kind="const" type="Ljava/lang/String;">
+                <ast end="113" start="98" type="45"/>
+              </node>
+              <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="N654a8762_7" kind="call" type="V">
+                <link label="#arg0" src="N654a8762_6"/>
+                <link label="#this" src="N654a8762_5"/>
+                <ast end="114" start="79" type="32"/>
+              </node>
+              <node id="N654a8762_8" kind="receive" type="V">
+                <link label="#return" src="N654a8762_7"/>
+                <ast end="114" start="79" type="32"/>
+              </node>
+            </scope>
+            <node id="N654a8762_1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
+              <ast end="67" start="54" type="44"/>
             </node>
-            <node id="NHelloWorld.main.b0_5" kind="const"
-                  type="Ljava/lang/String;" data="Hello World!">
-              <ast length="14" start="92" type="45"/>
+            <node id="N654a8762_2" kind="assign" ref="$LHelloWorld;.:MethodDeclaration:30:121/$args" type="[Ljava/lang/String;">
+              <link src="N654a8762_1"/>
+              <ast end="67" start="54" type="44"/>
             </node>
-            <node id="NHelloWorld.main.b0_6" kind="call"
-                  type="V" data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V">
-              <link label="arg0" src="NHelloWorld.main.b0_5"/>
-              <link label="obj" src="NHelloWorld.main.b0_3"/>
-              <ast length="34" start="73" type="32"/>
-            </node>
-            ...
+            <node id="N654a8762_3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+            <node id="N654a8762_4" kind="input" ref="#this" type="LHelloWorld;"/>
           </scope>
-        </graph>
-      </file>
+        </method>
+      </class>
     </fgyama>
 
-Node types (kinds):
--------------------
+## Node types (kinds):
 
-  * const
-  * valueset
-  * ref
-  * arrayref
-  * fieldref
-  * assign
-  * arrayassign
-  * fieldassign
-  * assignop
-  * prefix
-  * infix
-  * postfix
-  * typecast
-  * instanceof
-  * iter
+| Kind         | Data                |
+| ------------ | ------------------- |
+| value        | Actual value        |
+| valueset     | Value count         |
+| op_assign    | Assignment operator |
+| op_prefix    | Prefix operator     |
+| op_infix     | Infix operator      |
+| op_postfix   | Postfix operator    |
+| op_typecast  | Casting type        |
+| op_typecheck | Checking type       |
+| op_iter      |                     |
+| ref_var      |                     |
+| ref_array    |                     |
+| ref_field    |                     |
+| assign_var   |                     |
+| assign_array |                     |
+| assign_field |                     |
+| ------------ | ------------------- |
+| call         | Method IDs          |
+| new          | Constructor ID      |
+| input        |                     |
+| output       |                     |
+| receive      |                     |
+| throw        |                     |
+| catch        |                     |
+| ------------ | ------------------- |
+| join         |                     |
+| begin        |                     |
+| end          |                     |
+| repeat       |                     |
+| case         | Label count         |
 
-  * input
-  * output
-  * call
-  * new
-  * throw
+## Coding style:
 
-  * join
-  * begin
-  * end
-  * repeat
-  * case
-
-Coding style:
--------------
     (c-add-style "me"
              '("Java"
                (c-offsets-alist . (
@@ -90,8 +104,8 @@ Coding style:
                                    ))
                ))
 
-TODOs:
-------
+## TODOs:
+
   * DFMethodType should have an Exception field.
   * Vararg methods matching.
   * Lambdas.

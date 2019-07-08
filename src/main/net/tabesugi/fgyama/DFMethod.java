@@ -44,10 +44,20 @@ class SingleAssignNode extends ProgNode {
         ASTNode ast) {
         super(graph, scope, ref.getRefType(), ref, ast);
     }
+}
+
+// VarAssignNode:
+class VarAssignNode extends SingleAssignNode {
+
+    public VarAssignNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
 
     @Override
     public String getKind() {
-        return "assign";
+        return "assign_var";
     }
 }
 
@@ -64,7 +74,7 @@ class ArrayAssignNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "arrayassign";
+        return "assign_array";
     }
 }
 
@@ -82,7 +92,7 @@ class FieldAssignNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "fieldassign";
+        return "assign_field";
     }
 }
 
@@ -97,7 +107,7 @@ class VarRefNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "ref";
+        return "ref_var";
     }
 }
 
@@ -114,7 +124,7 @@ class ArrayRefNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "arrayref";
+        return "ref_array";
     }
 }
 
@@ -132,7 +142,7 @@ class FieldRefNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "fieldref";
+        return "ref_field";
     }
 }
 
@@ -150,7 +160,7 @@ class PrefixNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "prefix";
+        return "op_prefix";
     }
 
     @Override
@@ -173,7 +183,7 @@ class PostfixNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "postfix";
+        return "op_postfix";
     }
 
     @Override
@@ -199,7 +209,7 @@ class InfixNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "infix";
+        return "op_infix";
     }
 
     @Override
@@ -220,7 +230,7 @@ class TypeCastNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "typecast";
+        return "op_typecast";
     }
 
     @Override
@@ -229,12 +239,12 @@ class TypeCastNode extends ProgNode {
     }
 }
 
-// InstanceofNode
-class InstanceofNode extends ProgNode {
+// TypeCheckNode
+class TypeCheckNode extends ProgNode {
 
     public DFType type;
 
-    public InstanceofNode(
+    public TypeCheckNode(
         DFGraph graph, DFVarScope scope,
         ASTNode ast, DFType type) {
         super(graph, scope, DFBasicType.BOOLEAN, null, ast);
@@ -244,7 +254,7 @@ class InstanceofNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "instanceof";
+        return "op_typecheck";
     }
 
     @Override
@@ -304,7 +314,7 @@ class AssignOpNode extends SingleAssignNode {
 
     @Override
     public String getKind() {
-        return "assignop";
+        return "op_assign";
     }
 
     @Override
@@ -327,7 +337,7 @@ class ConstNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "const";
+        return "value";
     }
 
     @Override
@@ -501,7 +511,7 @@ class IterNode extends ProgNode {
 
     @Override
     public String getKind() {
-        return "iter";
+        return "op_iter";
     }
 }
 
@@ -1472,7 +1482,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame,
                     instof.getLeftOperand());
-                DFNode node = new InstanceofNode(graph, scope, instof, type);
+                DFNode node = new TypeCheckNode(graph, scope, instof, type);
                 node.accept(ctx.getRValue());
                 ctx.setRValue(node);
 
@@ -1525,7 +1535,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             Name name = (Name)expr;
             if (name.isSimpleName()) {
                 DFRef ref = scope.lookupVar((SimpleName)name);
-                ctx.setLValue(new SingleAssignNode(graph, scope, ref, expr));
+                ctx.setLValue(new VarAssignNode(graph, scope, ref, expr));
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
@@ -1612,7 +1622,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     ctx, typeSpace, graph, finder, scope, frame, init);
                 DFNode value = ctx.getRValue();
                 if (value != null) {
-                    DFNode assign = new SingleAssignNode(graph, scope, ref, frag);
+                    DFNode assign = new VarAssignNode(graph, scope, ref, frag);
                     assign.accept(value);
                     ctx.set(assign);
                 }
@@ -2055,7 +2065,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFRef ref = loopScope.lookupVar(decl.getName());
         DFNode iterValue = new IterNode(graph, loopScope, ref, expr);
         iterValue.accept(ctx.getRValue());
-        SingleAssignNode assign = new SingleAssignNode(graph, loopScope, ref, expr);
+        VarAssignNode assign = new VarAssignNode(graph, loopScope, ref, expr);
         assign.accept(iterValue);
         loopCtx.set(assign);
         processStatement(
@@ -2442,7 +2452,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFRef ref = _scope.lookupArgument(i);
             DFNode input = new InputNode(graph, _scope, ref, decl);
             ctx.set(input);
-            DFNode assign = new SingleAssignNode(
+            DFNode assign = new VarAssignNode(
                 graph, _scope, _scope.lookupVar(decl.getName()), decl);
             assign.accept(input);
             ctx.set(assign);
@@ -2534,7 +2544,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                             graph, _scope,
                             DFNullType.NULL, null, "uninitialized");
                     }
-                    DFNode assign = new SingleAssignNode(
+                    DFNode assign = new VarAssignNode(
                         graph, _scope, ref, frag);
                     assign.accept(value);
                 }
