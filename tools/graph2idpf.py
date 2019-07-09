@@ -1,51 +1,108 @@
 #!/usr/bin/env python
 import sys
+import re
 from graph2idf import is_funcall, Cons, IDFBuilder
 
+REFS = ('ref_var', 'ref_field')
+ASSIGNS = ('assign_var', 'assign_field')
 
 IGNORED = frozenset([
     None, 'ref_var', 'ref_field', 'assign_var', 'assign_field',
     'receive', 'input', 'output', 'begin', 'end', 'repeat'])
 
-def getfeat(n0, label, n1):
-    if n1.kind in IGNORED:
-        return None
-    elif n1.data is None:
-        return '%s:%s' % (label, n1.kind)
-    elif is_funcall(n1):
-        (data,_,_) = n1.data.partition(' ')
-        return '%s:%s:%s' % (label, n1.kind, data)
-    else:
-        return '%s:%s:%s' % (label, n1.kind, n1.data)
+AUGMENTED = frozenset([
+    'call', 'op_infix',
+    'ref_array', 'ref_field',
+    'assign_array', 'assign_field'])
 
-def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
+WORD1 = re.compile(r'[A-Z]?[a-z]+$')
+WORD2 = re.compile(r'[A-Z]+$')
+def getnoun(name):
+    if name[-1].islower():
+        return WORD1.search(name).group(0).lower()
+    elif name[-1].isupper():
+        return WORD2.search(name).group(0).lower()
+    else:
+        return None
+
+def gettypenoun(name):
+    if name.endswith(';'):
+        return getnoun(name[:-1])
+    else:
+        return name
+
+def getmethodnoun(name):
+    assert '(' in name
+    (name,_,_) = name.partition('(')
+    if name.endswith(';.<init>'):
+        name = name[:-8]
+    return getnoun(name)
+
+def getfeat1(label, n):
+    if is_funcall(n):
+        (data,_,_) = n.data.partition(' ')
+        return '%s:%s:%s' % (label, n.kind, getmethodnoun(data))
+    elif n.kind in ('op_typecast', 'op_typecheck'):
+        return '%s:%s:%s' % (label, n.kind, gettypenoun(n.data))
+    elif n.data is None:
+        return '%s:%s' % (label, n.kind)
+    else:
+        return '%s:%s:%s' % (label, n.kind, n.data)
+
+def getfeat2(label, n):
+    if is_funcall(n):
+        (data,_,_) = n.data.partition(' ')
+        return '%s:%s:%s' % (label, n.kind, data)
+    elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):
+        return '%s:%s:%s' % (label, n.kind, getnoun(n.ref))
+    elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
+        return '%s:%s:STRING' % (label, n.kind)
+    elif n.kind in ('op_typecast', 'op_typecheck'):
+        return '%s:%s:%s' % (label, n.kind, gettypenoun(n.data))
+    elif n.kind in ('op_infix', 'value'):
+        return '%s:%s:%s' % (label, n.kind, n.data)
+    else:
+        return None
+
+def getfeats(n0, label, n1):
+    if n1.kind in IGNORED: return []
+    f1 = getfeat1(label, n1)
+    feats = [f1]
+    if n1.kind in AUGMENTED:
+        for (k,n2) in n1.inputs.items():
+            if k != label:
+                f2 = getfeat2(k, n2)
+                if f2 is not None:
+                    feats.append(f1+'|'+f2)
+    return feats
+
+def is_ref(ref):
+    return not (ref is None or ref.startswith('#') or ref.startswith('%'))
+
+def enum_forw(vtx, feats=None, chain=None, maxlen=5):
+    if feats is not None and maxlen < len(feats): return
     if chain is not None and vtx in chain: return
-    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.outputs:
         if label.startswith('_'): continue
-        feats = feats0
-        feat1 = getfeat(vtx.node, label, v.node)
-        if feat1 is not None:
-            feats = Cons((feat1, v.node), feats0)
-            yield feats
-        for z in enum_forw(v, feats, chain, maxlen):
-            yield z
+        if is_funcall(v.node) and not label.startswith('#'): continue
+        for feat1 in getfeats(vtx.node, label, v.node):
+            yield Cons((feat1, v.node), feats)
+            for z in enum_forw(v, feats, chain, maxlen):
+                yield z
     return
 
-def enum_back(vtx, feats0=None, chain=None, maxlen=5):
+def enum_back(vtx, feats=None, chain=None, maxlen=5):
+    if feats is not None and maxlen < len(feats): return
     if chain is not None and vtx in chain: return
-    if feats0 is not None and maxlen < len(feats0): return
     chain = Cons(vtx, chain)
     for (label,v) in vtx.inputs:
         if label.startswith('_'): continue
-        feats = feats0
-        feat1 = getfeat(v.node, label, vtx.node)
-        if feat1 is not None:
-            feats = Cons((feat1, v.node), feats0)
-            yield feats
-        for z in enum_back(v, feats, chain, maxlen):
-            yield z
+        if is_funcall(v.node) and not label.startswith('#'): continue
+        for feat1 in getfeats(vtx.node, label, v.node):
+            yield Cons((feat1, v.node), feats)
+            for z in enum_back(v, feats, chain, maxlen):
+                yield z
     return
 
 # main
@@ -96,16 +153,17 @@ def main(argv):
     for graph in builder.graphs:
         dbg.write('# gid: %r\n' % graph.name)
         for node in graph:
-            if node.kind not in ('ref_var','ref_field','assign_var','assign_field'): continue
-            if not node.ref.startswith('@'): continue
-            data = (node.ref, builder.getsrc(node))
-            fp.write('+ITEM %r\n' % (data,))
-            if node.kind in ('ref_var','ref_field'):
+            if node.kind in REFS:
                 enum = enum_forw
                 k = 'FORW'
-            else:
+            elif node.kind in ASSIGNS:
                 enum = enum_back
                 k = 'BACK'
+            else:
+                continue
+            if not is_ref(node.ref): continue
+            data = (node.ref, builder.getsrc(node))
+            fp.write('+ITEM %r\n' % (data,))
             for feats in enum(builder.vtxs[node], maxlen=maxlen):
                 if feats is None: continue
                 a = list(feats)
