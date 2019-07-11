@@ -15,7 +15,7 @@ class NaiveBayes:
 >>> b.add('other', ['sweet'], 10)
 >>> b.add('other', ['sweet','long'], 5)
 >>> b.add('other', ['yellow','long'], 5)
->>> b.fixate()
+>>> b.commit()
 >>> a = b.get(['long','sweet','yellow'])
 >>> [ k for (k,p) in a ]
 ['banana', 'other']
@@ -42,7 +42,7 @@ class NaiveBayes:
         self.kcount[key] += c
         return
 
-    def fixate(self):
+    def commit(self):
         for (k,v) in self.kcount.items():
             self.kprob[k] = math.log(v)
         for (f,d) in self.fcount.items():
@@ -69,7 +69,9 @@ class NaiveBayes:
                     keyp[k] = self.kprob[k]
                 keyp[k] += v - self.kprob[k]
         assert keyp
-        a = [ (k,math.exp(p)) for (k,p) in keyp.items() ]
+        # prevent exp(x) overflow by adjusting the maximum log to zero.
+        m = max(keyp.values())
+        a = [ (k,math.exp(p-m)) for (k,p) in keyp.items() ]
         z = sum( p for (_,p) in a )
         a = [ (k,p/z) for (k,p) in a if keys[k] == len(feats) ]
         a.sort(key=lambda x:x[1], reverse=True)

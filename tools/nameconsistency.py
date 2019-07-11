@@ -60,8 +60,8 @@ def main(argv):
             nb1.add(c.noun1, (c.noun0, feats))
             nb0.add(c.noun0, (c.noun1, feats))
             a.append(c)
-    nb0.fixate()
-    nb1.fixate()
+    nb0.commit()
+    nb1.commit()
 
     T = 10
     for c in chains:
