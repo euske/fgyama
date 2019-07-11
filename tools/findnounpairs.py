@@ -71,7 +71,7 @@ def getfeats(n0, label, n1):
     feats = [f1]
     if n1.kind in AUGMENTED:
         for (k,n2) in n1.inputs.items():
-            if k != label:
+            if n2 is not n0 and k != label:
                 f2 = getfeat2(k, n2)
                 if f2 is not None:
                     feats.append(f1+'|'+f2)

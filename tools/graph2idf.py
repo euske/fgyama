@@ -171,17 +171,18 @@ class IDFBuilder:
                         if gid not in self.gid2graph: continue
                         func = self.gid2graph[gid]
                         for n1 in func.ins:
+                            assert n1.kind == 'input'
                             label = n1.ref
                             if label in node.inputs:
                                 self.getvtx(node.inputs[label]).connect(
                                     label, self.getvtx(n1))
                         for n1 in func.outs:
+                            assert n1.kind == 'output'
                             vtx1 = self.getvtx(n1)
                             for (label,n2) in node.outputs:
-                                if label == 'update' and n1.ref == n2.ref:
-                                    vtx1.connect(label, self.getvtx(n2))
-                                elif label == 'return':
-                                    vtx1.connect(label, self.getvtx(n2))
+                                assert n2.kind == 'receive'
+                                assert n2.ref == label or n2.ref is None
+                                vtx1.connect(label, self.getvtx(n2))
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
