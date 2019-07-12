@@ -14,6 +14,11 @@ def q(s):
 def qp(props):
     return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
 
+def sr(ref):
+    if ref is None: return 'None'
+    (_,_,ref) = ref.rpartition('/')
+    return ref
+
 def write_gv(out, scope, highlight=None, level=0, name=None):
     h = ' '*level
     if name is None:
@@ -24,17 +29,23 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         out.write(h+'subgraph %s {\n' % q("cluster_"+name))
     out.write(h+' label=%s;\n' % q(name))
     for node in scope.nodes:
-        if node.kind in ('join','begin','end'):
+        kind = node.kind
+        if kind in ('join','begin','end'):
             styles = {'shape': 'diamond',
-                      'label': '%s (%s)' % (node.kind, node.ref)}
-        elif node.kind in ('input','output','receive'):
-            styles = {'shape': 'box',
-                      'label': '%s (%s)' % (node.kind, node.ref)}
-        elif node.kind.startswith('op_'):
+                      'label': '%s (%s)' % (kind, sr(node.ref))}
+        elif kind in ('value', 'valueset'):
             styles = {'shape': 'box', 'fontname':'courier',
-                      'label': (node.data or '')}
+                      'label': node.data}
+        elif kind in ('input','output','receive'):
+            styles = {'label': '%s (%s)' % (kind, sr(node.ref))}
+        elif kind in ('call','new'):
+            styles = {'fontname':'courier',
+                      'label': sr(node.data)}
+        elif kind.startswith('op_'):
+            styles = {'fontname':'courier',
+                      'label': (node.data or kind)}
         else:
-            styles = {'label': node.ref}
+            styles = {'label': sr(node.ref)}
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
         out.write(h+' N%s [%s];\n' % (node.nid, qp(styles)))
