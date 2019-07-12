@@ -8,34 +8,34 @@
       <ast end="161" start="107" type="31"/>
       <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161">
         <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161.:Block:132:161">
-          <node id="Nede5cb52_3" kind="ref_var" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
-            <link src="Nede5cb52_1"/>
+          <node id="G60_foo_N3" kind="ref_var" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+            <link src="G60_foo_N1"/>
             <ast end="138" start="135" type="42"/>
           </node>
-          <node data="1" id="Nede5cb52_4" kind="value" type="I">
+          <node data="1" id="G60_foo_N4" kind="value" type="I">
             <ast end="152" start="151" type="34"/>
           </node>
-          <node data="Ljava/lang/Math;.sin(D)D" id="Nede5cb52_5" kind="call" type="D">
-            <link label="#arg0" src="Nede5cb52_4"/>
-            <link label="#this" src="Nede5cb52_2"/>
+          <node data="Ljava/lang/Math;.sin(D)D" id="G60_foo_N5" kind="call" type="D">
+            <link label="#arg0" src="G60_foo_N4"/>
+            <link label="#this" src="G60_foo_N2"/>
             <ast end="153" start="147" type="32"/>
           </node>
-          <node id="Nede5cb52_6" kind="receive" type="D">
-            <link label="#return" src="Nede5cb52_5"/>
+          <node id="G60_foo_N6" kind="receive" type="D">
+            <link label="#return" src="G60_foo_N5"/>
             <ast end="153" start="147" type="32"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(D)V" id="Nede5cb52_7" kind="call" type="V">
-            <link label="#arg0" src="Nede5cb52_6"/>
-            <link label="#this" src="Nede5cb52_3"/>
+          <node data="Ljava/io/PrintStream;.println(D)V" id="G60_foo_N7" kind="call" type="V">
+            <link label="#arg0" src="G60_foo_N6"/>
+            <link label="#this" src="G60_foo_N3"/>
             <ast end="154" start="135" type="32"/>
           </node>
-          <node id="Nede5cb52_8" kind="receive" type="V">
-            <link label="#return" src="Nede5cb52_7"/>
+          <node id="G60_foo_N8" kind="receive" type="V">
+            <link label="#return" src="G60_foo_N7"/>
             <ast end="154" start="135" type="32"/>
           </node>
         </scope>
-        <node id="Nede5cb52_1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="Nede5cb52_2" kind="input" ref="#this" type="Lbasic_staticimport;"/>
+        <node id="G60_foo_N1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="G60_foo_N2" kind="input" ref="#this" type="Lbasic_staticimport;"/>
       </scope>
     </method>
   </class>
