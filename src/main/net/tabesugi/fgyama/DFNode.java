@@ -43,7 +43,7 @@ class DFLink {
 public class DFNode implements Comparable<DFNode> {
 
     private DFGraph _graph;
-    private int _id;
+    private int _nid;
     private DFVarScope _scope;
     private DFType _type;
     private DFRef _ref;
@@ -59,7 +59,7 @@ public class DFNode implements Comparable<DFNode> {
         assert scope != null;
         assert type != null;
         _graph = graph;
-        _id = graph.addNode(this);
+        _nid = graph.addNode(this);
         _scope = scope;
         _type = type;
         _ref = ref;
@@ -72,7 +72,7 @@ public class DFNode implements Comparable<DFNode> {
 
     @Override
     public int compareTo(DFNode node) {
-        return _id - node._id;
+        return _nid - node._nid;
     }
 
     public Element toXML(Document document) {
@@ -107,7 +107,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public String getNodeId() {
-        return ("N"+_graph.getHash()+"_"+_id);
+        return (_graph.getGraphId()+"_N"+_nid);
     }
 
     public String getKind() {

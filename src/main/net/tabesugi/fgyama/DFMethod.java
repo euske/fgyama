@@ -2573,13 +2573,15 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     // DFGraph methods.
 
-    private String _hash = null;
+    private static int _graphIdBase = 1;
+    private int _graphId = 0;
 
-    public String getHash() {
-        if (_hash == null) {
-            _hash = Utils.hashString(this.getSignature());
+    public String getGraphId() {
+        if (_graphId == 0) {
+            // Assign a unique id.
+            _graphId = _graphIdBase++;
         }
-        return _hash;
+        return "G"+_graphId+"_"+_name;
     }
 
     private List<DFNode> _nodes =

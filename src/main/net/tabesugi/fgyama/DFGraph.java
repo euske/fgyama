@@ -10,7 +10,7 @@ import org.w3c.dom.*;
 //
 interface DFGraph {
 
-    String getHash();
+    String getGraphId();
     Element toXML(Document document);
     int addNode(DFNode node);
 
