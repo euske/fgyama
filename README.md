@@ -62,37 +62,47 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
 ## Node types (kinds):
 
-| Kind         | Data                |
-| ------------ | ------------------- |
-| value        | Actual value        |
-| valueset     | Value count         |
-| op_assign    | Assignment operator |
-| op_prefix    | Prefix operator     |
-| op_infix     | Infix operator      |
-| op_postfix   | Postfix operator    |
-| op_typecast  | Casting type        |
-| op_typecheck | Checking type       |
-| op_iter      |                     |
-| ref_var      |                     |
-| ref_array    |                     |
-| ref_field    |                     |
-| assign_var   |                     |
-| assign_array |                     |
-| assign_field |                     |
-| ------------ | ------------------- |
-| call         | Method IDs          |
-| new          | Method ID           |
-| input        |                     |
-| output       |                     |
-| receive      |                     |
-| throw        |                     |
-| catch        |                     |
-| ------------ | ------------------- |
-| join         |                     |
-| begin        |                     |
-| end          |                     |
-| repeat       |                     |
-| case         | Label count         |
+### Basic Operations
+
+| Kind         | Data                | Input(s)                     |
+| ------------ | ------------------- | -----------------------------|
+| value        | Actual value        |                              |
+| valueset     | Value count         | Multiple nodes               |
+| op_assign    | Assignment operator | L, R                         |
+| op_prefix    | Prefix operator     | Default                      |
+| op_infix     | Infix operator      | L, R                         |
+| op_postfix   | Postfix operator    | Default                      |
+| op_typecast  | Casting type        | Default                      |
+| op_typecheck | Checking type       | Default                      |
+| op_iter      |                     | Default                      |
+| ref_var      |                     | Default                      |
+| ref_array    |                     | Default, array, index        |
+| ref_field    |                     | Default, obj                 |
+| assign_var   |                     | Default                      |
+| assign_array |                     | Default, array, index        |
+| assign_field |                     | Default, obj                 |
+
+### Function Call
+
+| Kind         | Data                | Input(s)                     |
+| ------------ | ------------------- | -----------------------------|
+| call         | Method IDs          | #this, #arg0, ..., Fields    |
+| new          | Method ID           | #this, #arg0, ..., Fields    |
+| input        |                     |                              |
+| output       |                     | Default                      |
+| receive      |                     | #return, Fields              |
+| throw        |                     |                              |
+| catch        |                     |                              |
+
+### Control Flow
+
+| Kind         | Data                | Input(s)                     |
+| ------------ | ------------------- | -----------------------------|
+| join         |                     | cond, true, false            |
+| begin        |                     | enter, repeat, _end          |
+| end          |                     | Default, cond, _begin        |
+| repeat       |                     | Default, _loop               |
+| case         | Label count         | Default, match0, match1, ... |
 
 ## Coding style:
 
