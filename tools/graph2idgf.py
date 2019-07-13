@@ -1,13 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph2idf import Cons, IDFBuilder
-
-def clen(x):
-    if x is None:
-        return 0
-    else:
-        return len(x)
+from graph2idf import IDFBuilder
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field')

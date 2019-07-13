@@ -6,6 +6,12 @@ from graph import DFGraph, get_graphs
 def is_funcall(node):
     return node.kind in ('call', 'new')
 
+def clen(x):
+    if x is None:
+        return 0
+    else:
+        return len(x)
+
 
 ##  Cons
 ##
