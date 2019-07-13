@@ -64,45 +64,45 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
 ### Basic Operations
 
-| Kind         | Data                | Input(s)                     |
-| ------------ | ------------------- | -----------------------------|
-| value        | Actual value        |                              |
-| valueset     | Value count         | Multiple nodes               |
-| op_assign    | Assignment operator | L, R                         |
-| op_prefix    | Prefix operator     | Default                      |
-| op_infix     | Infix operator      | L, R                         |
-| op_postfix   | Postfix operator    | Default                      |
-| op_typecast  | Casting type        | Default                      |
-| op_typecheck | Checking type       | Default                      |
-| op_iter      |                     | Default                      |
-| ref_var      |                     | Default                      |
-| ref_array    |                     | Default, array, index        |
-| ref_field    |                     | Default, obj                 |
-| assign_var   |                     | Default                      |
-| assign_array |                     | Default, array, index        |
-| assign_field |                     | Default, obj                 |
+| Kind         | Data                | Input(s)                       |
+| ------------ | ------------------- | -------------------------------|
+| value        | Actual value        |                                |
+| valueset     | Value count         | value0, value1, ...            |
+| op_assign    | Assignment operator | L, R                           |
+| op_prefix    | Prefix operator     | (default)                      |
+| op_infix     | Infix operator      | L, R                           |
+| op_postfix   | Postfix operator    | (default)                      |
+| op_typecast  | Casting type        | (default)                      |
+| op_typecheck | Checking type       | (default)                      |
+| op_iter      |                     | (default)                      |
+| ref_var      |                     | (default)                      |
+| ref_array    |                     | (default), array, index        |
+| ref_field    |                     | (default), obj                 |
+| assign_var   |                     | (default)                      |
+| assign_array |                     | (default), array, index        |
+| assign_field |                     | (default), obj                 |
 
 ### Function Call
 
-| Kind         | Data                | Input(s)                     |
-| ------------ | ------------------- | -----------------------------|
-| call         | Method IDs          | #this, #arg0, ..., Fields    |
-| new          | Method ID           | #this, #arg0, ..., Fields    |
-| input        |                     |                              |
-| output       |                     | Default                      |
-| receive      |                     | #return, Fields              |
-| throw        |                     |                              |
-| catch        |                     |                              |
+| Kind         | Data                | Input(s)                       |
+| ------------ | ------------------- | -------------------------------|
+| call         | Method IDs          | #this, #arg0, ..., Fields      |
+| new          | Method ID           | #this, #arg0, ..., Fields      |
+| input        |                     |                                |
+| output       |                     | (default)                      |
+| receive      |                     | #return, Fields                |
+| throw        |                     |                                |
+| catch        |                     |                                |
 
 ### Control Flow
 
-| Kind         | Data                | Input(s)                     |
-| ------------ | ------------------- | -----------------------------|
-| join         |                     | cond, true, false            |
-| begin        |                     | enter, repeat, _end          |
-| end          |                     | Default, cond, _begin        |
-| repeat       |                     | Default, _loop               |
-| case         | Label count         | Default, match0, match1, ... |
+| Kind         | Data                | Input(s)                       |
+| ------------ | ------------------- | -------------------------------|
+| join         |                     | cond, true, false              |
+| begin        | Loop ID             | enter, repeat                  |
+| end          | Loop ID             | (default), cond, _repeat       |
+| repeat       | Loop ID             | (default), _end                |
+| case         | Label count         | (default), match0, match1, ... |
 
 ## Coding style:
 
