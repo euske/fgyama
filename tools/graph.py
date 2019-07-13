@@ -50,10 +50,7 @@ class DFGraph:
             for (label,name) in node.inputs.items():
                 src = self.nodes[name]
                 node.inputs[label] = src
-                # links with _ in its name is informational.
-                # and should not be considered as a real dataflow.
-                if not label.startswith('_'):
-                    src.outputs.append((label, node))
+                src.outputs.append((label, node))
         return self
 
     def toxml(self):
@@ -161,6 +158,8 @@ class DFNode:
 
     def get_inputs(self):
         for (label,src) in self.inputs.items():
+            # links with _ in its name is informational.
+            # and should not be considered as a real dataflow.
             if not label.startswith('_'):
                 yield (label, src)
         return

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph2idf import is_funcall, Cons, IDFBuilder
+from graph2idf import Cons, IDFBuilder
 
 def clen(x):
     if x is None:
@@ -9,23 +9,20 @@ def clen(x):
     else:
         return len(x)
 
+CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field')
 ASSIGNS = ('assign_var', 'assign_field')
+CONDS = ('join', 'begin', 'end', 'case')
 
-IGNORED = frozenset([
-    None, # 'ref_var', 'ref_field', 'assign_var', 'assign_field',
-    'receive', 'input', 'output', 'begin', 'end', 'repeat'])
+IGNORED = (None, 'receive', 'input', 'output', 'repeat')
 
-def is_ignored(n):
-    return n.kind in IGNORED
-
-def is_transparent(n):
-    return (n.kind in REFS or n.kind in ASSIGNS)
-
-AUGMENTED = frozenset([
+AUGMENTED = (
     'call', 'op_infix',
     'ref_array', 'ref_field',
-    'assign_array', 'assign_field'])
+    'assign_array', 'assign_field')
+
+def is_ref(ref):
+    return not (ref is None or ref.startswith('#') or ref.startswith('%'))
 
 WORD1 = re.compile(r'[A-Z]?[a-z]+$')
 WORD2 = re.compile(r'[A-Z]+$')
@@ -51,11 +48,13 @@ def getmethodnoun(name):
     return getnoun(name)
 
 def getfeat(n):
-    if is_funcall(n):
+    if n.kind in CALLS:
         (data,_,_) = n.data.partition(' ')
         return '%s:%s' % (n.kind, getmethodnoun(data))
-    elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):
+    elif n.kind in REFS or n.kind in ASSIGNS:
         return '%s:%s' % (n.kind, getnoun(n.ref))
+    elif n.kind in CONDS:
+        return n.kind
     elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
         return '%s:STRING' % (n.kind)
     elif n.kind in ('op_typecast', 'op_typecheck'):
@@ -65,19 +64,16 @@ def getfeat(n):
     else:
         return '%s:%s' % (n.kind, n.data)
 
-def is_ref(ref):
-    return not (ref is None or ref.startswith('#') or ref.startswith('%'))
-
 def enum_forw(r, v0, v1, fprev=None, dist=0, maxdist=5):
     if maxdist <= dist: return
     if (v0,v1) in r: return
     feats = r[(v0,v1)] = []
     n1 = v1.node
     for (link,v2) in v1.outputs:
-        if link.startswith('_'): continue
+        if link.startswith('_') and link != '_end': continue
         n2 = v2.node
-        if is_funcall(n2) and not link.startswith('#'): continue
-        if is_ignored(n2) or n2.kind in REFS:
+        if n2.kind in CALLS and not link.startswith('#'): continue
+        if n2.kind in IGNORED or n2.kind in REFS:
             enum_forw(r, v0, v2, fprev, dist, maxdist)
         else:
             if n2.kind in ASSIGNS:
@@ -93,12 +89,12 @@ def enum_back(r, v0, v1, fprev=None, loverride=None, dist=0, maxdist=5):
     feats = r[(v0,v1)] = []
     n1 = v1.node
     for (link,v2) in v1.inputs:
-        if link.startswith('_'): continue
+        if link.startswith('_') and link != '_end': continue
         n2 = v2.node
-        if is_funcall(n1) and not link.startswith('#'): continue
+        if n1.kind in CALLS and not link.startswith('#'): continue
         if loverride is not None:
             link = loverride
-        if is_ignored(n2) or n2.kind in ASSIGNS:
+        if n2.kind in IGNORED or n2.kind in ASSIGNS:
             enum_back(r, v0, v2, fprev, link, dist, maxdist)
         else:
             if n2.kind in REFS:
