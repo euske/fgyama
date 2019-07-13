@@ -30,7 +30,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     out.write(h+' label=%s;\n' % q(name))
     for node in scope.nodes:
         kind = node.kind
-        if kind in ('join','begin','end'):
+        if kind in ('join','begin','end','repeat','case'):
             styles = {'shape': 'diamond',
                       'label': '%s (%s)' % (kind, sr(node.ref))}
         elif kind in ('value', 'valueset'):
@@ -58,7 +58,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                     styles = {}
                 elif label == 'cond':
                     styles = {'style': 'dotted', 'label': label}
-                elif label == '_loop':
+                elif label == '_end':
                     styles = {'style': 'dashed', 'constraint': 'false'}
                 elif label.startswith('_'):
                     continue

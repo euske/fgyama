@@ -455,10 +455,6 @@ class LoopBeginNode extends LoopNode {
     public void setRepeat(DFNode repeat) {
         this.accept(repeat, "repeat");
     }
-
-    public void setEnd(LoopEndNode end) {
-        this.accept(end, "_end");
-    }
 }
 
 // LoopEndNode
@@ -476,8 +472,8 @@ class LoopEndNode extends LoopNode {
         return "end";
     }
 
-    public void setBegin(LoopBeginNode begin) {
-        this.accept(begin, "_begin");
+    public void setRepeat(LoopRepeatNode repeat) {
+        this.accept(repeat, "_repeat");
     }
 }
 
@@ -495,8 +491,8 @@ class LoopRepeatNode extends LoopNode {
         return "repeat";
     }
 
-    public void setLoop(DFNode end) {
-        this.accept(end, "_loop");
+    public void setEnd(DFNode end) {
+        this.accept(end, "_end");
     }
 }
 
@@ -1656,8 +1652,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 graph, scope, ref, ast, loopId);
             LoopEndNode end = new LoopEndNode(
                 graph, scope, ref, ast, loopId, condValue);
-            begin.setEnd(end);
-            end.setBegin(begin);
+            end.setRepeat(repeat);
             begins.put(ref, begin);
             ends.put(ref, end);
             repeats.put(ref, repeat);
@@ -1748,7 +1743,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFNode end = ends.get(ref);
             LoopRepeatNode repeat = repeats.get(ref);
             ctx.set(end);
-            repeat.setLoop(end);
+            repeat.setEnd(end);
         }
     }
 
