@@ -24,18 +24,17 @@
               </node>
             </scope>
             <node data=":WhileStatement:65:97" id="G49_foo_N11" kind="begin" ref="$Lbasic_while;.:MethodDeclaration:32:109/$x" type="I">
-              <link label="_end" src="G49_foo_N13"/>
               <link label="enter" src="G49_foo_N2"/>
               <link label="repeat" src="G49_foo_N8"/>
               <ast end="97" start="65" type="61"/>
             </node>
             <node data=":WhileStatement:65:97" id="G49_foo_N12" kind="repeat" ref="$Lbasic_while;.:MethodDeclaration:32:109/$x" type="I">
-              <link label="_loop" src="G49_foo_N13"/>
+              <link label="_end" src="G49_foo_N13"/>
               <ast end="97" start="65" type="61"/>
             </node>
             <node data=":WhileStatement:65:97" id="G49_foo_N13" kind="end" ref="$Lbasic_while;.:MethodDeclaration:32:109/$x" type="I">
               <link src="G49_foo_N11"/>
-              <link label="_begin" src="G49_foo_N11"/>
+              <link label="_repeat" src="G49_foo_N12"/>
               <link label="cond" src="G49_foo_N7"/>
               <ast end="97" start="65" type="61"/>
             </node>

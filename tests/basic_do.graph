@@ -48,34 +48,32 @@
               <ast end="116" start="111" type="27"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N17" kind="begin" ref="$Lbasic_do;.:MethodDeclaration:29:135/$x" type="I">
-              <link label="_end" src="G57_foo_N19"/>
               <link label="enter" src="G57_foo_N2"/>
               <link label="repeat" src="G57_foo_N18"/>
               <ast end="118" start="73" type="19"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N18" kind="repeat" ref="$Lbasic_do;.:MethodDeclaration:29:135/$x" type="I">
-              <link label="_loop" src="G57_foo_N19"/>
+              <link label="_end" src="G57_foo_N19"/>
               <ast end="118" start="73" type="19"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N19" kind="end" ref="$Lbasic_do;.:MethodDeclaration:29:135/$x" type="I">
               <link src="G57_foo_N6"/>
-              <link label="_begin" src="G57_foo_N17"/>
+              <link label="_repeat" src="G57_foo_N18"/>
               <link label="cond" src="G57_foo_N16"/>
               <ast end="118" start="73" type="19"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N20" kind="begin" ref="$Lbasic_do;.:MethodDeclaration:29:135.:Block:58:135/$n" type="I">
-              <link label="_end" src="G57_foo_N22"/>
               <link label="enter" src="G57_foo_N5"/>
               <link label="repeat" src="G57_foo_N21"/>
               <ast end="118" start="73" type="19"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N21" kind="repeat" ref="$Lbasic_do;.:MethodDeclaration:29:135.:Block:58:135/$n" type="I">
-              <link label="_loop" src="G57_foo_N22"/>
+              <link label="_end" src="G57_foo_N22"/>
               <ast end="118" start="73" type="19"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N22" kind="end" ref="$Lbasic_do;.:MethodDeclaration:29:135.:Block:58:135/$n" type="I">
               <link src="G57_foo_N10"/>
-              <link label="_begin" src="G57_foo_N20"/>
+              <link label="_repeat" src="G57_foo_N21"/>
               <link label="cond" src="G57_foo_N16"/>
               <ast end="118" start="73" type="19"/>
             </node>

@@ -42,18 +42,17 @@
               </node>
             </scope>
             <node data=":WhileStatement:65:123" id="G16_foo_N14" kind="begin" ref="$Lbasic_break;.:MethodDeclaration:32:135/$x" type="I">
-              <link label="_end" src="G16_foo_N16"/>
               <link label="enter" src="G16_foo_N2"/>
               <link label="repeat" src="G16_foo_N11"/>
               <ast end="123" start="65" type="61"/>
             </node>
             <node data=":WhileStatement:65:123" id="G16_foo_N15" kind="repeat" ref="$Lbasic_break;.:MethodDeclaration:32:135/$x" type="I">
-              <link label="_loop" src="G16_foo_N16"/>
+              <link label="_end" src="G16_foo_N16"/>
               <ast end="123" start="65" type="61"/>
             </node>
             <node data=":WhileStatement:65:123" id="G16_foo_N16" kind="end" ref="$Lbasic_break;.:MethodDeclaration:32:135/$x" type="I">
               <link src="G16_foo_N14"/>
-              <link label="_begin" src="G16_foo_N14"/>
+              <link label="_repeat" src="G16_foo_N15"/>
               <link label="cond" src="G16_foo_N4"/>
               <ast end="123" start="65" type="61"/>
             </node>

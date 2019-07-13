@@ -33,18 +33,17 @@
               <ast end="91" start="90" type="42"/>
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N13" kind="begin" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
-              <link label="_end" src="G56_foo_N15"/>
               <link label="enter" src="G56_foo_N5"/>
               <link label="repeat" src="G56_foo_N9"/>
               <ast end="110" start="77" type="70"/>
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N14" kind="repeat" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
-              <link label="_loop" src="G56_foo_N15"/>
+              <link label="_end" src="G56_foo_N15"/>
               <ast end="110" start="77" type="70"/>
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N15" kind="end" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
               <link src="G56_foo_N13"/>
-              <link label="_begin" src="G56_foo_N13"/>
+              <link label="_repeat" src="G56_foo_N14"/>
               <link label="cond" src="G56_foo_N7"/>
               <ast end="110" start="77" type="70"/>
             </node>
