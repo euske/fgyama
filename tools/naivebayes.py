@@ -17,8 +17,8 @@ class NaiveBayes:
 >>> b.add('other', ['yellow','long'], 5)
 >>> b.commit()
 >>> a = b.get(['long','sweet','yellow'])
->>> [ k for (k,p) in a ]
-['banana', 'other']
+>>> [ (k, [ f for (q,f) in fs ]) for (k,p,fs) in a ]
+[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
 """
 
     def __init__(self):
@@ -54,8 +54,9 @@ class NaiveBayes:
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
-        keyp = {}
         keys = {}
+        keyp = {}
+        keyf = {}
         for f in feats:
             if f not in self.fprob: continue
             d = self.fprob[f]
@@ -65,15 +66,20 @@ class NaiveBayes:
                     keys[k] = 0
                 keys[k] += 1
                 if k not in self.kprob: continue
+                p0 = self.kprob[k]
+                p1 = v - p0
                 if k not in keyp:
-                    keyp[k] = self.kprob[k]
-                keyp[k] += v - self.kprob[k]
+                    keyp[k] = p0
+                    keyf[k] = []
+                keyp[k] += p1
+                keyf[k].append((f, p1))
         assert keyp
         # prevent exp(x) overflow by adjusting the maximum log to zero.
         m = max(keyp.values())
-        a = [ (k,math.exp(p-m)) for (k,p) in keyp.items() ]
+        a = [ (k,math.exp(p-m)) for (k,p) in keyp.items() if keys[k] == len(feats) ]
         z = sum( p for (_,p) in a )
-        a = [ (k,p/z) for (k,p) in a if keys[k] == len(feats) ]
+        a = [ (k,p/z, sorted(( (math.exp(q-m)/z,f) for (f,q) in keyf[k] ), reverse=True))
+              for (k,p) in a ]
         a.sort(key=lambda x:x[1], reverse=True)
         if n:
             a = a[:n]
