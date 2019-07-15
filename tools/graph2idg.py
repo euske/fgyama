@@ -18,41 +18,66 @@ AUGMENTED = (
 def is_ref(ref):
     return not (ref is None or ref.startswith('#') or ref.startswith('%'))
 
+NAME = re.compile(r'\w+$', re.U)
+def striplast(name):
+    m = NAME.search(name)
+    if m:
+        return m.group(0)
+    else:
+        return None
+
+def striptypename(name):
+    if name.endswith(';'):
+        name = name[:-1]
+    return striplast(name)
+
+def stripmethodname(name):
+    assert '(' in name
+    (name,_,_) = name.partition('(')
+    if name.endswith(';.<init>'):
+        name = name[:-8]
+    return striplast(name)
+
 WORD1 = re.compile(r'[A-Z]?[a-z]+$')
 WORD2 = re.compile(r'[A-Z]+$')
 def getnoun(name):
-    if name[-1].islower():
+    if name is None:
+        return None
+    elif name[-1].islower():
         return WORD1.search(name).group(0).lower()
     elif name[-1].isupper():
         return WORD2.search(name).group(0).lower()
     else:
         return None
 
-def gettypenoun(name):
-    if name.endswith(';'):
-        return getnoun(name[:-1])
-    else:
-        return name
-
-def getmethodnoun(name):
-    assert '(' in name
-    (name,_,_) = name.partition('(')
-    if name.endswith(';.<init>'):
-        name = name[:-8]
-    return getnoun(name)
+WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+')
+def splitwords(s):
+    """
+    >>> splitwords('name')
+    ['name']
+    >>> splitwords('this_is_name_!')
+    ['name', 'is', 'this']
+    >>> splitwords('thisIsName')
+    ['Name', 'Is', 'this']
+    >>> splitwords('SomeXMLStuff')
+    ['Stuff', 'XML', 'Some']
+"""
+    n = len(s)
+    r = ''.join(reversed(s))
+    return [ s[n-m.end(0):n-m.start(0)] for m in WORD.finditer(r) ]
 
 def getfeat(n):
     if n.kind in CALLS:
         (data,_,_) = n.data.partition(' ')
-        return '%s:%s' % (n.kind, getmethodnoun(data))
+        return '%s:%s' % (n.kind, getnoun(stripmethodname(data)))
     elif n.kind in REFS or n.kind in ASSIGNS:
-        return '%s:%s' % (n.kind, getnoun(n.ref))
+        return '%s:%s' % (n.kind, getnoun(striplast(n.ref)))
     elif n.kind in CONDS:
         return n.kind
     elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
         return '%s:STRING' % (n.kind)
     elif n.kind in ('op_typecast', 'op_typecheck'):
-        return '%s:%s' % (n.kind, gettypenoun(n.data))
+        return '%s:%s' % (n.kind, getnoun(striptypename(n.data)))
     elif n.data is None:
         return '%s' % (n.kind)
     else:
@@ -167,10 +192,10 @@ def main(argv):
                 continue
             items.add(item)
             data = item + (builder.getsrc(node),)
-            fp.write('+ITEM %r\n' % (data,))
+            fp.write('! %r\n' % (data,))
             for (t, dist,f0,f1,n) in feats:
                 data = (t, dist, f0, f1, builder.getsrc(n))
-                fp.write('+FEATURE %r\n' % (data,))
+                fp.write('+ %r\n' % (data,))
             nfeats += len(feats)
     print('Items: %r, Features: %r' % (len(items), nfeats), file=sys.stderr)
 
