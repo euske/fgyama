@@ -58,30 +58,31 @@ def splitwords(s):
     >>> splitwords('this_is_name_!')
     ['name', 'is', 'this']
     >>> splitwords('thisIsName')
-    ['Name', 'Is', 'this']
+    ['name', 'is', 'this']
     >>> splitwords('SomeXMLStuff')
-    ['Stuff', 'XML', 'Some']
+    ['stuff', 'xml', 'some']
 """
+    if s is None: return []
     n = len(s)
     r = ''.join(reversed(s))
-    return [ s[n-m.end(0):n-m.start(0)] for m in WORD.finditer(r) ]
+    return [ s[n-m.end(0):n-m.start(0)].lower() for m in WORD.finditer(r) ]
 
-def getfeat(n):
+def getfeats(n):
     if n.kind in CALLS:
         (data,_,_) = n.data.partition(' ')
-        return '%s:%s' % (n.kind, getnoun(stripmethodname(data)))
+        return [ '%s:%s' % (n.kind, w) for w in splitwords(stripmethodname(data)) ]
     elif n.kind in REFS or n.kind in ASSIGNS:
-        return '%s:%s' % (n.kind, getnoun(striplast(n.ref)))
+        return [ '%s:%s' % (n.kind, w) for w in splitwords(striplast(n.ref)) ]
     elif n.kind in CONDS:
-        return n.kind
+        return [ n.kind ]
     elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
-        return '%s:STRING' % (n.kind)
+        return [ '%s:STRING' % (n.kind) ]
     elif n.kind in ('op_typecast', 'op_typecheck'):
-        return '%s:%s' % (n.kind, getnoun(striptypename(n.data)))
+        return [ '%s:%s' % (n.kind, w) for w in splitwords(striptypename(n.data)) ]
     elif n.data is None:
-        return '%s' % (n.kind)
+        return [ n.kind ]
     else:
-        return '%s:%s' % (n.kind, n.data)
+        return [ '%s:%s' % (n.kind, n.data) ]
 
 def enum_forw(feats, done, v1, v0=None, fprev=None, dist=0, maxdist=5):
     if maxdist <= dist: return
@@ -97,9 +98,11 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, dist=0, maxdist=5):
         else:
             if n2.kind in ASSIGNS:
                 enum_forw(feats, done, v2, v0, fprev, dist, maxdist)
-            feat1 = link+':'+getfeat(n2)
-            feats.add(('FORW',dist,fprev,feat1,n2))
-            enum_forw(feats, done, v2, v1, feat1, dist+1, maxdist)
+            fs = [ link+':'+f for f in getfeats(n2) ]
+            for f in fs:
+                feats.add(('FORW',dist,fprev,f,n2))
+            if fs:
+                enum_forw(feats, done, v2, v1, fs[0], dist+1, maxdist)
     return
 
 def enum_back(feats, done, v1, v0=None, fprev=None, loverride=None, dist=0, maxdist=5):
@@ -118,9 +121,11 @@ def enum_back(feats, done, v1, v0=None, fprev=None, loverride=None, dist=0, maxd
         else:
             if n2.kind in REFS:
                 enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
-            feat1 = link+':'+getfeat(n2)
-            feats.add(('BACK',dist,fprev,feat1,n2))
-            enum_back(feats, done, v2, v1, feat1, None, dist+1, maxdist)
+            fs = [ link+':'+f for f in getfeats(n2) ]
+            for f in fs:
+                feats.add(('BACK',dist,fprev,f,n2))
+            if fs:
+                enum_back(feats, done, v2, v1, fs[0], None, dist+1, maxdist)
     return
 
 # main
