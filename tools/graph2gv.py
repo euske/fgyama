@@ -41,7 +41,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         elif kind in ('call','new'):
             styles = {'fontname':'courier',
                       'label': sr(node.data)}
-        elif kind.startswith('op_'):
+        elif kind is not None and kind.startswith('op_'):
             styles = {'fontname':'courier',
                       'label': (node.data or kind)}
         else:
