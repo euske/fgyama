@@ -17,7 +17,7 @@ class NaiveBayes:
 >>> b.add('other', ['yellow','long'], 5)
 >>> b.commit()
 >>> a = b.get(['long','sweet','yellow'])
->>> [ (k, [ f for (q,f) in fs ]) for (k,p,fs) in a ]
+>>> [ (k, fs) for (k,p,fs) in a ]
 [('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
 """
 
@@ -72,13 +72,13 @@ class NaiveBayes:
                     keyp[k] = p0
                     keyf[k] = []
                 keyp[k] += p1
-                keyf[k].append((f, p1))
+                keyf[k].append((p1, f))
         assert keyp
         # prevent exp(x) overflow by adjusting the maximum log to zero.
         m = max(keyp.values())
         a = [ (k,math.exp(p-m)) for (k,p) in keyp.items() if keys[k] == len(feats) ]
         z = sum( p for (_,p) in a )
-        a = [ (k,p/z, sorted(( (math.exp(q-m)/z,f) for (f,q) in keyf[k] ), reverse=True))
+        a = [ (k,p/z,[ f for (_,f) in sorted(keyf[k], reverse=True)])
               for (k,p) in a ]
         a.sort(key=lambda x:x[1], reverse=True)
         if n:
