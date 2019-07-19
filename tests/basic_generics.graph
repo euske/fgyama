@@ -108,7 +108,8 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" generic="Lbasic_generics/Moo&lt;T&gt;;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
+    <param name="T" type="Ljava/lang/Object;"/>
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;">
@@ -210,7 +211,8 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
+  <class extends="Ljava/lang/Object;" generic="Lbasic_generics/Moo&lt;T&gt;;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
+    <param name="T" type="Ljava/lang/String;"/>
     <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;">

@@ -154,6 +154,19 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             }
             elem.setAttribute("implements", b.toString());
         }
+        if (_genericKlass != null) {
+            elem.setAttribute("generic", _genericKlass.getTypeName());
+            if (_paramTypes != null) {
+                for (int i = 0; i < _paramTypes.length; i++) {
+                    DFMapType mapType = _genericKlass._mapTypes[i];
+                    DFType paramType = _paramTypes[i];
+                    Element eparam = document.createElement("param");
+                    eparam.setAttribute("name", mapType.getTypeName());
+                    eparam.setAttribute("type", paramType.getTypeName());
+                    elem.appendChild(eparam);
+                }
+            }
+        }
         return elem;
     }
 
