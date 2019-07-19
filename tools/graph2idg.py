@@ -4,8 +4,9 @@ import re
 from graph2idf import IDFBuilder
 
 CALLS = ('call', 'new')
-REFS = ('ref_var', 'ref_field')
-ASSIGNS = ('assign_var', 'assign_field')
+REFS = ('ref_var', 'ref_field', 'ref_array')
+ASSIGNS = ('assign_var', 'assign_field', 'assign_array')
+ARRAYS = ('ref_array', 'assign_array')
 CONDS = ('join', 'begin', 'end', 'case')
 
 IGNORED = (None, 'receive', 'input', 'output', 'repeat')
@@ -84,48 +85,62 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_forw(feats, done, v1, v0=None, fprev=None, dist=0, maxdist=5):
+def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
     if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
     n1 = v1.node
-    for (link,v2) in v1.outputs:
-        if link.startswith('_') and link != '_end': continue
-        n2 = v2.node
-        if n2.kind in CALLS and not link.startswith('#'): continue
-        if n2.kind in IGNORED or n2.kind in REFS:
-            enum_forw(feats, done, v2, v0, fprev, dist, maxdist)
-        else:
-            if n2.kind in ASSIGNS:
-                enum_forw(feats, done, v2, v0, fprev, dist, maxdist)
-            fs = [ link+':'+f for f in getfeats(n2) ]
+    #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
+    outputs = [
+        (link,v2) for (link,v2) in v1.outputs if
+        not (link.startswith('_') and link != '_end') and
+        not (n1.kind in CALLS and not link.startswith('#')) and
+        not (n1.kind in ARRAYS and not link)
+    ]
+    if n1.kind in IGNORED or n1.kind in REFS:
+        for (link,v2) in outputs:
+            enum_forw(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+    else:
+        fs = [ lprev+':'+f for f in getfeats(n1) ]
+        if fs:
             for f in fs:
-                feats.add(('FORW',dist,fprev,f,n2))
-            if fs:
-                enum_forw(feats, done, v2, v1, fs[0], dist+1, maxdist)
+                feats.add(('FORW',dist,fprev,f,n1))
+            if n1.kind in ASSIGNS:
+                for (link,v2) in outputs:
+                    enum_forw(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+                    enum_forw(feats, done, v2, v1, fs[0], lprev, dist+1, maxdist)
+            else:
+                for (link,v2) in outputs:
+                    enum_forw(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
     return
 
-def enum_back(feats, done, v1, v0=None, fprev=None, loverride=None, dist=0, maxdist=5):
+def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
     if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
     n1 = v1.node
-    for (link,v2) in v1.inputs:
-        if link.startswith('_') and link != '_end': continue
-        n2 = v2.node
-        if n1.kind in CALLS and not link.startswith('#'): continue
-        if loverride is not None:
-            link = loverride
-        if n2.kind in IGNORED or n2.kind in ASSIGNS:
-            enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
-        else:
-            if n2.kind in REFS:
-                enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
-            fs = [ link+':'+f for f in getfeats(n2) ]
+    #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
+    inputs = [
+        (link,v2) for (link,v2) in v1.inputs if
+        not (link.startswith('_') and link != '_end') and
+        not (n1.kind in CALLS and not link.startswith('#')) and
+        not (n1.kind in ARRAYS and not link)
+    ]
+    if n1.kind in IGNORED or n1.kind in ASSIGNS:
+        for (link,v2) in inputs:
+            enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+    else:
+        fs = [ lprev+':'+f for f in getfeats(n1) ]
+        if fs:
             for f in fs:
-                feats.add(('BACK',dist,fprev,f,n2))
-            if fs:
-                enum_back(feats, done, v2, v1, fs[0], None, dist+1, maxdist)
+                feats.add(('BACK',dist,fprev,f,n1))
+            if n1.kind in REFS:
+                for (link,v2) in inputs:
+                    enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+                    enum_back(feats, done, v2, v1, fs[0], lprev, dist+1, maxdist)
+            else:
+                for (link,v2) in inputs:
+                    enum_back(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
     return
 
 # main
