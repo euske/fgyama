@@ -2616,6 +2616,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             ecaller.setAttribute("name", caller.getSignature());
             elem.appendChild(ecaller);
         }
+        for (DFMethod override : this.getOverrides()) {
+            if (override == this) continue;
+            Element eoverride = document.createElement("override");
+            eoverride.setAttribute("name", override.getSignature());
+            elem.appendChild(eoverride);
+        }
         if (_ast != null) {
             Element east = document.createElement("ast");
             int start = _ast.getStartPosition();

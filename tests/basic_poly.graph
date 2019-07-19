@@ -241,6 +241,7 @@
     <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
+      <override name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="106" start="42" type="31"/>
       <scope name="Lbasic_poly_Foo;.:MethodDeclaration:42:106">
         <scope name="Lbasic_poly_Foo;.:MethodDeclaration:42:106.:Block:77:106">
