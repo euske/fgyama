@@ -91,13 +91,17 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
     done.add((v0,v1))
     n1 = v1.node
     #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    outputs = [
-        (link,v2) for (link,v2) in v1.outputs if
-        not (link.startswith('_') and link != '_end') and
-        not (n1.kind in CALLS and not link.startswith('#')) and
-        not (n1.kind in ARRAYS and not link)
-    ]
-    if n1.kind in IGNORED or n1.kind in REFS:
+    if lprev.startswith('@'):
+        lprev = '@'
+    outputs = []
+    for (link,v2) in v1.outputs:
+        if link.startswith('_') and link != '_end': continue
+        if n1.kind in ARRAYS and not link: continue
+        outputs.append((link, v2))
+    if n1.kind == 'output':
+        for (link,v2) in outputs:
+            enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
+    elif n1.kind in IGNORED or n1.kind in REFS:
         for (link,v2) in outputs:
             enum_forw(feats, done, v2, v0, fprev, lprev, dist, maxdist)
     else:
@@ -107,8 +111,7 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
                 feats.add(('FORW',dist,fprev,f,n1))
             if n1.kind in ASSIGNS:
                 for (link,v2) in outputs:
-                    enum_forw(feats, done, v2, v0, fprev, lprev, dist, maxdist)
-                    enum_forw(feats, done, v2, v1, fs[0], lprev, dist+1, maxdist)
+                    enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
             else:
                 for (link,v2) in outputs:
                     enum_forw(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
@@ -120,13 +123,17 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
     done.add((v0,v1))
     n1 = v1.node
     #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    inputs = [
-        (link,v2) for (link,v2) in v1.inputs if
-        not (link.startswith('_') and link != '_end') and
-        not (n1.kind in CALLS and not link.startswith('#')) and
-        not (n1.kind in ARRAYS and not link)
-    ]
-    if n1.kind in IGNORED or n1.kind in ASSIGNS:
+    if lprev.startswith('@'):
+        lprev = '@'
+    inputs = []
+    for (link,v2) in v1.inputs:
+        if link.startswith('_') and link != '_end': continue
+        if n1.kind in ARRAYS and not link: continue
+        inputs.append((link, v2))
+    if n1.kind == 'input':
+        for (link,v2) in inputs:
+            enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
+    elif n1.kind in IGNORED or n1.kind in ASSIGNS:
         for (link,v2) in inputs:
             enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
     else:
@@ -137,7 +144,6 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
             if n1.kind in REFS:
                 for (link,v2) in inputs:
                     enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
-                    enum_back(feats, done, v2, v1, fs[0], lprev, dist+1, maxdist)
             else:
                 for (link,v2) in inputs:
                     enum_back(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
@@ -198,16 +204,17 @@ def main(argv):
         for node in graph:
             feats = set()
             vtx = builder.vtxs[node]
-            if mode in (None,'-F') and node.kind in REFS and is_ref(node.ref):
+            if is_ref(node.ref):
                 item = ('REF', node.ref)
-                enum_forw(feats, set(), vtx, maxdist=maxdist)
-            elif mode in (None,'-B') and node.kind in ASSIGNS and is_ref(node.ref):
-                item = ('REF', node.ref)
-                enum_back(feats, set(), vtx, maxdist=maxdist)
-            elif mode in (None,'-C') and node.kind in CALLS:
+                if mode in (None,'-F'):
+                    enum_forw(feats, set(), vtx, maxdist=maxdist)
+                if mode in (None,'-B'):
+                    enum_back(feats, set(), vtx, maxdist=maxdist)
+            elif node.kind in CALLS:
                 item = ('METHOD', node.data)
-                enum_forw(feats, set(), vtx, maxdist=maxdist)
-                enum_back(feats, set(), vtx, maxdist=maxdist)
+                if mode in (None,'-C'):
+                    enum_forw(feats, set(), vtx, maxdist=maxdist)
+                    enum_back(feats, set(), vtx, maxdist=maxdist)
             else:
                 continue
             items.add(item)
@@ -217,6 +224,7 @@ def main(argv):
                 data = (t, dist, f0, f1, builder.getsrc(n))
                 fp.write('+ %r\n' % (data,))
             nfeats += len(feats)
+            fp.write('\n')
     print('Items: %r, Features: %r' % (len(items), nfeats), file=sys.stderr)
 
     if fp is not sys.stdout:
