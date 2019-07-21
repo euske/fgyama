@@ -19,15 +19,47 @@ def sp(x):
         return []
 
 
+##  DFKlass
+##
+class DFKlass:
+
+    def __init__(self, name, path, interface, extends, implements, generic):
+        self.name = name
+        self.path = path
+        self.interface = interface
+        self.extends = extends
+        self.implements = implements
+        self.generic = generic
+        self.methods = []
+        self.params = []
+        return
+
+    def __repr__(self):
+        return ('<DFKlass(%s) methods=%r>' %
+                (self.name, len(self.methods)))
+
+    def add_method(self, method):
+        assert isinstance(method, DFGraph)
+        self.methods.append(method)
+        return
+
+    def add_param(self, pname, ptype):
+        self.params.append((pname, ptype))
+        return
+
+    def get_methods(self):
+        return self.methods
+
+
 ##  DFGraph
 ##
 class DFGraph:
 
-    def __init__(self, gid, name, style, src=None):
+    def __init__(self, gid, name, style, klass=None):
         self.gid = gid
         self.name = name
         self.style = style
-        self.src = src
+        self.klass = klass
         self.root = None
         self.scopes = {}
         self.nodes = {}
@@ -63,8 +95,6 @@ class DFGraph:
             east.set('start', str(astart))
             east.set('end', str(aend))
             egraph.append(east)
-        if self.src is not None:
-            egraph.set('src', self.src)
         egraph.append(self.root.toxml())
         return egraph
 
@@ -181,11 +211,11 @@ class DFNode:
 
 ##  parse_graph
 ##
-def parse_graph(gid, egraph, src=None):
+def parse_graph(gid, egraph, klass=None):
     assert egraph.tag == 'method'
     gname = egraph.get('name')
     style = egraph.get('style')
-    graph = DFGraph(gid, gname, style, src)
+    graph = DFGraph(gid, gname, style, klass)
 
     def parse_node(scope, enode):
         assert enode.tag == 'node'
@@ -242,18 +272,49 @@ def parse_graph(gid, egraph, src=None):
     return graph.fixate()
 
 
+##  parse_klass
+##
+def parse_klass(eklass, gid=0):
+    assert eklass.tag == 'class'
+    name = eklass.get('name')
+    path = eklass.get('path')
+    interface = (eklass.get('interface') == 'true')
+    extends = eklass.get('extends')
+    impls = eklass.get('implements')
+    if impls is None:
+        implements = []
+    else:
+        implements = impls.split(' ')
+    generic = eklass.get('generic')
+    klass = DFKlass(name, path, interface, extends, implements, generic)
+    for egraph in eklass:
+        if egraph.tag == 'method':
+            if gid is not None:
+                gid += 1
+            graph = parse_graph(gid, egraph, klass=klass)
+            klass.add_method(graph)
+        elif egraph.tag == 'param':
+            pname = egraph.get('name')
+            ptype = egraph.get('type')
+            klass.add_param(pname, ptype)
+    return klass
+
+
+##  load_klasses
+##
+def load_klasses(fp, gid=0):
+    root = ElementTree(file=fp).getroot()
+    for eklass in root:
+        if eklass.tag != 'class': continue
+        yield parse_klass(eklass, gid=gid)
+    return
+
 ##  load_graphs
 ##
 def load_graphs(fp, gid=0):
-    root = ElementTree(file=fp).getroot()
-    for efile in root:
-        if efile.tag != 'class': continue
-        path = efile.get('path')
-        for egraph in efile:
-            if egraph.tag != 'method': continue
-            if gid is not None:
-                gid += 1
-            yield parse_graph(gid, egraph, src=path)
+    for klass in load_klasses(fp, gid=gid):
+        for graph in klass.get_methods():
+            yield graph
     return
 
 
