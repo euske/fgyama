@@ -30,21 +30,26 @@ class DFKlass:
         self.extends = extends
         self.implements = implements
         self.generic = generic
-        self.methods = []
         self.params = []
+        self.fields = []
+        self.methods = []
         return
 
     def __repr__(self):
         return ('<DFKlass(%s) methods=%r>' %
                 (self.name, len(self.methods)))
 
+    def add_param(self, pname, ptype):
+        self.params.append((pname, ptype))
+        return
+
+    def add_field(self, fname, ftype):
+        self.fields.append((fname, ftype))
+        return
+
     def add_method(self, method):
         assert isinstance(method, DFGraph)
         self.methods.append(method)
-        return
-
-    def add_param(self, pname, ptype):
-        self.params.append((pname, ptype))
         return
 
     def get_methods(self):
@@ -66,6 +71,7 @@ class DFGraph:
         self.ins = []
         self.outs = []
         self.callers = []
+        self.overrides = []
         self.ast = None
         return
 
@@ -209,9 +215,9 @@ class DFNode:
         return
 
 
-##  parse_graph
+##  parse_method
 ##
-def parse_graph(gid, egraph, klass=None):
+def parse_method(gid, egraph, klass=None):
     assert egraph.tag == 'method'
     gname = egraph.get('name')
     style = egraph.get('style')
@@ -263,6 +269,8 @@ def parse_graph(gid, egraph, klass=None):
             (_,graph.root) = parse_scope(1, e)
         elif e.tag == 'caller':
             graph.callers.append(e.get('name'))
+        elif e.tag == 'override':
+            graph.overrides.append(e.get('name'))
 
     for node in graph.nodes.values():
         if node.kind == 'input':
@@ -287,16 +295,20 @@ def parse_klass(eklass, gid=0):
         implements = impls.split(' ')
     generic = eklass.get('generic')
     klass = DFKlass(name, path, interface, extends, implements, generic)
-    for egraph in eklass:
-        if egraph.tag == 'method':
+    for e in eklass:
+        if e.tag == 'param':
+            pname = e.get('name')
+            ptype = e.get('type')
+            klass.add_param(pname, ptype)
+        elif e.tag == 'field':
+            fname = e.get('name')
+            ftype = e.get('type')
+            klass.add_field(fname, ftype)
+        elif e.tag == 'method':
             if gid is not None:
                 gid += 1
-            graph = parse_graph(gid, egraph, klass=klass)
+            graph = parse_method(gid, e, klass=klass)
             klass.add_method(graph)
-        elif egraph.tag == 'param':
-            pname = egraph.get('name')
-            ptype = egraph.get('type')
-            klass.add_param(pname, ptype)
     return klass
 
 
