@@ -150,6 +150,7 @@
     </method>
   </class>
   <class extends="Ljava/lang/Exception;" interface="false" name="Lbasic_exception/A;" path="tests/basic_exception.java">
+    <field name="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
     <method name="Lbasic_exception/A;.&lt;clinit&gt;()V" style="initializer">
       <ast end="97" start="36" type="55"/>
       <scope name="Lbasic_exception/A;.&lt;clinit&gt;">

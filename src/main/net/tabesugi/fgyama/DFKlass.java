@@ -167,6 +167,12 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 }
             }
         }
+        for (DFRef field : _fields) {
+            Element efield = document.createElement("field");
+            efield.setAttribute("name", field.getFullName());
+            efield.setAttribute("type", field.getRefType().getTypeName());
+            elem.appendChild(efield);
+        }
         return elem;
     }
 

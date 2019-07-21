@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Enum&lt;LE;&gt;;" interface="false" name="LE;" path="tests/basic_enum.java">
+    <field name="@LE;/.Moo" type="LE;"/>
+    <field name="@LE;/.Baa" type="LE;"/>
+    <field name="@LE;/.x" type="I"/>
     <method name="LE;.&lt;clinit&gt;()V" style="initializer">
       <ast end="102" start="0" type="71"/>
       <scope name="LE;.&lt;clinit&gt;">

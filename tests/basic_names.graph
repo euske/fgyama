@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
+    <field name="@Ldom/meep/basic_names;/.y" type="I"/>
     <method name="Ldom/meep/basic_names;.&lt;clinit&gt;()V" style="initializer">
       <ast end="470" start="19" type="55"/>
       <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
@@ -160,6 +161,7 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;" path="tests/basic_names.java">
+    <field name="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I"/>
     <method name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.&lt;clinit&gt;()V" style="initializer">
       <ast end="211" start="144" type="55"/>
       <scope name="Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;.&lt;clinit&gt;">

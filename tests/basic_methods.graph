@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods;" path="tests/basic_methods.java">
+    <field name="@Lbasic_methods;/.x" type="I"/>
     <method name="Lbasic_methods;.&lt;clinit&gt;()V" style="initializer">
       <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;.&lt;clinit&gt;">

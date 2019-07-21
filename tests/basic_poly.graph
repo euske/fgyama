@@ -226,6 +226,7 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
+    <field name="@Lbasic_poly_Foo;/.x" type="I"/>
     <method name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="108" start="0" type="55"/>
       <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">
