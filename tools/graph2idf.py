@@ -112,10 +112,11 @@ class IDFBuilder:
     def load(self, path, fp=None):
         for graph in get_graphs(path):
             if graph.style == 'initializer': continue
-            if graph.src not in self.srcmap:
+            path = graph.klass.path
+            if path not in self.srcmap:
                 fid = len(self.srcmap)
-                self.srcmap[graph.src] = fid
-                src = (fid, graph.src)
+                self.srcmap[path] = fid
+                src = (fid, path)
                 if fp is not None:
                     fp.write('+SOURCE %r\n' % (src,))
             self.graphs.append(graph)
@@ -126,15 +127,15 @@ class IDFBuilder:
     def getsrc(self, node, resolve=True):
         if node.ast is None: return None
         if isinstance(node, DFGraph):
-            name = node.src
+            path = node.klass.path
         else:
-            name = node.graph.src
+            path = node.graph.klass.path
         (_,start,end) = node.ast
         if resolve:
-            fid = self.srcmap[name]
+            fid = self.srcmap[path]
             return (fid, start, end)
         else:
-            return (name, start, end)
+            return (path, start, end)
 
     # Register a funcall.
     def addcall(self, x, y): # (caller, callee)

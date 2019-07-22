@@ -200,12 +200,12 @@ def main(argv):
     indexdb = IndexDB(path, insert=True)
 
     cid = None
-    src = None
     for path in args:
         for graph in get_graphs(path):
             assert isinstance(graph, DFGraph)
-            if graph.src is not None and graph.src != src:
-                cid = graphdb.add_src(graph.src)
+            path = graph.klass.src
+            if path is not None:
+                cid = graphdb.add_src(path)
             assert cid is not None
             graphdb.add(cid, graph)
             indexdb.index_graph(graph)

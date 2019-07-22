@@ -60,7 +60,7 @@ class DFKlass:
 ##
 class DFGraph:
 
-    def __init__(self, gid, name, style, klass=None):
+    def __init__(self, gid, name, style, klass):
         self.gid = gid
         self.name = name
         self.style = style
@@ -217,7 +217,7 @@ class DFNode:
 
 ##  parse_method
 ##
-def parse_method(gid, egraph, klass=None):
+def parse_method(gid, egraph, klass):
     assert egraph.tag == 'method'
     gname = egraph.get('name')
     style = egraph.get('style')
@@ -307,7 +307,7 @@ def parse_klass(eklass, gid=0):
         elif e.tag == 'method':
             if gid is not None:
                 gid += 1
-            graph = parse_method(gid, e, klass=klass)
+            graph = parse_method(gid, e, klass)
             klass.add_method(graph)
     return klass
 
