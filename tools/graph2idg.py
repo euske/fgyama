@@ -103,7 +103,7 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
             enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
     elif n1.kind in IGNORED or n1.kind in REFS:
         for (link,v2) in outputs:
-            enum_forw(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+            enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
     else:
         fs = [ lprev+':'+f for f in getfeats(n1) ]
         if fs:
@@ -130,7 +130,7 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
         if link.startswith('_') and link != '_end': continue
         if n1.kind in ARRAYS and not link: continue
         inputs.append((link, v2))
-    if n1.kind == 'input':
+    if n1.kind == 'input' or n1.kind == 'receive':
         for (link,v2) in inputs:
             enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
     elif n1.kind in IGNORED or n1.kind in ASSIGNS:
