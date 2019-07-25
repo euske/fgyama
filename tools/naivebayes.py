@@ -73,7 +73,7 @@ class NaiveBayes:
                         keyf[k] =[]
                     keyf[k].append((p1, f))
                 else:
-                    p1 = -p0-1
+                    p1 = -p0
                 keyp[k] += p1
         assert keyp
         a = [ (k,p) for (k,p) in keyp.items() ]
