@@ -22,7 +22,7 @@ class NaiveBayes:
 >>> b.commit()
 >>> a = b.get(['long','sweet','yellow'])
 >>> [ (k, fs) for (k,p,fs) in a ]
-[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
+[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow']), ('orange', ['yellow', 'sweet'])]
 """
 
     def __init__(self):
@@ -47,10 +47,12 @@ class NaiveBayes:
         return
 
     def commit(self):
+        # self.kprob[k] = log(C(k))
         for (k,v) in self.kcount.items():
             self.kprob[k] = math.log(v)
+        # self.fprob[f][k] = log(C(f,k))
         for (f,d) in self.fcount.items():
-            p = { k:math.log(v) for (k,v) in d.items() }
+            p = { k: math.log(v) for (k,v) in d.items() }
             self.fprob[f] = p
         return
 
@@ -58,27 +60,25 @@ class NaiveBayes:
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
-        keys = {}
         keyp = {}
         keyf = {}
         for f in feats:
             if f not in self.fprob: continue
             d = self.fprob[f]
             #print(f, d)
-            for (k,v) in d.items():
-                if k not in keys:
-                    keys[k] = 0
-                keys[k] += 1
-                if k not in self.kprob: continue
-                p0 = self.kprob[k]
-                p1 = v - p0
+            for (k,p0) in self.kprob.items():
+                if k in d:
+                    p1 = d[k] - p0
+                    if k not in keyf:
+                        keyf[k] =[]
+                    keyf[k].append((p1, f))
+                else:
+                    p1 = -p0
                 if k not in keyp:
                     keyp[k] = p0
-                    keyf[k] = []
                 keyp[k] += p1
-                keyf[k].append((p1, f))
         assert keyp
-        a = [ (k,p) for (k,p) in keyp.items() if keys[k] == len(feats) ]
+        a = [ (k,p) for (k,p) in keyp.items() ]
         a.sort(key=lambda x:x[1], reverse=True)
         # prevent exp(x) overflow by adjusting the maximum log to zero.
         m = max( p for (k,p) in a )
@@ -94,27 +94,26 @@ class NaiveBayes:
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
-        keys = {}
         keyp = {}
         n = sum(self.kcount.values())
         for f in feats:
             print(f+':')
             if f not in self.fcount: continue
             d = self.fcount[f]
-            for (k,v) in d.items():
-                if k not in keys:
-                    keys[k] = 0
-                keys[k] += 1
-                if k not in self.kcount: continue
+            for (k,c0) in self.kcount.items():
                 if k not in keyp:
-                    p = self.kcount[k] / n
+                    p = c0 / n
                     print('  p(%r) = %r' % (k, p))
                     keyp[k] = p
-                p = v / self.kcount[k]
-                print('    p(%r|%r) = %r' % (f, k, p))
+                if k in d:
+                    p = d[k] / c0
+                    print('    p(%r|%r) = %r' % (f, k, p))
+                else:
+                    p = 1 / c0
+                    print('    p(%r|%r)? = %r' % (f, k, p))
                 keyp[k] *= p
         assert keyp
-        a = [ (k,p) for (k,p) in keyp.items() if keys[k] == len(feats) ]
+        a = [ (k,p) for (k,p) in keyp.items() ]
         a.sort(key=lambda x:x[1], reverse=True)
         for (k,p) in a:
             print('p(%r) = %r' % (k, keyp[k]))
