@@ -130,7 +130,7 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
         if link.startswith('_') and link != '_end': continue
         if n1.kind in ARRAYS and not link: continue
         inputs.append((link, v2))
-    if n1.kind == 'input' or n1.kind == 'receive':
+    if n1.kind == 'input':
         for (link,v2) in inputs:
             enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
     elif n1.kind in IGNORED or n1.kind in ASSIGNS:
@@ -222,7 +222,7 @@ def main(argv):
             fp.write('! %r\n' % (data,))
             for (t, dist,f0,f1,n) in feats:
                 data = (t, dist, f0, f1, builder.getsrc(n))
-                fp.write('+ %r\n' % (data,))
+                fp.write('+ %r %r\n' % (1, data))
             nfeats += len(feats)
             fp.write('\n')
     print('Items: %r, Features: %r' % (len(items), nfeats), file=sys.stderr)

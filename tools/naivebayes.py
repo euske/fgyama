@@ -60,7 +60,7 @@ class NaiveBayes:
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
-        keyp = {}
+        keyp = { k:p0 for (k,p0) in self.kprob.items() }
         keyf = {}
         for f in feats:
             if f not in self.fprob: continue
@@ -73,9 +73,7 @@ class NaiveBayes:
                         keyf[k] =[]
                     keyf[k].append((p1, f))
                 else:
-                    p1 = -p0
-                if k not in keyp:
-                    keyp[k] = p0
+                    p1 = -p0-1
                 keyp[k] += p1
         assert keyp
         a = [ (k,p) for (k,p) in keyp.items() ]
@@ -84,8 +82,12 @@ class NaiveBayes:
         m = max( p for (k,p) in a )
         a = [ (k,math.exp(p-m)) for (k,p) in a ]
         z = sum( p for (_,p) in a )
-        a = [ (k,p/z,[ f for (_,f) in sorted(keyf[k], reverse=True)])
-              for (k,p) in a ]
+        def getfeat(k):
+            if k in keyf:
+                return [ f for (_,f) in sorted(keyf[k], reverse=True)]
+            else:
+                return None
+        a = [ (k, p/z, getfeat(k)) for (k,p) in a ]
         if n:
             a = a[:n]
         return a
@@ -94,23 +96,19 @@ class NaiveBayes:
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
-        keyp = {}
         n = sum(self.kcount.values())
+        keyp = { k:c0/n for (k,c0) in self.kcount.items() }
         for f in feats:
             print(f+':')
             if f not in self.fcount: continue
             d = self.fcount[f]
             for (k,c0) in self.kcount.items():
-                if k not in keyp:
-                    p = c0 / n
-                    print('  p(%r) = %r' % (k, p))
-                    keyp[k] = p
                 if k in d:
                     p = d[k] / c0
                     print('    p(%r|%r) = %r' % (f, k, p))
                 else:
                     p = 1 / c0
-                    print('    p(%r|%r)? = %r' % (f, k, p))
+                    print('    ?p(%r|%r) = %r' % (f, k, p))
                 keyp[k] *= p
         assert keyp
         a = [ (k,p) for (k,p) in keyp.items() ]
