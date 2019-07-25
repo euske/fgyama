@@ -34,7 +34,8 @@ def main(argv):
                 d = feats[item] = {}
         elif line.startswith('+ '):
             if d is not None:
-                data = eval(line[2:])
+                (n,_,line) = line[2:].partition(' ')
+                data = eval(line)
                 assert isinstance(data, tuple)
                 key = data[0:4]
                 value = data[4]
@@ -45,10 +46,9 @@ def main(argv):
                         a = d[key] = []
                     a.append(value)
                 else:
-                    if key in d:
-                        d[key] += 1
-                    else:
-                        d[key] = 1
+                    if key not in d:
+                        d[key] = 0
+                    d[key] += int(n)
         else:
             print(line, end='')
     #
