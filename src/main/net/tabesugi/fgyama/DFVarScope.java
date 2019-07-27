@@ -16,9 +16,6 @@ public class DFVarScope implements Comparable<DFVarScope> {
     private DFVarScope _outer;
     private String _name;
 
-    private Map<String, DFRef> _id2ref =
-        new HashMap<String, DFRef>();
-
     protected DFVarScope(String name) {
         _outer = null;
         _name = name;
@@ -72,46 +69,15 @@ public class DFVarScope implements Comparable<DFVarScope> {
         }
     }
 
-    protected DFRef addRef(String id, DFType type) {
-        return this.addRef(id, type, this);
-    }
-    protected DFRef addRef(String id, DFType type, DFVarScope scope) {
-        DFRef ref = _id2ref.get(id);
-        if (ref == null) {
-            ref = new DFRef(scope, id, type);
-            _id2ref.put(id, ref);
-        }
-        return ref;
-    }
-
-    protected DFRef lookupRef(String id)
-        throws VariableNotFound {
-        DFRef ref = _id2ref.get(id);
-        if (ref != null) {
-            return ref;
-        } else {
-            throw new VariableNotFound(id);
-        }
-    }
-
     public DFRef lookupThis() {
         assert _outer != null;
         return _outer.lookupThis();
     }
 
-    protected DFRef lookupLocalVar(String id)
-        throws VariableNotFound {
-        return this.lookupRef("$"+id);
-    }
-
     public DFRef lookupVar(String id)
         throws VariableNotFound {
-        try {
-            return this.lookupLocalVar(id);
-        } catch (VariableNotFound e) {
-            if (_outer == null) throw e;
-            return _outer.lookupVar(id);
-        }
+        if (_outer == null) new VariableNotFound(id);
+        return _outer.lookupVar(id);
     }
 
     public DFRef lookupVar(SimpleName name)
@@ -149,9 +115,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
     }
 
     public DFRef[] getRefs() {
-        DFRef[] refs = new DFRef[_id2ref.size()];
-        _id2ref.values().toArray(refs);
-        return refs;
+        return new DFRef[] {};
     }
 
     public DFLocalVarScope getChildByAST(ASTNode ast) {
@@ -176,8 +140,5 @@ public class DFVarScope implements Comparable<DFVarScope> {
         out.println(indent+"}");
     }
     protected void dumpContents(PrintStream out, String indent) {
-        for (DFRef ref : _id2ref.values()) {
-            out.println(indent+"defined: "+ref);
-        }
     }
 }

@@ -14,6 +14,10 @@ public class DFLocalVarScope extends DFVarScope {
 
     private SortedMap<String, DFLocalVarScope> _ast2child =
         new TreeMap<String, DFLocalVarScope>();
+    private List<DFRef> _vars =
+        new ArrayList<DFRef>();
+    private Map<String, DFRef> _id2var =
+        new HashMap<String, DFRef>();
 
     protected DFLocalVarScope(DFVarScope outer, String name) {
         super(outer, name);
@@ -40,8 +44,40 @@ public class DFLocalVarScope extends DFVarScope {
     }
 
     protected DFRef addVar(SimpleName name, DFType type) {
-        //Logger.info("DFLocalVarScope.addVar:", this, ":", name, "->", type);
-        return this.addRef("$"+name.getIdentifier(), type);
+        return this.addVar(name.getIdentifier(), type);
+    }
+
+    protected DFRef addVar(String id, DFType type) {
+        //Logger.info("DFLocalVarScope.addVar:", this, ":", id, "->", type);
+        DFRef ref = _id2var.get(id);
+        if (ref == null) {
+            ref = new DFVarRef(id, type);
+            _vars.add(ref);
+            _id2var.put(id, ref);
+        }
+        return ref;
+    }
+
+    @Override
+    public DFRef lookupVar(String id)
+        throws VariableNotFound {
+        DFRef ref = _id2var.get(id);
+        if (ref != null) return ref;
+        return super.lookupVar(id);
+    }
+
+    @Override
+    public DFRef[] getRefs() {
+        DFRef[] refs = new DFRef[_vars.size()];
+        _vars.toArray(refs);
+        return refs;
+    }
+
+    @Override
+    protected void dumpContents(PrintStream out, String indent) {
+        for (DFRef ref : _id2var.values()) {
+            out.println(indent+"defined: "+ref);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -434,6 +470,18 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else {
             throw new InvalidSyntax(ast);
+        }
+    }
+
+    // DFVarRef
+    private class DFVarRef extends DFRef {
+        public DFVarRef(String name, DFType type) {
+            super(DFLocalVarScope.this, name, type);
+        }
+
+        @Override
+        public String getFullName() {
+            return "$"+DFLocalVarScope.this.getScopeName()+"/"+getName();
         }
     }
 }
