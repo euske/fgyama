@@ -48,8 +48,10 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
-    private List<DFRef> _fields = new ArrayList<DFRef>();
-    private List<DFMethod> _methods = new ArrayList<DFMethod>();
+    private List<DFKlassScope.DFFieldRef> _fields =
+        new ArrayList<DFKlassScope.DFFieldRef>();
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
         new HashMap<String, DFMethod>();
 
@@ -167,7 +169,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                 }
             }
         }
-        for (DFRef field : _fields) {
+        for (DFKlassScope.DFFieldRef field : _fields) {
             Element efield = document.createElement("field");
             efield.setAttribute("name", field.getFullName());
             efield.setAttribute("type", field.getRefType().getTypeName());
@@ -811,7 +813,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         return this.lookupField(name.getIdentifier());
     }
 
-    protected List<DFRef> getFields() {
+    protected List<DFKlassScope.DFFieldRef> getFields() {
         assert _built;
 	return _fields;
     }
@@ -883,7 +885,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     protected DFRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
-        DFRef ref = _klassScope.addField(id, isStatic, type);
+        DFKlassScope.DFFieldRef ref = _klassScope.addField(id, isStatic, type);
         //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
@@ -1382,18 +1384,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     }
 
     // DFKlassScope
-    private class DFKlassScope extends DFVarScope {
-
-        private class DFThisRef extends DFRef {
-            public DFThisRef(DFType type) {
-                super(null, "#this", type);
-            }
-
-            @Override
-            public String getFullName() {
-                return "#this";
-            }
-        }
+    public class DFKlassScope extends DFVarScope {
 
         private DFRef _this;
         private Map<String, DFRef> _id2field =
@@ -1431,9 +1422,9 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             return ref;
         }
 
-        protected DFRef addField(
+        protected DFFieldRef addField(
             String id, boolean isStatic, DFType type) {
-            DFRef ref = new DFFieldRef(id, type);
+            DFFieldRef ref = new DFFieldRef(type, id);
             _id2field.put(id, ref);
             return ref;
         }
@@ -1449,15 +1440,39 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             }
         }
 
-        // DFFieldRef
-        private class DFFieldRef extends DFRef {
-            public DFFieldRef(String name, DFType type) {
-                super(DFKlassScope.this, name, type);
+        // DFThisRef
+        private class DFThisRef extends DFRef {
+            public DFThisRef(DFType type) {
+                super(type);
+            }
+
+            public boolean isInternal() {
+                return true;
             }
 
             @Override
             public String getFullName() {
-                return "@"+DFKlassScope.this.getScopeName()+"/."+getName();
+                return "#this";
+            }
+        }
+
+        // DFFieldRef
+        public class DFFieldRef extends DFRef {
+
+            private String _name;
+
+            public DFFieldRef(DFType type, String name) {
+                super(type);
+                _name = name;
+            }
+
+            public String getName() {
+                return _name;
+            }
+
+            @Override
+            public String getFullName() {
+                return "@"+DFKlassScope.this.getScopeName()+"/."+_name;
             }
         }
     }

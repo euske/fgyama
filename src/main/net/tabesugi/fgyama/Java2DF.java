@@ -54,7 +54,7 @@ class DFFileScope extends DFVarScope {
 
     public void importStatic(DFKlass klass) {
 	Logger.debug("ImportStatic:", klass+".*");
-	for (DFRef ref : klass.getFields()) {
+	for (DFKlass.DFKlassScope.DFFieldRef ref : klass.getFields()) {
 	    _refs.put(ref.getName(), ref);
 	}
 	for (DFMethod method : klass.getMethods()) {
@@ -66,8 +66,8 @@ class DFFileScope extends DFVarScope {
 	Logger.debug("ImportStatic:", klass+"."+name);
 	String id = name.getIdentifier();
 	try {
-	    DFRef ref = klass.lookupField(name);
-	    _refs.put(ref.getName(), ref);
+            DFRef ref = klass.lookupField(id);
+	    _refs.put(id, ref);
 	} catch (VariableNotFound e) {
             try {
                 DFMethod method = klass.lookupMethod(

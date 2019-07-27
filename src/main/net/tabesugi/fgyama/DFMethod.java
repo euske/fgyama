@@ -2650,7 +2650,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         protected DFMethodScope(DFVarScope outer, String name) {
             super(outer, name);
             _exception = new DFLocalRef(
-                "exception", DFBuiltinTypes.getExceptionKlass());
+                DFBuiltinTypes.getExceptionKlass(), "exception");
         }
 
         @Override
@@ -2690,7 +2690,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             } else {
                 type = finder.resolveSafe(returnType);
             }
-            _return = new DFLocalRef("return", type);
+            _return = new DFLocalRef(type, "return");
             _arguments = new DFLocalRef[methodDecl.parameters().size()];
             int i = 0;
             for (SingleVariableDeclaration decl :
@@ -2703,7 +2703,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (ndims != 0) {
                     argType = new DFArrayType(argType, ndims);
                 }
-                _arguments[i] = new DFLocalRef("arg"+i, argType);
+                _arguments[i] = new DFLocalRef(argType, "arg"+i);
                 this.addVar(decl.getName(), argType);
                 i++;
             }
@@ -2723,13 +2723,22 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
 
         private class DFLocalRef extends DFRef {
-            public DFLocalRef(String name, DFType type) {
-                super(null, name, type);
+
+            private String _name;
+
+            public DFLocalRef(DFType type, String name) {
+                super(type);
+                _name = name;
+            }
+
+            @Override
+            public boolean isInternal() {
+                return true;
             }
 
             @Override
             public String getFullName() {
-                return "#"+getName();
+                return "#"+_name;
             }
         }
     }

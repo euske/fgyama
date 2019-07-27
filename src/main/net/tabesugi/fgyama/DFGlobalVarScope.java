@@ -12,7 +12,7 @@ import org.w3c.dom.*;
 //
 public class DFGlobalVarScope extends DFVarScope {
 
-    private Map<String, DFRef> _id2ref =
+    private Map<String, DFRef> _id2elem =
         new HashMap<String, DFRef>();
 
     public DFGlobalVarScope() {
@@ -31,21 +31,22 @@ public class DFGlobalVarScope extends DFVarScope {
             elemType = ((DFArrayType)type).getElemType();
         }
         String id = elemType.getTypeName();
-        ref = _id2ref.get(id);
+        ref = _id2elem.get(id);
         if (ref == null) {
-            ref = new DFElemRef(this, id, elemType);
-            _id2ref.put(id, ref);
+            ref = new DFElemRef(elemType);
+            _id2elem.put(id, ref);
         }
         return ref;
     }
 
     private class DFElemRef extends DFRef {
-        public DFElemRef(DFVarScope scope, String name, DFType type) {
-            super(scope, name, type);
+
+        public DFElemRef(DFType type) {
+            super(type);
         }
 
         public String getFullName() {
-            return "%"+getName();
+            return "%"+this.getRefType().getTypeName();
         }
     }
 }

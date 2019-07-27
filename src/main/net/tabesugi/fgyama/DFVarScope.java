@@ -76,7 +76,7 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFRef lookupVar(String id)
         throws VariableNotFound {
-        if (_outer == null) new VariableNotFound(id);
+        if (_outer == null) throw new VariableNotFound(id);
         return _outer.lookupVar(id);
     }
 

@@ -10,17 +10,11 @@ import org.eclipse.jdt.core.dom.*;
 //  DFRef
 //  Place to store a value.
 //
-public class DFRef implements Comparable<DFRef> {
+public abstract class DFRef implements Comparable<DFRef> {
 
-    private DFVarScope _scope;
-    private String _name;
     private DFType _type;
 
-    public DFRef(DFVarScope scope, String name, DFType type) {
-        assert 1 <= name.length();
-        //assert scope != null || name.startsWith("#");
-        _scope = scope;
-        _name = name;
+    public DFRef(DFType type) {
         _type = type;
     }
 
@@ -36,36 +30,20 @@ public class DFRef implements Comparable<DFRef> {
     @Override
     public int compareTo(DFRef ref) {
         if (ref == this) return 0;
-        if (ref._scope == _scope) {
-            return _name.compareTo(ref._name);
-        }
-        if (_scope == null) return -1;
-        return _scope.compareTo(ref._scope);
+        return this.getFullName().compareTo(ref.getFullName());
     }
 
     public boolean isLocal() {
-        return (_scope instanceof DFLocalVarScope);
+        return false;
     }
 
     public boolean isInternal() {
-        return (_scope == null);
-    }
-
-    protected String getName() {
-	return _name;
-    }
-
-    public String getFullName() {
-        if (_scope instanceof DFLocalVarScope) {
-            return "$"+_scope.getScopeName()+"/"+_name;
-        } else if (_scope != null) {
-            return "@"+_scope.getScopeName()+"/"+_name;
-        } else {
-            return _name;
-        }
+        return false;
     }
 
     public DFType getRefType() {
         return _type;
     }
+
+    public abstract String getFullName();
 }
