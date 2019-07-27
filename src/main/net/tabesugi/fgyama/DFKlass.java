@@ -785,7 +785,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         assert _built;
         if (_klassScope != null) {
             try {
-                return _klassScope.lookupRef("."+id);
+                return _klassScope.lookupField(id);
             } catch (VariableNotFound e) {
             }
         }
@@ -883,7 +883,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     protected DFRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
-        DFRef ref = _klassScope.addRef("."+id, type);
+        DFRef ref = _klassScope.addField(id, isStatic, type);
         //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
@@ -1396,6 +1396,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
 
         private DFRef _this;
+        private Map<String, DFRef> _id2field =
+            new HashMap<String, DFRef>();
 
         public DFKlassScope(DFVarScope outer, String id) {
             super(outer, id);
@@ -1413,22 +1415,49 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
         }
 
         @Override
-        protected DFRef lookupVar1(String id)
+        public DFRef lookupVar(String id)
             throws VariableNotFound {
-            // try local variables first.
             try {
-                return super.lookupVar1(id);
-            } catch (VariableNotFound e) {
-                // try field names.
                 return DFKlass.this.lookupField(id);
+            } catch (VariableNotFound e) {
+                return super.lookupVar(id);
             }
+        }
+
+        public DFRef lookupField(String id)
+            throws VariableNotFound {
+            DFRef ref = _id2field.get(id);
+            if (ref == null) throw new VariableNotFound(id);
+            return ref;
+        }
+
+        protected DFRef addField(
+            String id, boolean isStatic, DFType type) {
+            DFRef ref = new DFFieldRef(id, type);
+            _id2field.put(id, ref);
+            return ref;
         }
 
         // dumpContents (for debugging)
         protected void dumpContents(PrintStream out, String indent) {
             super.dumpContents(out, indent);
+            for (DFRef ref : DFKlass.this.getFields()) {
+                out.println(indent+"defined: "+ref);
+            }
             for (DFMethod method : DFKlass.this.getMethods()) {
                 out.println(indent+"defined: "+method);
+            }
+        }
+
+        // DFFieldRef
+        private class DFFieldRef extends DFRef {
+            public DFFieldRef(String name, DFType type) {
+                super(DFKlassScope.this, name, type);
+            }
+
+            @Override
+            public String getFullName() {
+                return "@"+DFKlassScope.this.getScopeName()+"/."+getName();
             }
         }
     }

@@ -99,19 +99,24 @@ public class DFVarScope implements Comparable<DFVarScope> {
         return _outer.lookupThis();
     }
 
-    protected DFRef lookupVar1(String id)
+    protected DFRef lookupLocalVar(String id)
         throws VariableNotFound {
         return this.lookupRef("$"+id);
     }
 
-    public DFRef lookupVar(SimpleName name)
+    public DFRef lookupVar(String id)
         throws VariableNotFound {
         try {
-            return this.lookupVar1(name.getIdentifier());
+            return this.lookupLocalVar(id);
         } catch (VariableNotFound e) {
             if (_outer == null) throw e;
-            return _outer.lookupVar(name);
+            return _outer.lookupVar(id);
         }
+    }
+
+    public DFRef lookupVar(SimpleName name)
+        throws VariableNotFound {
+        return this.lookupVar(name.getIdentifier());
     }
 
     public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)

@@ -24,13 +24,13 @@ class DFFileScope extends DFVarScope {
     }
 
     @Override
-    protected DFRef lookupVar1(String id)
+    public DFRef lookupVar(String id)
 	throws VariableNotFound {
-	DFRef ref = _refs.get("."+id);
+	DFRef ref = _refs.get(id);
 	if (ref != null) {
 	    return ref;
 	} else {
-	    return super.lookupVar1(id);
+	    return super.lookupVar(id);
 	}
     }
 

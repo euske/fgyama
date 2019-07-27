@@ -68,13 +68,4 @@ public class DFRef implements Comparable<DFRef> {
     public DFType getRefType() {
         return _type;
     }
-
-    public DFRef parameterize(Map<DFMapType, DFType> typeMap) {
-        if (typeMap.containsKey(_type)) {
-	    DFType type = typeMap.get(_type);
-	    String name = _name+"<"+type.getTypeName()+">";
-            return new DFRef(_scope, name, type);
-        }
-        return this;
-    }
 }
