@@ -404,8 +404,7 @@ class JoinNode extends ProgNode {
         }
     }
 
-    @Override
-    public void close(DFNode node) {
+    public void merge(DFNode node) {
         if (!this.recvTrue) {
             assert this.recvFalse;
             this.recvTrue = true;
@@ -1723,14 +1722,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
         // Redirect the continue statements.
         for (DFExit exit : loopFrame.getExits()) {
-            if (exit.isCont()) {
+            if (exit.isContinue()) {
                 DFNode node = exit.getNode();
                 DFNode end = ends.get(node.getRef());
                 if (end == null) {
                     end = ctx.get(node.getRef());
                 }
                 if (node instanceof JoinNode) {
-                    ((JoinNode)node).close(end);
+                    ((JoinNode)node).merge(end);
                 }
                 ends.put(node.getRef(), node);
             } else {
@@ -1845,7 +1844,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 }
             }
             if (thenCtx == null || elseCtx == null) {
-                join.close(ctx.get(ref));
+                join.merge(ctx.get(ref));
             }
             ctx.set(join);
         }
@@ -1891,7 +1890,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 JoinNode join = new JoinNode(
                     graph, scope, ref.getRefType(), ref, apt, caseNode);
                 join.recv(true, dst);
-                join.close(ctx.get(ref));
+                join.merge(ctx.get(ref));
                 ctx.set(join);
             }
         }

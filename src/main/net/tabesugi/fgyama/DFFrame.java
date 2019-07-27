@@ -136,7 +136,9 @@ public class DFFrame {
             if (exit.getFrame() == this) {
                 //Logger.info("DFFrame.Exit:", this, ":", exit);
                 DFNode node = exit.getNode();
-                node.close(ctx.get(node.getRef()));
+                if (node instanceof JoinNode) {
+                    ((JoinNode)node).merge(ctx.get(node.getRef()));
+                }
                 ctx.set(node);
             }
         }

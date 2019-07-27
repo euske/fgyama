@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.*;
 
 
 //  DFExit
+//  Specifies a designated DFNode coming out of a certain DFFrame.
 //
 public class DFExit {
 
@@ -15,14 +16,15 @@ public class DFExit {
     private DFNode _node;
     private boolean _cont;
 
-    public DFExit(DFFrame frame, DFNode node) {
-        this(frame, node, false);
-    }
-
     public DFExit(DFFrame frame, DFNode node, boolean cont) {
+        assert node.getRef() != null;
         _frame = frame;
         _node = node;
         _cont = cont;
+    }
+
+    public DFExit(DFFrame frame, DFNode node) {
+        this(frame, node, false);
     }
 
     @Override
@@ -38,7 +40,7 @@ public class DFExit {
         return _node;
     }
 
-    public boolean isCont() {
+    public boolean isContinue() {
         return _cont;
     }
 

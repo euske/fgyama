@@ -155,9 +155,6 @@ public class DFNode implements Comparable<DFNode> {
         node._outputs.add(this);
     }
 
-    public void close(DFNode ctx) {
-    }
-
     public boolean purge() {
         if (_input == null) return false;
         for (DFNode node : _outputs) {
