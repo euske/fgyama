@@ -19,10 +19,6 @@ public class DFLocalVarScope extends DFVarScope {
         super(outer, name);
     }
 
-    public DFLocalVarScope(DFVarScope outer, SimpleName name) {
-        super(outer, name);
-    }
-
     public DFLocalVarScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
@@ -43,89 +39,13 @@ public class DFLocalVarScope extends DFVarScope {
         return scope;
     }
 
-    private DFRef addVar(SimpleName name, DFType type) {
+    protected DFRef addVar(SimpleName name, DFType type) {
         //Logger.info("DFLocalVarScope.addVar:", this, ":", name, "->", type);
         return this.addRef("$"+name.getIdentifier(), type);
     }
 
-    public DFRef lookupArgument(int index)
-        throws VariableNotFound {
-        try {
-            return this.lookupRef("#arg"+index);
-        } catch (VariableNotFound e) {
-            return super.lookupArgument(index);
-        }
-    }
-
-    public DFRef lookupReturn()
-        throws VariableNotFound {
-        try {
-            return this.lookupRef("#return");
-        } catch (VariableNotFound e) {
-            return super.lookupReturn();
-        }
-    }
-
-    public DFRef lookupException()
-        throws VariableNotFound {
-        try {
-            return this.lookupRef("#exception");
-        } catch (VariableNotFound e) {
-            return super.lookupException();
-        }
-    }
-
-    /**
-     * Lists all the variables defined inside a method.
-     */
     @SuppressWarnings("unchecked")
-    public void buildMethodDecl(
-        DFTypeFinder finder, MethodDeclaration methodDecl)
-        throws InvalidSyntax {
-        //Logger.info("DFLocalVarScope.build:", this);
-        if (methodDecl.getBody() == null) return;
-        Type returnType = methodDecl.getReturnType2();
-        DFType type;
-	if (returnType == null) {
-	    type = DFBasicType.VOID;
-	} else {
-	    type = finder.resolveSafe(returnType);
-	}
-        this.addRef("#return", type, null);
-        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
-        int i = 0;
-        for (SingleVariableDeclaration decl :
-                 (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-            DFType argType = finder.resolveSafe(decl.getType());
-            if (decl.isVarargs()) {
-                argType = new DFArrayType(argType, 1);
-            }
-	    int ndims = decl.getExtraDimensions();
-	    if (ndims != 0) {
-		argType = new DFArrayType(argType, ndims);
-	    }
-            this.addRef("#arg"+i, argType, null);
-            this.addVar(decl.getName(), argType);
-            i++;
-        }
-        this.buildStmt(finder, methodDecl.getBody());
-    }
-
-    public void buildBodyDecls(
-        DFTypeFinder finder, List<BodyDeclaration> decls)
-        throws InvalidSyntax {
-        this.addRef("#exception", DFBuiltinTypes.getExceptionKlass(), null);
-        for (BodyDeclaration body : decls) {
-            if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                DFLocalVarScope innerScope = this.getChildByAST(body);
-                innerScope.buildStmt(finder, initializer.getBody());
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void buildStmt(DFTypeFinder finder, Statement ast)
+    public void buildStmt(DFTypeFinder finder, Statement ast)
         throws InvalidSyntax {
         assert ast != null;
 

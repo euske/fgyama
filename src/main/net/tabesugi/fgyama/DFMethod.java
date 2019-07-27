@@ -708,7 +708,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private DFKlass _klass;
     private String _name;
     private DFCallStyle _callStyle;
-    private DFLocalVarScope _scope;
+    private DFMethodScope _scope;
     private DFFrame _frame;
 
     private DFTypeFinder _finder = null;
@@ -726,12 +726,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public DFMethod(
         DFKlass klass, String id, DFCallStyle callStyle,
-        String name, DFLocalVarScope scope) {
+        String name, DFVarScope outer) {
         super(id, klass);
         _klass = klass;
         _name = name;
         _callStyle = callStyle;
-        _scope = scope;
+        _scope = new DFMethodScope(outer, id);
         _frame = new DFFrame(DFFrame.RETURNABLE);
     }
 
@@ -847,6 +847,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public void setTree(ASTNode ast) {
 	_ast = ast;
+    }
+
+    public DFLocalVarScope getScope() {
+        return _scope;
     }
 
     public DFFrame getFrame() {
@@ -2635,5 +2639,98 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         Arrays.sort(nodes);
         elem.appendChild(_scope.toXML(document, nodes));
         return elem;
+    }
+
+    private class DFMethodScope extends DFLocalVarScope {
+
+        private DFLocalRef _exception;
+        private DFLocalRef _return = null;
+        private DFLocalRef[] _arguments = null;
+
+        protected DFMethodScope(DFVarScope outer, String name) {
+            super(outer, name);
+            _exception = new DFLocalRef(
+                "exception", DFBuiltinTypes.getExceptionKlass());
+        }
+
+        @Override
+        public DFRef lookupArgument(int index)
+            throws VariableNotFound {
+            if (_arguments == null) throw new VariableNotFound("#arg"+index);
+            return _arguments[index];
+        }
+
+        @Override
+        public DFRef lookupReturn()
+            throws VariableNotFound {
+            if (_return == null) throw new VariableNotFound("#return");
+            return _return;
+        }
+
+        @Override
+        public DFRef lookupException()
+            throws VariableNotFound {
+            if (_exception == null) throw new VariableNotFound("#exception");
+            return _exception;
+        }
+
+        /**
+         * Lists all the variables defined inside a method.
+         */
+        @SuppressWarnings("unchecked")
+        public void buildMethodDecl(
+            DFTypeFinder finder, MethodDeclaration methodDecl)
+            throws InvalidSyntax {
+            //Logger.info("DFLocalVarScope.build:", this);
+            if (methodDecl.getBody() == null) return;
+            Type returnType = methodDecl.getReturnType2();
+            DFType type;
+            if (returnType == null) {
+                type = DFBasicType.VOID;
+            } else {
+                type = finder.resolveSafe(returnType);
+            }
+            _return = new DFLocalRef("return", type);
+            _arguments = new DFLocalRef[methodDecl.parameters().size()];
+            int i = 0;
+            for (SingleVariableDeclaration decl :
+                     (List<SingleVariableDeclaration>) methodDecl.parameters()) {
+                DFType argType = finder.resolveSafe(decl.getType());
+                if (decl.isVarargs()) {
+                    argType = new DFArrayType(argType, 1);
+                }
+                int ndims = decl.getExtraDimensions();
+                if (ndims != 0) {
+                    argType = new DFArrayType(argType, ndims);
+                }
+                _arguments[i] = new DFLocalRef("arg"+i, argType);
+                this.addVar(decl.getName(), argType);
+                i++;
+            }
+            this.buildStmt(finder, methodDecl.getBody());
+        }
+
+        public void buildBodyDecls(
+            DFTypeFinder finder, List<BodyDeclaration> decls)
+            throws InvalidSyntax {
+            for (BodyDeclaration body : decls) {
+                if (body instanceof Initializer) {
+                    Initializer initializer = (Initializer)body;
+                    DFLocalVarScope innerScope = this.getChildByAST(body);
+                    innerScope.buildStmt(finder, initializer.getBody());
+                }
+            }
+        }
+
+        private class DFLocalRef extends DFRef {
+            public DFLocalRef(String name, DFType type) {
+                super(null, name, type);
+            }
+
+            @Override
+            public String getFullName() {
+                return "#"+getName();
+            }
+        }
     }
 }

@@ -320,9 +320,8 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
             throw new InvalidSyntax(ast);
         }
 
-        DFLocalVarScope initScope = new DFLocalVarScope(_klassScope, "<clinit>");
         _initMethod = new DFMethod(
-            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", initScope);
+            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", _klassScope);
         _initMethod.setFuncType(
             new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
         _initMethod.setTree(ast);
@@ -358,12 +357,11 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
                     callStyle = (isStatic(methodDecl))?
                         DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 }
-                DFLocalVarScope scope = new DFLocalVarScope(_klassScope, id);
-                DFMethod method = new DFMethod(this, id, callStyle, name, scope);
+                DFMethod method = new DFMethod(this, id, callStyle, name, _klassScope);
                 this.addMethod(method, id);
                 Statement stmt = methodDecl.getBody();
                 if (stmt != null) {
-                    this.buildTypeFromStmt(stmt, method, scope);
+                    this.buildTypeFromStmt(stmt, method, method.getScope());
                 }
 
 	    } else if (body instanceof AnnotationTypeMemberDeclaration) {
@@ -371,8 +369,7 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
-                String id = Utils.encodeASTNode(initializer);
-                DFLocalVarScope innerScope = initScope.addChild(body);
+                DFLocalVarScope innerScope = _initMethod.getScope().addChild(body);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, _initMethod, innerScope);
@@ -1387,11 +1384,22 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     // DFKlassScope
     private class DFKlassScope extends DFVarScope {
 
+        private class DFThisRef extends DFRef {
+            public DFThisRef(DFType type) {
+                super(null, "#this", type);
+            }
+
+            @Override
+            public String getFullName() {
+                return "#this";
+            }
+        }
+
         private DFRef _this;
 
         public DFKlassScope(DFVarScope outer, String id) {
             super(outer, id);
-            _this = this.addRef("#this", DFKlass.this, null);
+            _this = new DFThisRef(DFKlass.this);
         }
 
         @Override
