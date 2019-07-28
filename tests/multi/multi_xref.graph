@@ -36,7 +36,8 @@
             <link label="R" src="G5_moo_N9"/>
             <ast end="166" start="136" type="7"/>
           </node>
-          <node id="G5_moo_N11" kind="ref_var" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
+          <node id="G5_moo_N11" kind="ref_field" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
+            <link label="obj" src="G5_moo_N5"/>
             <link src="G5_moo_N7"/>
             <ast end="174" start="169" type="42"/>
           </node>
@@ -153,7 +154,8 @@
             <link label="R" src="G7_foo_N9"/>
             <ast end="126" start="96" type="7"/>
           </node>
-          <node id="G7_foo_N11" kind="ref_var" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
+          <node id="G7_foo_N11" kind="ref_field" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
+            <link label="obj" src="G7_foo_N5"/>
             <link src="G7_foo_N7"/>
             <ast end="134" start="129" type="42"/>
           </node>

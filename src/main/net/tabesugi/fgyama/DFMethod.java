@@ -941,7 +941,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 Name name = (Name)expr;
                 if (name.isSimpleName()) {
                     DFRef ref = scope.lookupVar((SimpleName)name);
-                    DFNode node = new VarRefNode(graph, scope, ref, expr);
+                    DFNode node;
+                    if (ref.isLocal()) {
+                        node = new VarRefNode(graph, scope, ref, expr);
+                    } else {
+                        DFNode obj = ctx.get(scope.lookupThis());
+                        node = new FieldRefNode(graph, scope, ref, expr, obj);
+                    }
                     node.accept(ctx.get(ref));
                     ctx.setRValue(node);
                 } else {
@@ -1534,7 +1540,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             Name name = (Name)expr;
             if (name.isSimpleName()) {
                 DFRef ref = scope.lookupVar((SimpleName)name);
-                ctx.setLValue(new VarAssignNode(graph, scope, ref, expr));
+                DFNode node;
+                if (ref.isLocal()) {
+                    node = new VarAssignNode(graph, scope, ref, expr);
+                } else {
+                    DFNode obj = ctx.get(scope.lookupThis());
+                    node = new FieldAssignNode(graph, scope, ref, expr, obj);
+                }
+                ctx.setLValue(node);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;

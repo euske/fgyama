@@ -28,7 +28,8 @@
             <link src="G51_fa_N4"/>
             <ast end="225" start="161" type="59"/>
           </node>
-          <node id="G51_fa_N6" kind="assign_var" ref="@Lbasic_methods;/.x" type="I">
+          <node id="G51_fa_N6" kind="assign_field" ref="@Lbasic_methods;/.x" type="I">
+            <link label="obj" src="G51_fa_N2"/>
             <link src="G51_fa_N9"/>
             <ast end="306" start="305" type="42"/>
           </node>

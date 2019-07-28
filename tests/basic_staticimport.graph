@@ -8,7 +8,8 @@
       <ast end="161" start="107" type="31"/>
       <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161">
         <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161.:Block:132:161">
-          <node id="G60_foo_N3" kind="ref_var" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <node id="G60_foo_N3" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+            <link label="obj" src="G60_foo_N2"/>
             <link src="G60_foo_N1"/>
             <ast end="138" start="135" type="42"/>
           </node>
