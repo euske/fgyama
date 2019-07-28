@@ -14,10 +14,10 @@ public class DFContext {
     private DFGraph _graph;
     private DFVarScope _scope;
 
-    private SortedMap<DFRef, DFNode> _first =
-        new TreeMap<DFRef, DFNode>();
-    private SortedMap<DFRef, DFNode> _last =
-        new TreeMap<DFRef, DFNode>();
+    private ConsistentHashMap<DFRef, DFNode> _first =
+        new ConsistentHashMap<DFRef, DFNode>();
+    private Map<DFRef, DFNode> _last =
+        new HashMap<DFRef, DFNode>();
     private DFNode _lval = null;
     private DFNode _rval = null;
 
@@ -74,8 +74,13 @@ public class DFContext {
         _rval = node;
     }
 
-    public Collection<DFNode> getFirsts() {
-        return _first.values();
+    public DFNode[] getFirsts() {
+        DFNode[] values = new DFNode[_first.size()];
+        int i = 0;
+        for (DFRef ref : _first.keys()) {
+            values[i++] = _first.get(ref);
+        }
+        return values;
     }
 
     public DFRef[] getChanged() {
