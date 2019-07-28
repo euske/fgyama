@@ -27,17 +27,13 @@ public abstract class DFRef {
         }
     }
 
-    public boolean isLocal() {
-        return false;
-    }
-
-    public boolean isInternal() {
-        return false;
-    }
-
     public DFType getRefType() {
         return _type;
     }
+
+    public abstract boolean isLocal();
+
+    public abstract boolean isInternal();
 
     public abstract String getFullName();
 }

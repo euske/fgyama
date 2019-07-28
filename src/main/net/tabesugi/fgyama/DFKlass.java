@@ -1438,8 +1438,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 super(type);
             }
 
-            public boolean isInternal() {
+            @Override
+            public boolean isLocal() {
                 return true;
+            }
+            @Override
+            public boolean isInternal() {
+                return false;
             }
 
             @Override
@@ -1460,6 +1465,15 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
             public String getName() {
                 return _name;
+            }
+
+            @Override
+            public boolean isLocal() {
+                return false;
+            }
+            @Override
+            public boolean isInternal() {
+                return false;
             }
 
             @Override

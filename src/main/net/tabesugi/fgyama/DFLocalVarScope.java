@@ -487,6 +487,10 @@ public class DFLocalVarScope extends DFVarScope {
         public boolean isLocal() {
             return true;
         }
+        @Override
+        public boolean isInternal() {
+            return false;
+        }
 
         @Override
         public String getFullName() {

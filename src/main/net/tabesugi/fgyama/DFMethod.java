@@ -1203,7 +1203,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         refs.addAll(frame1.getInputRefs());
                     }
                     for (DFRef ref : refs) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1217,7 +1217,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         refs.addAll(frame1.getOutputRefs());
                     }
                     for (DFRef ref : refs) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
                                     graph, scope, ref, invoke, call, ref.getFullName()));
                     }
@@ -1271,7 +1271,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFFrame frame1 = method.getFrame();
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getInputRefs()) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1279,7 +1279,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                   graph, scope, null, sinvoke, call, "#return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
                                     graph, scope, ref, sinvoke, call, ref.getFullName()));
                     }
@@ -1435,7 +1435,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFFrame frame1 = constructor.getFrame();
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getInputRefs()) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1443,7 +1443,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                   graph, scope, null, cstr, call, "#return"));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
-                        if (ref.isLocal() || ref.isInternal()) continue;
+                        if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
                                     graph, scope, ref, cstr, call, ref.getFullName()));
                     }
@@ -2346,13 +2346,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFFrame frame1 = constructor.getFrame();
             if (frame1 != null) {
                 for (DFRef ref : frame1.getInputRefs()) {
-                    if (ref.isLocal() || ref.isInternal()) continue;
+                    if (ref.isLocal()) continue;
                     call.accept(ctx.get(ref), ref.getFullName());
                 }
             }
             if (frame1 != null) {
                 for (DFRef ref : frame1.getOutputRefs()) {
-                    if (ref.isLocal() || ref.isInternal()) continue;
+                    if (ref.isLocal()) continue;
                     ctx.set(new ReceiveNode(
                                 graph, scope, ref, ci, call, ref.getFullName()));
                 }
@@ -2391,13 +2391,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFFrame frame1 = constructor.getFrame();
             if (frame1 != null) {
                 for (DFRef ref : frame1.getInputRefs()) {
-                    if (ref.isLocal() || ref.isInternal()) continue;
+                    if (ref.isLocal()) continue;
                     call.accept(ctx.get(ref), ref.getFullName());
                 }
             }
             if (frame1 != null) {
                 for (DFRef ref : frame1.getOutputRefs()) {
-                    if (ref.isLocal() || ref.isInternal()) continue;
+                    if (ref.isLocal()) continue;
                     ctx.set(new ReceiveNode(
                                 graph, scope, ref, sci, call, ref.getFullName()));
                 }
@@ -2457,7 +2457,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             i++;
         }
         for (DFRef ref : _frame.getInputRefs()) {
-            if (ref.isLocal() || ref.isInternal()) continue;
+            if (ref.isLocal()) continue;
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
         }
@@ -2490,7 +2490,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _frame.close(ctx);
         //_frame.dump();
         for (DFRef ref : _frame.getOutputRefs()) {
-            if (ref.isLocal() || ref.isInternal()) continue;
+            if (ref.isLocal()) continue;
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
         }
@@ -2643,13 +2643,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private class DFMethodScope extends DFLocalVarScope {
 
-        private DFLocalRef _exception;
-        private DFLocalRef _return = null;
-        private DFLocalRef[] _arguments = null;
+        private DFInternalRef _exception;
+        private DFInternalRef _return = null;
+        private DFInternalRef[] _arguments = null;
 
         protected DFMethodScope(DFVarScope outer, String name) {
             super(outer, name);
-            _exception = new DFLocalRef(
+            _exception = new DFInternalRef(
                 DFBuiltinTypes.getExceptionKlass(), "exception");
         }
 
@@ -2690,8 +2690,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             } else {
                 type = finder.resolveSafe(returnType);
             }
-            _return = new DFLocalRef(type, "return");
-            _arguments = new DFLocalRef[methodDecl.parameters().size()];
+            _return = new DFInternalRef(type, "return");
+            _arguments = new DFInternalRef[methodDecl.parameters().size()];
             int i = 0;
             for (SingleVariableDeclaration decl :
                      (List<SingleVariableDeclaration>) methodDecl.parameters()) {
@@ -2703,7 +2703,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (ndims != 0) {
                     argType = new DFArrayType(argType, ndims);
                 }
-                _arguments[i] = new DFLocalRef(argType, "arg"+i);
+                _arguments[i] = new DFInternalRef(argType, "arg"+i);
                 this.addVar(decl.getName(), argType);
                 i++;
             }
@@ -2722,15 +2722,19 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             }
         }
 
-        private class DFLocalRef extends DFRef {
+        private class DFInternalRef extends DFRef {
 
             private String _name;
 
-            public DFLocalRef(DFType type, String name) {
+            public DFInternalRef(DFType type, String name) {
                 super(type);
                 _name = name;
             }
 
+            @Override
+            public boolean isLocal() {
+                return true;
+            }
             @Override
             public boolean isInternal() {
                 return true;

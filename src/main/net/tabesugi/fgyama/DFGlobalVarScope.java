@@ -45,6 +45,16 @@ public class DFGlobalVarScope extends DFVarScope {
             super(type);
         }
 
+        @Override
+        public boolean isLocal() {
+            return false;
+        }
+        @Override
+        public boolean isInternal() {
+            return false;
+        }
+
+        @Override
         public String getFullName() {
             return "%"+this.getRefType().getTypeName();
         }

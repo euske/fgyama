@@ -76,14 +76,14 @@ public class DFFrame {
     public boolean expandRefs(DFFrame innerFrame) {
         boolean added = false;
         for (DFRef ref : innerFrame._inputRefs) {
-            if (ref.isLocal() || ref.isInternal()) continue;
+            if (ref.isLocal()) continue;
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
                 added = true;
             }
         }
         for (DFRef ref : innerFrame._outputRefs) {
-            if (ref.isLocal() || ref.isInternal()) continue;
+            if (ref.isLocal()) continue;
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
                 added = true;
