@@ -16,8 +16,6 @@
     <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <caller name="Lbasic_poly_Baa;.main()V"/>
-      <caller name="Lbasic_poly_Baa;.main()V"/>
-      <caller name="Lbasic_poly_Baa;.main()V"/>
       <override name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="106" start="42" type="31"/>
       <scope name="Lbasic_poly_Foo;.:MethodDeclaration:42:106">
@@ -54,7 +52,6 @@
       <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
     </method>
     <method name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
-      <caller name="Lbasic_poly_Baa;.main()V"/>
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast end="250" start="160" type="31"/>
       <scope name="Lbasic_poly_Baa;.:MethodDeclaration:160:250">
@@ -134,7 +131,6 @@
             <link label="#arg0" src="G39_main_N7"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <ast end="357" start="349" type="32"/>
           </node>
           <node id="G39_main_N9" kind="receive" type="I">
@@ -173,7 +169,6 @@
             <link label="#arg0" src="G39_main_N16"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <ast end="428" start="420" type="32"/>
           </node>
           <node id="G39_main_N18" kind="receive" type="I">
@@ -199,7 +194,6 @@
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="G39_main_N23" kind="call" type="I">
             <link label="#this" src="G39_main_N21"/>
             <link label="#arg0" src="G39_main_N22"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N1"/>
             <ast end="450" start="442" type="32"/>

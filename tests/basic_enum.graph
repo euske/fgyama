@@ -59,42 +59,41 @@
       <scope name="Lbasic_enum;.:MethodDeclaration:134:292">
         <scope name="Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292">
           <scope name="Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292.:SwitchStatement:190:286">
-            <node data="case(1)" id="G48_foo_N8" kind="case" type="LE;">
-              <link src="G48_foo_N7"/>
-              <link label="match0" src="G48_foo_N9"/>
+            <node data="case(1)" id="G48_foo_N7" kind="case" type="LE;">
+              <link src="G48_foo_N6"/>
+              <link label="match0" src="G48_foo_N8"/>
               <ast end="220" start="211" type="49"/>
             </node>
-            <node data="case(1)" id="G48_foo_N10" kind="case" type="LE;">
-              <link src="G48_foo_N7"/>
-              <link label="match0" src="G48_foo_N11"/>
+            <node data="case(1)" id="G48_foo_N9" kind="case" type="LE;">
+              <link src="G48_foo_N6"/>
+              <link label="match0" src="G48_foo_N10"/>
               <ast end="257" start="248" type="49"/>
             </node>
           </scope>
-          <node id="G48_foo_N5" kind="ref_field" ref="@LE;/.Moo" type="LE;">
-            <link src="G48_foo_N2"/>
+          <node id="G48_foo_N4" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+            <link src="G48_foo_N1"/>
             <ast end="180" start="175" type="40"/>
           </node>
-          <node id="G48_foo_N6" kind="assign_var" ref="$Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292/$x" type="LE;">
-            <link src="G48_foo_N5"/>
+          <node id="G48_foo_N5" kind="assign_var" ref="$Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292/$x" type="LE;">
+            <link src="G48_foo_N4"/>
             <ast end="180" start="171" type="59"/>
           </node>
-          <node id="G48_foo_N7" kind="ref_var" ref="$Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292/$x" type="LE;">
-            <link src="G48_foo_N6"/>
+          <node id="G48_foo_N6" kind="ref_var" ref="$Lbasic_enum;.:MethodDeclaration:134:292.:Block:159:292/$x" type="LE;">
+            <link src="G48_foo_N5"/>
             <ast end="199" start="198" type="42"/>
           </node>
-          <node id="G48_foo_N9" kind="ref_field" ref="@LE;/.Moo" type="LE;">
-            <link src="G48_foo_N2"/>
+          <node id="G48_foo_N8" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+            <link src="G48_foo_N1"/>
             <ast end="219" start="216" type="42"/>
           </node>
-          <node id="G48_foo_N11" kind="ref_field" ref="@LE;/.Baa" type="LE;">
-            <link src="G48_foo_N3"/>
+          <node id="G48_foo_N10" kind="ref_field" ref="@LE;/.Baa" type="LE;">
+            <link src="G48_foo_N2"/>
             <ast end="256" start="253" type="42"/>
           </node>
         </scope>
         <node id="G48_foo_N1" kind="input" ref="@LE;/.Moo" type="LE;"/>
-        <node id="G48_foo_N2" kind="input" ref="@LE;/.Moo" type="LE;"/>
-        <node id="G48_foo_N3" kind="input" ref="@LE;/.Baa" type="LE;"/>
-        <node id="G48_foo_N4" kind="input" ref="#this" type="Lbasic_enum;"/>
+        <node id="G48_foo_N2" kind="input" ref="@LE;/.Baa" type="LE;"/>
+        <node id="G48_foo_N3" kind="input" ref="#this" type="Lbasic_enum;"/>
       </scope>
     </method>
   </class>

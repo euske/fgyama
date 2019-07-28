@@ -14,7 +14,9 @@ public class ConsistentHashSet<E> extends HashSet<E> implements Iterable<E> {
 
     @Override
     public boolean add(E e) {
-        _elems.add(e);
+        if (!this.contains(e)) {
+            _elems.add(e);
+        }
         return super.add(e);
     }
 
