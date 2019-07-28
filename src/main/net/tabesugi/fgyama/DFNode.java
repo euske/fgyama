@@ -22,6 +22,14 @@ class DFLink {
         _label = label;
     }
 
+    protected DFNode getSrc() {
+        return _src;
+    }
+
+    protected void setSrc(DFNode node) {
+        _src = node;
+    }
+
     @Override
     public String toString() {
         return ("<DFLink "+_dst+"<-"+_src+">");
@@ -48,9 +56,9 @@ public class DFNode implements Comparable<DFNode> {
     private DFType _type;
     private DFRef _ref;
 
-    private DFNode _input = null;
-    private SortedMap<String, DFNode> _inputs =
-        new TreeMap<String, DFNode>();
+    private DFNode _value = null;
+    private List<DFLink> _links =
+        new ArrayList<DFLink>();
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
@@ -119,53 +127,44 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public DFLink[] getLinks() {
-        int n = (_input != null)? 1 : 0;
-        DFLink[] links = new DFLink[n+_inputs.size()];
-        if (_input != null) {
-            links[0] = new DFLink(this, _input, null);
-        }
-        String[] labels = new String[_inputs.size()];
-        _inputs.keySet().toArray(labels);
-        for (int i = 0; i < labels.length; i++) {
-            String label = labels[i];
-            DFNode node = _inputs.get(label);
-            links[n+i] = new DFLink(this, node, label);
-        }
+        DFLink[] links = new DFLink[_links.size()];
+        _links.toArray(links);
         return links;
     }
 
-    protected boolean hasInput() {
-        return _input != null;
+    protected boolean hasValue() {
+        return _value != null;
     }
 
     protected void accept(DFNode node) {
-        assert node != null;
-        assert _input == null;
-        _input = node;
-        if (_type instanceof DFUnknownType) {
-            _type = node.getNodeType();
-        }
-        node._outputs.add(this);
+        this.accept(node, null);
     }
 
     protected void accept(DFNode node, String label) {
         assert node != null;
-        assert !_inputs.containsKey(label);
-        _inputs.put(label, node);
+        if (label == null) {
+            assert _value == null;
+            _value = node;
+            if (_type instanceof DFUnknownType) {
+                _type = node.getNodeType();
+            }
+        }
+        DFLink link = new DFLink(this, node, label);
+        _links.add(link);
         node._outputs.add(this);
     }
 
     public boolean purge() {
-        if (_input == null) return false;
+        if (_value == null) return false;
         for (DFNode node : _outputs) {
-            if (node._input == this) {
-                node._input = _input;
-                _input._outputs.add(node);
+            if (node._value == this) {
+                node._value = _value;
+                _value._outputs.add(node);
             }
-            for (Map.Entry<String, DFNode> entry : node._inputs.entrySet()) {
-                if (entry.getValue() == this) {
-                    entry.setValue(_input);
-                    _input._outputs.add(node);
+            for (DFLink link : node._links) {
+                if (link.getSrc() == this) {
+                    link.setSrc(_value);
+                    _value._outputs.add(node);
                 }
             }
         }

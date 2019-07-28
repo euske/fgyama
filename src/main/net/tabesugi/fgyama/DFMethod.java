@@ -1664,7 +1664,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         if (preTest) {  // Repeat -> [S] -> Begin -> End
             // Connect the repeats to the loop inputs.
             for (DFNode input : loopCtx.getFirsts()) {
-                if (input.hasInput()) continue;
+                if (input.hasValue()) continue;
                 DFRef ref = input.getRef();
                 DFNode src = repeats.get(ref);
                 if (src == null) {
@@ -1695,7 +1695,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         } else {  // Begin -> [S] -> End -> Repeat
             // Connect the begins to the loop inputs.
             for (DFNode input : loopCtx.getFirsts()) {
-                if (input.hasInput()) continue;
+                if (input.hasValue()) continue;
                 DFRef ref = input.getRef();
                 DFNode src = begins.get(ref);
                 if (src == null) {
@@ -1818,14 +1818,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         SortedSet<DFRef> outRefs = new TreeSet<DFRef>();
         if (thenFrame != null && thenCtx != null) {
             for (DFNode src : thenCtx.getFirsts()) {
-                if (src.hasInput()) continue;
+                if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(thenFrame.getOutputRefs());
         }
         if (elseFrame != null && elseCtx != null) {
             for (DFNode src : elseCtx.getFirsts()) {
-                if (src.hasInput()) continue;
+                if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(elseFrame.getOutputRefs());
@@ -1884,7 +1884,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFNode caseNode, DFContext caseCtx) {
 
         for (DFNode src : caseCtx.getFirsts()) {
-            if (src.hasInput()) continue;
+            if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
         }
 
@@ -2090,7 +2090,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             tryCtx, typeSpace, graph, finder, tryScope, tryFrame,
             tryStmt.getBody());
         for (DFNode src : tryCtx.getFirsts()) {
-            if (src.hasInput()) continue;
+            if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
         }
         DFNode exc = tryCtx.get(tryScope.lookupException());
@@ -2115,7 +2115,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 catchCtx, typeSpace, graph, finder, catchScope, catchFrame,
                 cc.getBody());
             for (DFNode src : catchCtx.getFirsts()) {
-                if (src.hasInput()) continue;
+                if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
             outRefs.addAll(catchFrame.getOutputRefs());
