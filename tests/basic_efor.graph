@@ -42,9 +42,9 @@
               <ast end="110" start="77" type="70"/>
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N15" kind="end" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
-              <link src="G56_foo_N13"/>
-              <link label="_repeat" src="G56_foo_N14"/>
               <link label="cond" src="G56_foo_N7"/>
+              <link label="_repeat" src="G56_foo_N14"/>
+              <link src="G56_foo_N13"/>
               <ast end="110" start="77" type="70"/>
             </node>
           </scope>

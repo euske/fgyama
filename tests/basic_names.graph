@@ -26,8 +26,8 @@
             <ast end="133" start="127" type="45"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="G41_doit_N6" kind="call" type="V">
-            <link label="#arg0" src="G41_doit_N5"/>
             <link label="#this" src="G41_doit_N4"/>
+            <link label="#arg0" src="G41_doit_N5"/>
             <ast end="134" start="108" type="32"/>
           </node>
           <node id="G41_doit_N7" kind="receive" type="V">
@@ -50,8 +50,8 @@
             <ast end="252" start="249" type="42"/>
           </node>
           <node id="G41_doit_N12" kind="assign_field" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
-            <link src="G41_doit_N15"/>
             <link label="obj" src="G41_doit_N11"/>
+            <link src="G41_doit_N15"/>
             <ast end="254" start="249" type="40"/>
           </node>
           <node id="G41_doit_N13" kind="ref_var" ref="#this" type="Ldom/meep/basic_names;">
@@ -59,8 +59,8 @@
             <ast end="261" start="257" type="52"/>
           </node>
           <node id="G41_doit_N14" kind="ref_field" ref="@Ldom/meep/basic_names;/.y" type="I">
-            <link src="G41_doit_N2"/>
             <link label="obj" src="G41_doit_N13"/>
+            <link src="G41_doit_N2"/>
             <ast end="263" start="257" type="22"/>
           </node>
           <node data="=" id="G41_doit_N15" kind="op_assign" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
@@ -125,8 +125,10 @@
           </node>
           <node data="Ldom/meep/basic_names;.doit()V" id="G43_main_N10" kind="call" type="V">
             <link label="#this" src="G43_main_N9"/>
+            <link label="@Ljava/lang/System;/.out" src="G43_main_N3"/>
             <link label="@Ldom/meep/basic_names;/.y" src="G43_main_N4"/>
             <link label="@Ljava/lang/System;/.out" src="G43_main_N3"/>
+            <link label="@Ldom/meep/basic_names;/.y" src="G43_main_N4"/>
             <ast end="461" start="451" type="32"/>
           </node>
           <node id="G43_main_N11" kind="receive" type="V">
@@ -134,6 +136,10 @@
             <ast end="461" start="451" type="32"/>
           </node>
           <node id="G43_main_N12" kind="receive" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
+            <link label="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" src="G43_main_N10"/>
+            <ast end="461" start="451" type="32"/>
+          </node>
+          <node id="G43_main_N13" kind="receive" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
             <link label="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" src="G43_main_N10"/>
             <ast end="461" start="451" type="32"/>
           </node>
@@ -148,8 +154,8 @@
         <node id="G43_main_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="G43_main_N4" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
         <node id="G43_main_N5" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="G43_main_N13" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
-          <link src="G43_main_N12"/>
+        <node id="G43_main_N14" kind="output" ref="@Ldom/meep/basic_names/:MethodDeclaration:79:289/Baz;/.x" type="I">
+          <link src="G43_main_N13"/>
         </node>
       </scope>
     </method>

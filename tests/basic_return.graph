@@ -22,8 +22,8 @@
             <ast end="197" start="192" type="27"/>
           </node>
           <node data="Lbasic_return;.f(I)?" id="G12_foo_N11" kind="call" type="?">
-            <link label="#arg0" src="G12_foo_N10"/>
             <link label="#this" src="G12_foo_N7"/>
+            <link label="#arg0" src="G12_foo_N10"/>
             <ast end="198" start="190" type="32"/>
           </node>
           <node id="G12_foo_N12" kind="receive" type="?">

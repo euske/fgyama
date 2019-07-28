@@ -48,8 +48,20 @@
           </node>
           <node id="G59_foo_N13" kind="join" ref="$Lbasic_if;.:MethodDeclaration:29:126.:Block:59:126/$y" type="I">
             <link label="cond" src="G59_foo_N6"/>
-            <link label="false" src="G59_foo_N10"/>
             <link label="true" src="G59_foo_N7"/>
+            <link label="false" src="G59_foo_N10"/>
+            <ast end="120" start="70" type="25"/>
+          </node>
+          <node id="G59_foo_N14" kind="join" ref="$Lbasic_if;.:MethodDeclaration:29:126.:Block:59:126/$y" type="I">
+            <link label="cond" src="G59_foo_N6"/>
+            <link label="true" src="G59_foo_N7"/>
+            <link label="false" src="G59_foo_N10"/>
+            <ast end="120" start="70" type="25"/>
+          </node>
+          <node id="G59_foo_N15" kind="join" ref="$Lbasic_if;.:MethodDeclaration:29:126.:Block:59:126/$y" type="I">
+            <link label="cond" src="G59_foo_N6"/>
+            <link label="true" src="G59_foo_N7"/>
+            <link label="false" src="G59_foo_N10"/>
             <ast end="120" start="70" type="25"/>
           </node>
         </scope>

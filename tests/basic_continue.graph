@@ -25,8 +25,8 @@
               </node>
               <node id="G2_foo_N10" kind="join" ref="$Lbasic_continue;.:MethodDeclaration:35:148/$x" type="I">
                 <link label="cond" src="G2_foo_N8"/>
-                <link label="false" src="G2_foo_N16"/>
                 <link label="true" src="G2_foo_N15"/>
+                <link label="false" src="G2_foo_N16"/>
               </node>
               <node id="G2_foo_N11" kind="assign_var" ref="$Lbasic_continue;.:MethodDeclaration:35:148/$x" type="I">
                 <link src="G2_foo_N13"/>
@@ -51,9 +51,9 @@
               <ast end="129" start="68" type="61"/>
             </node>
             <node data=":WhileStatement:68:129" id="G2_foo_N16" kind="end" ref="$Lbasic_continue;.:MethodDeclaration:35:148/$x" type="I">
-              <link src="G2_foo_N14"/>
-              <link label="_repeat" src="G2_foo_N15"/>
               <link label="cond" src="G2_foo_N4"/>
+              <link label="_repeat" src="G2_foo_N15"/>
+              <link src="G2_foo_N14"/>
               <ast end="129" start="68" type="61"/>
             </node>
           </scope>

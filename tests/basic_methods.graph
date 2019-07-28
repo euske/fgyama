@@ -74,6 +74,7 @@
           <node data="Lbasic_methods/:MethodDeclaration:139:385/moo;.fc()I" id="G51_fa_N17" kind="call" type="I">
             <link label="#this" src="G51_fa_N16"/>
             <link label="@Lbasic_methods;/.x" src="G51_fa_N6"/>
+            <link label="@Lbasic_methods;/.x" src="G51_fa_N6"/>
             <ast end="378" start="372" type="32"/>
           </node>
           <node id="G51_fa_N18" kind="receive" type="I">
@@ -167,21 +168,22 @@
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.:MethodDeclaration:245:293">
         <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.:MethodDeclaration:245:293.:Block:261:293">
           <node id="G55_fc_N3" kind="ref_var" ref="#this" type="Lbasic_methods;">
-            <link src="G55_fc_N2"/>
+            <link src="G55_fc_N4"/>
             <ast end="288" start="270" type="52"/>
           </node>
-          <node id="G55_fc_N4" kind="ref_field" ref="@Lbasic_methods;/.x" type="I">
-            <link src="G55_fc_N1"/>
+          <node id="G55_fc_N5" kind="ref_field" ref="@Lbasic_methods;/.x" type="I">
             <link label="obj" src="G55_fc_N3"/>
+            <link src="G55_fc_N1"/>
             <ast end="290" start="270" type="22"/>
           </node>
-          <node id="G55_fc_N5" kind="output" ref="#return" type="I">
-            <link src="G55_fc_N4"/>
+          <node id="G55_fc_N6" kind="output" ref="#return" type="I">
+            <link src="G55_fc_N5"/>
             <ast end="291" start="263" type="41"/>
           </node>
         </scope>
         <node id="G55_fc_N1" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
         <node id="G55_fc_N2" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:385/moo;"/>
+        <node id="G55_fc_N4" ref="#this" type="Lbasic_methods;"/>
       </scope>
     </method>
   </class>

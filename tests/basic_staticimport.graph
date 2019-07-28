@@ -16,8 +16,8 @@
             <ast end="152" start="151" type="34"/>
           </node>
           <node data="Ljava/lang/Math;.sin(D)D" id="G60_foo_N5" kind="call" type="D">
-            <link label="#arg0" src="G60_foo_N4"/>
             <link label="#this" src="G60_foo_N2"/>
+            <link label="#arg0" src="G60_foo_N4"/>
             <ast end="153" start="147" type="32"/>
           </node>
           <node id="G60_foo_N6" kind="receive" type="D">
@@ -25,8 +25,8 @@
             <ast end="153" start="147" type="32"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(D)V" id="G60_foo_N7" kind="call" type="V">
-            <link label="#arg0" src="G60_foo_N6"/>
             <link label="#this" src="G60_foo_N3"/>
+            <link label="#arg0" src="G60_foo_N6"/>
             <ast end="154" start="135" type="32"/>
           </node>
           <node id="G60_foo_N8" kind="receive" type="V">

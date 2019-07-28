@@ -48,9 +48,9 @@
             <ast end="106" start="105" type="34"/>
           </node>
           <node data="Lbasic_ops;.moo(II)?" id="G3_foo_N15" kind="call" type="?">
+            <link label="#this" src="G3_foo_N4"/>
             <link label="#arg0" src="G3_foo_N13"/>
             <link label="#arg1" src="G3_foo_N14"/>
-            <link label="#this" src="G3_foo_N4"/>
             <ast end="107" start="98" type="32"/>
           </node>
           <node id="G3_foo_N16" kind="receive" type="?">
@@ -91,9 +91,9 @@
             <ast end="152" start="151" type="34"/>
           </node>
           <node id="G3_foo_N26" kind="assign_array" ref="%I" type="I">
-            <link src="G3_foo_N28"/>
             <link label="array" src="G3_foo_N24"/>
             <link label="index" src="G3_foo_N25"/>
+            <link src="G3_foo_N28"/>
             <ast end="153" start="149" type="2"/>
           </node>
           <node id="G3_foo_N27" kind="ref_var" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">
@@ -116,9 +116,9 @@
             <ast end="167" start="166" type="34"/>
           </node>
           <node id="G3_foo_N32" kind="ref_array" ref="%I" type="I">
-            <link src="G3_foo_N26"/>
             <link label="array" src="G3_foo_N30"/>
             <link label="index" src="G3_foo_N31"/>
+            <link src="G3_foo_N26"/>
             <ast end="168" start="164" type="2"/>
           </node>
           <node data="=" id="G3_foo_N33" kind="op_assign" ref="$Lbasic_ops;.:MethodDeclaration:30:186.:Block:59:186/$z" type="I">

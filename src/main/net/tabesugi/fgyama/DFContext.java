@@ -85,9 +85,8 @@ public class DFContext {
 
     public DFRef[] getChanged() {
         List<DFRef> refs = new ArrayList<DFRef>();
-        for (Map.Entry<DFRef, DFNode> ent : _first.entrySet()) {
-            DFRef ref = ent.getKey();
-            DFNode node0 = ent.getValue();
+        for (DFRef ref : _first.keys()) {
+            DFNode node0 = _first.get(ref);
             DFNode node1 = _last.get(ref);
             if (node0 != node1) {
                 refs.add(ref);
