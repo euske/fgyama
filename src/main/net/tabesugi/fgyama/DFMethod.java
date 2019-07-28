@@ -716,8 +716,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private Map<String, DFType> _mapTypeMap = null;
     private DFFunctionType _funcType = null;
 
-    private SortedSet<DFMethod> _callers =
-        new TreeSet<DFMethod>();
+    private ConsistentHashSet<DFMethod> _callers =
+        new ConsistentHashSet<DFMethod>();
 
     private ASTNode _ast = null;
 
@@ -837,7 +837,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _callers.add(method);
     }
 
-    public SortedSet<DFMethod> getCallers() {
+    public ConsistentHashSet<DFMethod> getCallers() {
         return _callers;
     }
 
@@ -1196,7 +1196,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     graph, scope, methods, invoke, obj);
                 call.setArgs(args);
                 {
-                    SortedSet<DFRef> refs = new TreeSet<DFRef>();
+                    ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
                     for (DFMethod method1 : methods) {
                         DFFrame frame1 = method1.getFrame();
                         if (frame1 == null) continue;
@@ -1210,7 +1210,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx.setRValue(new ReceiveNode(
                                   graph, scope, null, invoke, call, "#return"));
                 {
-                    SortedSet<DFRef> refs = new TreeSet<DFRef>();
+                    ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
                     for (DFMethod method1 : methods) {
                         DFFrame frame1 = method1.getFrame();
                         if (frame1 == null) continue;
@@ -1815,7 +1815,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // A JoinNode is added to each variable.
 
         // outRefs: all the references from both contexts.
-        SortedSet<DFRef> outRefs = new TreeSet<DFRef>();
+        ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
         if (thenFrame != null && thenCtx != null) {
             for (DFNode src : thenCtx.getFirsts()) {
                 if (src.hasValue()) continue;
@@ -2081,7 +2081,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFTypeFinder finder, DFVarScope scope, DFFrame frame,
 	TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
-        SortedSet<DFRef> outRefs = new TreeSet<DFRef>();
+        ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
 
         DFVarScope tryScope = scope.getChildByAST(tryStmt);
         DFFrame tryFrame = frame.getChildByAST(tryStmt);

@@ -13,7 +13,7 @@ import org.w3c.dom.*;
 
 //  DFKlass
 //
-public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> {
+public class DFKlass extends DFTypeSpace implements DFType {
 
     // These fields are available upon construction.
     private String _name;
@@ -128,14 +128,6 @@ public class DFKlass extends DFTypeSpace implements DFType, Comparable<DFKlass> 
     @Override
     public String toString() {
         return ("<DFKlass("+this.getTypeName()+")>");
-    }
-
-    @Override
-    public int compareTo(DFKlass klass) {
-        if (this == klass) return 0;
-        int x = _outerSpace.compareTo(klass._outerSpace);
-        if (x != 0) return x;
-        return getTypeName().compareTo(klass.getTypeName());
     }
 
     public Element toXML(Document document) {

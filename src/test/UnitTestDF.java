@@ -47,7 +47,7 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = srcs.get(javaPath);
             _converter.setTypeFinder(javaPath, cunit);
         }
-        Set<DFKlass> klasses = new TreeSet<DFKlass>();
+        Set<DFKlass> klasses = new ConsistentHashSet<DFKlass>();
         for (String javaPath : javaPaths) {
             CompilationUnit cunit = srcs.get(javaPath);
             _converter.loadKlasses(javaPath, cunit, klasses);

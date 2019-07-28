@@ -874,7 +874,7 @@ public class Java2DF {
             CompilationUnit cunit = srcs.get(path);
             converter.setTypeFinder(path, cunit);
         }
-        Set<DFKlass> klasses = new TreeSet<DFKlass>();
+        ConsistentHashSet<DFKlass> klasses = new ConsistentHashSet<DFKlass>();
         for (String path : files) {
             Logger.info("Pass3:", path);
             CompilationUnit cunit = srcs.get(path);

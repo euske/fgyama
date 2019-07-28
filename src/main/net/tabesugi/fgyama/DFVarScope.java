@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 //  DFVarScope
 //  Mapping from name -> reference.
 //
-public class DFVarScope implements Comparable<DFVarScope> {
+public class DFVarScope {
 
     private DFVarScope _outer;
     private String _name;
@@ -28,17 +28,6 @@ public class DFVarScope implements Comparable<DFVarScope> {
 
     public DFVarScope(DFVarScope outer, SimpleName name) {
         this(outer, name.getIdentifier());
-    }
-
-    @Override
-    public int compareTo(DFVarScope scope) {
-        if (scope == null) return +1;
-        if (scope == this) return 0;
-        if (scope._outer == _outer) {
-            return _name.compareTo(scope._name);
-        }
-        if (_outer == null) return -1;
-        return _outer.compareTo(scope._outer);
     }
 
     @Override

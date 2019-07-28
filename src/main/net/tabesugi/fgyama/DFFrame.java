@@ -16,17 +16,17 @@ public class DFFrame {
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
-    private SortedSet<DFRef> _inputRefs =
-        new TreeSet<DFRef>();
-    private SortedSet<DFRef> _outputRefs =
-        new TreeSet<DFRef>();
+    private ConsistentHashSet<DFRef> _inputRefs =
+        new ConsistentHashSet<DFRef>();
+    private ConsistentHashSet<DFRef> _outputRefs =
+        new ConsistentHashSet<DFRef>();
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
-    private SortedSet<DFNode> _inputNodes =
-        new TreeSet<DFNode>();
-    private SortedSet<DFNode> _outputNodes =
-        new TreeSet<DFNode>();
+    private ConsistentHashSet<DFNode> _inputNodes =
+        new ConsistentHashSet<DFNode>();
+    private ConsistentHashSet<DFNode> _outputNodes =
+        new ConsistentHashSet<DFNode>();
 
     public static final String ANONYMOUS = "@ANONYMOUS";
     public static final String BREAKABLE = "@BREAKABLE";
@@ -112,11 +112,11 @@ public class DFFrame {
         }
     }
 
-    public SortedSet<DFRef> getInputRefs() {
+    public Collection<DFRef> getInputRefs() {
         return _inputRefs;
     }
 
-    public SortedSet<DFRef> getOutputRefs() {
+    public Collection<DFRef> getOutputRefs() {
         return _outputRefs;
     }
 
@@ -154,8 +154,8 @@ public class DFFrame {
         }
     }
 
-    public SortedSet<DFNode> getInputNodes() {
-        SortedSet<DFNode> nodes = new TreeSet<DFNode>();
+    public Iterable<DFNode> getInputNodes() {
+        List<DFNode> nodes = new ArrayList<DFNode>();
         for (DFNode node : _inputNodes) {
             DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isInternal()) {
@@ -165,8 +165,8 @@ public class DFFrame {
         return nodes;
     }
 
-    public SortedSet<DFNode> getOutputNodes() {
-        SortedSet<DFNode> nodes = new TreeSet<DFNode>();
+    public Iterable<DFNode> getOutputNodes() {
+        List<DFNode> nodes = new ArrayList<DFNode>();
         for (DFNode node : _outputNodes) {
             DFRef ref = node.getRef();
             if (!ref.isLocal() || ref.isInternal()) {

@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.*;
 //  DFRef
 //  Place to store a value.
 //
-public abstract class DFRef implements Comparable<DFRef> {
+public abstract class DFRef {
 
     private DFType _type;
 
@@ -25,12 +25,6 @@ public abstract class DFRef implements Comparable<DFRef> {
         } else {
             return ("<DFRef("+this.getFullName()+": "+_type.toString()+">");
         }
-    }
-
-    @Override
-    public int compareTo(DFRef ref) {
-        if (ref == this) return 0;
-        return this.getFullName().compareTo(ref.getFullName());
     }
 
     public boolean isLocal() {
