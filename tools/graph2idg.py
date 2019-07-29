@@ -232,6 +232,7 @@ def main(argv):
                 fp.write('+ %r %r\n' % (1, data))
             nfeats += len(feats)
             fp.write('\n')
+        sys.stderr.write('.'); sys.stderr.flush()
     print('Items: %r, Features: %r' % (len(items), nfeats), file=sys.stderr)
 
     if fp is not sys.stdout:

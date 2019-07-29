@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import math
+import marshal
 
 class NaiveBayes:
 
@@ -54,6 +55,17 @@ class NaiveBayes:
         for (f,d) in self.fcount.items():
             p = { k: math.log(v) for (k,v) in d.items() }
             self.fprob[f] = p
+        return
+
+    def save(self, fp):
+        data = (self.fcount, self.kcount)
+        marshal.dump(data, fp)
+        return
+
+    def load(self, fp):
+        data = marshal.load(fp)
+        (self.fcount, self.kcount) = data
+        self.commit()
         return
 
     def get(self, feats, n=0, fallback=False):

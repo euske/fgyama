@@ -33,62 +33,73 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-o path] [-i path] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'd')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:')
     except getopt.GetoptError:
         return usage()
     debug = 0
+    outpath = None
+    inpath = None
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-o': outpath = v
+        elif k == '-i': inpath = v
     if not args: return usage()
+    assert inpath is None or outpath is None
 
     path = args.pop(0)
     print('Loading: %r...' % path, file=sys.stderr)
-    feats = {}
+
+    nb = NaiveBayes()
+
+    def learn(item, feats):
+        name = stripid(item)
+        words = splitwords(name)
+        for w in words:
+            nb.add(w, feats)
+        sys.stderr.write('.'); sys.stderr.flush()
+        return
+
+    def predict(item, feats):
+        name = stripid(item)
+        words = splitwords(name)
+        cands = nb.get(feats)
+        n = len(words)
+        if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):
+            print(item)
+            print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
+        return
+
+    f = learn
+    if inpath is not None:
+        with open(inpath, 'rb') as fp:
+            nb.load(fp)
+            f = predict
+
     with open(path) as fp:
-        a = None
+        a = item = None
         for line in fp:
             if line.startswith('! '):
                 data = eval(line[2:])
                 if data[0] == 'REF':
                     item = data[1]
-                    if item in feats:
-                        a = feats[item]
-                    else:
-                        a = feats[item] = {}
+                    a = set()
                 else:
                     a = None
             elif a is not None and line.startswith('+ '):
                 (n,_,line) = line[2:].partition(' ')
                 data = eval(line)
                 feat = data[0:4]
-                if feat not in a:
-                    a[feat] = 0
-                a[feat] += int(n)
-    #
-    nb = NaiveBayes()
-    for (item,a) in feats.items():
-        name = stripid(item)
-        words = splitwords(name)
-        for w in words:
-            nb.add(w, a.keys())
-    nb.commit()
-    #
-    nitems = 0
-    for (item,a) in feats.items():
-        if not a: continue
-        name = stripid(item)
-        words = splitwords(name)
-        cands = nb.get(a)
-        n = len(words)
-        if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):
-            print(item)
-            print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
-        nitems += 1
-    print(nitems)
+                a.add(feat)
+            elif a is not None and not line.strip():
+                if a:
+                    f(item, a)
 
+    if outpath is not None:
+        with open(outpath, 'wb') as fp:
+            nb.save(fp)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
