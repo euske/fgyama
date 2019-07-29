@@ -7,86 +7,86 @@
     <method name="Lbasic_return;.foo(III)I" style="static">
       <ast end="249" start="104" type="31"/>
       <scope name="Lbasic_return;.:MethodDeclaration:104:249">
-        <scope name="Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249">
-          <node id="G12_foo_N8" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
-            <link src="G12_foo_N2"/>
-            <ast end="193" start="192" type="42"/>
-          </node>
-          <node id="G12_foo_N9" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$b" type="I">
-            <link src="G12_foo_N4"/>
-            <ast end="197" start="196" type="42"/>
-          </node>
-          <node data="+" id="G12_foo_N10" kind="op_infix" type="I">
-            <link label="L" src="G12_foo_N8"/>
-            <link label="R" src="G12_foo_N9"/>
-            <ast end="197" start="192" type="27"/>
-          </node>
-          <node data="Lbasic_return;.f(I)?" id="G12_foo_N11" kind="call" type="?">
-            <link label="#this" src="G12_foo_N7"/>
-            <link label="#arg0" src="G12_foo_N10"/>
-            <ast end="198" start="190" type="32"/>
-          </node>
-          <node id="G12_foo_N12" kind="receive" type="?">
-            <link label="#return" src="G12_foo_N11"/>
-            <ast end="198" start="190" type="32"/>
-          </node>
-          <node id="G12_foo_N13" kind="assign_var" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
-            <link src="G12_foo_N12"/>
-            <ast end="198" start="186" type="59"/>
-          </node>
-          <node id="G12_foo_N14" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
-            <link src="G12_foo_N2"/>
-            <ast end="233" start="232" type="42"/>
-          </node>
-          <node data="-" id="G12_foo_N15" kind="op_prefix" type="I">
-            <link src="G12_foo_N14"/>
-            <ast end="233" start="231" type="38"/>
-          </node>
-          <node id="G12_foo_N16" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
-            <link src="G12_foo_N13"/>
-            <ast end="238" start="237" type="42"/>
-          </node>
-          <node id="G12_foo_N17" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$c" type="I">
-            <link src="G12_foo_N6"/>
-            <ast end="242" start="241" type="42"/>
-          </node>
-          <node data="*" id="G12_foo_N18" kind="op_infix" type="I">
-            <link label="L" src="G12_foo_N16"/>
-            <link label="R" src="G12_foo_N17"/>
-            <ast end="242" start="237" type="27"/>
-          </node>
-          <node data="+" id="G12_foo_N19" kind="op_infix" type="I">
-            <link label="L" src="G12_foo_N15"/>
-            <link label="R" src="G12_foo_N18"/>
-            <ast end="242" start="230" type="27"/>
-          </node>
-          <node id="G12_foo_N20" kind="output" ref="#return" type="I">
-            <link src="G12_foo_N19"/>
-            <ast end="243" start="223" type="41"/>
-          </node>
-        </scope>
         <node id="G12_foo_N1" kind="input" ref="#arg0" type="I">
           <ast end="131" start="126" type="44"/>
         </node>
         <node id="G12_foo_N2" kind="assign_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
-          <link src="G12_foo_N1"/>
           <ast end="131" start="126" type="44"/>
+          <link src="G12_foo_N1"/>
         </node>
         <node id="G12_foo_N3" kind="input" ref="#arg1" type="I">
           <ast end="138" start="133" type="44"/>
         </node>
         <node id="G12_foo_N4" kind="assign_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$b" type="I">
-          <link src="G12_foo_N3"/>
           <ast end="138" start="133" type="44"/>
+          <link src="G12_foo_N3"/>
         </node>
         <node id="G12_foo_N5" kind="input" ref="#arg2" type="I">
           <ast end="145" start="140" type="44"/>
         </node>
         <node id="G12_foo_N6" kind="assign_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$c" type="I">
-          <link src="G12_foo_N5"/>
           <ast end="145" start="140" type="44"/>
+          <link src="G12_foo_N5"/>
         </node>
         <node id="G12_foo_N7" kind="input" ref="#this" type="Lbasic_return;"/>
+        <scope name="Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249">
+          <node id="G12_foo_N8" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
+            <ast end="193" start="192" type="42"/>
+            <link src="G12_foo_N2"/>
+          </node>
+          <node id="G12_foo_N9" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$b" type="I">
+            <ast end="197" start="196" type="42"/>
+            <link src="G12_foo_N4"/>
+          </node>
+          <node data="+" id="G12_foo_N10" kind="op_infix" type="I">
+            <ast end="197" start="192" type="27"/>
+            <link label="L" src="G12_foo_N8"/>
+            <link label="R" src="G12_foo_N9"/>
+          </node>
+          <node data="Lbasic_return;.f(I)?" id="G12_foo_N11" kind="call" type="?">
+            <ast end="198" start="190" type="32"/>
+            <link label="#this" src="G12_foo_N7"/>
+            <link label="#arg0" src="G12_foo_N10"/>
+          </node>
+          <node id="G12_foo_N12" kind="receive" type="?">
+            <ast end="198" start="190" type="32"/>
+            <link src="G12_foo_N11"/>
+          </node>
+          <node id="G12_foo_N13" kind="assign_var" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
+            <ast end="198" start="186" type="59"/>
+            <link src="G12_foo_N12"/>
+          </node>
+          <node id="G12_foo_N14" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$a" type="I">
+            <ast end="233" start="232" type="42"/>
+            <link src="G12_foo_N2"/>
+          </node>
+          <node data="-" id="G12_foo_N15" kind="op_prefix" type="I">
+            <ast end="233" start="231" type="38"/>
+            <link src="G12_foo_N14"/>
+          </node>
+          <node id="G12_foo_N16" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249.:Block:147:249/$d" type="I">
+            <ast end="238" start="237" type="42"/>
+            <link src="G12_foo_N13"/>
+          </node>
+          <node id="G12_foo_N17" kind="ref_var" ref="$Lbasic_return;.:MethodDeclaration:104:249/$c" type="I">
+            <ast end="242" start="241" type="42"/>
+            <link src="G12_foo_N6"/>
+          </node>
+          <node data="*" id="G12_foo_N18" kind="op_infix" type="I">
+            <ast end="242" start="237" type="27"/>
+            <link label="L" src="G12_foo_N16"/>
+            <link label="R" src="G12_foo_N17"/>
+          </node>
+          <node data="+" id="G12_foo_N19" kind="op_infix" type="I">
+            <ast end="242" start="230" type="27"/>
+            <link label="L" src="G12_foo_N15"/>
+            <link label="R" src="G12_foo_N18"/>
+          </node>
+          <node id="G12_foo_N20" kind="output" ref="#return" type="I">
+            <ast end="243" start="223" type="41"/>
+            <link src="G12_foo_N19"/>
+          </node>
+        </scope>
       </scope>
     </method>
   </class>
