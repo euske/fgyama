@@ -105,7 +105,7 @@ public class DFFrame {
         _outputRefs.addAll(innerFrame._outputRefs);
     }
 
-    private void removeRefs(DFVarScope innerScope) {
+    private void removeRefs(DFLocalScope innerScope) {
         for (DFRef ref : innerScope.getRefs()) {
             _inputRefs.remove(ref);
             _outputRefs.remove(ref);
@@ -178,7 +178,7 @@ public class DFFrame {
 
     @SuppressWarnings("unchecked")
     public void buildMethodDecl(
-        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         MethodDeclaration methodDecl)
         throws InvalidSyntax {
         if (methodDecl.getBody() == null) return;
@@ -199,7 +199,7 @@ public class DFFrame {
     }
 
     public void buildBodyDecls(
-        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         List<BodyDeclaration> decls)
         throws InvalidSyntax {
         for (BodyDeclaration body : decls) {
@@ -213,7 +213,7 @@ public class DFFrame {
 
     @SuppressWarnings("unchecked")
     private void buildStmt(
-        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Statement stmt)
         throws InvalidSyntax {
         assert stmt != null;
@@ -223,7 +223,7 @@ public class DFFrame {
 
         } else if (stmt instanceof Block) {
 	    // "{ ... }"
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             Block block = (Block)stmt;
             for (Statement cstmt :
                      (List<Statement>) block.statements()) {
@@ -287,7 +287,7 @@ public class DFFrame {
                 enumKlass = type.toKlass();
                 enumKlass.load();
             }
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             for (Statement cstmt :
                      (List<Statement>) switchStmt.statements()) {
@@ -323,7 +323,7 @@ public class DFFrame {
         } else if (stmt instanceof WhileStatement) {
 	    // "while (c) { ... }"
             WhileStatement whileStmt = (WhileStatement)stmt;
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildExpr(finder, method, scope, whileStmt.getExpression());
             innerFrame.buildStmt(finder, method, innerScope, whileStmt.getBody());
@@ -333,7 +333,7 @@ public class DFFrame {
         } else if (stmt instanceof DoStatement) {
 	    // "do { ... } while (c);"
             DoStatement doStmt = (DoStatement)stmt;
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(finder, method, innerScope, doStmt.getBody());
             innerFrame.buildExpr(finder, method, scope, doStmt.getExpression());
@@ -343,7 +343,7 @@ public class DFFrame {
         } else if (stmt instanceof ForStatement) {
 	    // "for (i = 0; i < 10; i++) { ... }"
             ForStatement forStmt = (ForStatement)stmt;
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             for (Expression init : (List<Expression>) forStmt.initializers()) {
                 this.buildExpr(finder, method, innerScope, init);
             }
@@ -363,7 +363,7 @@ public class DFFrame {
 	    // "for (x : array) { ... }"
             EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.buildExpr(finder, method, scope, eForStmt.getExpression());
-            DFVarScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(finder, method, innerScope, eForStmt.getBody());
             innerFrame.removeRefs(innerScope);
@@ -408,14 +408,14 @@ public class DFFrame {
         } else if (stmt instanceof TryStatement) {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
-            DFVarScope tryScope = scope.getChildByAST(stmt);
+            DFLocalScope tryScope = scope.getChildByAST(stmt);
             DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
             tryFrame.buildStmt(finder, method, tryScope, tryStmt.getBody());
             tryFrame.removeRefs(tryScope);
             this.expandLocalRefs(tryFrame);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                DFVarScope catchScope = scope.getChildByAST(cc);
+                DFLocalScope catchScope = scope.getChildByAST(cc);
                 DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
                 catchFrame.buildStmt(finder, method, catchScope, cc.getBody());
                 catchFrame.removeRefs(catchScope);
@@ -464,7 +464,7 @@ public class DFFrame {
 
     @SuppressWarnings("unchecked")
     private DFType buildExpr(
-        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Expression expr)
         throws InvalidSyntax {
         assert expr != null;
@@ -862,7 +862,7 @@ public class DFFrame {
     }
 
     private void buildAssignment(
-        DFTypeFinder finder, DFMethod method, DFVarScope scope,
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Expression expr)
         throws InvalidSyntax {
         assert expr != null;

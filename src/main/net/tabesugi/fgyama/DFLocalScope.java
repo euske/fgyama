@@ -43,6 +43,14 @@ public class DFLocalScope extends DFVarScope {
         return scope;
     }
 
+    public Element toXML(Document document, DFNode[] nodes) {
+        Element elem = super.toXML(document, nodes);
+        for (DFLocalScope child : this.getChildren()) {
+            elem.appendChild(child.toXML(document, nodes));
+        }
+        return elem;
+    }
+
     protected DFRef addVar(SimpleName name, DFType type) {
         return this.addVar(name.getIdentifier(), type);
     }
@@ -66,7 +74,6 @@ public class DFLocalScope extends DFVarScope {
         return super.lookupVar(id);
     }
 
-    @Override
     public DFRef[] getRefs() {
         DFRef[] refs = new DFRef[_vars.size()];
         _vars.toArray(refs);
@@ -77,6 +84,9 @@ public class DFLocalScope extends DFVarScope {
     protected void dumpContents(PrintStream out, String indent) {
         for (DFRef ref : _id2var.values()) {
             out.println(indent+"defined: "+ref);
+        }
+        for (DFLocalScope scope : this.getChildren()) {
+            scope.dump(out, indent);
         }
     }
 

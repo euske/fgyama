@@ -928,7 +928,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processExpression(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame, Expression expr)
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame, Expression expr)
         throws InvalidSyntax, EntityNotFound {
         assert expr != null;
 
@@ -1530,7 +1530,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processAssignment(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
         Expression expr)
         throws InvalidSyntax, EntityNotFound {
         assert expr != null;
@@ -1622,7 +1622,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
      */
     private void processVariableDeclaration(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	List<VariableDeclarationFragment> frags)
         throws InvalidSyntax, EntityNotFound {
 
@@ -1646,7 +1646,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
      * Expands the graph for the loop variables.
      */
     private void processLoop(
-        DFContext ctx, DFGraph graph, DFVarScope scope,
+        DFContext ctx, DFGraph graph, DFLocalScope scope,
         DFFrame frame, ASTNode ast, DFNode condValue,
         DFFrame loopFrame, DFContext loopCtx, boolean preTest)
         throws InvalidSyntax {
@@ -1767,10 +1767,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processBlock(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	Block block)
         throws InvalidSyntax, EntityNotFound {
-        DFVarScope innerScope = scope.getChildByAST(block);
+        DFLocalScope innerScope = scope.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
             processStatement(
                 ctx, typeSpace, graph, finder, innerScope, frame, cstmt);
@@ -1780,7 +1780,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processVariableDeclarationStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	VariableDeclarationStatement varStmt)
         throws InvalidSyntax, EntityNotFound {
         processVariableDeclaration(
@@ -1790,7 +1790,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processExpressionStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	ExpressionStatement exprStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
@@ -1800,7 +1800,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processIfStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	IfStatement ifStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
@@ -1892,7 +1892,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     private void processCaseStatement(
-        DFContext ctx, DFGraph graph, DFVarScope scope,
+        DFContext ctx, DFGraph graph, DFLocalScope scope,
         DFFrame frame, ASTNode apt,
         DFNode caseNode, DFContext caseCtx) {
 
@@ -1916,7 +1916,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processSwitchStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	SwitchStatement switchStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
@@ -1929,7 +1929,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             ((DFKlass)type).isEnum()) {
             enumKlass = type.toKlass();
         }
-        DFVarScope switchScope = scope.getChildByAST(switchStmt);
+        DFLocalScope switchScope = scope.getChildByAST(switchStmt);
         DFFrame switchFrame = frame.getChildByAST(switchStmt);
 
         SwitchCase switchCase = null;
@@ -1985,10 +1985,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processWhileStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	WhileStatement whileStmt)
         throws InvalidSyntax, EntityNotFound {
-        DFVarScope loopScope = scope.getChildByAST(whileStmt);
+        DFLocalScope loopScope = scope.getChildByAST(whileStmt);
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         processExpression(
@@ -2006,10 +2006,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processDoStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	DoStatement doStmt)
         throws InvalidSyntax, EntityNotFound {
-        DFVarScope loopScope = scope.getChildByAST(doStmt);
+        DFLocalScope loopScope = scope.getChildByAST(doStmt);
         DFFrame loopFrame = frame.getChildByAST(doStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         processStatement(
@@ -2028,10 +2028,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processForStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	ForStatement forStmt)
         throws InvalidSyntax, EntityNotFound {
-        DFVarScope loopScope = scope.getChildByAST(forStmt);
+        DFLocalScope loopScope = scope.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         for (Expression init : (List<Expression>) forStmt.initializers()) {
             processExpression(
@@ -2063,13 +2063,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processEnhancedForStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-	DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+	DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	EnhancedForStatement eForStmt)
         throws InvalidSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
         processExpression(
             ctx, typeSpace, graph, finder, scope, frame, expr);
-        DFVarScope loopScope = scope.getChildByAST(eForStmt);
+        DFLocalScope loopScope = scope.getChildByAST(eForStmt);
         DFFrame loopFrame = frame.getChildByAST(eForStmt);
         DFContext loopCtx = new DFContext(graph, loopScope);
         SingleVariableDeclaration decl = eForStmt.getParameter();
@@ -2091,12 +2091,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processTryStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
         ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
 
-        DFVarScope tryScope = scope.getChildByAST(tryStmt);
+        DFLocalScope tryScope = scope.getChildByAST(tryStmt);
         DFFrame tryFrame = frame.getChildByAST(tryStmt);
         DFContext tryCtx = new DFContext(graph, tryScope);
         processStatement(
@@ -2118,7 +2118,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             CatchClause cc = catches.get(i);
             SingleVariableDeclaration decl = cc.getException();
             excs[i] = finder.resolve(decl.getType());
-            DFVarScope catchScope = scope.getChildByAST(cc);
+            DFLocalScope catchScope = scope.getChildByAST(cc);
             DFFrame catchFrame = frame.getChildByAST(cc);
             DFContext catchCtx = new DFContext(graph, catchScope);
             DFRef ref = catchScope.lookupVar(decl.getName());
@@ -2184,7 +2184,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     @SuppressWarnings("unchecked")
     private void processStatement(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	Statement stmt)
         throws InvalidSyntax, EntityNotFound {
         assert stmt != null;
@@ -2431,10 +2431,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processInitializer(
         DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
-        DFTypeFinder finder, DFVarScope scope, DFFrame frame,
+        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	Initializer initializer)
         throws InvalidSyntax, EntityNotFound {
-        DFVarScope innerScope = scope.getChildByAST(initializer);
+        DFLocalScope innerScope = scope.getChildByAST(initializer);
         processStatement(
             ctx, typeSpace, graph, finder, innerScope, frame,
             initializer.getBody());

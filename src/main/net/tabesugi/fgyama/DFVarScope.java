@@ -38,9 +38,6 @@ public class DFVarScope {
     public Element toXML(Document document, DFNode[] nodes) {
         Element elem = document.createElement("scope");
         elem.setAttribute("name", this.getScopeName());
-        for (DFVarScope child : this.getChildren()) {
-            elem.appendChild(child.toXML(document, nodes));
-        }
         for (DFNode node : nodes) {
             if (node.getScope() == this) {
 		Element e = node.toXML(document);
@@ -103,29 +100,13 @@ public class DFVarScope {
         return _outer.lookupArray(type);
     }
 
-    public DFRef[] getRefs() {
-        return new DFRef[] {};
-    }
-
-    public DFLocalScope getChildByAST(ASTNode ast) {
-        return null;
-    }
-
-    public DFVarScope[] getChildren() {
-        return new DFVarScope[] {};
-    }
-
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
         out.println(indent+this.getScopeName()+" {");
-        String i2 = indent + "  ";
-        this.dumpContents(out, i2);
-        for (DFVarScope scope : this.getChildren()) {
-            scope.dump(out, i2);
-        }
+        this.dumpContents(out, indent+"  ");
         out.println(indent+"}");
     }
     protected void dumpContents(PrintStream out, String indent) {
