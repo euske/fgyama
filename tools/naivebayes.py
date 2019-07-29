@@ -28,9 +28,9 @@ class NaiveBayes:
 
     def __init__(self):
         self.fcount = {}
-        self.fprob = {}
         self.kcount = {}
-        self.kprob = {}
+        self.fprob = None
+        self.kprob = None
         return
 
     def add(self, key, feats, c=1):
@@ -45,13 +45,16 @@ class NaiveBayes:
         if key not in self.kcount:
             self.kcount[key] = 0
         self.kcount[key] += c
+        self.fprob = self.kprob = None
         return
 
     def commit(self):
         # self.kprob[k] = log(C(k))
+        self.kprob = {}
         for (k,v) in self.kcount.items():
             self.kprob[k] = math.log(v)
         # self.fprob[f][k] = log(C(f,k))
+        self.fprob = {}
         for (f,d) in self.fcount.items():
             p = { k: math.log(v) for (k,v) in d.items() }
             self.fprob[f] = p
@@ -71,6 +74,8 @@ class NaiveBayes:
     def get(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
+        assert self.kprob is not None
+        assert self.fprob is not None
         assert feats
         keyp = { k:p0 for (k,p0) in self.kprob.items() }
         keyf = {}

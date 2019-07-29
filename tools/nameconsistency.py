@@ -72,6 +72,10 @@ def main(argv):
             print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
         return
 
+    item2feats = None
+    if inpath is None and outpath is None:
+        item2feats = {}
+
     f = learn
     if inpath is not None:
         with open(inpath, 'rb') as fp:
@@ -79,27 +83,35 @@ def main(argv):
             f = predict
 
     with open(path) as fp:
-        a = item = None
+        item = feats = None
         for line in fp:
             if line.startswith('! '):
                 data = eval(line[2:])
                 if data[0] == 'REF':
                     item = data[1]
-                    a = set()
+                    feats = set()
                 else:
-                    a = None
-            elif a is not None and line.startswith('+ '):
+                    feats = None
+            elif feats is not None and line.startswith('+ '):
                 (n,_,line) = line[2:].partition(' ')
                 data = eval(line)
                 feat = data[0:4]
-                a.add(feat)
-            elif a is not None and not line.strip():
-                if a:
-                    f(item, a)
+                feats.add(feat)
+            elif feats is not None and not line.strip():
+                if feats:
+                    f(item, feats)
+                    if item2feats is not None:
+                        item2feats[item] = feats
 
     if outpath is not None:
         with open(outpath, 'wb') as fp:
             nb.save(fp)
+
+    if item2feats is not None:
+        nb.commit()
+        for (item,feats) in item2feats.items():
+            predict(item, feats)
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
