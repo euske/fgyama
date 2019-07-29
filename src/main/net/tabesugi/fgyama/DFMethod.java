@@ -545,11 +545,17 @@ class MethodCallNode extends CallNode {
 class ReceiveNode extends DFNode {
 
     public ReceiveNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, CallNode call, String label) {
-        super(graph, scope, (ref != null)? ref.getRefType() : call.getNodeType(),
-              ref, ast);
-        this.accept(call, label);
+        DFGraph graph, DFVarScope scope, CallNode call,
+        ASTNode ast) {
+        super(graph, scope, call.getNodeType(), null, ast);
+        this.accept(call);
+    }
+
+    public ReceiveNode(
+        DFGraph graph, DFVarScope scope, CallNode call,
+        ASTNode ast, DFRef ref) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.accept(call, ref.getFullName());
     }
 
     @Override
@@ -1186,7 +1192,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, invoke, call, "#return"));
+                                  graph, scope, call, invoke));
                 {
                     ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
                     for (DFMethod method1 : methods) {
@@ -1197,7 +1203,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     for (DFRef ref : refs) {
                         if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, invoke, call, ref.getFullName()));
+                                    graph, scope, call, invoke, ref));
                     }
                 }
                 if (call.exception != null) {
@@ -1254,12 +1260,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, sinvoke, call, "#return"));
+                                  graph, scope, call, sinvoke));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, sinvoke, call, ref.getFullName()));
+                                    graph, scope, call, sinvoke, ref));
                     }
                 }
                 if (call.exception != null) {
@@ -1418,12 +1424,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     }
                 }
                 ctx.setRValue(new ReceiveNode(
-                                  graph, scope, null, cstr, call, "#return"));
+                                  graph, scope, call, cstr));
                 if (frame1 != null) {
                     for (DFRef ref : frame1.getOutputRefs()) {
                         if (ref.isLocal()) continue;
                         ctx.set(new ReceiveNode(
-                                    graph, scope, ref, cstr, call, ref.getFullName()));
+                                    graph, scope, call, cstr, ref));
                     }
                 }
                 if (call.exception != null) {
@@ -2341,7 +2347,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal()) continue;
                     ctx.set(new ReceiveNode(
-                                graph, scope, ref, ci, call, ref.getFullName()));
+                                graph, scope, call, ci, ref));
                 }
             }
             if (call.exception != null) {
@@ -2386,7 +2392,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 for (DFRef ref : frame1.getOutputRefs()) {
                     if (ref.isLocal()) continue;
                     ctx.set(new ReceiveNode(
-                                graph, scope, ref, sci, call, ref.getFullName()));
+                                graph, scope, call, sci, ref));
                 }
             }
             if (call.exception != null) {

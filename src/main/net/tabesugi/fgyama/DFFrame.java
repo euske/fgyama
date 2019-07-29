@@ -23,10 +23,8 @@ public class DFFrame {
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
-    private ConsistentHashSet<DFNode> _inputNodes =
-        new ConsistentHashSet<DFNode>();
-    private ConsistentHashSet<DFNode> _outputNodes =
-        new ConsistentHashSet<DFNode>();
+    private ConsistentHashSet<DFNode> _inputNodes = null;
+    private ConsistentHashSet<DFNode> _outputNodes = null;
 
     public static final String ANONYMOUS = "@ANONYMOUS";
     public static final String BREAKABLE = "@BREAKABLE";
@@ -132,11 +130,15 @@ public class DFFrame {
     }
 
     public void finish(DFContext ctx) {
+        assert _inputNodes == null;
+        _inputNodes = new ConsistentHashSet<DFNode>();
         for (DFRef ref : _inputRefs) {
             DFNode node = ctx.getFirst(ref);
             assert node != null;
             _inputNodes.add(node);
         }
+        assert _outputNodes == null;
+        _outputNodes = new ConsistentHashSet<DFNode>();
         for (DFRef ref : _outputRefs) {
             DFNode node = ctx.get(ref);
             assert node != null;
@@ -145,6 +147,7 @@ public class DFFrame {
     }
 
     public Iterable<DFNode> getInputNodes() {
+        assert _inputNodes != null;
         List<DFNode> nodes = new ArrayList<DFNode>();
         for (DFNode node : _inputNodes) {
             DFRef ref = node.getRef();
@@ -156,6 +159,7 @@ public class DFFrame {
     }
 
     public Iterable<DFNode> getOutputNodes() {
+        assert _outputNodes != null;
         List<DFNode> nodes = new ArrayList<DFNode>();
         for (DFNode node : _outputNodes) {
             DFRef ref = node.getRef();
