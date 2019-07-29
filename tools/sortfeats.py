@@ -50,7 +50,7 @@ def main(argv):
                         d[key] = 0
                     d[key] += int(n)
         else:
-            print(line, end='')
+            pass
     #
     for item in sorted(feats.keys()):
         print('!', item)
@@ -62,6 +62,7 @@ def main(argv):
                 print('#', values)
             else:
                 print('+', values, key)
+        print()
     total = sum( len(d) for d in feats.values() )
     print('%d items, %d keys' % (len(feats), total), file=sys.stderr)
     return 0

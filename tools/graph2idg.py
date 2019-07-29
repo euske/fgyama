@@ -97,20 +97,14 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
     done.add((v0,v1))
     n1 = v1.node
     #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    if lprev.startswith('@'):
-        lprev = '@'
+    if lprev.startswith('@') or lprev.startswith('%'):
+        lprev = ''
     outputs = []
     for (link,v2) in v1.outputs:
         if link.startswith('_') and link != '_end': continue
         if n1.kind in ARRAYS and not link: continue
         outputs.append((link, v2))
-    if n1.kind == 'output':
-        for (link,v2) in outputs:
-            enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
-        return
-    elif n1.kind == 'receive' and lprev.startswith('@'):
-        pass
-    elif n1.kind in IGNORED or (lprev == '' and n1.kind in REFS):
+    if n1.kind in IGNORED or (lprev == '' and n1.kind in REFS):
         for (link,v2) in outputs:
             enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
         return
@@ -132,8 +126,8 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
     done.add((v0,v1))
     n1 = v1.node
     #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    if lprev.startswith('@'):
-        lprev = '@'
+    if lprev.startswith('@') or lprev.startswith('%'):
+        lprev = ''
     inputs = []
     for (link,v2) in v1.inputs:
         if link.startswith('_') and link != '_end': continue
@@ -143,9 +137,7 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
         for (link,v2) in inputs:
             enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
         return
-    elif n1.kind == 'receive':
-        pass
-    elif n1.kind in IGNORED or n1.kind in ASSIGNS:
+    if n1.kind in IGNORED or n1.kind in ASSIGNS:
         for (link,v2) in inputs:
             enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
         return
