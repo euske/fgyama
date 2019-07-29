@@ -78,11 +78,12 @@ def main(argv):
     #
     nitems = 0
     for (item,a) in feats.items():
+        if not a: continue
         name = stripid(item)
         words = splitwords(name)
         cands = nb.get(a)
         n = len(words)
-        if sorted(words) != sorted(cands[:n]):
+        if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):
             print(item)
             print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
         nitems += 1

@@ -22,7 +22,7 @@ class NaiveBayes:
 >>> b.commit()
 >>> a = b.get(['long','sweet','yellow'])
 >>> [ (k, fs) for (k,p,fs) in a ]
-[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow']), ('orange', ['yellow', 'sweet'])]
+[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
 """
 
     def __init__(self):
@@ -56,12 +56,13 @@ class NaiveBayes:
             self.fprob[f] = p
         return
 
-    def get(self, feats, n=0):
+    def get(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
         keyp = { k:p0 for (k,p0) in self.kprob.items() }
         keyf = {}
+        skipped = set()
         for f in feats:
             if f not in self.fprob: continue
             d = self.fprob[f]
@@ -72,32 +73,35 @@ class NaiveBayes:
                     if k not in keyf:
                         keyf[k] =[]
                     keyf[k].append((p1, f))
-                else:
+                elif fallback:
                     p1 = -p0
+                else:
+                    skipped.add(k)
+                    continue
                 keyp[k] += p1
-        assert keyp
-        a = [ (k,p) for (k,p) in keyp.items() ]
+        a = [ (k,p) for (k,p) in keyp.items() if k not in skipped ]
+        if not a: return a
         a.sort(key=lambda x:x[1], reverse=True)
         # prevent exp(x) overflow by adjusting the maximum log to zero.
         m = max( p for (k,p) in a )
-        a = [ (k,math.exp(p-m)) for (k,p) in a ]
-        z = sum( p for (_,p) in a )
         def getfeat(k):
             if k in keyf:
                 return [ f for (_,f) in sorted(keyf[k], reverse=True)]
             else:
                 return None
-        a = [ (k, p/z, getfeat(k)) for (k,p) in a ]
+        a = [ (k, p-m, getfeat(k)) for (k,p) in a ]
         if n:
             a = a[:n]
         return a
 
-    def getd(self, feats, n=0):
+    # for debugging
+    def getd(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
         n = sum(self.kcount.values())
         keyp = { k:c0/n for (k,c0) in self.kcount.items() }
+        skipped = set()
         for f in feats:
             print(f+':')
             if f not in self.fcount: continue
@@ -106,12 +110,15 @@ class NaiveBayes:
                 if k in d:
                     p = d[k] / c0
                     print('    p(%r|%r) = %r' % (f, k, p))
-                else:
+                elif fallback:
                     p = 1 / c0
                     print('    ?p(%r|%r) = %r' % (f, k, p))
+                else:
+                    skipped.add(k)
+                    continue
                 keyp[k] *= p
-        assert keyp
-        a = [ (k,p) for (k,p) in keyp.items() ]
+        a = [ (k,p) for (k,p) in keyp.items() if k not in skipped ]
+        if not a: return a
         a.sort(key=lambda x:x[1], reverse=True)
         for (k,p) in a:
             print('p(%r) = %r' % (k, keyp[k]))
