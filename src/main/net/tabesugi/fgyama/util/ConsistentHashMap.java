@@ -6,46 +6,87 @@ import java.util.*;
 
 //  ConsistentHashMap
 //
-public class ConsistentHashMap<K,V> extends HashMap<K,V> {
+public class ConsistentHashMap<K,V> implements Map<K,V> {
 
-    private static final long serialVersionUID = 1L;
-
+    private Map<K,V> _map = new HashMap<K,V>();
     private List<K> _keys = new ArrayList<K>();
 
     @Override
     public void clear() {
+        _map.clear();
         _keys.clear();
-        super.clear();
+    }
+
+    @Override
+    public boolean containsKey(Object key) {
+        return _map.containsKey(key);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return _map.containsValue(value);
+    }
+
+    @Override
+    public Set<Map.Entry<K,V>> entrySet() {
+        return _map.entrySet();
+    }
+
+    @Override
+    public V get(Object key) {
+        return _map.get(key);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return _map.isEmpty();
+    }
+
+    @Override
+    public Set<K> keySet() {
+        return _map.keySet();
     }
 
     @Override
     public V put(K key, V value) {
-        if (value != null && this.get(key) == null) {
+        if (value != null && _map.get(key) == null) {
             _keys.add(key);
-        } else if (value == null && this.get(key) != null) {
+        } else if (value == null && _map.get(key) != null) {
             _keys.remove(key);
         }
-        return super.put(key, value);
+        return _map.put(key, value);
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
         for (Map.Entry<? extends K, ? extends V> e : m.entrySet()) {
-            if (e.getValue() != null && this.get(e.getKey()) == null) {
-                _keys.add(e.getKey());
-            } else if (e.getValue() == null && this.get(e.getKey()) != null) {
-                _keys.remove(e.getKey());
+            K key = e.getKey();
+            V value = e.getValue();
+            if (value != null && _map.get(key) == null) {
+                _keys.add(key);
+            } else if (value == null && _map.get(key) != null) {
+                _keys.remove(key);
             }
         }
-        super.putAll(m);
+        _map.putAll(m);
     }
 
     @Override
     public V remove(Object key) {
-        if (this.get(key) != null) {
+        if (_map.get(key) != null) {
             _keys.remove(key);
         }
-        return super.remove(key);
+        return _map.remove(key);
+    }
+
+    @Override
+    public int size() {
+        return _map.size();
+    }
+
+    @Override
+    public Collection<V> values() {
+        return _map.values();
     }
 
     public List<K> keys() {

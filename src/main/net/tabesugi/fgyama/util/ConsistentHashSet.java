@@ -6,66 +6,95 @@ import java.util.*;
 
 //  ConsistentHashSet
 //
-public class ConsistentHashSet<E> extends HashSet<E> implements Iterable<E> {
+public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
 
-    private static final long serialVersionUID = 1L;
-
-    private List<E> _elems = new ArrayList<E>();
+    private Set<E> _set = new HashSet<E>();
+    private List<E> _list = new ArrayList<E>();
 
     @Override
     public boolean add(E e) {
-        if (!this.contains(e)) {
-            _elems.add(e);
+        if (!_set.contains(e)) {
+            _list.add(e);
         }
-        return super.add(e);
-    }
-
-    @Override
-    public void clear() {
-        _elems.clear();
-        super.clear();
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        if (this.contains(o)) {
-            _elems.remove(o);
-        }
-        return super.remove(o);
+        return _set.add(e);
     }
 
     @Override
     public boolean addAll(Collection<? extends E> c) {
         for (E e : c) {
-            if (!this.contains(e)) {
-                _elems.add(e);
+            if (!_set.contains(e)) {
+                _list.add(e);
             }
         }
-        return super.addAll(c);
+        return _set.addAll(c);
     }
 
     @Override
-    public boolean retainAll(Collection<?> c) {
-        for (E e : this) {
-            if (!c.contains(e)) {
-                _elems.remove(e);
-            }
-        }
-        return super.retainAll(c);
+    public void clear() {
+        _set.clear();
+        _list.clear();
     }
 
     @Override
-    public boolean removeAll(Collection<?> c) {
-        for (E e : this) {
-            if (c.contains(e)) {
-                _elems.remove(e);
-            }
-        }
-        return super.removeAll(c);
+    public boolean contains(Object o) {
+        return _set.contains(o);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        return _set.containsAll(c);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return _set.isEmpty();
     }
 
     @Override
     public Iterator<E> iterator() {
-        return _elems.iterator();
+        return _list.iterator();
+    }
+
+    @Override
+    public boolean remove(Object o) {
+        if (_set.contains(o)) {
+            _list.remove(o);
+        }
+        return _set.remove(o);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        for (E e : _set) {
+            if (c.contains(e)) {
+                _list.remove(e);
+            }
+        }
+        return _set.removeAll(c);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        for (E e : _set) {
+            if (!c.contains(e)) {
+                _list.remove(e);
+            }
+        }
+        return _set.retainAll(c);
+    }
+
+    @Override
+    public int size() {
+        return _set.size();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        return _set.toArray(a);
+    }
+
+    @Override
+    public Object[] toArray() {
+        return _set.toArray();
     }
 }
