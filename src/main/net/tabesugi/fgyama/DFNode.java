@@ -8,44 +8,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFLink
-//
-class DFLink {
-
-    private DFNode _dst;
-    private DFNode _src;
-    private String _label;
-
-    public DFLink(DFNode dst, DFNode src, String label) {
-        _dst = dst;
-        _src = src;
-        _label = label;
-    }
-
-    protected DFNode getSrc() {
-        return _src;
-    }
-
-    protected void setSrc(DFNode node) {
-        _src = node;
-    }
-
-    @Override
-    public String toString() {
-        return ("<DFLink "+_dst+"<-"+_src+">");
-    }
-
-    public Element toXML(Document document) {
-        Element elem = document.createElement("link");
-        elem.setAttribute("src", _src.getNodeId());
-        if (_label != null) {
-            elem.setAttribute("label", _label);
-        }
-        return elem;
-    }
-}
-
-
 //  DFNode
 //
 public class DFNode implements Comparable<DFNode> {
@@ -55,6 +17,7 @@ public class DFNode implements Comparable<DFNode> {
     private DFVarScope _scope;
     private DFType _type;
     private DFRef _ref;
+    private ASTNode _ast;
 
     private DFNode _value = null;
     private List<DFLink> _links =
@@ -62,7 +25,9 @@ public class DFNode implements Comparable<DFNode> {
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
-    public DFNode(DFGraph graph, DFVarScope scope, DFType type, DFRef ref) {
+    public DFNode(
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
+        ASTNode ast) {
         assert graph != null;
         assert scope != null;
         assert type != null;
@@ -71,6 +36,7 @@ public class DFNode implements Comparable<DFNode> {
         _scope = scope;
         _type = type;
         _ref = ref;
+        _ast = ast;
     }
 
     @Override
@@ -96,7 +62,16 @@ public class DFNode implements Comparable<DFNode> {
         if (_ref != null) {
             elem.setAttribute("ref", _ref.getFullName());
         }
-        for (DFLink link : this.getLinks()) {
+        if (_ast != null) {
+            Element east = document.createElement("ast");
+            int start = _ast.getStartPosition();
+            int end = start + _ast.getLength();
+            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
+            east.setAttribute("start", Integer.toString(start));
+            east.setAttribute("end", Integer.toString(end));
+            elem.appendChild(east);
+        }
+        for (DFLink link : _links) {
             elem.appendChild(link.toXML(document));
         }
         return elem;
@@ -126,12 +101,6 @@ public class DFNode implements Comparable<DFNode> {
         return null;
     }
 
-    public DFLink[] getLinks() {
-        DFLink[] links = new DFLink[_links.size()];
-        _links.toArray(links);
-        return links;
-    }
-
     protected boolean hasValue() {
         return _value != null;
     }
@@ -149,7 +118,7 @@ public class DFNode implements Comparable<DFNode> {
                 _type = node.getNodeType();
             }
         }
-        DFLink link = new DFLink(this, node, label);
+        DFLink link = new DFLink(node, label);
         _links.add(link);
         node._outputs.add(this);
     }
@@ -202,6 +171,41 @@ public class DFNode implements Comparable<DFNode> {
             return left;
         } else {
             return right;
+        }
+    }
+
+    //  DFLink
+    //
+    private class DFLink {
+
+        private DFNode _src;
+        private String _label;
+
+        public DFLink(DFNode src, String label) {
+            _src = src;
+            _label = label;
+        }
+
+        protected DFNode getSrc() {
+            return _src;
+        }
+
+        protected void setSrc(DFNode node) {
+            _src = node;
+        }
+
+        @Override
+        public String toString() {
+            return ("<DFLink "+DFNode.this+"<-"+_src+">");
+        }
+
+        public Element toXML(Document document) {
+            Element elem = document.createElement("link");
+            elem.setAttribute("src", _src.getNodeId());
+            if (_label != null) {
+                elem.setAttribute("label", _label);
+            }
+            return elem;
         }
     }
 }

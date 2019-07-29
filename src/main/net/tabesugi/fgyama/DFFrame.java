@@ -131,17 +131,7 @@ public class DFFrame {
         _exits.add(exit);
     }
 
-    public void close(DFContext ctx) {
-        for (DFExit exit : _exits) {
-            if (exit.getFrame() == this) {
-                //Logger.info("DFFrame.Exit:", this, ":", exit);
-                DFNode node = exit.getNode();
-                if (node instanceof JoinNode) {
-                    ((JoinNode)node).merge(ctx.get(node.getRef()));
-                }
-                ctx.set(node);
-            }
-        }
+    public void finish(DFContext ctx) {
         for (DFRef ref : _inputRefs) {
             DFNode node = ctx.getFirst(ref);
             assert node != null;

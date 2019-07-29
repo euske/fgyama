@@ -8,36 +8,8 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-// ProgNode: a DFNode that corresponds to an actual program point.
-abstract class ProgNode extends DFNode {
-
-    private ASTNode _ast;
-
-    public ProgNode(
-        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, type, ref);
-        _ast = ast;
-    }
-
-    @Override
-    public Element toXML(Document document) {
-        Element elem = super.toXML(document);
-        if (_ast != null) {
-            Element east = document.createElement("ast");
-            int start = _ast.getStartPosition();
-            int end = start + _ast.getLength();
-            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(start));
-            east.setAttribute("end", Integer.toString(end));
-            elem.appendChild(east);
-        }
-        return elem;
-    }
-}
-
 // SingleAssignNode:
-class SingleAssignNode extends ProgNode {
+class SingleAssignNode extends DFNode {
 
     public SingleAssignNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -62,7 +34,7 @@ class VarAssignNode extends SingleAssignNode {
 }
 
 // ArrayAssignNode:
-class ArrayAssignNode extends ProgNode {
+class ArrayAssignNode extends DFNode {
 
     public ArrayAssignNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -79,7 +51,7 @@ class ArrayAssignNode extends ProgNode {
 }
 
 // FieldAssignNode:
-class FieldAssignNode extends ProgNode {
+class FieldAssignNode extends DFNode {
 
     public FieldAssignNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -97,7 +69,7 @@ class FieldAssignNode extends ProgNode {
 }
 
 // VarRefNode: represnets a variable reference.
-class VarRefNode extends ProgNode {
+class VarRefNode extends DFNode {
 
     public VarRefNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -112,7 +84,7 @@ class VarRefNode extends ProgNode {
 }
 
 // ArrayRefNode
-class ArrayRefNode extends ProgNode {
+class ArrayRefNode extends DFNode {
 
     public ArrayRefNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -129,7 +101,7 @@ class ArrayRefNode extends ProgNode {
 }
 
 // FieldRefNode
-class FieldRefNode extends ProgNode {
+class FieldRefNode extends DFNode {
 
     public FieldRefNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -147,7 +119,7 @@ class FieldRefNode extends ProgNode {
 }
 
 // PrefixNode
-class PrefixNode extends ProgNode {
+class PrefixNode extends DFNode {
 
     public PrefixExpression.Operator op;
 
@@ -170,7 +142,7 @@ class PrefixNode extends ProgNode {
 }
 
 // PostfixNode
-class PostfixNode extends ProgNode {
+class PostfixNode extends DFNode {
 
     public PostfixExpression.Operator op;
 
@@ -193,7 +165,7 @@ class PostfixNode extends ProgNode {
 }
 
 // InfixNode
-class InfixNode extends ProgNode {
+class InfixNode extends DFNode {
 
     public InfixExpression.Operator op;
 
@@ -219,7 +191,7 @@ class InfixNode extends ProgNode {
 }
 
 // TypeCastNode
-class TypeCastNode extends ProgNode {
+class TypeCastNode extends DFNode {
 
     public TypeCastNode(
         DFGraph graph, DFVarScope scope, DFType type,
@@ -240,7 +212,7 @@ class TypeCastNode extends ProgNode {
 }
 
 // TypeCheckNode
-class TypeCheckNode extends ProgNode {
+class TypeCheckNode extends DFNode {
 
     public DFType type;
 
@@ -264,7 +236,7 @@ class TypeCheckNode extends ProgNode {
 }
 
 // CaseNode
-class CaseNode extends ProgNode {
+class CaseNode extends DFNode {
 
     public List<DFNode> matches = new ArrayList<DFNode>();
 
@@ -324,7 +296,7 @@ class AssignOpNode extends SingleAssignNode {
 }
 
 // ConstNode: represents a constant value.
-class ConstNode extends ProgNode {
+class ConstNode extends DFNode {
 
     public String data;
 
@@ -347,7 +319,7 @@ class ConstNode extends ProgNode {
 }
 
 // ValueSetNode: represents an array.
-class ValueSetNode extends ProgNode {
+class ValueSetNode extends DFNode {
 
     public List<DFNode> values = new ArrayList<DFNode>();
 
@@ -375,7 +347,7 @@ class ValueSetNode extends ProgNode {
 }
 
 // JoinNode
-class JoinNode extends ProgNode {
+class JoinNode extends DFNode {
 
     public boolean recvTrue = false;
     public boolean recvFalse = false;
@@ -419,7 +391,7 @@ class JoinNode extends ProgNode {
 }
 
 // LoopNode
-class LoopNode extends ProgNode {
+class LoopNode extends DFNode {
 
     public String loopId;
 
@@ -496,7 +468,7 @@ class LoopRepeatNode extends LoopNode {
 }
 
 // IterNode
-class IterNode extends ProgNode {
+class IterNode extends DFNode {
 
     public IterNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -511,7 +483,7 @@ class IterNode extends ProgNode {
 }
 
 // CallNode
-abstract class CallNode extends ProgNode {
+abstract class CallNode extends DFNode {
 
     public DFFunctionType funcType;
     public DFNode[] args;
@@ -570,7 +542,7 @@ class MethodCallNode extends CallNode {
 }
 
 // ReceiveNode:
-class ReceiveNode extends ProgNode {
+class ReceiveNode extends DFNode {
 
     public ReceiveNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
@@ -644,7 +616,7 @@ class OutputNode extends SingleAssignNode {
 }
 
 // ThrowNode
-class ThrowNode extends ProgNode {
+class ThrowNode extends DFNode {
 
     public ThrowNode(
         DFGraph graph, DFVarScope scope,
@@ -1500,7 +1472,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 } else {
                     throw new InvalidSyntax(body);
                 }
-                ctx.setRValue(new DFNode(graph, scope,  DFUnknownType.UNKNOWN, null));
+                ctx.setRValue(
+                    new DFNode(graph, scope, DFUnknownType.UNKNOWN, null, null));
 		// XXX TODO LambdaExpression
 		Logger.error("Unsupported: LambdaExpression", expr);
 
@@ -1511,7 +1484,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 //  TypeMethodReference
                 MethodReference mref = (MethodReference)expr;
                 DFKlass klass = scope.lookupThis().getRefType().toKlass();
-                ctx.setRValue(new DFNode(graph, scope,  DFUnknownType.UNKNOWN, null));
+                ctx.setRValue(
+                    new DFNode(graph, scope, DFUnknownType.UNKNOWN, null, null));
                 // XXX TODO MethodReference
 		Logger.error("Unsupported: MethodReference", expr);
 
@@ -1876,7 +1850,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 join.recv(true, node);
                 frame.addExit(exit.wrap(join));
             }
-            thenFrame.close(ctx);
+            this.closeFrame(thenFrame, ctx);
         }
         if (elseFrame != null) {
             for (DFExit exit : elseFrame.getExits()) {
@@ -1887,7 +1861,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 join.recv(false, node);
                 frame.addExit(exit.wrap(join));
             }
-            elseFrame.close(ctx);
+            this.closeFrame(elseFrame, ctx);
         }
     }
 
@@ -1980,7 +1954,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx, graph, switchScope, switchFrame,
                 switchCase, caseNode, caseCtx);
         }
-        switchFrame.close(ctx);
+        this.closeFrame(switchFrame, ctx);
     }
 
     private void processWhileStatement(
@@ -2001,7 +1975,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, whileStmt,
             condValue, loopFrame, loopCtx, true);
-        loopFrame.close(ctx);
+        this.closeFrame(loopFrame, ctx);
     }
 
     private void processDoStatement(
@@ -2022,7 +1996,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, doStmt,
             condValue, loopFrame, loopCtx, false);
-        loopFrame.close(ctx);
+        this.closeFrame(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2057,7 +2031,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, forStmt,
             condValue, loopFrame, loopCtx, true);
-        loopFrame.close(ctx);
+        this.closeFrame(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2085,7 +2059,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, eForStmt,
             iterValue, loopFrame, loopCtx, true);
-        loopFrame.close(ctx);
+        this.closeFrame(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2162,7 +2136,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             join.recv(null, node);
             frame.addExit(exit.wrap(join));
         }
-        tryFrame.close(ctx);
+        this.closeFrame(tryFrame, ctx);
         for (int i = 0; i < ncats; i++) {
             for (DFExit exit : frames[i].getExits()) {
                 DFNode node = exit.getNode();
@@ -2171,7 +2145,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 join.recv(excs[i], node);
                 frame.addExit(exit.wrap(join));
             }
-            frames[i].close(ctx);
+            this.closeFrame(frames[i], ctx);
         }
 
         Block finBlock = tryStmt.getFinally();
@@ -2298,7 +2272,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             processStatement(
                 ctx, typeSpace, graph, finder, scope, labeledFrame,
                 labeledStmt.getBody());
-            labeledFrame.close(ctx);
+            this.closeFrame(labeledFrame, ctx);
 
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"
@@ -2440,6 +2414,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             initializer.getBody());
     }
 
+    private void closeFrame(
+        DFFrame frame, DFContext ctx) {
+        for (DFExit exit : frame.getExits()) {
+            if (exit.getFrame() == frame) {
+                //Logger.info("DFMethod.Exit:", this, ":", exit);
+                DFNode node = exit.getNode();
+                if (node instanceof JoinNode) {
+                    ((JoinNode)node).merge(ctx.get(node.getRef()));
+                }
+                ctx.set(node);
+            }
+        }
+        frame.finish(ctx);
+    }
+
     /**
      * Performs dataflow analysis for a given method.
      */
@@ -2500,7 +2489,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
 
         // Cleanup.
-        _frame.close(ctx);
+        this.closeFrame(_frame, ctx);
         //_frame.dump();
         for (DFRef ref : _frame.getOutputRefs()) {
             if (ref.isLocal()) continue;
@@ -2576,7 +2565,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 throw new InvalidSyntax(body);
             }
         }
-        _frame.close(ctx);
+        this.closeFrame(_frame, ctx);
 
         this.cleanup();
         return this;
@@ -2604,21 +2593,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     public void cleanup() {
-        Set<DFNode> removed = new HashSet<DFNode>();
+        Set<DFNode> toremove = new HashSet<DFNode>();
         for (DFNode node : _nodes) {
             if (node.getKind() == null && node.purge()) {
-                removed.add(node);
+                toremove.add(node);
             }
         }
         // Do not remove input/output nodes.
         DFFrame frame = this.getFrame();
         for (DFNode node : frame.getInputNodes()) {
-            removed.remove(node);
+            toremove.remove(node);
         }
         for (DFNode node : frame.getOutputNodes()) {
-            removed.remove(node);
+            toremove.remove(node);
         }
-        for (DFNode node : removed) {
+        for (DFNode node : toremove) {
             _nodes.remove(node);
         }
     }
