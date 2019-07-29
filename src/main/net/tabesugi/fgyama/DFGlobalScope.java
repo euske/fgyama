@@ -8,20 +8,20 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFGlobalVarScope
+//  DFGlobalScope
 //
-public class DFGlobalVarScope extends DFVarScope {
+public class DFGlobalScope extends DFVarScope {
 
     private Map<String, DFRef> _id2elem =
         new HashMap<String, DFRef>();
 
-    public DFGlobalVarScope() {
+    public DFGlobalScope() {
         super("GLOBAL");
     }
 
     @Override
     public String toString() {
-        return ("<DFGlobalVarScope>");
+        return ("<DFGlobalScope>");
     }
 
     public DFRef lookupArray(DFType type) {

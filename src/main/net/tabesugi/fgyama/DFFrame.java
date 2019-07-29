@@ -205,7 +205,7 @@ public class DFFrame {
         for (BodyDeclaration body : decls) {
             if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFLocalVarScope innerScope = scope.getChildByAST(body);
+                DFLocalScope innerScope = scope.getChildByAST(body);
                 this.buildStmt(finder, method, innerScope, initializer.getBody());
             }
         }

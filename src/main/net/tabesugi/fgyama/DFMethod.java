@@ -849,7 +849,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 	_ast = ast;
     }
 
-    public DFLocalVarScope getScope() {
+    public DFLocalScope getScope() {
         return _scope;
     }
 
@@ -2654,7 +2654,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return elem;
     }
 
-    private class DFMethodScope extends DFLocalVarScope {
+    private class DFMethodScope extends DFLocalScope {
 
         private DFInternalRef _exception;
         private DFInternalRef _return = null;
@@ -2694,7 +2694,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public void buildMethodDecl(
             DFTypeFinder finder, MethodDeclaration methodDecl)
             throws InvalidSyntax {
-            //Logger.info("DFLocalVarScope.build:", this);
+            //Logger.info("DFLocalScope.build:", this);
             if (methodDecl.getBody() == null) return;
             Type returnType = methodDecl.getReturnType2();
             DFType type;
@@ -2729,7 +2729,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             for (BodyDeclaration body : decls) {
                 if (body instanceof Initializer) {
                     Initializer initializer = (Initializer)body;
-                    DFLocalVarScope innerScope = this.getChildByAST(body);
+                    DFLocalScope innerScope = this.getChildByAST(body);
                     innerScope.buildStmt(finder, initializer.getBody());
                 }
             }

@@ -363,7 +363,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
-                DFLocalVarScope innerScope = _initMethod.getScope().addChild(body);
+                DFLocalScope innerScope = _initMethod.getScope().addChild(body);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, _initMethod, innerScope);
@@ -378,7 +378,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     @SuppressWarnings("unchecked")
     private void buildTypeFromStmt(
         Statement ast,
-        DFTypeSpace space, DFLocalVarScope outerScope)
+        DFTypeSpace space, DFLocalScope outerScope)
         throws InvalidSyntax {
         assert ast != null;
 
@@ -386,7 +386,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
                 this.buildTypeFromStmt(stmt, space, innerScope);
@@ -428,7 +428,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             this.buildTypeFromExpr(switchStmt.getExpression(), space, innerScope);
             for (Statement stmt :
                      (List<Statement>) switchStmt.statements()) {
@@ -445,20 +445,20 @@ public class DFKlass extends DFTypeSpace implements DFType {
         } else if (ast instanceof WhileStatement) {
             WhileStatement whileStmt = (WhileStatement)ast;
             this.buildTypeFromExpr(whileStmt.getExpression(), space, outerScope);
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             Statement stmt = whileStmt.getBody();
             this.buildTypeFromStmt(stmt, space, innerScope);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             Statement stmt = doStmt.getBody();
             this.buildTypeFromStmt(stmt, space, innerScope);
             this.buildTypeFromExpr(doStmt.getExpression(), space, innerScope);
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 this.buildTypeFromExpr(init, space, innerScope);
@@ -477,7 +477,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             this.buildTypeFromExpr(eForStmt.getExpression(), space, outerScope);
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             this.buildTypeFromStmt(eForStmt.getBody(), space, innerScope);
 
         } else if (ast instanceof BreakStatement) {
@@ -496,7 +496,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            DFLocalVarScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 this.buildTypeFromExpr(decl, space, innerScope);
@@ -504,7 +504,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             this.buildTypeFromStmt(tryStmt.getBody(), space, innerScope);
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
-                DFLocalVarScope catchScope = outerScope.addChild(cc);
+                DFLocalScope catchScope = outerScope.addChild(cc);
                 this.buildTypeFromStmt(cc.getBody(), space, catchScope);
             }
             Block finBlock = tryStmt.getFinally();

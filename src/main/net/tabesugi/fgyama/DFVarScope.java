@@ -107,7 +107,7 @@ public class DFVarScope {
         return new DFRef[] {};
     }
 
-    public DFLocalVarScope getChildByAST(ASTNode ast) {
+    public DFLocalScope getChildByAST(ASTNode ast) {
         return null;
     }
 

@@ -8,37 +8,37 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.*;
 
 
-//  DFLocalVarScope
+//  DFLocalScope
 //
-public class DFLocalVarScope extends DFVarScope {
+public class DFLocalScope extends DFVarScope {
 
-    private SortedMap<String, DFLocalVarScope> _ast2child =
-        new TreeMap<String, DFLocalVarScope>();
+    private SortedMap<String, DFLocalScope> _ast2child =
+        new TreeMap<String, DFLocalScope>();
     private List<DFRef> _vars =
         new ArrayList<DFRef>();
     private Map<String, DFRef> _id2var =
         new HashMap<String, DFRef>();
 
-    protected DFLocalVarScope(DFVarScope outer, String name) {
+    protected DFLocalScope(DFVarScope outer, String name) {
         super(outer, name);
     }
 
-    public DFLocalVarScope getChildByAST(ASTNode ast) {
+    public DFLocalScope getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
         return _ast2child.get(key);
     }
 
-    public DFLocalVarScope[] getChildren() {
-        DFLocalVarScope[] scopes = new DFLocalVarScope[_ast2child.size()];
+    public DFLocalScope[] getChildren() {
+        DFLocalScope[] scopes = new DFLocalScope[_ast2child.size()];
         _ast2child.values().toArray(scopes);
         return scopes;
     }
 
-    protected DFLocalVarScope addChild(ASTNode ast) {
+    protected DFLocalScope addChild(ASTNode ast) {
         String id = Utils.encodeASTNode(ast);
-        //Logger.info("DFLocalVarScope.addChild:", this, ":", id);
-        DFLocalVarScope scope = new DFLocalVarScope(this, id);
+        //Logger.info("DFLocalScope.addChild:", this, ":", id);
+        DFLocalScope scope = new DFLocalScope(this, id);
         _ast2child.put(id, scope);
         return scope;
     }
@@ -48,7 +48,7 @@ public class DFLocalVarScope extends DFVarScope {
     }
 
     protected DFRef addVar(String id, DFType type) {
-        //Logger.info("DFLocalVarScope.addVar:", this, ":", id, "->", type);
+        //Logger.info("DFLocalScope.addVar:", this, ":", id, "->", type);
         DFRef ref = _id2var.get(id);
         if (ref == null) {
             ref = new DFVarRef(type, id);
@@ -89,7 +89,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof Block) {
             Block block = (Block)ast;
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             for (Statement stmt :
                      (List<Statement>) block.statements()) {
                 innerScope.buildStmt(finder, stmt);
@@ -137,7 +137,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof SwitchStatement) {
             SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             Expression expr = switchStmt.getExpression();
             innerScope.buildExpr(finder, expr);
             for (Statement stmt :
@@ -156,13 +156,13 @@ public class DFLocalVarScope extends DFVarScope {
             WhileStatement whileStmt = (WhileStatement)ast;
             Expression expr = whileStmt.getExpression();
             this.buildExpr(finder, expr);
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             Statement stmt = whileStmt.getBody();
             innerScope.buildStmt(finder, stmt);
 
         } else if (ast instanceof DoStatement) {
             DoStatement doStmt = (DoStatement)ast;
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             Statement stmt = doStmt.getBody();
             innerScope.buildStmt(finder, stmt);
             Expression expr = doStmt.getExpression();
@@ -170,7 +170,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof ForStatement) {
             ForStatement forStmt = (ForStatement)ast;
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 innerScope.buildExpr(finder, init);
@@ -189,7 +189,7 @@ public class DFLocalVarScope extends DFVarScope {
         } else if (ast instanceof EnhancedForStatement) {
             EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
             this.buildExpr(finder, eForStmt.getExpression());
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFType varType = finder.resolveSafe(decl.getType());
 	    int ndims = decl.getExtraDimensions();
@@ -214,7 +214,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
-            DFLocalVarScope innerScope = this.getChildByAST(ast);
+            DFLocalScope innerScope = this.getChildByAST(ast);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 innerScope.buildExpr(finder, decl);
@@ -223,7 +223,7 @@ public class DFLocalVarScope extends DFVarScope {
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
-                DFLocalVarScope catchScope = this.getChildByAST(cc);
+                DFLocalScope catchScope = this.getChildByAST(cc);
 		DFType varType = finder.resolveSafe(decl.getType());
 		int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
@@ -494,7 +494,7 @@ public class DFLocalVarScope extends DFVarScope {
 
         @Override
         public String getFullName() {
-            return "$"+DFLocalVarScope.this.getScopeName()+"/$"+_name;
+            return "$"+DFLocalScope.this.getScopeName()+"/$"+_name;
         }
     }
 }

@@ -87,8 +87,8 @@ public class Java2DF {
     private DFRootTypeSpace _rootSpace;
     private List<Exporter> _exporters =
         new ArrayList<Exporter>();
-    private DFGlobalVarScope _globalScope =
-        new DFGlobalVarScope();
+    private DFGlobalScope _globalScope =
+        new DFGlobalScope();
     private Map<String, DFFileScope> _fileScope =
         new HashMap<String, DFFileScope>();
     private Map<String, DFKlass[]> _fileKlasses =
