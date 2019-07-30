@@ -114,10 +114,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	    this.buildTypeFromDecls(_ast);
 	} else {
             // In case of a .jar class, refer to the same inner classes.
-	    for (Map.Entry<String,DFKlass> e : genericKlass.getKlasses()) {
-		String id = e.getKey();
-		DFKlass klass = e.getValue();
-		this.addKlass(id, klass);
+	    for (DFKlass klass : genericKlass.getInnerKlasses()) {
+		this.addKlass(klass._name, klass);
 	    }
         }
 

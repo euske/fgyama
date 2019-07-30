@@ -85,8 +85,12 @@ public class ConsistentHashMap<K,V> implements Map<K,V> {
     }
 
     @Override
-    public Collection<V> values() {
-        return _map.values();
+    public List<V> values() {
+        List<V> a = new ArrayList<V>();
+        for (K key : _keys) {
+            a.add(_map.get(key));
+        }
+        return a;
     }
 
     public List<K> keys() {

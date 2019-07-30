@@ -15,10 +15,10 @@ public class DFTypeSpace {
     private String _name;
     private DFTypeSpace _outerSpace;
 
-    private SortedMap<String, DFTypeSpace> _id2space =
-        new TreeMap<String, DFTypeSpace>();
-    private SortedMap<String, DFKlass> _id2klass =
-        new TreeMap<String, DFKlass>();
+    private Map<String, DFTypeSpace> _id2space =
+        new HashMap<String, DFTypeSpace>();
+    private Map<String, DFKlass> _id2klass =
+        new ConsistentHashMap<String, DFKlass>();
 
     public DFTypeSpace(String name, DFTypeSpace outerSpace) {
         _name = name;
@@ -103,8 +103,8 @@ public class DFTypeSpace {
         return klass;
     }
 
-    protected Set<Map.Entry<String, DFKlass>> getKlasses() {
-	return _id2klass.entrySet();
+    protected Collection<DFKlass> getInnerKlasses() {
+        return _id2klass.values();
     }
 
     public DFType getType(Name name) {

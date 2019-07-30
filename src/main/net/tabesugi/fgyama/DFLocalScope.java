@@ -12,8 +12,8 @@ import org.w3c.dom.*;
 //
 public class DFLocalScope extends DFVarScope {
 
-    private SortedMap<String, DFLocalScope> _ast2child =
-        new TreeMap<String, DFLocalScope>();
+    private Map<String, DFLocalScope> _ast2child =
+        new ConsistentHashMap<String, DFLocalScope>();
     private List<DFRef> _vars =
         new ArrayList<DFRef>();
     private Map<String, DFRef> _id2var =
@@ -29,12 +29,6 @@ public class DFLocalScope extends DFVarScope {
         return _ast2child.get(key);
     }
 
-    public DFLocalScope[] getChildren() {
-        DFLocalScope[] scopes = new DFLocalScope[_ast2child.size()];
-        _ast2child.values().toArray(scopes);
-        return scopes;
-    }
-
     protected DFLocalScope addChild(ASTNode ast) {
         String id = Utils.encodeASTNode(ast);
         //Logger.info("DFLocalScope.addChild:", this, ":", id);
@@ -45,7 +39,7 @@ public class DFLocalScope extends DFVarScope {
 
     public Element toXML(Document document, DFNode[] nodes) {
         Element elem = super.toXML(document, nodes);
-        for (DFLocalScope child : this.getChildren()) {
+        for (DFLocalScope child : _ast2child.values()) {
             elem.appendChild(child.toXML(document, nodes));
         }
         return elem;
@@ -85,7 +79,7 @@ public class DFLocalScope extends DFVarScope {
         for (DFRef ref : _id2var.values()) {
             out.println(indent+"defined: "+ref);
         }
-        for (DFLocalScope scope : this.getChildren()) {
+        for (DFLocalScope scope : _ast2child.values()) {
             scope.dump(out, indent);
         }
     }
