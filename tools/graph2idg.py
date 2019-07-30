@@ -222,7 +222,7 @@ def main(argv):
                     ok = True
             elif node.kind in CALLS:
                 item = ('METHOD', node.data)
-                if mode in (None,'-C'):
+                if mode in ('-C',):
                     enum_forw(feats, count, set(), vtx, maxdist=maxdist)
                     enum_back(feats, count, set(), vtx, maxdist=maxdist)
                     ok = True

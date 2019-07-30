@@ -30,6 +30,7 @@ def main(argv):
                 d = None
             elif item in feats:
                 d = feats[item]
+                sys.stderr.write('.'); sys.stderr.flush()
             else:
                 d = feats[item] = {}
         elif line.startswith('+ '):
