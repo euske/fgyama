@@ -91,7 +91,8 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+def enum_forw(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+    if count <= 0: return
     if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
@@ -106,7 +107,7 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
         outputs.append((link, v2))
     if n1.kind in IGNORED or (lprev == '' and n1.kind in REFS):
         for (link,v2) in outputs:
-            enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
+            enum_forw(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if fs:
@@ -114,13 +115,14 @@ def enum_forw(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
             feats.add(('FORW',dist,fprev,f,n1))
         if n1.kind in ASSIGNS:
             for (link,v2) in outputs:
-                enum_forw(feats, done, v2, v0, fprev, link, dist, maxdist)
+                enum_forw(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
         else:
             for (link,v2) in outputs:
-                enum_forw(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
+                enum_forw(feats, count-1, done, v2, v1, fs[0], link, dist+1, maxdist)
     return
 
-def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+def enum_back(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+    if count <= 0: return
     if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
@@ -135,11 +137,11 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
         inputs.append((link, v2))
     if n1.kind == 'input':
         for (link,v2) in inputs:
-            enum_back(feats, done, v2, v0, fprev, link, dist, maxdist)
+            enum_back(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
         return
     if n1.kind in IGNORED or n1.kind in ASSIGNS:
         for (link,v2) in inputs:
-            enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+            enum_back(feats, count-1, done, v2, v0, fprev, lprev, dist, maxdist)
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if fs:
@@ -147,10 +149,10 @@ def enum_back(feats, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5)
             feats.add(('BACK',dist,fprev,f,n1))
         if n1.kind in REFS:
             for (link,v2) in inputs:
-                enum_back(feats, done, v2, v0, fprev, lprev, dist, maxdist)
+                enum_back(feats, count-1, done, v2, v0, fprev, lprev, dist, maxdist)
         else:
             for (link,v2) in inputs:
-                enum_back(feats, done, v2, v1, fs[0], link, dist+1, maxdist)
+                enum_back(feats, count-1, done, v2, v1, fs[0], link, dist+1, maxdist)
     return
 
 # main
@@ -201,6 +203,7 @@ def main(argv):
            len(builder.vtxs)),
           file=sys.stderr)
 
+    count = maxdist*5+5
     items = set()
     nfeats = 0
     for graph in builder.graphs:
@@ -212,16 +215,16 @@ def main(argv):
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
                 if mode in (None,'-F'):
-                    enum_forw(feats, set(), vtx, maxdist=maxdist)
+                    enum_forw(feats, count, set(), vtx, maxdist=maxdist)
                     ok = True
                 if mode in (None,'-B'):
-                    enum_back(feats, set(), vtx, maxdist=maxdist)
+                    enum_back(feats, count, set(), vtx, maxdist=maxdist)
                     ok = True
             elif node.kind in CALLS:
                 item = ('METHOD', node.data)
                 if mode in (None,'-C'):
-                    enum_forw(feats, set(), vtx, maxdist=maxdist)
-                    enum_back(feats, set(), vtx, maxdist=maxdist)
+                    enum_forw(feats, count, set(), vtx, maxdist=maxdist)
+                    enum_back(feats, count, set(), vtx, maxdist=maxdist)
                     ok = True
             if not ok: continue
             items.add(item)
