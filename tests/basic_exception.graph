@@ -24,6 +24,38 @@
             <link label="Lbasic_exception/A;" src="G13_foo_N16"/>
             <link label="Ljava/lang/Exception;" src="G13_foo_N28"/>
           </node>
+          <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330">
+            <node id="G13_foo_N14" ref="#exception" type="Ljava/lang/Exception;"/>
+            <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330.:Block:160:215">
+              <node id="G13_foo_N6" kind="assign_var" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
+                <ast end="175" start="174" type="42"/>
+                <link src="G13_foo_N10"/>
+              </node>
+              <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="G13_foo_N8" kind="call" type="Ljava/lang/String;">
+                <ast end="183" start="178" type="32"/>
+                <link label="#this" src="G13_foo_N3"/>
+              </node>
+              <node id="G13_foo_N9" kind="receive" type="Ljava/lang/String;">
+                <ast end="183" start="178" type="32"/>
+                <link src="G13_foo_N8"/>
+              </node>
+              <node data="=" id="G13_foo_N10" kind="op_assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
+                <ast end="183" start="174" type="7"/>
+                <link label="R" src="G13_foo_N9"/>
+              </node>
+              <node id="G13_foo_N11" kind="assign_var" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
+                <ast end="198" start="197" type="42"/>
+                <link src="G13_foo_N13"/>
+              </node>
+              <node data="b" id="G13_foo_N12" kind="value" type="Ljava/lang/String;">
+                <ast end="204" start="201" type="45"/>
+              </node>
+              <node data="=" id="G13_foo_N13" kind="op_assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
+                <ast end="204" start="197" type="7"/>
+                <link label="R" src="G13_foo_N12"/>
+              </node>
+            </scope>
+          </scope>
           <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263">
             <node id="G13_foo_N15" kind="catch" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:CatchClause:216:263/$e" type="Lbasic_exception/A;">
               <ast end="226" start="223" type="44"/>
@@ -72,38 +104,6 @@
               <node id="G13_foo_N26" kind="receive" type="V">
                 <ast end="319" start="298" type="32"/>
                 <link src="G13_foo_N25"/>
-              </node>
-            </scope>
-          </scope>
-          <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330">
-            <node id="G13_foo_N14" ref="#exception" type="Ljava/lang/Exception;"/>
-            <scope name="Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336.:TryStatement:156:330.:Block:160:215">
-              <node id="G13_foo_N6" kind="assign_var" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
-                <ast end="175" start="174" type="42"/>
-                <link src="G13_foo_N10"/>
-              </node>
-              <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="G13_foo_N8" kind="call" type="Ljava/lang/String;">
-                <ast end="183" start="178" type="32"/>
-                <link label="#this" src="G13_foo_N3"/>
-              </node>
-              <node id="G13_foo_N9" kind="receive" type="Ljava/lang/String;">
-                <ast end="183" start="178" type="32"/>
-                <link src="G13_foo_N8"/>
-              </node>
-              <node data="=" id="G13_foo_N10" kind="op_assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
-                <ast end="183" start="174" type="7"/>
-                <link label="R" src="G13_foo_N9"/>
-              </node>
-              <node id="G13_foo_N11" kind="assign_var" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
-                <ast end="198" start="197" type="42"/>
-                <link src="G13_foo_N13"/>
-              </node>
-              <node data="b" id="G13_foo_N12" kind="value" type="Ljava/lang/String;">
-                <ast end="204" start="201" type="45"/>
-              </node>
-              <node data="=" id="G13_foo_N13" kind="op_assign" ref="$Lbasic_exception;.:MethodDeclaration:103:336.:Block:121:336/$x" type="Ljava/lang/String;">
-                <ast end="204" start="197" type="7"/>
-                <link label="R" src="G13_foo_N12"/>
               </node>
             </scope>
           </scope>
