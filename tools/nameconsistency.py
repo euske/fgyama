@@ -46,6 +46,7 @@ def main(argv):
     inpath = None
     srcdb = None
     watch = set()
+    threshold = 0.99
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
@@ -71,6 +72,8 @@ def main(argv):
     def predict(item, feats):
         name = stripid(item)
         words = splitwords(name)
+        feats = nb.narrow(feats, threshold)
+        if not feats: return
         cands = nb.get(feats)
         n = len(words)
         if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):

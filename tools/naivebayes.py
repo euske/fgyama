@@ -71,6 +71,26 @@ class NaiveBayes:
         self.commit()
         return
 
+    def narrow(self, feats, ratio):
+        key2feats = {}
+        for f in feats:
+            if f not in self.fprob: continue
+            for k in self.fprob[f]:
+                if k in key2feats:
+                    a = key2feats[k]
+                else:
+                    a = key2feats[k] = []
+                a.append(f)
+        m = max( len(a) for a in key2feats.values() )
+        f2 = set()
+        for (k,a) in key2feats.items():
+            if len(a) < m*ratio: continue
+            if not f2:
+                f2 = set(a)
+            else:
+                f2.intersection_update(set(a))
+        return f2
+
     def get(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
