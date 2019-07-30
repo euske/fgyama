@@ -66,8 +66,8 @@
             </node>
             <node data=":ForStatement:74:122" id="G17_foo_N20" kind="begin" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
               <ast end="122" start="74" type="24"/>
-              <link label="enter" src="G17_foo_N7"/>
-              <link label="repeat" src="G17_foo_N17"/>
+              <link label="init" src="G17_foo_N7"/>
+              <link label="cont" src="G17_foo_N17"/>
             </node>
             <node data=":ForStatement:74:122" id="G17_foo_N21" kind="repeat" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
               <ast end="122" start="74" type="24"/>
@@ -81,8 +81,8 @@
             </node>
             <node data=":ForStatement:74:122" id="G17_foo_N23" kind="begin" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
               <ast end="122" start="74" type="24"/>
-              <link label="enter" src="G17_foo_N5"/>
-              <link label="repeat" src="G17_foo_N13"/>
+              <link label="init" src="G17_foo_N5"/>
+              <link label="cont" src="G17_foo_N13"/>
             </node>
             <node data=":ForStatement:74:122" id="G17_foo_N24" kind="repeat" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
               <ast end="122" start="74" type="24"/>

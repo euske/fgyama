@@ -34,8 +34,8 @@
           <scope name="Lbasic_break;.:MethodDeclaration:32:135.:Block:62:135.:WhileStatement:65:123">
             <node data=":WhileStatement:65:123" id="G16_foo_N14" kind="begin" ref="$Lbasic_break;.:MethodDeclaration:32:135/$x" type="I">
               <ast end="123" start="65" type="61"/>
-              <link label="enter" src="G16_foo_N2"/>
-              <link label="repeat" src="G16_foo_N11"/>
+              <link label="init" src="G16_foo_N2"/>
+              <link label="cont" src="G16_foo_N11"/>
             </node>
             <node data=":WhileStatement:65:123" id="G16_foo_N15" kind="repeat" ref="$Lbasic_break;.:MethodDeclaration:32:135/$x" type="I">
               <ast end="123" start="65" type="61"/>

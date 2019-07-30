@@ -46,8 +46,8 @@
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N17" kind="begin" ref="$Lbasic_do;.:MethodDeclaration:29:135/$x" type="I">
               <ast end="118" start="73" type="19"/>
-              <link label="enter" src="G57_foo_N2"/>
-              <link label="repeat" src="G57_foo_N18"/>
+              <link label="init" src="G57_foo_N2"/>
+              <link label="cont" src="G57_foo_N18"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N18" kind="repeat" ref="$Lbasic_do;.:MethodDeclaration:29:135/$x" type="I">
               <ast end="118" start="73" type="19"/>
@@ -61,8 +61,8 @@
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N20" kind="begin" ref="$Lbasic_do;.:MethodDeclaration:29:135.:Block:58:135/$n" type="I">
               <ast end="118" start="73" type="19"/>
-              <link label="enter" src="G57_foo_N5"/>
-              <link label="repeat" src="G57_foo_N21"/>
+              <link label="init" src="G57_foo_N5"/>
+              <link label="cont" src="G57_foo_N21"/>
             </node>
             <node data=":DoStatement:73:118" id="G57_foo_N21" kind="repeat" ref="$Lbasic_do;.:MethodDeclaration:29:135.:Block:58:135/$n" type="I">
               <ast end="118" start="73" type="19"/>

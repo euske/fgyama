@@ -43,8 +43,8 @@
           <scope name="Lbasic_while;.:MethodDeclaration:32:109.:Block:62:109.:WhileStatement:65:97">
             <node data=":WhileStatement:65:97" id="G49_foo_N11" kind="begin" ref="$Lbasic_while;.:MethodDeclaration:32:109/$x" type="I">
               <ast end="97" start="65" type="61"/>
-              <link label="enter" src="G49_foo_N2"/>
-              <link label="repeat" src="G49_foo_N8"/>
+              <link label="init" src="G49_foo_N2"/>
+              <link label="cont" src="G49_foo_N8"/>
             </node>
             <node data=":WhileStatement:65:97" id="G49_foo_N12" kind="repeat" ref="$Lbasic_while;.:MethodDeclaration:32:109/$x" type="I">
               <ast end="97" start="65" type="61"/>

@@ -46,8 +46,8 @@
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N13" kind="begin" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
               <ast end="110" start="77" type="70"/>
-              <link label="enter" src="G56_foo_N5"/>
-              <link label="repeat" src="G56_foo_N9"/>
+              <link label="init" src="G56_foo_N5"/>
+              <link label="cont" src="G56_foo_N9"/>
             </node>
             <node data=":EnhancedForStatement:77:110" id="G56_foo_N14" kind="repeat" ref="$Lbasic_xfor;.:MethodDeclaration:31:127.:Block:62:127/$s" type="I">
               <ast end="110" start="77" type="70"/>

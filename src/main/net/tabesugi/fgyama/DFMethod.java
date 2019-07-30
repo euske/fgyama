@@ -413,9 +413,9 @@ class LoopBeginNode extends LoopNode {
 
     public LoopBeginNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, String loopId, DFNode enter) {
+        ASTNode ast, String loopId, DFNode init) {
         super(graph, scope, ref, ast, loopId);
-        this.accept(enter, "enter");
+        this.accept(init, "init");
     }
 
     @Override
@@ -423,8 +423,8 @@ class LoopBeginNode extends LoopNode {
         return "begin";
     }
 
-    public void setRepeat(DFNode repeat) {
-        this.accept(repeat, "repeat");
+    public void setCont(DFNode cont) {
+        this.accept(cont, "cont");
     }
 }
 
@@ -1671,7 +1671,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (output != null) {
                     LoopBeginNode begin = begins.get(ref);
                     if (begin != null) {
-                        begin.setRepeat(output);
+                        begin.setCont(output);
                     } else {
                         //assert !loopRefs.contains(ref);
                         ctx.set(output);
@@ -1713,7 +1713,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             for (DFRef ref : loopRefs) {
                 LoopRepeatNode repeat = repeats.get(ref);
                 LoopBeginNode begin = begins.get(ref);
-                begin.setRepeat(repeat);
+                begin.setCont(repeat);
             }
         }
 
