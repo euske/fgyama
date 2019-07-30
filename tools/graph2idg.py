@@ -91,7 +91,7 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_forw(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
     if count <= 0: return
     if maxdist <= dist: return
     if (v0,v1) in done: return
@@ -107,21 +107,20 @@ def enum_forw(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, max
         outputs.append((link, v2))
     if n1.kind in IGNORED or (lprev == '' and n1.kind in REFS):
         for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
+            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
-    if fs:
-        for f in fs:
-            feats.add(('FORW',dist,fprev,f,n1))
-        if n1.kind in ASSIGNS:
-            for (link,v2) in outputs:
-                enum_forw(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
-        else:
-            for (link,v2) in outputs:
-                enum_forw(feats, count-1, done, v2, v1, fs[0], link, dist+1, maxdist)
+    if not fs: return
+    feats.update( ('FORW',dist,fprev,f,n1) for f in fs )
+    if n1.kind in ASSIGNS:
+        for (link,v2) in outputs:
+            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
+    else:
+        for (link,v2) in outputs:
+            enum_forw(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
     return
 
-def enum_back(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, maxdist=5):
+def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
     if count <= 0: return
     if maxdist <= dist: return
     if (v0,v1) in done: return
@@ -137,22 +136,21 @@ def enum_back(feats, count, done, v1, v0=None, fprev=None, lprev='', dist=0, max
         inputs.append((link, v2))
     if n1.kind == 'input':
         for (link,v2) in inputs:
-            enum_back(feats, count-1, done, v2, v0, fprev, link, dist, maxdist)
+            enum_back(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
         return
     if n1.kind in IGNORED or n1.kind in ASSIGNS:
         for (link,v2) in inputs:
-            enum_back(feats, count-1, done, v2, v0, fprev, lprev, dist, maxdist)
+            enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
-    if fs:
-        for f in fs:
-            feats.add(('BACK',dist,fprev,f,n1))
-        if n1.kind in REFS:
-            for (link,v2) in inputs:
-                enum_back(feats, count-1, done, v2, v0, fprev, lprev, dist, maxdist)
-        else:
-            for (link,v2) in inputs:
-                enum_back(feats, count-1, done, v2, v1, fs[0], link, dist+1, maxdist)
+    if not fs: return
+    feats.update( ('BACK',dist,fprev,f,n1) for f in fs )
+    if n1.kind in REFS:
+        for (link,v2) in inputs:
+            enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
+    else:
+        for (link,v2) in inputs:
+            enum_back(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
     return
 
 # main
@@ -215,10 +213,14 @@ def main(argv):
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
                 if mode in (None,'-F'):
-                    enum_forw(feats, count, set(), vtx, maxdist=maxdist)
+                    for (link,v1) in vtx.outputs:
+                        if link.startswith('_') and link != '_end': continue
+                        enum_forw(feats, count, set(), v1, lprev=link, maxdist=maxdist)
                     ok = True
                 if mode in (None,'-B'):
-                    enum_back(feats, count, set(), vtx, maxdist=maxdist)
+                    for (link,v1) in vtx.inputs:
+                        if link.startswith('_') and link != '_end': continue
+                        enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
                     ok = True
             elif node.kind in CALLS:
                 item = ('METHOD', node.data)
