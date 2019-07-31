@@ -207,10 +207,16 @@ def main(argv):
     for graph in builder.graphs:
         dbg.write('# gid: %r\n' % graph.name)
         item2feats = {}
+        item2nodes = {}
         for node in graph:
             vtx = builder.vtxs[node]
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
+                if item in item2nodes:
+                    nodes = item2nodes[item]
+                else:
+                    nodes = item2nodes[item] = []
+                nodes.append(node)
                 if item in item2feats:
                     feats = item2feats[item]
                 else:
@@ -225,6 +231,11 @@ def main(argv):
                         enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
             elif node.kind in CALLS:
                 item = ('METHOD', node.data)
+                if item in item2nodes:
+                    nodes = item2nodes[item]
+                else:
+                    nodes = item2nodes[item] = []
+                nodes.append(node)
                 if item in item2feats:
                     feats = item2feats[item]
                 else:
@@ -232,9 +243,10 @@ def main(argv):
                 if mode in ('-C',):
                     enum_forw(feats, count, set(), vtx, maxdist=maxdist)
                     enum_back(feats, count, set(), vtx, maxdist=maxdist)
+
         for (item,feats) in item2feats.items():
             if not feats: continue
-            data = item + (builder.getsrc(node),)
+            data = item + tuple( builder.getsrc(n) for n in item2nodes[item] )
             fp.write('! %r\n' % (data,))
             for (t, dist,f0,f1,n) in feats:
                 data = (t, dist, f0, f1, builder.getsrc(n))
