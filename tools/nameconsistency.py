@@ -34,10 +34,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o path] [-i path] [-B srcdb] [-f find] [feats ...]' % argv[0])
+        print('usage: %s [-d] [-o path] [-i path] [-B srcdb] [-f find] [-t threshold] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:B:f:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:B:f:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
@@ -53,6 +53,7 @@ def main(argv):
         elif k == '-i': inpath = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-f': watch.add(v)
+        elif k == '-t': threshold = float(v)
     if not args: return usage()
     assert inpath is None or outpath is None
 
@@ -102,6 +103,7 @@ def main(argv):
                 srcmap[srcid] = path
             elif line.startswith('! '):
                 data = eval(line[2:])
+                item = None
                 if data[0] == 'REF':
                     item = data[1]
                     feats = set()

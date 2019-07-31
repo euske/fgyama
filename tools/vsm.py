@@ -57,8 +57,6 @@ class VSM:
 
     def findsim(self, k0, threshold=0):
         f0 = self.docs[k0]
-        maxs = -10
-        maxk = None
         a = []
         for (k1,f1) in self.docs.items():
             if k1 == k0: continue
@@ -67,3 +65,12 @@ class VSM:
             a.append((sim, k1))
         a.sort(reverse=True)
         return a
+
+    def findall(self, threshold=0):
+        items = list(self.docs.items())
+        for (i,(k0,f0)) in enumerate(items):
+            for (k1,f1) in items[i+1:]:
+                sim = self.calcsim(f0, f1)
+                if sim < threshold: continue
+                yield (sim, k0, k1)
+        return
