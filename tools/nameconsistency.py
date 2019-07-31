@@ -72,12 +72,12 @@ def main(argv):
     def predict(item, feats):
         name = stripid(item)
         words = splitwords(name)
-        feats = nb.narrow(feats, threshold)
-        if not feats: return
-        cands = nb.get(feats)
+        f2 = nb.narrow(feats, threshold)
+        if not f2: return
+        cands = nb.get(f2)
         n = len(words)
         if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):
-            print(len(feats), item)
+            print(len(feats), len(f2), item)
             print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
         return
 
@@ -112,8 +112,7 @@ def main(argv):
                 else:
                     feats = None
             elif feats is not None and line.startswith('+ '):
-                (n,_,line) = line[2:].partition(' ')
-                data = eval(line)
+                data = eval(line[2:])
                 feat = data[0:4]
                 feats.add(feat)
                 if annot is not None and data[4] is not None:

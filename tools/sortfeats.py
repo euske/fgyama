@@ -19,53 +19,58 @@ def main(argv):
         elif k == '-t': target = v
     if not args: return usage()
 
-    feats = {}
-    d = None
+    item2srcs = {}
+    item2feats = {}
+    feats = None
     for line in fileinput.input(args):
-        if line.startswith('! '):
+        if line.startswith('# gid:'):
+            sys.stderr.write('.'); sys.stderr.flush()
+
+        elif line.startswith('+SOURCE '):
+            print(line.strip())
+
+        elif line.startswith('! '):
             data = eval(line[2:])
             assert isinstance(data, tuple)
             item = data[0:2]
+            src = data[2]
             if target is not None and data[0] != target:
-                d = None
-            elif item in feats:
-                d = feats[item]
-                sys.stderr.write('.'); sys.stderr.flush()
+                feats = None
+            elif item in item2feats:
+                feats = item2feats[item]
             else:
-                d = feats[item] = {}
+                feats = item2feats[item] = {}
+            if item in item2srcs:
+                srcs = item2srcs[item]
+            else:
+                srcs = item2srcs[item] = []
+            if src is not None:
+                srcs.append(src)
+
         elif line.startswith('+ '):
-            if d is not None:
-                (n,_,line) = line[2:].partition(' ')
-                data = eval(line)
+            if feats is not None:
+                data = eval(line[2:])
                 assert isinstance(data, tuple)
-                key = data[0:4]
-                value = data[4]
-                if verbose:
-                    if key in d:
-                        a = d[key]
+                feat = data[0:4]
+                src = data[4]
+                if src is not None:
+                    if feat in feats:
+                        a = feats[feat]
                     else:
-                        a = d[key] = []
-                    a.append(value)
-                else:
-                    if key not in d:
-                        d[key] = 0
-                    d[key] += int(n)
+                        a = feats[feat] = []
+                    if src not in a:
+                        a.append(src)
         else:
             pass
     #
-    for item in sorted(feats.keys()):
-        print('!', item)
-        d = feats[item]
-        for key in sorted(d.keys()):
-            values = d[key]
-            if verbose:
-                print('+', len(values), key)
-                print('#', values)
-            else:
-                print('+', values, key)
+    for item in sorted(item2feats.keys()):
+        print('!', item + tuple(item2srcs[item]))
+        feats = item2feats[item]
+        for feat in sorted(feats.keys()):
+            print('+', feat + tuple(feats[feat]))
         print()
-    total = sum( len(d) for d in feats.values() )
-    print('%d items, %d keys' % (len(feats), total), file=sys.stderr)
+    total = sum( len(d) for d in item2feats.values() )
+    print('%d items, %d keys' % (len(item2feats), total), file=sys.stderr)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

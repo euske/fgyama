@@ -202,43 +202,48 @@ def main(argv):
           file=sys.stderr)
 
     count = maxdist*5+5
-    items = set()
+    nitems = 0
     nfeats = 0
     for graph in builder.graphs:
         dbg.write('# gid: %r\n' % graph.name)
+        item2feats = {}
         for node in graph:
-            feats = set()
             vtx = builder.vtxs[node]
-            ok = False
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
+                if item in item2feats:
+                    feats = item2feats[item]
+                else:
+                    feats = item2feats[item] = set()
                 if mode in (None,'-F'):
                     for (link,v1) in vtx.outputs:
                         if link.startswith('_') and link != '_end': continue
                         enum_forw(feats, count, set(), v1, lprev=link, maxdist=maxdist)
-                    ok = True
                 if mode in (None,'-B'):
                     for (link,v1) in vtx.inputs:
                         if link.startswith('_') and link != '_end': continue
                         enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
-                    ok = True
             elif node.kind in CALLS:
                 item = ('METHOD', node.data)
+                if item in item2feats:
+                    feats = item2feats[item]
+                else:
+                    feats = item2feats[item] = set()
                 if mode in ('-C',):
                     enum_forw(feats, count, set(), vtx, maxdist=maxdist)
                     enum_back(feats, count, set(), vtx, maxdist=maxdist)
-                    ok = True
-            if not ok: continue
-            items.add(item)
+        for (item,feats) in item2feats.items():
+            if not feats: continue
             data = item + (builder.getsrc(node),)
             fp.write('! %r\n' % (data,))
             for (t, dist,f0,f1,n) in feats:
                 data = (t, dist, f0, f1, builder.getsrc(n))
-                fp.write('+ %r %r\n' % (1, data))
-            nfeats += len(feats)
+                fp.write('+ %r\n' % (data,))
             fp.write('\n')
+            nitems += 1
+            nfeats += len(feats)
         sys.stderr.write('.'); sys.stderr.flush()
-    print('Items: %r, Features: %r' % (len(items), nfeats), file=sys.stderr)
+    print('Items: %r, Features: %r' % (nitems, nfeats), file=sys.stderr)
 
     if fp is not sys.stdout:
         fp.close()
