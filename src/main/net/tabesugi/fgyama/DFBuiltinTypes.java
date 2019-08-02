@@ -11,8 +11,8 @@ public class DFBuiltinTypes {
 
     public static void initialize(DFRootTypeSpace rootSpace)
         throws IOException, InvalidSyntax {
-        // Note: some of the built-in classes are self-referential
-        // that cannot be automatically loaded. So create them manually.
+        // Note: manually create some of the built-in classes that are
+        // self-referential and cannot be automatically loaded.
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
         _object = java_lang.createKlass(null, null, "Object");
         _class = java_lang.createKlass(null, null, "Class");

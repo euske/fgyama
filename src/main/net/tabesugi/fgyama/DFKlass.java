@@ -160,10 +160,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             }
         }
         for (DFKlassScope.DFFieldRef field : _fields) {
-            Element efield = document.createElement("field");
-            efield.setAttribute("name", field.getFullName());
-            efield.setAttribute("type", field.getRefType().getTypeName());
-            elem.appendChild(efield);
+            elem.appendChild(field.toXML(document));
         }
         return elem;
     }
@@ -313,7 +310,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
 
         _initMethod = new DFMethod(
-            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", _klassScope);
+            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", _klassScope, false);
         _initMethod.setFuncType(
             new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
         _initMethod.setTree(ast);
@@ -349,9 +346,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
                     callStyle = (isStatic(methodDecl))?
                         DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
                 }
-                DFMethod method = new DFMethod(this, id, callStyle, name, _klassScope);
-                this.addMethod(method, id);
                 Statement stmt = methodDecl.getBody();
+                DFMethod method = new DFMethod(
+                    this, id, callStyle, name, _klassScope, (stmt == null));
+                this.addMethod(method, id);
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, method, method.getScope());
                 }
@@ -1080,7 +1078,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
             } else {
                 callStyle = DFCallStyle.InstanceMethod;
             }
-            DFMethod method = new DFMethod(this, sig, callStyle, name, null);
+            DFMethod method = new DFMethod(
+                this, sig, callStyle, name, null, meth.isAbstract());
             method.setFinder(finder);
             DFFunctionType funcType;
 	    if (sig != null) {
@@ -1228,7 +1227,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	}
 	// Enum has a special method "values()".
 	DFMethod method = new DFMethod(
-	    this, "values", DFCallStyle.InstanceMethod, "values", null);
+	    this, "values", DFCallStyle.InstanceMethod, "values", null, false);
 	method.setFinder(finder);
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, new DFArrayType(this, 1)));
@@ -1414,7 +1413,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         protected DFFieldRef addField(
             String id, boolean isStatic, DFType type) {
-            DFFieldRef ref = new DFFieldRef(type, id);
+            DFFieldRef ref = new DFFieldRef(type, id, isStatic);
             _id2field.put(id, ref);
             return ref;
         }
@@ -1455,10 +1454,20 @@ public class DFKlass extends DFTypeSpace implements DFType {
         public class DFFieldRef extends DFRef {
 
             private String _name;
+            private boolean _static;
 
-            public DFFieldRef(DFType type, String name) {
+            public DFFieldRef(DFType type, String name, boolean isStatic) {
                 super(type);
                 _name = name;
+                _static = isStatic;
+            }
+
+            public Element toXML(Document document) {
+                Element elem = document.createElement("field");
+                elem.setAttribute("name", this.getFullName());
+                elem.setAttribute("type", this.getRefType().getTypeName());
+                elem.setAttribute("static", Boolean.toString(_static));
+                return elem;
             }
 
             public String getName() {

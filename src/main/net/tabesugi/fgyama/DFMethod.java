@@ -688,6 +688,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private DFCallStyle _callStyle;
     private DFMethodScope _scope;
     private DFFrame _frame;
+    private boolean _abstract;
 
     private DFTypeFinder _finder = null;
     private DFMapType[] _mapTypes = null;
@@ -704,13 +705,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public DFMethod(
         DFKlass klass, String id, DFCallStyle callStyle,
-        String name, DFVarScope outer) {
+        String name, DFVarScope outer, boolean isAbstract) {
         super(id, klass);
         _klass = klass;
         _name = name;
         _callStyle = callStyle;
         _scope = new DFMethodScope(outer, id);
         _frame = new DFFrame(DFFrame.RETURNABLE);
+        _abstract = isAbstract;
     }
 
     public void setFinder(DFTypeFinder finder) {
@@ -767,6 +769,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public DFCallStyle getCallStyle() {
         return _callStyle;
+    }
+
+    public boolean isAbstract() {
+        return _abstract;
     }
 
     public DFFunctionType getFuncType() {
@@ -1165,7 +1171,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
-                            klass, id, DFCallStyle.InstanceMethod, id, null);
+                            klass, id, DFCallStyle.InstanceMethod, id, null, false);
                         fallback.setFuncType(
                             new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
                         Logger.error(
@@ -1239,7 +1245,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        baseKlass, id, DFCallStyle.InstanceMethod, id, null);
+                        baseKlass, id, DFCallStyle.InstanceMethod, id, null, false);
                     fallback.setFuncType(
                         new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
                     Logger.error(
@@ -2622,6 +2628,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         Element elem = document.createElement("method");
         elem.setAttribute("name", this.getSignature());
         elem.setAttribute("style", _callStyle.toString());
+        elem.setAttribute("abstract", Boolean.toString(_abstract));
         for (DFMethod caller : _callers) {
             Element ecaller = document.createElement("caller");
             ecaller.setAttribute("name", caller.getSignature());
