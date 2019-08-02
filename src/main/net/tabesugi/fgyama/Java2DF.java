@@ -54,7 +54,7 @@ class DFFileScope extends DFVarScope {
 
     public void importStatic(DFKlass klass) {
 	Logger.debug("ImportStatic:", klass+".*");
-	for (DFKlass.DFKlassScope.DFFieldRef ref : klass.getFields()) {
+	for (DFKlass.DFFieldRef ref : klass.getFields()) {
 	    _refs.put(ref.getName(), ref);
 	}
 	for (DFMethod method : klass.getMethods()) {

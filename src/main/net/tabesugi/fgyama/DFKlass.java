@@ -48,8 +48,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
-    private List<DFKlassScope.DFFieldRef> _fields =
-        new ArrayList<DFKlassScope.DFFieldRef>();
+    private List<DFFieldRef> _fields =
+        new ArrayList<DFFieldRef>();
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
@@ -159,7 +159,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-        for (DFKlassScope.DFFieldRef field : _fields) {
+        for (DFFieldRef field : _fields) {
             elem.appendChild(field.toXML(document));
         }
         return elem;
@@ -801,7 +801,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return this.lookupField(name.getIdentifier());
     }
 
-    protected List<DFKlassScope.DFFieldRef> getFields() {
+    public List<DFFieldRef> getFields() {
         assert _built;
 	return _fields;
     }
@@ -873,7 +873,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     protected DFRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
-        DFKlassScope.DFFieldRef ref = _klassScope.addField(id, isStatic, type);
+        DFFieldRef ref = _klassScope.addField(id, isStatic, type);
         //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
@@ -1372,8 +1372,68 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+    // DFFieldRef
+    public class DFFieldRef extends DFRef {
+
+        private String _name;
+        private boolean _static;
+
+        public DFFieldRef(DFType type, String name, boolean isStatic) {
+            super(type);
+            _name = name;
+            _static = isStatic;
+        }
+
+        public Element toXML(Document document) {
+            Element elem = document.createElement("field");
+            elem.setAttribute("name", this.getFullName());
+            elem.setAttribute("type", this.getRefType().getTypeName());
+            elem.setAttribute("static", Boolean.toString(_static));
+            return elem;
+        }
+
+        public String getName() {
+            return _name;
+        }
+
+        @Override
+        public boolean isLocal() {
+            return false;
+        }
+        @Override
+        public boolean isInternal() {
+            return false;
+        }
+
+        @Override
+        public String getFullName() {
+            return "@"+DFKlass.this.getTypeName()+"/."+_name;
+        }
+    }
+
+    // DFThisRef
+    private class DFThisRef extends DFRef {
+        public DFThisRef(DFType type) {
+            super(type);
+        }
+
+        @Override
+        public boolean isLocal() {
+            return true;
+        }
+        @Override
+        public boolean isInternal() {
+            return false;
+        }
+
+        @Override
+        public String getFullName() {
+            return "#this";
+        }
+    }
+
     // DFKlassScope
-    public class DFKlassScope extends DFVarScope {
+    private class DFKlassScope extends DFVarScope {
 
         private DFRef _this;
         private Map<String, DFRef> _id2field =
@@ -1426,66 +1486,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
             }
             for (DFMethod method : DFKlass.this.getMethods()) {
                 out.println(indent+"defined: "+method);
-            }
-        }
-
-        // DFThisRef
-        private class DFThisRef extends DFRef {
-            public DFThisRef(DFType type) {
-                super(type);
-            }
-
-            @Override
-            public boolean isLocal() {
-                return true;
-            }
-            @Override
-            public boolean isInternal() {
-                return false;
-            }
-
-            @Override
-            public String getFullName() {
-                return "#this";
-            }
-        }
-
-        // DFFieldRef
-        public class DFFieldRef extends DFRef {
-
-            private String _name;
-            private boolean _static;
-
-            public DFFieldRef(DFType type, String name, boolean isStatic) {
-                super(type);
-                _name = name;
-                _static = isStatic;
-            }
-
-            public Element toXML(Document document) {
-                Element elem = document.createElement("field");
-                elem.setAttribute("name", this.getFullName());
-                elem.setAttribute("type", this.getRefType().getTypeName());
-                elem.setAttribute("static", Boolean.toString(_static));
-                return elem;
-            }
-
-            public String getName() {
-                return _name;
-            }
-
-            @Override
-            public boolean isLocal() {
-                return false;
-            }
-            @Override
-            public boolean isInternal() {
-                return false;
-            }
-
-            @Override
-            public String getFullName() {
-                return "@"+DFKlassScope.this.getScopeName()+"/."+_name;
             }
         }
     }
