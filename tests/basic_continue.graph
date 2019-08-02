@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_continue;" path="tests/basic_continue.java">
-    <method name="Lbasic_continue;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_continue;.&lt;clinit&gt;()V" style="initializer">
       <ast end="150" start="0" type="55"/>
       <scope name="Lbasic_continue;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_continue;.foo(I)V" style="static">
+    <method abstract="false" name="Lbasic_continue;.foo(I)V" style="static">
       <ast end="148" start="35" type="31"/>
       <scope name="Lbasic_continue;.:MethodDeclaration:35:148">
         <node id="G2_foo_N1" kind="input" ref="#arg0" type="I">

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_while;" path="tests/basic_while.java">
-    <method name="Lbasic_while;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_while;.&lt;clinit&gt;()V" style="initializer">
       <ast end="111" start="0" type="55"/>
       <scope name="Lbasic_while;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_while;.foo(I)V" style="static">
+    <method abstract="false" name="Lbasic_while;.foo(I)V" style="static">
       <ast end="109" start="32" type="31"/>
       <scope name="Lbasic_while;.:MethodDeclaration:32:109">
         <node id="G49_foo_N1" kind="input" ref="#arg0" type="I">

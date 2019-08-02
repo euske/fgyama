@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_return;" path="tests/basic_return.java">
-    <method name="Lbasic_return;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_return;.&lt;clinit&gt;()V" style="initializer">
       <ast end="251" start="46" type="55"/>
       <scope name="Lbasic_return;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_return;.foo(III)I" style="static">
+    <method abstract="false" name="Lbasic_return;.foo(III)I" style="static">
       <ast end="249" start="104" type="31"/>
       <scope name="Lbasic_return;.:MethodDeclaration:104:249">
         <node id="G12_foo_N1" kind="input" ref="#arg0" type="I">

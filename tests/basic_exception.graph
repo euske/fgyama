@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_exception;" path="tests/basic_exception.java">
-    <method name="Lbasic_exception;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_exception;.&lt;clinit&gt;()V" style="initializer">
       <ast end="433" start="0" type="55"/>
       <scope name="Lbasic_exception;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_exception;.foo()V" style="instance">
+    <method abstract="false" name="Lbasic_exception;.foo()V" style="instance">
       <ast end="336" start="103" type="31"/>
       <scope name="Lbasic_exception;.:MethodDeclaration:103:336">
         <node id="G13_foo_N1" kind="input" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
@@ -110,7 +110,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_exception;.moo()Ljava/lang/String;" style="instance">
+    <method abstract="false" name="Lbasic_exception;.moo()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_exception;.foo()V"/>
       <ast end="431" start="342" type="31"/>
       <scope name="Lbasic_exception;.:MethodDeclaration:342:431">
@@ -150,8 +150,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Exception;" interface="false" name="Lbasic_exception/A;" path="tests/basic_exception.java">
-    <field name="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
-    <method name="Lbasic_exception/A;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_exception/A;/.text" static="false" type="Ljava/lang/String;"/>
+    <method abstract="false" name="Lbasic_exception/A;.&lt;clinit&gt;()V" style="initializer">
       <ast end="97" start="36" type="55"/>
       <scope name="Lbasic_exception/A;.&lt;clinit&gt;">
         <node data="uninitialized" id="G15_&lt;clinit&gt;_N1" kind="value" type="@null"/>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_if;" path="tests/basic_if.java">
-    <method name="Lbasic_if;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_if;.&lt;clinit&gt;()V" style="initializer">
       <ast end="128" start="0" type="55"/>
       <scope name="Lbasic_if;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_if;.foo(I)V" style="static">
+    <method abstract="false" name="Lbasic_if;.foo(I)V" style="static">
       <ast end="126" start="29" type="31"/>
       <scope name="Lbasic_if;.:MethodDeclaration:29:126">
         <node id="G59_foo_N1" kind="input" ref="#arg0" type="I">

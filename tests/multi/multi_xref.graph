@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
-    <field name="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;"/>
-    <method name="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Ldom/meep/multi_xref1;/.xref2" static="false" type="Ldom/meep/multi_xref2;"/>
+    <method abstract="false" name="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" style="initializer">
       <ast end="256" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref1;.&lt;clinit&gt;">
         <node data="uninitialized" id="G4_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -11,7 +11,7 @@
         </node>
       </scope>
     </method>
-    <method name="Ldom/meep/multi_xref1;.moo()V" style="instance">
+    <method abstract="false" name="Ldom/meep/multi_xref1;.moo()V" style="instance">
       <caller name="Ldom/meep/multi_xref2;.foo()V"/>
       <ast end="254" start="115" type="31"/>
       <scope name="Ldom/meep/multi_xref1;.:MethodDeclaration:115:254">
@@ -102,8 +102,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
-    <field name="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
-    <method name="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Ldom/meep/multi_xref2;/.xref1" static="false" type="Ldom/meep/multi_xref1;"/>
+    <method abstract="false" name="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" style="initializer">
       <ast end="297" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref2;.&lt;clinit&gt;">
         <node data="uninitialized" id="G6_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -113,7 +113,7 @@
         </node>
       </scope>
     </method>
-    <method name="Ldom/meep/multi_xref2;.foo()V" style="instance">
+    <method abstract="false" name="Ldom/meep/multi_xref2;.foo()V" style="instance">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast end="239" start="75" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:75:239">
@@ -210,7 +210,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Ldom/meep/multi_xref2;.bam()I" style="static">
+    <method abstract="false" name="Ldom/meep/multi_xref2;.bam()I" style="static">
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast end="295" start="245" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:MethodDeclaration:245:295">
@@ -228,8 +228,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
-    <field name="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
-    <method name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Ldom/meep/multi_xref1/baa;/.baz" static="false" type="I"/>
+    <method abstract="false" name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="109" start="75" type="55"/>
       <scope name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;">
         <node data="uninitialized" id="G9_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -241,8 +241,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
-    <field name="@Ldom/dood/multi_xref3;/.boo" type="I"/>
-    <method name="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Ldom/dood/multi_xref3;/.boo" static="true" type="I"/>
+    <method abstract="false" name="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" style="initializer">
       <ast end="195" start="48" type="55"/>
       <scope name="Ldom/dood/multi_xref3;.&lt;clinit&gt;">
         <node data="100" id="G10_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -254,7 +254,7 @@
         </node>
       </scope>
     </method>
-    <method name="Ldom/dood/multi_xref3;.baa()V" style="instance">
+    <method abstract="false" name="Ldom/dood/multi_xref3;.baa()V" style="instance">
       <ast end="193" start="114" type="31"/>
       <scope name="Ldom/dood/multi_xref3;.:MethodDeclaration:114:193">
         <node id="G11_baa_N1" kind="input" ref="#this" type="Ldom/dood/multi_xref3;"/>

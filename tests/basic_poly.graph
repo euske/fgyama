@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
-    <field name="@Lbasic_poly_Foo;/.x" type="I"/>
-    <method name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_poly_Foo;/.x" static="false" type="I"/>
+    <method abstract="false" name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="108" start="0" type="55"/>
       <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">
         <node data="0" id="G36_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -13,7 +13,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
+    <method abstract="false" name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <override name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
@@ -47,11 +47,11 @@
     </method>
   </class>
   <class extends="Lbasic_poly_Foo;" interface="false" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
-    <method name="Lbasic_poly_Baa;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_poly_Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="552" start="110" type="55"/>
       <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
+    <method abstract="false" name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
       <caller name="Lbasic_poly_Baa;.main()V"/>
       <ast end="250" start="160" type="31"/>
       <scope name="Lbasic_poly_Baa;.:MethodDeclaration:160:250">
@@ -103,7 +103,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_poly_Baa;.main()V" style="static">
+    <method abstract="false" name="Lbasic_poly_Baa;.main()V" style="static">
       <ast end="550" start="256" type="31"/>
       <scope name="Lbasic_poly_Baa;.:MethodDeclaration:256:550">
         <node id="G39_main_N1" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>

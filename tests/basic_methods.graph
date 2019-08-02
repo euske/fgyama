@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods;" path="tests/basic_methods.java">
-    <field name="@Lbasic_methods;/.x" type="I"/>
-    <method name="Lbasic_methods;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_methods;/.x" static="false" type="I"/>
+    <method abstract="false" name="Lbasic_methods;.&lt;clinit&gt;()V" style="initializer">
       <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;.&lt;clinit&gt;">
         <node data="0" id="G50_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -13,7 +13,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_methods;.fa()V" style="instance">
+    <method abstract="false" name="Lbasic_methods;.fa()V" style="instance">
       <ast end="385" start="139" type="31"/>
       <scope name="Lbasic_methods;.:MethodDeclaration:139:385">
         <node id="G51_fa_N1" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
@@ -89,7 +89,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_methods;.fb()I" style="static">
+    <method abstract="false" name="Lbasic_methods;.fb()I" style="static">
       <caller name="Lbasic_methods;.fa()V"/>
       <ast end="450" start="390" type="31"/>
       <scope name="Lbasic_methods;.:MethodDeclaration:390:450">
@@ -115,11 +115,11 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/A;" path="tests/basic_methods.java">
-    <method name="Lbasic_methods/A;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_methods/A;.&lt;clinit&gt;()V" style="initializer">
       <ast end="118" start="34" type="55"/>
       <scope name="Lbasic_methods/A;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
+    <method abstract="false" name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
       <ast end="112" start="52" type="31"/>
       <scope name="Lbasic_methods/A;.:MethodDeclaration:52:112">
@@ -137,11 +137,11 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;" path="tests/basic_methods.java">
-    <method name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;()V" style="initializer">
       <ast end="225" start="173" type="1"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.toString()Ljava/lang/String;" style="instance">
+    <method abstract="false" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.toString()Ljava/lang/String;" style="instance">
       <ast end="222" start="180" type="31"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.:MethodDeclaration:180:222">
         <node id="G54_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;"/>
@@ -158,11 +158,11 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:MethodDeclaration:139:385/moo;" path="tests/basic_methods.java">
-    <method name="Lbasic_methods/:MethodDeclaration:139:385/moo;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_methods/:MethodDeclaration:139:385/moo;.&lt;clinit&gt;()V" style="initializer">
       <ast end="296" start="228" type="55"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_methods/:MethodDeclaration:139:385/moo;.fc()I" style="instance">
+    <method abstract="false" name="Lbasic_methods/:MethodDeclaration:139:385/moo;.fc()I" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
       <ast end="293" start="245" type="31"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/moo;.:MethodDeclaration:245:293">

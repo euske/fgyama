@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_funcs;" path="tests/basic_funcs.java">
-    <field name="@Lbasic_funcs;/.y" type="I"/>
-    <field name="@Lbasic_funcs;/.z" type="I"/>
-    <method name="Lbasic_funcs;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_funcs;/.y" static="false" type="I"/>
+    <field name="@Lbasic_funcs;/.z" static="false" type="I"/>
+    <method abstract="false" name="Lbasic_funcs;.&lt;clinit&gt;()V" style="initializer">
       <ast end="479" start="0" type="55"/>
       <scope name="Lbasic_funcs;.&lt;clinit&gt;">
         <node data="0" id="G32_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -21,7 +21,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
+    <method abstract="false" name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
       <ast end="243" start="77" type="31"/>
       <scope name="Lbasic_funcs;.:MethodDeclaration:77:243">
         <node id="G33_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
@@ -116,7 +116,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_funcs;.moo(I)I" style="static">
+    <method abstract="false" name="Lbasic_funcs;.moo(I)I" style="static">
       <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast end="407" start="249" type="31"/>
@@ -250,7 +250,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_funcs;.foo()I" style="static">
+    <method abstract="false" name="Lbasic_funcs;.foo()I" style="static">
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast end="477" start="413" type="31"/>
       <scope name="Lbasic_funcs;.:MethodDeclaration:413:477">

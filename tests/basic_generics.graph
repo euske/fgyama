@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics;" path="tests/basic_generics.java">
-    <method name="Lbasic_generics;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_generics;.&lt;clinit&gt;()V" style="initializer">
       <ast end="567" start="0" type="55"/>
       <scope name="Lbasic_generics;.&lt;clinit&gt;"/>
     </method>
-    <method name="Lbasic_generics;.test()V" style="static">
+    <method abstract="false" name="Lbasic_generics;.test()V" style="static">
       <ast end="494" start="300" type="31"/>
       <scope name="Lbasic_generics;.:MethodDeclaration:300:494">
         <node id="G18_test_N1" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
@@ -74,7 +74,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics;.foo(Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;)Ljava/lang/Object;" style="static">
+    <method abstract="false" name="Lbasic_generics;.foo(Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;)Ljava/lang/Object;" style="static">
       <ast end="565" start="500" type="31"/>
       <scope name="Lbasic_generics;.:MethodDeclaration:500:565">
         <node id="G19_foo_N1" kind="input" ref="#arg0" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;">
@@ -109,8 +109,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;T&gt;;" path="tests/basic_generics.java">
-    <field name="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;"/>
-    <method name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_generics/Moo&lt;T&gt;;/.x" static="false" type="Ljava/lang/Object;"/>
+    <method abstract="false" name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;">
         <node data="uninitialized" id="G20_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -120,7 +120,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;T&gt;;.&lt;init&gt;(Ljava/lang/Object;)Lbasic_generics/Moo&lt;T&gt;;" style="constructor">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;T&gt;;.&lt;init&gt;(Ljava/lang/Object;)Lbasic_generics/Moo&lt;T&gt;;" style="constructor">
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:80:124">
         <node id="G21_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
@@ -155,7 +155,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;T&gt;;.get()Ljava/lang/Object;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;T&gt;;.get()Ljava/lang/Object;" style="instance">
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:134:196">
         <node id="G22_get_N1" kind="input" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;"/>
@@ -181,7 +181,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;T&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;T&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="instance">
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:206:265">
         <node id="G23_copy_N1" kind="input" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;"/>
@@ -214,8 +214,8 @@
   </class>
   <class extends="Ljava/lang/Object;" generic="Lbasic_generics/Moo&lt;T&gt;;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" path="tests/basic_generics.java">
     <param name="T" type="Ljava/lang/Object;"/>
-    <field name="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;"/>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" static="false" type="Ljava/lang/Object;"/>
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;clinit&gt;">
         <node data="uninitialized" id="G24_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -225,7 +225,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;init&gt;(Ljava/lang/Object;)Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="constructor">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;init&gt;(Ljava/lang/Object;)Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="constructor">
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124">
         <node id="G25_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
@@ -260,7 +260,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get()Ljava/lang/Object;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.get()Ljava/lang/Object;" style="instance">
       <caller name="Lbasic_generics;.foo(Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;)Ljava/lang/Object;"/>
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:134:196">
@@ -287,7 +287,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="instance">
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:206:265">
         <node id="G27_copy_N1" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;"/>
@@ -319,21 +319,21 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;/Baa;" path="tests/basic_generics.java">
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="288" start="275" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;/Baa;.&lt;clinit&gt;"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo/Baa;" path="tests/basic_generics.java">
-    <method name="Lbasic_generics/Moo/Baa;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_generics/Moo/Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="288" start="275" type="55"/>
       <scope name="Lbasic_generics/Moo/Baa;.&lt;clinit&gt;"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" generic="Lbasic_generics/Moo&lt;T&gt;;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
     <param name="T" type="Ljava/lang/String;"/>
-    <field name="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" static="false" type="Ljava/lang/String;"/>
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;">
         <node data="uninitialized" id="G28_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -343,7 +343,7 @@
         </node>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="constructor">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="constructor">
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124">
         <node id="G29_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
@@ -378,7 +378,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get()Ljava/lang/String;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_generics;.test()V"/>
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:134:196">
@@ -405,7 +405,7 @@
         </scope>
       </scope>
     </method>
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="instance">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="instance">
       <caller name="Lbasic_generics;.test()V"/>
       <ast end="265" start="206" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:206:265">
@@ -438,13 +438,13 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;" path="tests/basic_generics.java">
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="288" start="275" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.&lt;clinit&gt;"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;" path="tests/basic_generics.java">
-    <method name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.&lt;clinit&gt;()V" style="initializer">
       <ast end="288" start="275" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.&lt;clinit&gt;"/>
     </method>
