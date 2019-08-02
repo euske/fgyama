@@ -2,6 +2,7 @@
 import sys
 import re
 from graph2idf import IDFBuilder
+from srcdb import SourceDB, SourceAnnot
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
@@ -145,7 +146,7 @@ def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdis
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
     feats.update( ('BACK',dist,fprev,f,n1) for f in fs )
-    if n1.kind in REFS:
+    if lprev == '' and n1.kind in REFS:
         for (link,v2) in inputs:
             enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
     else:
@@ -162,7 +163,7 @@ def main(argv):
               '[-M maxoverrides] [-F|-B] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:m:M:FBC')
+        (opts, args) = getopt.getopt(argv[1:], 'do:m:M:B:fbC')
     except getopt.GetoptError:
         return usage()
     debug = 0
@@ -170,13 +171,15 @@ def main(argv):
     maxoverrides = 1
     mode = None
     output = None
+    srcdb = None
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': output = v
         elif k == '-m': maxdist = int(v)
         elif k == '-M': maxoverrides = int(v)
-        elif k == '-F': mode = k
-        elif k == '-B': mode = k
+        elif k == '-B': srcdb = SourceDB(v)
+        elif k == '-f': mode = k
+        elif k == '-b': mode = k
         elif k == '-C': mode = k
     if not args: return usage()
 
@@ -249,8 +252,16 @@ def main(argv):
             data = item + tuple( builder.getsrc(n) for n in item2nodes[item] )
             fp.write('! %r\n' % (data,))
             for (t, dist,f0,f1,n) in feats:
-                data = (t, dist, f0, f1, builder.getsrc(n))
+                src = builder.getsrc(n)
+                data = (t, dist, f0, f1, src)
                 fp.write('+ %r\n' % (data,))
+                if srcdb is not None:
+                    src = builder.getsrc(n, False)
+                    if src is not None:
+                        (path,start,end) = src
+                        annot = SourceAnnot(srcdb)
+                        annot.add(path, start, end)
+                        annot.show_text()
             fp.write('\n')
             nitems += 1
             nfeats += len(feats)

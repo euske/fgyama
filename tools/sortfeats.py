@@ -19,15 +19,19 @@ def main(argv):
         elif k == '-t': target = v
     if not args: return usage()
 
+    srcid2path = {}
     item2srcs = {}
     item2feats = {}
-    feats = None
+    feat2srcs = None
     for line in fileinput.input(args):
         if line.startswith('# gid:'):
             sys.stderr.write('.'); sys.stderr.flush()
 
         elif line.startswith('+SOURCE '):
-            print(line.strip())
+            (_,_,line) = line.partition(' ')
+            (srcid, path) = eval(line)
+            srcid2path[srcid] = path
+            print('+SOURCE', (srcid, path))
 
         elif line.startswith('! '):
             data = eval(line[2:])
@@ -35,11 +39,11 @@ def main(argv):
             item = data[0:2]
             src = data[2]
             if target is not None and data[0] != target:
-                feats = None
+                feat2srcs = None
             elif item in item2feats:
-                feats = item2feats[item]
+                feat2srcs = item2feats[item]
             else:
-                feats = item2feats[item] = {}
+                feat2srcs = item2feats[item] = {}
             if item in item2srcs:
                 srcs = item2srcs[item]
             else:
@@ -48,26 +52,27 @@ def main(argv):
                 srcs.append(src)
 
         elif line.startswith('+ '):
-            if feats is not None:
+            if feat2srcs is not None:
                 data = eval(line[2:])
                 assert isinstance(data, tuple)
                 feat = data[0:4]
                 src = data[4]
                 if src is not None:
-                    if feat in feats:
-                        a = feats[feat]
+                    if feat in feat2srcs:
+                        srcs = feat2srcs[feat]
                     else:
-                        a = feats[feat] = []
-                    if src not in a:
-                        a.append(src)
+                        srcs = feat2srcs[feat] = []
+                    if src not in srcs:
+                        srcs.append(src)
         else:
             pass
     #
     for item in sorted(item2feats.keys()):
         print('!', item + tuple(item2srcs[item]))
-        feats = item2feats[item]
-        for feat in sorted(feats.keys()):
-            print('+', feat + tuple(feats[feat]))
+        feat2srcs = item2feats[item]
+        for feat in sorted(feat2srcs.keys()):
+            srcs = feat2srcs[feat]
+            print('+', feat + tuple(srcs))
         print()
     total = sum( len(d) for d in item2feats.values() )
     print('%d items, %d keys' % (len(item2feats), total), file=sys.stderr)
