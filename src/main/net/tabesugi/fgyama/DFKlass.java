@@ -674,6 +674,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
+            String id = Utils.encodeASTNode(lambda);
+            DFKlass lambdaKlass = space.createKlass(this, outerScope, id);
             ASTNode body = lambda.getBody();
             if (body instanceof Statement) {
             } else if (body instanceof Expression) {
@@ -687,6 +689,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
+            MethodReference methodref = (MethodReference)expr;
+            String id = Utils.encodeASTNode(methodref);
+            DFKlass methodrefKlass = space.createKlass(this, outerScope, id);
             // XXX TODO MethodReference
 
         } else {

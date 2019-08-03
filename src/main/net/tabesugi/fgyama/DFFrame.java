@@ -838,16 +838,19 @@ public class DFFrame {
                 throw new InvalidSyntax(body);
             }
             // XXX TODO LambdaExpression
-            return DFUnknownType.UNKNOWN;
+            String id = Utils.encodeASTNode(lambda);
+            return method.getType(id);
 
         } else if (expr instanceof MethodReference) {
             // MethodReference
+            MethodReference methodref = (MethodReference)expr;
             //  CreationReference
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
+            String id = Utils.encodeASTNode(methodref);
             // XXX TODO MethodReference
-            return DFUnknownType.UNKNOWN;
+            return method.getType(id);
 
         } else {
             // ???

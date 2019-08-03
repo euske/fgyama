@@ -1484,22 +1484,25 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 } else {
                     throw new InvalidSyntax(body);
                 }
-                ctx.setRValue(
-                    new DFNode(graph, scope, DFUnknownType.UNKNOWN, null, null));
 		// XXX TODO LambdaExpression
 		Logger.error("Unsupported: LambdaExpression", expr);
+                String id = Utils.encodeASTNode(lambda);
+                DFType lambdaType = typeSpace.getType(id);
+                ctx.setRValue(
+                    new DFNode(graph, scope, lambdaType, null, null));
 
             } else if (expr instanceof MethodReference) {
                 //  CreationReference
                 //  ExpressionMethodReference
                 //  SuperMethodReference
                 //  TypeMethodReference
-                MethodReference mref = (MethodReference)expr;
-                DFKlass klass = scope.lookupThis().getRefType().toKlass();
-                ctx.setRValue(
-                    new DFNode(graph, scope, DFUnknownType.UNKNOWN, null, null));
+                MethodReference methodref = (MethodReference)expr;
                 // XXX TODO MethodReference
 		Logger.error("Unsupported: MethodReference", expr);
+                String id = Utils.encodeASTNode(methodref);
+                DFType methodrefType = typeSpace.getType(id);
+                ctx.setRValue(
+                    new DFNode(graph, scope, methodrefType, null, null));
 
             } else {
                 throw new InvalidSyntax(expr);
