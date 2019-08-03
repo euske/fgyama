@@ -20,6 +20,8 @@ def main(argv):
     if not args: return usage()
 
     srcid2path = {}
+    fid2feat = {}
+    feat2fid = {}
     item2srcs = {}
     item2feats = {}
     feat2srcs = None
@@ -56,12 +58,18 @@ def main(argv):
                 data = eval(line[2:])
                 assert isinstance(data, tuple)
                 feat = data[0:4]
+                if feat in feat2fid:
+                    fid = feat2fid[feat]
+                else:
+                    fid = len(feat2fid)+1
+                    feat2fid[feat] = fid
+                    fid2feat[fid] = feat
                 src = data[4]
                 if src is not None:
-                    if feat in feat2srcs:
-                        srcs = feat2srcs[feat]
+                    if fid in feat2srcs:
+                        srcs = feat2srcs[fid]
                     else:
-                        srcs = feat2srcs[feat] = []
+                        srcs = feat2srcs[fid] = []
                     if src not in srcs:
                         srcs.append(src)
         else:
@@ -70,8 +78,9 @@ def main(argv):
     for item in sorted(item2feats.keys()):
         print('!', item + tuple(item2srcs[item]))
         feat2srcs = item2feats[item]
-        for feat in sorted(feat2srcs.keys()):
-            srcs = feat2srcs[feat]
+        for fid in sorted(feat2srcs.keys(), key=lambda fid:fid2feat[fid]):
+            feat = fid2feat[fid]
+            srcs = feat2srcs[fid]
             print('+', feat + tuple(srcs))
         print()
     total = sum( len(d) for d in item2feats.values() )
