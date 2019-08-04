@@ -192,12 +192,22 @@ public class DFFrame {
         this.buildStmt(finder, method, scope, methodDecl.getBody());
     }
 
+    @SuppressWarnings("unchecked")
     public void buildBodyDecls(
         DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         List<BodyDeclaration> decls)
         throws InvalidSyntax {
         for (BodyDeclaration body : decls) {
-            if (body instanceof Initializer) {
+	    if (body instanceof FieldDeclaration) {
+                FieldDeclaration fieldDecl = (FieldDeclaration)body;
+                for (VariableDeclarationFragment frag :
+                         (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
+                    Expression init = frag.getInitializer();
+                    if (init != null) {
+                        this.buildExpr(finder, method, method.getScope(), init);
+                    }
+		}
+            } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
                 DFLocalScope innerScope = scope.getChildByAST(body);
                 this.buildStmt(finder, method, innerScope, initializer.getBody());

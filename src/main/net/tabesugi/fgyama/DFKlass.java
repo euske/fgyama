@@ -329,7 +329,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        this.buildTypeFromExpr(init, this, _klassScope);
+                        this.buildTypeFromExpr(init, _initMethod, _initMethod.getScope());
                     }
                 }
 

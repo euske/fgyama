@@ -1488,6 +1488,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 		Logger.error("Unsupported: LambdaExpression", expr);
                 String id = Utils.encodeASTNode(lambda);
                 DFType lambdaType = typeSpace.getType(id);
+		assert lambdaType != null;
                 ctx.setRValue(
                     new DFNode(graph, scope, lambdaType, null, null));
 
@@ -1501,6 +1502,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 		Logger.error("Unsupported: MethodReference", expr);
                 String id = Utils.encodeASTNode(methodref);
                 DFType methodrefType = typeSpace.getType(id);
+		assert methodrefType != null;
                 ctx.setRValue(
                     new DFNode(graph, scope, methodrefType, null, null));
 
