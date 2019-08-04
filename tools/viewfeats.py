@@ -9,29 +9,25 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] -B srcdb path [feats ...]' % argv[0])
+        print('usage: %s [-d] srcdb path [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dc:B:n:')
+        (opts, args) = getopt.getopt(argv[1:], 'dc:n:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     encoding = None
-    srcdb = None
     ntop = 10
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-c': encoding = v
-        elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-n': ntop = int(v)
     if not args: return usage()
-    if srcdb is None: return usage()
-
     path = args.pop(0)
-    print('Loading: %r...' % path, file=sys.stderr)
+    srcdb = SourceDB(path, encoding)
+    path = args.pop(0)
 
     srcid2path = {}
-    word2freq = {}
     item2srcs = { w:[] for w in args if not w.startswith('+') }
     word2items = { w[1:]:{} for w in args if w.startswith('+') }
     feat2srcs = None
@@ -51,9 +47,6 @@ def main(argv):
                     if name in item2srcs:
                         item2srcs[name].extend(data[2:])
                     for w in splitwords(name):
-                        if w not in word2freq:
-                            word2freq[w] = 0
-                        word2freq[w] += 1
                         if w in word2items:
                             item2feats = word2items[w]
                             if item in item2feats:
@@ -79,10 +72,6 @@ def main(argv):
 
             else:
                 feat2srcs = None
-
-    words = sorted(word2freq.keys(), key=lambda w: word2freq[w], reverse=True)
-    for w in words[:10]:
-        print('#', w, word2freq[w])
 
     for (item,srcs) in item2srcs.items():
         print('!!!', item)

@@ -77,7 +77,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [graph ...]' % argv[0])
+        print('usage: %s [-d] graph [feats ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'd')
@@ -95,26 +95,23 @@ def main(argv):
         for klass in load_klasses(fp):
             db.add_klass(klass)
 
-    path = args.pop(0)
-    print('Loading: %r...' % path, file=sys.stderr)
     feats = {}
-    with open(path) as fp:
-        a = None
-        for line in fp:
-            if line.startswith('! '):
-                data = eval(line[2:])
-                if data[0] == 'REF':
-                    item = data[1]
-                    if item in feats:
-                        a = feats[item]
-                    else:
-                        a = feats[item] = set()
-            elif line.startswith('+ '):
-                data = eval(line[2:])
-                assert a is not None
-                #feat = (data[0], data[1], data[2], data[3])
-                feat = (data[0], data[2], data[3])
-                a.add(feat)
+    a = None
+    for line in fileinput.input(args):
+        if line.startswith('! '):
+            data = eval(line[2:])
+            if data[0] == 'REF':
+                item = data[1]
+                if item in feats:
+                    a = feats[item]
+                else:
+                    a = feats[item] = set()
+        elif line.startswith('+ '):
+            data = eval(line[2:])
+            assert a is not None
+            #feat = (data[0], data[1], data[2], data[3])
+            feat = (data[0], data[2], data[3])
+            a.add(feat)
     #
     items = list(feats.keys())
     r = []

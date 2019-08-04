@@ -578,10 +578,10 @@ def main(argv):
         if k == '-d': debug += 1
     if not args: return usage()
 
-    nclasses = 0
-    ngraphs = 0
-    nnodes = 0
     for path in args:
+        nclasses = 0
+        ngraphs = 0
+        nnodes = 0
         for graph in get_graphs(path):
             ngraphs += 1
             nnodes += len(graph.nodes)
@@ -592,10 +592,8 @@ def main(argv):
             for efile in root:
                 if efile.tag == 'class':
                     nclasses += 1
-
-    print('nclasses:', nclasses)
-    print('ngraphs:', ngraphs)
-    print('nnodes:', nnodes)
+        print('%s: classes=%r, graphs=%r, nodes=%r' %
+              (path, nclasses, ngraphs, nnodes))
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

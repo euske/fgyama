@@ -17,7 +17,6 @@ def main(argv):
     for (k, v) in opts:
         if k == '-v': verbose += 1
         elif k == '-t': target = v
-    if not args: return usage()
 
     srcid2path = {}
     fid2feat = {}
@@ -27,7 +26,8 @@ def main(argv):
     feat2srcs = None
     for line in fileinput.input(args):
         if line.startswith('# gid:'):
-            sys.stderr.write('.'); sys.stderr.flush()
+            if verbose:
+                sys.stderr.write('.'); sys.stderr.flush()
 
         elif line.startswith('+SOURCE '):
             (_,_,line) = line.partition(' ')
@@ -84,7 +84,7 @@ def main(argv):
             print('+', feat + tuple(srcs))
         print()
     total = sum( len(d) for d in item2feats.values() )
-    print('%d items, %d keys' % (len(item2feats), total), file=sys.stderr)
+    print('Items: %r, Features: %r' % (len(item2feats), total), file=sys.stderr)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

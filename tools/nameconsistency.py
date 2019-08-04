@@ -30,11 +30,7 @@ def main(argv):
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-f': watch.add(v)
         elif k == '-t': threshold = float(v)
-    if not args: return usage()
     assert inpath is None or outpath is None
-
-    path = args.pop(0)
-    print('Loading: %r...' % path, file=sys.stderr)
 
     nb = NaiveBayes()
 
@@ -69,41 +65,40 @@ def main(argv):
             f = predict
 
     srcmap = {}
-    with open(path) as fp:
-        item = feats = None
-        annot = None
-        for line in fp:
-            if line.startswith('+SOURCE'):
-                (_,_,line) = line.partition(' ')
-                (srcid, path) = eval(line)
-                srcmap[srcid] = path
-            elif line.startswith('! '):
-                data = eval(line[2:])
-                item = None
-                if data[0] == 'REF':
-                    item = data[1]
-                    feats = set()
-                    if item in watch:
-                        (srcid,start,end) = data[2]
-                        annot = SourceAnnot(srcdb)
-                        annot.add(srcmap[srcid], start, end, 0)
-                else:
-                    feats = None
-            elif feats is not None and line.startswith('+ '):
-                data = eval(line[2:])
-                feat = data[0:4]
-                feats.add(feat)
-                if annot is not None and data[4] is not None:
-                    (srcid,start,end) = data[4]
+    item = feats = None
+    annot = None
+    for line in fileinput.input(args):
+        if line.startswith('+SOURCE'):
+            (_,_,line) = line.partition(' ')
+            (srcid, path) = eval(line)
+            srcmap[srcid] = path
+        elif line.startswith('! '):
+            data = eval(line[2:])
+            item = None
+            if data[0] == 'REF':
+                item = data[1]
+                feats = set()
+                if item in watch:
+                    (srcid,start,end) = data[2]
+                    annot = SourceAnnot(srcdb)
                     annot.add(srcmap[srcid], start, end, 0)
-            elif feats is not None and not line.strip():
-                if feats:
-                    f(item, feats)
-                    if item2feats is not None:
-                        item2feats[item] = feats
-                if annot is not None:
-                    annot.show_text()
-                    annot = None
+            else:
+                feats = None
+        elif feats is not None and line.startswith('+ '):
+            data = eval(line[2:])
+            feat = data[0:4]
+            feats.add(feat)
+            if annot is not None and data[4] is not None:
+                (srcid,start,end) = data[4]
+                annot.add(srcmap[srcid], start, end, 0)
+        elif feats is not None and not line.strip():
+            if feats:
+                f(item, feats)
+                if item2feats is not None:
+                    item2feats[item] = feats
+            if annot is not None:
+                annot.show_text()
+                annot = None
 
     if outpath is not None:
         with open(outpath, 'wb') as fp:
