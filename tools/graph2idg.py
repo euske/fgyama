@@ -3,6 +3,7 @@ import sys
 import re
 from graph2idf import IDFBuilder
 from srcdb import SourceDB, SourceAnnot
+from getwords import striptypename, stripmethodname, stripref, splitwords
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
@@ -19,61 +20,6 @@ AUGMENTED = (
 
 def is_ref(ref):
     return not (ref is None or ref.startswith('#') or ref.startswith('%'))
-
-NAME = re.compile(r'\w+$', re.U)
-def striplast(name):
-    m = NAME.search(name)
-    if m:
-        return m.group(0)
-    else:
-        return None
-
-def striptypename(name):
-    if name.endswith(';'):
-        name = name[:-1]
-    return striplast(name)
-
-def stripmethodname(name):
-    assert '(' in name
-    (name,_,_) = name.partition('(')
-    if name.endswith(';.<init>'):
-        name = name[:-8]
-    return striplast(name)
-
-def stripref(name):
-    if name.startswith('%'):
-        return striptypename(name)
-    else:
-        return striplast(name)
-
-WORD1 = re.compile(r'[A-Z]?[a-z]+$')
-WORD2 = re.compile(r'[A-Z]+$')
-def getnoun(name):
-    if name is None:
-        return None
-    elif name[-1].islower():
-        return WORD1.search(name).group(0).lower()
-    elif name[-1].isupper():
-        return WORD2.search(name).group(0).lower()
-    else:
-        return None
-
-WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+')
-def splitwords(s):
-    """
-    >>> splitwords('name')
-    ['name']
-    >>> splitwords('this_is_name_!')
-    ['name', 'is', 'this']
-    >>> splitwords('thisIsName')
-    ['name', 'is', 'this']
-    >>> splitwords('SomeXMLStuff')
-    ['stuff', 'xml', 'some']
-"""
-    if s is None: return []
-    n = len(s)
-    r = ''.join(reversed(s))
-    return [ s[n-m.end(0):n-m.start(0)].lower() for m in WORD.finditer(r) ]
 
 def getfeats(n):
     if n.kind in CALLS:

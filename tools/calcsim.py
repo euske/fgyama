@@ -2,6 +2,7 @@
 import sys
 import re
 from graph import DFGraph, load_klasses
+from getwords import stripid, stripmethodid, stripgeneric, splitwords
 
 # methods:
 #   words overlap (jaccard)
@@ -21,44 +22,6 @@ def jaccard(s1, s2):
 def avg(a):
     assert a
     return sum(a) / len(a)
-
-NAME = re.compile(r'\w+$', re.U)
-def stripid(name):
-    m = NAME.search(name)
-    if m:
-        return m.group(0)
-    else:
-        return None
-
-def stripmethodid(x):
-    assert '(' in x, x
-    (name,_,x) = x.partition('(')
-    assert ')' in x, x
-    (args,_retype) = x.partition(')')
-    if name.endswith(';.<init>'):
-        name = name[:-8]
-    return (stripid(name), args, retype)
-
-def stripgeneric(name):
-    (base,_,_) = name.partition('<')
-    return base
-
-WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+|[0-9]+')
-def splitwords(s):
-    """
-    >>> splitwords('name')
-    ['name']
-    >>> splitwords('this_is_name_!')
-    ['name', 'is', 'this']
-    >>> splitwords('thisIsName')
-    ['name', 'is', 'this']
-    >>> splitwords('SomeXMLStuff')
-    ['stuff', 'xml', 'some']
-"""
-    if s is None: return []
-    n = len(s)
-    r = ''.join(reversed(s))
-    return [ s[n-m.end(0):n-m.start(0)].lower() for m in WORD.finditer(r) ]
 
 
 ##  ClassDB

@@ -2,32 +2,8 @@
 import sys
 import re
 from srcdb import SourceDB, SourceAnnot
+from getwords import stripid, splitwords
 from naivebayes import NaiveBayes
-
-NAME = re.compile(r'\w+$', re.U)
-def stripid(name):
-    m = NAME.search(name)
-    if m:
-        return m.group(0)
-    else:
-        return None
-
-WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+|[0-9]+')
-def splitwords(s):
-    """
-    >>> splitwords('name')
-    ['name']
-    >>> splitwords('this_is_name_!')
-    ['name', 'is', 'this']
-    >>> splitwords('thisIsName')
-    ['name', 'is', 'this']
-    >>> splitwords('SomeXMLStuff')
-    ['stuff', 'xml', 'some']
-"""
-    if s is None: return []
-    n = len(s)
-    r = ''.join(reversed(s))
-    return [ s[n-m.end(0):n-m.start(0)].lower() for m in WORD.finditer(r) ]
 
 # main
 def main(argv):

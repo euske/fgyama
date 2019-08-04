@@ -28,6 +28,10 @@ def stripref(name):
     else:
         return stripid(name)
 
+def stripgeneric(name):
+    (base,_,_) = name.partition('<')
+    return base
+
 WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+')
 def splitwords(s):
     """
