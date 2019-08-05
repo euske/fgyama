@@ -26,6 +26,7 @@ def main(argv):
     srcdb = None
     nbins = 0
     threshold = 0.30
+    minratio = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-B': srcdb = SourceDB(v, encoding)
@@ -41,8 +42,10 @@ def main(argv):
             refs[ref] = ntype
     print('Refs: %r' % len(refs), file=sys.stderr)
 
+    item2srcs = None
+    if srcdb is not None:
+        item2srcs = {}
     srcmap = {}
-    item2srcs = {}
     items = []
     item = feats = None
     sp = VSM()
@@ -59,11 +62,12 @@ def main(argv):
                 item = data[1]
                 feats = set()
                 items.append(item)
-                if item in item2srcs:
-                    srcs = item2srcs[item]
-                else:
-                    srcs = item2srcs[item] = []
-                srcs.extend(data[2:])
+                if item2srcs is not None:
+                    if item in item2srcs:
+                        srcs = item2srcs[item]
+                    else:
+                        srcs = item2srcs[item] = []
+                    srcs.extend(data[2:])
             else:
                 feats = None
 
@@ -88,12 +92,14 @@ def main(argv):
     if nbins:
         pairs = [ None for _ in range(nbins) ]
         z = (nbins-1) / (1.0-threshold)
+        minpairs = int(nbins * minratio)
+        npairs = 0
         for (sim,item0,item1) in sp.findall(threshold=threshold):
             i = int((sim-threshold)*z)
             if pairs[i] is None:
-                filled += 1
+                npairs += 1
             pairs[i] = (sim, item0, item1)
-            if nbins*0.8 < filled: break
+            if minpairs < npairs: break
         pairs = [ x for x in pairs if x is not None ]
         pairs.sort(key=lambda b:b[0], reverse=True)
     else:
@@ -123,12 +129,12 @@ def main(argv):
         totalwordsim += wordsim
         print('*** sim=%.2f, wordsim=%.2f, type=%r: %s/%s' %
               (sim, wordsim, (type0==type1), name0, name1))
-        if name0 != name1 and srcdb is not None:
+        if item2srcs is not None and name0 != name1:
             print('+++', item0)
             show(item2srcs[item0])
             print('+++', item1)
             show(item2srcs[item1])
-        print('# score=%r/%r/%r/%r, avg=%r' %
+        print('# score=%r/%r/%r/%r, avg=%.2f' %
               (npairs, nametype, nameonly, typeonly, totalwordsim/npairs))
         print()
 
