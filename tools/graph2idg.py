@@ -58,7 +58,7 @@ def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdis
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    feats.update( ('FORW',dist,fprev,f,n1) for f in fs )
+    feats.update( (dist+1,fprev,f,n1) for f in fs )
     if n1.kind in ASSIGNS:
         for (link,v2) in outputs:
             enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
@@ -91,7 +91,7 @@ def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdis
         return
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    feats.update( ('BACK',dist,fprev,f,n1) for f in fs )
+    feats.update( (-(dist+1),fprev,f,n1) for f in fs )
     if lprev == '' and n1.kind in REFS:
         for (link,v2) in inputs:
             enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
@@ -133,10 +133,6 @@ def main(argv):
         fp = sys.stdout
     else:
         fp = open(output, 'w')
-    if 0 < debug:
-        dbg = sys.stderr
-    else:
-        dbg = fp
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
@@ -150,26 +146,31 @@ def main(argv):
            len(builder.vtxs)),
           file=sys.stderr)
 
-    count = maxdist*5+5
-    nitems = 0
-    nfeats = 0
+    item2nodes = {}
     for graph in builder.graphs:
-        dbg.write('# gid: %r\n' % graph.name)
-        item2feats = {}
-        item2nodes = {}
         for node in graph:
-            vtx = builder.vtxs[node]
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
-                if item in item2nodes:
-                    nodes = item2nodes[item]
-                else:
-                    nodes = item2nodes[item] = []
-                nodes.append(node)
-                if item in item2feats:
-                    feats = item2feats[item]
-                else:
-                    feats = item2feats[item] = set()
+            elif mode == '-C' and node.kind in CALLS:
+                item = ('METHOD', node.data)
+            else:
+                continue
+            if item in item2nodes:
+                nodes = item2nodes[item]
+            else:
+                nodes = item2nodes[item] = []
+            nodes.append(node)
+    print('Items: %r, Nodes: %r' %
+          (len(item2nodes), sum( len(nodes) for nodes in item2nodes.values() )),
+          file=sys.stderr)
+
+    count = maxdist*5+5
+    nfeats = 0
+    for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
+        feats = set()
+        if item[0] == 'REF':
+            for node in nodes:
+                vtx = builder.vtxs[node]
                 if mode in (None,'-F'):
                     for (link,v1) in vtx.outputs:
                         if link.startswith('_') and link != '_end': continue
@@ -178,41 +179,45 @@ def main(argv):
                     for (link,v1) in vtx.inputs:
                         if link.startswith('_') and link != '_end': continue
                         enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
-            elif node.kind in CALLS:
-                item = ('METHOD', node.data)
-                if item in item2nodes:
-                    nodes = item2nodes[item]
-                else:
-                    nodes = item2nodes[item] = []
-                nodes.append(node)
-                if item in item2feats:
-                    feats = item2feats[item]
-                else:
-                    feats = item2feats[item] = set()
-                if mode in ('-C',):
-                    enum_forw(feats, count, set(), vtx, maxdist=maxdist)
-                    enum_back(feats, count, set(), vtx, maxdist=maxdist)
+        elif item[0] == 'METHOD':
+            for node in nodes:
+                vtx = builder.vtxs[node]
+                enum_forw(feats, count, set(), vtx, maxdist=maxdist)
+                enum_back(feats, count, set(), vtx, maxdist=maxdist)
+        if not feats: continue
 
-        for (item,feats) in item2feats.items():
-            if not feats: continue
-            data = item + tuple( builder.getsrc(n) for n in item2nodes[item] )
-            fp.write('! %r\n' % (data,))
-            for (t, dist,f0,f1,n) in feats:
-                src = builder.getsrc(n)
-                data = (t, dist, f0, f1, src)
-                fp.write('+ %r\n' % (data,))
-                if srcdb is not None:
+        srcs = ( builder.getsrc(n) for n in nodes if n.ast is not None )
+        data = item + tuple(sorted(srcs))
+        fp.write('! %r\n' % (data,))
+        feat2nodes = {}
+        for (dist,f0,f1,n) in feats:
+            feat = (dist,f0,f1)
+            if feat in feat2nodes:
+                nodes = feat2nodes[feat]
+            else:
+                nodes = feat2nodes[feat] = set()
+            nodes.add(n)
+        for (feat,nodes) in sorted(feat2nodes.items(), key=lambda x:x[0]):
+            srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
+            data = feat + tuple(sorted(srcs))
+            fp.write('+ %r\n' % (data,))
+            if srcdb is not None:
+                annot = SourceAnnot(srcdb)
+                for n in nodes:
                     src = builder.getsrc(n, False)
-                    if src is not None:
-                        (path,start,end) = src
-                        annot = SourceAnnot(srcdb)
-                        annot.add(path, start, end)
-                        annot.show_text()
-            fp.write('\n')
-            nitems += 1
-            nfeats += len(feats)
-        sys.stderr.write('.'); sys.stderr.flush()
-    print('Items: %r, Features: %r' % (nitems, nfeats), file=sys.stderr)
+                    if src is None: continue
+                    (path,start,end) = src
+                    annot.add(path, start, end)
+                annot.show_text()
+        fp.write('\n')
+        nfeats += len(feat2nodes)
+        if debug:
+            print('# %r: %r feats' % (item, len(feat2nodes)))
+        else:
+            sys.stderr.write('.'); sys.stderr.flush()
+
+    print('Total: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
+          file=sys.stderr)
 
     if fp is not sys.stdout:
         fp.close()
