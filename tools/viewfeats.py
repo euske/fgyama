@@ -63,12 +63,12 @@ def main(argv):
             elif feat2srcs is not None and line.startswith('+ '):
                 assert item is not None
                 data = eval(line[2:])
-                feat = data[0:4]
+                feat = data[0:3]
                 if feat in feat2srcs:
                     srcs = feat2srcs[feat]
                 else:
                     srcs = feat2srcs[feat] = []
-                srcs.extend(data[4:])
+                srcs.extend(data[3:])
 
             else:
                 feat2srcs = None

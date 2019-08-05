@@ -4,6 +4,7 @@ import re
 from srcdb import SourceDB, SourceAnnot
 from getwords import stripid, splitwords
 from vsm import VSM
+from math import exp
 
 def jaccard(s1, s2):
     if not s1 or not s2: return 0
@@ -14,19 +15,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-B srcdb] [-t threshold] vars [feats ...]' % argv[0])
+        print('usage: %s [-d] [-B srcdb] [-n nbins] [-t threshold] vars [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dB:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'dB:n:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     encoding = None
     srcdb = None
-    threshold = 0.50
+    nbins = 0
+    threshold = 0.30
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-B': srcdb = SourceDB(v, encoding)
+        elif k == '-n': nbins = int(v)
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 
@@ -60,18 +63,18 @@ def main(argv):
                     srcs = item2srcs[item]
                 else:
                     srcs = item2srcs[item] = []
-                srcs.extend(( x for x in data[2:] if x is not None ))
+                srcs.extend(data[2:])
             else:
                 feats = None
 
         elif feats is not None and line.startswith('+ '):
             data = eval(line[2:])
-            feat = data[0:4]
+            feat = data[0:3]
             feats.add(feat)
 
         elif feats is not None and not line.strip():
             if feats:
-                sp.add(item, { k:1 for k in feats })
+                sp.add(item, { (d,f0,f1):exp(-abs(d)) for (d,f0,f1) in feats })
 
     sp.commit()
 
@@ -82,30 +85,28 @@ def main(argv):
         annot.show_text()
         return
 
-    nbins = 100
-    bins = [ None for _ in range(nbins) ]
-    filled = 0
-    total = 0
-    count = 0
-    for (sim,item0,item1) in sp.findall(threshold=threshold):
-        i = int((sim-threshold)*(nbins-1))
-        if bins[i] is None:
-            filled += 1
-        else:
-            total -= bins[i][0]
-        bins[i] = (sim, item0, item1)
-        total += sim
-        count += 1
-        if nbins < count and threshold < total/filled: break
+    if nbins:
+        pairs = [ None for _ in range(nbins) ]
+        z = (nbins-1) / (1.0-threshold)
+        for (sim,item0,item1) in sp.findall(threshold=threshold):
+            i = int((sim-threshold)*z)
+            if pairs[i] is None:
+                filled += 1
+            pairs[i] = (sim, item0, item1)
+            if nbins*0.8 < filled: break
+        pairs = [ x for x in pairs if x is not None ]
+        pairs.sort(key=lambda b:b[0], reverse=True)
+    else:
+        pairs = sp.findall(threshold=threshold)
 
-    bins = [ b for b in bins if b is not None ]
-    bins.sort(reverse=True)
-    npairs = len(bins)
+    npairs = 0
     nametype = 0
     nameonly = 0
     typeonly = 0
     totalwordsim = 0
-    for (sim,item0,item1) in bins:
+    for (sim,item0,item1) in pairs:
+        assert item0 != item1
+        npairs += 1
         type0 = refs[item0]
         type1 = refs[item1]
         name0 = stripid(item0)
@@ -120,15 +121,16 @@ def main(argv):
         words1 = set(splitwords(name1))
         wordsim = jaccard(words0, words1)
         totalwordsim += wordsim
-        print(sim, (type0==type1), name0, name1, wordsim)
-        if srcdb is not None:
-            print(sim, item0, item1)
-            print('+++')
+        print('*** sim=%.2f, wordsim=%.2f, type=%r: %s/%s' %
+              (sim, wordsim, (type0==type1), name0, name1))
+        if name0 != name1 and srcdb is not None:
+            print('+++', item0)
             show(item2srcs[item0])
-            print('+++')
+            print('+++', item1)
             show(item2srcs[item1])
-    print('npairs=%r, score=%r/%r/%r, avg=%r' %
-          (npairs, nametype, nameonly, typeonly, totalwordsim/npairs))
+        print('# score=%r/%r/%r/%r, avg=%r' %
+              (npairs, nametype, nameonly, typeonly, totalwordsim/npairs))
+        print()
 
     return 0
 

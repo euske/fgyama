@@ -10,10 +10,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o path] [-i path] [-B srcdb] [-f find] [-t threshold] [feats ...]' % argv[0])
+        print('usage: %s [-d] [-o path] [-i path] [-B srcdb] [-w watch] [-t threshold] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:B:f:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:B:w:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
@@ -28,7 +28,7 @@ def main(argv):
         elif k == '-o': outpath = v
         elif k == '-i': inpath = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
-        elif k == '-f': watch.add(v)
+        elif k == '-w': watch.add(v)
         elif k == '-t': threshold = float(v)
     assert inpath is None or outpath is None
 
@@ -46,12 +46,13 @@ def main(argv):
         name = stripid(item)
         words = splitwords(name)
         f2 = nb.narrow(feats, threshold)
-        if not f2: return
+        if len(f2) <= 1: return
         cands = nb.get(f2)
         n = len(words)
-        if sorted(words) != sorted( w for (w,_,_) in cands[:n] ):
-            print(len(feats), len(f2), item)
-            print('#', [ (w,p) for (w,p,_) in cands[:n+1] ])
+        if sorted(words) != sorted( w for (w,_) in cands[:n] ):
+            print('!', len(feats), len(f2), item)
+            print('#', cands[:n+1])
+            nb.explain([ w for (w,_) in cands[:5] ], f2)
         return
 
     item2feats = None
@@ -79,18 +80,18 @@ def main(argv):
                 item = data[1]
                 feats = set()
                 if item in watch:
-                    (srcid,start,end) = data[2]
                     annot = SourceAnnot(srcdb)
-                    annot.add(srcmap[srcid], start, end, 0)
+                    for (srcid,start,end) in data[2:]:
+                        annot.add(srcmap[srcid], start, end, 0)
             else:
                 feats = None
         elif feats is not None and line.startswith('+ '):
             data = eval(line[2:])
-            feat = data[0:4]
+            feat = data[0:3]
             feats.add(feat)
-            if annot is not None and data[4] is not None:
-                (srcid,start,end) = data[4]
-                annot.add(srcmap[srcid], start, end, 0)
+            if annot is not None:
+                for (srcid,start,end) in data[3:]:
+                    annot.add(srcmap[srcid], start, end, 0)
         elif feats is not None and not line.strip():
             if feats:
                 f(item, feats)
@@ -99,6 +100,7 @@ def main(argv):
             if annot is not None:
                 annot.show_text()
                 annot = None
+            feats = None
 
     if outpath is not None:
         with open(outpath, 'wb') as fp:

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import math
 import marshal
 
@@ -46,6 +47,45 @@ class NaiveBayes:
             self.kcount[key] = 0
         self.kcount[key] += c
         self.fprob = self.kprob = None
+        return
+
+    def dump(self, threshold=2, ntop=10):
+        key2feats = { k:{} for (k,n) in self.kcount.items() if threshold <= n }
+        for (f,d) in self.fcount.items():
+            for (k,v) in d.items():
+                if v < threshold or k not in key2feats: continue
+                feats = key2feats[k]
+                feats[f] = v
+        for (k,n) in sorted(self.kcount.items(), key=lambda x:x[1], reverse=True):
+            feats = key2feats[k]
+            print('+%s (%r)' % (k, n))
+            feats = sorted(feats.items(), key=lambda x:x[1], reverse=True)
+            for (f,v) in feats[:ntop]:
+                print(' ', v, f)
+            if ntop < len(feats):
+                print('  ...others: %d' % (len(feats)-ntop))
+            print()
+        return
+
+    def explain(self, keys, feats, ntop=5):
+        keyfeats = { k:[] for k in keys }
+        for f in feats:
+            if f not in self.fcount: continue
+            d = self.fcount[f]
+            t = sum(d.values())
+            for (k,v) in d.items():
+                p = (t-v)/v
+                if k in keyfeats:
+                    a = keyfeats[k]
+                    a.append((p, f))
+        for (k,a) in keyfeats.items():
+            a.sort()
+            print('+%s (%r)' % (k, self.kcount[k]))
+            for (p,f) in a[:ntop]:
+                print(' %.2f: %s' % (p,f))
+            if ntop < len(a):
+                print('  ...others: %d' % (len(a)-ntop))
+        print()
         return
 
     def commit(self):
@@ -98,7 +138,6 @@ class NaiveBayes:
         assert self.fprob is not None
         assert feats
         keyp = { k:p0 for (k,p0) in self.kprob.items() }
-        keyf = {}
         skipped = set()
         for f in feats:
             if f not in self.fprob: continue
@@ -107,9 +146,6 @@ class NaiveBayes:
             for (k,p0) in self.kprob.items():
                 if k in d:
                     p1 = d[k] - p0
-                    if k not in keyf:
-                        keyf[k] =[]
-                    keyf[k].append((p1, f))
                 elif fallback:
                     p1 = -p0
                 else:
@@ -121,12 +157,7 @@ class NaiveBayes:
         a.sort(key=lambda x:x[1], reverse=True)
         # prevent exp(x) overflow by adjusting the maximum log to zero.
         m = max( p for (k,p) in a )
-        def getfeat(k):
-            if k in keyf:
-                return [ f for (_,f) in sorted(keyf[k], reverse=True)]
-            else:
-                return None
-        a = [ (k, p-m, getfeat(k)) for (k,p) in a ]
+        a = [ (k, p-m) for (k,p) in a ]
         if n:
             a = a[:n]
         return a
@@ -162,3 +193,11 @@ class NaiveBayes:
         if n:
             a = a[:n]
         return a
+
+def main(argv):
+    nb = NaiveBayes()
+    with open(argv[1], 'rb') as fp:
+        nb.load(fp)
+    nb.dump()
+    return 0
+if __name__ == '__main__': sys.exit(main(sys.argv))

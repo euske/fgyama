@@ -36,6 +36,9 @@ class VSM:
         self.idf = None
         return
 
+    def get(self, key):
+        return self.docs[key]
+
     def commit(self):
         n = math.log(len(self.docs))
         self.idf = {None: n}
@@ -47,12 +50,14 @@ class VSM:
     def calcsim(self, feats1, feats2):
         assert self.idf is not None
         D = self.idf[None]
-        f1 = { k1: v1*self.idf.get(k1,D) for (k1,v1) in feats1.items() }
-        f2 = { k2: v2*self.idf.get(k2,D) for (k2,v2) in feats2.items() }
+        keys = set(feats1.keys())
+        keys.update(feats2.keys())
+        f1 = { k: feats1.get(k,0)*self.idf.get(k,D) for k in keys }
+        f2 = { k: feats2.get(k,0)*self.idf.get(k,D) for k in keys }
         n1 = sum( v*v for v in f1.values() )
         n2 = sum( v*v for v in f2.values() )
         if n1 == 0 or n2 == 0: return 0
-        dot = sum( f1[k]*f2[k] for k in f1.keys() if k in f2 )
+        dot = sum( f1[k]*f2[k] for k in keys )
         return dot/math.sqrt(n1*n2)
 
     def findsim(self, k0, threshold=0):
