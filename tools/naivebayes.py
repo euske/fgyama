@@ -82,22 +82,24 @@ class NaiveBayes:
             a.sort()
             print('+%s (%r)' % (k, self.kcount[k]))
             for (p,f) in a[:ntop]:
-                print(' %.2f: %s' % (p,f))
+                print('  %.2f: %r' % (p,f))
             if ntop < len(a):
                 print('  ...others: %d' % (len(a)-ntop))
         print()
         return
 
     def commit(self):
-        # self.kprob[k] = log(C(k))
-        self.kprob = {}
-        for (k,v) in self.kcount.items():
-            self.kprob[k] = math.log(v)
-        # self.fprob[f][k] = log(C(f,k))
-        self.fprob = {}
-        for (f,d) in self.fcount.items():
-            p = { k: math.log(v) for (k,v) in d.items() }
-            self.fprob[f] = p
+        if self.kprob is None:
+            # self.kprob[k] = log(C(k))
+            self.kprob = {}
+            for (k,v) in self.kcount.items():
+                self.kprob[k] = math.log(v)
+        if self.fprob is None:
+            # self.fprob[f][k] = log(C(f,k))
+            self.fprob = {}
+            for (f,d) in self.fcount.items():
+                p = { k: math.log(v) for (k,v) in d.items() }
+                self.fprob[f] = p
         return
 
     def save(self, fp):

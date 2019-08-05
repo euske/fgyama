@@ -10,10 +10,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o path] [-i path] [-B srcdb] [-w watch] [-t threshold] [feats ...]' % argv[0])
+        print('usage: %s [-d] [-o path] [-i path] [-c encoding] [-B srcdb] [-t threshold] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:B:w:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:c:B:w:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
@@ -21,20 +21,19 @@ def main(argv):
     outpath = None
     inpath = None
     srcdb = None
-    watch = set()
     threshold = 0.99
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
         elif k == '-i': inpath = v
+        elif k == '-c': encoding = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
-        elif k == '-w': watch.add(v)
         elif k == '-t': threshold = float(v)
     assert inpath is None or outpath is None
 
     nb = NaiveBayes()
 
-    def learn(item, feats):
+    def learn(item, feats, annot):
         name = stripid(item)
         words = splitwords(name)
         for w in words:
@@ -42,7 +41,7 @@ def main(argv):
         sys.stderr.write('.'); sys.stderr.flush()
         return
 
-    def predict(item, feats):
+    def predict(item, feats, annot):
         name = stripid(item)
         words = splitwords(name)
         f2 = nb.narrow(feats, threshold)
@@ -52,6 +51,8 @@ def main(argv):
         if sorted(words) != sorted( w for (w,_) in cands[:n] ):
             print('!', len(feats), len(f2), item)
             print('#', cands[:n+1])
+            if annot is not None:
+                annot.show_text()
             nb.explain([ w for (w,_) in cands[:5] ], f2)
         return
 
@@ -66,41 +67,36 @@ def main(argv):
             f = predict
 
     srcmap = {}
-    item = feats = None
-    annot = None
+    item = feats = annot = None
     for line in fileinput.input(args):
+        line = line.strip()
         if line.startswith('+SOURCE'):
             (_,_,line) = line.partition(' ')
             (srcid, path) = eval(line)
             srcmap[srcid] = path
+
         elif line.startswith('! '):
             data = eval(line[2:])
-            item = None
+            item = feats = annot = None
             if data[0] == 'REF':
                 item = data[1]
                 feats = set()
-                if item in watch:
+                if srcdb is not None:
                     annot = SourceAnnot(srcdb)
                     for (srcid,start,end) in data[2:]:
                         annot.add(srcmap[srcid], start, end, 0)
-            else:
-                feats = None
+
         elif feats is not None and line.startswith('+ '):
             data = eval(line[2:])
             feat = data[0:3]
             feats.add(feat)
-            if annot is not None:
-                for (srcid,start,end) in data[3:]:
-                    annot.add(srcmap[srcid], start, end, 0)
-        elif feats is not None and not line.strip():
+
+        elif feats is not None and not line:
             if feats:
-                f(item, feats)
+                f(item, feats, annot)
                 if item2feats is not None:
                     item2feats[item] = feats
-            if annot is not None:
-                annot.show_text()
-                annot = None
-            feats = None
+            item = feats = annot = None
 
     if outpath is not None:
         with open(outpath, 'wb') as fp:

@@ -33,6 +33,7 @@ def main(argv):
     feat2srcs = None
     with open(path) as fp:
         for line in fp:
+            line = line.strip()
             if line.startswith('+SOURCE'):
                 (_,_,line) = line.partition(' ')
                 (srcid, path) = eval(line)

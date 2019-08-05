@@ -50,6 +50,7 @@ def main(argv):
     item = feats = None
     sp = VSM()
     for line in fileinput.input(args):
+        line = line.strip()
         if line.startswith('+SOURCE'):
             (_,_,line) = line.partition(' ')
             (srcid, path) = eval(line)
@@ -76,7 +77,7 @@ def main(argv):
             feat = data[0:3]
             feats.add(feat)
 
-        elif feats is not None and not line.strip():
+        elif feats is not None and not line:
             if feats:
                 sp.add(item, { (d,f0,f1):exp(-abs(d)) for (d,f0,f1) in feats })
 
