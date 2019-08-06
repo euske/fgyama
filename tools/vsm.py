@@ -10,7 +10,7 @@ class VSM:
 >>> sp.commit()
 >>> sp.calcsim({'baa':1, 'baz':1}, {'baz':2})
 0
->>> sp.findsim('A')
+>>> list(sp.findsim('A'))
 [(0, 'B')]
 """
 
@@ -40,11 +40,12 @@ class VSM:
         return self.docs[key]
 
     def commit(self):
-        n = math.log(len(self.docs))
-        self.idf = {None: n}
-        for (k,v) in self.df.items():
-            if v <= 1: continue
-            self.idf[k] = n - math.log(v)
+        if self.idf is None:
+            n = math.log(len(self.docs))
+            self.idf = {None: n}
+            for (k,v) in self.df.items():
+                if v <= 1: continue
+                self.idf[k] = n - math.log(v)
         return
 
     def calcsim(self, feats1, feats2):
@@ -67,9 +68,8 @@ class VSM:
             if k1 == k0: continue
             sim = self.calcsim(f0, f1)
             if sim < threshold: continue
-            a.append((sim, k1))
-        a.sort(reverse=True)
-        return a
+            yield (sim, k1)
+        return
 
     def findall(self, threshold=0):
         items = list(self.docs.items())

@@ -15,7 +15,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-B srcdb] [-n nbins] [-t threshold] vars [feats ...]' % argv[0])
+        print('usage: %s [-d] [-B srcdb] [-n nbins] [-t threshold] vars feats [var ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dB:n:t:')
@@ -47,40 +47,41 @@ def main(argv):
         item2srcs = {}
     srcmap = {}
     items = []
-    item = feats = None
     sp = VSM()
-    for line in fileinput.input(args):
-        line = line.strip()
-        if line.startswith('+SOURCE'):
-            (_,_,line) = line.partition(' ')
-            (srcid, path) = eval(line)
-            srcmap[srcid] = path
+    path = args.pop(0)
+    with open(path) as fp:
+        item = feats = None
+        for line in fp:
+            line = line.strip()
+            if line.startswith('+SOURCE'):
+                (_,_,line) = line.partition(' ')
+                (srcid, path) = eval(line)
+                srcmap[srcid] = path
 
-        elif line.startswith('! '):
-            sys.stderr.write('.'); sys.stderr.flush()
-            data = eval(line[2:])
-            if data[0] == 'REF':
-                item = data[1]
-                feats = set()
-                items.append(item)
-                if item2srcs is not None:
-                    if item in item2srcs:
-                        srcs = item2srcs[item]
-                    else:
-                        srcs = item2srcs[item] = []
-                    srcs.extend(data[2:])
-            else:
-                feats = None
+            elif line.startswith('! '):
+                sys.stderr.write('.'); sys.stderr.flush()
+                data = eval(line[2:])
+                if data[0] == 'REF':
+                    item = data[1]
+                    feats = set()
+                    items.append(item)
+                    if item2srcs is not None:
+                        if item in item2srcs:
+                            srcs = item2srcs[item]
+                        else:
+                            srcs = item2srcs[item] = []
+                        srcs.extend(data[2:])
+                else:
+                    feats = None
 
-        elif feats is not None and line.startswith('+ '):
-            data = eval(line[2:])
-            feat = data[0:3]
-            feats.add(feat)
+            elif feats is not None and line.startswith('+ '):
+                data = eval(line[2:])
+                feat = data[0:3]
+                feats.add(feat)
 
-        elif feats is not None and not line:
-            if feats:
-                sp.add(item, { (d,f0,f1):exp(-abs(d)) for (d,f0,f1) in feats })
-
+            elif feats is not None and not line:
+                if feats:
+                    sp.add(item, { (d,f0,f1):exp(-abs(d)) for (d,f0,f1) in feats })
     sp.commit()
 
     def show(srcs):
@@ -90,7 +91,12 @@ def main(argv):
         annot.show_text()
         return
 
-    if nbins:
+    if args:
+        pairs = []
+        for item0 in args:
+            for (sim,item1) in sp.findsim(item0, threshold=threshold):
+                pairs.append((sim, item0, item1))
+    elif nbins:
         pairs = [ None for _ in range(nbins) ]
         z = (nbins-1) / (1.0-threshold)
         minpairs = int(nbins * minratio)
