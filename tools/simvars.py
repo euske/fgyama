@@ -16,7 +16,8 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-B srcdb] [-n minpairs] [-t threshold] vars feats [var ...]' % argv[0])
+        print('usage: %s [-d] [-B srcdb] [-n minpairs] [-t threshold] vars feats [var ...]' %
+              argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dB:n:t:')
@@ -106,7 +107,7 @@ def main(argv):
             if pairs[i] is None:
                 npairs += 1
             pairs[i] = (sim, item0, item1)
-            if minpairs < npairs: break
+            if minpairs <= npairs: break
         pairs = [ x for x in pairs if x is not None ]
     else:
         pairs = sp.findall(threshold=threshold)
