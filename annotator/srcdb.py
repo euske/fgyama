@@ -157,7 +157,12 @@ class SourceDB:
     def __init__(self, basedir, encoding=None):
         self.basedir = basedir
         self.encoding = encoding
+        self.srcmap = {}
         self._cache = {}
+        return
+
+    def register(self, fid, name):
+        self.srcmap[fid] = name
         return
 
     def get(self, name):
@@ -180,4 +185,94 @@ class SourceDB:
         for src in self._cache.values():
             for (_,line) in src.show():
                 fp.write(line)
+        return
+
+
+def q(s):
+    return (s.replace('&','&amp;')
+            .replace('>','&gt;')
+            .replace('<','&lt;')
+            .replace('"','&quot;'))
+
+def show_html_headers(fp=sys.stdout):
+    fp.write('''<style>
+pre { margin: 1em; border: 1px solid gray;}
+.src { font-size: 75%; font-weight: bold; margin: 1em; }
+.p1 { background:#ffff00; color:black; }
+.p2 { background:#00ffff; color:black; }
+.p3 { background:#88ff88; color:black; }
+.p4 { background:#ff88ff; color:black; }
+.p5 { background:#8888ff; color:black; }
+.p6 { background:#ff0000; color:white; }
+.p7 { background:#008800; color:white; }
+.p8 { background:#0000ff; color:white; }
+.p9 { background:#004488; color:white; }
+.p10 { background:#884400; color:white; }
+</style>
+<script>
+function toggle(id) {
+  let e = document.getElementById(id);
+  e.hidden = !e.hidden;
+}
+</script>
+''')
+    return
+
+
+##  SourceAnnot
+##
+class SourceAnnot:
+
+    def __init__(self, srcdb):
+        self.srcdb = srcdb
+        self.nodes = {}
+        return
+
+    def add(self, name, start, end, anno=None):
+        src = self.srcdb.get(name)
+        if src in self.nodes:
+            a = self.nodes[src]
+        else:
+            a = self.nodes[src] = []
+        a.append((start, end, anno))
+        return
+
+    def addbyfid(self, fid, start, end, anno=None):
+        name = self.srcdb.srcmap[fid]
+        self.add(name, start, end, anno=anno)
+        return
+
+    def show_html(self, fp=sys.stdout, furl=q, ncontext=3):
+        for (src,ranges) in self.nodes.items():
+            url = src.name
+            def astart(nid):
+                return '<span class="p%s">' % nid
+            def aend(anno):
+                return '</span>'
+            def abody(annos, s):
+                return q(s.replace('\n',''))
+            fp.write('<div class=src><a href="%s">%s</a></div>\n' %
+                     (furl(url), src.name))
+            fp.write('<pre>\n')
+            for (lineno,s) in src.show(
+                    ranges, astart=astart, aend=aend, abody=abody,
+                    ncontext=ncontext):
+                if lineno is None:
+                    fp.write('     '+s+'\n')
+                else:
+                    lineno += 1
+                    fp.write('<a href="%s#L%d">%5d</a>:%s\n' %
+                             (furl(url), lineno, lineno, s))
+            fp.write('</pre>\n')
+        return
+
+    def show_text(self, fp=sys.stdout, ncontext=3):
+        for (src,ranges) in self.nodes.items():
+            fp.write('# %s\n' % src.name)
+            for (lineno,line) in src.show(ranges, ncontext=ncontext):
+                if lineno is None:
+                    fp.write(line.rstrip()+'\n')
+                else:
+                    fp.write('%4d: %s\n' % (lineno, line.rstrip()))
+            fp.write('\n')
         return

@@ -1,14 +1,10 @@
 // helper.ts
 
 const CATEGORIES = [
-    'a:Interchangeable',
-    'b:Complementary',
-    'c:Inherited',
-    'd:Inclusive',
-    'e:Opposite',
-    'f:Same Signature',
-    'g:No Relation',
-    'u:Unknown'
+    'a:MUST HAVE the same name',
+    'b:CAN HAVE the same name',
+    'c:MUST NOT HAVE the same name',
+    'u:UNDECIDABLE'
 ];
 
 var textarea: HTMLTextAreaElement = null;
