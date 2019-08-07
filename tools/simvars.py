@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
+import random
 from srcdb import SourceDB, SourceAnnot
 from getwords import stripid, splitwords
 from vsm import VSM
@@ -15,7 +16,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-B srcdb] [-n nbins] [-t threshold] vars feats [var ...]' % argv[0])
+        print('usage: %s [-d] [-B srcdb] [-n minpairs] [-t threshold] vars feats [var ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dB:n:t:')
@@ -24,13 +25,12 @@ def main(argv):
     debug = 0
     encoding = None
     srcdb = None
-    nbins = 0
+    minpairs = 0
     threshold = 0.30
-    minratio = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-B': srcdb = SourceDB(v, encoding)
-        elif k == '-n': nbins = int(v)
+        elif k == '-n': minpairs = int(v)
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 
@@ -96,10 +96,10 @@ def main(argv):
         for item0 in args:
             for (sim,item1) in sp.findsim(item0, threshold=threshold):
                 pairs.append((sim, item0, item1))
-    elif nbins:
+    elif minpairs:
+        nbins = int(minpairs*1.1)
         pairs = [ None for _ in range(nbins) ]
         z = (nbins-1) / (1.0-threshold)
-        minpairs = int(nbins * minratio)
         npairs = 0
         for (sim,item0,item1) in sp.findall(threshold=threshold):
             i = int((sim-threshold)*z)
@@ -108,10 +108,22 @@ def main(argv):
             pairs[i] = (sim, item0, item1)
             if minpairs < npairs: break
         pairs = [ x for x in pairs if x is not None ]
-        pairs.sort(key=lambda b:b[0], reverse=True)
     else:
         pairs = sp.findall(threshold=threshold)
 
+    if minpairs:
+        assert item2srcs is not None
+        def f(srcs):
+            return [ (srcmap[srcid],start,end) for (srcid,start,end) in srcs ]
+        random.shuffle(pairs)
+        for (i,(sim,item0,item1)) in enumerate(pairs):
+            type0 = refs[item0]
+            type1 = refs[item1]
+            data = (i, sim,
+                    (item0, type0, f(item2srcs[item0])),
+                    (item1, type1, f(item2srcs[item1])))
+            print(data)
+        return
     npairs = 0
     nametype = 0
     nameonly = 0
