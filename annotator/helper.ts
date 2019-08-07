@@ -1,9 +1,10 @@
 // helper.ts
 
 const CATEGORIES = [
-    'a:MUST HAVE the same name',
-    'b:CAN HAVE the same name',
-    'c:MUST NOT HAVE the same name',
+    'a:MUST BE the same',
+    'b:CAN BE the same',
+    'c:Similar but different',
+    'd:Completely different',
     'u:UNDECIDABLE'
 ];
 

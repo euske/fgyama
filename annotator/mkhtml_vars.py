@@ -58,7 +58,7 @@ h3 { background: #000088; color: white; padding: 2px; }
 .src0 { background:#eeffff; }
 .var0 { background:#ff88ff; }
 .src1 { background:#ffffee; }
-.var1 { background:#448844; }
+.var1 { background:#44cc44; }
 </style>
 ''')
     show_html_headers(out)
@@ -68,20 +68,21 @@ h3 { background: #000088; color: white; padding: 2px; }
         out.write('</script>')
     out.write('''<body onload="run('{fieldname}', 'results')">
 <h1>Similar Variable Tagging Experiment: {title}</h1>
-'''.format(fieldname='data_'+name, title=name))
+'''.format(fieldname='vars_'+name, title=name))
     out.write('''
 <h2>Your Mission</h2>
 <ul>
 <li> For each code snippet, look at the variable marked as
-    <code class=var0>XXX</code> / <code class=var1>XXX</code>
+    <code class=var0>aa</code> / <code class=var1>bb</code>
     and choose their relationship from the menu.
   <ol type=a>
-  <li> They <code>MUST HAVE</code> the same name.
-  <li> They <code>CAN HAVE</code> the same name.
-  <li> They <code>MUST NOT HAVE</code> the same name.
+  <li> They MUST BE the same name.
+  <li> They CAN BE the same name.
+  <li> They SHOULD BE similar but different.
+  <li> They MUST BE completely different.
   </ol>
 <li> When it's undecidable after <u>3 minutes</u> with the given snippet,
- choose <code>UNDECIDABLE</code>.
+ choose UNDECIDABLE.
 <li> <u>Do not consult others about the code during this experiment.</u>
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
@@ -91,6 +92,7 @@ h3 { background: #000088; color: white; padding: 2px; }
 
 <h2>Problems</h2>
 ''')
+    VARS = ['<span class=var0>aa</span>', '<span class=var1>bb</span>']
     for line in fileinput.input(args):
         data = eval(line.strip())
         index = data[0]
@@ -108,7 +110,7 @@ h3 { background: #000088; color: white; padding: 2px; }
                 def abody(annos, s):
                     s = q(s.replace('\n',''))
                     if annos:
-                        s = pat.sub('<span class=var%d>XXX</span>' % i, s)
+                        s = pat.sub(VARS[i], s)
                     return s
                 for (lineno,s) in src.show(ranges, astart=dummy, aend=dummy, abody=abody):
                     if lineno is None:
