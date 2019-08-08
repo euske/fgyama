@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import os
 import re
 from srcdb import SourceDB, SourceAnnot
 from getwords import stripid, splitwords
@@ -10,13 +11,14 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o path] [-i path] [-c encoding] [-B srcdb] [-t threshold] [feats ...]' % argv[0])
+        print('usage: %s [-d] [-f] [-o path] [-i path] [-c encoding] [-B srcdb] [-t threshold] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:c:B:w:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'dfo:i:c:B:w:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
+    force = False
     encoding = None
     outpath = None
     inpath = None
@@ -24,21 +26,22 @@ def main(argv):
     threshold = 0.99
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-f': force = True
         elif k == '-o': outpath = v
         elif k == '-i': inpath = v
         elif k == '-c': encoding = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-t': threshold = float(v)
     assert inpath is None or outpath is None
-
-    nb = NaiveBayes()
+    if not force and outpath is not None and os.path.exists(outpath):
+        print('already exists: %r' % outpath)
+        return 1
 
     def learn(item, feats, annot):
         name = stripid(item)
         words = splitwords(name)
         for w in words:
             nb.add(w, feats)
-        sys.stderr.write('.'); sys.stderr.flush()
         return
 
     def predict(item, feats, annot):
@@ -56,16 +59,19 @@ def main(argv):
             nb.explain([ w for (w,_) in cands[:5] ], f2)
         return
 
+    nb = NaiveBayes()
+    proc = learn
+    if inpath is not None:
+        print('Importing model: %r' % inpath)
+        with open(inpath, 'rb') as fp:
+            nb.load(fp)
+            proc = predict
+
     item2feats = None
     if inpath is None and outpath is None:
         item2feats = {}
 
-    f = learn
-    if inpath is not None:
-        with open(inpath, 'rb') as fp:
-            nb.load(fp)
-            f = predict
-
+    print('Scanning...')
     srcmap = {}
     item = feats = annot = None
     for line in fileinput.input(args):
@@ -85,6 +91,7 @@ def main(argv):
                     annot = SourceAnnot(srcdb)
                     for (srcid,start,end) in data[2:]:
                         annot.add(srcmap[srcid], start, end, 0)
+            sys.stderr.write('.'); sys.stderr.flush()
 
         elif feats is not None and line.startswith('+ '):
             data = eval(line[2:])
@@ -93,12 +100,13 @@ def main(argv):
 
         elif feats is not None and not line:
             if feats:
-                f(item, feats, annot)
+                proc(item, feats, annot)
                 if item2feats is not None:
                     item2feats[item] = feats
             item = feats = annot = None
 
     if outpath is not None:
+        print('Exporting model: %r' % outpath)
         with open(outpath, 'wb') as fp:
             nb.save(fp)
 

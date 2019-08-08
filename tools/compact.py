@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+#
+# compact.py - compact features
+#
+
 import sys
 import os.path
 import marshal
@@ -23,16 +27,19 @@ def main(argv):
         print('already exists: %r' % outpath)
         return 1
 
-    srcmap = {}
-    featmap = {}
-    item2fid = {}
+    srcmap = []
+    featmap = []
+
+    feat2fid = {}
+    item2fids = {}
 
     for line in fileinput.input(args):
         line = line.strip()
         if line.startswith('+SOURCE'):
             (_,_,line) = line.partition(' ')
             (srcid, path) = eval(line)
-            srcmap[srcid] = path
+            assert len(srcmap) == srcid
+            srcmap.append(path)
 
         elif line.startswith('! '):
             data = eval(line[2:])
@@ -40,18 +47,20 @@ def main(argv):
             if data[0] == 'REF':
                 item = data[1]
                 fid2srcs = {0: data[2:]}
-                assert item not in item2fid
-                item2fid[item] = fid2srcs
+                assert item not in item2fids
+                item2fids[item] = fid2srcs
+                sys.stderr.write('.'); sys.stderr.flush()
 
         elif item is not None and line.startswith('+ '):
             assert fid2srcs is not None
             data = eval(line[2:])
             feat = data[0:3]
-            if feat in featmap:
-                fid = featmap[feat]
+            if feat in feat2fid:
+                fid = feat2fid[feat]
             else:
-                fid = len(featmap)+1
-                featmap[feat] = fid
+                featmap.append(feat)
+                fid = len(featmap)
+                feat2fid[feat] = fid
             if fid in fid2srcs:
                 srcs = fid2srcs[fid]
             else:
@@ -61,10 +70,10 @@ def main(argv):
         elif not line:
             item = fid2srcs = None
 
-    print('%r: srcmap=%d, featmap=%d, item2fid=%d' %
-          (outpath, len(srcmap), len(featmap), len(item2fid)))
+    print('%r: srcmap=%d, featmap=%d, item2fids=%d' %
+          (outpath, len(srcmap), len(featmap), len(item2fids)))
 
-    data = (srcmap, featmap, item2fid)
+    data = (srcmap, featmap, item2fids)
     with open(outpath, 'wb') as fp:
         marshal.dump(data, fp)
     return 0
