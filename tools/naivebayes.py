@@ -39,10 +39,11 @@ class NaiveBayes:
             if f in self.fcount:
                 d = self.fcount[f]
             else:
-                d = self.fcount[f] = {}
+                d = self.fcount[f] = {None:0}
             if key not in d:
                 d[key] = 0
             d[key] += c
+            d[None] += c
         if key not in self.kcount:
             self.kcount[key] = 0
         self.kcount[key] += c
@@ -57,13 +58,13 @@ class NaiveBayes:
                 feats = key2feats[k]
                 feats[f] = v
         for (k,n) in sorted(self.kcount.items(), key=lambda x:x[1], reverse=True):
+            if k not in key2feats: continue
             feats = key2feats[k]
-            print('+%s (%r)' % (k, n))
-            feats = sorted(feats.items(), key=lambda x:x[1], reverse=True)
-            for (f,v) in feats[:ntop]:
-                print(' ', v, f)
-            if ntop < len(feats):
-                print('  ...others: %d' % (len(feats)-ntop))
+            print('+%s (%r cases, %r features)' % (k, n, len(feats)))
+            a = [ (f,v,self.fcount[f][None]) for (f,v) in feats.items() ]
+            a = sorted(a, reverse=True, key=lambda x:x[1]*x[1]/x[2])
+            for (f,v,n) in a[:ntop]:
+                print(' %4d %d %r' % (n, v, f))
             print()
         return
 
@@ -72,14 +73,13 @@ class NaiveBayes:
         for f in feats:
             if f not in self.fcount: continue
             d = self.fcount[f]
-            t = sum(d.values())
+            n = d[None]
             for (k,v) in d.items():
-                p = (t-v)/v
                 if k in keyfeats:
                     a = keyfeats[k]
-                    a.append((p, f))
+                    a.append((v/n, f))
         for (k,a) in keyfeats.items():
-            a.sort()
+            a.sort(reverse=True)
             print('+%s (%r)' % (k, self.kcount[k]))
             for (p,f) in a[:ntop]:
                 print('  %.2f: %r' % (p,f))
