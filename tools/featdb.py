@@ -101,11 +101,11 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
         return feat
 
     def add_item(self, item, fid2srcs):
-        assert tid not in self._itemmap
         self._cur.execute(
             'INSERT INTO Items VALUES (NULL,?);',
             (item,))
         tid = self._cur.lastrowid
+        assert tid not in self._itemmap
         for (fid,srcs) in fid2srcs.items():
             if srcs:
                 sid0 = 0

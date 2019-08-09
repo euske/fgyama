@@ -8,7 +8,6 @@ from getwords import striptypename, stripmethodname, stripref, splitwords
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
 ASSIGNS = ('assign_var', 'assign_field', 'assign_array')
-ARRAYS = ('ref_array', 'assign_array')
 CONDS = ('join', 'begin', 'end', 'case')
 
 IGNORED = (None, 'receive', 'input', 'output', 'repeat')
@@ -38,66 +37,80 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
-    if count <= 0: return
-    if maxdist <= dist: return
-    if (v0,v1) in done: return
-    done.add((v0,v1))
-    n1 = v1.node
-    #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    if lprev.startswith('@') or lprev.startswith('%'):
-        lprev = ''
-    outputs = []
-    for (link,v2) in v1.outputs:
-        if link.startswith('_') and link != '_end': continue
-        if n1.kind in ARRAYS and not link: continue
-        outputs.append((link, v2))
-    if n1.kind in IGNORED or (lprev == '' and n1.kind in REFS):
-        for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
-        return
-    fs = [ lprev+':'+f for f in getfeats(n1) ]
-    if not fs: return
-    feats.update( (dist+1,fprev,f,n1) for f in fs )
-    if n1.kind in ASSIGNS:
-        for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
-    else:
-        for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
-    return
-
 def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
+    # prevent explosion.
     if count <= 0: return
     if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
     n1 = v1.node
     #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
-    if lprev.startswith('@') or lprev.startswith('%'):
-        lprev = ''
+    # list the input nodes to visit.
     inputs = []
     for (link,v2) in v1.inputs:
+        # do not follow informational links.
         if link.startswith('_') and link != '_end': continue
-        if n1.kind in ARRAYS and not link: continue
+        # do not use a value in arrays.
+        if n1.kind == 'ref_array' and not link: continue
+        # strip label names.
+        if link and link[0] in '@%': link = ''
         inputs.append((link, v2))
-    if n1.kind == 'input':
-        for (link,v2) in inputs:
-            enum_back(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
-        return
-    if n1.kind in IGNORED or n1.kind in ASSIGNS:
-        for (link,v2) in inputs:
+    # ignore transparent nodes.
+    if n1.kind in IGNORED or n1.kind == 'assign_var':
+        for (_,v2) in inputs:
             enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
         return
+    # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
     feats.update( (-(dist+1),fprev,f,n1) for f in fs )
-    if lprev == '' and n1.kind in REFS:
-        for (link,v2) in inputs:
+    # if this is a ref_var node, the fact that it refers to a certain variable
+    # is recorded, but the node itself is transparent in a chain.
+    if n1.kind == 'ref_var':
+        for (_,v2) in inputs:
             enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
-    else:
-        for (link,v2) in inputs:
-            enum_back(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
+        return
+    # visit the next nodes.
+    for (link,v2) in inputs:
+        enum_back(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
+    return
+
+def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
+    # prevent explosion.
+    if count <= 0: return
+    if maxdist <= dist: return
+    if (v0,v1) in done: return
+    done.add((v0,v1))
+    n1 = v1.node
+    #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
+    # list the output nodes to visit.
+    outputs = []
+    for (link,v2) in v1.outputs:
+        # do not follow informational links.
+        if link.startswith('_') and link != '_end': continue
+        # do not pass a value in arrays.
+        if n1.kind == 'assign_array' and not link: continue
+        # strip label names.
+        if link and link[0] in '@%': link = ''
+        outputs.append((link, v2))
+    # ignore transparent nodes.
+    if n1.kind in IGNORED or n1.kind == 'ref_var':
+        for (link,v2) in outputs:
+            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
+        return
+    # add the features.
+    fs = [ lprev+':'+f for f in getfeats(n1) ]
+    if not fs: return
+    feats.update( (dist+1,fprev,f,n1) for f in fs )
+    # if this is a assign_var node, the fact that it assigns to a certain variable
+    # is recorded, but the node itself is transparent in a chain.
+    if n1.kind == 'assign_var':
+        for (link,v2) in outputs:
+            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
+        return
+    # visit the next nodes.
+    for (link,v2) in outputs:
+        enum_forw(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
     return
 
 # main
@@ -106,7 +119,7 @@ def main(argv):
     import getopt
     def usage():
         print('usage: %s [-d] [-o output] [-m maxdist] '
-              '[-M maxoverrides] [-F|-B] [graph ...]' % argv[0])
+              '[-M maxoverrides] [-B srcdb] [-f|-b] [graph ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:m:M:B:fbC')
@@ -171,11 +184,11 @@ def main(argv):
         if item[0] == 'REF':
             for node in nodes:
                 vtx = builder.vtxs[node]
-                if mode in (None,'-F'):
+                if mode in (None,'-f'):
                     for (link,v1) in vtx.outputs:
                         if link.startswith('_') and link != '_end': continue
                         enum_forw(feats, count, set(), v1, lprev=link, maxdist=maxdist)
-                if mode in (None,'-B'):
+                if mode in (None,'-b'):
                     for (link,v1) in vtx.inputs:
                         if link.startswith('_') and link != '_end': continue
                         enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
