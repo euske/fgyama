@@ -22,7 +22,7 @@ class NaiveBayes:
 >>> b.fcount
 {'yellow': {'banana': 45, 'orange': 30, 'other': 5}, 'long': {'banana': 40, 'other': 10}, 'sweet': {'banana': 35, 'orange': 15, 'other': 15}}
 >>> b.commit()
->>> a = b.get(['long','sweet','yellow'])
+>>> a = b.getkeys(['long','sweet','yellow'])
 >>> [ (k, fs) for (k,p,fs) in a ]
 [('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
 """
@@ -51,41 +51,16 @@ class NaiveBayes:
         return
 
     def dump(self, threshold=2, ntop=10):
-        key2feats = { k:{} for (k,n) in self.kcount.items() if threshold <= n }
-        for (f,d) in self.fcount.items():
-            for (k,v) in d.items():
-                if v < threshold or k not in key2feats: continue
-                feats = key2feats[k]
-                feats[f] = v
+        key2feats = self.getfeats(threshold=threshold)
         for (k,n) in sorted(self.kcount.items(), key=lambda x:x[1], reverse=True):
             if k not in key2feats: continue
             feats = key2feats[k]
             print('+%s (%r cases, %r features)' % (k, n, len(feats)))
-            a = [ (f,v,self.fcount[f][None]) for (f,v) in feats.items() ]
+            a = [ (f,v,self.fcount[f][None]) for (f,v) in feats ]
             a = sorted(a, reverse=True, key=lambda x:x[1]*x[1]/x[2])
-            for (f,v,n) in a[:ntop]:
-                print(' %4d %d %r' % (n, v, f))
+            for (f,v,t) in a[:ntop]:
+                print(' %d/%d %r' % (v, t, f))
             print()
-        return
-
-    def explain(self, keys, feats, ntop=5):
-        keyfeats = { k:[] for k in keys }
-        for f in feats:
-            if f not in self.fcount: continue
-            d = self.fcount[f]
-            n = d[None]
-            for (k,v) in d.items():
-                if k in keyfeats:
-                    a = keyfeats[k]
-                    a.append((v/n, f))
-        for (k,a) in keyfeats.items():
-            a.sort(reverse=True)
-            print('+%s (%r)' % (k, self.kcount[k]))
-            for (p,f) in a[:ntop]:
-                print('  %.2f: %r' % (p,f))
-            if ntop < len(a):
-                print('  ...others: %d' % (len(a)-ntop))
-        print()
         return
 
     def commit(self):
@@ -133,7 +108,7 @@ class NaiveBayes:
                 f2.intersection_update(set(a))
         return f2
 
-    def get(self, feats, n=0, fallback=False):
+    def getkeys(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert self.kprob is not None
@@ -165,7 +140,7 @@ class NaiveBayes:
         return a
 
     # for debugging
-    def getd(self, feats, n=0, fallback=False):
+    def getkeysd(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
         assert feats
@@ -195,6 +170,18 @@ class NaiveBayes:
         if n:
             a = a[:n]
         return a
+
+    def getfeats(self, keys=None, threshold=0):
+        if keys is None:
+            keys = self.kcount.keys()
+        keyfeats = { k:[] for k in keys }
+        for (f,d) in self.fcount.items():
+            for (k,v) in d.items():
+                if v < threshold: continue
+                if k in keyfeats:
+                    a = keyfeats[k]
+                    a.append((f, v))
+        return keyfeats
 
 def main(argv):
     nb = NaiveBayes()

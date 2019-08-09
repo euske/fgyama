@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# feat2db.py - store features to sqlite.
+# feat2db.py - store features to sqlite3.
 #
 import sys
 import os.path
@@ -17,7 +17,12 @@ class FeatDB:
         self._cur = self._conn.cursor()
         self._srcmap = {}
         self._featmap = {}
+        self._items = []
+        self._itemmap = {}
         return
+
+    def __iter__(self):
+        return iter(self.get_items())
 
     def init(self):
         self._cur.executescript('''
@@ -96,6 +101,7 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
         return feat
 
     def add_item(self, item, fid2srcs):
+        assert tid not in self._itemmap
         self._cur.execute(
             'INSERT INTO Items VALUES (NULL,?);',
             (item,))
@@ -119,29 +125,49 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
             self._cur.execute(
                 'INSERT INTO ItemFeats VALUES (?,?,?,?);',
                 (sid0, sid1, tid, fid))
+        self._items.append((tid, item))
+        self._itemmap[tid] = item
         return
 
-    def get_items(self):
-        self._cur.execute(
-            'SELECT Tid,Item FROM Items;')
-        return self._cur.fetchall()
+    def get_item(self, tid):
+        if tid in self._itemmap:
+            item = self._itemmap[tid]
+        else:
+            self._cur.execute(
+                'SELECT Item FROM Items WHERE Tid=?;',
+                (tid,))
+            (item,) = self._cur.fetchone()
+            self._itemmap[fid] = item
+        return item
 
-    def get_itemfeats(self, tid):
+    def get_items(self):
+        if not self._items:
+            self._cur.execute(
+                'SELECT Tid,Item FROM Items;')
+            self._items = list(self._cur.fetchall())
+            for (tid,item) in self._items:
+                self._itemmap[tid] = item
+        return self._items
+
+    def get_feats(self, tid, resolve=False):
         self._cur.execute(
             'SELECT Sid0,Sid1,Fid FROM ItemFeats WHERE Tid=?;',
             (tid,))
         feat2srcs = {}
         for (sid0,sid1,fid) in list(self._cur.fetchall()):
-            feat = self.get_feat(fid)
-            self._cur.execute(
-                'SELECT SrcId,Start,End FROM ItemFeatSrcs WHERE Sid BETWEEN ? AND ?;',
-                (sid0, sid1))
-            srcs = []
-            for (srcid,start,end) in list(self._cur.fetchall()):
-                if srcid < 0: continue
-                path = self.get_source(srcid)
-                srcs.append((path, start, end))
-            feat2srcs[feat] = srcs
+            if resolve:
+                feat = self.get_feat(fid)
+                self._cur.execute(
+                    'SELECT SrcId,Start,End FROM ItemFeatSrcs WHERE Sid BETWEEN ? AND ?;',
+                    (sid0, sid1))
+                srcs = []
+                for (srcid,start,end) in list(self._cur.fetchall()):
+                    if srcid < 0: continue
+                    path = self.get_source(srcid)
+                    srcs.append((path, start, end))
+                feat2srcs[feat] = srcs
+            else:
+                feat2srcs[fid] = None
         return feat2srcs
 
 # main
@@ -164,9 +190,9 @@ def main(argv):
         dbpath = args.pop(0)
         print('Reading from: %r' % dbpath)
         db = FeatDB(dbpath)
-        for (tid,item) in db.get_items():
+        for (tid,item) in db:
             print('!', item)
-            feat2srcs = db.get_itemfeats(tid)
+            feat2srcs = db.get_feats(tid, resolve=True)
             for (feat,srcs) in feat2srcs.items():
                 print('+', feat)
                 print('#', srcs)
