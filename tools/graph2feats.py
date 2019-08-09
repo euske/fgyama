@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph2idf import IDFBuilder
+from graph2idf import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from getwords import striptypename, stripmethodname, stripref, splitwords
 
@@ -37,13 +37,17 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
+maxdist = 5
+maxchain = 5
+
+def enum_back(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # prevent explosion.
-    if count <= 0: return
-    if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
+    if maxchain < clen(chain): return
+    if maxdist <= dist: return
     n1 = v1.node
+    chain = Cons(n1, chain)
     #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
     # list the input nodes to visit.
     inputs = []
@@ -58,30 +62,33 @@ def enum_back(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdis
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'assign_var':
         for (_,v2) in inputs:
-            enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
+            enum_back(feats, done, v2, lprev, v0, fprev, chain, dist)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    feats.update( (-(dist+1),fprev,f,n1) for f in fs )
+    for f in fs:
+        feat = (-(dist+1),fprev,f)
+        feats[feat] = chain
     # if this is a ref_var node, the fact that it refers to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'ref_var':
         for (_,v2) in inputs:
-            enum_back(feats, count-1, done, v2, lprev, v0, fprev, dist, maxdist)
+            enum_back(feats, done, v2, lprev, v0, fprev, chain, dist)
         return
     # visit the next nodes.
     for (link,v2) in inputs:
-        enum_back(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
+        enum_back(feats, done, v2, link, v1, fs[0], None, dist+1)
     return
 
-def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdist=5):
+def enum_forw(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # prevent explosion.
-    if count <= 0: return
-    if maxdist <= dist: return
     if (v0,v1) in done: return
     done.add((v0,v1))
+    if maxchain < clen(chain): return
+    if maxdist <= dist: return
     n1 = v1.node
+    chain = Cons(n1, chain)
     #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
     # list the output nodes to visit.
     outputs = []
@@ -96,25 +103,28 @@ def enum_forw(feats, count, done, v1, lprev, v0=None, fprev=None, dist=0, maxdis
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'ref_var':
         for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
+            enum_forw(feats, done, v2, link, v0, fprev, chain, dist)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    feats.update( (dist+1,fprev,f,n1) for f in fs )
+    for f in fs:
+        feat = ((dist+1),fprev,f)
+        feats[feat] = chain
     # if this is a assign_var node, the fact that it assigns to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'assign_var':
         for (link,v2) in outputs:
-            enum_forw(feats, count-1, done, v2, link, v0, fprev, dist, maxdist)
+            enum_forw(feats, done, v2, link, v0, fprev, chain, dist)
         return
     # visit the next nodes.
     for (link,v2) in outputs:
-        enum_forw(feats, count-1, done, v2, link, v1, fs[0], dist+1, maxdist)
+        enum_forw(feats, done, v2, link, v1, fs[0], None, dist+1)
     return
 
 # main
 def main(argv):
+    global maxchain, maxdist
     import fileinput
     import getopt
     def usage():
@@ -177,41 +187,33 @@ def main(argv):
           (len(item2nodes), sum( len(nodes) for nodes in item2nodes.values() )),
           file=sys.stderr)
 
-    count = maxdist*5+5
+    maxchain = maxdist
     nfeats = 0
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
-        feats = set()
+        feats = {}
         if item[0] == 'REF':
             for node in nodes:
                 vtx = builder.vtxs[node]
                 if mode in (None,'-f'):
                     for (link,v1) in vtx.outputs:
                         if link.startswith('_') and link != '_end': continue
-                        enum_forw(feats, count, set(), v1, lprev=link, maxdist=maxdist)
+                        enum_forw(feats, set(), v1, lprev=link)
                 if mode in (None,'-b'):
                     for (link,v1) in vtx.inputs:
                         if link.startswith('_') and link != '_end': continue
-                        enum_back(feats, count, set(), v1, lprev=link, maxdist=maxdist)
+                        enum_back(feats, set(), v1, lprev=link)
         elif item[0] == 'METHOD':
             for node in nodes:
                 vtx = builder.vtxs[node]
-                enum_forw(feats, count, set(), vtx, maxdist=maxdist)
-                enum_back(feats, count, set(), vtx, maxdist=maxdist)
+                enum_forw(feats, set(), vtx)
+                enum_back(feats, set(), vtx)
         if not feats: continue
 
         srcs = ( builder.getsrc(n) for n in nodes if n.ast is not None )
         data = item + tuple(sorted(srcs))
         fp.write('! %r\n' % (data,))
-        feat2nodes = {}
-        for (dist,f0,f1,n) in feats:
-            feat = (dist,f0,f1)
-            if feat in feat2nodes:
-                nodes = feat2nodes[feat]
-            else:
-                nodes = feat2nodes[feat] = set()
-            nodes.add(n)
-        for (feat,nodes) in sorted(feat2nodes.items(), key=lambda x:x[0]):
-            srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
+        for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
+            srcs = set( builder.getsrc(n) for n in chain if n.ast is not None )
             data = feat + tuple(sorted(srcs))
             fp.write('+ %r\n' % (data,))
             if srcdb is not None:
@@ -223,9 +225,9 @@ def main(argv):
                     annot.add(path, start, end)
                 annot.show_text()
         fp.write('\n')
-        nfeats += len(feat2nodes)
+        nfeats += len(feats)
         if debug:
-            print('# %r: %r feats' % (item, len(feat2nodes)))
+            print('# %r: %r feats' % (item, len(feats)))
         else:
             sys.stderr.write('.'); sys.stderr.flush()
 

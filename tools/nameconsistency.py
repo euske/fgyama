@@ -42,10 +42,11 @@ def main(argv):
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
 
-    def showsrc(src):
+    def showsrc(srcs):
         annot = SourceAnnot(srcdb)
-        (path,start,end) = src
-        annot.add(path, start, end)
+        for src in srcs:
+            (path,start,end) = src
+            annot.add(path, start, end)
         annot.show_text()
         return
 
@@ -84,11 +85,10 @@ def main(argv):
                         feats.append((score, fid))
                 feats.sort(reverse=True)
                 print('!', item, sum( score for (score,_) in feats ))
-                showsrc(fid2srcs[0][0])
+                showsrc(fid2srcs[0])
                 for (_,fid) in feats[:3]:
-                    print('-- evidence', fid)
-                    src0 = fid2srcs[fid][0]
-                    showsrc(src0)
+                    srcs0 = fid2srcs[fid]
+                    srcs1 = []
                     item2srcs = db.get_featitems(fid, resolve=True, source=True)
                     for (item1,srcs) in item2srcs.items():
                         if item1 == item: continue
@@ -96,15 +96,11 @@ def main(argv):
                         name = stripid(item1)
                         words = splitwords(name)
                         if k not in words: continue
-                        src1 = None
-                        for src in srcs:
-                            if src != src0:
-                                src1 = src
-                                break
-                        if src1 is not None:
-                            print(item1)
-                            showsrc(src1)
-                            break
+                        srcs1 = srcs
+                        break
+                    print('-- evidence', fid, item1)
+                    showsrc(srcs0)
+                    showsrc(srcs1)
         return
 
     nb = NaiveBayes()

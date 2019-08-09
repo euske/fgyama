@@ -70,12 +70,12 @@ def main(argv):
             items.sort(key=lambda item:iscore[item], reverse=True)
             for item in items[:1]:
                 print('!', db.get_item(item))
-                feats = db.get_feats(item, resolve=True)
+                feats = db.get_feats(item, resolve=True, source=True)
                 srcs = feats[feat]
                 if not srcs: continue
                 #srcs.extend(feats[None])
                 annot = SourceAnnot(srcdb)
-                for src in srcs[:1]:
+                for src in srcs:
                     (path,start,end) = src
                     annot.add(path, start, end)
                 annot.show_text()
