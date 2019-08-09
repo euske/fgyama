@@ -20,11 +20,11 @@ class NaiveBayes:
 >>> b.kcount
 {'banana': 50, 'orange': 30, 'other': 20}
 >>> b.fcount
-{'yellow': {'banana': 45, 'orange': 30, 'other': 5}, 'long': {'banana': 40, 'other': 10}, 'sweet': {'banana': 35, 'orange': 15, 'other': 15}}
+{'yellow': {None: 80, 'banana': 45, 'orange': 30, 'other': 5}, 'long': {None: 50, 'banana': 40, 'other': 10}, 'sweet': {None: 65, 'banana': 35, 'orange': 15, 'other': 15}}
 >>> b.commit()
 >>> a = b.getkeys(['long','sweet','yellow'])
->>> [ (k, fs) for (k,p,fs) in a ]
-[('banana', ['yellow', 'long', 'sweet']), ('other', ['sweet', 'long', 'yellow'])]
+>>> [ k for (k,p) in a ]
+['banana', 'other']
 """
 
     def __init__(self):

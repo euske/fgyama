@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+import math
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
 from getwords import stripid, splitwords
@@ -39,25 +40,71 @@ def main(argv):
         return 1
     if not args: return usage()
     dbpath = args.pop(0)
+    db = FeatDB(dbpath)
 
-    def learn(item, feats):
+    def showsrc(src):
+        annot = SourceAnnot(srcdb)
+        (path,start,end) = src
+        annot.add(path, start, end)
+        annot.show_text()
+        return
+
+    def learn(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
         for w in words:
-            nb.add(w, feats.keys())
+            nb.add(w, fids.keys())
         return
 
-    def predict(item, feats):
+    def predict(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
-        f2 = nb.narrow(feats.keys(), threshold)
+        f2 = nb.narrow(fids.keys(), threshold)
         if len(f2) <= 1: return
-        cands = nb.get(f2)
-        n = len(words)
-        if sorted(words) != sorted( w for (w,_) in cands[:n] ):
-            print('!', len(feats), len(f2), item)
-            print('#', cands[:n+1])
-            nb.explain([ w for (w,_) in cands[:5] ], f2)
+        cands = nb.getkeys(f2)
+        if not cands: return
+        keys = [ k for (k,_) in cands ]
+        topword = keys[0]
+        if topword not in words:
+            print('#', cands[:len(words)+1], words)
+            try:
+                i = words.index(topword)
+                print(name, '->', keys[:i], name)
+            except ValueError:
+                print(name, '->', topword)
+            fid2srcs = db.get_feats(tid, source=True)
+            for (k,fs) in nb.getfeats([topword]).items():
+                feats = []
+                fs = dict(fs)
+                for fid in fids:
+                    assert fid in fid2srcs
+                    if fid != 0 and fid in fs:
+                        (d,_,_) = db.get_feat(fid)
+                        score = math.exp(-abs(d)) * fs[fid]
+                        feats.append((score, fid))
+                feats.sort(reverse=True)
+                print('!', item, sum( score for (score,_) in feats ))
+                showsrc(fid2srcs[0][0])
+                for (_,fid) in feats[:3]:
+                    print('-- evidence', fid)
+                    src0 = fid2srcs[fid][0]
+                    showsrc(src0)
+                    item2srcs = db.get_featitems(fid, resolve=True, source=True)
+                    for (item1,srcs) in item2srcs.items():
+                        if item1 == item: continue
+                        if not srcs: continue
+                        name = stripid(item1)
+                        words = splitwords(name)
+                        if k not in words: continue
+                        src1 = None
+                        for src in srcs:
+                            if src != src0:
+                                src1 = src
+                                break
+                        if src1 is not None:
+                            print(item1)
+                            showsrc(src1)
+                            break
         return
 
     nb = NaiveBayes()
@@ -68,10 +115,9 @@ def main(argv):
             nb.load(fp)
             proc = predict
 
-    db = FeatDB(dbpath)
     for (tid,item) in db:
-        feats = db.get_feats(tid)
-        proc(item, feats)
+        fids = db.get_feats(tid)
+        proc(tid, item, fids)
         sys.stderr.write('.'); sys.stderr.flush()
 
     if outpath is not None:
@@ -82,8 +128,8 @@ def main(argv):
     if inpath is None and outpath is None:
         nb.commit()
         for (tid,item) in db.get_items():
-            feats = db.get_feats(tid)
-            predict(item, feats)
+            fids = db.get_feats(tid)
+            predict(tid, item, fids)
 
     return 0
 

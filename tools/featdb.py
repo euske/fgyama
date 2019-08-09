@@ -50,7 +50,8 @@ CREATE TABLE ItemFeats (
     Tid INTEGER,
     Fid INTEGER
 );
-CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
+CREATE INDEX ItemFeatsByTid ON ItemFeats(Tid);
+CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
 ''')
         return
 
@@ -58,7 +59,7 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
         self._conn.commit()
         return
 
-    def add_source(self, srcid, path):
+    def add_path(self, srcid, path):
         assert srcid not in self._srcmap
         self._cur.execute(
             'INSERT INTO Sources VALUES (?,?);',
@@ -66,7 +67,7 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
         self._srcmap[srcid] = path
         return
 
-    def get_source(self, srcid):
+    def get_path(self, srcid):
         if srcid in self._srcmap:
             path = self._srcmap[srcid]
         else:
@@ -76,6 +77,17 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
             (path,) = self._cur.fetchone()
             self._srcmap[srcid] = path
         return path
+
+    def get_sources(self, sid0, sid1):
+        self._cur.execute(
+            'SELECT SrcId,Start,End FROM ItemFeatSrcs WHERE Sid BETWEEN ? AND ?;',
+            (sid0, sid1))
+        srcs = []
+        for (srcid,start,end) in list(self._cur.fetchall()):
+            if srcid < 0: continue
+            path = self.get_path(srcid)
+            srcs.append((path, start, end))
+        return srcs
 
     def add_feat(self, fid, feat):
         assert fid not in self._featmap
@@ -149,7 +161,7 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
                 self._itemmap[tid] = item
         return self._items
 
-    def get_feats(self, tid, resolve=False):
+    def get_feats(self, tid, resolve=False, source=False):
         self._cur.execute(
             'SELECT Sid0,Sid1,Fid FROM ItemFeats WHERE Tid=?;',
             (tid,))
@@ -157,18 +169,31 @@ CREATE INDEX IndexItemFeats ON ItemFeats(Tid);
         for (sid0,sid1,fid) in list(self._cur.fetchall()):
             if resolve:
                 feat = self.get_feat(fid)
-                self._cur.execute(
-                    'SELECT SrcId,Start,End FROM ItemFeatSrcs WHERE Sid BETWEEN ? AND ?;',
-                    (sid0, sid1))
-                srcs = []
-                for (srcid,start,end) in list(self._cur.fetchall()):
-                    if srcid < 0: continue
-                    path = self.get_source(srcid)
-                    srcs.append((path, start, end))
-                feat2srcs[feat] = srcs
             else:
-                feat2srcs[fid] = None
+                feat = fid
+            if source:
+                srcs = self.get_sources(sid0, sid1)
+            else:
+                srcs = None
+            feat2srcs[feat] = srcs
         return feat2srcs
+
+    def get_featitems(self, fid, resolve=False, source=False):
+        self._cur.execute(
+            'SELECT Sid0,Sid1,Tid FROM ItemFeats WHERE Fid=?;',
+            (fid,))
+        item2srcs = {}
+        for (sid0,sid1,tid) in list(self._cur.fetchall()):
+            if resolve:
+                item = self.get_item(tid)
+            else:
+                item = tid
+            if source:
+                srcs = self.get_sources(sid0, sid1)
+            else:
+                srcs = None
+            item2srcs[item] = srcs
+        return item2srcs
 
 # main
 def main(argv):
@@ -192,7 +217,7 @@ def main(argv):
         db = FeatDB(dbpath)
         for (tid,item) in db:
             print('!', item)
-            feat2srcs = db.get_feats(tid, resolve=True)
+            feat2srcs = db.get_feats(tid, resolve=True, source=True)
             for (feat,srcs) in feat2srcs.items():
                 print('+', feat)
                 print('#', srcs)
@@ -214,7 +239,7 @@ def main(argv):
         if line.startswith('+SOURCE'):
             (_,_,line) = line.partition(' ')
             (srcid, path) = eval(line)
-            db.add_source(srcid, path)
+            db.add_path(srcid, path)
 
         elif line.startswith('! '):
             data = eval(line[2:])

@@ -48,7 +48,7 @@ def main(argv):
                     items = feat2items[feat] = []
                 assert tid not in items
                 items.append(tid)
-        sys.stderr.write('.'); sys.stderr.flush()
+        #sys.stderr.write('.'); sys.stderr.flush()
 
     for (word,feat2items) in word2feats.items():
         fscore = []

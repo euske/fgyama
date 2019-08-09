@@ -126,7 +126,7 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxdist = 5
+    maxdist = 4
     maxoverrides = 1
     mode = None
     output = None
