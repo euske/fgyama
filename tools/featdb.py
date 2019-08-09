@@ -89,14 +89,16 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
             srcs.append((path, start, end))
         return srcs
 
-    def add_feat(self, fid, feat):
+    def add_feat(self, feat, fid=None):
+        if fid is None:
+            fid = len(self._featmap)+1
         assert fid not in self._featmap
         data = marshal.dumps(feat)
         self._cur.execute(
             'INSERT INTO Feats VALUES (?,?);',
             (fid, data))
         self._featmap[fid] = feat
-        return
+        return fid
 
     def get_feat(self, fid):
         if fid == 0:
@@ -259,7 +261,7 @@ def main(argv):
             else:
                 fid = len(feat2fid)+1
                 feat2fid[feat] = fid
-                db.add_feat(fid, feat)
+                db.add_feat(feat, fid)
             if fid in fid2srcs:
                 srcs = fid2srcs[fid]
             else:

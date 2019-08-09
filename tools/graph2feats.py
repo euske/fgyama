@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import sys
+import os
 import re
 from graph2idf import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
+from featdb import FeatDB
 from getwords import striptypename, stripmethodname, stripref, splitwords
 
 CALLS = ('call', 'new')
@@ -37,8 +39,8 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-maxdist = 5
-maxchain = 5
+maxdist = 4
+maxchain = 4
 
 def enum_back(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # prevent explosion.
@@ -122,6 +124,7 @@ def enum_forw(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
         enum_forw(feats, done, v2, link, v1, fs[0], None, dist+1)
     return
 
+
 # main
 def main(argv):
     global maxchain, maxdist
@@ -136,15 +139,15 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxdist = 4
     maxoverrides = 1
     mode = None
-    output = None
+    outpath = None
     srcdb = None
     for (k, v) in opts:
         if k == '-d': debug += 1
-        elif k == '-o': output = v
+        elif k == '-o': outpath = v
         elif k == '-m': maxdist = int(v)
+        elif k == '-c': maxchain = int(v)
         elif k == '-M': maxoverrides = int(v)
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-f': mode = k
@@ -152,15 +155,21 @@ def main(argv):
         elif k == '-C': mode = k
     if not args: return usage()
 
-    if output is None:
-        fp = sys.stdout
-    else:
-        fp = open(output, 'w')
+    db = None
+    if outpath is not None:
+        if os.path.exists(outpath):
+            print('Already exists: %r' % outpath)
+            return 1
+        db = FeatDB(outpath)
+        db.init()
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
-        builder.load(path, fp)
+        builder.load(path)
+    if db is not None:
+        for (path,srcid) in builder.srcmap.items():
+            db.add_path(srcid, path)
 
     builder.run()
     print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
@@ -187,7 +196,10 @@ def main(argv):
           (len(item2nodes), sum( len(nodes) for nodes in item2nodes.values() )),
           file=sys.stderr)
 
-    maxchain = maxdist
+    def getsrcs(nodes):
+        srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
+        return tuple(srcs)
+
     nfeats = 0
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         feats = {}
@@ -208,34 +220,36 @@ def main(argv):
                 enum_forw(feats, set(), vtx)
                 enum_back(feats, set(), vtx)
         if not feats: continue
-
-        srcs = ( builder.getsrc(n) for n in nodes if n.ast is not None )
-        data = item + tuple(sorted(srcs))
-        fp.write('! %r\n' % (data,))
-        for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
-            srcs = set( builder.getsrc(n) for n in chain if n.ast is not None )
-            data = feat + tuple(sorted(srcs))
-            fp.write('+ %r\n' % (data,))
-            if srcdb is not None:
-                annot = SourceAnnot(srcdb)
-                for n in nodes:
-                    src = builder.getsrc(n, False)
-                    if src is None: continue
-                    (path,start,end) = src
-                    annot.add(path, start, end)
-                annot.show_text()
-        fp.write('\n')
         nfeats += len(feats)
-        if debug:
-            print('# %r: %r feats' % (item, len(feats)))
-        else:
+
+        if db is not None:
+            fid2srcs = { 0:getsrcs(nodes) }
+            for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
+                fid = db.add_feat(feat)
+                fid2srcs[fid] = getsrcs(chain)
+            db.add_item(item[1], fid2srcs)
             sys.stderr.write('.'); sys.stderr.flush()
+        else:
+            data = item + getsrcs(nodes)
+            print('! %r' % (data,))
+            for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
+                data = feat + getsrcs(chain)
+                print('+ %r' % (data,))
+                if srcdb is not None:
+                    annot = SourceAnnot(srcdb)
+                    for n in nodes:
+                        src = builder.getsrc(n, False)
+                        if src is None: continue
+                        (path,start,end) = src
+                        annot.add(path, start, end)
+                    annot.show_text()
+            print()
 
     print('Total: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
           file=sys.stderr)
 
-    if fp is not sys.stdout:
-        fp.close()
+    if db is not None:
+        db.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
