@@ -202,15 +202,17 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o dbpath] [feats ...]' % argv[0])
+        print('usage: %s [-o dbpath] [-s] [feats ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:s')
     except getopt.GetoptError:
         return usage()
     outpath = None
+    source = False
     for (k, v) in opts:
         if k == '-o': outpath = v
+        elif k == 's': source = True
     if not args: return usage()
 
     if outpath is None:
@@ -219,10 +221,12 @@ def main(argv):
         db = FeatDB(dbpath)
         for (tid,item) in db:
             print('!', item)
-            feat2srcs = db.get_feats(tid, resolve=True, source=True)
+            feat2srcs = db.get_feats(tid, resolve=True, source=source)
             for (feat,srcs) in feat2srcs.items():
+                if feat is None: continue
                 print('+', feat)
-                print('#', srcs)
+                if srcs:
+                    print('#', srcs)
         return
 
     if os.path.exists(outpath):

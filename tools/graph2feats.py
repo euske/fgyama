@@ -19,6 +19,10 @@ AUGMENTED = (
     'ref_array', 'ref_field',
     'assign_array', 'assign_field')
 
+NODE_COST = 10
+
+debug = 0
+
 def is_ref(ref):
     return not (ref is None or ref.startswith('#') or ref.startswith('%'))
 
@@ -39,18 +43,18 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-maxdist = 4
-maxchain = 4
-
-def enum_back(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
+def enum_back(feats, count, done, v1, lprev,
+              v0=None, fprev=None, chain=None, dist=0):
     # prevent explosion.
+    if count <= 0: return
+    count -= 1
     if (v0,v1) in done: return
     done.add((v0,v1))
-    if maxchain < clen(chain): return
-    if maxdist <= dist: return
     n1 = v1.node
+    if debug:
+        print('back: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
+              (n1.nid, n1.kind, len(v1.inputs), fprev, lprev, count, len(done)))
     chain = Cons(n1, chain)
-    #print('back: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
     # list the input nodes to visit.
     inputs = []
     for (link,v2) in v1.inputs:
@@ -64,7 +68,7 @@ def enum_back(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'assign_var':
         for (_,v2) in inputs:
-            enum_back(feats, done, v2, lprev, v0, fprev, chain, dist)
+            enum_back(feats, count, done, v2, lprev, v0, fprev, chain, dist)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
@@ -76,22 +80,27 @@ def enum_back(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'ref_var':
         for (_,v2) in inputs:
-            enum_back(feats, done, v2, lprev, v0, fprev, chain, dist)
+            enum_back(feats, count, done, v2, lprev, v0, fprev, chain, dist)
         return
     # visit the next nodes.
+    count -= NODE_COST
+    dist += 1
     for (link,v2) in inputs:
-        enum_back(feats, done, v2, link, v1, fs[0], None, dist+1)
+        enum_back(feats, count, done, v2, link, v1, fs[0], None, dist)
     return
 
-def enum_forw(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
+def enum_forw(feats, count, done, v1, lprev,
+              v0=None, fprev=None, chain=None, dist=0):
     # prevent explosion.
+    if count <= 0: return
+    count -= 1
     if (v0,v1) in done: return
     done.add((v0,v1))
-    if maxchain < clen(chain): return
-    if maxdist <= dist: return
     n1 = v1.node
+    if debug:
+        print('forw: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
+              (n1.nid, n1.kind, len(v1.outputs), fprev, lprev, count, len(done)))
     chain = Cons(n1, chain)
-    #print('forw: %s %r [%s] %s(%s)' % (fprev, lprev, dist, n1.nid, n1.kind))
     # list the output nodes to visit.
     outputs = []
     for (link,v2) in v1.outputs:
@@ -105,7 +114,7 @@ def enum_forw(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'ref_var':
         for (link,v2) in outputs:
-            enum_forw(feats, done, v2, link, v0, fprev, chain, dist)
+            enum_forw(feats, count, done, v2, link, v0, fprev, chain, dist)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
@@ -117,17 +126,19 @@ def enum_forw(feats, done, v1, lprev, v0=None, fprev=None, chain=None, dist=0):
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'assign_var':
         for (link,v2) in outputs:
-            enum_forw(feats, done, v2, link, v0, fprev, chain, dist)
+            enum_forw(feats, count, done, v2, link, v0, fprev, chain, dist)
         return
     # visit the next nodes.
+    count -= NODE_COST
+    dist += 1
     for (link,v2) in outputs:
-        enum_forw(feats, done, v2, link, v1, fs[0], None, dist+1)
+        enum_forw(feats, count, done, v2, link, v1, fs[0], None, dist)
     return
 
 
 # main
 def main(argv):
-    global maxchain, maxdist
+    global debug, maxchain, maxdist
     import fileinput
     import getopt
     def usage():
@@ -135,19 +146,18 @@ def main(argv):
               '[-M maxoverrides] [-B srcdb] [-f|-b] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:m:M:B:fbC')
+        (opts, args) = getopt.getopt(argv[1:], 'do:c:M:B:fbC')
     except getopt.GetoptError:
         return usage()
-    debug = 0
     maxoverrides = 1
+    count = 50
     mode = None
     outpath = None
     srcdb = None
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
-        elif k == '-m': maxdist = int(v)
-        elif k == '-c': maxchain = int(v)
+        elif k == '-c': count = int(v)
         elif k == '-M': maxoverrides = int(v)
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-f': mode = k
@@ -205,20 +215,22 @@ def main(argv):
         feats = {}
         if item[0] == 'REF':
             for node in nodes:
-                vtx = builder.vtxs[node]
+                v0 = builder.vtxs[node]
+                done = set()
                 if mode in (None,'-f'):
-                    for (link,v1) in vtx.outputs:
+                    for (link,v1) in v0.outputs:
                         if link.startswith('_') and link != '_end': continue
-                        enum_forw(feats, set(), v1, lprev=link)
+                        enum_forw(feats, count, done, v1, link, v0)
                 if mode in (None,'-b'):
-                    for (link,v1) in vtx.inputs:
+                    for (link,v1) in v0.inputs:
                         if link.startswith('_') and link != '_end': continue
-                        enum_back(feats, set(), v1, lprev=link)
+                        enum_back(feats, count, done, v1, link, v0)
         elif item[0] == 'METHOD':
             for node in nodes:
-                vtx = builder.vtxs[node]
-                enum_forw(feats, set(), vtx)
-                enum_back(feats, set(), vtx)
+                v0 = builder.vtxs[node]
+                done = set()
+                enum_forw(feats, count, done, v0)
+                enum_back(feats, count, done, v0)
         if not feats: continue
         nfeats += len(feats)
 
