@@ -211,6 +211,7 @@ def main(argv):
         return tuple(srcs)
 
     nfeats = 0
+    feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         feats = {}
         if item[0] == 'REF':
@@ -237,7 +238,12 @@ def main(argv):
         if db is not None:
             fid2srcs = { 0:getsrcs(nodes) }
             for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
-                fid = db.add_feat(feat)
+                if feat in feat2fid:
+                    fid = feat2fid[feat]
+                else:
+                    fid = len(feat2fid)+1
+                    feat2fid[feat] = fid
+                    db.add_feat(feat, fid)
                 fid2srcs[fid] = getsrcs(chain)
             db.add_item(item[1], fid2srcs)
             sys.stderr.write('.'); sys.stderr.flush()

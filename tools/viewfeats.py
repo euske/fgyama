@@ -33,7 +33,7 @@ def main(argv):
     db = FeatDB(dbpath)
 
     word2feats = { w:{} for w in args }
-
+    
     for (tid,item) in db:
         name = stripid(item)
         words = splitwords(name)
