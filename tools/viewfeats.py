@@ -11,7 +11,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n feats] srcdb feats.db' % argv[0])
+        print('usage: %s [-d] [-n feats] srcdb feats.db [word ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dc:n:')

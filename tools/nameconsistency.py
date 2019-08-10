@@ -66,41 +66,42 @@ def main(argv):
         if not cands: return
         keys = [ k for (k,_) in cands ]
         topword = keys[0]
-        if topword not in words:
-            print('#', cands[:len(words)+1], words)
-            try:
-                i = words.index(topword)
-                print(name, '->', keys[:i], name)
-            except ValueError:
-                print(name, '->', topword)
-            fid2srcs = db.get_feats(tid, source=True)
-            for (k,fs) in nb.getfeats([topword]).items():
-                feats = []
-                fs = dict(fs)
-                for fid in fids:
-                    assert fid in fid2srcs
-                    if fid != 0 and fid in fs:
-                        (d,_,_) = db.get_feat(fid)
-                        score = math.exp(-abs(d)) * fs[fid]
-                        feats.append((score, fid))
-                feats.sort(reverse=True)
-                print('!', item, sum( score for (score,_) in feats ))
-                showsrc(fid2srcs[0])
-                for (_,fid) in feats[:3]:
-                    srcs0 = fid2srcs[fid]
-                    srcs1 = []
-                    item2srcs = db.get_featitems(fid, resolve=True, source=True)
-                    for (item1,srcs) in item2srcs.items():
-                        if item1 == item: continue
-                        if not srcs: continue
-                        name = stripid(item1)
-                        words = splitwords(name)
-                        if k not in words: continue
-                        srcs1 = srcs
-                        break
-                    print('-- evidence', fid, item1)
-                    showsrc(srcs0)
-                    showsrc(srcs1)
+        if topword in words: return
+        print('#', cands[:len(words)+1], words)
+        try:
+            i = words.index(topword)
+            print(name, '->', keys[:i], name)
+        except ValueError:
+            print(name, '->', topword)
+        fid2srcs = db.get_feats(tid, source=True)
+        for (k,fs) in nb.getfeats([topword]).items():
+            feats = []
+            fs = dict(fs)
+            for fid in fids:
+                assert fid in fid2srcs
+                if fid != 0 and fid in fs:
+                    (d,_,_) = db.get_feat(fid)
+                    score = math.exp(-abs(d)) * fs[fid]
+                    feats.append((score, fid))
+            feats.sort(reverse=True)
+            print('!', item, sum( score for (score,_) in feats ))
+            if srcdb is None: continue
+            showsrc(fid2srcs[0])
+            for (_,fid) in feats[:3]:
+                srcs0 = fid2srcs[fid]
+                srcs1 = []
+                item2srcs = db.get_featitems(fid, resolve=True, source=True)
+                for (item1,srcs) in item2srcs.items():
+                    if item1 == item: continue
+                    if not srcs: continue
+                    name = stripid(item1)
+                    words = splitwords(name)
+                    if k not in words: continue
+                    srcs1 = srcs
+                    break
+                print('-- evidence', fid, item1)
+                showsrc(srcs0)
+                showsrc(srcs1)
         return
 
     nb = NaiveBayes()
