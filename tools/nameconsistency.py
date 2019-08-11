@@ -8,6 +8,11 @@ from featdb import FeatDB
 from getwords import stripid, splitwords
 from naivebayes import NaiveBayes
 
+def tocamelcase(words):
+    return ''.join(
+        (w if i == 0 else w[0].upper()+w[1:])
+        for (i,w) in enumerate(words) )
+
 # main
 def main(argv):
     import fileinput
@@ -42,7 +47,8 @@ def main(argv):
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
 
-    def showsrc(srcs):
+    def showsrc(s, srcs):
+        if srcdb is None: return
         annot = SourceAnnot(srcdb)
         for src in srcs:
             (path,start,end) = src
@@ -60,6 +66,7 @@ def main(argv):
     def predict(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
+        nwords = len(words)
         f2 = nb.narrow(fids.keys(), threshold)
         if len(f2) <= 1: return
         cands = nb.getkeys(f2)
@@ -67,47 +74,59 @@ def main(argv):
         keys = [ k for (k,_) in cands ]
         topword = keys[0]
         if topword in words: return
-        print('#', cands[:len(words)+1], words)
-        try:
-            i = words.index(topword)
-            print(name, '->', keys[:i], name)
-        except ValueError:
-            print(name, '->', topword)
-        fid2srcs = db.get_feats(tid, source=True)
+        print('#', words, cands[:nwords+1])
+        feats = []
         for (k,fs) in nb.getfeats([topword]).items():
-            feats = []
             fs = dict(fs)
             for fid in fids:
-                assert fid in fid2srcs
+                #assert fid in fid2srcs
                 if fid != 0 and fid in fs:
                     (d,_,_) = db.get_feat(fid)
                     score = math.exp(-abs(d)) * fs[fid]
                     feats.append((score, fid))
-            feats.sort(reverse=True)
-            print('!', item, sum( score for (score,_) in feats ))
-            if srcdb is None: continue
-            showsrc(fid2srcs[0])
-            for (_,fid) in feats[:3]:
-                srcs0 = fid2srcs[fid]
-                srcs1 = []
-                item2srcs = db.get_featitems(fid, resolve=True, source=True)
-                for (item1,srcs) in item2srcs.items():
-                    if item1 == item: continue
-                    if not srcs: continue
-                    name = stripid(item1)
-                    words = splitwords(name)
-                    if k not in words: continue
-                    srcs1 = srcs
-                    break
-                print('-- evidence', fid, item1)
-                showsrc(srcs0)
-                showsrc(srcs1)
+        feats.sort(reverse=True)
+        totalscore = sum( score for (score,_) in feats )
+        print('! %.3f %s' % (totalscore, item))
+        for (i,k) in enumerate(keys[:nwords+1]):
+            if k in words:
+                name1 = tocamelcase(keys[:i])
+                name2 = tocamelcase(keys[:i]+[name])
+                print('+NAME', name, name1, name2)
+                break
+        else:
+            print('+NAME', name, topword)
+        fid2srcs = db.get_feats(tid, source=True)
+        print('+ORIGINAL', fid2srcs[0])
+        showsrc(' ', fid2srcs[0])
+        for (_,fid) in feats[:3]:
+            srcs0 = fid2srcs[fid]
+            srcs1 = []
+            evidence = None
+            item2srcs = db.get_featitems(fid, resolve=True, source=True)
+            for (item1,srcs) in item2srcs.items():
+                if item1 == item: continue
+                if not srcs: continue
+                name = stripid(item1)
+                words = splitwords(name)
+                if topword not in words: continue
+                srcs1 = srcs
+                evidence = item1
+                break
+            if evidence is None: continue
+            feat = db.get_feat(fid)
+            print('+FEATURE', feat)
+            print('+SOURCE0', srcs0)
+            showsrc('1', srcs0)
+            print('+EVIDENCE', evidence)
+            print('+SOURCE1', srcs1)
+            showsrc('2', srcs1)
+        print()
         return
 
     nb = NaiveBayes()
     proc = learn
     if inpath is not None:
-        print('Importing model: %r' % inpath)
+        print('Importing model: %r' % inpath, file=sys.stderr)
         with open(inpath, 'rb') as fp:
             nb.load(fp)
             proc = predict
@@ -115,10 +134,10 @@ def main(argv):
     for (tid,item) in db:
         fids = db.get_feats(tid)
         proc(tid, item, fids)
-        sys.stderr.write('.'); sys.stderr.flush()
+        #sys.stderr.write('.'); sys.stderr.flush()
 
     if outpath is not None:
-        print('Exporting model: %r' % outpath)
+        print('Exporting model: %r' % outpath, file=sys.stderr)
         with open(outpath, 'wb') as fp:
             nb.save(fp)
 
