@@ -2,7 +2,7 @@
 import sys
 import os
 import re
-from graph2idf import IDFBuilder, Cons, clen
+from interproc import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
 from getwords import striptypename, stripmethodname, stripref, splitwords

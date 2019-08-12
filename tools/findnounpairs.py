@@ -2,7 +2,7 @@
 import sys
 import re
 from srcdb import SourceDB, SourceAnnot
-from graph2idf import Cons, IDFBuilder, is_funcall
+from interproc import Cons, IDFBuilder, is_funcall
 
 REFS = frozenset(['ref_var', 'ref_field'])
 ASSIGNS = frozenset(['assign_var', 'assign_field'])

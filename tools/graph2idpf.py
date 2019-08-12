@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph2idf import is_funcall, Cons, IDFBuilder
+from interproc import is_funcall, Cons, IDFBuilder
 
 def clen(x):
     if x is None:

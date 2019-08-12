@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graph2idf import is_funcall, Cons, IDFBuilder
+from interproc import is_funcall, Cons, IDFBuilder
 
 
 IGNORED = frozenset([
