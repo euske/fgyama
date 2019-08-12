@@ -55,6 +55,7 @@ class NaiveBayes:
         for (k,n) in sorted(self.kcount.items(), key=lambda x:x[1], reverse=True):
             if k not in key2feats: continue
             feats = key2feats[k]
+            if not feats: continue
             print('+%s (%r cases, %r features)' % (k, n, len(feats)))
             a = [ (f,v,self.fcount[f][None]) for (f,v) in feats ]
             a = sorted(a, reverse=True, key=lambda x:x[1]*x[1]/x[2])

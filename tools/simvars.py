@@ -3,6 +3,7 @@ import sys
 import re
 import random
 from srcdb import SourceDB, SourceAnnot
+from featdb import FeatDB
 from getwords import stripid, splitwords
 from vsm import VSM
 from math import exp
@@ -43,49 +44,20 @@ def main(argv):
             refs[ref] = ntype
     print('Refs: %r' % len(refs), file=sys.stderr)
 
-    item2srcs = None
-    if srcdb is not None:
-        item2srcs = {}
-    srcmap = {}
-    items = []
+    dbpath = args.pop(0)
+    db = FeatDB(dbpath)
+    
     sp = VSM()
-    path = args.pop(0)
-    with open(path) as fp:
-        item = feats = None
-        for line in fp:
-            line = line.strip()
-            if line.startswith('+SOURCE'):
-                (_,_,line) = line.partition(' ')
-                (srcid, path) = eval(line)
-                srcmap[srcid] = path
+    for (tid,_) in db:
+        feats = db.get_feats(tid, resolve=True)
+        sp.add(tid, { feat:exp(-abs(feat[0])) for feat in feats.keys()
+                      if feat is not None })
+        sys.stderr.write('.'); sys.stderr.flush()
 
-            elif line.startswith('! '):
-                sys.stderr.write('.'); sys.stderr.flush()
-                data = eval(line[2:])
-                if data[0] == 'REF':
-                    item = data[1]
-                    feats = set()
-                    items.append(item)
-                    if item2srcs is not None:
-                        if item in item2srcs:
-                            srcs = item2srcs[item]
-                        else:
-                            srcs = item2srcs[item] = []
-                        srcs.extend(data[2:])
-                else:
-                    feats = None
-
-            elif feats is not None and line.startswith('+ '):
-                data = eval(line[2:])
-                feat = data[0:3]
-                feats.add(feat)
-
-            elif feats is not None and not line:
-                if feats:
-                    sp.add(item, { (d,f0,f1):exp(-abs(d)) for (d,f0,f1) in feats })
     sp.commit()
 
     def show(srcs):
+        if srcdb is None: return
         annot = SourceAnnot(srcdb)
         for (srcid, start, end) in srcs:
             annot.add(srcmap[srcid], start, end, 0)
@@ -94,35 +66,36 @@ def main(argv):
 
     if args:
         pairs = []
-        for item0 in args:
-            for (sim,item1) in sp.findsim(item0, threshold=threshold):
-                pairs.append((sim, item0, item1))
+        for tid0 in args:
+            for (sim,tid1) in sp.findsim(tid0, threshold=threshold):
+                pairs.append((sim, tid0, tid1))
     elif minpairs:
         nbins = int(minpairs*1.1)
         pairs = [ None for _ in range(nbins) ]
         z = (nbins-1) / (1.0-threshold)
         npairs = 0
-        for (sim,item0,item1) in sp.findall(threshold=threshold):
+        for (sim,tid0,tid1) in sp.findall(threshold=threshold):
             i = int((sim-threshold)*z)
             if pairs[i] is None:
                 npairs += 1
-            pairs[i] = (sim, item0, item1)
+            pairs[i] = (sim, tid0, tid1)
             if minpairs <= npairs: break
         pairs = [ x for x in pairs if x is not None ]
     else:
         pairs = sp.findall(threshold=threshold)
 
     if minpairs:
-        assert item2srcs is not None
-        def f(srcs):
-            return [ (srcmap[srcid],start,end) for (srcid,start,end) in srcs ]
         random.shuffle(pairs)
-        for (i,(sim,item0,item1)) in enumerate(pairs):
+        for (i,(sim,tid0,tid1)) in enumerate(pairs):
+            item0 = db.get_item(tid0)
+            item1 = db.get_item(tid1)
             type0 = refs[item0]
             type1 = refs[item1]
+            srcs0 = db.get_feats(tid0, source=True)[0]
+            srcs1 = db.get_feats(tid0, source=True)[1]
             data = (i, sim,
-                    (item0, type0, f(item2srcs[item0])),
-                    (item1, type1, f(item2srcs[item1])))
+                    (item0, type0, f(srcs0)),
+                    (item1, type1, f(srcs1)))
             print(data)
         return
     npairs = 0
@@ -130,9 +103,11 @@ def main(argv):
     nameonly = 0
     typeonly = 0
     totalwordsim = 0
-    for (sim,item0,item1) in pairs:
-        assert item0 != item1
+    for (sim,tid0,tid1) in pairs:
+        assert tid0 != tid1
         npairs += 1
+        item0 = db.get_item(tid0)
+        item1 = db.get_item(tid1)
         type0 = refs[item0]
         type1 = refs[item1]
         name0 = stripid(item0)
@@ -149,11 +124,13 @@ def main(argv):
         totalwordsim += wordsim
         print('*** sim=%.2f, wordsim=%.2f, type=%r: %s/%s' %
               (sim, wordsim, (type0==type1), name0, name1))
-        if item2srcs is not None and name0 != name1:
+        if name0 != name1:
+            srcs0 = db.get_feats(tid0, source=True)[0]
+            srcs1 = db.get_feats(tid0, source=True)[1]
             print('+++', item0)
-            show(item2srcs[item0])
+            show(srcs0)
             print('+++', item1)
-            show(item2srcs[item1])
+            show(srcs1)
         print('# score=%r/%r/%r/%r, avg=%.2f' %
               (npairs, nametype, nameonly, typeonly, totalwordsim/npairs))
         print()
