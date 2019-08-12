@@ -77,13 +77,13 @@ class IPVertex:
     def __repr__(self):
         return ('<IPVertex(%d)>' % (self.vid))
 
-    def connect(self, label, output):
+    def connect(self, label, output, funcall=None):
         #print('# connect: %r-%s-%r' % (self, label, output))
         #assert output is not self
         assert isinstance(label, str)
         assert isinstance(output, IPVertex)
-        self.outputs.append((label, output))
-        output.inputs.append((label, self))
+        self.outputs.append((label, output, funcall))
+        output.inputs.append((label, self, funcall))
         return
 
 
@@ -182,14 +182,14 @@ class IDFBuilder:
                             label = n1.ref
                             if label in node.inputs:
                                 self.getvtx(node.inputs[label]).connect(
-                                    label, self.getvtx(n1))
+                                    label, self.getvtx(n1), node)
                         for n1 in func.outs:
                             assert n1.kind == 'output'
                             vtx1 = self.getvtx(n1)
                             for (label,n2) in node.outputs:
                                 assert n2.kind == 'receive'
                                 assert n2.ref == label or n2.ref is None
-                                vtx1.connect(label, self.getvtx(n2))
+                                vtx1.connect(label, self.getvtx(n2), node)
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
