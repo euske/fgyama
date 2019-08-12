@@ -126,7 +126,7 @@ def main(argv):
               (sim, wordsim, (type0==type1), name0, name1))
         if name0 != name1:
             srcs0 = db.get_feats(tid0, source=True)[0]
-            srcs1 = db.get_feats(tid0, source=True)[1]
+            srcs1 = db.get_feats(tid1, source=True)[0]
             print('+++', item0)
             show(srcs0)
             print('+++', item1)
