@@ -70,7 +70,7 @@ def main(argv):
                 #assert fid in fid2srcs
                 if fid != 0 and fid in fs:
                     (d,_,_) = db.get_feat(fid)
-                    score = math.exp(-abs(d)) * fs[fid]
+                    score = math.exp(-abs(d)) * fs[fid] / fs[0]
                     feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
