@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+import json
 from interproc import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
@@ -270,10 +271,10 @@ def main(argv):
             sys.stderr.write('.'); sys.stderr.flush()
         else:
             data = item + getsrcs(nodes)
-            print('+ITEM %r' % (data,))
+            print('+ITEM', json.dumps(data))
             for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
                 data = feat + getsrcs(chain)
-                print('+FEAT %r' % (data,))
+                print('+FEAT', json.dumps(data))
                 if srcdb is not None:
                     annot = SourceAnnot(srcdb)
                     for n in nodes:

@@ -230,6 +230,9 @@ class SourceAnnot:
         self.nodes = {}
         return
 
+    def __iter__(self):
+        return self.nodes.items()
+
     def add(self, name, start, end, anno=None):
         src = self.srcdb.get(name)
         if src in self.nodes:
@@ -245,7 +248,7 @@ class SourceAnnot:
         return
 
     def show_html(self, fp=sys.stdout, furl=q, ncontext=3):
-        for (src,ranges) in self.nodes.items():
+        for (src,ranges) in self:
             url = src.name
             def astart(nid):
                 return '<span class="p%s">' % nid
@@ -269,7 +272,7 @@ class SourceAnnot:
         return
 
     def show_text(self, fp=sys.stdout, ncontext=3):
-        for (src,ranges) in self.nodes.items():
+        for (src,ranges) in self:
             fp.write('# %s\n' % src.name)
             for (lineno,line) in src.show(ranges, ncontext=ncontext):
                 if lineno is None:

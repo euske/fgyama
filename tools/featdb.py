@@ -5,6 +5,7 @@
 import sys
 import os.path
 import marshal
+import json
 import sqlite3
 
 
@@ -241,11 +242,11 @@ def main(argv):
     for line in fileinput.input(args):
         line = line.strip()
         if line.startswith('+SOURCE '):
-            (srcid, path) = eval(line[8:])
+            (srcid, path) = json.loads(line[8:])
             db.add_path(srcid, path)
 
         elif line.startswith('+ITEM '):
-            data = eval(line[6:])
+            data = json.loads(line[6:])
             item = fid2srcs = None
             if data[0] == 'REF':
                 item = data[1]
@@ -255,8 +256,8 @@ def main(argv):
 
         elif item is not None and line.startswith('+FEAT '):
             assert fid2srcs is not None
-            data = eval(line[6:])
-            feat = data[0:3]
+            data = json.loads(line[6:])
+            feat = tuple(data[0:3])
             if feat in feat2fid:
                 fid = feat2fid[feat]
             else:
