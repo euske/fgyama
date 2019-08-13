@@ -86,7 +86,7 @@ def main(argv):
                     feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
-        print('! %.3f %s' % (totalscore, item))
+        print('+ITEM %.3f %s' % (totalscore, item))
         for (i,k) in enumerate(keys[:nwords+1]):
             if k in words:
                 name1 = tocamelcase(keys[:i])

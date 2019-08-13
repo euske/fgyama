@@ -66,10 +66,10 @@ def main(argv):
         fscore.sort(reverse=True)
         for (score,fid,items) in fscore[:ntop]:
             feat = db.get_feat(fid)
-            print('+', feat, len(items), score)
+            print('+FEAT', feat, len(items), score)
             items.sort(key=lambda item:iscore[item], reverse=True)
             for item in items[:1]:
-                print('!', db.get_item(item))
+                print('+ITEM', db.get_item(item))
                 feats = db.get_feats(item, resolve=True, source=True)
                 srcs = feats[feat]
                 if not srcs: continue

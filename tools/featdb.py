@@ -218,11 +218,11 @@ def main(argv):
         print('Reading from: %r' % dbpath)
         db = FeatDB(dbpath)
         for (tid,item) in db:
-            print('!', item)
+            print('+ITEM', item)
             feat2srcs = db.get_feats(tid, resolve=True, source=source)
             for (feat,srcs) in feat2srcs.items():
                 if feat is None: continue
-                print('+', feat)
+                print('+FEAT', feat)
                 if srcs:
                     print('#', srcs)
         return
@@ -240,13 +240,12 @@ def main(argv):
 
     for line in fileinput.input(args):
         line = line.strip()
-        if line.startswith('+SOURCE'):
-            (_,_,line) = line.partition(' ')
-            (srcid, path) = eval(line)
+        if line.startswith('+SOURCE '):
+            (srcid, path) = eval(line[8:])
             db.add_path(srcid, path)
 
-        elif line.startswith('! '):
-            data = eval(line[2:])
+        elif line.startswith('+ITEM '):
+            data = eval(line[6:])
             item = fid2srcs = None
             if data[0] == 'REF':
                 item = data[1]
@@ -254,9 +253,9 @@ def main(argv):
                 sys.stderr.write('.'); sys.stderr.flush()
                 nitems += 1
 
-        elif item is not None and line.startswith('+ '):
+        elif item is not None and line.startswith('+FEAT '):
             assert fid2srcs is not None
-            data = eval(line[2:])
+            data = eval(line[6:])
             feat = data[0:3]
             if feat in feat2fid:
                 fid = feat2fid[feat]

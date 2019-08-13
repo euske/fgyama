@@ -270,10 +270,10 @@ def main(argv):
             sys.stderr.write('.'); sys.stderr.flush()
         else:
             data = item + getsrcs(nodes)
-            print('! %r' % (data,))
+            print('+ITEM %r' % (data,))
             for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
                 data = feat + getsrcs(chain)
-                print('+ %r' % (data,))
+                print('+FEAT %r' % (data,))
                 if srcdb is not None:
                     annot = SourceAnnot(srcdb)
                     for n in nodes:
