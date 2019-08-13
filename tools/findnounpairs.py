@@ -2,7 +2,7 @@
 import sys
 import re
 from srcdb import SourceDB, SourceAnnot
-from interproc import Cons, IDFBuilder, is_funcall
+from interproc import Cons, IDFBuilder
 
 REFS = frozenset(['ref_var', 'ref_field'])
 ASSIGNS = frozenset(['assign_var', 'assign_field'])
@@ -40,7 +40,7 @@ def getmethodnoun(name):
     return getnoun(name)
 
 def getfeat1(label, n):
-    if is_funcall(n):
+    if n.is_funcall():
         (data,_,_) = n.data.partition(' ')
         return '%s:%s:%s' % (label, n.kind, getmethodnoun(data))
     elif n.kind in ('op_typecast', 'op_typecheck'):
@@ -51,7 +51,7 @@ def getfeat1(label, n):
         return '%s:%s:%s' % (label, n.kind, n.data)
 
 def getfeat2(label, n):
-    if is_funcall(n):
+    if n.is_funcall():
         (data,_,_) = n.data.partition(' ')
         return '%s:%s:%s' % (label, n.kind, data)
     elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):

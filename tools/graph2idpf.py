@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from interproc import is_funcall, Cons, IDFBuilder
+from interproc import Cons, IDFBuilder
 
 def clen(x):
     if x is None:
@@ -48,7 +48,7 @@ def getmethodnoun(name):
     return getnoun(name)
 
 def getfeat1(label, n):
-    if is_funcall(n):
+    if n.is_funcall():
         (data,_,_) = n.data.partition(' ')
         return '%s:%s:%s' % (label, n.kind, getmethodnoun(data))
     elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):
@@ -63,7 +63,7 @@ def getfeat1(label, n):
         return '%s:%s:%s' % (label, n.kind, n.data)
 
 def getfeat2(label, n):
-    if is_funcall(n):
+    if n.is_funcall():
         (data,_,_) = n.data.partition(' ')
         return '%s:%s:%s' % (label, n.kind, getmethodnoun(data))
     elif n.kind in ('ref_var','ref_field','assign_var','assign_field'):
@@ -108,7 +108,7 @@ def enum_forw(r, v0, srcs=None, feats=None, maxlen=5, maxfeats=32):
     for (l1,v1) in v0.outputs:
         if l1.startswith('_'): continue
         n1 = v1.node
-        if is_funcall(n1) and not l1.startswith('#'): continue
+        if n1.is_funcall() and not l1.startswith('#'): continue
         if is_ignored(n1):
             enum_forw(r, v1, srcs, feats, maxlen)
         else:
@@ -134,7 +134,7 @@ def enum_back(r, v0, srcs=None, feats=None, maxlen=5, maxfeats=32):
     for (l1,v1) in v0.inputs:
         if l1.startswith('_'): continue
         n1 = v1.node
-        if is_funcall(n0) and not l1.startswith('#'): continue
+        if n0.is_funcall() and not l1.startswith('#'): continue
         if is_ignored(n1):
             enum_back(r, v1, srcs, feats, maxlen)
         else:

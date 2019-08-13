@@ -200,6 +200,9 @@ class DFNode:
                 yield (label, src)
         return
 
+    def is_funcall(self):
+        return (self.kind == 'call' or self.kind == 'new')
+
     def dump(self, d, maxlev, lev=0, label=None):
         if label is None:
             print('  '*lev+str(self))

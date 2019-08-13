@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from interproc import is_funcall, Cons, IDFBuilder
+from interproc import Cons, IDFBuilder
 
 IGNORED = frozenset([
     None, 'ref_var', 'assign_var',
@@ -12,7 +12,7 @@ def getfeat(label, n1):
         return None
     elif n1.data is None:
         return '%s:%s' % (label, n1.kind)
-    elif is_funcall(n1):
+    elif n1.is_funcall():
         (data,_,_) = n1.data.partition(' ')
         return '%s:%s:%s' % (label, n1.kind, data)
     else:

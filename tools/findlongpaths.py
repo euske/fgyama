@@ -2,7 +2,7 @@
 import sys
 import re
 from srcdb import SourceDB, SourceAnnot
-from interproc import is_funcall, Cons, IDFBuilder
+from interproc import Cons, IDFBuilder
 
 
 WORD1 = re.compile(r'[A-Z]?[a-z]+$')

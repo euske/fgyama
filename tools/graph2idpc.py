@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from interproc import is_funcall, Cons, IDFBuilder
+from interproc import Cons, IDFBuilder
 
 
 IGNORED = frozenset([
@@ -12,7 +12,7 @@ def getfeat(n0, label, n1):
         return None
     elif n1.data is None:
         return '%s:%s' % (label, n1.kind)
-    elif is_funcall(n1):
+    elif n1.is_funcall():
         (data,_,_) = n1.data.partition(' ')
         return '%s:%s:%s' % (label, n1.kind, data)
     else:
@@ -24,7 +24,7 @@ def enum_forw(vtx, feats0=None, chain=None, maxlen=5):
     chain = Cons(vtx, chain)
     for (label,v) in vtx.outputs:
         if label.startswith('_'): continue
-        if is_funcall(v.node) and not label.startswith('#arg'): continue
+        if v..node.is_funcall() and not label.startswith('#arg'): continue
         if v.node.kind == 'receive' and label != 'return': continue
         feats = feats0
         feat1 = getfeat(vtx.node, label, v.node)
@@ -41,7 +41,7 @@ def enum_back(vtx, feats0=None, chain=None, maxlen=5):
     chain = Cons(vtx, chain)
     for (label,v) in vtx.inputs:
         if label.startswith('_'): continue
-        if is_funcall(vtx.node) and not label.startswith('#arg'): continue
+        if vtx.node.is_funcall() and not label.startswith('#arg'): continue
         if vtx.node.kind == 'receive' and label != 'return': continue
         feats = feats0
         feat1 = getfeat(v.node, label, vtx.node)

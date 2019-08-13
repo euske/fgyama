@@ -3,9 +3,6 @@ import sys
 from graph import DFGraph, get_graphs
 
 
-def is_funcall(node):
-    return node.kind in ('call', 'new')
-
 def clen(x):
     if x is None:
         return 0
@@ -164,7 +161,7 @@ class IDFBuilder:
         # Enumerate caller/callee relationships.
         for src in self.graphs:
             for node in src:
-                if is_funcall(node):
+                if node.is_funcall():
                     funcs = node.data.split(' ')
                     for gid in funcs[:self.maxoverrides]:
                         self.addcall(node, gid)
@@ -172,7 +169,7 @@ class IDFBuilder:
         # Convert every node to IPVertex.
         for graph in self.graphs:
             for node in graph:
-                if is_funcall(node):
+                if node.is_funcall():
                     funcs = node.data.split(' ')
                     for gid in funcs[:self.maxoverrides]:
                         if gid not in self.gid2graph: continue
