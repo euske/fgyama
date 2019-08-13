@@ -2,7 +2,7 @@
 import sys
 import re
 from graph import DFGraph, load_klasses
-from getwords import stripid, stripmethodid, stripgeneric, splitwords
+from getwords import stripid, stripgeneric, splitmethodname, splitwords
 
 # methods:
 #   words overlap (jaccard)
@@ -48,10 +48,10 @@ class ClassDB:
     def cmp_methods(self, id1, id2):
         method1 = self.methods[id1]
         method2 = self.methods[id2]
-        (name1,args1,retype1) = stripmethodid(method1.name)
-        (name2,args2,retype2) = stripmethodid(method2.name)
         overriden = (method1.name in method2.overrides or
                      method2.name in method1.overrides)
+        (name1,args1,retype1) = splitmethodname(method1.name)
+        (name2,args2,retype2) = splitmethodname(method2.name)
         sameargs = (args1 == args2)
         sameretype = (retype1 == retype2)
         words1 = splitwords(name1)

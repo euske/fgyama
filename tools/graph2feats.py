@@ -5,7 +5,7 @@ import re
 from interproc import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
-from getwords import striptypename, stripmethodname, stripref, splitwords
+from getwords import striptypename, stripref, splitmethodname, splitwords
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
@@ -29,7 +29,8 @@ def is_ref(ref):
 def getfeats(n):
     if n.kind in CALLS:
         (data,_,_) = n.data.partition(' ')
-        return [ '%s:%s' % (n.kind, w) for w in splitwords(stripmethodname(data)) ]
+        (name,_,_) = splitmethodname(data)
+        return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
     elif n.kind in REFS or n.kind in ASSIGNS:
         return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
     elif n.kind in CONDS:

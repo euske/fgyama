@@ -2,7 +2,7 @@
 import sys
 import re
 from graph import DFGraph, get_graphs
-from getwords import stripmethodname, splitwords
+from getwords import splitmethodname, splitwords
 
 def main(argv):
     args = argv[1:]
@@ -11,7 +11,7 @@ def main(argv):
     words = {}
     for path in args:
         for graph in get_graphs(path):
-            name = stripmethodname(graph.name)
+            (name,args,retype) = splitmethodname(graph.name)
             if name is None: continue
             #print(name)
             nnames += 1

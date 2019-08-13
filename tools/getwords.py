@@ -15,13 +15,6 @@ def striptypename(name):
         name = name[:-1]
     return stripid(name)
 
-def stripmethodname(name):
-    assert '(' in name
-    (name,_,_) = name.partition('(')
-    if name.endswith(';.<init>'):
-        name = name[:-8]
-    return stripid(name)
-
 def stripref(name):
     if name.startswith('%'):
         return striptypename(name)
@@ -31,6 +24,15 @@ def stripref(name):
 def stripgeneric(name):
     (base,_,_) = name.partition('<')
     return base
+
+def splitmethodname(name):
+    assert '(' in name and ')' in name
+    i = name.index('(')
+    j = name.index(')')
+    (name, args, retype) = (name[:i], name[i:j+1], name[j+1:])
+    if name.endswith(';.<init>'):
+        name = name[:-8]
+    return (stripid(name), args, retype)
 
 WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+')
 def splitwords(s):
