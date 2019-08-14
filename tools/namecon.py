@@ -48,14 +48,14 @@ def main(argv):
         name = stripid(item)
         words = splitwords(name)
         for w in words:
-            nb.add(w, fids.keys())
+            nb.add(w, fids)
         return
 
     def predict(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
         nwords = len(words)
-        f2 = nb.narrow(fids.keys(), threshold)
+        f2 = nb.narrow(fids, threshold)
         if len(f2) <= 1: return
         cands = nb.getkeys(f2)
         if not cands: return
@@ -77,10 +77,11 @@ def main(argv):
             fs = dict(fs)
             for fid in fids:
                 #assert fid in fid2srcs
-                if fid != 0 and fid in fs:
-                    feat = db.get_feat(fid)
-                    score = math.exp(-abs(feat[0])) * fs[fid] / fs[0]
-                    feats.append((score, fid))
+                if fid not in fs: continue
+                n = nb.fcount[fid][None]
+                feat = db.get_feat(fid)
+                score = math.exp(-abs(feat[0])) * fs[fid] / n
+                feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
         print('+SCORE', totalscore)
@@ -119,7 +120,7 @@ def main(argv):
 
     for (tid,item) in db:
         fids = db.get_feats(tid)
-        proc(tid, item, fids)
+        proc(tid, item, [ fid for fid in fids if fid != 0 ])
         sys.stderr.write('.'); sys.stderr.flush()
 
     if outpath is not None:

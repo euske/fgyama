@@ -49,6 +49,7 @@ def main(argv):
         names = rec['NAMES']
         print('+', item)
         print(score, name, names)
+        print()
         annot = SourceAnnot(srcdb)
         for (path,s,e) in rec['SOURCE']:
             annot.add(path,s,e)
