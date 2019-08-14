@@ -13,7 +13,10 @@ def stripid(name):
 def striptypename(name):
     if name.endswith(';'):
         name = name[:-1]
-    return stripid(name)
+    name = stripid(name)
+    if name is not None and name.startswith('L'):
+        name = name[1:]
+    return name
 
 def stripref(name):
     if name.startswith('%'):

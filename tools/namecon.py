@@ -78,8 +78,8 @@ def main(argv):
             for fid in fids:
                 #assert fid in fid2srcs
                 if fid != 0 and fid in fs:
-                    (d,_,_) = db.get_feat(fid)
-                    score = math.exp(-abs(d)) * fs[fid] / fs[0]
+                    feat = db.get_feat(fid)
+                    score = math.exp(-abs(feat[0])) * fs[fid] / fs[0]
                     feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
@@ -99,7 +99,7 @@ def main(argv):
                 words = splitwords(name)
                 if topword not in words: continue
                 fid2srcs1 = db.get_feats(tid1, source=True)
-                srcs1 = fid2srcs1[0] + fid2srcs1[fid]
+                srcs1 = fid2srcs1[fid]
                 evidence = item1
                 break
             if evidence is None: continue
@@ -120,7 +120,7 @@ def main(argv):
     for (tid,item) in db:
         fids = db.get_feats(tid)
         proc(tid, item, fids)
-        #sys.stderr.write('.'); sys.stderr.flush()
+        sys.stderr.write('.'); sys.stderr.flush()
 
     if outpath is not None:
         print('Exporting model: %r' % outpath, file=sys.stderr)

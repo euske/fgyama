@@ -226,6 +226,7 @@ def main(argv):
                 print('+FEAT', feat)
                 if srcs:
                     print('#', srcs)
+            print()
         return
 
     if os.path.exists(outpath):
