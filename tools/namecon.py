@@ -62,7 +62,16 @@ def main(argv):
         keys = [ k for (k,_) in cands ]
         topword = keys[0]
         if topword in words: return
+        print('+ITEM', json.dumps(item))
         print('#', words, cands[:nwords+1])
+        names = [topword]
+        for (i,k) in enumerate(keys[:nwords+1]):
+            if k in words:
+                name1 = tocamelcase(keys[:i])
+                name2 = tocamelcase(keys[:i]+[name])
+                names = [name1,name2]
+                break
+        print('+NAMES', json.dumps(names))
         feats = []
         for (k,fs) in nb.getfeats([topword]).items():
             fs = dict(fs)
@@ -74,30 +83,23 @@ def main(argv):
                     feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
-        print('+ITEM', json.dumps((totalscore, item)))
-        for (i,k) in enumerate(keys[:nwords+1]):
-            if k in words:
-                name1 = tocamelcase(keys[:i])
-                name2 = tocamelcase(keys[:i]+[name])
-                print('+NAME', json.dumps((name, name1, name2)))
-                break
-        else:
-            print('+NAME', json.dumps((name, topword)))
-        fid2srcs = db.get_feats(tid, source=True)
-        print('+SOURCE', json.dumps(fid2srcs[0]))
+        print('+SCORE', totalscore)
+        fid2srcs0 = db.get_feats(tid, source=True)
+        print('+SOURCE', json.dumps(fid2srcs0[0]))
         supports = []
         for (_,fid) in feats[:nfeats]:
-            srcs0 = fid2srcs[fid]
+            srcs0 = fid2srcs0[fid]
             srcs1 = []
             evidence = None
-            item2srcs = db.get_featitems(fid, resolve=True, source=True)
-            for (item1,srcs) in item2srcs.items():
-                if item1 == item: continue
-                if not srcs: continue
+            tids = db.get_featitems(fid)
+            for tid1 in tids.keys():
+                if tid1 == tid: continue
+                item1 = db.get_item(tid1)
                 name = stripid(item1)
                 words = splitwords(name)
                 if topword not in words: continue
-                srcs1 = srcs
+                fid2srcs1 = db.get_feats(tid1, source=True)
+                srcs1 = fid2srcs1[0] + fid2srcs1[fid]
                 evidence = item1
                 break
             if evidence is None: continue

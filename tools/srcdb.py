@@ -231,7 +231,7 @@ class SourceAnnot:
         return
 
     def __iter__(self):
-        return self.nodes.items()
+        return iter(self.nodes.items())
 
     def add(self, name, start, end, anno=None):
         src = self.srcdb.get(name)
@@ -271,13 +271,14 @@ class SourceAnnot:
             fp.write('</pre>\n')
         return
 
-    def show_text(self, fp=sys.stdout, ncontext=3):
+    def show_text(self, fp=sys.stdout, ncontext=3,
+                  showline=lambda line: line):
         for (src,ranges) in self:
-            fp.write('# %s\n' % src.name)
+            fp.write(showline('# %s' % src.name)+'\n')
             for (lineno,line) in src.show(ranges, ncontext=ncontext):
                 if lineno is None:
-                    fp.write(line.rstrip()+'\n')
+                    fp.write(showline('    '+line.rstrip())+'\n')
                 else:
-                    fp.write('%4d: %s\n' % (lineno, line.rstrip()))
+                    fp.write(showline('%4d: %s' % (lineno, line.rstrip()))+'\n')
             fp.write('\n')
         return
