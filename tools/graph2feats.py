@@ -45,13 +45,17 @@ def getfeats(n):
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
-def enum_back(feats, count, done, v1, lprev,
-              v0=None, fprev=None, chain=None, dist=0, calls=None):
+def gettypefeats(n):
+    return [ '@'+w for w in splitwords(striptypename(n.ntype)) ]
+    
+def enum_back(feats, count, done, v1, lprev=None,
+              v0=None, fprev='', chain=None, dist=0, calls=None):
     # prevent explosion.
     if count <= 0: return
     count -= 1
     if (v0,v1) in done: return
-    done.add((v0,v1))
+    if v0 is not None:
+        done.add((v0,v1))
     n1 = v1.node
     if debug:
         print('back: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
@@ -66,7 +70,7 @@ def enum_back(feats, count, done, v1, lprev,
         if n1.kind == 'ref_array' and not link: continue
         # strip label names.
         if link and link[0] in '@%': link = ''
-        #
+        # interprocedural.
         if n1.kind == 'output':
             inputs.append((link, v2, Cons(funcall, calls)))
         elif n1.kind == 'input' and calls is not None:
@@ -74,6 +78,13 @@ def enum_back(feats, count, done, v1, lprev,
                 inputs.append((link, v2, calls.cdr))
         else:
             inputs.append((link, v2, calls))
+    if v0 is None:
+        for f in gettypefeats(n1):
+            feats[(0,f)] = chain
+        for (link,v2,calls) in inputs:
+            enum_back(feats, count, done, v2, link,
+                      v1, fprev, chain, dist, calls)
+        return
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'assign_var':
         for (_,v2,calls) in inputs:
@@ -86,6 +97,8 @@ def enum_back(feats, count, done, v1, lprev,
     for f in fs:
         feat = (-(dist+1),fprev,f)
         feats[feat] = chain
+    for f in gettypefeats(n1):
+        feats[(-(dist+1),f)] = chain
     # if this is a ref_var node, the fact that it refers to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'ref_var':
@@ -101,13 +114,14 @@ def enum_back(feats, count, done, v1, lprev,
                   v1, fs[0], None, dist, calls)
     return
 
-def enum_forw(feats, count, done, v1, lprev,
-              v0=None, fprev=None, chain=None, dist=0, calls=None):
+def enum_forw(feats, count, done, v1, lprev=None,
+              v0=None, fprev='', chain=None, dist=0, calls=None):
     # prevent explosion.
     if count <= 0: return
     count -= 1
     if (v0,v1) in done: return
-    done.add((v0,v1))
+    if v0 is not None:
+        done.add((v0,v1))
     n1 = v1.node
     if debug:
         print('forw: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
@@ -122,7 +136,7 @@ def enum_forw(feats, count, done, v1, lprev,
         if n1.kind == 'assign_array' and not link: continue
         # strip label names.
         if link and link[0] in '@%': link = ''
-        #
+        # interprocedural.
         if n1.kind == 'input':
             outputs.append((link, v2, Cons(funcall, calls)))
         elif n1.kind == 'output' and calls is not None:
@@ -130,11 +144,18 @@ def enum_forw(feats, count, done, v1, lprev,
                 outputs.append((link, v2, calls.cdr))
         else:
             outputs.append((link, v2, calls))
+    if v0 is None:
+        for f in gettypefeats(n1):
+            feats[(0,f)] = chain
+        for (link,v2,calls) in outputs:
+            enum_forw(feats, count, done, v2, link,
+                      v1, fprev, chain, dist, calls)
+        return
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'ref_var':
         for (link,v2,calls) in outputs:
-            enum_forw(feats, count, done, v2, link, v1,
-                      fprev, chain, dist, calls)
+            enum_forw(feats, count, done, v2, link, 
+                      v1, fprev, chain, dist, calls)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
@@ -142,6 +163,8 @@ def enum_forw(feats, count, done, v1, lprev,
     for f in fs:
         feat = ((dist+1),fprev,f)
         feats[feat] = chain
+    for f in gettypefeats(n1):
+        feats[((dist+1),f)] = chain
     # if this is a assign_var node, the fact that it assigns to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'assign_var':
@@ -174,6 +197,7 @@ def main(argv):
     maxoverrides = 1
     count = 50
     mode = None
+    funcs = False
     outpath = None
     srcdb = None
     for (k, v) in opts:
@@ -184,7 +208,7 @@ def main(argv):
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-f': mode = k
         elif k == '-b': mode = k
-        elif k == '-C': mode = k
+        elif k == '-C': funcs = True
     if not args: return usage()
 
     db = None
@@ -215,7 +239,7 @@ def main(argv):
         for node in graph:
             if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
                 item = ('REF', node.ref)
-            elif mode == '-C' and node.kind in CALLS:
+            elif funcs and node.kind in CALLS:
                 item = ('METHOD', node.data)
             else:
                 continue
@@ -236,24 +260,13 @@ def main(argv):
     feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         feats = {}
-        if item[0] == 'REF':
-            for node in nodes:
-                v0 = builder.vtxs[node]
-                done = set()
-                if mode in (None,'-f'):
-                    for (link,v1,_) in v0.outputs:
-                        if link.startswith('_') and link != '_end': continue
-                        enum_forw(feats, count, done, v1, link, v0)
-                if mode in (None,'-b'):
-                    for (link,v1,_) in v0.inputs:
-                        if link.startswith('_') and link != '_end': continue
-                        enum_back(feats, count, done, v1, link, v0)
-        elif item[0] == 'METHOD':
-            for node in nodes:
-                v0 = builder.vtxs[node]
-                done = set()
-                enum_forw(feats, count, done, v0)
+        for node in nodes:
+            v0 = builder.vtxs[node]
+            done = set()
+            if mode in (None,'-b'):
                 enum_back(feats, count, done, v0)
+            if mode in (None,'-f'):
+                enum_forw(feats, count, done, v0)
         if not feats: continue
         nfeats += len(feats)
 
