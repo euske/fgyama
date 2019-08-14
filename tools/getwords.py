@@ -10,23 +10,22 @@ def stripid(name):
     else:
         return None
 
+def stripgeneric(name):
+    (base,_,_) = name.partition('<')
+    return base
+
 def striptypename(name):
-    if name.endswith(';'):
-        name = name[:-1]
-    name = stripid(name)
-    if name is not None and name.startswith('L'):
-        name = name[1:]
-    return name
+    if name.startswith('L'):
+        assert name.endswith(';')
+        name = name[1:-1]
+        name = stripgeneric(name)
+    return stripid(name)
 
 def stripref(name):
     if name.startswith('%'):
         return striptypename(name)
     else:
         return stripid(name)
-
-def stripgeneric(name):
-    (base,_,_) = name.partition('<')
-    return base
 
 def splitmethodname(name):
     assert '(' in name and ')' in name
