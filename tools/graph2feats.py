@@ -6,7 +6,7 @@ import json
 from interproc import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
-from getwords import striptypename, stripref, splitmethodname, splitwords
+from getwords import stripref, splitmethodname, splitwords, gettypewords
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
@@ -33,20 +33,23 @@ def getfeats(n):
         (name,_,_) = splitmethodname(data)
         return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
     elif n.kind in REFS or n.kind in ASSIGNS:
-        return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
+        if n.ref.startswith('%'):
+            return [ '%s:%%%s' % (n.kind, w) for w in gettypewords(n.ref[1:]) ]
+        else:
+            return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
     elif n.kind in CONDS:
         return [ n.kind ]
     elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
         return [ '%s:STRING' % (n.kind) ]
     elif n.kind in ('op_typecast', 'op_typecheck'):
-        return [ '%s:%s' % (n.kind, w) for w in splitwords(striptypename(n.data)) ]
+        return [ '%s:%s' % (n.kind, w) for w in gettypewords(n.data) ]
     elif n.data is None:
         return [ n.kind ]
     else:
         return [ '%s:%s' % (n.kind, n.data) ]
 
 def gettypefeats(n):
-    return [ '@'+w for w in splitwords(striptypename(n.ntype)) ]
+    return [ '@'+w for w in gettypewords(n.ntype) ]
     
 def enum_back(feats, count, done, v1, lprev=None,
               v0=None, fprev='', chain=None, dist=0, calls=None):

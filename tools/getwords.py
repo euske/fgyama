@@ -14,18 +14,9 @@ def stripgeneric(name):
     (base,_,_) = name.partition('<')
     return base
 
-def striptypename(name):
-    if name.startswith('L'):
-        assert name.endswith(';')
-        name = name[1:-1]
-        name = stripgeneric(name)
-    return stripid(name)
-
 def stripref(name):
-    if name.startswith('%'):
-        return striptypename(name)
-    else:
-        return stripid(name)
+    assert not name.startswith('%')
+    return stripid(name)
 
 def splitmethodname(name):
     assert '(' in name and ')' in name
@@ -52,6 +43,19 @@ def splitwords(s):
     n = len(s)
     r = ''.join(reversed(s))
     return [ s[n-m.end(0):n-m.start(0)].lower() for m in WORD.finditer(r) ]
+
+def gettypewords(name):
+    header = ''
+    while name.startswith('['):
+        header += '['
+        name = name[1:]
+    if name.startswith('L'):
+        assert name.endswith(';')
+        name = name[1:-1]
+        name = stripgeneric(name)
+        return [ header+'L'+w for w in splitwords(name) ]
+    else:
+        return [ header+name ]
 
 def main(argv):
     import fileinput
