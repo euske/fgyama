@@ -2,7 +2,7 @@
 import sys
 import re
 import random
-from srcdb import SourceDB, SourceAnnot
+import json
 from featdb import FeatDB
 from getwords import stripid, splitwords
 from vsm import VSM
@@ -17,21 +17,19 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-B srcdb] [-n minpairs] [-t threshold] vars feats [var ...]' %
+        print('usage: %s [-d] [-n minpairs] [-t threshold] vars feats [var ...]' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dB:n:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'dn:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     encoding = None
-    srcdb = None
     minpairs = 0
-    threshold = 0.30
+    threshold = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
-        elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-n': minpairs = int(v)
         elif k == '-t': threshold = float(v)
     if not args: return usage()
@@ -52,17 +50,8 @@ def main(argv):
         feats = db.get_feats(tid, resolve=True)
         sp.add(tid, { feat:exp(-abs(feat[0])) for feat in feats.keys()
                       if feat is not None })
-        sys.stderr.write('.'); sys.stderr.flush()
-
     sp.commit()
-
-    def show(srcs):
-        if srcdb is None: return
-        annot = SourceAnnot(srcdb)
-        for (srcid, start, end) in srcs:
-            annot.add(srcmap[srcid], start, end, 0)
-        annot.show_text()
-        return
+    print('Docs: %r' % len(sp), file=sys.stderr)
 
     if args:
         pairs = []
@@ -82,7 +71,7 @@ def main(argv):
             if minpairs <= npairs: break
         pairs = [ x for x in pairs if x is not None ]
     else:
-        pairs = sp.findall(threshold=threshold)
+        pairs = sp.findall(threshold=threshold, verbose=True)
 
     if minpairs:
         random.shuffle(pairs)
@@ -98,6 +87,7 @@ def main(argv):
                     (item1, type1, f(srcs1)))
             print(data)
         return
+    
     npairs = 0
     nametype = 0
     nameonly = 0
@@ -122,18 +112,18 @@ def main(argv):
         words1 = set(splitwords(name1))
         wordsim = jaccard(words0, words1)
         totalwordsim += wordsim
-        print('*** sim=%.2f, wordsim=%.2f, type=%r: %s/%s' %
-              (sim, wordsim, (type0==type1), name0, name1))
-        if name0 != name1:
-            srcs0 = db.get_feats(tid0, source=True)[0]
-            srcs1 = db.get_feats(tid1, source=True)[0]
-            print('+++', item0)
-            show(srcs0)
-            print('+++', item1)
-            show(srcs1)
-        print('# score=%r/%r/%r/%r, avg=%.2f' %
-              (npairs, nametype, nameonly, typeonly, totalwordsim/npairs))
+        print('+SIM', json.dumps(sim))
+        print('+WORDSIM', json.dumps(wordsim))
+        print('+TYPE', json.dumps(type0 == type1))
+        print('+ITEMS', json.dumps([item0, item1]))
+        srcs0 = db.get_feats(tid0, source=True)[0]
+        srcs1 = db.get_feats(tid1, source=True)[0]
+        print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
+    
+    print('NPairs=%r, NameType=%r, NameOnly=%r, TypeOnly=%r, AvgWordSim=%.2f' %
+          (npairs, nametype, nameonly, typeonly, totalwordsim/npairs),
+          file=sys.stderr)
 
     return 0
 

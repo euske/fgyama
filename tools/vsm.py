@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import math
 
 class VSM:
@@ -20,6 +21,9 @@ class VSM:
         self.idf = None
         self.docs = {}
         return
+
+    def __len__(self):
+        return len(self.docs)
 
     def add(self, key, feats):
         a = set()
@@ -71,11 +75,13 @@ class VSM:
             yield (sim, k1)
         return
 
-    def findall(self, threshold=0):
+    def findall(self, threshold=0, verbose=False):
         items = list(self.docs.items())
         for (i,(k0,f0)) in enumerate(items):
             for (k1,f1) in items[i+1:]:
                 sim = self.calcsim(f0, f1)
                 if sim < threshold: continue
                 yield (sim, k0, k1)
+            if verbose:
+                sys.stderr.write('.'); sys.stderr.flush()
         return
