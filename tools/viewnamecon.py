@@ -23,23 +23,31 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-H] [-c encoding] srcdb [out]' % argv[0])
+        print('usage: %s [-H] [-J script] [-e simvars] [-c encoding] srcdb [namecon]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'Hc:')
+        (opts, args) = getopt.getopt(argv[1:], 'HJ:e:c:')
     except getopt.GetoptError:
         return usage()
     html = False
+    script = None
     encoding = None
+    excluded = set()
     out = sys.stdout
     for (k, v) in opts:
         if k == '-H': html = True
+        elif k == '-J':
+            with open(v) as fp:
+                script = fp.read()
+        elif k == '-e': 
+            with open(v) as fp:
+                for rec in getrecs(fp):
+                    excluded.update(rec['ITEMS'])
         elif k == '-c': encoding = v
     
     if not args: return usage()
     path = args.pop(0)
     srcdb = SourceDB(path, encoding)
-    if not args: return usage()
 
     def showtext(srcs, header=' '):
         annot = SourceAnnot(srcdb)
@@ -98,6 +106,7 @@ function toggle(id) {
     recs = sorted(getrecs(fp), key=lambda rec:rec['SCORE'], reverse=True)
     for (i,rec) in enumerate(recs):
         item = rec['ITEM']
+        if item in excluded: continue
         score = rec['SCORE']
         name = stripid(item)
         names = rec['NAMES']
