@@ -34,6 +34,9 @@ class NaiveBayes:
         self.kprob = None
         return
 
+    def __len__(self):
+        return len(self.kcount)
+
     def add(self, key, feats, c=1):
         for f in feats:
             if f in self.fcount:

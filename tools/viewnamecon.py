@@ -103,10 +103,10 @@ function toggle(id) {
         showhtmlheaders()
         
     fp = fileinput.input(args)
-    recs = sorted(getrecs(fp), key=lambda rec:rec['SCORE'], reverse=True)
+    recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
+    recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
     for (i,rec) in enumerate(recs):
         item = rec['ITEM']
-        if item in excluded: continue
         score = rec['SCORE']
         name = stripid(item)
         names = rec['NAMES']

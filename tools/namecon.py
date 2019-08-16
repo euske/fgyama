@@ -69,9 +69,11 @@ def main(argv):
             if k in words:
                 name1 = tocamelcase(keys[:i])
                 name2 = tocamelcase(keys[:i]+[name])
-                names = [name1,name2]
+                name3 = tocamelcase([name]+keys[:i])
+                names = [name1,name2,name3]
                 break
         print('+NAMES', json.dumps(names))
+        nallfeats = sum(nb.kcount.values())
         feats = []
         for (k,fs) in nb.getfeats([topword]).items():
             fs = dict(fs)
@@ -79,8 +81,9 @@ def main(argv):
                 #assert fid in fid2srcs
                 if fid not in fs: continue
                 n = nb.fcount[fid][None]
+                assert n <= nallfeats
                 feat = db.get_feat(fid)
-                score = math.exp(-abs(feat[0])) * fs[fid] / n
+                score = math.exp(-abs(feat[0])) * math.log(nallfeats / n) * fs[fid]
                 feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
