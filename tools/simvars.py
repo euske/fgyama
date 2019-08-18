@@ -12,25 +12,41 @@ def jaccard(s1, s2):
     if not s1 or not s2: return 0
     return len(s1.intersection(s2)) / len(s1.union(s2))
 
+def getrecs(fp):
+    rec = {}
+    for line in fp:
+        line = line.strip()
+        if line.startswith('+'):
+            (k,_,v) = line[1:].partition(' ')
+            rec[k] = json.loads(v)
+        elif not line:
+            yield rec
+            rec = {}
+    return
+
 # main
 def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n minpairs] [-t threshold] vars feats [var ...]' %
+        print('usage: %s [-d] [-n minpairs] [-i items] [-t threshold] vars feats [var ...]' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dn:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'dn:i:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     encoding = None
     minpairs = 0
+    items = []
     threshold = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-n': minpairs = int(v)
+        elif k == '-i':
+            with open(v) as fp:
+                items.extend( rec['ITEM'] for rec in getrecs(fp) )
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 
@@ -44,7 +60,7 @@ def main(argv):
 
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
-    
+
     sp = VSM()
     for (tid,_) in db:
         feats = db.get_feats(tid, resolve=True)
@@ -54,10 +70,16 @@ def main(argv):
     print('Docs: %r' % len(sp), file=sys.stderr)
 
     if args:
+        items.extend(args)
+
+    if items:
+        print('Items: %r' % len(items), file=sys.stderr)
         pairs = []
-        for tid0 in args:
+        for item0 in items:
+            tid0 = db.get_tid(item0)
             for (sim,tid1) in sp.findsim(tid0, threshold=threshold):
                 pairs.append((sim, tid0, tid1))
+            sys.stderr.write('.'); sys.stderr.flush()
     elif minpairs:
         nbins = int(minpairs*1.1)
         pairs = [ None for _ in range(nbins) ]
@@ -87,7 +109,7 @@ def main(argv):
                     (item1, type1, f(srcs1)))
             print(data)
         return
-    
+
     npairs = 0
     nametype = 0
     nameonly = 0
@@ -120,7 +142,7 @@ def main(argv):
         srcs1 = db.get_feats(tid1, source=True)[0]
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
-    
+
     print('NPairs=%r, NameType=%r, NameOnly=%r, TypeOnly=%r, AvgWordSim=%.2f' %
           (npairs, nametype, nameonly, typeonly, totalwordsim/npairs),
           file=sys.stderr)

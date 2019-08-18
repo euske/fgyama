@@ -153,6 +153,11 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
             self._itemmap[fid] = item
         return item
 
+    def get_tid(self, item):
+        for (tid,v) in self._items:
+            if v == item: return tid
+        raise KeyError(item)
+
     def get_items(self):
         if not self._items:
             self._cur.execute(

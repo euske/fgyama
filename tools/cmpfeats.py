@@ -1,65 +1,52 @@
 #!/usr/bin/env python
 import sys
-from naivebayes import NaiveBayes
 from featdb import FeatDB
+from getwords import stripid, splitwords
 from vsm import VSM
 
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-t threshold] param1 featdb1 param2 featdb2' % argv[0])
+        print('usage: %s [-t threshold] featdb1 featdb2 ...' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 't:')
     except getopt.GetoptError:
         return usage()
 
-    threshold = 0.1
+    threshold = 0.5
     for (k, v) in opts:
         if k == '-t': threshold = float(v)
 
-    if not args: return usage()
-    path = args.pop(0)
-    nb1 = NaiveBayes()
-    with open(path, 'rb') as fp:
-        nb1.load(fp)
-    if not args: return usage()
-    path = args.pop(0)
-    db1 = FeatDB(path)
-    
-    if not args: return usage()
-    path = args.pop(0)
-    nb2 = NaiveBayes()
-    with open(path, 'rb') as fp:
-        nb2.load(fp)
-    if not args: return usage()
-    path = args.pop(0)
-    db2 = FeatDB(path)
+    ws = []
+    for (i,path) in enumerate(args):
+        print('Loading: %d: %r...' % (i,path), file=sys.stderr)
+        db = FeatDB(path)
+        wordfeats = {}
+        for (tid,item) in db.get_items():
+            feats = db.get_feats(tid, resolve=True)
+            name = stripid(item)
+            words = splitwords(name)
+            for w in words:
+                if w in wordfeats:
+                    fs = wordfeats[w]
+                else:
+                    fs = wordfeats[w] = {}
+                for f in feats.keys():
+                    if f not in fs:
+                        fs[f] = 0
+                    fs[f] += 1
+        ws.append(wordfeats)
 
     sp = VSM()
-    keys = [[], []]
-    for (i,(nb,db)) in enumerate([(nb1,db1), (nb2,db2)]):
-        k2f = {}
-        for (fid,d) in nb.fcount.items():
-            feat = db.get_feat(fid)
-            for (k,v) in d.items():
-                if k is None: continue
-                if k in k2f:
-                    z = k2f[k]
-                else:
-                    z = k2f[k] = {}
-                z[fid] = v
-        for (k,z) in k2f.items():
-            sp.add((i,k), z)
-            keys[i].append((i,k))
-        print('listing', i, len(k2f))
+    for (i,wordfeats) in enumerate(ws):
+        for (w,fs) in wordfeats.items():
+            sp.add((i,w), fs)
     sp.commit()
 
-    for k0 in keys[0]:
-        for k1 in keys[1]:
-            sim = sp.calcsim(sp.docs[k0], sp.docs[k1])
-            if sim < threshold: continue
-            print(sim, k0, k1)
+    for (sim,(i0,k0),(i1,k1)) in sp.findall(threshold=threshold, verbose=True):
+        if i0 == i1: continue
+        print(sim, (i0,k0), (i1,k1))
     
     return 0
 
