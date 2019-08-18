@@ -39,14 +39,14 @@ def main(argv):
     debug = 0
     encoding = None
     minpairs = 0
-    items = []
+    items = set()
     threshold = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-n': minpairs = int(v)
         elif k == '-i':
             with open(v) as fp:
-                items.extend( rec['ITEM'] for rec in getrecs(fp) )
+                items.update( rec['ITEM'] for rec in getrecs(fp) )
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 
@@ -70,7 +70,7 @@ def main(argv):
     print('Docs: %r' % len(sp), file=sys.stderr)
 
     if args:
-        items.extend(args)
+        items.update(args)
 
     if items:
         print('Items: %r' % len(items), file=sys.stderr)
