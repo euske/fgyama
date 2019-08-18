@@ -73,8 +73,11 @@ class VSM:
             yield (sim, k1)
         return
 
-    def findall(self, threshold=0, verbose=False):
-        items = list(self.docs.items())
+    def findall(self, keys=None, threshold=0, verbose=False):
+        if keys is None:
+            items = list(self.docs.items())
+        else:
+            items = [ (k,self.docs[k]) for k in keys ]
         for (i,(k0,f0)) in enumerate(items):
             for (k1,f1) in items[i+1:]:
                 sim = self.calcsim(f0, f1)

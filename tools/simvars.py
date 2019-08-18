@@ -46,7 +46,9 @@ def main(argv):
         elif k == '-n': minpairs = int(v)
         elif k == '-i':
             with open(v) as fp:
-                items.update( rec['ITEM'] for rec in getrecs(fp) )
+                for rec in getrecs(fp):
+                    items.add(rec['ITEM'])
+                    items.update( x[2] for x in rec['SUPPORT'] )
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 
@@ -74,12 +76,8 @@ def main(argv):
 
     if items:
         print('Items: %r' % len(items), file=sys.stderr)
-        pairs = []
-        for item0 in items:
-            tid0 = db.get_tid(item0)
-            for (sim,tid1) in sp.findsim(tid0, threshold=threshold):
-                pairs.append((sim, tid0, tid1))
-            sys.stderr.write('.'); sys.stderr.flush()
+        tids = [ db.get_tid(item) for item in items ]
+        pairs = sp.findall(tids, threshold=threshold, verbose=True)
     elif minpairs:
         nbins = int(minpairs*1.1)
         pairs = [ None for _ in range(nbins) ]
