@@ -50,7 +50,7 @@ def getfeats(n):
 
 def gettypefeats(n):
     return [ '@'+w for w in gettypewords(n.ntype) ]
-    
+
 def enum_back(feats, count, done, v1, lprev=None,
               v0=None, fprev='', chain=None, dist=0, calls=None):
     # prevent explosion.
@@ -82,8 +82,6 @@ def enum_back(feats, count, done, v1, lprev=None,
         else:
             inputs.append((link, v2, calls))
     if v0 is None:
-        for f in gettypefeats(n1):
-            feats[(0,f)] = chain
         for (link,v2,calls) in inputs:
             enum_back(feats, count, done, v2, link,
                       v1, fprev, chain, dist, calls)
@@ -97,11 +95,10 @@ def enum_back(feats, count, done, v1, lprev=None,
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
+    fs += gettypefeats(n1)
     for f in fs:
         feat = (-(dist+1),fprev,f)
         feats[feat] = chain
-    for f in gettypefeats(n1):
-        feats[(-(dist+1),f)] = chain
     # if this is a ref_var node, the fact that it refers to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'ref_var':
@@ -148,8 +145,6 @@ def enum_forw(feats, count, done, v1, lprev=None,
         else:
             outputs.append((link, v2, calls))
     if v0 is None:
-        for f in gettypefeats(n1):
-            feats[(0,f)] = chain
         for (link,v2,calls) in outputs:
             enum_forw(feats, count, done, v2, link,
                       v1, fprev, chain, dist, calls)
@@ -157,17 +152,16 @@ def enum_forw(feats, count, done, v1, lprev=None,
     # ignore transparent nodes.
     if n1.kind in IGNORED or n1.kind == 'ref_var':
         for (link,v2,calls) in outputs:
-            enum_forw(feats, count, done, v2, link, 
+            enum_forw(feats, count, done, v2, link,
                       v1, fprev, chain, dist, calls)
         return
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
+    fs += gettypefeats(n1)
     for f in fs:
         feat = ((dist+1),fprev,f)
         feats[feat] = chain
-    for f in gettypefeats(n1):
-        feats[((dist+1),f)] = chain
     # if this is a assign_var node, the fact that it assigns to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'assign_var':
