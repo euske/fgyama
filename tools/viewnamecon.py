@@ -21,6 +21,11 @@ def getrecs(fp):
             rec = {}
     return
 
+def tocamelcase(words):
+    return ''.join(
+        (w if i == 0 else w[0].upper()+w[1:])
+        for (i,w) in enumerate(words) )
+
 def main(argv):
     import fileinput
     import getopt

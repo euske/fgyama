@@ -9,11 +9,6 @@ from featdb import FeatDB
 from getwords import stripid, splitwords
 from naivebayes import NaiveBayes
 
-def tocamelcase(words):
-    return ''.join(
-        (w if i == 0 else w[0].upper()+w[1:])
-        for (i,w) in enumerate(words) )
-
 # main
 def main(argv):
     import fileinput
@@ -57,21 +52,17 @@ def main(argv):
         nwords = len(words)
         f2 = nb.narrow(fids, threshold)
         if len(f2) <= 1: return
-        cands = nb.getkeys(f2)
-        if not cands: return
-        keys = [ k for (k,_) in cands ]
-        topword = keys[0]
+        result = nb.getkeys(f2)
+        if not result: return
+        cands = [ k for (k,_) in result ]
+        topword = cands[0]
         if topword in words: return
+        print('#', words, result[:nwords+1])
         print('+ITEM', json.dumps(item))
-        print('#', words, cands[:nwords+1])
         names = [topword]
-        for (i,k) in enumerate(keys[:nwords+1]):
+        for (i,k) in enumerate(cands[:nwords+1]):
             if k in words:
-                name1 = tocamelcase(keys[:i])
-                name2 = tocamelcase(keys[:i]+[name])
-                name3 = tocamelcase([name]+keys[:i])
-                names = [name1,name2,name3]
-                break
+                names = cands[:i+1]
         print('+NAMES', json.dumps(names))
         nallfeats = sum(nb.kcount.values())
         feats = []
