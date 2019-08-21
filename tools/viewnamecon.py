@@ -146,10 +146,10 @@ function toggle(id) {
         item = rec['ITEM']
         score = rec['SCORE']
         name = stripid(item)
-        names = rec['NAMES']
+        cands = rec['CANDS']
         if html:
             key = ('R%003d' % rid)
-            s = ' / '.join( '<code class=src1><mark>%s</mark></code>' % q(n) for n in names )
+            s = ' / '.join( '<code class=src1><mark>%s</mark></code>' % q(n) for n in cands )
             if shuffle:
                 print(title, key, score)
             else:
@@ -171,7 +171,7 @@ function toggle(id) {
                 out.write('</div></div>\n')
         else:
             out.write('+ %r\n' % item)
-            out.write('%r %r %r\n\n' % (score, name, names))
+            out.write('%r %r %r\n\n' % (score, name, cands))
             showsrc(rec['SOURCE'], ' ')
             for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
                 out.write('- %r %r\n' % (evidence, feat))

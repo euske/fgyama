@@ -23,7 +23,7 @@ class NaiveBayes:
 {'yellow': {None: 80, 'banana': 45, 'orange': 30, 'other': 5}, 'long': {None: 50, 'banana': 40, 'other': 10}, 'sweet': {None: 65, 'banana': 35, 'orange': 15, 'other': 15}}
 >>> b.commit()
 >>> a = b.getkeys(['long','sweet','yellow'])
->>> [ k for (k,p) in a ]
+>>> [ k for (_,k) in a ]
 ['banana', 'other']
 """
 
@@ -38,7 +38,11 @@ class NaiveBayes:
         return len(self.kcount)
 
     def add(self, key, feats, c=1):
-        for f in feats:
+        assert key is not None
+        if key not in self.kcount:
+            self.kcount[key] = 0
+        self.kcount[key] += c
+        for f in set(feats):
             if f in self.fcount:
                 d = self.fcount[f]
             else:
@@ -47,9 +51,7 @@ class NaiveBayes:
                 d[key] = 0
             d[key] += c
             d[None] += c
-        if key not in self.kcount:
-            self.kcount[key] = 0
-        self.kcount[key] += c
+            assert d[key] <= self.kcount[key]
         self.fprob = self.kprob = None
         return
 
@@ -79,6 +81,14 @@ class NaiveBayes:
             for (f,d) in self.fcount.items():
                 p = { k: math.log(v) for (k,v) in d.items() }
                 self.fprob[f] = p
+        # validate
+        n = max(self.kcount.values())
+        for (f,d) in self.fcount.items():
+            assert d[None] == sum( v for (k,v) in d.items() if k is not None )
+            for (k,v) in d.items():
+                if k is None: continue
+                assert k in self.kprob
+                assert v <= n
         return
 
     def save(self, fp):
@@ -133,12 +143,12 @@ class NaiveBayes:
                     skipped.add(k)
                     continue
                 keyp[k] += p1
-        a = [ (k,p) for (k,p) in keyp.items() if k not in skipped ]
+        a = [ (p,k) for (k,p) in keyp.items() if k not in skipped ]
         if not a: return a
-        a.sort(key=lambda x:x[1], reverse=True)
+        a.sort(reverse=True)
         # prevent exp(x) overflow by adjusting the maximum log to zero.
-        m = max( p for (k,p) in a )
-        a = [ (k, p-m) for (k,p) in a ]
+        m = max( p for (p,_) in a )
+        a = [ (p-m, k) for (p,k) in a ]
         if n:
             a = a[:n]
         return a
@@ -166,10 +176,10 @@ class NaiveBayes:
                     skipped.add(k)
                     continue
                 keyp[k] *= p
-        a = [ (k,p) for (k,p) in keyp.items() if k not in skipped ]
+        a = [ (p,k) for (k,p) in keyp.items() if k not in skipped ]
         if not a: return a
-        a.sort(key=lambda x:x[1], reverse=True)
-        for (k,p) in a:
+        a.sort(reverse=True)
+        for (p,k) in a:
             print('p(%r) = %r' % (k, keyp[k]))
         if n:
             a = a[:n]
@@ -182,9 +192,9 @@ class NaiveBayes:
         for (f,d) in self.fcount.items():
             for (k,v) in d.items():
                 if v < threshold: continue
-                if k in keyfeats:
-                    a = keyfeats[k]
-                    a.append((f, v))
+                if k not in keyfeats: continue
+                a = keyfeats[k]
+                a.append((f, v))
         return keyfeats
 
 def main(argv):

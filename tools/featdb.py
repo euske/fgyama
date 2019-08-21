@@ -201,6 +201,13 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
             item2srcs[item] = srcs
         return item2srcs
 
+    def get_numfeatitems(self, fid, resolve=False, source=False):
+        self._cur.execute(
+            'SELECT count(*) FROM ItemFeats WHERE Fid=?;',
+            (fid,))
+        (n,) = self._cur.fetchone()
+        return n
+
 # main
 def main(argv):
     import fileinput

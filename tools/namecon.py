@@ -47,35 +47,27 @@ def main(argv):
         return
 
     def predict(tid, item, fids):
-        name = stripid(item)
-        words = splitwords(name)
-        nwords = len(words)
         f2 = nb.narrow(fids, threshold)
         if len(f2) <= 1: return
-        result = nb.getkeys(f2)
-        if not result: return
-        cands = [ k for (k,_) in result ]
-        topword = cands[0]
+        cands = nb.getkeys(f2)
+        if not cands: return
+        name = stripid(item)
+        words = splitwords(name)
+        (_,topword) = cands[0]
         if topword in words: return
-        print('#', words, result[:nwords+1])
+        cands = cands[:len(words)+1]
+        print('#', words, cands)
         print('+ITEM', json.dumps(item))
-        names = [topword]
-        for (i,k) in enumerate(cands[:nwords+1]):
-            if k in words:
-                names = cands[:i+1]
-        print('+NAMES', json.dumps(names))
-        nallfeats = sum(nb.kcount.values())
+        print('+CANDS', json.dumps(cands))
         feats = []
-        for (k,fs) in nb.getfeats([topword]).items():
-            fs = dict(fs)
-            for fid in fids:
-                #assert fid in fid2srcs
-                if fid not in fs: continue
-                n = nb.fcount[fid][None]
-                assert n <= nallfeats
-                feat = db.get_feat(fid)
-                score = math.exp(-abs(feat[0])) * math.log(nallfeats / n) * fs[fid]
-                feats.append((score, fid))
+        nallitems = len(db.get_items())
+        for fid in fids:
+            d = nb.fcount[fid]
+            if topword not in d: continue
+            df = math.log(nallitems / db.get_numfeatitems(fid))
+            feat = db.get_feat(fid)
+            score = math.exp(-abs(feat[0])) * df * d[topword]
+            feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
         print('+SCORE', totalscore)
@@ -119,6 +111,7 @@ def main(argv):
 
     if outpath is not None:
         print('Exporting model: %r' % outpath, file=sys.stderr)
+        nb.commit()
         with open(outpath, 'wb') as fp:
             nb.save(fp)
 
