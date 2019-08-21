@@ -51,6 +51,7 @@ def main(argv):
             assert fid in fid2items
         #sys.stderr.write('.'); sys.stderr.flush()
 
+    nallitems = len(db.get_items())
     for (word,fid2items) in word2fids.items():
         if not fid2items: continue
         fscore = []
@@ -58,8 +59,9 @@ def main(argv):
         nitems = len(fid2items[0])
         for (fid,items) in fid2items.items():
             if fid == 0: continue
+            df = math.log(nallitems / db.get_numfeatitems(fid))
             feat = db.get_feat(fid)
-            score = math.exp(-abs(feat[0])) * len(items)
+            score = math.exp(-abs(feat[0])) * df * len(items)
             fscore.append((score, fid, items))
             for item in items:
                 if item not in iscore:
