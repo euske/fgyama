@@ -4,6 +4,13 @@ from featdb import FeatDB
 from getwords import stripid, splitwords
 from vsm import VSM
 
+def get(d, k, v):
+    if k in d:
+        a = d[k]
+    else:
+        a = d[k] = v
+    return a
+
 def main(argv):
     import getopt
     def usage():
@@ -18,6 +25,7 @@ def main(argv):
     for (k, v) in opts:
         if k == '-t': threshold = float(v)
 
+    relword = {}
     ws = []
     for (i,path) in enumerate(args):
         print('Loading: %d: %r...' % (i,path), file=sys.stderr)
@@ -27,11 +35,12 @@ def main(argv):
             feats = db.get_feats(tid, resolve=True)
             name = stripid(item)
             words = splitwords(name)
+            for (i,w0) in enumerate(words):
+                for w1 in words[i+1:]:
+                    get(relword, w0, []).append(w1)
+                    get(relword, w1, []).append(w0)
             for w in words:
-                if w in wordfeats:
-                    fs = wordfeats[w]
-                else:
-                    fs = wordfeats[w] = {}
+                fs = get(wordfeats, w, {})
                 for f in feats.keys():
                     if f not in fs:
                         fs[f] = 0
@@ -44,10 +53,12 @@ def main(argv):
             sp.add((i,w), fs)
     sp.commit()
 
-    for (sim,(i0,k0),(i1,k1)) in sp.findall(threshold=threshold, verbose=True):
-        if i0 == i1: continue
-        print(sim, (i0,k0), (i1,k1))
-    
+    for (sim,(i0,w0),(i1,w1)) in sp.findall(threshold=threshold, verbose=True):
+        if w0 == w1: continue
+        if w1 in relword and w0 in relword[w1]: continue
+        if w0 in relword and w1 in relword[w0]: continue
+        print(sim, (i0,w0), (i1,w1))
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

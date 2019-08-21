@@ -11,7 +11,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n feats] srcdb feats.db [word ...]' % argv[0])
+        print('usage: %s [-d] [-n feats] srcdb featdb [word ...]' % argv[0])
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dc:n:')
@@ -32,37 +32,40 @@ def main(argv):
     srcdb = SourceDB(basepath, encoding)
     db = FeatDB(dbpath)
 
-    word2feats = { w:{} for w in args }
-    
+    word2fids = { w:{} for w in args }
+
     for (tid,item) in db:
         name = stripid(item)
         words = splitwords(name)
-        feats = db.get_feats(tid)
+        fids = db.get_feats(tid)
         for w in words:
-            if w not in word2feats: continue
-            feat2items = word2feats[w]
-            for feat in feats:
-                if feat in feat2items:
-                    items = feat2items[feat]
+            if w not in word2fids: continue
+            fid2items = word2fids[w]
+            for fid in fids:
+                if fid in fid2items:
+                    items = fid2items[fid]
                 else:
-                    items = feat2items[feat] = []
+                    items = fid2items[fid] = []
                 assert tid not in items
                 items.append(tid)
+            assert fid in fid2items
         #sys.stderr.write('.'); sys.stderr.flush()
 
-    for (word,feat2items) in word2feats.items():
+    for (word,fid2items) in word2fids.items():
+        if not fid2items: continue
         fscore = []
         iscore = {}
-        for (fid,items) in feat2items.items():
+        nitems = len(fid2items[0])
+        for (fid,items) in fid2items.items():
             if fid == 0: continue
-            (d,_,_) = db.get_feat(fid)
-            score = math.exp(-abs(d)) * len(items)
+            feat = db.get_feat(fid)
+            score = math.exp(-abs(feat[0])) * len(items)
             fscore.append((score, fid, items))
             for item in items:
                 if item not in iscore:
                     iscore[item] = 0
                 iscore[item] += score
-        print('word: %r, items: %r, feats: %r' % (word, len(iscore), len(fscore)))
+        print('*** word: %r, items: %r, feats: %r\n' % (word, nitems, len(fscore)))
         fscore.sort(reverse=True)
         for (score,fid,items) in fscore[:ntop]:
             feat = db.get_feat(fid)
