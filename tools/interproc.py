@@ -186,6 +186,8 @@ class IDFBuilder:
                             for (label,n2) in node.outputs:
                                 assert n2.kind == 'receive'
                                 assert n2.ref == label or n2.ref is None
+                                if label is None: label = '#return'
+                                if n1.ref != label: continue
                                 vtx1.connect(label, self.getvtx(n2), node)
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
