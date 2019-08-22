@@ -30,28 +30,28 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-J script] [-n limit] [-S] [-e simvars] [-c encoding] srcdb [namecon]' % argv[0])
+        print('usage: %s [-o output] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:J:n:Se:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:S:n:Re:c:')
     except getopt.GetoptError:
         return usage()
     output = None
     html = False
     script = None
     encoding = None
-    shuffle = False
+    randomized = False
     excluded = set()
     limit = 10
     for (k, v) in opts:
         if k == '-o':
             output = v
             html = output.endswith('.html')
-        elif k == '-J':
+        elif k == '-S':
             with open(v) as fp:
                 script = fp.read()
         elif k == '-n': limit = int(v)
-        elif k == '-S': shuffle = True
+        elif k == '-R': randomized = True
         elif k == '-e':
             with open(v) as fp:
                 for rec in getrecs(fp):
@@ -74,14 +74,14 @@ def main(argv):
 <style>
 h1 { border-bottom: 4px solid black; }
 h2 { color: white; background: black; padding: 4px; }
-h3 { border-bottom: 1px solid black; margin-top: 0; }
+h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
 pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
 .support { margin: 1em; padding: 1em; border: 2px solid black; }
-.src { background: #88ff88; }
-.src0 { background: #ffcccc; }
-.src0 mark { color: white; background: red; }
-.src1 { background: #ccccff; }
-.src1 mark { color: white; background: blue; }
+.old { background: #ccccff; }
+.old mark { color: white; background: blue; }
+.new { background: #88ff88; }
+.match { background: #ffcccc; }
+.match mark { color: white; background: red; }
 </style>
 <script>
 function toggle(id) {
@@ -101,20 +101,21 @@ function toggle(id) {
 <h1>Variable Rewrite Experiment: {title}</h1>
 <h2>Your Mission</h2>
 <ul>
-<li> For each <span class=src>green</span> snippet, look at the <code class=src><mark>variable</mark></code>
-    and choose if one of the <code class=src1><mark>rewrites</mark></code> improves the ease of code understanding.
+<li> For each <span class=old>blue</span> snippet, look at the <code class=old><mark>variable</mark></code>
+    and choose if one of the <code class=new><mark>rewrites</mark></code> helps understanding the code.<br>
+  Choose either:
   <ol type=a>
   <li> The rewrite is GOOD.
   <li> The rewrite is ACCEPTABLE.
   <li> The rewrite is BAD.
+  </ol><ol type=a start="26">
+  <li> UNDECIDABLE (cannot determine after <u>3 minutes</u>).
   </ol>
-<li> When it's undecidable after <u>3 minutes</u> with the given snippet,
- choose UNDECIDABLE.
-<li> <u>Do not consult others about the code during this experiment.</u>
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
   the experiment organizer.<br>
+<li> <u>Do not consult others about the code during this experiment.</u>
 </ul>
 '''.format(title=title))
 
@@ -146,32 +147,42 @@ function toggle(id) {
         item = rec['ITEM']
         score = rec['SCORE']
         name = stripid(item)
-        cands = rec['CANDS']
         if html:
             key = ('R%003d' % rid)
-            s = ' / '.join( '<code class=src1><mark>%s</mark></code>' % q(n) for n in cands )
-            if shuffle:
+            words = list(reversed(splitwords(name)))
+            cands = [ k for (_,k) in rec['CANDS'] ]
+            wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
+            wordincands = [ w for w in words if w in cands ]
+            for (i,w) in zip(wordidx, wordincands):
+                cands[i] = w
+            def f(w):
+                s = 'old' if w in words else 'new'
+                return '<code class=%s><mark>%s</mark></code>' % (s, q(w))
+            old = ' / '.join( f(w) for w in words )
+            new = ' / '.join( f(k) for k in cands )
+            footer = ' &nbsp; (%.3f)' % score
+            if randomized:
+                footer = ''
                 print(title, key, score)
-            else:
-                s += ' &nbsp; (%.3f)' % score
-            out.write('<h2>Proposal %d: <code class=src><mark>%s</mark></code> &rarr; %s</h2>\n' %
-                      (rid, q(name), s))
-            out.write('<div class=cat>Category: <span id="%s" class=ui> </span></div>\n' % (key))
-            showsrc(rec['SOURCE'], 'src')
+            out.write('<h2>Proposal %d: %s &rarr; %s%s</h2>\n' %
+                      (rid, old, new, footer))
+            if script is not None:
+                out.write('<div class=cat>Evaluation: <span id="%s" class=ui> </span></div>\n' % (key))
+            out.write('<h3><code class=old><mark>%s</mark></code></h3>' % stripid(item))
+            showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
                 out.write('<div class=support>\n')
-                out.write('<h3>Support %d: <code>%s</code> &nbsp; (<code>%s</code>)</h3>\n' %
-                          (sid, stripid(evidence), feat))
-                showsrc(srcs1, 'src1')
+                out.write('<h3><code class=new><mark>%s</mark></code> &nbsp; (<code>%s</code>)</h3>\n' %
+                          (stripid(evidence), feat))
+                showsrc(srcs1, 'new')
                 id = ('S_%s_%s' % (rid,sid))
-                out.write('<a href="javascript:void(0)" onclick="toggle(\'%s\')">[+]</a>\n' % id)
+                out.write('<a href="javascript:void(0)" onclick="toggle(\'%s\')">[+]</a> Match<br>\n' % id)
                 out.write('<div id=%s hidden>\n' % id)
-                out.write('<h3>Original</h3>\n' % feat)
-                showsrc(srcs0, 'src0')
+                showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
             out.write('+ %r\n' % item)
-            out.write('%r %r %r\n\n' % (score, name, cands))
+            out.write('%r %r %r\n\n' % (score, name, rec['CANDS']))
             showsrc(rec['SOURCE'], ' ')
             for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
                 out.write('- %r %r\n' % (evidence, feat))
@@ -187,8 +198,8 @@ function toggle(id) {
         (title,_) = os.path.splitext(os.path.basename(path))
         if html:
             showhtmlheaders(title)
-        if shuffle:
-            random.shuffle(recs)
+        if randomized:
+            random.randomized(recs)
         else:
             recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         if limit:
