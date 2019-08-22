@@ -2676,21 +2676,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         @Override
         public DFRef lookupArgument(int index)
             throws VariableNotFound {
-            if (_arguments == null) throw new VariableNotFound("#arg"+index);
+	    assert _arguments != null;
             return _arguments[index];
         }
 
         @Override
         public DFRef lookupReturn()
             throws VariableNotFound {
-            if (_return == null) throw new VariableNotFound("#return");
+	    assert _return != null;
             return _return;
         }
 
         @Override
         public DFRef lookupException()
             throws VariableNotFound {
-            if (_exception == null) throw new VariableNotFound("#exception");
+	    assert _exception != null;
             return _exception;
         }
 
