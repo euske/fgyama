@@ -4,6 +4,7 @@ import sys
 from subprocess import Popen, PIPE
 from graph import DFGraph
 from graph import get_graphs
+from getwords import stripid, splitmethodname
 
 def q(s):
     if s:
@@ -13,11 +14,6 @@ def q(s):
 
 def qp(props):
     return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
-
-def sr(ref):
-    if ref is None: return 'None'
-    (_,_,ref) = ref.rpartition('/')
-    return ref
 
 def write_gv(out, scope, highlight=None, level=0, name=None):
     h = ' '*level
@@ -30,22 +26,28 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     out.write(h+' label=%s;\n' % q(name))
     for node in scope.nodes:
         kind = node.kind
+        styles = { 'label':kind }
         if kind in ('join','begin','end','repeat','case'):
-            styles = {'shape': 'diamond',
-                      'label': '%s (%s)' % (kind, sr(node.ref))}
+            styles['shape'] = 'diamond'
+            if node.ref is not None:
+                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
         elif kind in ('value', 'valueset'):
-            styles = {'shape': 'box', 'fontname':'courier',
-                      'label': node.data}
+            styles['shape'] = 'box'
+            styles['fontname'] = 'courier'
+            styles['label'] = node.data
         elif kind in ('input','output','receive'):
-            styles = {'label': '%s (%s)' % (kind, sr(node.ref))}
+            if node.ref is not None:
+                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
         elif kind in ('call','new'):
-            styles = {'fontname':'courier',
-                      'label': sr(node.data)}
+            (name,_,_) = splitmethodname(node.data)
+            styles['fontname'] = 'courier'
+            styles['label'] = name
         elif kind is not None and kind.startswith('op_'):
-            styles = {'fontname':'courier',
-                      'label': (node.data or kind)}
+            styles['fontname'] = 'courier'
+            styles['label'] = (node.data or kind)
         else:
-            styles = {'label': sr(node.ref)}
+            if node.ref is not None:
+                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
         out.write(h+' N%s [%s];\n' % (node.nid, qp(styles)))
