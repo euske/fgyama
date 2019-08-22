@@ -95,7 +95,7 @@ def enum_back(feats, count, done, v1, lprev=None,
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    fs += gettypefeats(n1)
+    fs += [ lprev+':'+f for f in gettypefeats(n1) ]
     for f in fs:
         feat = (-(dist+1),fprev,f)
         feats[feat] = chain
@@ -158,7 +158,7 @@ def enum_forw(feats, count, done, v1, lprev=None,
     # add the features.
     fs = [ lprev+':'+f for f in getfeats(n1) ]
     if not fs: return
-    fs += gettypefeats(n1)
+    fs += gettypefeats(v0.node)
     for f in fs:
         feat = ((dist+1),fprev,f)
         feats[feat] = chain
