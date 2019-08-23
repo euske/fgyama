@@ -66,7 +66,7 @@ def main(argv):
             if topword not in d: continue
             df = math.log(nallitems / db.get_numfeatitems(fid))
             feat = db.get_feat(fid)
-            score = math.exp(-abs(feat[0])) * df * d[topword]
+            score = math.exp(-abs(feat[0])) * df * d[topword] / d[None]
             feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )

@@ -181,11 +181,11 @@ function toggle(id) {
                 showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
-            out.write('+ %r\n' % item)
+            out.write('*** %r\n\n' % item)
             out.write('%r %r %r\n\n' % (score, name, rec['CANDS']))
             showsrc(rec['SOURCE'], ' ')
             for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
-                out.write('- %r %r\n' % (evidence, feat))
+                out.write('+ %r %r\n' % (evidence, feat))
                 showsrc(srcs1, 'E')
                 showsrc(srcs0, 'S')
         return

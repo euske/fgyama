@@ -101,11 +101,13 @@ def main(argv):
             type0 = refs[item0]
             type1 = refs[item1]
             srcs0 = db.get_feats(tid0, source=True)[0]
-            srcs1 = db.get_feats(tid0, source=True)[1]
-            data = (i, sim,
-                    (item0, type0, f(srcs0)),
-                    (item1, type1, f(srcs1)))
-            print(data)
+            srcs1 = db.get_feats(tid1, source=True)[0]
+            print('+PID', i)
+            print('+SIM', json.dumps(sim))
+            print('+TYPES', json.dumps([type0, type1]))
+            print('+ITEMS', json.dumps([item0, item1]))
+            print('+SRCS', json.dumps([srcs0, srcs1]))
+            print()
         return
 
     npairs = 0
@@ -113,7 +115,7 @@ def main(argv):
     nameonly = 0
     typeonly = 0
     totalwordsim = 0
-    for (sim,tid0,tid1) in pairs:
+    for (i,(sim,tid0,tid1)) in enumerate(pairs):
         assert tid0 != tid1
         npairs += 1
         item0 = db.get_item(tid0)
@@ -132,12 +134,13 @@ def main(argv):
         words1 = set(splitwords(name1))
         wordsim = jaccard(words0, words1)
         totalwordsim += wordsim
-        print('+SIM', json.dumps(sim))
-        print('+WORDSIM', json.dumps(wordsim))
-        print('+TYPE', json.dumps(type0 == type1))
-        print('+ITEMS', json.dumps([item0, item1]))
         srcs0 = db.get_feats(tid0, source=True)[0]
         srcs1 = db.get_feats(tid1, source=True)[0]
+        print('+PID', i)
+        print('+SIM', json.dumps(sim))
+        print('+WORDSIM', json.dumps(wordsim))
+        print('+TYPES', json.dumps([type0, type1]))
+        print('+ITEMS', json.dumps([item0, item1]))
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
 
