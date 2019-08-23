@@ -4,9 +4,9 @@ import re
 import random
 import json
 from featdb import FeatDB
-from getwords import stripid, splitwords
 from vsm import VSM
 from math import exp
+from getwords import stripid, splitwords
 
 def jaccard(s1, s2):
     if not s1 or not s2: return 0
@@ -29,21 +29,27 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n minpairs] [-i items] [-t threshold] vars feats [var ...]' %
+        print('usage: %s [-d] [-n minpairs] [-r refs] [-i items] [-t threshold] featdb [var ...]' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dn:i:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'dn:r:i:t:')
     except getopt.GetoptError:
         return usage()
     debug = 0
-    encoding = None
     minpairs = 0
+    refs = None
     items = set()
     threshold = 0.90
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-n': minpairs = int(v)
+        elif k == '-r':
+            refs = {}
+            with open(v) as fp:
+                for line in fp:
+                    (ref,_,ntype) = line.strip().partition(' ')
+                    refs[ref] = ntype
         elif k == '-i':
             with open(v) as fp:
                 for rec in getrecs(fp):
@@ -51,14 +57,6 @@ def main(argv):
                     items.update( x[2] for x in rec['SUPPORT'] )
         elif k == '-t': threshold = float(v)
     if not args: return usage()
-
-    path = args.pop(0)
-    refs = {}
-    with open(path) as fp:
-        for line in fp:
-            (ref,_,ntype) = line.strip().partition(' ')
-            refs[ref] = ntype
-    print('Refs: %r' % len(refs), file=sys.stderr)
 
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
@@ -96,16 +94,17 @@ def main(argv):
     if minpairs:
         random.shuffle(pairs)
         for (i,(sim,tid0,tid1)) in enumerate(pairs):
-            item0 = db.get_item(tid0)
-            item1 = db.get_item(tid1)
-            type0 = refs[item0]
-            type1 = refs[item1]
-            srcs0 = db.get_feats(tid0, source=True)[0]
-            srcs1 = db.get_feats(tid1, source=True)[0]
             print('+PID', i)
             print('+SIM', json.dumps(sim))
-            print('+TYPES', json.dumps([type0, type1]))
+            item0 = db.get_item(tid0)
+            item1 = db.get_item(tid1)
             print('+ITEMS', json.dumps([item0, item1]))
+            if refs is not None:
+                type0 = refs[item0]
+                type1 = refs[item1]
+                print('+TYPES', json.dumps([type0, type1]))
+            srcs0 = db.get_feats(tid0, source=True)[0]
+            srcs1 = db.get_feats(tid1, source=True)[0]
             print('+SRCS', json.dumps([srcs0, srcs1]))
             print()
         return
@@ -116,31 +115,33 @@ def main(argv):
     typeonly = 0
     totalwordsim = 0
     for (i,(sim,tid0,tid1)) in enumerate(pairs):
+        print('+PID', i)
+        print('+SIM', json.dumps(sim))
         assert tid0 != tid1
         npairs += 1
         item0 = db.get_item(tid0)
         item1 = db.get_item(tid1)
-        type0 = refs[item0]
-        type1 = refs[item1]
+        print('+ITEMS', json.dumps([item0, item1]))
+        type0 = type1 = None
+        if refs is not None:
+            type0 = refs[item0]
+            type1 = refs[item1]
+            print('+TYPES', json.dumps([type0, type1]))
         name0 = stripid(item0)
         name1 = stripid(item1)
-        if type0 == type1 and name0 == name1:
+        if type0 is not None and type0 == type1 and name0 == name1:
             nametype += 1
-        elif type0 == type1:
+        elif type0 is not None and type0 == type1:
             typeonly += 1
         elif name0 == name1:
             nameonly += 1
         words0 = set(splitwords(name0))
         words1 = set(splitwords(name1))
         wordsim = jaccard(words0, words1)
+        print('+WORDSIM', json.dumps(wordsim))
         totalwordsim += wordsim
         srcs0 = db.get_feats(tid0, source=True)[0]
         srcs1 = db.get_feats(tid1, source=True)[0]
-        print('+PID', i)
-        print('+SIM', json.dumps(sim))
-        print('+WORDSIM', json.dumps(wordsim))
-        print('+TYPES', json.dumps([type0, type1]))
-        print('+ITEMS', json.dumps([item0, item1]))
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
 
