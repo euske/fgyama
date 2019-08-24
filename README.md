@@ -116,10 +116,10 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
 ## TODOs:
 
-  * DFMethodType should have an Exception field.
-  * Vararg methods matching.
   * Lambdas.
   * Method references.
+  * Catch and forward method Exceptions.
+  * Vararg methods matching.
   * Handle consecutive SwitchCases.
   * Java language spec.: https://docs.oracle.com/javase/specs/
   * Moar unittests.

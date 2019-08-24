@@ -103,4 +103,8 @@ public class DFFunctionType implements DFType {
     public void setExceptions(DFType[] exceptions) {
         _exceptions = exceptions;
     }
+
+    public DFType[] getExceptions() {
+        return _exceptions;
+    }
 }

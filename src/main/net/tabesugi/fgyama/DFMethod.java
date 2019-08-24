@@ -487,7 +487,6 @@ abstract class CallNode extends DFNode {
 
     public DFFunctionType funcType;
     public DFNode[] args;
-    public DFNode exception;
 
     public CallNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
@@ -495,7 +494,6 @@ abstract class CallNode extends DFNode {
         super(graph, scope, type, ref, ast);
         this.funcType = funcType;
         this.args = null;
-        this.exception = null;
     }
 
     @Override
@@ -518,10 +516,11 @@ class MethodCallNode extends CallNode {
     public DFMethod[] methods;
 
     public MethodCallNode(
-        DFGraph graph, DFVarScope scope, DFMethod[] methods,
-        ASTNode ast, DFNode obj) {
-        super(graph, scope, methods[0].getFuncType().getReturnType(), null,
-              ast, methods[0].getFuncType());
+        DFGraph graph, DFVarScope scope,
+        ASTNode ast, DFFunctionType funcType,
+        DFNode obj, DFMethod[] methods) {
+        super(graph, scope, funcType.getReturnType(), null,
+              ast, funcType);
         if (obj != null) {
             this.accept(obj, "#this");
         }
@@ -1182,8 +1181,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     }
                 }
                 DFMethod methods[] = method.getOverrides();
+                DFFunctionType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
-                    graph, scope, methods, invoke, obj);
+                    graph, scope, invoke, funcType, obj, methods);
                 call.setArgs(args);
                 {
                     ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
@@ -1212,10 +1212,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                     graph, scope, call, invoke, ref));
                     }
                 }
-                if (call.exception != null) {
-                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                    frame.addExit(new DFExit(dstFrame, call.exception));
-                }
+                // TODO: catch and forward exceptions.
+                // for (DFNode exception : funcType.getExceptions()) {
+                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                //     frame.addExit(new DFExit(dstFrame, exception));
+                // }
 
             } else if (expr instanceof SuperMethodInvocation) {
 		// "super.method()"
@@ -1255,8 +1256,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     method = fallback;
                 }
                 DFMethod methods[] = new DFMethod[] { method };
+                DFFunctionType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
-                    graph, scope, methods, sinvoke, obj);
+                    graph, scope, sinvoke, funcType, obj, methods);
                 call.setArgs(args);
                 DFFrame frame1 = method.getFrame();
                 if (frame1 != null) {
@@ -1274,10 +1276,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                     graph, scope, call, sinvoke, ref));
                     }
                 }
-                if (call.exception != null) {
-                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                    frame.addExit(new DFExit(dstFrame, call.exception));
-                }
+                // TODO: catch and forward exceptions.
+                // for (DFNode exception : funcType.getExceptions()) {
+                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                //     frame.addExit(new DFExit(dstFrame, exception));
+                // }
 
             } else if (expr instanceof ArrayCreation) {
 		// "new int[10]"
@@ -1419,6 +1422,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 typeList.toArray(argTypes);
                 DFMethod constructor = instKlass.lookupMethod(
                     DFCallStyle.Constructor, null, argTypes);
+                DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);
@@ -1438,10 +1442,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                     graph, scope, call, cstr, ref));
                     }
                 }
-                if (call.exception != null) {
-                    DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                    frame.addExit(new DFExit(dstFrame, call.exception));
-                }
+                // TODO: catch and forward exceptions.
+                // for (DFNode exception : funcType.getExceptions()) {
+                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+                //     frame.addExit(new DFExit(dstFrame, exception));
+                // }
 
             } else if (expr instanceof ConditionalExpression) {
 		// "c? a : b"
@@ -2344,8 +2349,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFMethod constructor = klass.lookupMethod(
                 DFCallStyle.Constructor, null, argTypes);
             DFMethod methods[] = new DFMethod[] { constructor };
+            DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
-                graph, scope, methods, ci, obj);
+                graph, scope, ci, funcType, obj, methods);
             call.setArgs(args);
             DFFrame frame1 = constructor.getFrame();
             if (frame1 != null) {
@@ -2361,10 +2367,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                 graph, scope, call, ci, ref));
                 }
             }
-            if (call.exception != null) {
-                DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                frame.addExit(new DFExit(dstFrame, call.exception));
-            }
+            // TODO: catch and forward exceptions.
+            // for (DFNode exception : funcType.getExceptions()) {
+            //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+            //     frame.addExit(new DFExit(dstFrame, exception));
+            // }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
@@ -2389,8 +2396,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFMethod constructor = baseKlass.lookupMethod(
                 DFCallStyle.Constructor, null, argTypes);
             DFMethod methods[] = new DFMethod[] { constructor };
+            DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
-                graph, scope, methods, sci, obj);
+                graph, scope, sci, funcType, obj, methods);
             call.setArgs(args);
             DFFrame frame1 = constructor.getFrame();
             if (frame1 != null) {
@@ -2406,10 +2414,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                                 graph, scope, call, sci, ref));
                 }
             }
-            if (call.exception != null) {
-                DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                frame.addExit(new DFExit(dstFrame, call.exception));
-            }
+            // TODO: catch and forward exceptions.
+            // for (DFNode exception : funcType.getExceptions()) {
+            //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+            //     frame.addExit(new DFExit(dstFrame, exception));
+            // }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
 	    // "class K { ... }"
