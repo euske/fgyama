@@ -296,6 +296,24 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	this.buildTypeFromDecls(ast);
     }
 
+    public void setKlassLambda(String filePath, LambdaExpression lambda)
+	throws InvalidSyntax {
+        _filePath = filePath;
+        _ast = lambda;
+        String id = Utils.encodeASTNode(lambda);
+        DFMethod method = new DFMethod(
+            this, id, DFCallStyle.Lambda, "lambda", _klassScope, false);
+        this.addMethod(method, id);
+        ASTNode body = lambda.getBody();
+        if (body instanceof Statement) {
+            this.buildTypeFromStmt((Statement)body, method, method.getScope());
+        } else if (body instanceof Expression) {
+            this.buildTypeFromExpr((Expression)body, method, method.getScope());
+        } else {
+            throw new InvalidSyntax(body);
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
@@ -676,13 +694,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFKlass lambdaKlass = space.createKlass(this, outerScope, id);
-            ASTNode body = lambda.getBody();
-            if (body instanceof Statement) {
-            } else if (body instanceof Expression) {
-            } else {
-                throw new InvalidSyntax(body);
-            }
-	    // XXX TODO LambdaExpression
+            lambdaKlass.setKlassLambda(this.getFilePath(), lambda);
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -1143,6 +1155,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         } else if (ast instanceof AnonymousClassDeclaration) {
             this.buildMembersFromAnonDecl(finder, (AnonymousClassDeclaration)ast);
+
+        } else {
+            throw new InvalidSyntax(ast);
         }
     }
 

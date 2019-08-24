@@ -841,13 +841,6 @@ public class DFFrame {
         } else if (expr instanceof LambdaExpression) {
             // "x -> { ... }"
             LambdaExpression lambda = (LambdaExpression)expr;
-            ASTNode body = lambda.getBody();
-            if (body instanceof Statement) {
-            } else if (body instanceof Expression) {
-            } else {
-                throw new InvalidSyntax(body);
-            }
-            // XXX TODO LambdaExpression
             String id = Utils.encodeASTNode(lambda);
             return method.getType(id);
 

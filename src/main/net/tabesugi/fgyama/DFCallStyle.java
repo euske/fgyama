@@ -9,6 +9,7 @@ public enum DFCallStyle {
     Constructor,
     InstanceMethod,
     StaticMethod,
+    Lambda,
     InstanceOrStatic,           // for search only.
     Initializer;
 
