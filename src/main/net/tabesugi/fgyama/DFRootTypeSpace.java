@@ -71,7 +71,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
 	String klassName = fullName.substring(j+1);
         DFTypeSpace space = this.lookupSpace(spaceName);
         // Create a top-level klass.
-        DFKlass klass = space.createKlass(null, null, klassName);
+        DFKlass klass = space.getKlass(klassName);
+        if (klass == null) {
+            klass = space.addKlass(
+                klassName, new DFKlass(klassName, space, null, null));
+        }
         klass.setFinder(_finder);
         while (0 <= i) {
             // Create inner klasses.
@@ -79,8 +83,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-            space = klass;
-            klass = space.createKlass(klass, klass.getKlassScope(), name);
+            if (klass.getKlass(name) != null) {
+                klass = klass.getKlass(name);
+            } else {
+                klass = klass.addKlass(
+                    name, new DFKlass(name, klass, klass, klass.getKlassScope()));
+            }
         }
         klass.setJarPath(jarPath, entPath);
         InputStream strm = jarFile.getInputStream(jarEntry);

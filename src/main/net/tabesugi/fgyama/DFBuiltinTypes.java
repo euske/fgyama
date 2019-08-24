@@ -14,19 +14,19 @@ public class DFBuiltinTypes {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
         DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
-        _object = java_lang.createKlass(null, null, "Object");
-        _class = java_lang.createKlass(null, null, "Class");
-        _enum = java_lang.createKlass(null, null, "Enum");
-        _string = java_lang.createKlass(null, null, "String");
-        _byte = java_lang.createKlass(null, null, "Byte");
-        _character = java_lang.createKlass(null, null, "Character");
-        _short = java_lang.createKlass(null, null, "Short");
-        _integer = java_lang.createKlass(null, null, "Integer");
-        _long = java_lang.createKlass(null, null, "Long");
-        _float = java_lang.createKlass(null, null, "Float");
-        _double = java_lang.createKlass(null, null, "Double");
-        _boolean = java_lang.createKlass(null, null, "Boolean");
-        _exception = java_lang.createKlass(null, null, "Exception");
+        _object = createKlass(java_lang, "Object");
+        _class = createKlass(java_lang, "Class");
+        _enum = createKlass(java_lang, "Enum");
+        _string = createKlass(java_lang, "String");
+        _byte = createKlass(java_lang, "Byte");
+        _character = createKlass(java_lang, "Character");
+        _short = createKlass(java_lang, "Short");
+        _integer = createKlass(java_lang, "Integer");
+        _long = createKlass(java_lang, "Long");
+        _float = createKlass(java_lang, "Float");
+        _double = createKlass(java_lang, "Double");
+        _boolean = createKlass(java_lang, "Boolean");
+        _exception = createKlass(java_lang, "Exception");
         _array = new ArrayKlass(java_lang, _object);
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
@@ -45,6 +45,11 @@ public class DFBuiltinTypes {
         _double.load();
         _boolean.load();
         _exception.load();
+    }
+
+    private static DFKlass createKlass(DFTypeSpace typeSpace, String id) {
+        return typeSpace.addKlass(
+            id, new DFKlass(id, typeSpace, null, null));
     }
 
     private static class ArrayKlass extends DFKlass {

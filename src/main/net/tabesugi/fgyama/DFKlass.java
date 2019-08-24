@@ -678,7 +678,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
                 String id = Utils.encodeASTNode(anonDecl);
-                DFKlass anonKlass = space.createKlass(this, outerScope, id);
+                DFKlass anonKlass = space.addKlass(
+                    id, new DFKlass(id, space, this, outerScope));
                 anonKlass.setKlassTree(this.getFilePath(), anonDecl);
             }
 
@@ -693,7 +694,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
-            DFKlass lambdaKlass = space.createKlass(this, outerScope, id);
+            DFKlass lambdaKlass = space.addKlass(
+                id, new DFKlass(id, space, this, outerScope));
             lambdaKlass.setKlassLambda(this.getFilePath(), lambda);
 
         } else if (expr instanceof MethodReference) {
@@ -703,7 +705,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
             //  TypeMethodReference
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
-            DFKlass methodrefKlass = space.createKlass(this, outerScope, id);
+            DFKlass methodrefKlass = space.addKlass(
+                id, new DFKlass(id, space, this, outerScope));
             // XXX TODO MethodReference
 
         } else {

@@ -79,25 +79,15 @@ public class DFTypeSpace {
         return space;
     }
 
-    protected DFKlass createKlass(
-        DFKlass outerKlass, DFVarScope outerScope, SimpleName name) {
-        return this.createKlass(
-            outerKlass, outerScope, name.getIdentifier());
-    }
-
-    protected DFKlass createKlass(
-        DFKlass outerKlass, DFVarScope outerScope, String id) {
+    public DFKlass getKlass(String id) {
         assert id.indexOf('.') < 0;
-        DFKlass klass = _id2klass.get(id);
-        if (klass != null) return klass;
-        klass = new DFKlass(id, this, outerKlass, outerScope);
-        //Logger.info("DFTypeSpace.createKlass:", klass);
-        return this.addKlass(id, klass);
+        //assert !_id2klass.containsKey(id);
+        return _id2klass.get(id);
     }
 
     public DFKlass addKlass(String id, DFKlass klass) {
         assert id.indexOf('.') < 0;
-        //assert !_id2klass.containsKey(id);
+        assert !_id2klass.containsKey(id);
         _id2klass.put(id, klass);
         //Logger.info("DFTypeSpace.addKlass:", this, ":", id);
         return klass;
@@ -126,8 +116,9 @@ public class DFTypeSpace {
         DFKlass outerKlass, DFVarScope outerScope) {
         assert abstTypeDecl != null;
         //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
-        DFKlass klass = this.createKlass(
-            outerKlass, outerScope, abstTypeDecl.getName());
+        String id = abstTypeDecl.getName().getIdentifier();
+        DFKlass klass = this.addKlass(
+            id, new DFKlass(id, this, outerKlass, outerScope));
         if (abstTypeDecl instanceof TypeDeclaration) {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
