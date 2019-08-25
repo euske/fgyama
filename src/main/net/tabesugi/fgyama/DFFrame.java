@@ -481,16 +481,49 @@ public class DFFrame {
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
+	    DFRef ref = scope.lookupThis();
+	    this.addInputRef(ref);
+	    DFKlass klass = ref.getRefType().toKlass();
+            klass.load();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) ci.arguments()) {
-                this.buildExpr(finder, method, scope, arg);
+                DFType type = this.buildExpr(finder, method, scope, arg);
+                if (type == null) return;
+                typeList.add(type);
             }
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
+            try {
+		DFMethod method1 = klass.lookupMethod(
+		    DFCallStyle.Constructor, null, argTypes);
+                method1.addCaller(method);
+		this.fixateType(method, ci.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
+	    DFRef ref = scope.lookupThis();
+	    this.addInputRef(ref);
+	    DFKlass klass = ref.getRefType().toKlass();
+            DFKlass baseKlass = klass.getBaseKlass();
+            baseKlass.load();
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) sci.arguments()) {
-                this.buildExpr(finder, method, scope, arg);
+                DFType type = this.buildExpr(finder, method, scope, arg);
+                if (type == null) return;
+                typeList.add(type);
             }
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
+            try {
+		DFMethod method1 = baseKlass.lookupMethod(
+		    DFCallStyle.Constructor, null, argTypes);
+                method1.addCaller(method);
+		this.fixateType(method, sci.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
 	    // "class K { ... }"
