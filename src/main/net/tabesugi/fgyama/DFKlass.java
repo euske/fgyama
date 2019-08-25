@@ -188,6 +188,18 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return _interface;
     }
 
+    public boolean isFuncInterface() {
+        if (!_interface) return false;
+        // Count the number of abstract methods.
+        int n = 0;
+        for (DFMethod method : _methods) {
+            if (method.isAbstract()) {
+                n++;
+            }
+        }
+        return (n == 1);
+    }
+
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
@@ -296,26 +308,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	this.buildTypeFromDecls(ast);
     }
 
-    public void setKlassLambda(String filePath, LambdaExpression lambda)
-	throws InvalidSyntax {
-        _filePath = filePath;
-        _ast = lambda;
-        String id = Utils.encodeASTNode(lambda);
-        DFMethod method = new DFMethod(
-            this, id, DFCallStyle.Lambda, "lambda", _klassScope, false);
-        this.addMethod(method, id);
-        ASTNode body = lambda.getBody();
-        if (body instanceof Statement) {
-            this.buildTypeFromStmt((Statement)body, method, method.getScope());
-        } else if (body instanceof Expression) {
-            this.buildTypeFromExpr((Expression)body, method, method.getScope());
-        } else {
-            throw new InvalidSyntax(body);
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    private void buildTypeFromDecls(ASTNode ast)
+    protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
 
         List<BodyDeclaration> decls;
@@ -390,7 +384,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildTypeFromStmt(
+    protected void buildTypeFromStmt(
         Statement ast,
         DFTypeSpace space, DFLocalScope outerScope)
         throws InvalidSyntax {
@@ -561,7 +555,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildTypeFromExpr(
+    protected void buildTypeFromExpr(
         Expression expr,
         DFTypeSpace space, DFVarScope outerScope)
         throws InvalidSyntax {
@@ -695,8 +689,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFKlass lambdaKlass = space.addKlass(
-                id, new DFKlass(id, space, this, outerScope));
-            lambdaKlass.setKlassLambda(this.getFilePath(), lambda);
+                id, new DFFunctionalKlass(id, space, this, outerScope));
+            lambdaKlass.setKlassTree(this.getFilePath(), lambda);
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -903,7 +897,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return _id2method.get(key);
     }
 
-    private DFMethod addMethod(DFMethod method, String key) {
+    protected DFMethod addMethod(DFMethod method, String key) {
         //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
         if (key != null) {
@@ -1005,7 +999,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMemberFromJKlass: TypeNotFound (baseKlass)",
+                    "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
                     this, e.name, sig);
 	    }
 	    _baseKlass.load();
@@ -1016,7 +1010,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    iface = parser.resolveType(finder);
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMemberFromJKlass: TypeNotFound (iface)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
                         this, e.name, sig);
 		}
 		if (iface == null) break;
@@ -1035,7 +1029,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    _baseKlass = finder.lookupType(superClass).toKlass();
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMemberFromJKlass: TypeNotFound (baseKlass)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
                         this, e.name);
 		}
 	    }
@@ -1049,7 +1043,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 			iface = finder.lookupType(ifaces[i]).toKlass();
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.buildMemberFromJKlass: TypeNotFound (iface)",
+                            "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
                             this, e.name);
 		    }
 		    _baseIfaces[i] = iface;
@@ -1079,7 +1073,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		}
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMemberFromJKlass: TypeNotFound (field)",
+                    "DFKlass.buildMembersFromJKlass: TypeNotFound (field)",
                     this, e.name, sig);
 		type = DFUnknownType.UNKNOWN;
 	    }
@@ -1113,7 +1107,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMemberFromJKlass: TypeNotFound (method)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (method)",
                         this, e.name, sig);
 		    continue;
 		}
@@ -1136,7 +1130,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 			type = finder.lookupType(excNames[i]);
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.buildMemberFromJKlass: TypeNotFound (exception)",
+                            "DFKlass.buildMembersFromJKlass: TypeNotFound (exception)",
                             this, e.name);
 			type = DFUnknownType.UNKNOWN;
 		    }
@@ -1281,7 +1275,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
     @SuppressWarnings("unchecked")
     private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
-        _initMethod.setFinder(finder);
+        if (_initMethod != null) {
+            _initMethod.setFinder(finder);
+        }
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {

@@ -120,6 +120,19 @@ public class Java2DF {
             AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
             this.enumKlassesDecls(
                 finder, klass, anonDecl.bodyDeclarations(), klasses);
+        } else if (ast instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)ast;
+            DFMethod method = ((DFFunctionalKlass)klass).getFuncMethod();
+            ASTNode body = lambda.getBody();
+            if (body instanceof Statement) {
+                this.enumKlassesStmt(
+                    finder, method, (Statement)body, klasses);
+            } else if (body instanceof Expression) {
+                this.enumKlassesExpr(
+                    finder, method, (Expression)body, klasses);
+            } else {
+                throw new InvalidSyntax(body);
+            }
         } else {
             throw new InvalidSyntax(ast);
         }
@@ -132,6 +145,7 @@ public class Java2DF {
         throws InvalidSyntax {
 
         DFMethod initMethod = klass.getInitMethod();
+        assert initMethod != null;
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
@@ -576,7 +590,10 @@ public class Java2DF {
             this.enumKlassesExpr(finder, space, instof.getLeftOperand(), klasses);
 
         } else if (ast instanceof LambdaExpression) {
-            // XXX TODO LambdaExpression
+            LambdaExpression lambda = (LambdaExpression)ast;
+            String id = Utils.encodeASTNode(lambda);
+            DFKlass lambdaKlass = (DFKlass)space.getType(id);
+            enumKlasses(lambdaKlass, klasses);
 
         } else if (ast instanceof MethodReference) {
             //  CreationReference
@@ -721,7 +738,9 @@ public class Java2DF {
         for (DFKlass klass : klasses) {
             klass.overrideMethods();
             DFMethod init = klass.getInitMethod();
-            init.buildScope();
+            if (init != null) {
+                init.buildScope();
+            }
             for (DFMethod method : klass.getMethods()) {
 		method.buildScope();
             }
@@ -731,7 +750,9 @@ public class Java2DF {
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
         for (DFKlass klass : klasses) {
             DFMethod init = klass.getInitMethod();
-            init.buildFrame();
+            if (init != null) {
+                init.buildFrame();
+            }
             for (DFMethod method : klass.getMethods()) {
 		method.buildFrame();
 		queue.add(method);
@@ -759,8 +780,13 @@ public class Java2DF {
         throws InvalidSyntax, EntityNotFound {
         this.startKlass(klass);
         try {
-            DFGraph graph = klass.getInitMethod().processKlassBody();
-            this.exportGraph(graph);
+            DFMethod init = klass.getInitMethod();
+            if (init != null) {
+                DFGraph graph = init.processKlassBody();
+                if (graph != null) {
+                    this.exportGraph(graph);
+                }
+            }
         } catch (EntityNotFound e) {
             if (strict) throw e;
         }

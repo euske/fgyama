@@ -346,6 +346,21 @@ class ValueSetNode extends DFNode {
     }
 }
 
+// LambdaNode: represents a lambda (functional interface).
+class LambdaNode extends DFNode {
+
+    public LambdaNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast) {
+        super(graph, scope, type, null, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "lambda";
+    }
+}
+
 // JoinNode
 class JoinNode extends DFNode {
 
@@ -851,6 +866,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 	    _scope.buildBodyDecls(_finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof AnonymousClassDeclaration) {
             _scope.buildBodyDecls(_finder, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
+        } else if (_ast instanceof LambdaExpression) {
+            _scope.buildLambda(_finder, (LambdaExpression)_ast);
 	}  else {
 	    throw new InvalidSyntax(_ast);
 	}
@@ -872,7 +889,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         } else if (_ast instanceof AnonymousClassDeclaration) {
             _frame.buildBodyDecls(
                 _finder, this, _scope, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
-        }  else {
+        } else if (_ast instanceof LambdaExpression) {
+            _frame.buildLambda(
+                _finder, this, _scope, (LambdaExpression)_ast);
+        } else {
             throw new InvalidSyntax(_ast);
         }
     }
@@ -1483,19 +1503,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             } else if (expr instanceof LambdaExpression) {
 		// "x -> { ... }"
                 LambdaExpression lambda = (LambdaExpression)expr;
-                ASTNode body = lambda.getBody();
-                if (body instanceof Statement) {
-                } else if (body instanceof Expression) {
-                } else {
-                    throw new InvalidSyntax(body);
-                }
-		// XXX TODO LambdaExpression
-		Logger.error("Unsupported: LambdaExpression", expr);
                 String id = Utils.encodeASTNode(lambda);
                 DFType lambdaType = typeSpace.getType(id);
 		assert lambdaType != null;
                 ctx.setRValue(
-                    new DFNode(graph, scope, lambdaType, null, null));
+                    new LambdaNode(graph, scope, lambdaType, lambda));
 
             } else if (expr instanceof MethodReference) {
                 //  CreationReference
@@ -2462,28 +2474,27 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     public DFGraph processMethod()
         throws InvalidSyntax, EntityNotFound {
         if (_ast == null) return null;
+
         assert _scope != null;
         assert _frame != null;
         assert _finder != null;
-        MethodDeclaration methodDecl = (MethodDeclaration)_ast;
-        if (methodDecl.getBody() == null) return null;
-
         DFGraph graph = this;
         DFContext ctx = new DFContext(graph, _scope);
+        ASTNode body;
 
-        // Setup inputs.
-        int i = 0;
-        for (SingleVariableDeclaration decl :
-                 (List<SingleVariableDeclaration>)methodDecl.parameters()) {
-            DFRef ref = _scope.lookupArgument(i);
-            DFNode input = new InputNode(graph, _scope, ref, decl);
-            ctx.set(input);
-            DFNode assign = new VarAssignNode(
-                graph, _scope, _scope.lookupVar(decl.getName()), decl);
-            assign.accept(input);
-            ctx.set(assign);
-            i++;
+        if (_ast instanceof MethodDeclaration) {
+            MethodDeclaration methodDecl = (MethodDeclaration)_ast;
+            body = methodDecl.getBody();
+            if (body == null) return null;
+            this.processMethodDecl(graph, ctx, methodDecl);
+        } else if (_ast instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)_ast;
+            body = lambda.getBody();
+            this.processLambda(graph, ctx, lambda);
+        } else {
+            throw new InvalidSyntax(_ast);
         }
+
         for (DFRef ref : _frame.getInputRefs()) {
             if (ref.isLocal()) continue;
             DFNode input = new InputNode(graph, _scope, ref, null);
@@ -2495,11 +2506,16 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             ctx.set(input);
         }
 
-        // Process the function body.
         try {
-            processStatement(
-                ctx, this, graph, _finder, _scope, _frame,
-                methodDecl.getBody());
+            if (body instanceof Statement) {
+                processStatement(
+                    ctx, this, graph, _finder, _scope, _frame,
+                    (Statement)body);
+            } else if (body instanceof Expression) {
+                processExpression(
+                    ctx, this, graph, _finder, _scope, _frame,
+                    (Expression)body);
+            }
         } catch (MethodNotFound e) {
             e.setMethod(this);
             Logger.error(
@@ -2528,6 +2544,42 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     @SuppressWarnings("unchecked")
+    private void processMethodDecl(
+        DFGraph graph, DFContext ctx, MethodDeclaration methodDecl)
+        throws InvalidSyntax, EntityNotFound {
+        int i = 0;
+        for (VariableDeclaration decl :
+                 (List<VariableDeclaration>)methodDecl.parameters()) {
+            DFRef ref = _scope.lookupArgument(i);
+            DFNode input = new InputNode(graph, _scope, ref, decl);
+            ctx.set(input);
+            DFNode assign = new VarAssignNode(
+                graph, _scope, _scope.lookupVar(decl.getName()), decl);
+            assign.accept(input);
+            ctx.set(assign);
+            i++;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processLambda(
+        DFGraph graph, DFContext ctx, LambdaExpression lambda)
+        throws InvalidSyntax, EntityNotFound {
+        int i = 0;
+        for (VariableDeclaration decl :
+                 (List<VariableDeclaration>)lambda.parameters()) {
+            DFRef ref = _scope.lookupArgument(i);
+            DFNode input = new InputNode(graph, _scope, ref, decl);
+            ctx.set(input);
+            DFNode assign = new VarAssignNode(
+                graph, _scope, _scope.lookupVar(decl.getName()), decl);
+            assign.accept(input);
+            ctx.set(assign);
+            i++;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     public DFGraph processKlassBody()
         throws InvalidSyntax, EntityNotFound {
         // lookup base/inner klasses.
@@ -2537,6 +2589,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             decls = ((AbstractTypeDeclaration)_ast).bodyDeclarations();
         } else if (_ast instanceof AnonymousClassDeclaration) {
             decls = ((AnonymousClassDeclaration)_ast).bodyDeclarations();
+        } else if (_ast instanceof LambdaExpression) {
+            return null;
         } else {
             throw new InvalidSyntax(_ast);
         }
@@ -2737,6 +2791,38 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 i++;
             }
             this.buildStmt(finder, methodDecl.getBody());
+        }
+
+        @SuppressWarnings("unchecked")
+        public void buildLambda(
+            DFTypeFinder finder, LambdaExpression lambda)
+            throws InvalidSyntax {
+            //Logger.info("DFLocalScope.build:", this);
+            _arguments = new DFInternalRef[lambda.parameters().size()];
+            int i = 0;
+            for (VariableDeclaration decl :
+                     (List<VariableDeclaration>) lambda.parameters()) {
+                //DFType argType = finder.resolveSafe(decl.getType());
+                //if (decl.isVarargs()) {
+                //    argType = new DFArrayType(argType, 1);
+                //}
+                DFType argType = DFUnknownType.UNKNOWN; // XXX
+                int ndims = decl.getExtraDimensions();
+                if (ndims != 0) {
+                    argType = new DFArrayType(argType, ndims);
+                }
+                _arguments[i] = new DFInternalRef(argType, "arg"+i);
+                this.addVar(decl.getName(), argType);
+                i++;
+            }
+            ASTNode body = lambda.getBody();
+            if (body instanceof Statement) {
+                this.buildStmt(finder, (Statement)body);
+            } else if (body instanceof Expression) {
+                this.buildExpr(finder, (Expression)body);
+            } else {
+                throw new InvalidSyntax(body);
+            }
         }
 
         public void buildBodyDecls(

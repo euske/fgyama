@@ -177,8 +177,8 @@ public class DFFrame {
         throws InvalidSyntax {
         if (methodDecl.getBody() == null) return;
         int i = 0;
-        for (SingleVariableDeclaration decl :
-                 (List<SingleVariableDeclaration>) methodDecl.parameters()) {
+        for (VariableDeclaration decl :
+                 (List<VariableDeclaration>) methodDecl.parameters()) {
             try {
                 DFRef ref = scope.lookupArgument(i);
                 this.addInputRef(ref);
@@ -190,6 +190,34 @@ public class DFFrame {
             i++;
         }
         this.buildStmt(finder, method, scope, methodDecl.getBody());
+    }
+
+    @SuppressWarnings("unchecked")
+    public void buildLambda(
+        DFTypeFinder finder, DFMethod method, DFLocalScope scope,
+        LambdaExpression lambda)
+        throws InvalidSyntax {
+        int i = 0;
+        for (VariableDeclaration decl :
+                 (List<VariableDeclaration>) lambda.parameters()) {
+            try {
+                DFRef ref = scope.lookupArgument(i);
+                this.addInputRef(ref);
+            } catch (VariableNotFound e) {
+                Logger.error(
+                    "DFFrame.buildLambda: VariableNotFound (arg)",
+                    this, e.name, decl);
+            }
+            i++;
+        }
+        ASTNode body = lambda.getBody();
+        if (body instanceof Statement) {
+            this.buildStmt(finder, method, scope, (Statement)body);
+        } else if (body instanceof Expression) {
+            this.buildExpr(finder, method, scope, (Expression)body);
+        } else {
+            throw new InvalidSyntax(body);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -216,7 +244,7 @@ public class DFFrame {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildStmt(
+    public void buildStmt(
         DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Statement stmt)
         throws InvalidSyntax {
@@ -467,7 +495,7 @@ public class DFFrame {
     }
 
     @SuppressWarnings("unchecked")
-    private DFType buildExpr(
+    public DFType buildExpr(
         DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Expression expr)
         throws InvalidSyntax {

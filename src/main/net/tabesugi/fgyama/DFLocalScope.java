@@ -273,7 +273,7 @@ public class DFLocalScope extends DFVarScope {
      * Lists all the variables defined within an expression.
      */
     @SuppressWarnings("unchecked")
-    private void buildExpr(DFTypeFinder finder, Expression ast)
+    public void buildExpr(DFTypeFinder finder, Expression ast)
         throws InvalidSyntax {
         assert ast != null;
 
@@ -430,7 +430,7 @@ public class DFLocalScope extends DFVarScope {
             this.buildExpr(finder, instof.getLeftOperand());
 
         } else if (ast instanceof LambdaExpression) {
-            // XXX TODO LambdaExpression
+            // Lambda classes are processed separately.
 
         } else if (ast instanceof MethodReference) {
             //  CreationReference
