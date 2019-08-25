@@ -733,9 +733,11 @@ public class Java2DF {
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
+        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 
-        // Build method scopes.
+        // Build method scopes (normal classes).
         for (DFKlass klass : klasses) {
+	    if (klass instanceof DFFunctionalKlass) continue;
             klass.overrideMethods();
             DFMethod init = klass.getInitMethod();
             if (init != null) {
@@ -746,9 +748,35 @@ public class Java2DF {
             }
         }
 
-        // Build call graphs.
-        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
+        // Build call graphs (normal classes).
         for (DFKlass klass : klasses) {
+	    if (klass instanceof DFFunctionalKlass) continue;
+            DFMethod init = klass.getInitMethod();
+            if (init != null) {
+                init.buildFrame();
+            }
+            for (DFMethod method : klass.getMethods()) {
+		method.buildFrame();
+		queue.add(method);
+            }
+        }
+
+        // Build method scopes (lambdas).
+        for (DFKlass klass : klasses) {
+	    if (!(klass instanceof DFFunctionalKlass)) continue;
+	    klass.overrideMethods();
+	    DFMethod init = klass.getInitMethod();
+	    if (init != null) {
+		init.buildScope();
+	    }
+	    for (DFMethod method : klass.getMethods()) {
+		method.buildScope();
+	    }
+        }
+
+        // Build call graphs (lambdas).
+        for (DFKlass klass : klasses) {
+	    if (!(klass instanceof DFFunctionalKlass)) continue;
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildFrame();

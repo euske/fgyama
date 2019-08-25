@@ -2764,24 +2764,16 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public void buildMethodDecl(
             DFTypeFinder finder, MethodDeclaration methodDecl)
             throws InvalidSyntax {
-            //Logger.info("DFLocalScope.build:", this);
+            //Logger.info("DFMethodScope.buildMethodDecl:", this);
             if (methodDecl.getBody() == null) return;
-            Type returnType = methodDecl.getReturnType2();
-            DFType type;
-            if (returnType == null) {
-                type = DFBasicType.VOID;
-            } else {
-                type = finder.resolveSafe(returnType);
-            }
-            _return = new DFInternalRef(type, "return");
+	    DFFunctionType funcType = DFMethod.this.getFuncType();
+	    DFType[] argTypes = funcType.getArgTypes();
+            _return = new DFInternalRef(funcType.getReturnType(), "return");
             _arguments = new DFInternalRef[methodDecl.parameters().size()];
             int i = 0;
-            for (SingleVariableDeclaration decl :
-                     (List<SingleVariableDeclaration>) methodDecl.parameters()) {
-                DFType argType = finder.resolveSafe(decl.getType());
-                if (decl.isVarargs()) {
-                    argType = new DFArrayType(argType, 1);
-                }
+            for (VariableDeclaration decl :
+                     (List<VariableDeclaration>) methodDecl.parameters()) {
+                DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     argType = new DFArrayType(argType, ndims);
@@ -2797,16 +2789,15 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public void buildLambda(
             DFTypeFinder finder, LambdaExpression lambda)
             throws InvalidSyntax {
-            //Logger.info("DFLocalScope.build:", this);
+            //Logger.info("DFMethodScope.buildLambda:", this);
+	    DFFunctionType funcType = DFMethod.this.getFuncType();
+	    DFType[] argTypes = funcType.getArgTypes();
+            _return = new DFInternalRef(funcType.getReturnType(), "return");
             _arguments = new DFInternalRef[lambda.parameters().size()];
             int i = 0;
             for (VariableDeclaration decl :
                      (List<VariableDeclaration>) lambda.parameters()) {
-                //DFType argType = finder.resolveSafe(decl.getType());
-                //if (decl.isVarargs()) {
-                //    argType = new DFArrayType(argType, 1);
-                //}
-                DFType argType = DFUnknownType.UNKNOWN; // XXX
+                DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     argType = new DFArrayType(argType, ndims);

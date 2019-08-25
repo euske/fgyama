@@ -230,10 +230,18 @@ public class DFFrame {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                    Expression init = frag.getInitializer();
-                    if (init != null) {
-                        this.buildExpr(finder, method, method.getScope(), init);
-                    }
+		    try {
+			DFRef ref = scope.lookupVar(frag.getName());
+			Expression init = frag.getInitializer();
+			if (init != null) {
+			    this.buildExpr(finder, method, method.getScope(), init);
+			    this.fixateType(method, init, ref.getRefType());
+			}
+		    } catch (VariableNotFound e) {
+			Logger.error(
+			    "DFFrame.buildBodyDecls: VariableNotFound (decl)",
+			    this, e.name, frag);
+		    }
 		}
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
@@ -628,7 +636,10 @@ public class DFFrame {
             if (op != Assignment.Operator.ASSIGN) {
                 this.buildExpr(finder, method, scope, assn.getLeftHandSide());
             }
-            this.buildAssignment(finder, method, scope, assn.getLeftHandSide());
+            DFRef ref = this.buildAssignment(finder, method, scope, assn.getLeftHandSide());
+            if (ref != null) {
+                this.fixateType(method, assn.getRightHandSide(), ref.getRefType());
+            }
             return this.buildExpr(finder, method, scope, assn.getRightHandSide());
 
         } else if (expr instanceof VariableDeclarationExpression) {
@@ -693,6 +704,7 @@ public class DFFrame {
                 DFMethod method1 = klass.lookupMethod(
                     callStyle, invoke.getName(), argTypes);
                 method1.addCaller(method);
+                this.fixateType(method, invoke.arguments(), method1.getFuncType().getArgTypes());
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
                 return DFUnknownType.UNKNOWN;
@@ -717,6 +729,7 @@ public class DFFrame {
                 DFMethod method1 = baseKlass.lookupMethod(
                     DFCallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 method1.addCaller(method);
+                this.fixateType(method, sinvoke.arguments(), method1.getFuncType().getArgTypes());
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
                 return DFUnknownType.UNKNOWN;
@@ -845,15 +858,28 @@ public class DFFrame {
                     return null;
                 }
             }
-            instType.toKlass().load();
+            DFKlass instKlass = instType.toKlass();
+            instKlass.load();
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.buildExpr(finder, method, scope, expr1);
             }
+            List<DFType> typeList = new ArrayList<DFType>();
             for (Expression arg : (List<Expression>) cstr.arguments()) {
-                this.buildExpr(finder, method, scope, arg);
+                DFType type = this.buildExpr(finder, method, scope, arg);
+                if (type == null) return type;
+                typeList.add(type);
             }
-            return instType;
+            DFType[] argTypes = new DFType[typeList.size()];
+            typeList.toArray(argTypes);
+            try {
+		DFMethod method1 = instKlass.lookupMethod(
+		    DFCallStyle.Constructor, null, argTypes);
+                method1.addCaller(method);
+		this.fixateType(method, cstr.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
+	    return instType;
 
         } else if (expr instanceof ConditionalExpression) {
             // "c? a : b"
@@ -889,7 +915,7 @@ public class DFFrame {
         }
     }
 
-    private void buildAssignment(
+    private DFRef buildAssignment(
         DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         Expression expr)
         throws InvalidSyntax {
@@ -912,7 +938,7 @@ public class DFFrame {
                         try {
                             type = finder.lookupType(qname.getQualifier());
                         } catch (TypeNotFound e) {
-                            return;
+                            return null;
                         }
                     }
                     DFKlass klass = type.toKlass();
@@ -922,9 +948,10 @@ public class DFFrame {
                 }
             } catch (VariableNotFound e) {
                 //Logger.error("VariableNotFound", e.name);
-                return;
+                return null;
             }
             this.addOutputRef(ref);
+            return ref;
 
         } else if (expr instanceof ArrayAccess) {
 	    // "a[0]"
@@ -934,7 +961,9 @@ public class DFFrame {
             if (type instanceof DFArrayType) {
                 DFRef ref = scope.lookupArray(type);
                 this.addOutputRef(ref);
+                return ref;
             }
+            return null;
 
         } else if (expr instanceof FieldAccess) {
 	    // "(expr).foo"
@@ -949,7 +978,7 @@ public class DFFrame {
             }
             if (type == null) {
                 type = this.buildExpr(finder, method, scope, expr1);
-                if (type == null) return;
+                if (type == null) return null;
             }
             DFKlass klass = type.toKlass();
             klass.load();
@@ -957,10 +986,12 @@ public class DFFrame {
             try {
                 DFRef ref = klass.lookupField(fieldName);
                 this.addOutputRef(ref);
+                return ref;
             } catch (VariableNotFound e) {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (fieldassign)",
                     this, e.name, expr);
+                return null;
             }
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -972,19 +1003,41 @@ public class DFFrame {
             try {
                 DFRef ref = klass.lookupField(fieldName);
                 this.addOutputRef(ref);
+                return ref;
             } catch (VariableNotFound e) {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (superfieldassign)",
                     this, e.name, expr);
+                return null;
             }
 
         } else if (expr instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    this.buildAssignment(finder, method, scope, paren.getExpression());
+	    return this.buildAssignment(finder, method, scope, paren.getExpression());
 
         } else {
             throw new InvalidSyntax(expr);
         }
+    }
+
+    private void fixateType(DFMethod method, Expression expr, DFType type) {
+	if (expr instanceof ParenthesizedExpression) {
+            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    fixateType(method, paren.getExpression(), type);
+
+        } else if (expr instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)expr;
+            String id = Utils.encodeASTNode(lambda);
+            DFFunctionalKlass lambdaKlass =
+		(DFFunctionalKlass)method.getType(id);
+	    lambdaKlass.setBaseKlass(type.toKlass());
+	}
+    }
+
+    private void fixateType(DFMethod method, List<Expression> exprs, DFType[] types) {
+	for (int i = 0; i < exprs.size(); i++) {
+	    this.fixateType(method, exprs.get(i), types[i]);
+	}
     }
 
     // dump: for debugging.

@@ -29,12 +29,16 @@ class DFFunctionalKlass extends DFKlass {
         return _funcMethod;
     }
 
+    public void setBaseKlass(DFKlass klass) {
+	_funcMethod.setFuncType(klass.getFuncMethod().getFuncType());
+    }
+
     protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
         LambdaExpression lambda = (LambdaExpression)ast;
         String id = Utils.encodeASTNode(lambda);
         _funcMethod = new DFMethod(
-            this, id, DFCallStyle.Lambda, "lambda",
+            this, id, DFCallStyle.Lambda, "function",
             this.getKlassScope(), false);
         this.addMethod(_funcMethod, id);
         ASTNode body = lambda.getBody();

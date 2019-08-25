@@ -200,6 +200,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
+    public DFMethod getFuncMethod() {
+        for (DFMethod method : _methods) {
+            if (method.isAbstract()) return method;
+        }
+	return null;
+    }
+
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
@@ -1317,7 +1324,11 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 DFType[] argTypes = new DFType[varDecls.size()];
 		for (int i = 0; i < varDecls.size(); i++) {
 		    SingleVariableDeclaration varDecl = varDecls.get(i);
-		    argTypes[i] = finder2.resolveSafe(varDecl.getType());
+		    DFType argType = finder2.resolveSafe(varDecl.getType());
+		    if (varDecl.isVarargs()) {
+			argType = new DFArrayType(argType, 1);
+		    }
+		    argTypes[i] = argType;
 		}
                 DFType returnType;
                 if (decl.isConstructor()) {
