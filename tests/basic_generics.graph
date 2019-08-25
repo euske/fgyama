@@ -9,6 +9,9 @@
       <scope name="Lbasic_generics;.:MethodDeclaration:300:494">
         <node id="G18_test_N1" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
         <node id="G18_test_N2" kind="input" ref="#this" type="Lbasic_generics;"/>
+        <node id="G18_test_N19" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <link src="G18_test_N17"/>
+        </node>
         <scope name="Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494">
           <node data="moo" id="G18_test_N3" kind="value" type="Ljava/lang/String;">
             <ast end="375" start="370" type="45"/>
@@ -67,7 +70,11 @@
             <ast end="458" start="448" type="32"/>
             <link src="G18_test_N15"/>
           </node>
-          <node id="G18_test_N17" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="G18_test_N17" kind="receive" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+            <ast end="458" start="448" type="32"/>
+            <link label="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" src="G18_test_N15"/>
+          </node>
+          <node id="G18_test_N18" kind="assign_var" ref="$Lbasic_generics;.:MethodDeclaration:300:494.:Block:326:494/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="458" start="442" type="59"/>
             <link src="G18_test_N16"/>
           </node>
@@ -186,6 +193,9 @@
       <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:206:265">
         <node id="G23_copy_N1" kind="input" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;"/>
         <node id="G23_copy_N2" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;T&gt;;"/>
+        <node id="G23_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <link src="G23_copy_N6"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;T&gt;;.:MethodDeclaration:206:265.:Block:220:265">
           <node id="G23_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;T&gt;;/.x" type="Ljava/lang/Object;">
             <ast end="253" start="252" type="42"/>
@@ -226,6 +236,8 @@
       </scope>
     </method>
     <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.&lt;init&gt;(Ljava/lang/Object;)Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;" style="constructor">
+      <caller name="Lbasic_generics/Moo&lt;T&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;"/>
+      <caller name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;"/>
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:80:124">
         <node id="G25_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
@@ -292,6 +304,9 @@
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:206:265">
         <node id="G27_copy_N1" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;"/>
         <node id="G27_copy_N2" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;"/>
+        <node id="G27_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
+          <link src="G27_copy_N6"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;.:MethodDeclaration:206:265.:Block:220:265">
           <node id="G27_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;/.x" type="Ljava/lang/Object;">
             <ast end="253" start="252" type="42"/>
@@ -344,6 +359,8 @@
       </scope>
     </method>
     <method abstract="false" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" style="constructor">
+      <caller name="Lbasic_generics;.test()V"/>
+      <caller name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:80:124">
         <node id="G29_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
@@ -411,6 +428,9 @@
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:206:265">
         <node id="G31_copy_N1" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
         <node id="G31_copy_N2" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
+        <node id="G31_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <link src="G31_copy_N6"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:MethodDeclaration:206:265.:Block:220:265">
           <node id="G31_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <ast end="253" start="252" type="42"/>
