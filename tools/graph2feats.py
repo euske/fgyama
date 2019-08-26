@@ -71,8 +71,10 @@ def enum_back(feats, count, done, v1, lprev=None,
         if link.startswith('_') and link != '_end': continue
         # do not use a value in arrays.
         if n1.kind == 'ref_array' and not link: continue
-        # strip label names.
-        if link and link[0] in '@%': link = ''
+        # treat indirect assignment the same way as normal assignment.
+        if link and link[0] in '@%':
+            #if funcall is None: continue
+            link = ''
         # interprocedural.
         if n1.kind == 'output':
             inputs.append((link, v2, Cons(funcall, calls)))
@@ -99,6 +101,8 @@ def enum_back(feats, count, done, v1, lprev=None,
     for f in fs:
         feat = (-(dist+1),fprev,f)
         feats[feat] = chain
+        if debug:
+            print('  feat:', feat)
     # if this is a ref_var node, the fact that it refers to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'ref_var':
@@ -134,8 +138,10 @@ def enum_forw(feats, count, done, v1, lprev=None,
         if link.startswith('_') and link != '_end': continue
         # do not pass a value in arrays.
         if n1.kind == 'assign_array' and not link: continue
-        # strip label names.
-        if link and link[0] in '@%': link = ''
+        # treat indirect assignment the same way as normal assignment.
+        if link and link[0] in '@%':
+            #if funcall is None: continue
+            link = ''
         # interprocedural.
         if n1.kind == 'input':
             outputs.append((link, v2, Cons(funcall, calls)))
@@ -162,6 +168,8 @@ def enum_forw(feats, count, done, v1, lprev=None,
     for f in fs:
         feat = ((dist+1),fprev,f)
         feats[feat] = chain
+        if debug:
+            print('  feat:', feat)
     # if this is a assign_var node, the fact that it assigns to a certain variable
     # is recorded, but the node itself is transparent in a chain.
     if n1.kind == 'assign_var':
@@ -234,13 +242,16 @@ def main(argv):
     item2nodes = {}
     for graph in builder.graphs:
         for node in graph:
-            if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
-                item = ('REF', node.ref)
-            elif funcs and node.kind in CALLS:
-                item = ('METHOD', node.data)
+            item = None
+            if funcs:
+                if node.kind in CALLS:
+                    item = node.data
             else:
+                if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
+                    item = node.ref
+            if item is None:
                 continue
-            if item in item2nodes:
+            elif item in item2nodes:
                 nodes = item2nodes[item]
             else:
                 nodes = item2nodes[item] = []
@@ -257,6 +268,8 @@ def main(argv):
     feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         feats = {}
+        if debug:
+            print('item: %r' % item)
         for node in nodes:
             v0 = builder.vtxs[node]
             done = set()
@@ -277,22 +290,23 @@ def main(argv):
                     feat2fid[feat] = fid
                     db.add_feat(feat, fid)
                 fid2srcs[fid] = getsrcs(chain)
-            db.add_item(item[1], fid2srcs)
+            db.add_item(item, fid2srcs)
             sys.stderr.write('.'); sys.stderr.flush()
         else:
-            data = item + getsrcs(nodes)
+            data = (item, getsrcs(nodes))
             print('+ITEM', json.dumps(data))
+            if srcdb is not None:
+                annot = SourceAnnot(srcdb)
+                for n in nodes:
+                    if n.ast is None: continue
+                    src = builder.getsrc(n, False)
+                    if src is None: continue
+                    (path,start,end) = src
+                    annot.add(path, start, end)
+                annot.show_text()
             for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
                 data = feat + getsrcs(chain)
                 print('+FEAT', json.dumps(data))
-                if srcdb is not None:
-                    annot = SourceAnnot(srcdb)
-                    for n in nodes:
-                        src = builder.getsrc(n, False)
-                        if src is None: continue
-                        (path,start,end) = src
-                        annot.add(path, start, end)
-                    annot.show_text()
             print()
 
     print('Total: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
