@@ -806,9 +806,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _funcType.canAccept(argTypes, typeMap);
     }
 
-    public void addOverride(DFMethod method) {
+    public boolean addOverride(DFMethod method) {
+        if (method._callStyle != DFCallStyle.Lambda &&
+            !_name.equals(method._name)) return false;
+        if (!_funcType.equals(method._funcType)) return false;
 	//Logger.info("DFMethod.addOverride:", this, "<-", method);
         _overrides.add(method);
+        return true;
     }
 
     private void listOverrides(List<DFOverride> overrides, int prio) {

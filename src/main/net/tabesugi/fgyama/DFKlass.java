@@ -769,6 +769,12 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return null;
     }
 
+    // Only used by DFFunctionalKlass.
+    protected void setBaseKlass(DFKlass klass) {
+        assert _baseKlass == null;
+        _baseKlass = klass;
+    }
+
     public DFKlass getBaseKlass() {
         assert _built;
         return _baseKlass;
@@ -929,10 +935,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     private void overrideMethod(DFMethod method1) {
         for (DFMethod method0 : getMethods()) {
-            if (method0.equals(method1)) {
-                method0.addOverride(method1);
-                break;
-            }
+            if (method0.addOverride(method1)) break;
         }
     }
 

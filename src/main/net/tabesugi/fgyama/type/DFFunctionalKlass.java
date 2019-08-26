@@ -11,7 +11,14 @@ import org.eclipse.jdt.core.dom.*;
 //
 class DFFunctionalKlass extends DFKlass {
 
-    private DFMethod _funcMethod = null;
+    private class DFFunctionalMethod extends DFMethod {
+        public DFFunctionalMethod(String id) {
+            super(DFFunctionalKlass.this, id, DFCallStyle.Lambda, id,
+                  DFFunctionalKlass.this.getKlassScope(), false);
+        }
+    }
+
+    private DFFunctionalMethod _funcMethod = null;
 
     public DFFunctionalKlass(
         String name, DFTypeSpace outerSpace,
@@ -30,16 +37,15 @@ class DFFunctionalKlass extends DFKlass {
     }
 
     public void setBaseKlass(DFKlass klass) {
+        super.setBaseKlass(klass);
 	_funcMethod.setFuncType(klass.getFuncMethod().getFuncType());
     }
 
     protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
         LambdaExpression lambda = (LambdaExpression)ast;
-        String id = Utils.encodeASTNode(lambda);
-        _funcMethod = new DFMethod(
-            this, id, DFCallStyle.Lambda, "function",
-            this.getKlassScope(), false);
+        String id = "function";
+        _funcMethod = new DFFunctionalMethod(id);
         this.addMethod(_funcMethod, id);
         ASTNode body = lambda.getBody();
         if (body instanceof Statement) {
@@ -53,6 +59,7 @@ class DFFunctionalKlass extends DFKlass {
 
     protected void buildMembersFromTree(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
+        // _baseKlass is left undefined.
         _funcMethod.setFinder(finder);
         _funcMethod.setTree(ast);
     }
