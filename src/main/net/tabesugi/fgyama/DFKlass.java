@@ -935,7 +935,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     private void overrideMethod(DFMethod method1) {
         for (DFMethod method0 : getMethods()) {
-            if (method0.addOverride(method1)) break;
+            if (method0.addOverrider(method1)) break;
         }
     }
 

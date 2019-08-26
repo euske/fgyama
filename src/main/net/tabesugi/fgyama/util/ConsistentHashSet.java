@@ -8,8 +8,18 @@ import java.util.*;
 //
 public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
 
-    private Set<E> _set = new HashSet<E>();
-    private List<E> _list = new ArrayList<E>();
+    private Set<E> _set;
+    private List<E> _list;
+
+    public ConsistentHashSet() {
+        _set = new HashSet<E>();
+        _list = new ArrayList<E>();
+    }
+
+    public ConsistentHashSet(ConsistentHashSet<E> c) {
+        _set = new HashSet<E>(c._set);
+        _list = new ArrayList<E>(c._list);
+    }
 
     @Override
     public boolean add(E e) {

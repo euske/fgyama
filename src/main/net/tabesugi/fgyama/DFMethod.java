@@ -715,7 +715,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private ASTNode _ast = null;
 
     // List of subclass' methods overriding this method.
-    private List<DFMethod> _overrides = new ArrayList<DFMethod>();
+    private List<DFMethod> _overriders = new ArrayList<DFMethod>();
+    // List of superclass' methods being overriden by this method.
+    private List<DFMethod> _overriding = new ArrayList<DFMethod>();
 
     public DFMethod(
         DFKlass klass, String id, DFCallStyle callStyle,
@@ -806,27 +808,28 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _funcType.canAccept(argTypes, typeMap);
     }
 
-    public boolean addOverride(DFMethod method) {
+    public boolean addOverrider(DFMethod method) {
         if (method._callStyle != DFCallStyle.Lambda &&
             !_name.equals(method._name)) return false;
         if (!_funcType.equals(method._funcType)) return false;
-	//Logger.info("DFMethod.addOverride:", this, "<-", method);
-        _overrides.add(method);
+	//Logger.info("DFMethod.addOverrider:", this, "<-", method);
+        _overriders.add(method);
+        method._overriding.add(this);
         return true;
     }
 
-    private void listOverrides(List<DFOverride> overrides, int prio) {
-        overrides.add(new DFOverride(this, prio));
-        for (DFMethod method : _overrides) {
-            method.listOverrides(overrides, prio+1);
+    private void listOverriders(List<DFOverride> overriders, int prio) {
+        overriders.add(new DFOverride(this, prio));
+        for (DFMethod method : _overriders) {
+            method.listOverriders(overriders, prio+1);
         }
     }
 
-    public DFMethod[] getOverrides() {
-        List<DFOverride> overrides = new ArrayList<DFOverride>();
-        this.listOverrides(overrides, 0);
-        DFOverride[] a = new DFOverride[overrides.size()];
-        overrides.toArray(a);
+    public DFMethod[] getOverriders() {
+        List<DFOverride> overriders = new ArrayList<DFOverride>();
+        this.listOverriders(overriders, 0);
+        DFOverride[] a = new DFOverride[overriders.size()];
+        overriders.toArray(a);
         Arrays.sort(a);
         DFMethod[] methods = new DFMethod[a.length];
 	for (int i = 0; i < a.length; i++) {
@@ -839,8 +842,16 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _callers.add(method);
     }
 
+    private void listCallers(ConsistentHashSet<DFMethod> callers) {
+        callers.addAll(_callers);
+        for (DFMethod method : _overriding) {
+            method.listCallers(callers);
+        }
+    }
     public ConsistentHashSet<DFMethod> getCallers() {
-        return _callers;
+        ConsistentHashSet<DFMethod> callers = new ConsistentHashSet<DFMethod>();
+        listCallers(callers);
+        return callers;
     }
 
     public DFTypeFinder getFinder() {
@@ -1204,7 +1215,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         method = fallback;
                     }
                 }
-                DFMethod methods[] = method.getOverrides();
+                DFMethod methods[] = method.getOverriders();
                 DFFunctionType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
                     graph, scope, invoke, funcType, obj, methods);
@@ -2701,16 +2712,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         elem.setAttribute("name", this.getSignature());
         elem.setAttribute("style", _callStyle.toString());
         elem.setAttribute("abstract", Boolean.toString(_abstract));
-        for (DFMethod caller : _callers) {
+        for (DFMethod caller : this.getCallers()) {
             Element ecaller = document.createElement("caller");
             ecaller.setAttribute("name", caller.getSignature());
             elem.appendChild(ecaller);
         }
-        for (DFMethod override : this.getOverrides()) {
-            if (override == this) continue;
-            Element eoverride = document.createElement("override");
-            eoverride.setAttribute("name", override.getSignature());
-            elem.appendChild(eoverride);
+        for (DFMethod overrider : this.getOverriders()) {
+            if (overrider == this) continue;
+            Element eoverrider = document.createElement("overrider");
+            eoverrider.setAttribute("name", overrider.getSignature());
+            elem.appendChild(eoverrider);
+        }
+        for (DFMethod overriding : _overriding) {
+            Element eoverriding = document.createElement("overriding");
+            eoverriding.setAttribute("name", overriding.getSignature());
+            elem.appendChild(eoverriding);
         }
         if (_ast != null) {
             Element east = document.createElement("ast");
