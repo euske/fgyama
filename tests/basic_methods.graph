@@ -121,6 +121,7 @@
     </method>
     <method abstract="false" name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
+      <overriding name="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
       <ast end="112" start="52" type="31"/>
       <scope name="Lbasic_methods/A;.:MethodDeclaration:52:112">
         <node id="G53_toString_N1" kind="input" ref="#this" type="Lbasic_methods/A;"/>
@@ -142,6 +143,7 @@
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.&lt;clinit&gt;"/>
     </method>
     <method abstract="false" name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.toString()Ljava/lang/String;" style="instance">
+      <overriding name="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
       <ast end="222" start="180" type="31"/>
       <scope name="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;.:MethodDeclaration:180:222">
         <node id="G54_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:MethodDeclaration:139:385/:AnonymousClassDeclaration:173:225;"/>
