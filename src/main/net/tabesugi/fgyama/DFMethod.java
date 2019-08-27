@@ -2530,6 +2530,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 processExpression(
                     ctx, this, graph, _finder, _scope, _frame,
                     (Expression)body);
+                DFRef ref = _scope.lookupReturn();
+                OutputNode output = new OutputNode(graph, _scope, ref, body);
+                output.accept(ctx.getRValue());
+                ctx.set(output);
             }
         } catch (MethodNotFound e) {
             e.setMethod(this);
