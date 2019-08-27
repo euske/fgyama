@@ -496,7 +496,6 @@ public class DFFrame {
             try {
 		DFMethod method1 = klass.lookupMethod(
 		    DFCallStyle.Constructor, null, argTypes);
-                method1.addCaller(method);
 		this.fixateType(method, ci.arguments(), method1.getFuncType().getArgTypes());
             } catch (MethodNotFound e) {
 	    }
@@ -736,7 +735,9 @@ public class DFFrame {
             try {
                 DFMethod method1 = klass.lookupMethod(
                     callStyle, invoke.getName(), argTypes);
-                method1.addCaller(method);
+		for (DFMethod m : method1.getOverriders()) {
+		    m.addCaller(method);
+		}
                 this.fixateType(method, invoke.arguments(), method1.getFuncType().getArgTypes());
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
@@ -1053,23 +1054,23 @@ public class DFFrame {
         }
     }
 
-    private void fixateType(DFMethod method, Expression expr, DFType type) {
+    private void fixateType(DFTypeSpace typeSpace, Expression expr, DFType type) {
 	if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    fixateType(method, paren.getExpression(), type);
+	    fixateType(typeSpace, paren.getExpression(), type);
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFFunctionalKlass lambdaKlass =
-		(DFFunctionalKlass)method.getType(id);
+		(DFFunctionalKlass)typeSpace.getType(id);
 	    lambdaKlass.setBaseKlass(type.toKlass());
 	}
     }
 
-    private void fixateType(DFMethod method, List<Expression> exprs, DFType[] types) {
+    private void fixateType(DFTypeSpace typeSpace, List<Expression> exprs, DFType[] types) {
 	for (int i = 0; i < exprs.size(); i++) {
-	    this.fixateType(method, exprs.get(i), types[i]);
+	    this.fixateType(typeSpace, exprs.get(i), types[i]);
 	}
     }
 

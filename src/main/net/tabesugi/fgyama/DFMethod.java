@@ -842,16 +842,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _callers.add(method);
     }
 
-    private void listCallers(ConsistentHashSet<DFMethod> callers) {
-        callers.addAll(_callers);
-        for (DFMethod method : _overriding) {
-            method.listCallers(callers);
-        }
-    }
     public ConsistentHashSet<DFMethod> getCallers() {
-        ConsistentHashSet<DFMethod> callers = new ConsistentHashSet<DFMethod>();
-        listCallers(callers);
-        return callers;
+	return _callers;
     }
 
     public DFTypeFinder getFinder() {

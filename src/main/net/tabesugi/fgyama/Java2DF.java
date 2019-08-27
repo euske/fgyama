@@ -735,10 +735,14 @@ public class Java2DF {
         // (public, inner, in-statement and anonymous) are known.
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 
+	// List method overrides.
+        for (DFKlass klass : klasses) {
+            klass.overrideMethods();
+	}
+
         // Build method scopes (normal classes).
         for (DFKlass klass : klasses) {
 	    if (klass instanceof DFFunctionalKlass) continue;
-            klass.overrideMethods();
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildScope();
@@ -764,7 +768,6 @@ public class Java2DF {
         // Build method scopes (lambdas).
         for (DFKlass klass : klasses) {
 	    if (!(klass instanceof DFFunctionalKlass)) continue;
-	    klass.overrideMethods();
 	    DFMethod init = klass.getInitMethod();
 	    if (init != null) {
 		init.buildScope();
