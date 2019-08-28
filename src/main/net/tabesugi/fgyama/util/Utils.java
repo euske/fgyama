@@ -197,7 +197,41 @@ public class Utils {
     public static String encodeASTNode(ASTNode node) {
         int start = node.getStartPosition();
         int end = start + node.getLength();
-        return (":"+getASTNodeTypeName(node.getNodeType())+":"+start+":"+end);
+        String label;
+        if (node instanceof AbstractTypeDeclaration) {
+            label = ((AbstractTypeDeclaration)node).getName().getIdentifier();
+        } else if (node instanceof Block) {
+            label = "B";
+        } else if (node instanceof DoStatement) {
+            label = "do";
+        } else if (node instanceof EnhancedForStatement) {
+            label = "efor";
+        } else if (node instanceof ForStatement) {
+            label = "for";
+        } else if (node instanceof IfStatement) {
+            label = "if";
+        } else if (node instanceof Initializer) {
+            label = "clinit";
+        } else if (node instanceof LambdaExpression) {
+            label = "lambda";
+        } else if (node instanceof MethodDeclaration) {
+            label = ((MethodDeclaration)node).getName().getIdentifier();
+        } else if (node instanceof VariableDeclaration) {
+            label = ((VariableDeclaration)node).getName().getIdentifier();
+        } else if (node instanceof SwitchCase) {
+            label = "case";
+        } else if (node instanceof SwitchStatement) {
+            label = "switch";
+        } else if (node instanceof SynchronizedStatement) {
+            label = "synchronized";
+        } else if (node instanceof TryStatement) {
+            label = "try";
+        } else if (node instanceof WhileStatement) {
+            label = "while";
+        } else {
+            label = "AST"+node.getNodeType();
+        }
+        return (":"+label+":"+start+":"+end);
     }
 
     public static String getASTNodeTypeName(int type) {
