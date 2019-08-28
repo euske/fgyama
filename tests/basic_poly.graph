@@ -18,18 +18,18 @@
       <caller name="Lbasic_poly;.main([Ljava/lang/String;)V"/>
       <overrider name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="106" start="42" type="31"/>
-      <scope name="Lbasic_poly_Foo;.:MethodDeclaration:42:106">
+      <scope name="Lbasic_poly_Foo;.:moo:42:106">
         <node id="G37_moo_N1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
           <ast end="75" start="57" type="44"/>
         </node>
-        <node id="G37_moo_N2" kind="assign_var" ref="$Lbasic_poly_Foo;.:MethodDeclaration:42:106/$obj" type="Lbasic_poly_Foo;">
+        <node id="G37_moo_N2" kind="assign_var" ref="$Lbasic_poly_Foo;.:moo:42:106/$obj" type="Lbasic_poly_Foo;">
           <ast end="75" start="57" type="44"/>
           <link src="G37_moo_N1"/>
         </node>
         <node id="G37_moo_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="G37_moo_N4" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
-        <scope name="Lbasic_poly_Foo;.:MethodDeclaration:42:106.:Block:77:106">
-          <node id="G37_moo_N5" kind="ref_var" ref="$Lbasic_poly_Foo;.:MethodDeclaration:42:106/$obj" type="Lbasic_poly_Foo;">
+        <scope name="Lbasic_poly_Foo;.:moo:42:106.:B:77:106">
+          <node id="G37_moo_N5" kind="ref_var" ref="$Lbasic_poly_Foo;.:moo:42:106/$obj" type="Lbasic_poly_Foo;">
             <ast end="97" start="94" type="42"/>
             <link src="G37_moo_N2"/>
           </node>
@@ -55,18 +55,18 @@
       <caller name="Lbasic_poly;.main([Ljava/lang/String;)V"/>
       <overriding name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="273" start="160" type="31"/>
-      <scope name="Lbasic_poly_Baa;.:MethodDeclaration:160:273">
+      <scope name="Lbasic_poly_Baa;.:moo:160:273">
         <node id="G38_moo_N1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
           <ast end="193" start="175" type="44"/>
         </node>
-        <node id="G38_moo_N2" kind="assign_var" ref="$Lbasic_poly_Baa;.:MethodDeclaration:160:273/$obj" type="Lbasic_poly_Foo;">
+        <node id="G38_moo_N2" kind="assign_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
           <ast end="193" start="175" type="44"/>
           <link src="G38_moo_N1"/>
         </node>
         <node id="G38_moo_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="G38_moo_N4" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
-        <scope name="Lbasic_poly_Baa;.:MethodDeclaration:160:273.:Block:195:273">
-          <node id="G38_moo_N5" kind="ref_var" ref="$Lbasic_poly_Baa;.:MethodDeclaration:160:273/$obj" type="Lbasic_poly_Foo;">
+        <scope name="Lbasic_poly_Baa;.:moo:160:273.:B:195:273">
+          <node id="G38_moo_N5" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
             <ast end="218" start="215" type="42"/>
             <link src="G38_moo_N2"/>
           </node>
@@ -80,7 +80,7 @@
             <ast end="219" start="205" type="48"/>
             <link src="G38_moo_N6"/>
           </node>
-          <node id="G38_moo_N8" kind="ref_var" ref="$Lbasic_poly_Baa;.:MethodDeclaration:160:273/$obj" type="Lbasic_poly_Foo;">
+          <node id="G38_moo_N8" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
             <ast end="262" start="259" type="42"/>
             <link src="G38_moo_N2"/>
           </node>
@@ -112,17 +112,17 @@
     </method>
     <method abstract="false" name="Lbasic_poly;.main([Ljava/lang/String;)V" style="static">
       <ast end="728" start="307" type="31"/>
-      <scope name="Lbasic_poly;.:MethodDeclaration:307:728">
+      <scope name="Lbasic_poly;.:main:307:728">
         <node id="G39_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast end="344" start="331" type="44"/>
         </node>
-        <node id="G39_main_N2" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728/$args" type="[Ljava/lang/String;">
+        <node id="G39_main_N2" kind="assign_var" ref="$Lbasic_poly;.:main:307:728/$args" type="[Ljava/lang/String;">
           <ast end="344" start="331" type="44"/>
           <link src="G39_main_N1"/>
         </node>
         <node id="G39_main_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="G39_main_N4" kind="input" ref="#this" type="Lbasic_poly;"/>
-        <scope name="Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728">
+        <scope name="Lbasic_poly;.:main:307:728.:B:346:728">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="G39_main_N5" kind="new" type="Lbasic_poly_Foo;">
             <ast end="395" start="375" type="14"/>
           </node>
@@ -130,15 +130,15 @@
             <ast end="395" start="375" type="14"/>
             <link src="G39_main_N5"/>
           </node>
-          <node id="G39_main_N7" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$a" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N7" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$a" type="Lbasic_poly_Foo;">
             <ast end="395" start="371" type="59"/>
             <link src="G39_main_N6"/>
           </node>
-          <node id="G39_main_N8" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$a" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N8" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$a" type="Lbasic_poly_Foo;">
             <ast end="414" start="413" type="42"/>
             <link src="G39_main_N7"/>
           </node>
-          <node id="G39_main_N9" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$a" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N9" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$a" type="Lbasic_poly_Foo;">
             <ast end="420" start="419" type="42"/>
             <link src="G39_main_N7"/>
           </node>
@@ -152,7 +152,7 @@
             <ast end="421" start="413" type="32"/>
             <link src="G39_main_N10"/>
           </node>
-          <node id="G39_main_N12" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node id="G39_main_N12" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="421" start="409" type="59"/>
             <link src="G39_main_N11"/>
           </node>
@@ -163,19 +163,19 @@
             <ast end="492" start="472" type="14"/>
             <link src="G39_main_N13"/>
           </node>
-          <node id="G39_main_N15" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$b" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N15" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$b" type="Lbasic_poly_Foo;">
             <ast end="492" start="468" type="59"/>
             <link src="G39_main_N14"/>
           </node>
-          <node id="G39_main_N16" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node id="G39_main_N16" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="503" start="502" type="42"/>
             <link src="G39_main_N21"/>
           </node>
-          <node id="G39_main_N17" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$b" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N17" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$b" type="Lbasic_poly_Foo;">
             <ast end="507" start="506" type="42"/>
             <link src="G39_main_N15"/>
           </node>
-          <node id="G39_main_N18" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$a" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N18" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$a" type="Lbasic_poly_Foo;">
             <ast end="513" start="512" type="42"/>
             <link src="G39_main_N7"/>
           </node>
@@ -189,19 +189,19 @@
             <ast end="514" start="506" type="32"/>
             <link src="G39_main_N19"/>
           </node>
-          <node data="=" id="G39_main_N21" kind="op_assign" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node data="=" id="G39_main_N21" kind="op_assign" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="514" start="502" type="7"/>
             <link label="R" src="G39_main_N20"/>
           </node>
-          <node id="G39_main_N22" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node id="G39_main_N22" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="548" start="547" type="42"/>
             <link src="G39_main_N27"/>
           </node>
-          <node id="G39_main_N23" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$b" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N23" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$b" type="Lbasic_poly_Foo;">
             <ast end="552" start="551" type="42"/>
             <link src="G39_main_N15"/>
           </node>
-          <node id="G39_main_N24" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$b" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N24" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$b" type="Lbasic_poly_Foo;">
             <ast end="558" start="557" type="42"/>
             <link src="G39_main_N15"/>
           </node>
@@ -215,7 +215,7 @@
             <ast end="559" start="551" type="32"/>
             <link src="G39_main_N25"/>
           </node>
-          <node data="=" id="G39_main_N27" kind="op_assign" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node data="=" id="G39_main_N27" kind="op_assign" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="559" start="547" type="7"/>
             <link label="R" src="G39_main_N26"/>
           </node>
@@ -226,19 +226,19 @@
             <ast end="631" start="611" type="14"/>
             <link src="G39_main_N28"/>
           </node>
-          <node id="G39_main_N30" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$c" type="Lbasic_poly_Baa;">
+          <node id="G39_main_N30" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$c" type="Lbasic_poly_Baa;">
             <ast end="631" start="607" type="59"/>
             <link src="G39_main_N29"/>
           </node>
-          <node id="G39_main_N31" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node id="G39_main_N31" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="642" start="641" type="42"/>
             <link src="G39_main_N36"/>
           </node>
-          <node id="G39_main_N32" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$c" type="Lbasic_poly_Baa;">
+          <node id="G39_main_N32" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$c" type="Lbasic_poly_Baa;">
             <ast end="646" start="645" type="42"/>
             <link src="G39_main_N30"/>
           </node>
-          <node id="G39_main_N33" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$a" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N33" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$a" type="Lbasic_poly_Foo;">
             <ast end="652" start="651" type="42"/>
             <link src="G39_main_N7"/>
           </node>
@@ -252,19 +252,19 @@
             <ast end="653" start="645" type="32"/>
             <link src="G39_main_N34"/>
           </node>
-          <node data="=" id="G39_main_N36" kind="op_assign" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node data="=" id="G39_main_N36" kind="op_assign" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="653" start="641" type="7"/>
             <link label="R" src="G39_main_N35"/>
           </node>
-          <node id="G39_main_N37" kind="assign_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node id="G39_main_N37" kind="assign_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="687" start="686" type="42"/>
             <link src="G39_main_N42"/>
           </node>
-          <node id="G39_main_N38" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$c" type="Lbasic_poly_Baa;">
+          <node id="G39_main_N38" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$c" type="Lbasic_poly_Baa;">
             <ast end="691" start="690" type="42"/>
             <link src="G39_main_N30"/>
           </node>
-          <node id="G39_main_N39" kind="ref_var" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$b" type="Lbasic_poly_Foo;">
+          <node id="G39_main_N39" kind="ref_var" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$b" type="Lbasic_poly_Foo;">
             <ast end="697" start="696" type="42"/>
             <link src="G39_main_N15"/>
           </node>
@@ -278,7 +278,7 @@
             <ast end="698" start="690" type="32"/>
             <link src="G39_main_N40"/>
           </node>
-          <node data="=" id="G39_main_N42" kind="op_assign" ref="$Lbasic_poly;.:MethodDeclaration:307:728.:Block:346:728/$x" type="I">
+          <node data="=" id="G39_main_N42" kind="op_assign" ref="$Lbasic_poly;.:main:307:728.:B:346:728/$x" type="I">
             <ast end="698" start="686" type="7"/>
             <link label="R" src="G39_main_N41"/>
           </node>

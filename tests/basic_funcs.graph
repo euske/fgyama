@@ -23,11 +23,11 @@
     </method>
     <method abstract="false" name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
       <ast end="243" start="77" type="31"/>
-      <scope name="Lbasic_funcs;.:MethodDeclaration:77:243">
+      <scope name="Lbasic_funcs;.:main:77:243">
         <node id="G33_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast end="114" start="101" type="44"/>
         </node>
-        <node id="G33_main_N2" kind="assign_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243/$args" type="[Ljava/lang/String;">
+        <node id="G33_main_N2" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243/$args" type="[Ljava/lang/String;">
           <ast end="114" start="101" type="44"/>
           <link src="G33_main_N1"/>
         </node>
@@ -39,8 +39,8 @@
         <node id="G33_main_N25" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="G33_main_N19"/>
         </node>
-        <scope name="Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243">
-          <node id="G33_main_N8" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243/$args" type="[Ljava/lang/String;">
+        <scope name="Lbasic_funcs;.:main:77:243.:B:116:243">
+          <node id="G33_main_N8" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243/$args" type="[Ljava/lang/String;">
             <ast end="141" start="137" type="42"/>
             <link src="G33_main_N2"/>
           </node>
@@ -53,11 +53,11 @@
             <link label="index" src="G33_main_N9"/>
             <link src="G33_main_N3"/>
           </node>
-          <node id="G33_main_N11" kind="assign_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$a" type="Ljava/lang/String;">
+          <node id="G33_main_N11" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$a" type="Ljava/lang/String;">
             <ast end="144" start="133" type="59"/>
             <link src="G33_main_N10"/>
           </node>
-          <node id="G33_main_N12" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$a" type="Ljava/lang/String;">
+          <node id="G33_main_N12" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$a" type="Ljava/lang/String;">
             <ast end="180" start="179" type="42"/>
             <link src="G33_main_N11"/>
           </node>
@@ -69,11 +69,11 @@
             <ast end="181" start="162" type="32"/>
             <link src="G33_main_N13"/>
           </node>
-          <node id="G33_main_N15" kind="assign_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$b" type="I">
+          <node id="G33_main_N15" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="181" start="158" type="59"/>
             <link src="G33_main_N14"/>
           </node>
-          <node id="G33_main_N16" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$b" type="I">
+          <node id="G33_main_N16" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="204" start="203" type="42"/>
             <link src="G33_main_N15"/>
           </node>
@@ -92,7 +92,7 @@
             <ast end="205" start="199" type="32"/>
             <link label="@Lbasic_funcs;/.z" src="G33_main_N17"/>
           </node>
-          <node id="G33_main_N20" kind="assign_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$c" type="I">
+          <node id="G33_main_N20" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
             <ast end="205" start="195" type="59"/>
             <link src="G33_main_N18"/>
           </node>
@@ -100,7 +100,7 @@
             <ast end="225" start="215" type="40"/>
             <link src="G33_main_N4"/>
           </node>
-          <node id="G33_main_N22" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:77:243.:Block:116:243/$c" type="I">
+          <node id="G33_main_N22" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
             <ast end="235" start="234" type="42"/>
             <link src="G33_main_N20"/>
           </node>
@@ -120,11 +120,11 @@
       <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast end="407" start="249" type="31"/>
-      <scope name="Lbasic_funcs;.:MethodDeclaration:249:407">
+      <scope name="Lbasic_funcs;.:moo:249:407">
         <node id="G34_moo_N1" kind="input" ref="#arg0" type="I">
           <ast end="276" start="271" type="44"/>
         </node>
-        <node id="G34_moo_N2" kind="assign_var" ref="$Lbasic_funcs;.:MethodDeclaration:249:407/$x" type="I">
+        <node id="G34_moo_N2" kind="assign_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
           <ast end="276" start="271" type="44"/>
           <link src="G34_moo_N1"/>
         </node>
@@ -134,7 +134,7 @@
         <node id="G34_moo_N36" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="G34_moo_N34"/>
         </node>
-        <scope name="Lbasic_funcs;.:MethodDeclaration:249:407.:Block:278:407">
+        <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="G34_moo_N6" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
             <ast end="289" start="288" type="42"/>
             <link label="obj" src="G34_moo_N5"/>
@@ -148,7 +148,7 @@
             <link label="L" src="G34_moo_N3"/>
             <link label="R" src="G34_moo_N7"/>
           </node>
-          <node id="G34_moo_N9" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:249:407/$x" type="I">
+          <node id="G34_moo_N9" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
             <ast end="309" start="308" type="42"/>
             <link src="G34_moo_N2"/>
           </node>
@@ -186,7 +186,7 @@
             <link label="false" src="G34_moo_N30"/>
             <link label="true" src="G34_moo_N33"/>
           </node>
-          <scope name="Lbasic_funcs;.:MethodDeclaration:249:407.:Block:278:407.:Block:316:353">
+          <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:316:353">
             <node data="Lbasic_funcs;.foo()I" id="G34_moo_N13" kind="call" type="I">
               <ast end="342" start="337" type="32"/>
               <link label="#this" src="G34_moo_N5"/>
@@ -206,8 +206,8 @@
               <link src="G34_moo_N15"/>
             </node>
           </scope>
-          <scope name="Lbasic_funcs;.:MethodDeclaration:249:407.:Block:278:407.:Block:359:401">
-            <node id="G34_moo_N19" kind="ref_var" ref="$Lbasic_funcs;.:MethodDeclaration:249:407/$x" type="I">
+          <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:359:401">
+            <node id="G34_moo_N19" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
               <ast end="385" start="384" type="42"/>
               <link src="G34_moo_N2"/>
             </node>
@@ -253,13 +253,13 @@
     <method abstract="false" name="Lbasic_funcs;.foo()I" style="static">
       <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast end="477" start="413" type="31"/>
-      <scope name="Lbasic_funcs;.:MethodDeclaration:413:477">
+      <scope name="Lbasic_funcs;.:foo:413:477">
         <node id="G35_foo_N1" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
         <node id="G35_foo_N2" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="G35_foo_N8" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="G35_foo_N3"/>
         </node>
-        <scope name="Lbasic_funcs;.:MethodDeclaration:413:477.:Block:437:477">
+        <scope name="Lbasic_funcs;.:foo:413:477.:B:437:477">
           <node id="G35_foo_N3" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
             <ast end="448" start="447" type="42"/>
             <link label="obj" src="G35_foo_N2"/>

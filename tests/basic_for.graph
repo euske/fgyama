@@ -6,24 +6,24 @@
     </method>
     <method abstract="false" name="Lbasic_for;.foo(I)I" style="static">
       <ast end="139" start="30" type="31"/>
-      <scope name="Lbasic_for;.:MethodDeclaration:30:139">
+      <scope name="Lbasic_for;.:foo:30:139">
         <node id="G17_foo_N1" kind="input" ref="#arg0" type="I">
           <ast end="57" start="52" type="44"/>
         </node>
-        <node id="G17_foo_N2" kind="assign_var" ref="$Lbasic_for;.:MethodDeclaration:30:139/$n" type="I">
+        <node id="G17_foo_N2" kind="assign_var" ref="$Lbasic_for;.:foo:30:139/$n" type="I">
           <ast end="57" start="52" type="44"/>
           <link src="G17_foo_N1"/>
         </node>
         <node id="G17_foo_N3" kind="input" ref="#this" type="Lbasic_for;"/>
-        <scope name="Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139">
+        <scope name="Lbasic_for;.:foo:30:139.:B:59:139">
           <node data="0" id="G17_foo_N4" kind="value" type="I">
             <ast end="71" start="70" type="34"/>
           </node>
-          <node id="G17_foo_N5" kind="assign_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+          <node id="G17_foo_N5" kind="assign_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
             <ast end="71" start="66" type="59"/>
             <link src="G17_foo_N4"/>
           </node>
-          <node id="G17_foo_N26" kind="ref_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+          <node id="G17_foo_N26" kind="ref_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
             <ast end="132" start="131" type="42"/>
             <link src="G17_foo_N25"/>
           </node>
@@ -31,19 +31,19 @@
             <ast end="133" start="124" type="41"/>
             <link src="G17_foo_N26"/>
           </node>
-          <scope name="Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122">
+          <scope name="Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122">
             <node data="0" id="G17_foo_N6" kind="value" type="I">
               <ast end="88" start="87" type="34"/>
             </node>
-            <node id="G17_foo_N7" kind="assign_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node id="G17_foo_N7" kind="assign_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="88" start="83" type="59"/>
               <link src="G17_foo_N6"/>
             </node>
-            <node id="G17_foo_N8" kind="ref_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node id="G17_foo_N8" kind="ref_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="91" start="90" type="42"/>
               <link src="G17_foo_N21"/>
             </node>
-            <node id="G17_foo_N10" kind="ref_var" ref="$Lbasic_for;.:MethodDeclaration:30:139/$n" type="I">
+            <node id="G17_foo_N10" kind="ref_var" ref="$Lbasic_for;.:foo:30:139/$n" type="I">
               <ast end="95" start="94" type="42"/>
               <link src="G17_foo_N2"/>
             </node>
@@ -52,58 +52,58 @@
               <link label="L" src="G17_foo_N8"/>
               <link label="R" src="G17_foo_N10"/>
             </node>
-            <node id="G17_foo_N17" kind="assign_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node id="G17_foo_N17" kind="assign_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="98" start="97" type="42"/>
               <link src="G17_foo_N19"/>
             </node>
             <node data="1" id="G17_foo_N18" kind="value" type="I">
               <ast end="103" start="102" type="34"/>
             </node>
-            <node data="+=" id="G17_foo_N19" kind="op_assign" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node data="+=" id="G17_foo_N19" kind="op_assign" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="103" start="97" type="7"/>
               <link label="L" src="G17_foo_N21"/>
               <link label="R" src="G17_foo_N18"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N20" kind="begin" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node data=":for:74:122" id="G17_foo_N20" kind="begin" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="init" src="G17_foo_N7"/>
               <link label="cont" src="G17_foo_N17"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N21" kind="repeat" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node data=":for:74:122" id="G17_foo_N21" kind="repeat" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="_end" src="G17_foo_N22"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N22" kind="end" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+            <node data=":for:74:122" id="G17_foo_N22" kind="end" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="cond" src="G17_foo_N12"/>
               <link label="_repeat" src="G17_foo_N21"/>
               <link src="G17_foo_N20"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N23" kind="begin" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+            <node data=":for:74:122" id="G17_foo_N23" kind="begin" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="init" src="G17_foo_N5"/>
               <link label="cont" src="G17_foo_N13"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N24" kind="repeat" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+            <node data=":for:74:122" id="G17_foo_N24" kind="repeat" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="_end" src="G17_foo_N25"/>
             </node>
-            <node data=":ForStatement:74:122" id="G17_foo_N25" kind="end" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+            <node data=":for:74:122" id="G17_foo_N25" kind="end" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
               <ast end="122" start="74" type="24"/>
               <link label="cond" src="G17_foo_N12"/>
               <link label="_repeat" src="G17_foo_N24"/>
               <link src="G17_foo_N23"/>
             </node>
-            <scope name="Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122.:Block:105:122">
-              <node id="G17_foo_N13" kind="assign_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+            <scope name="Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122.:B:105:122">
+              <node id="G17_foo_N13" kind="assign_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
                 <ast end="113" start="112" type="42"/>
                 <link src="G17_foo_N16"/>
               </node>
-              <node id="G17_foo_N14" kind="ref_var" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139.:ForStatement:74:122/$i" type="I">
+              <node id="G17_foo_N14" kind="ref_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122/$i" type="I">
                 <ast end="118" start="117" type="42"/>
                 <link src="G17_foo_N21"/>
               </node>
-              <node data="+=" id="G17_foo_N16" kind="op_assign" ref="$Lbasic_for;.:MethodDeclaration:30:139.:Block:59:139/$x" type="I">
+              <node data="+=" id="G17_foo_N16" kind="op_assign" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
                 <ast end="118" start="112" type="7"/>
                 <link label="L" src="G17_foo_N24"/>
                 <link label="R" src="G17_foo_N14"/>

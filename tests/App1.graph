@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="LRecord;" path="App1.java">
-    <field name="@LRecord;/.key" type="Ljava/lang/String;"/>
-    <field name="@LRecord;/.value" type="Ljava/lang/String;"/>
-    <method name="LRecord;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@LRecord;/.key" static="false" type="Ljava/lang/String;"/>
+    <field name="@LRecord;/.value" static="false" type="Ljava/lang/String;"/>
+    <method abstract="false" name="LRecord;.&lt;clinit&gt;()V" style="initializer">
       <ast end="173" start="19" type="55"/>
       <scope name="LRecord;.&lt;clinit&gt;">
         <node data="uninitialized" id="G1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -17,20 +17,21 @@
         </node>
       </scope>
     </method>
-    <method name="LRecord;.&lt;init&gt;(Ljava/lang/String;Ljava/lang/String;)LRecord;" style="constructor">
+    <method abstract="false" name="LRecord;.&lt;init&gt;(Ljava/lang/String;Ljava/lang/String;)LRecord;" style="constructor">
+      <caller name="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;"/>
       <ast end="171" start="72" type="31"/>
-      <scope name="LRecord;.:MethodDeclaration:72:171">
+      <scope name="LRecord;.:Record:72:171">
         <node id="G2_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="96" start="86" type="44"/>
         </node>
-        <node id="G2_&lt;init&gt;_N2" kind="assign_var" ref="$LRecord;.:MethodDeclaration:72:171/$key" type="Ljava/lang/String;">
+        <node id="G2_&lt;init&gt;_N2" kind="assign_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
           <ast end="96" start="86" type="44"/>
           <link src="G2_&lt;init&gt;_N1"/>
         </node>
         <node id="G2_&lt;init&gt;_N3" kind="input" ref="#arg1" type="Ljava/lang/String;">
           <ast end="110" start="98" type="44"/>
         </node>
-        <node id="G2_&lt;init&gt;_N4" kind="assign_var" ref="$LRecord;.:MethodDeclaration:72:171/$value" type="Ljava/lang/String;">
+        <node id="G2_&lt;init&gt;_N4" kind="assign_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
           <ast end="110" start="98" type="44"/>
           <link src="G2_&lt;init&gt;_N3"/>
         </node>
@@ -41,7 +42,7 @@
         <node id="G2_&lt;init&gt;_N15" kind="output" ref="@LRecord;/.value" type="Ljava/lang/String;">
           <link src="G2_&lt;init&gt;_N11"/>
         </node>
-        <scope name="LRecord;.:MethodDeclaration:72:171.:Block:112:171">
+        <scope name="LRecord;.:Record:72:171.:B:112:171">
           <node id="G2_&lt;init&gt;_N6" kind="ref_var" ref="#this" type="LRecord;">
             <ast end="126" start="122" type="52"/>
             <link src="G2_&lt;init&gt;_N5"/>
@@ -51,7 +52,7 @@
             <link label="obj" src="G2_&lt;init&gt;_N6"/>
             <link src="G2_&lt;init&gt;_N9"/>
           </node>
-          <node id="G2_&lt;init&gt;_N8" kind="ref_var" ref="$LRecord;.:MethodDeclaration:72:171/$key" type="Ljava/lang/String;">
+          <node id="G2_&lt;init&gt;_N8" kind="ref_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
             <ast end="136" start="133" type="42"/>
             <link src="G2_&lt;init&gt;_N2"/>
           </node>
@@ -68,7 +69,7 @@
             <link label="obj" src="G2_&lt;init&gt;_N10"/>
             <link src="G2_&lt;init&gt;_N13"/>
           </node>
-          <node id="G2_&lt;init&gt;_N12" kind="ref_var" ref="$LRecord;.:MethodDeclaration:72:171/$value" type="Ljava/lang/String;">
+          <node id="G2_&lt;init&gt;_N12" kind="ref_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
             <ast end="164" start="159" type="42"/>
             <link src="G2_&lt;init&gt;_N4"/>
           </node>
@@ -81,10 +82,10 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="LListy&lt;T&gt;;" path="App1.java">
-    <field name="@LListy&lt;T&gt;;/._n" type="I"/>
-    <field name="@LListy&lt;T&gt;;/._max" type="I"/>
-    <field name="@LListy&lt;T&gt;;/._objs" type="[Ljava/lang/Object;"/>
-    <method name="LListy&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@LListy&lt;T&gt;;/._n" static="false" type="I"/>
+    <field name="@LListy&lt;T&gt;;/._max" static="false" type="I"/>
+    <field name="@LListy&lt;T&gt;;/._objs" static="false" type="[Ljava/lang/Object;"/>
+    <method abstract="false" name="LListy&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="873" start="175" type="55"/>
       <scope name="LListy&lt;T&gt;;.&lt;clinit&gt;">
         <node data="0" id="G3_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -110,13 +111,13 @@
         </node>
       </scope>
     </method>
-    <method name="LListy&lt;T&gt;;.add(Ljava/lang/Object;)V" style="instance">
+    <method abstract="false" name="LListy&lt;T&gt;;.add(Ljava/lang/Object;)V" style="instance">
       <ast end="658" start="297" type="31"/>
-      <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658">
+      <scope name="LListy&lt;T&gt;;.:add:297:658">
         <node id="G4_add_N1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
           <ast end="316" start="313" type="44"/>
         </node>
-        <node id="G4_add_N2" kind="assign_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658/$x" type="Ljava/lang/Object;">
+        <node id="G4_add_N2" kind="assign_var" ref="$LListy&lt;T&gt;;.:add:297:658/$x" type="Ljava/lang/Object;">
           <ast end="316" start="313" type="44"/>
           <link src="G4_add_N1"/>
         </node>
@@ -125,7 +126,7 @@
         <node id="G4_add_N5" kind="input" ref="@LListy&lt;T&gt;;/._n" type="I"/>
         <node id="G4_add_N6" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
         <node id="G4_add_N7" kind="input" ref="#this" type="LListy&lt;T&gt;;"/>
-        <node id="G4_add_N71" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I"/>
+        <node id="G4_add_N71" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I"/>
         <node id="G4_add_N83" kind="output" ref="@LListy&lt;T&gt;;/._max" type="I">
           <link src="G4_add_N72"/>
         </node>
@@ -138,7 +139,7 @@
         <node id="G4_add_N86" kind="output" ref="@LListy&lt;T&gt;;/._n" type="I">
           <link src="G4_add_N77"/>
         </node>
-        <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658">
+        <scope name="LListy&lt;T&gt;;.:add:297:658.:B:318:658">
           <node id="G4_add_N8" kind="ref_field" ref="@LListy&lt;T&gt;;/._objs" type="[Ljava/lang/Object;">
             <ast end="337" start="332" type="42"/>
             <link label="obj" src="G4_add_N7"/>
@@ -178,7 +179,7 @@
             <link label="true" src="G4_add_N16"/>
             <link label="false" src="G4_add_N4"/>
           </node>
-          <node id="G4_add_N73" kind="join" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+          <node id="G4_add_N73" kind="join" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
             <ast end="627" start="328" type="25"/>
             <link label="cond" src="G4_add_N14"/>
             <link label="true" src="G4_add_N65"/>
@@ -221,7 +222,7 @@
             <link label="index" src="G4_add_N78"/>
             <link src="G4_add_N82"/>
           </node>
-          <node id="G4_add_N81" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658/$x" type="Ljava/lang/Object;">
+          <node id="G4_add_N81" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658/$x" type="Ljava/lang/Object;">
             <ast end="651" start="650" type="42"/>
             <link src="G4_add_N2"/>
           </node>
@@ -229,7 +230,7 @@
             <ast end="651" start="636" type="7"/>
             <link label="R" src="G4_add_N81"/>
           </node>
-          <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627">
+          <scope name="LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627">
             <node id="G4_add_N16" kind="assign_field" ref="@LListy&lt;T&gt;;/._max" type="I">
               <ast end="379" start="375" type="42"/>
               <link label="obj" src="G4_add_N7"/>
@@ -268,7 +269,7 @@
             <node data="0" id="G4_add_N25" kind="valueset" type="[Ljava/lang/Object;">
               <ast end="438" start="422" type="3"/>
             </node>
-            <node id="G4_add_N26" kind="assign_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+            <node id="G4_add_N26" kind="assign_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
               <ast end="438" start="415" type="59"/>
               <link src="G4_add_N25"/>
             </node>
@@ -285,7 +286,7 @@
               <link label="L" src="G4_add_N27"/>
               <link label="R" src="G4_add_N29"/>
             </node>
-            <node id="G4_add_N65" kind="join" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+            <node id="G4_add_N65" kind="join" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
               <ast end="591" start="452" type="25"/>
               <link label="cond" src="G4_add_N30"/>
               <link label="true" src="G4_add_N54"/>
@@ -302,7 +303,7 @@
               <link label="obj" src="G4_add_N7"/>
               <link src="G4_add_N70"/>
             </node>
-            <node id="G4_add_N69" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+            <node id="G4_add_N69" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
               <ast end="616" start="612" type="42"/>
               <link src="G4_add_N26"/>
             </node>
@@ -310,16 +311,16 @@
               <ast end="616" start="604" type="7"/>
               <link label="R" src="G4_add_N69"/>
             </node>
-            <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591">
-              <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577">
+            <scope name="LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591">
+              <scope name="LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577">
                 <node data="0" id="G4_add_N31" kind="value" type="I">
                   <ast end="503" start="502" type="34"/>
                 </node>
-                <node id="G4_add_N32" kind="assign_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G4_add_N32" kind="assign_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="503" start="498" type="59"/>
                   <link src="G4_add_N31"/>
                 </node>
-                <node id="G4_add_N33" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G4_add_N33" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="506" start="505" type="42"/>
                   <link src="G4_add_N53"/>
                 </node>
@@ -333,54 +334,54 @@
                   <link label="L" src="G4_add_N33"/>
                   <link label="R" src="G4_add_N36"/>
                 </node>
-                <node id="G4_add_N49" kind="assign_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G4_add_N49" kind="assign_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="514" start="513" type="42"/>
                   <link src="G4_add_N51"/>
                 </node>
-                <node id="G4_add_N50" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G4_add_N50" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="514" start="513" type="42"/>
                   <link src="G4_add_N53"/>
                 </node>
-                <node data="++" id="G4_add_N51" kind="op_postfix" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data="++" id="G4_add_N51" kind="op_postfix" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="516" start="513" type="37"/>
                   <link src="G4_add_N50"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N52" kind="begin" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G4_add_N52" kind="begin" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="init" src="G4_add_N32"/>
                   <link label="cont" src="G4_add_N49"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N53" kind="repeat" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G4_add_N53" kind="repeat" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="_end" src="G4_add_N54"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N54" kind="end" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G4_add_N54" kind="end" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="cond" src="G4_add_N38"/>
                   <link label="_repeat" src="G4_add_N53"/>
                   <link src="G4_add_N52"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N56" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G4_add_N56" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="init" src="G4_add_N6"/>
                   <link label="cont" src="G4_add_N42"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N57" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G4_add_N57" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="_end" src="G4_add_N58"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G4_add_N58" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G4_add_N58" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="cond" src="G4_add_N38"/>
                   <link label="_repeat" src="G4_add_N57"/>
                   <link src="G4_add_N56"/>
                 </node>
-                <scope name="LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577.:Block:518:577">
-                  <node id="G4_add_N39" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+                <scope name="LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577.:B:518:577">
+                  <node id="G4_add_N39" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
                     <ast end="544" start="540" type="42"/>
                     <link src="G4_add_N26"/>
                   </node>
-                  <node id="G4_add_N41" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                  <node id="G4_add_N41" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                     <ast end="546" start="545" type="42"/>
                     <link src="G4_add_N53"/>
                   </node>
@@ -395,7 +396,7 @@
                     <link label="obj" src="G4_add_N7"/>
                     <link src="G4_add_N3"/>
                   </node>
-                  <node id="G4_add_N45" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                  <node id="G4_add_N45" kind="ref_var" ref="$LListy&lt;T&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                     <ast end="557" start="556" type="42"/>
                     <link src="G4_add_N53"/>
                   </node>
@@ -416,13 +417,13 @@
         </scope>
       </scope>
     </method>
-    <method name="LListy&lt;T&gt;;.get(I)Ljava/lang/Object;" style="instance">
+    <method abstract="false" name="LListy&lt;T&gt;;.get(I)Ljava/lang/Object;" style="instance">
       <ast end="821" start="664" type="31"/>
-      <scope name="LListy&lt;T&gt;;.:MethodDeclaration:664:821">
+      <scope name="LListy&lt;T&gt;;.:get:664:821">
         <node id="G5_get_N1" kind="input" ref="#arg0" type="I">
           <ast end="717" start="712" type="44"/>
         </node>
-        <node id="G5_get_N2" kind="assign_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:664:821/$i" type="I">
+        <node id="G5_get_N2" kind="assign_var" ref="$LListy&lt;T&gt;;.:get:664:821/$i" type="I">
           <ast end="717" start="712" type="44"/>
           <link src="G5_get_N1"/>
         </node>
@@ -431,11 +432,11 @@
         <node id="G5_get_N5" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
         <node id="G5_get_N6" kind="input" ref="#this" type="LListy&lt;T&gt;;"/>
         <node id="G5_get_N24" ref="#return" type="Ljava/lang/Object;"/>
-        <scope name="LListy&lt;T&gt;;.:MethodDeclaration:664:821.:Block:719:821">
+        <scope name="LListy&lt;T&gt;;.:get:664:821.:B:719:821">
           <node data="0" id="G5_get_N7" kind="value" type="I">
             <ast end="734" start="733" type="34"/>
           </node>
-          <node id="G5_get_N8" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:664:821/$i" type="I">
+          <node id="G5_get_N8" kind="ref_var" ref="$LListy&lt;T&gt;;.:get:664:821/$i" type="I">
             <ast end="739" start="738" type="42"/>
             <link src="G5_get_N2"/>
           </node>
@@ -444,7 +445,7 @@
             <link label="L" src="G5_get_N7"/>
             <link label="R" src="G5_get_N8"/>
           </node>
-          <node id="G5_get_N10" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:664:821/$i" type="I">
+          <node id="G5_get_N10" kind="ref_var" ref="$LListy&lt;T&gt;;.:get:664:821/$i" type="I">
             <ast end="744" start="743" type="42"/>
             <link src="G5_get_N2"/>
           </node>
@@ -481,13 +482,13 @@
             <ast end="815" start="803" type="41"/>
             <link src="G5_get_N26"/>
           </node>
-          <scope name="LListy&lt;T&gt;;.:MethodDeclaration:664:821.:Block:719:821.:Block:751:794">
+          <scope name="LListy&lt;T&gt;;.:get:664:821.:B:719:821.:B:751:794">
             <node id="G5_get_N15" kind="ref_field" ref="@LListy&lt;T&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="780" start="775" type="42"/>
               <link label="obj" src="G5_get_N6"/>
               <link src="G5_get_N4"/>
             </node>
-            <node id="G5_get_N17" kind="ref_var" ref="$LListy&lt;T&gt;;.:MethodDeclaration:664:821/$i" type="I">
+            <node id="G5_get_N17" kind="ref_var" ref="$LListy&lt;T&gt;;.:get:664:821/$i" type="I">
               <ast end="782" start="781" type="42"/>
               <link src="G5_get_N2"/>
             </node>
@@ -509,12 +510,12 @@
         </scope>
       </scope>
     </method>
-    <method name="LListy&lt;T&gt;;.size()I" style="instance">
+    <method abstract="false" name="LListy&lt;T&gt;;.size()I" style="instance">
       <ast end="871" start="827" type="31"/>
-      <scope name="LListy&lt;T&gt;;.:MethodDeclaration:827:871">
+      <scope name="LListy&lt;T&gt;;.:size:827:871">
         <node id="G6_size_N1" kind="input" ref="@LListy&lt;T&gt;;/._n" type="I"/>
         <node id="G6_size_N2" kind="input" ref="#this" type="LListy&lt;T&gt;;"/>
-        <scope name="LListy&lt;T&gt;;.:MethodDeclaration:827:871.:Block:845:871">
+        <scope name="LListy&lt;T&gt;;.:size:827:871.:B:845:871">
           <node id="G6_size_N3" kind="ref_field" ref="@LListy&lt;T&gt;;/._n" type="I">
             <ast end="864" start="862" type="42"/>
             <link label="obj" src="G6_size_N2"/>
@@ -529,8 +530,8 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="LDB;" path="App1.java">
-    <field name="@LDB;/._a" type="LListy&lt;LRecord;&gt;;"/>
-    <method name="LDB;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@LDB;/._a" static="false" type="LListy&lt;LRecord;&gt;;"/>
+    <method abstract="false" name="LDB;.&lt;clinit&gt;()V" style="initializer">
       <ast end="1634" start="875" type="55"/>
       <scope name="LDB;.&lt;clinit&gt;">
         <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="G7_&lt;clinit&gt;_N1" kind="new" type="LListy&lt;LRecord;&gt;;">
@@ -546,13 +547,14 @@
         </node>
       </scope>
     </method>
-    <method name="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" style="constructor">
+    <method abstract="false" name="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" style="constructor">
+      <caller name="LApp1;.main([Ljava/lang/String;)V"/>
       <ast end="1389" start="943" type="31"/>
-      <scope name="LDB;.:MethodDeclaration:943:1389">
+      <scope name="LDB;.:DB:943:1389">
         <node id="G8_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="964" start="953" type="44"/>
         </node>
-        <node id="G8_&lt;init&gt;_N2" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389/$path" type="Ljava/lang/String;">
+        <node id="G8_&lt;init&gt;_N2" kind="assign_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
           <ast end="964" start="953" type="44"/>
           <link src="G8_&lt;init&gt;_N1"/>
         </node>
@@ -564,20 +566,26 @@
         <node id="G8_&lt;init&gt;_N8" kind="input" ref="#this" type="LDB;"/>
         <node id="G8_&lt;init&gt;_N75" ref="@LRecord;/.key" type="Ljava/lang/String;"/>
         <node id="G8_&lt;init&gt;_N76" ref="@LRecord;/.value" type="Ljava/lang/String;"/>
-        <node id="G8_&lt;init&gt;_N77" kind="output" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+        <node id="G8_&lt;init&gt;_N77" kind="output" ref="@LRecord;/.key" type="Ljava/lang/String;">
+          <link src="G8_&lt;init&gt;_N75"/>
+        </node>
+        <node id="G8_&lt;init&gt;_N78" kind="output" ref="@LRecord;/.value" type="Ljava/lang/String;">
+          <link src="G8_&lt;init&gt;_N76"/>
+        </node>
+        <node id="G8_&lt;init&gt;_N79" kind="output" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
           <link src="G8_&lt;init&gt;_N68"/>
         </node>
-        <node id="G8_&lt;init&gt;_N78" kind="output" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+        <node id="G8_&lt;init&gt;_N80" kind="output" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
           <link src="G8_&lt;init&gt;_N74"/>
         </node>
-        <node id="G8_&lt;init&gt;_N79" kind="output" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+        <node id="G8_&lt;init&gt;_N81" kind="output" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
           <link src="G8_&lt;init&gt;_N65"/>
         </node>
-        <node id="G8_&lt;init&gt;_N80" kind="output" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+        <node id="G8_&lt;init&gt;_N82" kind="output" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
           <link src="G8_&lt;init&gt;_N71"/>
         </node>
-        <scope name="LDB;.:MethodDeclaration:943:1389.:Block:985:1389">
-          <node id="G8_&lt;init&gt;_N9" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389/$path" type="Ljava/lang/String;">
+        <scope name="LDB;.:DB:943:1389.:B:985:1389">
+          <node id="G8_&lt;init&gt;_N9" kind="ref_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
             <ast end="1057" start="1053" type="42"/>
             <link src="G8_&lt;init&gt;_N2"/>
           </node>
@@ -597,76 +605,76 @@
             <ast end="1059" start="1019" type="14"/>
             <link src="G8_&lt;init&gt;_N12"/>
           </node>
-          <node id="G8_&lt;init&gt;_N14" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389/$reader" type="Ljava/io/BufferedReader;">
+          <node id="G8_&lt;init&gt;_N14" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
             <ast end="1059" start="1010" type="59"/>
             <link src="G8_&lt;init&gt;_N13"/>
           </node>
           <node data="true" id="G8_&lt;init&gt;_N15" kind="value" type="Z">
             <ast end="1080" start="1076" type="9"/>
           </node>
-          <scope name="LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383">
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N63" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+          <scope name="LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N63" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="init" src="G8_&lt;init&gt;_N4"/>
               <link label="cont" src="G8_&lt;init&gt;_N61"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N64" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N64" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="_end" src="G8_&lt;init&gt;_N65"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N65" kind="end" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N65" kind="end" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="cond" src="G8_&lt;init&gt;_N15"/>
               <link label="_repeat" src="G8_&lt;init&gt;_N64"/>
               <link src="G8_&lt;init&gt;_N63"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N66" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N66" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="init" src="G8_&lt;init&gt;_N5"/>
               <link label="cont" src="G8_&lt;init&gt;_N59"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N67" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N67" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="_end" src="G8_&lt;init&gt;_N68"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N68" kind="end" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N68" kind="end" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="cond" src="G8_&lt;init&gt;_N15"/>
               <link label="_repeat" src="G8_&lt;init&gt;_N67"/>
               <link src="G8_&lt;init&gt;_N66"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N69" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N69" kind="begin" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="init" src="G8_&lt;init&gt;_N6"/>
               <link label="cont" src="G8_&lt;init&gt;_N62"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N70" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N70" kind="repeat" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="_end" src="G8_&lt;init&gt;_N71"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N71" kind="end" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N71" kind="end" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
               <link label="cond" src="G8_&lt;init&gt;_N15"/>
               <link label="_repeat" src="G8_&lt;init&gt;_N70"/>
               <link src="G8_&lt;init&gt;_N69"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N72" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N72" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="init" src="G8_&lt;init&gt;_N7"/>
               <link label="cont" src="G8_&lt;init&gt;_N60"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N73" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N73" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="_end" src="G8_&lt;init&gt;_N74"/>
             </node>
-            <node data=":WhileStatement:1069:1383" id="G8_&lt;init&gt;_N74" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="G8_&lt;init&gt;_N74" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
               <link label="cond" src="G8_&lt;init&gt;_N15"/>
               <link label="_repeat" src="G8_&lt;init&gt;_N73"/>
               <link src="G8_&lt;init&gt;_N72"/>
             </node>
-            <scope name="LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383">
-              <node id="G8_&lt;init&gt;_N16" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389/$reader" type="Ljava/io/BufferedReader;">
+            <scope name="LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383">
+              <node id="G8_&lt;init&gt;_N16" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
                 <ast end="1116" start="1110" type="42"/>
                 <link src="G8_&lt;init&gt;_N14"/>
               </node>
@@ -678,11 +686,11 @@
                 <ast end="1127" start="1110" type="32"/>
                 <link src="G8_&lt;init&gt;_N18"/>
               </node>
-              <node id="G8_&lt;init&gt;_N20" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N20" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1127" start="1103" type="59"/>
                 <link src="G8_&lt;init&gt;_N19"/>
               </node>
-              <node id="G8_&lt;init&gt;_N21" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N21" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1149" start="1145" type="42"/>
                 <link src="G8_&lt;init&gt;_N20"/>
               </node>
@@ -694,7 +702,7 @@
                 <link label="L" src="G8_&lt;init&gt;_N21"/>
                 <link label="R" src="G8_&lt;init&gt;_N22"/>
               </node>
-              <node id="G8_&lt;init&gt;_N24" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N24" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1190" start="1186" type="42"/>
                 <link src="G8_&lt;init&gt;_N20"/>
               </node>
@@ -710,18 +718,18 @@
                 <ast end="1203" start="1186" type="32"/>
                 <link src="G8_&lt;init&gt;_N26"/>
               </node>
-              <node id="G8_&lt;init&gt;_N28" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$i" type="I">
+              <node id="G8_&lt;init&gt;_N28" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1203" start="1182" type="59"/>
                 <link src="G8_&lt;init&gt;_N27"/>
               </node>
-              <node id="G8_&lt;init&gt;_N29" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N29" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1234" start="1230" type="42"/>
                 <link src="G8_&lt;init&gt;_N20"/>
               </node>
               <node data="0" id="G8_&lt;init&gt;_N30" kind="value" type="I">
                 <ast end="1246" start="1245" type="34"/>
               </node>
-              <node id="G8_&lt;init&gt;_N31" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$i" type="I">
+              <node id="G8_&lt;init&gt;_N31" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1249" start="1248" type="42"/>
                 <link src="G8_&lt;init&gt;_N28"/>
               </node>
@@ -735,15 +743,15 @@
                 <ast end="1250" start="1230" type="32"/>
                 <link src="G8_&lt;init&gt;_N32"/>
               </node>
-              <node id="G8_&lt;init&gt;_N34" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$key" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N34" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
                 <ast end="1250" start="1224" type="59"/>
                 <link src="G8_&lt;init&gt;_N33"/>
               </node>
-              <node id="G8_&lt;init&gt;_N35" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N35" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1283" start="1279" type="42"/>
                 <link src="G8_&lt;init&gt;_N20"/>
               </node>
-              <node id="G8_&lt;init&gt;_N36" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$i" type="I">
+              <node id="G8_&lt;init&gt;_N36" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1295" start="1294" type="42"/>
                 <link src="G8_&lt;init&gt;_N28"/>
               </node>
@@ -764,15 +772,15 @@
                 <ast end="1298" start="1279" type="32"/>
                 <link src="G8_&lt;init&gt;_N39"/>
               </node>
-              <node id="G8_&lt;init&gt;_N41" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$value" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N41" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
                 <ast end="1298" start="1271" type="59"/>
                 <link src="G8_&lt;init&gt;_N40"/>
               </node>
-              <node id="G8_&lt;init&gt;_N42" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$key" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N42" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
                 <ast end="1339" start="1336" type="42"/>
                 <link src="G8_&lt;init&gt;_N34"/>
               </node>
-              <node id="G8_&lt;init&gt;_N43" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$value" type="Ljava/lang/String;">
+              <node id="G8_&lt;init&gt;_N43" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
                 <ast end="1346" start="1341" type="42"/>
                 <link src="G8_&lt;init&gt;_N41"/>
               </node>
@@ -795,7 +803,7 @@
                 <link label="@LRecord;/.value" src="G8_&lt;init&gt;_N44"/>
                 <link src="G8_&lt;init&gt;_N76"/>
               </node>
-              <node id="G8_&lt;init&gt;_N48" kind="assign_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$rec" type="LRecord;">
+              <node id="G8_&lt;init&gt;_N48" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
                 <ast end="1347" start="1319" type="59"/>
                 <link src="G8_&lt;init&gt;_N45"/>
               </node>
@@ -804,7 +812,7 @@
                 <link label="obj" src="G8_&lt;init&gt;_N8"/>
                 <link src="G8_&lt;init&gt;_N3"/>
               </node>
-              <node id="G8_&lt;init&gt;_N52" kind="ref_var" ref="$LDB;.:MethodDeclaration:943:1389.:Block:985:1389.:WhileStatement:1069:1383.:Block:1082:1383/$rec" type="LRecord;">
+              <node id="G8_&lt;init&gt;_N52" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
                 <ast end="1371" start="1368" type="42"/>
                 <link src="G8_&lt;init&gt;_N48"/>
               </node>
@@ -842,14 +850,14 @@
         </scope>
       </scope>
     </method>
-    <method name="LDB;.get(Ljava/lang/String;)Ljava/lang/String;" style="instance">
+    <method abstract="false" name="LDB;.get(Ljava/lang/String;)Ljava/lang/String;" style="instance">
       <caller name="LApp1;.main([Ljava/lang/String;)V"/>
       <ast end="1632" start="1395" type="31"/>
-      <scope name="LDB;.:MethodDeclaration:1395:1632">
+      <scope name="LDB;.:get:1395:1632">
         <node id="G9_get_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="1423" start="1413" type="44"/>
         </node>
-        <node id="G9_get_N2" kind="assign_var" ref="$LDB;.:MethodDeclaration:1395:1632/$key" type="Ljava/lang/String;">
+        <node id="G9_get_N2" kind="assign_var" ref="$LDB;.:get:1395:1632/$key" type="Ljava/lang/String;">
           <ast end="1423" start="1413" type="44"/>
           <link src="G9_get_N1"/>
         </node>
@@ -861,7 +869,7 @@
         <node id="G9_get_N8" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
         <node id="G9_get_N9" kind="input" ref="#this" type="LDB;"/>
         <node id="G9_get_N52" ref="#return" type="Ljava/lang/String;"/>
-        <scope name="LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632">
+        <scope name="LDB;.:get:1395:1632.:B:1425:1632">
           <node data="null" id="G9_get_N56" kind="value" type="@null">
             <ast end="1625" start="1621" type="33"/>
           </node>
@@ -869,15 +877,15 @@
             <ast end="1626" start="1614" type="41"/>
             <link src="G9_get_N56"/>
           </node>
-          <scope name="LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605">
+          <scope name="LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605">
             <node data="0" id="G9_get_N10" kind="value" type="I">
               <ast end="1449" start="1448" type="34"/>
             </node>
-            <node id="G9_get_N11" kind="assign_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node id="G9_get_N11" kind="assign_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1449" start="1444" type="59"/>
               <link src="G9_get_N10"/>
             </node>
-            <node id="G9_get_N12" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node id="G9_get_N12" kind="ref_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1452" start="1451" type="42"/>
               <link src="G9_get_N50"/>
             </node>
@@ -900,55 +908,55 @@
               <link label="L" src="G9_get_N12"/>
               <link label="R" src="G9_get_N19"/>
             </node>
-            <node id="G9_get_N46" kind="assign_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node id="G9_get_N46" kind="assign_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1467" start="1466" type="42"/>
               <link src="G9_get_N48"/>
             </node>
-            <node id="G9_get_N47" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node id="G9_get_N47" kind="ref_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1467" start="1466" type="42"/>
               <link src="G9_get_N50"/>
             </node>
-            <node data="++" id="G9_get_N48" kind="op_postfix" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node data="++" id="G9_get_N48" kind="op_postfix" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1469" start="1466" type="37"/>
               <link src="G9_get_N47"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N49" kind="begin" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node data=":for:1435:1605" id="G9_get_N49" kind="begin" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1605" start="1435" type="24"/>
               <link label="init" src="G9_get_N11"/>
               <link label="cont" src="G9_get_N46"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N50" kind="repeat" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node data=":for:1435:1605" id="G9_get_N50" kind="repeat" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1605" start="1435" type="24"/>
               <link label="_end" src="G9_get_N51"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N51" kind="end" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+            <node data=":for:1435:1605" id="G9_get_N51" kind="end" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
               <ast end="1605" start="1435" type="24"/>
               <link label="cond" src="G9_get_N20"/>
               <link label="_repeat" src="G9_get_N50"/>
               <link src="G9_get_N49"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N53" kind="begin" ref="#return" type="Ljava/lang/String;">
+            <node data=":for:1435:1605" id="G9_get_N53" kind="begin" ref="#return" type="Ljava/lang/String;">
               <ast end="1605" start="1435" type="24"/>
               <link label="init" src="G9_get_N52"/>
               <link label="cont" src="G9_get_N42"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N54" kind="repeat" ref="#return" type="Ljava/lang/String;">
+            <node data=":for:1435:1605" id="G9_get_N54" kind="repeat" ref="#return" type="Ljava/lang/String;">
               <ast end="1605" start="1435" type="24"/>
               <link label="_end" src="G9_get_N55"/>
             </node>
-            <node data=":ForStatement:1435:1605" id="G9_get_N55" kind="end" ref="#return" type="Ljava/lang/String;">
+            <node data=":for:1435:1605" id="G9_get_N55" kind="end" ref="#return" type="Ljava/lang/String;">
               <ast end="1605" start="1435" type="24"/>
               <link label="cond" src="G9_get_N20"/>
               <link label="_repeat" src="G9_get_N54"/>
               <link src="G9_get_N53"/>
             </node>
-            <scope name="LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605.:Block:1471:1605">
+            <scope name="LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605.:B:1471:1605">
               <node id="G9_get_N21" kind="ref_field" ref="@LDB;/._a" type="LListy&lt;LRecord;&gt;;">
                 <ast end="1500" start="1498" type="42"/>
                 <link label="obj" src="G9_get_N9"/>
                 <link src="G9_get_N3"/>
               </node>
-              <node id="G9_get_N22" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+              <node id="G9_get_N22" kind="ref_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
                 <ast end="1506" start="1505" type="42"/>
                 <link src="G9_get_N50"/>
               </node>
@@ -964,11 +972,11 @@
                 <ast end="1507" start="1498" type="32"/>
                 <link src="G9_get_N23"/>
               </node>
-              <node id="G9_get_N27" kind="assign_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605.:Block:1471:1605/$rec" type="LRecord;">
+              <node id="G9_get_N27" kind="assign_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605.:B:1471:1605/$rec" type="LRecord;">
                 <ast end="1507" start="1492" type="59"/>
                 <link src="G9_get_N26"/>
               </node>
-              <node id="G9_get_N28" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605.:Block:1471:1605/$rec" type="LRecord;">
+              <node id="G9_get_N28" kind="ref_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605.:B:1471:1605/$rec" type="LRecord;">
                 <ast end="1528" start="1525" type="42"/>
                 <link src="G9_get_N27"/>
               </node>
@@ -977,7 +985,7 @@
                 <link label="obj" src="G9_get_N28"/>
                 <link src="G9_get_N4"/>
               </node>
-              <node id="G9_get_N31" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632/$key" type="Ljava/lang/String;">
+              <node id="G9_get_N31" kind="ref_var" ref="$LDB;.:get:1395:1632/$key" type="Ljava/lang/String;">
                 <ast end="1543" start="1540" type="42"/>
                 <link src="G9_get_N2"/>
               </node>
@@ -996,7 +1004,7 @@
                 <link label="true" src="G9_get_N39"/>
                 <link label="false" src="G9_get_N54"/>
               </node>
-              <node id="G9_get_N44" kind="join" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605/$i" type="I">
+              <node id="G9_get_N44" kind="join" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605/$i" type="I">
                 <link label="cond" src="G9_get_N34"/>
                 <link label="true" src="G9_get_N50"/>
                 <link label="false" src="G9_get_N51"/>
@@ -1006,8 +1014,8 @@
                 <link label="true" src="G9_get_N39"/>
                 <link label="false" src="G9_get_N57"/>
               </node>
-              <scope name="LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605.:Block:1471:1605.:Block:1546:1595">
-                <node id="G9_get_N35" kind="ref_var" ref="$LDB;.:MethodDeclaration:1395:1632.:Block:1425:1632.:ForStatement:1435:1605.:Block:1471:1605/$rec" type="LRecord;">
+              <scope name="LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605.:B:1471:1605.:B:1546:1595">
+                <node id="G9_get_N35" kind="ref_var" ref="$LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605.:B:1471:1605/$rec" type="LRecord;">
                   <ast end="1574" start="1571" type="42"/>
                   <link src="G9_get_N27"/>
                 </node>
@@ -1029,10 +1037,10 @@
   </class>
   <class extends="Ljava/lang/Object;" generic="LListy&lt;T&gt;;" interface="false" name="LListy&lt;LRecord;&gt;;" path="App1.java">
     <param name="T" type="LRecord;"/>
-    <field name="@LListy&lt;LRecord;&gt;;/._n" type="I"/>
-    <field name="@LListy&lt;LRecord;&gt;;/._max" type="I"/>
-    <field name="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;"/>
-    <method name="LListy&lt;LRecord;&gt;;.&lt;clinit&gt;()V" style="initializer">
+    <field name="@LListy&lt;LRecord;&gt;;/._n" static="false" type="I"/>
+    <field name="@LListy&lt;LRecord;&gt;;/._max" static="false" type="I"/>
+    <field name="@LListy&lt;LRecord;&gt;;/._objs" static="false" type="[Ljava/lang/Object;"/>
+    <method abstract="false" name="LListy&lt;LRecord;&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="873" start="175" type="55"/>
       <scope name="LListy&lt;LRecord;&gt;;.&lt;clinit&gt;">
         <node data="0" id="G10_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -1058,14 +1066,14 @@
         </node>
       </scope>
     </method>
-    <method name="LListy&lt;LRecord;&gt;;.add(Ljava/lang/Object;)V" style="instance">
+    <method abstract="false" name="LListy&lt;LRecord;&gt;;.add(Ljava/lang/Object;)V" style="instance">
       <caller name="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;"/>
       <ast end="658" start="297" type="31"/>
-      <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658">
+      <scope name="LListy&lt;LRecord;&gt;;.:add:297:658">
         <node id="G11_add_N1" kind="input" ref="#arg0" type="Ljava/lang/Object;">
           <ast end="316" start="313" type="44"/>
         </node>
-        <node id="G11_add_N2" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658/$x" type="Ljava/lang/Object;">
+        <node id="G11_add_N2" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658/$x" type="Ljava/lang/Object;">
           <ast end="316" start="313" type="44"/>
           <link src="G11_add_N1"/>
         </node>
@@ -1074,7 +1082,7 @@
         <node id="G11_add_N5" kind="input" ref="@LListy&lt;LRecord;&gt;;/._n" type="I"/>
         <node id="G11_add_N6" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
         <node id="G11_add_N7" kind="input" ref="#this" type="LListy&lt;LRecord;&gt;;"/>
-        <node id="G11_add_N71" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I"/>
+        <node id="G11_add_N71" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I"/>
         <node id="G11_add_N83" kind="output" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
           <link src="G11_add_N72"/>
         </node>
@@ -1087,7 +1095,7 @@
         <node id="G11_add_N86" kind="output" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
           <link src="G11_add_N77"/>
         </node>
-        <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658">
+        <scope name="LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658">
           <node id="G11_add_N8" kind="ref_field" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
             <ast end="337" start="332" type="42"/>
             <link label="obj" src="G11_add_N7"/>
@@ -1127,7 +1135,7 @@
             <link label="true" src="G11_add_N16"/>
             <link label="false" src="G11_add_N4"/>
           </node>
-          <node id="G11_add_N73" kind="join" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+          <node id="G11_add_N73" kind="join" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
             <ast end="627" start="328" type="25"/>
             <link label="cond" src="G11_add_N14"/>
             <link label="true" src="G11_add_N65"/>
@@ -1170,7 +1178,7 @@
             <link label="index" src="G11_add_N78"/>
             <link src="G11_add_N82"/>
           </node>
-          <node id="G11_add_N81" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658/$x" type="Ljava/lang/Object;">
+          <node id="G11_add_N81" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658/$x" type="Ljava/lang/Object;">
             <ast end="651" start="650" type="42"/>
             <link src="G11_add_N2"/>
           </node>
@@ -1178,7 +1186,7 @@
             <ast end="651" start="636" type="7"/>
             <link label="R" src="G11_add_N81"/>
           </node>
-          <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627">
+          <scope name="LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627">
             <node id="G11_add_N16" kind="assign_field" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="379" start="375" type="42"/>
               <link label="obj" src="G11_add_N7"/>
@@ -1217,7 +1225,7 @@
             <node data="0" id="G11_add_N25" kind="valueset" type="[Ljava/lang/Object;">
               <ast end="438" start="422" type="3"/>
             </node>
-            <node id="G11_add_N26" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+            <node id="G11_add_N26" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
               <ast end="438" start="415" type="59"/>
               <link src="G11_add_N25"/>
             </node>
@@ -1234,7 +1242,7 @@
               <link label="L" src="G11_add_N27"/>
               <link label="R" src="G11_add_N29"/>
             </node>
-            <node id="G11_add_N65" kind="join" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+            <node id="G11_add_N65" kind="join" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
               <ast end="591" start="452" type="25"/>
               <link label="cond" src="G11_add_N30"/>
               <link label="true" src="G11_add_N54"/>
@@ -1251,7 +1259,7 @@
               <link label="obj" src="G11_add_N7"/>
               <link src="G11_add_N70"/>
             </node>
-            <node id="G11_add_N69" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+            <node id="G11_add_N69" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
               <ast end="616" start="612" type="42"/>
               <link src="G11_add_N26"/>
             </node>
@@ -1259,16 +1267,16 @@
               <ast end="616" start="604" type="7"/>
               <link label="R" src="G11_add_N69"/>
             </node>
-            <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591">
-              <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577">
+            <scope name="LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591">
+              <scope name="LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577">
                 <node data="0" id="G11_add_N31" kind="value" type="I">
                   <ast end="503" start="502" type="34"/>
                 </node>
-                <node id="G11_add_N32" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G11_add_N32" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="503" start="498" type="59"/>
                   <link src="G11_add_N31"/>
                 </node>
-                <node id="G11_add_N33" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G11_add_N33" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="506" start="505" type="42"/>
                   <link src="G11_add_N53"/>
                 </node>
@@ -1282,54 +1290,54 @@
                   <link label="L" src="G11_add_N33"/>
                   <link label="R" src="G11_add_N36"/>
                 </node>
-                <node id="G11_add_N49" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G11_add_N49" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="514" start="513" type="42"/>
                   <link src="G11_add_N51"/>
                 </node>
-                <node id="G11_add_N50" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node id="G11_add_N50" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="514" start="513" type="42"/>
                   <link src="G11_add_N53"/>
                 </node>
-                <node data="++" id="G11_add_N51" kind="op_postfix" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data="++" id="G11_add_N51" kind="op_postfix" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="516" start="513" type="37"/>
                   <link src="G11_add_N50"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N52" kind="begin" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G11_add_N52" kind="begin" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="init" src="G11_add_N32"/>
                   <link label="cont" src="G11_add_N49"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N53" kind="repeat" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G11_add_N53" kind="repeat" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="_end" src="G11_add_N54"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N54" kind="end" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                <node data=":for:489:577" id="G11_add_N54" kind="end" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                   <ast end="577" start="489" type="24"/>
                   <link label="cond" src="G11_add_N38"/>
                   <link label="_repeat" src="G11_add_N53"/>
                   <link src="G11_add_N52"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N56" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G11_add_N56" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="init" src="G11_add_N6"/>
                   <link label="cont" src="G11_add_N42"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N57" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G11_add_N57" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="_end" src="G11_add_N58"/>
                 </node>
-                <node data=":ForStatement:489:577" id="G11_add_N58" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <node data=":for:489:577" id="G11_add_N58" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
                   <ast end="577" start="489" type="24"/>
                   <link label="cond" src="G11_add_N38"/>
                   <link label="_repeat" src="G11_add_N57"/>
                   <link src="G11_add_N56"/>
                 </node>
-                <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577.:Block:518:577">
-                  <node id="G11_add_N39" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627/$objs" type="[Ljava/lang/Object;">
+                <scope name="LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577.:B:518:577">
+                  <node id="G11_add_N39" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627/$objs" type="[Ljava/lang/Object;">
                     <ast end="544" start="540" type="42"/>
                     <link src="G11_add_N26"/>
                   </node>
-                  <node id="G11_add_N41" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                  <node id="G11_add_N41" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                     <ast end="546" start="545" type="42"/>
                     <link src="G11_add_N53"/>
                   </node>
@@ -1344,7 +1352,7 @@
                     <link label="obj" src="G11_add_N7"/>
                     <link src="G11_add_N3"/>
                   </node>
-                  <node id="G11_add_N45" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:297:658.:Block:318:658.:Block:361:627.:Block:471:591.:ForStatement:489:577/$i" type="I">
+                  <node id="G11_add_N45" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:add:297:658.:B:318:658.:B:361:627.:B:471:591.:for:489:577/$i" type="I">
                     <ast end="557" start="556" type="42"/>
                     <link src="G11_add_N53"/>
                   </node>
@@ -1365,14 +1373,14 @@
         </scope>
       </scope>
     </method>
-    <method name="LListy&lt;LRecord;&gt;;.get(I)Ljava/lang/Object;" style="instance">
+    <method abstract="false" name="LListy&lt;LRecord;&gt;;.get(I)Ljava/lang/Object;" style="instance">
       <caller name="LDB;.get(Ljava/lang/String;)Ljava/lang/String;"/>
       <ast end="821" start="664" type="31"/>
-      <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821">
+      <scope name="LListy&lt;LRecord;&gt;;.:get:664:821">
         <node id="G12_get_N1" kind="input" ref="#arg0" type="I">
           <ast end="717" start="712" type="44"/>
         </node>
-        <node id="G12_get_N2" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821/$i" type="I">
+        <node id="G12_get_N2" kind="assign_var" ref="$LListy&lt;LRecord;&gt;;.:get:664:821/$i" type="I">
           <ast end="717" start="712" type="44"/>
           <link src="G12_get_N1"/>
         </node>
@@ -1381,11 +1389,11 @@
         <node id="G12_get_N5" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
         <node id="G12_get_N6" kind="input" ref="#this" type="LListy&lt;LRecord;&gt;;"/>
         <node id="G12_get_N24" ref="#return" type="Ljava/lang/Object;"/>
-        <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821.:Block:719:821">
+        <scope name="LListy&lt;LRecord;&gt;;.:get:664:821.:B:719:821">
           <node data="0" id="G12_get_N7" kind="value" type="I">
             <ast end="734" start="733" type="34"/>
           </node>
-          <node id="G12_get_N8" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821/$i" type="I">
+          <node id="G12_get_N8" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:get:664:821/$i" type="I">
             <ast end="739" start="738" type="42"/>
             <link src="G12_get_N2"/>
           </node>
@@ -1394,7 +1402,7 @@
             <link label="L" src="G12_get_N7"/>
             <link label="R" src="G12_get_N8"/>
           </node>
-          <node id="G12_get_N10" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821/$i" type="I">
+          <node id="G12_get_N10" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:get:664:821/$i" type="I">
             <ast end="744" start="743" type="42"/>
             <link src="G12_get_N2"/>
           </node>
@@ -1431,13 +1439,13 @@
             <ast end="815" start="803" type="41"/>
             <link src="G12_get_N26"/>
           </node>
-          <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821.:Block:719:821.:Block:751:794">
+          <scope name="LListy&lt;LRecord;&gt;;.:get:664:821.:B:719:821.:B:751:794">
             <node id="G12_get_N15" kind="ref_field" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="780" start="775" type="42"/>
               <link label="obj" src="G12_get_N6"/>
               <link src="G12_get_N4"/>
             </node>
-            <node id="G12_get_N17" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:MethodDeclaration:664:821/$i" type="I">
+            <node id="G12_get_N17" kind="ref_var" ref="$LListy&lt;LRecord;&gt;;.:get:664:821/$i" type="I">
               <ast end="782" start="781" type="42"/>
               <link src="G12_get_N2"/>
             </node>
@@ -1459,13 +1467,13 @@
         </scope>
       </scope>
     </method>
-    <method name="LListy&lt;LRecord;&gt;;.size()I" style="instance">
+    <method abstract="false" name="LListy&lt;LRecord;&gt;;.size()I" style="instance">
       <caller name="LDB;.get(Ljava/lang/String;)Ljava/lang/String;"/>
       <ast end="871" start="827" type="31"/>
-      <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:827:871">
+      <scope name="LListy&lt;LRecord;&gt;;.:size:827:871">
         <node id="G13_size_N1" kind="input" ref="@LListy&lt;LRecord;&gt;;/._n" type="I"/>
         <node id="G13_size_N2" kind="input" ref="#this" type="LListy&lt;LRecord;&gt;;"/>
-        <scope name="LListy&lt;LRecord;&gt;;.:MethodDeclaration:827:871.:Block:845:871">
+        <scope name="LListy&lt;LRecord;&gt;;.:size:827:871.:B:845:871">
           <node id="G13_size_N3" kind="ref_field" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
             <ast end="864" start="862" type="42"/>
             <link label="obj" src="G13_size_N2"/>
@@ -1480,17 +1488,17 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="LApp1;" path="App1.java">
-    <method name="LApp1;.&lt;clinit&gt;()V" style="initializer">
+    <method abstract="false" name="LApp1;.&lt;clinit&gt;()V" style="initializer">
       <ast end="1893" start="1636" type="55"/>
       <scope name="LApp1;.&lt;clinit&gt;"/>
     </method>
-    <method name="LApp1;.main([Ljava/lang/String;)V" style="static">
+    <method abstract="false" name="LApp1;.main([Ljava/lang/String;)V" style="static">
       <ast end="1891" start="1660" type="31"/>
-      <scope name="LApp1;.:MethodDeclaration:1660:1891">
+      <scope name="LApp1;.:main:1660:1891">
         <node id="G14_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast end="1697" start="1684" type="44"/>
         </node>
-        <node id="G14_main_N2" kind="assign_var" ref="$LApp1;.:MethodDeclaration:1660:1891/$args" type="[Ljava/lang/String;">
+        <node id="G14_main_N2" kind="assign_var" ref="$LApp1;.:main:1660:1891/$args" type="[Ljava/lang/String;">
           <ast end="1697" start="1684" type="44"/>
           <link src="G14_main_N1"/>
         </node>
@@ -1500,165 +1508,191 @@
         <node id="G14_main_N6" kind="input" ref="@LDB;/._a" type="LListy&lt;LRecord;&gt;;"/>
         <node id="G14_main_N7" kind="input" ref="@LRecord;/.key" type="Ljava/lang/String;"/>
         <node id="G14_main_N8" kind="input" ref="@LRecord;/.value" type="Ljava/lang/String;"/>
-        <node id="G14_main_N9" kind="input" ref="@LListy&lt;LRecord;&gt;;/._n" type="I"/>
-        <node id="G14_main_N10" kind="input" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;"/>
-        <node id="G14_main_N11" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
-        <node id="G14_main_N12" kind="input" ref="#this" type="LApp1;"/>
-        <node id="G14_main_N17" ref="@LListy&lt;LRecord;&gt;;/._max" type="I"/>
-        <scope name="LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891">
-          <node id="G14_main_N13" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891/$args" type="[Ljava/lang/String;">
+        <node id="G14_main_N9" kind="input" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;"/>
+        <node id="G14_main_N10" kind="input" ref="@LListy&lt;LRecord;&gt;;/._max" type="I"/>
+        <node id="G14_main_N11" kind="input" ref="@LListy&lt;LRecord;&gt;;/._n" type="I"/>
+        <node id="G14_main_N12" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
+        <node id="G14_main_N13" kind="input" ref="#this" type="LApp1;"/>
+        <node id="G14_main_N61" kind="output" ref="@LRecord;/.key" type="Ljava/lang/String;">
+          <link src="G14_main_N19"/>
+        </node>
+        <node id="G14_main_N62" kind="output" ref="@LRecord;/.value" type="Ljava/lang/String;">
+          <link src="G14_main_N20"/>
+        </node>
+        <node id="G14_main_N63" kind="output" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+          <link src="G14_main_N21"/>
+        </node>
+        <node id="G14_main_N64" kind="output" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+          <link src="G14_main_N22"/>
+        </node>
+        <node id="G14_main_N65" kind="output" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+          <link src="G14_main_N23"/>
+        </node>
+        <node id="G14_main_N66" kind="output" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+          <link src="G14_main_N24"/>
+        </node>
+        <scope name="LApp1;.:main:1660:1891.:B:1718:1891">
+          <node id="G14_main_N14" kind="ref_var" ref="$LApp1;.:main:1660:1891/$args" type="[Ljava/lang/String;">
             <ast end="1747" start="1743" type="42"/>
             <link src="G14_main_N2"/>
           </node>
-          <node data="0" id="G14_main_N14" kind="value" type="I">
+          <node data="0" id="G14_main_N15" kind="value" type="I">
             <ast end="1749" start="1748" type="34"/>
           </node>
-          <node id="G14_main_N15" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
+          <node id="G14_main_N16" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
             <ast end="1750" start="1743" type="2"/>
-            <link label="array" src="G14_main_N13"/>
-            <link label="index" src="G14_main_N14"/>
+            <link label="array" src="G14_main_N14"/>
+            <link label="index" src="G14_main_N15"/>
             <link src="G14_main_N3"/>
           </node>
-          <node data="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" id="G14_main_N16" kind="new" type="LDB;">
+          <node data="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" id="G14_main_N17" kind="new" type="LDB;">
             <ast end="1751" start="1736" type="14"/>
-            <link label="#arg0" src="G14_main_N15"/>
+            <link label="#arg0" src="G14_main_N16"/>
             <link label="@LDB;/._a" src="G14_main_N6"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N10"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._max" src="G14_main_N17"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N9"/>
-            <link label="%Ljava/lang/Object;" src="G14_main_N11"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N9"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._max" src="G14_main_N10"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N11"/>
+            <link label="%Ljava/lang/Object;" src="G14_main_N12"/>
           </node>
           <node id="G14_main_N18" kind="receive" type="LDB;">
             <ast end="1751" start="1736" type="14"/>
-            <link src="G14_main_N16"/>
+            <link src="G14_main_N17"/>
           </node>
-          <node id="G14_main_N19" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
+          <node id="G14_main_N19" kind="receive" ref="@LRecord;/.key" type="Ljava/lang/String;">
             <ast end="1751" start="1736" type="14"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._max" src="G14_main_N16"/>
+            <link label="@LRecord;/.key" src="G14_main_N17"/>
           </node>
-          <node id="G14_main_N20" kind="receive" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+          <node id="G14_main_N20" kind="receive" ref="@LRecord;/.value" type="Ljava/lang/String;">
             <ast end="1751" start="1736" type="14"/>
-            <link label="%Ljava/lang/Object;" src="G14_main_N16"/>
+            <link label="@LRecord;/.value" src="G14_main_N17"/>
           </node>
-          <node id="G14_main_N21" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+          <node id="G14_main_N21" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._max" type="I">
             <ast end="1751" start="1736" type="14"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N16"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._max" src="G14_main_N17"/>
           </node>
-          <node id="G14_main_N22" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+          <node id="G14_main_N22" kind="receive" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
             <ast end="1751" start="1736" type="14"/>
-            <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N16"/>
+            <link label="%Ljava/lang/Object;" src="G14_main_N17"/>
           </node>
-          <node id="G14_main_N23" kind="assign_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891/$db" type="LDB;">
+          <node id="G14_main_N23" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <ast end="1751" start="1736" type="14"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N17"/>
+          </node>
+          <node id="G14_main_N24" kind="receive" ref="@LListy&lt;LRecord;&gt;;/._n" type="I">
+            <ast end="1751" start="1736" type="14"/>
+            <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N17"/>
+          </node>
+          <node id="G14_main_N25" kind="assign_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891/$db" type="LDB;">
             <ast end="1751" start="1731" type="59"/>
             <link src="G14_main_N18"/>
           </node>
-          <scope name="LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885">
-            <node data="1" id="G14_main_N24" kind="value" type="I">
+          <scope name="LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885">
+            <node data="1" id="G14_main_N26" kind="value" type="I">
               <ast end="1775" start="1774" type="34"/>
             </node>
-            <node id="G14_main_N25" kind="assign_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
+            <node id="G14_main_N27" kind="assign_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
               <ast end="1775" start="1770" type="59"/>
-              <link src="G14_main_N24"/>
+              <link src="G14_main_N26"/>
             </node>
-            <node id="G14_main_N26" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
+            <node id="G14_main_N28" kind="ref_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
               <ast end="1778" start="1777" type="42"/>
-              <link src="G14_main_N57"/>
+              <link src="G14_main_N59"/>
             </node>
-            <node id="G14_main_N28" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891/$args" type="[Ljava/lang/String;">
+            <node id="G14_main_N30" kind="ref_var" ref="$LApp1;.:main:1660:1891/$args" type="[Ljava/lang/String;">
               <ast end="1785" start="1781" type="42"/>
               <link src="G14_main_N2"/>
             </node>
-            <node id="G14_main_N30" kind="ref_field" ref="@Ljava/lang/_Array;/.length" type="I">
+            <node id="G14_main_N32" kind="ref_field" ref="@Ljava/lang/_Array;/.length" type="I">
               <ast end="1792" start="1781" type="40"/>
-              <link label="obj" src="G14_main_N28"/>
+              <link label="obj" src="G14_main_N30"/>
               <link src="G14_main_N4"/>
             </node>
-            <node data="&lt;" id="G14_main_N32" kind="op_infix" type="Z">
+            <node data="&lt;" id="G14_main_N34" kind="op_infix" type="Z">
               <ast end="1792" start="1777" type="27"/>
-              <link label="L" src="G14_main_N26"/>
-              <link label="R" src="G14_main_N30"/>
+              <link label="L" src="G14_main_N28"/>
+              <link label="R" src="G14_main_N32"/>
             </node>
-            <node id="G14_main_N53" kind="assign_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
-              <ast end="1795" start="1794" type="42"/>
-              <link src="G14_main_N55"/>
-            </node>
-            <node id="G14_main_N54" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
+            <node id="G14_main_N55" kind="assign_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
               <ast end="1795" start="1794" type="42"/>
               <link src="G14_main_N57"/>
             </node>
-            <node data="++" id="G14_main_N55" kind="op_postfix" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
+            <node id="G14_main_N56" kind="ref_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
+              <ast end="1795" start="1794" type="42"/>
+              <link src="G14_main_N59"/>
+            </node>
+            <node data="++" id="G14_main_N57" kind="op_postfix" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
               <ast end="1797" start="1794" type="37"/>
-              <link src="G14_main_N54"/>
-            </node>
-            <node data=":ForStatement:1761:1885" id="G14_main_N56" kind="begin" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
-              <ast end="1885" start="1761" type="24"/>
-              <link label="init" src="G14_main_N25"/>
-              <link label="cont" src="G14_main_N53"/>
-            </node>
-            <node data=":ForStatement:1761:1885" id="G14_main_N57" kind="repeat" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
-              <ast end="1885" start="1761" type="24"/>
-              <link label="_end" src="G14_main_N58"/>
-            </node>
-            <node data=":ForStatement:1761:1885" id="G14_main_N58" kind="end" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
-              <ast end="1885" start="1761" type="24"/>
-              <link label="cond" src="G14_main_N32"/>
-              <link label="_repeat" src="G14_main_N57"/>
               <link src="G14_main_N56"/>
             </node>
-            <scope name="LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885.:Block:1799:1885">
-              <node id="G14_main_N33" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891/$db" type="LDB;">
+            <node data=":for:1761:1885" id="G14_main_N58" kind="begin" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
+              <ast end="1885" start="1761" type="24"/>
+              <link label="init" src="G14_main_N27"/>
+              <link label="cont" src="G14_main_N55"/>
+            </node>
+            <node data=":for:1761:1885" id="G14_main_N59" kind="repeat" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
+              <ast end="1885" start="1761" type="24"/>
+              <link label="_end" src="G14_main_N60"/>
+            </node>
+            <node data=":for:1761:1885" id="G14_main_N60" kind="end" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
+              <ast end="1885" start="1761" type="24"/>
+              <link label="cond" src="G14_main_N34"/>
+              <link label="_repeat" src="G14_main_N59"/>
+              <link src="G14_main_N58"/>
+            </node>
+            <scope name="LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885.:B:1799:1885">
+              <node id="G14_main_N35" kind="ref_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891/$db" type="LDB;">
                 <ast end="1826" start="1824" type="42"/>
-                <link src="G14_main_N23"/>
+                <link src="G14_main_N25"/>
               </node>
-              <node id="G14_main_N35" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891/$args" type="[Ljava/lang/String;">
+              <node id="G14_main_N37" kind="ref_var" ref="$LApp1;.:main:1660:1891/$args" type="[Ljava/lang/String;">
                 <ast end="1835" start="1831" type="42"/>
                 <link src="G14_main_N2"/>
               </node>
-              <node id="G14_main_N36" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885/$i" type="I">
+              <node id="G14_main_N38" kind="ref_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885/$i" type="I">
                 <ast end="1837" start="1836" type="42"/>
-                <link src="G14_main_N57"/>
+                <link src="G14_main_N59"/>
               </node>
-              <node id="G14_main_N37" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
+              <node id="G14_main_N39" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
                 <ast end="1838" start="1831" type="2"/>
-                <link label="array" src="G14_main_N35"/>
-                <link label="index" src="G14_main_N36"/>
+                <link label="array" src="G14_main_N37"/>
+                <link label="index" src="G14_main_N38"/>
                 <link src="G14_main_N3"/>
               </node>
-              <node data="LDB;.get(Ljava/lang/String;)Ljava/lang/String;" id="G14_main_N39" kind="call" type="Ljava/lang/String;">
+              <node data="LDB;.get(Ljava/lang/String;)Ljava/lang/String;" id="G14_main_N41" kind="call" type="Ljava/lang/String;">
                 <ast end="1839" start="1824" type="32"/>
-                <link label="#this" src="G14_main_N33"/>
-                <link label="#arg0" src="G14_main_N37"/>
+                <link label="#this" src="G14_main_N35"/>
+                <link label="#arg0" src="G14_main_N39"/>
                 <link label="@LDB;/._a" src="G14_main_N6"/>
-                <link label="@LRecord;/.key" src="G14_main_N7"/>
-                <link label="@LRecord;/.value" src="G14_main_N8"/>
-                <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N22"/>
-                <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N21"/>
-                <link label="%Ljava/lang/Object;" src="G14_main_N20"/>
+                <link label="@LRecord;/.key" src="G14_main_N19"/>
+                <link label="@LRecord;/.value" src="G14_main_N20"/>
+                <link label="@LListy&lt;LRecord;&gt;;/._n" src="G14_main_N24"/>
+                <link label="@LListy&lt;LRecord;&gt;;/._objs" src="G14_main_N23"/>
+                <link label="%Ljava/lang/Object;" src="G14_main_N22"/>
               </node>
-              <node id="G14_main_N46" kind="receive" type="Ljava/lang/String;">
+              <node id="G14_main_N48" kind="receive" type="Ljava/lang/String;">
                 <ast end="1839" start="1824" type="32"/>
-                <link src="G14_main_N39"/>
+                <link src="G14_main_N41"/>
               </node>
-              <node id="G14_main_N47" kind="assign_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885.:Block:1799:1885/$v" type="Ljava/lang/String;">
+              <node id="G14_main_N49" kind="assign_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885.:B:1799:1885/$v" type="Ljava/lang/String;">
                 <ast end="1839" start="1820" type="59"/>
-                <link src="G14_main_N46"/>
+                <link src="G14_main_N48"/>
               </node>
-              <node id="G14_main_N48" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+              <node id="G14_main_N50" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <ast end="1863" start="1853" type="40"/>
                 <link src="G14_main_N5"/>
               </node>
-              <node id="G14_main_N50" kind="ref_var" ref="$LApp1;.:MethodDeclaration:1660:1891.:Block:1718:1891.:ForStatement:1761:1885.:Block:1799:1885/$v" type="Ljava/lang/String;">
+              <node id="G14_main_N52" kind="ref_var" ref="$LApp1;.:main:1660:1891.:B:1718:1891.:for:1761:1885.:B:1799:1885/$v" type="Ljava/lang/String;">
                 <ast end="1873" start="1872" type="42"/>
-                <link src="G14_main_N47"/>
+                <link src="G14_main_N49"/>
               </node>
-              <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="G14_main_N51" kind="call" type="V">
+              <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="G14_main_N53" kind="call" type="V">
                 <ast end="1874" start="1853" type="32"/>
-                <link label="#this" src="G14_main_N48"/>
-                <link label="#arg0" src="G14_main_N50"/>
+                <link label="#this" src="G14_main_N50"/>
+                <link label="#arg0" src="G14_main_N52"/>
               </node>
-              <node id="G14_main_N52" kind="receive" type="V">
+              <node id="G14_main_N54" kind="receive" type="V">
                 <ast end="1874" start="1853" type="32"/>
-                <link src="G14_main_N51"/>
+                <link src="G14_main_N53"/>
               </node>
             </scope>
           </scope>

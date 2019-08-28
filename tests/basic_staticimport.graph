@@ -6,10 +6,10 @@
     </method>
     <method abstract="false" name="Lbasic_staticimport;.foo()V" style="static">
       <ast end="161" start="107" type="31"/>
-      <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161">
+      <scope name="Lbasic_staticimport;.:foo:107:161">
         <node id="G60_foo_N1" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="G60_foo_N2" kind="input" ref="#this" type="Lbasic_staticimport;"/>
-        <scope name="Lbasic_staticimport;.:MethodDeclaration:107:161.:Block:132:161">
+        <scope name="Lbasic_staticimport;.:foo:107:161.:B:132:161">
           <node id="G60_foo_N3" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="138" start="135" type="42"/>
             <link label="obj" src="G60_foo_N2"/>
