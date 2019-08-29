@@ -7,52 +7,80 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 
 ### Input
 
-    public class HelloWorld {
+    public class Hello {
         public static void main(String[] args) {
-            System.out.println("Hello, World!");
+    	String name = args[0];
+            System.out.println("Hello, "+name);
         }
     }
 
 ### Output (SVG)
 
-<img src="docs/HelloWorld.svg">
+<img src="docs/Hello.svg">
 
 ### Output (XML)
 
     <?xml version="1.0" encoding="UTF-8"?><fgyama>
-      <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="HelloWorld.java">
-        <method abstract="false" name="LHelloWorld;.&lt;clinit&gt;()V" style="initializer">
-          <ast end="123" start="0" type="55"/>
-          <scope name="LHelloWorld;.&lt;clinit&gt;"/>
+      <class extends="Ljava/lang/Object;" interface="false" name="LHello;" path="Hello.java">
+        <method abstract="false" name="LHello;.&lt;clinit&gt;()V" style="initializer">
+          <ast end="141" start="0" type="55"/>
+          <scope name="LHello;.&lt;clinit&gt;"/>
         </method>
-        <method abstract="false" name="LHelloWorld;.main([Ljava/lang/String;)V" style="static">
-          <ast end="121" start="30" type="31"/>
-          <scope name="LHelloWorld;.:main:30:121">
+        <method abstract="false" name="LHello;.main([Ljava/lang/String;)V" style="static">
+          <ast end="139" start="25" type="31"/>
+          <scope name="LHello;.:MethodDeclaration:25:139">
             <node id="G1_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
-              <ast end="67" start="54" type="44"/>
+              <ast end="62" start="49" type="44"/>
             </node>
-            <node id="G1_main_N2" kind="assign_var" ref="$LHelloWorld;.:main:30:121/$args" type="[Ljava/lang/String;">
-              <ast end="67" start="54" type="44"/>
+            <node id="G1_main_N2" kind="assign_var" ref="$LHello;.:MethodDeclaration:25:139/$args" type="[Ljava/lang/String;">
+              <ast end="62" start="49" type="44"/>
               <link src="G1_main_N1"/>
             </node>
-            <node id="G1_main_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-            <node id="G1_main_N4" kind="input" ref="#this" type="LHelloWorld;"/>
-            <scope name="LHelloWorld;.:main:30:121.:B:69:121">
-              <node id="G1_main_N5" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
-                <ast end="89" start="79" type="40"/>
+            <node id="G1_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+            <node id="G1_main_N4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+            <node id="G1_main_N5" kind="input" ref="#this" type="LHello;"/>
+            <scope name="LHello;.:MethodDeclaration:25:139.:Block:64:139">
+              <node id="G1_main_N6" kind="ref_var" ref="$LHello;.:MethodDeclaration:25:139/$args" type="[Ljava/lang/String;">
+                <ast end="85" start="81" type="42"/>
+                <link src="G1_main_N2"/>
+              </node>
+              <node data="0" id="G1_main_N7" kind="value" type="I">
+                <ast end="87" start="86" type="34"/>
+              </node>
+              <node id="G1_main_N8" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
+                <ast end="88" start="81" type="2"/>
+                <link label="array" src="G1_main_N6"/>
+                <link label="index" src="G1_main_N7"/>
                 <link src="G1_main_N3"/>
               </node>
-              <node data="Hello, World!" id="G1_main_N6" kind="value" type="Ljava/lang/String;">
-                <ast end="113" start="98" type="45"/>
+              <node id="G1_main_N9" kind="assign_var" ref="$LHello;.:MethodDeclaration:25:139.:Block:64:139/$name" type="Ljava/lang/String;">
+                <ast end="88" start="74" type="59"/>
+                <link src="G1_main_N8"/>
               </node>
-              <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="G1_main_N7" kind="call" type="V">
-                <ast end="114" start="79" type="32"/>
-                <link label="#this" src="G1_main_N5"/>
-                <link label="#arg0" src="G1_main_N6"/>
+              <node id="G1_main_N10" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+                <ast end="108" start="98" type="40"/>
+                <link src="G1_main_N4"/>
               </node>
-              <node id="G1_main_N8" kind="receive" type="V">
-                <ast end="114" start="79" type="32"/>
-                <link src="G1_main_N7"/>
+              <node data="Hello, " id="G1_main_N11" kind="value" type="Ljava/lang/String;">
+                <ast end="126" start="117" type="45"/>
+              </node>
+              <node id="G1_main_N12" kind="ref_var" ref="$LHello;.:MethodDeclaration:25:139.:Block:64:139/$name" type="Ljava/lang/String;">
+                <ast end="131" start="127" type="42"/>
+                <link src="G1_main_N9"/>
+              </node>
+              <node data="+" id="G1_main_N13" kind="op_infix" type="Ljava/lang/String;">
+                <ast end="131" start="117" type="27"/>
+                <link label="L" src="G1_main_N11"/>
+                <link label="R" src="G1_main_N12"/>
+              </node>
+              <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="G1_main_N14" kind="call" type="V">
+                <ast end="132" start="98" type="32"/>
+                <link label="#this" src="G1_main_N10"/>
+                <link label="#arg0" src="G1_main_N13"/>
+              </node>
+              <node id="G1_main_N15" kind="receive" type="V">
+                <ast end="132" start="98" type="32"/>
+                <link src="G1_main_N14"/>
               </node>
             </scope>
           </scope>
