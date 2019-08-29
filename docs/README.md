@@ -6,11 +6,13 @@
 
  - Dataflow Graph is a better way to analyze program semantics.
  - Source code analysis was preferred.
+ - Needs to process a large program.
 
 ## Blurb
 
  - Produces interprocedural dataflow graphs entirely from source code.
  - Can analyze programs without complete dependencies (jar files).
+ - Able to process a large codebase (~100kloc) in a few minutes.
  - Supports up to most JDK 8 language features. (Method references under working).
  - Detailed output with type information, call graphs and source text references.
  - Small external dependency - JDT for syntax parser and BCEL for byte code parser.
@@ -18,10 +20,10 @@
 
 ## History
 
- - Apr. 2017: originally started as a Python script using SrcML (https://www.srcml.org/)
- - May. 2017: switch to Java/JDT.
- - Apr. 2018: going interprocedural.
- - Mar. 2019: basic features supported.
+ - Apr. 2017: Originally started as a Python script using SrcML (https://www.srcml.org/)
+ - May. 2017: Switch to Java/JDT. (https://www.eclipse.org/jdt/)
+ - Apr. 2018: Going interprocedural.
+ - Mar. 2019: Basic features supported.
  - Aug. 2019: Lambda implementation.
 
 ## Design Decisions
