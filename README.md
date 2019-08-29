@@ -27,7 +27,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
         }
     }
 
-### Output
+### Output (XML)
 
     <?xml version="1.0" encoding="UTF-8"?><fgyama>
       <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="HelloWorld.java">
@@ -69,6 +69,10 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
         </method>
       </class>
     </fgyama>
+
+### Output (Graphviz)
+
+<img src="tests/HelloWorld.svg">
 
 ## Node types (kinds):
 
