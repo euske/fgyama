@@ -44,17 +44,17 @@ def main(argv):
         words = splitwords(name)
         for w in words:
             nb.add(w, fids)
-        return
+        return True
 
     def predict(tid, item, fids):
         f2 = nb.narrow(fids, threshold)
-        if len(f2) <= 1: return
+        if len(f2) <= 1: return False
         cands = nb.getkeys(f2)
-        if not cands: return
+        if not cands: return False
         name = stripid(item)
         words = splitwords(name)
         (_,topword) = cands[0]
-        if topword in words: return
+        if topword in words: return False
         cands = cands[:len(words)+1]
         print('#', words, cands)
         print('+ITEM', json.dumps(item))
@@ -94,7 +94,7 @@ def main(argv):
             supports.append((feat, srcs0, evidence, srcs1))
         print('+SUPPORT', json.dumps(supports))
         print()
-        return
+        return True
 
     nb = NaiveBayes()
     proc = learn
@@ -104,10 +104,15 @@ def main(argv):
             nb.load(fp)
             proc = predict
 
+    n = m = 0
     for (tid,item) in db:
         fids = db.get_feats(tid)
-        proc(tid, item, [ fid for fid in fids if fid != 0 ])
+        fids = [ fid for fid in fids if fid != 0 ]
+        n += 1
+        if proc(tid, item, fids):
+            m += 1
         sys.stderr.write('.'); sys.stderr.flush()
+    print('Processed: %d/%d' % (m,n), file=sys.stderr)
 
     if outpath is not None:
         print('Exporting model: %r' % outpath, file=sys.stderr)
