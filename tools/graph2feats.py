@@ -20,20 +20,15 @@ AUGMENTED = (
     'ref_array', 'ref_field',
     'assign_array', 'assign_field')
 
-NODE_COST = 10
-
-debug = 0
-
-def is_ref(ref):
-    return not (ref is None or ref.startswith('#') or ref.startswith('%'))
-
-def getfeats(n):
+def getfeats(n, ref0=None):
     if n.kind in CALLS:
         (data,_,_) = n.data.partition(' ')
         (name,_,_) = splitmethodname(data)
         return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
     elif n.kind in REFS or n.kind in ASSIGNS:
-        if n.ref.startswith('%'):
+        if n.ref is ref0:
+            return [ '%s:SELF' % n.kind ]
+        elif n.ref.startswith('%'):
             return [ '%s:%%%s' % (n.kind, w) for w in gettypewords(n.ref[1:]) ]
         else:
             return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
@@ -51,144 +46,166 @@ def getfeats(n):
 def gettypefeats(n):
     return [ '@'+w for w in gettypewords(n.ntype) ]
 
-def enum_back(feats, count, done, v1, lprev=None,
-              v0=None, fprev='', chain=None, dist=0, calls=None):
-    # prevent explosion.
-    if count <= 0: return
-    count -= 1
-    if (v0,v1) in done: return
-    if v0 is not None:
-        done.add((v0,v1))
-    n1 = v1.node
-    if debug:
-        print('back: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
-              (n1.nid, n1.kind, len(v1.inputs), fprev, lprev, count, len(done)))
-    chain = Cons(n1, chain)
-    # list the input nodes to visit.
-    inputs = []
-    for (link,v2,funcall) in v1.inputs:
-        # do not follow informational links.
-        if link.startswith('_') and link != '_end': continue
-        # do not use a value in arrays.
-        if n1.kind == 'ref_array' and not link: continue
-        # treat indirect assignment the same way as normal assignment.
-        if link and link[0] in '@%':
-            #if funcall is None: continue
-            link = ''
-        # interprocedural.
-        if n1.kind == 'output':
-            inputs.append((link, v2, Cons(funcall, calls)))
-        elif n1.kind == 'input' and calls is not None:
-            if calls.car is funcall:
-                inputs.append((link, v2, calls.cdr))
-        else:
-            inputs.append((link, v2, calls))
-    if v0 is None:
-        for (link,v2,calls) in inputs:
-            enum_back(feats, count, done, v2, link,
-                      v1, fprev, chain, dist, calls)
-        return
-    # ignore transparent nodes.
-    if n1.kind in IGNORED or n1.kind == 'assign_var':
-        for (_,v2,calls) in inputs:
-            enum_back(feats, count, done, v2, lprev,
-                      v1, fprev, chain, dist, calls)
-        return
-    # add the features.
-    fs = [ lprev+':'+f for f in getfeats(n1) ]
-    if not fs: return
-    fs += [ lprev+':'+f for f in gettypefeats(n1) ]
-    for f in fs:
-        feat = (-(dist+1),fprev,f)
-        feats[feat] = chain
-        if debug:
-            print('  feat:', feat)
-    # if this is a ref_var node, the fact that it refers to a certain variable
-    # is recorded, but the node itself is transparent in a chain.
-    if n1.kind == 'ref_var':
-        for (_,v2,calls) in inputs:
-            enum_back(feats, count, done, v2, lprev,
-                      v1, fprev, chain, dist, calls)
-        return
-    # visit the next nodes.
-    count -= NODE_COST
-    dist += 1
-    for (link,v2,calls) in inputs:
-        enum_back(feats, count, done, v2, link,
-                  v1, fs[0], None, dist, calls)
-    return
 
-def enum_forw(feats, count, done, v1, lprev=None,
-              v0=None, fprev='', chain=None, dist=0, calls=None):
-    # prevent explosion.
-    if count <= 0: return
-    count -= 1
-    if (v0,v1) in done: return
-    if v0 is not None:
-        done.add((v0,v1))
-    n1 = v1.node
-    if debug:
-        print('forw: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
-              (n1.nid, n1.kind, len(v1.outputs), fprev, lprev, count, len(done)))
-    chain = Cons(n1, chain)
-    # list the output nodes to visit.
-    outputs = []
-    for (link,v2,funcall) in v1.outputs:
-        # do not follow informational links.
-        if link.startswith('_') and link != '_end': continue
-        # do not pass a value in arrays.
-        if n1.kind == 'assign_array' and not link: continue
-        # treat indirect assignment the same way as normal assignment.
-        if link and link[0] in '@%':
-            #if funcall is None: continue
-            link = ''
-        # interprocedural.
-        if n1.kind == 'input':
-            outputs.append((link, v2, Cons(funcall, calls)))
-        elif n1.kind == 'output' and calls is not None:
-            if calls.car is funcall:
-                outputs.append((link, v2, calls.cdr))
-        else:
-            outputs.append((link, v2, calls))
-    if v0 is None:
-        for (link,v2,calls) in outputs:
-            enum_forw(feats, count, done, v2, link,
-                      v1, fprev, chain, dist, calls)
+##  FeatGenerator
+##
+class FeatGenerator:
+
+    node_cost = 10
+
+    def __init__(self, mode, count, debug=0):
+        self.mode = mode
+        self.count = count
+        self.debug = debug
         return
-    # ignore transparent nodes.
-    if n1.kind in IGNORED or n1.kind == 'ref_var':
-        for (link,v2,calls) in outputs:
-            enum_forw(feats, count, done, v2, link,
-                      v1, fprev, chain, dist, calls)
+
+    def enum_feats(self, feats, vtx, ref0=None):
+        self.feats = feats
+        self.ref0 = ref0
+        self.done = set()
+        if self.mode in (None,'-b'):
+            self.enum_back(self.count, vtx)
+        if self.mode in (None,'-f'):
+            self.enum_forw(self.count, vtx)
         return
-    # add the features.
-    fs = [ lprev+':'+f for f in getfeats(n1) ]
-    if not fs: return
-    fs += gettypefeats(v0.node)
-    for f in fs:
-        feat = ((dist+1),fprev,f)
-        feats[feat] = chain
-        if debug:
-            print('  feat:', feat)
-    # if this is a assign_var node, the fact that it assigns to a certain variable
-    # is recorded, but the node itself is transparent in a chain.
-    if n1.kind == 'assign_var':
-        for (link,v2,calls) in outputs:
-            enum_forw(feats, count, done, v2, link,
-                      v1, fprev, chain, dist, calls)
+
+    def enum_back(self, count, v1, lprev=None,
+                  v0=None, fprev='', chain=None, dist=0, calls=None):
+        # prevent explosion.
+        if count <= 0: return
+        count -= 1
+        if (v0,v1) in self.done: return
+        if v0 is not None:
+            self.done.add((v0,v1))
+        n1 = v1.node
+        if self.debug:
+            print('back: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
+                  (n1.nid, n1.kind, len(v1.inputs), fprev, lprev, count, len(self.done)))
+        chain = Cons(n1, chain)
+        # list the input nodes to visit.
+        inputs = []
+        for (link,v2,funcall) in v1.inputs:
+            # do not follow informational links.
+            if link.startswith('_') and link != '_end': continue
+            # do not use a value in arrays.
+            if n1.kind == 'ref_array' and not link: continue
+            # treat indirect assignment the same way as normal assignment.
+            if link and link[0] in '@%':
+                #if funcall is None: continue
+                link = ''
+            # interprocedural.
+            if n1.kind == 'output':
+                inputs.append((link, v2, Cons(funcall, calls)))
+            elif n1.kind == 'input' and calls is not None:
+                if calls.car is funcall:
+                    inputs.append((link, v2, calls.cdr))
+            else:
+                inputs.append((link, v2, calls))
+        if v0 is None:
+            for (link,v2,calls) in inputs:
+                self.enum_back(count, v2, link,
+                               v1, fprev, chain, dist, calls)
+            return
+        # ignore transparent nodes.
+        if n1.kind in IGNORED or n1.kind == 'assign_var':
+            for (_,v2,calls) in inputs:
+                self.enum_back(count, v2, lprev,
+                               v1, fprev, chain, dist, calls)
+            return
+        # add the features.
+        fs = [ lprev+':'+f for f in getfeats(n1, self.ref0) ]
+        if not fs: return
+        fs += [ lprev+':'+f for f in gettypefeats(n1) ]
+        for f in fs:
+            feat = (-(dist+1),fprev,f)
+            self.feats[feat] = chain
+            if self.debug:
+                print('  feat:', feat)
+        # if this is a ref_var node, the fact that it refers to a certain variable
+        # is recorded, but the node itself is transparent in a chain.
+        if n1.kind == 'ref_var':
+            for (_,v2,calls) in inputs:
+                self.enum_back(count, v2, lprev,
+                               v1, fprev, chain, dist, calls)
+            return
+        # visit the next nodes.
+        count -= self.node_cost
+        dist += 1
+        for (link,v2,calls) in inputs:
+            self.enum_back(count, v2, link,
+                           v1, fs[0], None, dist, calls)
         return
-    # visit the next nodes.
-    count -= NODE_COST
-    dist += 1
-    for (link,v2,calls) in outputs:
-        enum_forw(feats, count, done, v2, link,
-                  v1, fs[0], None, dist, calls)
-    return
+
+    def enum_forw(self, count, v1, lprev=None,
+                  v0=None, fprev='', chain=None, dist=0, calls=None):
+        # prevent explosion.
+        if count <= 0: return
+        count -= 1
+        if (v0,v1) in self.done: return
+        if v0 is not None:
+            self.done.add((v0,v1))
+        n1 = v1.node
+        if self.debug:
+            print('forw: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
+                  (n1.nid, n1.kind, len(v1.outputs), fprev, lprev, count, len(self.done)))
+        chain = Cons(n1, chain)
+        # list the output nodes to visit.
+        outputs = []
+        for (link,v2,funcall) in v1.outputs:
+            # do not follow informational links.
+            if link.startswith('_') and link != '_end': continue
+            # do not pass a value in arrays.
+            if n1.kind == 'assign_array' and not link: continue
+            # treat indirect assignment the same way as normal assignment.
+            if link and link[0] in '@%':
+                #if funcall is None: continue
+                link = ''
+            # interprocedural.
+            if n1.kind == 'input':
+                outputs.append((link, v2, Cons(funcall, calls)))
+            elif n1.kind == 'output' and calls is not None:
+                if calls.car is funcall:
+                    outputs.append((link, v2, calls.cdr))
+            else:
+                outputs.append((link, v2, calls))
+        if v0 is None:
+            for (link,v2,calls) in outputs:
+                self.enum_forw(count, v2, link,
+                               v1, fprev, chain, dist, calls)
+            return
+        # ignore transparent nodes.
+        if n1.kind in IGNORED or n1.kind == 'ref_var':
+            for (link,v2,calls) in outputs:
+                self.enum_forw(count, v2, link,
+                               v1, fprev, chain, dist, calls)
+            return
+        # add the features.
+        fs = [ lprev+':'+f for f in getfeats(n1, self.ref0) ]
+        if not fs: return
+        fs += gettypefeats(v0.node)
+        for f in fs:
+            feat = ((dist+1),fprev,f)
+            self.feats[feat] = chain
+            if self.debug:
+                print('  feat:', feat)
+        # if this is a assign_var node, the fact that it assigns to a certain variable
+        # is recorded, but the node itself is transparent in a chain.
+        if n1.kind == 'assign_var':
+            for (link,v2,calls) in outputs:
+                self.enum_forw(count, v2, link,
+                               v1, fprev, chain, dist, calls)
+            return
+        # visit the next nodes.
+        count -= self.node_cost
+        dist += 1
+        for (link,v2,calls) in outputs:
+            self.enum_forw(count, v2, link,
+                           v1, fs[0], None, dist, calls)
+        return
 
 
 # main
 def main(argv):
-    global debug, maxchain, maxdist
     import fileinput
     import getopt
     def usage():
@@ -199,6 +216,7 @@ def main(argv):
         (opts, args) = getopt.getopt(argv[1:], 'do:c:M:B:fbC')
     except getopt.GetoptError:
         return usage()
+    debug = 0
     maxoverrides = 1
     count = 50
     mode = None
@@ -247,8 +265,10 @@ def main(argv):
                 if node.kind in CALLS:
                     item = node.data
             else:
-                if (node.kind in REFS or node.kind in ASSIGNS) and is_ref(node.ref):
-                    item = node.ref
+                if node.kind in REFS or node.kind in ASSIGNS:
+                    assert node.ref is not None
+                    if not (node.ref.startswith('#') or node.ref.startswith('%')):
+                        item = node.ref
             if item is None:
                 continue
             elif item in item2nodes:
@@ -264,19 +284,16 @@ def main(argv):
         srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
         return tuple(srcs)
 
+    gen = FeatGenerator(mode, count, debug=debug)
     nfeats = 0
     feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
-        feats = {}
         if debug:
             print('item: %r' % item)
+        feats = {}
         for node in nodes:
             v0 = builder.vtxs[node]
-            done = set()
-            if mode in (None,'-b'):
-                enum_back(feats, count, done, v0)
-            if mode in (None,'-f'):
-                enum_forw(feats, count, done, v0)
+            gen.enum_feats(feats, v0, item)
         if not feats: continue
         nfeats += len(feats)
 
