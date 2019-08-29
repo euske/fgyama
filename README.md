@@ -28,19 +28,19 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
         </method>
         <method abstract="false" name="LHello;.main([Ljava/lang/String;)V" style="static">
           <ast end="139" start="25" type="31"/>
-          <scope name="LHello;.:MethodDeclaration:25:139">
+          <scope name="LHello;.:main:25:139">
             <node id="G1_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
               <ast end="62" start="49" type="44"/>
             </node>
-            <node id="G1_main_N2" kind="assign_var" ref="$LHello;.:MethodDeclaration:25:139/$args" type="[Ljava/lang/String;">
+            <node id="G1_main_N2" kind="assign_var" ref="$LHello;.:main:25:139/$args" type="[Ljava/lang/String;">
               <ast end="62" start="49" type="44"/>
               <link src="G1_main_N1"/>
             </node>
             <node id="G1_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
             <node id="G1_main_N4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
             <node id="G1_main_N5" kind="input" ref="#this" type="LHello;"/>
-            <scope name="LHello;.:MethodDeclaration:25:139.:Block:64:139">
-              <node id="G1_main_N6" kind="ref_var" ref="$LHello;.:MethodDeclaration:25:139/$args" type="[Ljava/lang/String;">
+            <scope name="LHello;.:main:25:139.:B:64:139">
+              <node id="G1_main_N6" kind="ref_var" ref="$LHello;.:main:25:139/$args" type="[Ljava/lang/String;">
                 <ast end="85" start="81" type="42"/>
                 <link src="G1_main_N2"/>
               </node>
@@ -53,7 +53,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
                 <link label="index" src="G1_main_N7"/>
                 <link src="G1_main_N3"/>
               </node>
-              <node id="G1_main_N9" kind="assign_var" ref="$LHello;.:MethodDeclaration:25:139.:Block:64:139/$name" type="Ljava/lang/String;">
+              <node id="G1_main_N9" kind="assign_var" ref="$LHello;.:main:25:139.:B:64:139/$name" type="Ljava/lang/String;">
                 <ast end="88" start="74" type="59"/>
                 <link src="G1_main_N8"/>
               </node>
@@ -64,7 +64,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
               <node data="Hello, " id="G1_main_N11" kind="value" type="Ljava/lang/String;">
                 <ast end="126" start="117" type="45"/>
               </node>
-              <node id="G1_main_N12" kind="ref_var" ref="$LHello;.:MethodDeclaration:25:139.:Block:64:139/$name" type="Ljava/lang/String;">
+              <node id="G1_main_N12" kind="ref_var" ref="$LHello;.:main:25:139.:B:64:139/$name" type="Ljava/lang/String;">
                 <ast end="131" start="127" type="42"/>
                 <link src="G1_main_N9"/>
               </node>
@@ -147,8 +147,8 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 
 ### Testing
 
-    $ ./run.sh net.tabesugi.fgyama.Java2DF Class1.java Class2.java ... > out.graph
-    $ python tools/graph2gv.py out.graph | dot -Tsvg > out.svg
+    $ ./run.sh net.tabesugi.fgyama.Java2DF ./tests/Hello.java Class2.java ... > Hello.graph
+    $ python tools/graph2gv.py Hello.graph | dot -Tsvg > Hello.svg
 
 
 ## Development
