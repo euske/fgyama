@@ -1,6 +1,6 @@
 # FGyama
 
-FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
+FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 
 ## Prerequisites:
 
@@ -17,27 +17,37 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
     $ ./run.sh net.tabesugi.fgyama.Java2DF Class1.java Class2.java ... > out.graph
     $ python tools/graph2gv.py out.graph > out.gv
 
-## Output XML format:
+## Output Format:
+
+### Input
+
+    public class HelloWorld {
+        public static void main(String[] args) {
+            System.out.println("Hello, World!");
+        }
+    }
+
+### Output
 
     <?xml version="1.0" encoding="UTF-8"?><fgyama>
       <class extends="Ljava/lang/Object;" interface="false" name="LHelloWorld;" path="HelloWorld.java">
-        <method name="LHelloWorld;.&lt;clinit&gt;()V" style="initializer">
+        <method abstract="false" name="LHelloWorld;.&lt;clinit&gt;()V" style="initializer">
           <ast end="123" start="0" type="55"/>
           <scope name="LHelloWorld;.&lt;clinit&gt;"/>
         </method>
-        <method name="LHelloWorld;.main([Ljava/lang/String;)V" style="static">
+        <method abstract="false" name="LHelloWorld;.main([Ljava/lang/String;)V" style="static">
           <ast end="121" start="30" type="31"/>
-          <scope name="LHelloWorld;.:MethodDeclaration:30:121">
+          <scope name="LHelloWorld;.:main:30:121">
             <node id="G1_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
               <ast end="67" start="54" type="44"/>
             </node>
-            <node id="G1_main_N2" kind="assign_var" ref="$LHelloWorld;.:MethodDeclaration:30:121/$args" type="[Ljava/lang/String;">
+            <node id="G1_main_N2" kind="assign_var" ref="$LHelloWorld;.:main:30:121/$args" type="[Ljava/lang/String;">
               <ast end="67" start="54" type="44"/>
               <link src="G1_main_N1"/>
             </node>
             <node id="G1_main_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
             <node id="G1_main_N4" kind="input" ref="#this" type="LHelloWorld;"/>
-            <scope name="LHelloWorld;.:MethodDeclaration:30:121.:Block:69:121">
+            <scope name="LHelloWorld;.:main:30:121.:B:69:121">
               <node id="G1_main_N5" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <ast end="89" start="79" type="40"/>
                 <link src="G1_main_N3"/>
@@ -118,7 +128,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java.
 
   * Lambdas.
   * Method references.
-  * Catch and forward method Exceptions.
+  * Exception chaining.
   * Vararg methods matching.
   * Handle consecutive SwitchCases.
   * Java language spec.: https://docs.oracle.com/javase/specs/
