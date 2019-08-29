@@ -20,29 +20,6 @@ AUGMENTED = (
     'ref_array', 'ref_field',
     'assign_array', 'assign_field')
 
-def getfeats(n, ref0=None):
-    if n.kind in CALLS:
-        (data,_,_) = n.data.partition(' ')
-        (name,_,_) = splitmethodname(data)
-        return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
-    elif n.kind in REFS or n.kind in ASSIGNS:
-        if n.ref is ref0:
-            return [ '%s:SELF' % n.kind ]
-        elif n.ref.startswith('%'):
-            return [ '%s:%%%s' % (n.kind, w) for w in gettypewords(n.ref[1:]) ]
-        else:
-            return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
-    elif n.kind in CONDS:
-        return [ n.kind ]
-    elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
-        return [ '%s:STRING' % (n.kind) ]
-    elif n.kind in ('op_typecast', 'op_typecheck'):
-        return [ '%s:%s' % (n.kind, w) for w in gettypewords(n.data) ]
-    elif n.data is None:
-        return [ n.kind ]
-    else:
-        return [ '%s:%s' % (n.kind, n.data) ]
-
 def gettypefeats(n):
     return [ '@'+w for w in gettypewords(n.ntype) ]
 
@@ -53,9 +30,14 @@ class FeatGenerator:
 
     node_cost = 10
 
-    def __init__(self, mode, count, debug=0):
-        self.mode = mode
+    def __init__(self, direction, count,
+                 interproc=True, namefeat=True, typefeat=True,
+                 debug=0):
+        self.direction = direction
         self.count = count
+        self.interproc = interproc
+        self.namefeat = namefeat
+        self.typefeat = typefeat
         self.debug = debug
         return
 
@@ -63,16 +45,55 @@ class FeatGenerator:
         self.feats = feats
         self.ref0 = ref0
         self.done = set()
-        if self.mode in (None,'-b'):
+        if self.direction <= 0:
             self.enum_back(self.count, vtx)
-        if self.mode in (None,'-f'):
+        if 0 <= self.direction:
             self.enum_forw(self.count, vtx)
         return
+
+    def getbasefeats(self, n):
+        if n.kind in CALLS:
+            return []
+        elif n.kind in REFS or n.kind in ASSIGNS:
+            if n.ref is self.ref0:
+                return [ '%s:SELF' % n.kind ]
+            elif n.ref.startswith('%'):
+                return [ '%s:%%%s' % (n.kind, w) for w in gettypewords(n.ref[1:]) ]
+            else:
+                return []
+        elif n.kind in CONDS:
+            return [ n.kind ]
+        elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
+            return [ '%s:STRING' % (n.kind) ]
+        elif n.kind in ('op_typecast', 'op_typecheck'):
+            return [ '%s:%s' % (n.kind, w) for w in gettypewords(n.data) ]
+        elif n.data is None:
+            return [ n.kind ]
+        else:
+            return [ '%s:%s' % (n.kind, n.data) ]
+
+    def getnamefeats(self, n):
+        if n.kind in CALLS:
+            (data,_,_) = n.data.partition(' ')
+            (name,_,_) = splitmethodname(data)
+            return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
+        elif n.kind in REFS or n.kind in ASSIGNS:
+            if n.ref is self.ref0:
+                return []
+            elif n.ref.startswith('%'):
+                return []
+            else:
+                if self.namefeat:
+                    return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
+                else:
+                    return [ n.kind ]
+        else:
+            return []
 
     def enum_back(self, count, v1, lprev=None,
                   v0=None, fprev='', chain=None, dist=0, calls=None):
         # prevent explosion.
-        if count <= 0: return
+        if count < 0: return
         count -= 1
         if (v0,v1) in self.done: return
         if v0 is not None:
@@ -95,9 +116,10 @@ class FeatGenerator:
                 link = ''
             # interprocedural.
             if n1.kind == 'output':
-                inputs.append((link, v2, Cons(funcall, calls)))
+                if self.interproc:
+                    inputs.append((link, v2, Cons(funcall, calls)))
             elif n1.kind == 'input' and calls is not None:
-                if calls.car is funcall:
+                if self.interproc and calls.car is funcall:
                     inputs.append((link, v2, calls.cdr))
             else:
                 inputs.append((link, v2, calls))
@@ -113,9 +135,11 @@ class FeatGenerator:
                                v1, fprev, chain, dist, calls)
             return
         # add the features.
-        fs = [ lprev+':'+f for f in getfeats(n1, self.ref0) ]
+        ws = [ lprev+':'+f for f in self.getnamefeats(n1) ]
+        fs = ws + [ lprev+':'+f for f in self.getbasefeats(n1) ]
         if not fs: return
-        fs += [ lprev+':'+f for f in gettypefeats(n1) ]
+        if self.typefeat:
+            fs += [ lprev+':'+f for f in gettypefeats(n1) ]
         for f in fs:
             feat = (-(dist+1),fprev,f)
             self.feats[feat] = chain
@@ -131,15 +155,16 @@ class FeatGenerator:
         # visit the next nodes.
         count -= self.node_cost
         dist += 1
-        for (link,v2,calls) in inputs:
-            self.enum_back(count, v2, link,
-                           v1, fs[0], None, dist, calls)
+        for fprev in (ws or fs[:1]):
+            for (link,v2,calls) in inputs:
+                self.enum_back(count, v2, link,
+                               v1, fprev, None, dist, calls)
         return
 
     def enum_forw(self, count, v1, lprev=None,
                   v0=None, fprev='', chain=None, dist=0, calls=None):
         # prevent explosion.
-        if count <= 0: return
+        if count < 0: return
         count -= 1
         if (v0,v1) in self.done: return
         if v0 is not None:
@@ -162,9 +187,10 @@ class FeatGenerator:
                 link = ''
             # interprocedural.
             if n1.kind == 'input':
-                outputs.append((link, v2, Cons(funcall, calls)))
+                if self.interproc:
+                    outputs.append((link, v2, Cons(funcall, calls)))
             elif n1.kind == 'output' and calls is not None:
-                if calls.car is funcall:
+                if self.interproc and calls.car is funcall:
                     outputs.append((link, v2, calls.cdr))
             else:
                 outputs.append((link, v2, calls))
@@ -180,9 +206,11 @@ class FeatGenerator:
                                v1, fprev, chain, dist, calls)
             return
         # add the features.
-        fs = [ lprev+':'+f for f in getfeats(n1, self.ref0) ]
+        ws = [ lprev+':'+f for f in self.getnamefeats(n1) ]
+        fs = ws + [ lprev+':'+f for f in self.getbasefeats(n1) ]
         if not fs: return
-        fs += gettypefeats(v0.node)
+        if self.typefeat:
+            fs += gettypefeats(v0.node)
         for f in fs:
             feat = ((dist+1),fprev,f)
             self.feats[feat] = chain
@@ -198,9 +226,10 @@ class FeatGenerator:
         # visit the next nodes.
         count -= self.node_cost
         dist += 1
-        for (link,v2,calls) in outputs:
-            self.enum_forw(count, v2, link,
-                           v1, fs[0], None, dist, calls)
+        for fprev in (ws or fs[:1]):
+            for (link,v2,calls) in outputs:
+                self.enum_forw(count, v2, link,
+                               v1, fprev, None, dist, calls)
         return
 
 
@@ -209,29 +238,37 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-m maxdist] '
-              '[-M maxoverrides] [-B srcdb] [-f|-b] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-o output] [-C count] '
+              '[-M maxoverrides] [-B srcdb] [-f|-b] '
+              '[-F)unction] [-I)nterproc] [-N)amefeat] [-T)ypefeat] '
+              '[graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:c:M:B:fbC')
+        (opts, args) = getopt.getopt(argv[1:], 'do:C:M:B:fbFINT')
     except getopt.GetoptError:
         return usage()
     debug = 0
-    maxoverrides = 1
-    count = 50
-    mode = None
-    funcs = False
     outpath = None
+    count = 50
+    maxoverrides = 1
     srcdb = None
+    direction = 0
+    itype = 'ref'
+    interproc = False
+    namefeat = False
+    typefeat = False
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
-        elif k == '-c': count = int(v)
+        elif k == '-C': count = int(v)
         elif k == '-M': maxoverrides = int(v)
         elif k == '-B': srcdb = SourceDB(v)
-        elif k == '-f': mode = k
-        elif k == '-b': mode = k
-        elif k == '-C': funcs = True
+        elif k == '-f': direction = +1
+        elif k == '-b': direction = -1
+        elif k == '-F': itype = 'func'
+        elif k == '-I': interproc = True
+        elif k == '-N': namefeat = True
+        elif k == '-T': typefeat = True
     if not args: return usage()
 
     db = None
@@ -261,7 +298,7 @@ def main(argv):
     for graph in builder.graphs:
         for node in graph:
             item = None
-            if funcs:
+            if itype == 'func':
                 if node.kind in CALLS:
                     item = node.data
             else:
@@ -284,7 +321,8 @@ def main(argv):
         srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
         return tuple(srcs)
 
-    gen = FeatGenerator(mode, count, debug=debug)
+    gen = FeatGenerator(direction, count, interproc,
+                        namefeat, typefeat, debug=debug)
     nfeats = 0
     feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
@@ -326,7 +364,7 @@ def main(argv):
                 print('+FEAT', json.dumps(data))
             print()
 
-    print('Total: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
+    print('\nTotal: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
           file=sys.stderr)
 
     if db is not None:
