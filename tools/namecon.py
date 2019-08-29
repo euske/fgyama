@@ -54,7 +54,7 @@ def main(argv):
         name = stripid(item)
         words = splitwords(name)
         (_,topword) = cands[0]
-        if topword in words: return False
+        if topword in words: return True
         cands = cands[:len(words)+1]
         print('#', words, cands)
         print('+ITEM', json.dumps(item))
@@ -94,7 +94,7 @@ def main(argv):
             supports.append((feat, srcs0, evidence, srcs1))
         print('+SUPPORT', json.dumps(supports))
         print()
-        return True
+        return False
 
     nb = NaiveBayes()
     proc = learn
@@ -112,7 +112,7 @@ def main(argv):
         if proc(tid, item, fids):
             m += 1
         sys.stderr.write('.'); sys.stderr.flush()
-    print('Processed: %d/%d' % (m,n), file=sys.stderr)
+    print('\nProcessed: %d/%d' % (m,n), file=sys.stderr)
 
     if outpath is not None:
         print('Exporting model: %r' % outpath, file=sys.stderr)

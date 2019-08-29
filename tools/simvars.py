@@ -145,7 +145,7 @@ def main(argv):
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
 
-    print('NPairs=%r, NameType=%r, NameOnly=%r, TypeOnly=%r, AvgWordSim=%.2f' %
+    print('\nNPairs=%r, NameType=%r, NameOnly=%r, TypeOnly=%r, AvgWordSim=%.2f' %
           (npairs, nametype, nameonly, typeonly, totalwordsim/npairs),
           file=sys.stderr)
 
