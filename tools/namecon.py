@@ -38,6 +38,7 @@ def main(argv):
     if not args: return usage()
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
+    nallitems = len(db.get_items())
 
     def learn(tid, item, fids):
         name = stripid(item)
@@ -47,12 +48,18 @@ def main(argv):
         return True
 
     def predict(tid, item, fids):
-        f2 = nb.narrow(fids, threshold)
-        if len(f2) <= 1: return False
-        cands = nb.getkeys(f2)
-        if not cands: return False
         name = stripid(item)
         words = splitwords(name)
+        for w in words:
+            nb.remove(w, fids)
+        f2 = nb.narrow(fids, threshold)
+        if f2:
+            cands = nb.getkeys(f2)
+        else:
+            cands = []
+        for w in words:
+            nb.add(w, fids)
+        if not cands: return False
         (_,topword) = cands[0]
         if topword in words: return True
         cands = cands[:len(words)+1]
@@ -60,13 +67,13 @@ def main(argv):
         print('+ITEM', json.dumps(item))
         print('+CANDS', json.dumps(cands))
         feats = []
-        nallitems = len(db.get_items())
         for fid in fids:
             d = nb.fcount[fid]
             if topword not in d: continue
             df = math.log(nallitems / db.get_numfeatitems(fid))
+            ff = math.log(d[None] / d[topword])
             feat = db.get_feat(fid)
-            score = math.exp(-abs(feat[0])) * df * d[topword] / d[None]
+            score = math.exp(-abs(feat[0])) * df / ff
             feats.append((score, fid))
         feats.sort(reverse=True)
         totalscore = sum( score for (score,_) in feats )
@@ -116,12 +123,10 @@ def main(argv):
 
     if outpath is not None:
         print('Exporting model: %r' % outpath, file=sys.stderr)
-        nb.commit()
         with open(outpath, 'wb') as fp:
             nb.save(fp)
 
     if inpath is None and outpath is None:
-        nb.commit()
         for (tid,item) in db.get_items():
             fids = db.get_feats(tid)
             predict(tid, item, fids)

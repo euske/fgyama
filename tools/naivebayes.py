@@ -21,7 +21,6 @@ class NaiveBayes:
 {'banana': 50, 'orange': 30, 'other': 20}
 >>> b.fcount
 {'yellow': {None: 80, 'banana': 45, 'orange': 30, 'other': 5}, 'long': {None: 50, 'banana': 40, 'other': 10}, 'sweet': {None: 65, 'banana': 35, 'orange': 15, 'other': 15}}
->>> b.commit()
 >>> a = b.getkeys(['long','sweet','yellow'])
 >>> [ k for (_,k) in a ]
 ['banana', 'other']
@@ -30,8 +29,6 @@ class NaiveBayes:
     def __init__(self):
         self.fcount = {}
         self.kcount = {}
-        self.fprob = None
-        self.kprob = None
         return
 
     def __len__(self):
@@ -52,7 +49,19 @@ class NaiveBayes:
             d[key] += c
             d[None] += c
             assert d[key] <= self.kcount[key]
-        self.fprob = self.kprob = None
+        return
+
+    def remove(self, key, feats, c=1):
+        assert key is not None
+        assert key in self.kcount
+        self.kcount[key] -= c
+        for f in set(feats):
+            assert f in self.fcount
+            d = self.fcount[f]
+            assert key in d
+            d[key] -= c
+            d[None] -= c
+            assert d[key] <= self.kcount[key]
         return
 
     def dump(self, threshold=2, ntop=10):
@@ -69,25 +78,13 @@ class NaiveBayes:
             print()
         return
 
-    def commit(self):
-        if self.kprob is None:
-            # self.kprob[k] = log(C(k))
-            self.kprob = {}
-            for (k,v) in self.kcount.items():
-                self.kprob[k] = math.log(v)
-        if self.fprob is None:
-            # self.fprob[f][k] = log(C(f,k))
-            self.fprob = {}
-            for (f,d) in self.fcount.items():
-                p = { k: math.log(v) for (k,v) in d.items() }
-                self.fprob[f] = p
-        # validate
+    def validate(self):
         n = max(self.kcount.values())
         for (f,d) in self.fcount.items():
             assert d[None] == sum( v for (k,v) in d.items() if k is not None )
             for (k,v) in d.items():
                 if k is None: continue
-                assert k in self.kprob
+                assert k in self.kcount
                 assert v <= n
         return
 
@@ -99,14 +96,14 @@ class NaiveBayes:
     def load(self, fp):
         data = marshal.load(fp)
         (self.fcount, self.kcount) = data
-        self.commit()
+        self.validate()
         return
 
     def narrow(self, feats, ratio):
         key2feats = {}
         for f in feats:
-            if f not in self.fprob: continue
-            for k in self.fprob[f]:
+            if f not in self.fcount: continue
+            for k in self.fcount[f]:
                 if k in key2feats:
                     a = key2feats[k]
                 else:
@@ -125,18 +122,16 @@ class NaiveBayes:
     def getkeys(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
-        assert self.kprob is not None
-        assert self.fprob is not None
-        assert feats
-        keyp = { k:p0 for (k,p0) in self.kprob.items() }
+        keyp = { k:math.log(v) for (k,v) in self.kcount.items() if 0 < v }
+        kprob = keyp.copy()
         skipped = set()
         for f in feats:
-            if f not in self.fprob: continue
-            d = self.fprob[f]
+            if f not in self.fcount: continue
+            d = self.fcount[f]
             #print(f, d)
-            for (k,p0) in self.kprob.items():
-                if k in d:
-                    p1 = d[k] - p0
+            for (k,p0) in kprob.items():
+                if k in d and 0 < d[k]:
+                    p1 = math.log(d[k]) - p0
                 elif fallback:
                     p1 = -p0
                 else:
@@ -157,7 +152,6 @@ class NaiveBayes:
     def getkeysd(self, feats, n=0, fallback=False):
         # argmax P(k | f1,f2,...) = argmax P(k) P(f1,f2,...|k)
         # = argmax P(k) P(f1|k) P(f2|k), ...
-        assert feats
         n = sum(self.kcount.values())
         keyp = { k:c0/n for (k,c0) in self.kcount.items() }
         skipped = set()
