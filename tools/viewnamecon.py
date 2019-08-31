@@ -201,6 +201,10 @@ function toggle(id) {
         if randomized:
             random.randomized(recs)
         else:
+            for rec in recs:
+                feats = rec['FEATS']
+                score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
+                rec['SCORE'] = score
             recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         if limit:
             recs = recs[:limit]

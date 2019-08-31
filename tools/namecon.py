@@ -25,6 +25,7 @@ def main(argv):
     inpath = None
     threshold = 0.99
     nfeats = 3
+    C = 0.7
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
@@ -67,21 +68,24 @@ def main(argv):
         print('+ITEM', json.dumps(item))
         print('+CANDS', json.dumps(cands))
         feats = []
+        fscore = {}
         for fid in fids:
             d = nb.fcount[fid]
             if topword not in d: continue
+            # A rarer feature overall means stronger indication.
             df = math.log(nallitems / db.get_numfeatitems(fid))
-            ff = math.log(d[None] / d[topword])
+            # A frequent feature for this category means stronger indication.
+            ff = d[topword] / d[None]
+            # Discount a "distant" feature from the subject.
             feat = db.get_feat(fid)
-            score = math.exp(-abs(feat[0])) * df / ff
-            feats.append((score, fid))
-        feats.sort(reverse=True)
-        totalscore = sum( score for (score,_) in feats )
-        print('+SCORE', totalscore)
+            fscore[fid] = math.exp(-C*abs(feat[0])) * df * ff
+            feats.append((feat, df, ff))
+        print('+FEATS', json.dumps(feats))
         fid2srcs0 = db.get_feats(tid, source=True)
         print('+SOURCE', json.dumps(fid2srcs0[0]))
         supports = []
-        for (_,fid) in feats[:nfeats]:
+        fids2 = sorted(fscore.keys(), key=lambda fid:fscore[fid], reverse=True)
+        for fid in fids2[:nfeats]:
             srcs0 = fid2srcs0[fid]
             srcs1 = []
             evidence = None
@@ -93,7 +97,7 @@ def main(argv):
                 words = splitwords(name)
                 if topword not in words: continue
                 fid2srcs1 = db.get_feats(tid1, source=True)
-                srcs1 = fid2srcs1[fid]
+                srcs1 = fid2srcs1[0] + fid2srcs1[fid]
                 evidence = item1
                 break
             if evidence is None: continue
