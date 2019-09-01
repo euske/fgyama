@@ -189,6 +189,14 @@ public class DFFrame {
             }
             i++;
         }
+        if (method.getCallStyle() == DFCallStyle.Constructor) {
+            DFKlass klass = method.getKlass();
+            for (DFKlass.DFFieldRef ref : klass.getFields()) {
+                if (!ref.isStatic()) {
+                    this.addOutputRef(ref);
+                }
+            }
+        }
         this.buildStmt(finder, method, scope, methodDecl.getBody());
     }
 

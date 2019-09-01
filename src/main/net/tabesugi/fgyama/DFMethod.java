@@ -783,6 +783,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return name;
     }
 
+    public DFKlass getKlass() {
+        return _klass;
+    }
+
     public DFCallStyle getCallStyle() {
         return _callStyle;
     }

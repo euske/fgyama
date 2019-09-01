@@ -1438,6 +1438,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
             return false;
         }
 
+        public boolean isStatic() {
+            return _static;
+        }
+
         @Override
         public String getFullName() {
             return "@"+DFKlass.this.getTypeName()+"/."+_name;
