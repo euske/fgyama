@@ -1,44 +1,132 @@
 #!/usr/bin/env python
 import sys
 from interproc import IDFBuilder, Cons, clen
-from getwords import splitmethodname
+from getwords import splitmethodname, stripid
 
 debug = 0
+MAXNAMES = 5
 
-def mkgraph(links):
-    linkto = {}
-    linkfrom = {}
-    for (iref0,iref1) in links:
-        if iref0 in linkto:
-            a = linkto[iref0]
-        else:
-            a = linkto[iref0] = []
-        if iref1 not in a:
-            a.append(iref1)
-        if iref1 in linkfrom:
-            a = linkfrom[iref1]
-        else:
-            a = linkfrom[iref1] = []
-        if iref0 not in a:
-            a.append(iref0)
-    return (linkto, linkfrom)
+def q(s):
+    if s:
+        return '"%s"' % s.replace('"',r'\"')
+    else:
+        return '""'
 
-def trace(done, ccid, vtx, iref0=None, cc=None):
+class IRef:
+
+    ccid = {}
+
+    @classmethod
+    def get(klass, cc, ref):
+        if cc in klass.ccid:
+            d = klass.ccid[cc]
+        else:
+            d = klass.ccid[cc] = {}
+        if ref in d:
+            iref = d[ref]
+        else:
+            iid = len(d)+1
+            iref = d[ref] = klass(cc, ref, iid)
+        return iref
+
+    def __init__(self, cc, ref, iid):
+        self.cc = cc
+        self.ref = ref
+        self.iid = iid
+        self.linkto = []
+        self.linkfrom = []
+        return
+
+    def __str__(self):
+        return stripid(self.ref)
+
+    def __repr__(self):
+        return '<+%s:%s>' % (self.iid, self.ref)
+
+    def connect(self, iref):
+        self.linkto.append(iref)
+        iref.linkfrom.append(self)
+        return
+
+class IRefComponent:
+
+    def __init__(self, cid, irefs=None):
+        if irefs is None:
+            irefs = []
+        self.cid = cid
+        self.irefs = irefs
+        self.linkto = set()
+        self.linkfrom = set()
+        return
+
+    def __repr__(self):
+        names = set( str(iref) for iref in self.irefs )
+        if MAXNAMES < len(names):
+            names = list(names)[:MAXNAMES] + ['...']
+        return '[%s]' % ', '.join(names)
+
+    def __iter__(self):
+        return iter(self.irefs)
+
+    def add(self, iref):
+        self.irefs.append(iref)
+        return
+
+    def fixate(self, sc):
+        for iref0 in self.irefs:
+            for iref1 in iref0.linkto:
+                cpt = sc[iref1]
+                if cpt is self: continue
+                self.linkto.add(cpt)
+                cpt.linkfrom.add(self)
+        return
+
+    @classmethod
+    def fromitems(klass, irefs):
+        S = []
+        P = []
+        sc = {}
+        po = {}
+        cpts = []
+        def visit(v0):
+            if v0 in po: return
+            po[v0] = len(po)
+            S.append(v0)
+            P.append(v0)
+            for v in v0.linkto:
+                if v not in po:
+                    visit(v)
+                elif v not in sc:
+                    # assert(po[w] < po[v0])
+                    i = len(P)
+                    while po[v] < po[P[i-1]]:
+                        i -= 1
+                    P[i:] = []
+            if P[-1] is v0:
+                c = klass(len(cpts)+1)
+                while S:
+                    v = S.pop()
+                    c.add(v)
+                    if v is v0: break
+                assert P.pop() is v0
+                for v in c:
+                    sc[v] = c
+                cpts.append(c)
+        for iref in irefs:
+            if iref not in sc:
+                visit(iref)
+        for c in cpts:
+            c.fixate(sc)
+        return cpts
+
+def trace(done, vtx, iref0=None, cc=None):
     node = vtx.node
     ref = node.ref
     if ref is not None and ref[0] not in '%#':
         if ref[0] == '$':
-            if ref in ccid:
-                d = ccid[ref]
-            else:
-                d = ccid[ref] = {}
-            if cc in d:
-                z = d[cc]
-            else:
-                z = d[cc] = len(d)+1
-            iref1 = '+%s:%s' % (z, ref)
+            iref1 = IRef.get(cc, ref)
         else:
-            iref1 = ref
+            iref1 = IRef.get(None, ref)
         if iref0 is not None:
             yield (iref0, iref1)
         iref0 = iref1
@@ -48,14 +136,14 @@ def trace(done, ccid, vtx, iref0=None, cc=None):
         if link.startswith('_') and link != '_end': continue
         if v.node.kind == 'input' and funcall is not None:
             if cc is None or funcall not in cc:
-                for z in trace(done, ccid, v, iref0, Cons(funcall, cc)):
+                for z in trace(done, v, iref0, Cons(funcall, cc)):
                     yield z
         elif node.kind == 'output' and funcall is not None:
             if cc is not None and cc.car is funcall:
-                for z in trace(done, ccid, v, iref0, cc.cdr):
+                for z in trace(done, v, iref0, cc.cdr):
                     yield z
         else:
-            for z in trace(done, ccid, v, iref0, cc):
+            for z in trace(done, v, iref0, cc):
                 yield z
     return
 
@@ -81,6 +169,10 @@ def main(argv):
         elif k == '-f': methods.update(v.split(','))
     if not args: return usage()
 
+    out = sys.stdout
+    if outpath is not None:
+        out = open(outpath, 'w')
+
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
@@ -93,8 +185,6 @@ def main(argv):
           file=sys.stderr)
 
     # Enumerate all the flows.
-    ccid = {}
-    links = []
     irefs = set()
     for graph in builder.graphs:
         (name,_,_) = splitmethodname(graph.name)
@@ -103,82 +193,99 @@ def main(argv):
         done = set()
         for node in graph:
             if not node.inputs: continue
-            mat = trace(done, ccid, builder.vtxs[node])
+            mat = trace(done, builder.vtxs[node])
             for (iref0, iref1) in mat:
                 if iref0 == iref1: continue
                 if debug:
                     print(iref0, '->', iref1)
-                links.append((iref0, iref1))
+                iref0.connect(iref1)
                 irefs.add(iref0)
                 irefs.add(iref1)
-    print('irefs:', len(irefs))
-    print('links:', len(links))
+    print('irefs:', len(irefs), file=sys.stderr)
 
     # Discover strong components.
-    (linkto, linkfrom) = mkgraph(links)
-    S = []
-    P = []
-    C = []
-    sc = {}
-    po = {}
-    def visit(v):
-        if v in po: return
-        po[v] = len(po)
-        S.append(v)
-        P.append(v)
-        if v in linkto:
-            for w in linkto[v]:
-                assert v is not w
-                if w not in po:
-                    visit(w)
-                elif w not in sc:
-                    # assert(po[w] < po[v])
-                    i = len(P)
-                    while po[w] < po[P[i-1]]:
-                        i -= 1
-                    P[i:] = []
-        if P[-1] is v:
-            c = []
-            while S:
-                z = S.pop()
-                c.append(z)
-                if z is v: break
-            assert P.pop() is v
-            for v in c:
-                sc[v] = c
-            C.append(c)
-    for iref in irefs:
-        visit(iref)
+    cpts = IRefComponent.fromitems(irefs)
+    print('cpts:', len(cpts), file=sys.stderr)
 
-    # Compute maximum spanning trees.
-    queue = [ iref for iref in irefs if iref not in linkto ]
-    maxdist = { iref:0 for iref in queue }
-    maxprev = { iref:None for iref in queue }
-    while queue:
-        iref1 = queue.pop(0)
-        if iref1 not in linkfrom: continue
-        assert iref1 in maxdist
-        dist = maxdist[iref1] + 1
-        assert iref1 in sc
-        c = sc[iref1]
-        for iref1 in c:
-            for iref0 in linkfrom[iref1]:
-                assert iref0 != iref1
-                if sc[iref0] is c: continue
-                if iref0 in maxdist and dist <= maxdist[iref0]: continue
-                maxdist[iref0] = dist
-                maxprev[iref0] = iref1
-                queue.append(iref0)
-                if (len(maxdist) % 1000) == 0:
-                    print('queue:', len(queue), len(maxdist))
+    # Discover the most significant edges.
+    incount = {}
+    incoming = {}
+    outcount = {}
+    outgoing = {}
+    for cpt in cpts:
+        incount[cpt] = len(cpt.linkfrom)
+        incoming[cpt] = 0 if cpt.linkfrom else 1
+        outcount[cpt] = len(cpt.linkto)
+        outgoing[cpt] = 0 if cpt.linkto else 1
+    def count_forw(cpt0):
+        for cpt1 in cpt0.linkto:
+            assert cpt0 is not cpt1
+            incount[cpt1] -= 1
+            incoming[cpt1] += incoming[cpt0]
+            if incount[cpt1] == 0:
+                count_forw(cpt1)
+        return
+    def count_bacj(cpt1):
+        for cpt0 in cpt1.linkfrom:
+            assert cpt0 is not cpt1
+            outcount[cpt0] -= 1
+            outgoing[cpt0] += outgoing[cpt1]
+            if outcount[cpt0] == 0:
+                count_bacj(cpt0)
+        return
+    for cpt in cpts:
+        if not cpt.linkfrom:
+            count_forw(cpt)
+        if not cpt.linkto:
+            count_bacj(cpt)
 
-    for iref in irefs:
-        if iref in linkfrom: continue
-        a = []
-        while iref in maxprev:
-            a.append(iref)
-            iref = maxprev[iref]
-        print(a)
+    maxcount = 0
+    for cpt0 in cpts:
+        for cpt1 in cpt0.linkto:
+            count = incoming[cpt0] + outgoing[cpt1]
+            if maxcount < count:
+                maxcount = count
+    print('maxcount:', maxcount, file=sys.stderr)
+
+    # Traverse the edges.
+    maxlinks = set()
+    def trav_forw(cpt0):
+        if not cpt0.linkto: return
+        mc = max( outgoing[cpt1] for cpt1 in cpt0.linkto )
+        for cpt1 in cpt0.linkto:
+            if outgoing[cpt1] == mc:
+                maxlinks.add((cpt0, cpt1))
+                trav_forw(cpt1)
+        return
+    def trav_back(cpt1):
+        if not cpt1.linkfrom: return
+        mc = max( incoming[cpt0] for cpt0 in cpt1.linkfrom )
+        for cpt0 in cpt1.linkfrom:
+            if incoming[cpt0] == mc:
+                maxlinks.add((cpt0, cpt1))
+                trav_back(cpt0)
+        return
+    for cpt0 in cpts:
+        for cpt1 in cpt0.linkto:
+            count = incoming[cpt0] + outgoing[cpt1]
+            if count == maxcount:
+                maxlinks.add((cpt0, cpt1))
+                trav_back(cpt0)
+                trav_forw(cpt1)
+    print('maxlinks:', len(maxlinks), file=sys.stderr)
+
+    maxcpts = set( cpt0 for (cpt0,_) in maxlinks )
+    maxcpts.update( cpt1 for (_,cpt1) in maxlinks )
+    print('maxcpts:', len(maxcpts), file=sys.stderr)
+
+    # Generate a trimmed graph.
+    out.write('digraph %s {\n' % q(name))
+    for cpt in maxcpts:
+        out.write(' N%d [label=%s, fontname="courier"];\n' %
+                  (cpt.cid, q(str(cpt))))
+    for (cpt0,cpt1) in maxlinks:
+        out.write(' N%d -> N%d;\n' % (cpt0.cid, cpt1.cid))
+    out.write('}\n')
 
     return 0
 
