@@ -697,9 +697,36 @@ class CatchJoin extends SingleAssignNode {
 //
 public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMethod> {
 
+    public enum CallStyle {
+        Constructor,
+        InstanceMethod,
+        StaticMethod,
+        Lambda,
+        InstanceOrStatic,           // for search only.
+        Initializer;
+
+        @Override
+        public String toString() {
+            switch (this) {
+            case InstanceMethod:
+                return "instance";
+            case StaticMethod:
+                return "static";
+            case Initializer:
+                return "initializer";
+            case Constructor:
+                return "constructor";
+            case Lambda:
+                return "lambda";
+            default:
+                return null;
+            }
+        }
+    }
+
     private DFKlass _klass;
     private String _name;
-    private DFCallStyle _callStyle;
+    private CallStyle _callStyle;
     private DFMethodScope _scope;
     private DFFrame _frame;
     private boolean _abstract;
@@ -720,7 +747,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private List<DFMethod> _overriding = new ArrayList<DFMethod>();
 
     public DFMethod(
-        DFKlass klass, String id, DFCallStyle callStyle,
+        DFKlass klass, String id, CallStyle callStyle,
         String name, DFVarScope outer, boolean isAbstract) {
         super(id, klass);
         _klass = klass;
@@ -787,7 +814,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _klass;
     }
 
-    public DFCallStyle getCallStyle() {
+    public CallStyle getCallStyle() {
         return _callStyle;
     }
 
@@ -813,7 +840,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     public boolean addOverrider(DFMethod method) {
-        if (method._callStyle != DFCallStyle.Lambda &&
+        if (method._callStyle != CallStyle.Lambda &&
             !_name.equals(method._name)) return false;
         if (!_funcType.equals(method._funcType)) return false;
 	//Logger.info("DFMethod.addOverrider:", this, "<-", method);
@@ -1149,21 +1176,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             } else if (expr instanceof MethodInvocation) {
                 MethodInvocation invoke = (MethodInvocation)expr;
                 Expression expr1 = invoke.getExpression();
-                DFCallStyle callStyle;
+                CallStyle callStyle;
                 DFNode obj = null;
                 DFType type = null;
                 if (expr1 == null) {
                     // "method()"
                     obj = ctx.get(scope.lookupThis());
                     type = obj.getNodeType();
-                    callStyle = DFCallStyle.InstanceOrStatic;
+                    callStyle = CallStyle.InstanceOrStatic;
                 } else {
-                    callStyle = DFCallStyle.InstanceMethod;
+                    callStyle = CallStyle.InstanceMethod;
                     if (expr1 instanceof Name) {
                         // "ClassName.method()"
                         try {
                             type = finder.lookupType((Name)expr1);
-                            callStyle = DFCallStyle.StaticMethod;
+                            callStyle = CallStyle.StaticMethod;
                         } catch (TypeNotFound e) {
                         }
                     }
@@ -1201,7 +1228,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         DFMethod fallback = new DFMethod(
-                            klass, id, DFCallStyle.InstanceMethod, id, null, false);
+                            klass, id, CallStyle.InstanceMethod, id, null, false);
                         fallback.setFuncType(
                             new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
                         Logger.error(
@@ -1272,12 +1299,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFMethod method;
                 try {
                     method = baseKlass.lookupMethod(
-                        DFCallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                        CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 } catch (MethodNotFound e) {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     DFMethod fallback = new DFMethod(
-                        baseKlass, id, DFCallStyle.InstanceMethod, id, null, false);
+                        baseKlass, id, CallStyle.InstanceMethod, id, null, false);
                     fallback.setFuncType(
                         new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
                     Logger.error(
@@ -1452,7 +1479,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFType[] argTypes = new DFType[typeList.size()];
                 typeList.toArray(argTypes);
                 DFMethod constructor = instKlass.lookupMethod(
-                    DFCallStyle.Constructor, null, argTypes);
+                    CallStyle.Constructor, null, argTypes);
                 DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
                     graph, scope, instKlass, constructor, cstr, obj);
@@ -2370,7 +2397,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             typeList.toArray(argTypes);
             DFKlass klass = scope.lookupThis().getRefType().toKlass();
             DFMethod constructor = klass.lookupMethod(
-                DFCallStyle.Constructor, null, argTypes);
+                CallStyle.Constructor, null, argTypes);
             DFMethod methods[] = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -2417,7 +2444,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
             DFMethod constructor = baseKlass.lookupMethod(
-                DFCallStyle.Constructor, null, argTypes);
+                CallStyle.Constructor, null, argTypes);
             DFMethod methods[] = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(

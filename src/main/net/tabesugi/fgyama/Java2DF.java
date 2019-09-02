@@ -71,7 +71,7 @@ class DFFileScope extends DFVarScope {
 	} catch (VariableNotFound e) {
             try {
                 DFMethod method = klass.lookupMethod(
-                    DFCallStyle.StaticMethod, name, null);
+                    DFMethod.CallStyle.StaticMethod, name, null);
                 _methods.add(method);
             } catch (MethodNotFound ee) {
             }

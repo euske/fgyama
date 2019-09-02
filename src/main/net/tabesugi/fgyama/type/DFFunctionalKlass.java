@@ -13,7 +13,7 @@ class DFFunctionalKlass extends DFKlass {
 
     private class DFFunctionalMethod extends DFMethod {
         public DFFunctionalMethod(String id) {
-            super(DFFunctionalKlass.this, id, DFCallStyle.Lambda, id,
+            super(DFFunctionalKlass.this, id, CallStyle.Lambda, id,
                   DFFunctionalKlass.this.getKlassScope(), false);
         }
     }

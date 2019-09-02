@@ -189,7 +189,7 @@ public class DFFrame {
             }
             i++;
         }
-        if (method.getCallStyle() == DFCallStyle.Constructor) {
+        if (method.getCallStyle() == DFMethod.CallStyle.Constructor) {
             DFKlass klass = method.getKlass();
             for (DFKlass.DFFieldRef ref : klass.getFields()) {
                 if (!ref.isStatic()) {
@@ -503,7 +503,7 @@ public class DFFrame {
             typeList.toArray(argTypes);
             try {
 		DFMethod method1 = klass.lookupMethod(
-		    DFCallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, null, argTypes);
 		this.fixateType(method, ci.arguments(), method1.getFuncType().getArgTypes());
             } catch (MethodNotFound e) {
 	    }
@@ -526,7 +526,7 @@ public class DFFrame {
             typeList.toArray(argTypes);
             try {
 		DFMethod method1 = baseKlass.lookupMethod(
-		    DFCallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, null, argTypes);
                 method1.addCaller(method);
 		this.fixateType(method, sci.arguments(), method1.getFuncType().getArgTypes());
             } catch (MethodNotFound e) {
@@ -706,21 +706,21 @@ public class DFFrame {
         } else if (expr instanceof MethodInvocation) {
             MethodInvocation invoke = (MethodInvocation)expr;
             Expression expr1 = invoke.getExpression();
-            DFCallStyle callStyle;
+            DFMethod.CallStyle callStyle;
             DFKlass klass = null;
             if (expr1 == null) {
                 // "method()"
                 DFRef ref = scope.lookupThis();
                 this.addInputRef(ref);
                 klass = ref.getRefType().toKlass();
-                callStyle = DFCallStyle.InstanceOrStatic;
+                callStyle = DFMethod.CallStyle.InstanceOrStatic;
             } else {
-                callStyle = DFCallStyle.InstanceMethod;
+                callStyle = DFMethod.CallStyle.InstanceMethod;
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
                         klass = finder.lookupType((Name)expr1).toKlass();
-                        callStyle = DFCallStyle.StaticMethod;
+                        callStyle = DFMethod.CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
                 }
@@ -769,7 +769,7 @@ public class DFFrame {
             baseKlass.load();
             try {
                 DFMethod method1 = baseKlass.lookupMethod(
-                    DFCallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 method1.addCaller(method);
                 this.fixateType(method, sinvoke.arguments(), method1.getFuncType().getArgTypes());
                 return method1.getFuncType().getReturnType();
@@ -916,7 +916,7 @@ public class DFFrame {
             typeList.toArray(argTypes);
             try {
 		DFMethod method1 = instKlass.lookupMethod(
-		    DFCallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, null, argTypes);
                 method1.addCaller(method);
 		this.fixateType(method, cstr.arguments(), method1.getFuncType().getArgTypes());
             } catch (MethodNotFound e) {

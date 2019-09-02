@@ -329,7 +329,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
 
         _initMethod = new DFMethod(
-            this, "<clinit>", DFCallStyle.Initializer, "<clinit>", _klassScope, false);
+            this, "<clinit>", DFMethod.CallStyle.Initializer,
+            "<clinit>", _klassScope, false);
         _initMethod.setFuncType(
             new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
         _initMethod.setTree(ast);
@@ -356,14 +357,15 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 MethodDeclaration methodDecl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(methodDecl);
                 String name;
-                DFCallStyle callStyle;
+                DFMethod.CallStyle callStyle;
                 if (methodDecl.isConstructor()) {
                     name = "<init>";
-                    callStyle = DFCallStyle.Constructor;
+                    callStyle = DFMethod.CallStyle.Constructor;
                 } else {
                     name = methodDecl.getName().getIdentifier();
                     callStyle = (isStatic(methodDecl))?
-                        DFCallStyle.StaticMethod : DFCallStyle.InstanceMethod;
+                        DFMethod.CallStyle.StaticMethod :
+                        DFMethod.CallStyle.InstanceMethod;
                 }
                 Statement stmt = methodDecl.getBody();
                 DFMethod method = new DFMethod(
@@ -839,16 +841,16 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     private DFMethod lookupMethod1(
-        DFCallStyle callStyle, SimpleName name, DFType[] argTypes) {
+        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
         String id = (name == null)? null : name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
-            DFCallStyle callStyle1 = method1.getCallStyle();
+            DFMethod.CallStyle callStyle1 = method1.getCallStyle();
             if (!(callStyle == callStyle1 ||
-                  (callStyle == DFCallStyle.InstanceOrStatic &&
-                   (callStyle1 == DFCallStyle.InstanceMethod ||
-                    callStyle1 == DFCallStyle.StaticMethod)))) continue;
+                  (callStyle == DFMethod.CallStyle.InstanceOrStatic &&
+                   (callStyle1 == DFMethod.CallStyle.InstanceMethod ||
+                    callStyle1 == DFMethod.CallStyle.StaticMethod)))) continue;
             if (id != null && !id.equals(method1.getName())) continue;
             int dist = method1.canAccept(argTypes);
             if (dist < 0) continue;
@@ -861,7 +863,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFMethod lookupMethod(
-        DFCallStyle callStyle, SimpleName name, DFType[] argTypes)
+        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
         assert _built;
         DFMethod method = this.lookupMethod1(callStyle, name, argTypes);
@@ -1094,13 +1096,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
             if (meth.isPrivate()) continue;
             sig = Utils.getJKlassSignature(meth.getAttributes());
             String name = meth.getName();
-            DFCallStyle callStyle;
+            DFMethod.CallStyle callStyle;
             if (meth.getName().equals("<init>")) {
-                callStyle = DFCallStyle.Constructor;
+                callStyle = DFMethod.CallStyle.Constructor;
             } else if (meth.isStatic()) {
-                callStyle = DFCallStyle.StaticMethod;
+                callStyle = DFMethod.CallStyle.StaticMethod;
             } else {
-                callStyle = DFCallStyle.InstanceMethod;
+                callStyle = DFMethod.CallStyle.InstanceMethod;
             }
             DFMethod method = new DFMethod(
                 this, sig, callStyle, name, null, meth.isAbstract());
@@ -1254,7 +1256,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	}
 	// Enum has a special method "values()".
 	DFMethod method = new DFMethod(
-	    this, "values", DFCallStyle.InstanceMethod, "values", null, false);
+	    this, "values", DFMethod.CallStyle.InstanceMethod,
+            "values", null, false);
 	method.setFinder(finder);
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, new DFArrayType(this, 1)));
