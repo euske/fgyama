@@ -2689,10 +2689,16 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public void cleanup() {
         Set<DFNode> toremove = new HashSet<DFNode>();
-        for (DFNode node : _nodes) {
-            if (node.getKind() == null && node.purge()) {
-                toremove.add(node);
+        while (true) {
+            boolean changed = false;
+            for (DFNode node : _nodes) {
+                if (!toremove.contains(node) && node.canPurge()) {
+                    node.unlink();
+                    toremove.add(node);
+                    changed = true;
+                }
             }
+            if (!changed) break;
         }
         // Do not remove input/output nodes.
         DFFrame frame = this.getFrame();

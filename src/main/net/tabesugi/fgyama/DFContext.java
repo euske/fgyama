@@ -31,9 +31,7 @@ public class DFContext {
         DFNode node = _last.get(ref);
         if (node == null) {
             assert !_first.containsKey(ref);
-            node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
-            _last.put(ref, node);
-            _first.put(ref, node);
+            node = this.create(ref);
         }
         return node;
     }
@@ -42,9 +40,7 @@ public class DFContext {
         DFNode node = _first.get(ref);
         if (node == null) {
             assert !_last.containsKey(ref);
-            node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
-            _first.put(ref, node);
-            _last.put(ref, node);
+            node = this.create(ref);
         }
         return node;
     }
@@ -95,6 +91,13 @@ public class DFContext {
         DFRef[] a = new DFRef[refs.size()];
         refs.toArray(a);
         return a;
+    }
+
+    private DFNode create(DFRef ref) {
+        DFNode node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
+        _last.put(ref, node);
+        _first.put(ref, node);
+        return node;
     }
 
     // dump: for debugging.

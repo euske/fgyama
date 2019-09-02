@@ -41,7 +41,7 @@ public class DFNode implements Comparable<DFNode> {
 
     @Override
     public String toString() {
-        return ("<DFNode("+this.getNodeId()+") "+this.getData()+">");
+        return ("<DFNode("+this.getNodeId()+") "+this.getKind()+" "+this.getData()+">");
     }
 
     @Override
@@ -123,8 +123,11 @@ public class DFNode implements Comparable<DFNode> {
         node._outputs.add(this);
     }
 
-    public boolean purge() {
-        if (_value == null) return false;
+    public boolean canPurge() {
+        return (this.getKind() == null && this.hasValue());
+    }
+
+    public void unlink() {
         for (DFNode node : _outputs) {
             if (node._value == this) {
                 node._value = _value;
@@ -137,7 +140,6 @@ public class DFNode implements Comparable<DFNode> {
                 }
             }
         }
-        return true;
     }
 
     public static DFType inferPrefixType(
