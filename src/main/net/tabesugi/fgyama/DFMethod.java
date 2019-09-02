@@ -364,15 +364,13 @@ class LambdaNode extends DFNode {
 // JoinNode
 class JoinNode extends DFNode {
 
-    private DFNode _cond;
-    private DFNode _recvTrue = null;
-    private DFNode _recvFalse = null;
+    private boolean _recvTrue = false;
+    private boolean _recvFalse = false;
 
     public JoinNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, DFNode cond) {
         super(graph, scope, type, ref, ast);
-        _cond = cond;
         this.accept(cond, "cond");
     }
 
@@ -383,53 +381,73 @@ class JoinNode extends DFNode {
 
     public void recv(boolean cond, DFNode node) {
         if (cond) {
-            assert _recvTrue == null;
-            _recvTrue = node;
+            assert !_recvTrue;
+            _recvTrue = true;
             this.accept(node, "true");
         } else {
-            assert _recvFalse == null;
-            _recvFalse = node;
+            assert !_recvFalse;
+            _recvFalse = true;
             this.accept(node, "false");
         }
     }
 
     public void merge(DFNode node) {
-        if (_recvTrue == null) {
-            assert _recvFalse != null;
-            _recvTrue = node;
+        if (!_recvTrue) {
+            assert _recvFalse;
+            _recvTrue = true;
             this.accept(node, "true");
         }
-        if (_recvFalse == null) {
-            assert _recvTrue != null;
-            _recvFalse = node;
+        if (!_recvFalse) {
+            assert _recvTrue;
+            _recvFalse = true;
             this.accept(node, "false");
         }
     }
 
     @Override
     public boolean canPurge() {
-        if (_recvTrue instanceof JoinNode &&
-            ((JoinNode)_recvTrue)._cond == _cond &&
-            ((JoinNode)_recvTrue)._recvFalse == _recvFalse) {
-            return true;
-        } else if (_recvFalse instanceof JoinNode &&
-            ((JoinNode)_recvFalse)._cond == _cond &&
-            ((JoinNode)_recvFalse)._recvTrue == _recvTrue) {
-            return true;
+        if (_recvTrue) {
+            DFNode cond = this.getSrc("cond");
+            DFNode srcTrue = this.getSrc("true");
+            if (srcTrue instanceof JoinNode &&
+                ((JoinNode)srcTrue).getSrc("cond") == cond &&
+                ((JoinNode)srcTrue).getSrc("false") == this.getSrc("false")) {
+                return true;
+            }
+        }
+        if (_recvFalse) {
+            DFNode cond = this.getSrc("cond");
+            DFNode srcFalse = this.getSrc("false");
+            if (srcFalse instanceof JoinNode &&
+                ((JoinNode)srcFalse).getSrc("cond") == cond &&
+                ((JoinNode)srcFalse).getSrc("true") == this.getSrc("true")) {
+                return true;
+            }
         }
         return false;
     }
 
     @Override
     public void unlink() {
-        if (_recvTrue instanceof JoinNode &&
-            ((JoinNode)_recvTrue)._cond == _cond &&
-            ((JoinNode)_recvTrue)._recvFalse == _recvFalse) {
-            unlink(_recvTrue);
-        } else if (_recvFalse instanceof JoinNode &&
-            ((JoinNode)_recvFalse)._cond == _cond &&
-            ((JoinNode)_recvFalse)._recvTrue == _recvTrue) {
-            unlink(_recvFalse);
+        if (_recvTrue) {
+            DFNode cond = this.getSrc("cond");
+            DFNode srcTrue = this.getSrc("true");
+            if (srcTrue instanceof JoinNode &&
+                ((JoinNode)srcTrue).getSrc("cond") == cond &&
+                ((JoinNode)srcTrue).getSrc("false") == this.getSrc("false")) {
+                unlink(srcTrue);
+                return;
+            }
+        }
+        if (_recvFalse) {
+            DFNode cond = this.getSrc("cond");
+            DFNode srcFalse = this.getSrc("false");
+            if (srcFalse instanceof JoinNode &&
+                ((JoinNode)srcFalse).getSrc("cond") == cond &&
+                ((JoinNode)srcFalse).getSrc("true") == this.getSrc("true")) {
+                unlink(srcFalse);
+                return;
+            }
         }
     }
 }
@@ -2615,7 +2633,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
         // Cleanup.
         this.closeFrame(_frame, ctx);
-        //_frame.dump();
 
         DFRef retref = _scope.lookupReturn();
         for (DFRef ref : _frame.getOutputRefs()) {

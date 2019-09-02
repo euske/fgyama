@@ -19,7 +19,6 @@ public class DFNode implements Comparable<DFNode> {
     private DFRef _ref;
     private ASTNode _ast;
 
-    private DFNode _value = null;
     private List<DFLink> _links =
         new ArrayList<DFLink>();
     private List<DFNode> _outputs =
@@ -102,7 +101,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     protected boolean hasValue() {
-        return _value != null;
+        return this.getSrc(null) != null;
     }
 
     protected void accept(DFNode node) {
@@ -112,36 +111,45 @@ public class DFNode implements Comparable<DFNode> {
     protected void accept(DFNode node, String label) {
         assert node != null;
         if (label == null) {
-            assert _value == null;
-            _value = node;
             if (_type instanceof DFUnknownType) {
                 _type = node.getNodeType();
             }
         }
+        assert this.getSrc(label) == null;
         DFLink link = new DFLink(node, label);
         _links.add(link);
         node._outputs.add(this);
     }
+
+    protected DFNode getSrc(String label) {
+        for (DFLink link : _links) {
+            if (link.hasLabel(label)) {
+                return link._src;
+            }
+        }
+        return null;
+    }
+
 
     public boolean canPurge() {
         return (this.getKind() == null && this.hasValue());
     }
 
     public void unlink() {
-        assert _value != null;
-        unlink(_value);
+        DFNode src = this.getSrc(null);
+        assert src != null;
+        unlink(src);
     }
 
-    protected void unlink(DFNode value) {
+    protected void unlink(DFNode src) {
+        for (DFLink link : _links) {
+            link._src._outputs.remove(this);
+        }
         for (DFNode node : _outputs) {
-            if (node._value == this) {
-                node._value = value;
-                value._outputs.add(node);
-            }
             for (DFLink link : node._links) {
-                if (link.getSrc() == this) {
-                    link.setSrc(value);
-                    value._outputs.add(node);
+                if (link._src == this) {
+                    link._src = src;
+                    src._outputs.add(node);
                 }
             }
         }
@@ -193,12 +201,9 @@ public class DFNode implements Comparable<DFNode> {
             _label = label;
         }
 
-        protected DFNode getSrc() {
-            return _src;
-        }
-
-        protected void setSrc(DFNode node) {
-            _src = node;
+        protected boolean hasLabel(String label) {
+            return ((_label == null && label == null) ||
+                    (_label != null && _label.equals(label)));
         }
 
         @Override
