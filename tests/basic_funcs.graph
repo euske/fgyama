@@ -135,7 +135,7 @@
           <link src="G34_moo_N34"/>
         </node>
         <node id="G34_moo_N37" kind="output" ref="#return" type="I">
-          <link src="G34_moo_N35"/>
+          <link src="G34_moo_N31"/>
         </node>
         <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="G34_moo_N6" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
@@ -178,11 +178,6 @@
             <link label="cond" src="G34_moo_N11"/>
             <link label="false" src="G34_moo_N27"/>
             <link label="true" src="G34_moo_N32"/>
-          </node>
-          <node id="G34_moo_N35" kind="join" ref="#return" type="I">
-            <link label="cond" src="G34_moo_N11"/>
-            <link label="false" src="G34_moo_N30"/>
-            <link label="true" src="G34_moo_N31"/>
           </node>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:316:353">
             <node data="Lbasic_funcs;.foo()I" id="G34_moo_N13" kind="call" type="I">
