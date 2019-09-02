@@ -16,6 +16,9 @@
         </node>
         <node id="G58_foo_N3" kind="input" ref="#this" type="Lbasic_switch;"/>
         <node id="G58_foo_N9" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I"/>
+        <node id="G58_foo_N23" kind="output" ref="#return" type="I">
+          <link src="G58_foo_N22"/>
+        </node>
         <scope name="Lbasic_switch;.:foo:33:185.:B:62:185">
           <node id="G58_foo_N4" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185/$n" type="I">
             <ast end="82" start="81" type="42"/>
@@ -25,7 +28,7 @@
             <ast end="178" start="177" type="42"/>
             <link src="G58_foo_N17"/>
           </node>
-          <node id="G58_foo_N22" kind="output" ref="#return" type="I">
+          <node id="G58_foo_N22" kind="return" ref="#return" type="I">
             <ast end="179" start="170" type="41"/>
             <link src="G58_foo_N21"/>
           </node>

@@ -26,8 +26,11 @@
           <ast end="75" start="57" type="44"/>
           <link src="G37_moo_N1"/>
         </node>
-        <node id="G37_moo_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-        <node id="G37_moo_N4" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
+        <node id="G37_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
+        <node id="G37_moo_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
+        <node id="G37_moo_N8" kind="output" ref="#return" type="I">
+          <link src="G37_moo_N7"/>
+        </node>
         <scope name="Lbasic_poly_Foo;.:moo:42:106.:B:77:106">
           <node id="G37_moo_N5" kind="ref_var" ref="$Lbasic_poly_Foo;.:moo:42:106/$obj" type="Lbasic_poly_Foo;">
             <ast end="97" start="94" type="42"/>
@@ -36,9 +39,9 @@
           <node id="G37_moo_N6" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
             <ast end="99" start="94" type="40"/>
             <link label="obj" src="G37_moo_N5"/>
-            <link src="G37_moo_N3"/>
+            <link src="G37_moo_N4"/>
           </node>
-          <node id="G37_moo_N7" kind="output" ref="#return" type="I">
+          <node id="G37_moo_N7" kind="return" ref="#return" type="I">
             <ast end="100" start="87" type="41"/>
             <link src="G37_moo_N6"/>
           </node>
@@ -63,8 +66,11 @@
           <ast end="193" start="175" type="44"/>
           <link src="G38_moo_N1"/>
         </node>
-        <node id="G38_moo_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-        <node id="G38_moo_N4" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
+        <node id="G38_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
+        <node id="G38_moo_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
+        <node id="G38_moo_N13" kind="output" ref="#return" type="I">
+          <link src="G38_moo_N12"/>
+        </node>
         <scope name="Lbasic_poly_Baa;.:moo:160:273.:B:195:273">
           <node id="G38_moo_N5" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
             <ast end="218" start="215" type="42"/>
@@ -72,9 +78,9 @@
           </node>
           <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="G38_moo_N6" kind="call" type="I">
             <ast end="219" start="205" type="48"/>
-            <link label="#this" src="G38_moo_N4"/>
+            <link label="#this" src="G38_moo_N3"/>
             <link label="#arg0" src="G38_moo_N5"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G38_moo_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G38_moo_N4"/>
           </node>
           <node id="G38_moo_N7" kind="receive" type="I">
             <ast end="219" start="205" type="48"/>
@@ -87,7 +93,7 @@
           <node id="G38_moo_N9" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
             <ast end="264" start="259" type="40"/>
             <link label="obj" src="G38_moo_N8"/>
-            <link src="G38_moo_N3"/>
+            <link src="G38_moo_N4"/>
           </node>
           <node data="1" id="G38_moo_N10" kind="value" type="I">
             <ast end="266" start="265" type="34"/>
@@ -97,7 +103,7 @@
             <link label="L" src="G38_moo_N9"/>
             <link label="R" src="G38_moo_N10"/>
           </node>
-          <node id="G38_moo_N12" kind="output" ref="#return" type="I">
+          <node id="G38_moo_N12" kind="return" ref="#return" type="I">
             <ast end="267" start="252" type="41"/>
             <link src="G38_moo_N11"/>
           </node>
@@ -120,8 +126,8 @@
           <ast end="344" start="331" type="44"/>
           <link src="G39_main_N1"/>
         </node>
-        <node id="G39_main_N3" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-        <node id="G39_main_N4" kind="input" ref="#this" type="Lbasic_poly;"/>
+        <node id="G39_main_N3" kind="input" ref="#this" type="Lbasic_poly;"/>
+        <node id="G39_main_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <scope name="Lbasic_poly;.:main:307:728.:B:346:728">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="G39_main_N5" kind="new" type="Lbasic_poly_Foo;">
             <ast end="395" start="375" type="14"/>
@@ -146,7 +152,7 @@
             <ast end="421" start="413" type="32"/>
             <link label="#this" src="G39_main_N8"/>
             <link label="#arg0" src="G39_main_N9"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N4"/>
           </node>
           <node id="G39_main_N11" kind="receive" type="I">
             <ast end="421" start="413" type="32"/>
@@ -183,7 +189,7 @@
             <ast end="514" start="506" type="32"/>
             <link label="#this" src="G39_main_N17"/>
             <link label="#arg0" src="G39_main_N18"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N4"/>
           </node>
           <node id="G39_main_N20" kind="receive" type="I">
             <ast end="514" start="506" type="32"/>
@@ -209,7 +215,7 @@
             <ast end="559" start="551" type="32"/>
             <link label="#this" src="G39_main_N23"/>
             <link label="#arg0" src="G39_main_N24"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N4"/>
           </node>
           <node id="G39_main_N26" kind="receive" type="I">
             <ast end="559" start="551" type="32"/>
@@ -246,7 +252,7 @@
             <ast end="653" start="645" type="32"/>
             <link label="#this" src="G39_main_N32"/>
             <link label="#arg0" src="G39_main_N33"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N4"/>
           </node>
           <node id="G39_main_N35" kind="receive" type="I">
             <ast end="653" start="645" type="32"/>
@@ -272,7 +278,7 @@
             <ast end="698" start="690" type="32"/>
             <link label="#this" src="G39_main_N38"/>
             <link label="#arg0" src="G39_main_N39"/>
-            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N3"/>
+            <link label="@Lbasic_poly_Foo;/.x" src="G39_main_N4"/>
           </node>
           <node id="G39_main_N41" kind="receive" type="I">
             <ast end="698" start="690" type="32"/>

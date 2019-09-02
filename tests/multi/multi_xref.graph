@@ -15,11 +15,11 @@
       <caller name="Ldom/meep/multi_xref2;.foo()V"/>
       <ast end="254" start="115" type="31"/>
       <scope name="Ldom/meep/multi_xref1;.:moo:115:254">
-        <node id="G5_moo_N1" kind="input" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;"/>
-        <node id="G5_moo_N2" kind="input" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
-        <node id="G5_moo_N3" kind="input" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
-        <node id="G5_moo_N4" kind="input" ref="@Ldom/dood/multi_xref3;/.boo" type="I"/>
-        <node id="G5_moo_N5" kind="input" ref="#this" type="Ldom/meep/multi_xref1;"/>
+        <node id="G5_moo_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref1;"/>
+        <node id="G5_moo_N2" kind="input" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;"/>
+        <node id="G5_moo_N3" kind="input" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
+        <node id="G5_moo_N4" kind="input" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
+        <node id="G5_moo_N5" kind="input" ref="@Ldom/dood/multi_xref3;/.boo" type="I"/>
         <node id="G5_moo_N22" kind="output" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
           <link src="G5_moo_N15"/>
         </node>
@@ -32,7 +32,7 @@
         <scope name="Ldom/meep/multi_xref1;.:moo:115:254.:B:133:254">
           <node id="G5_moo_N6" kind="ref_var" ref="#this" type="Ldom/meep/multi_xref1;">
             <ast end="140" start="136" type="52"/>
-            <link src="G5_moo_N5"/>
+            <link src="G5_moo_N1"/>
           </node>
           <node id="G5_moo_N7" kind="assign_field" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
             <ast end="146" start="136" type="22"/>
@@ -52,15 +52,15 @@
           </node>
           <node id="G5_moo_N11" kind="ref_field" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
             <ast end="174" start="169" type="42"/>
-            <link label="obj" src="G5_moo_N5"/>
+            <link label="obj" src="G5_moo_N1"/>
             <link src="G5_moo_N7"/>
           </node>
           <node data="Ldom/meep/multi_xref2;.foo()V" id="G5_moo_N12" kind="call" type="V">
             <ast end="180" start="169" type="32"/>
             <link label="#this" src="G5_moo_N11"/>
-            <link label="@Ldom/meep/multi_xref2;/.xref1" src="G5_moo_N2"/>
-            <link label="@Ldom/meep/multi_xref1/baa;/.baz" src="G5_moo_N3"/>
-            <link label="@Ldom/dood/multi_xref3;/.boo" src="G5_moo_N4"/>
+            <link label="@Ldom/meep/multi_xref2;/.xref1" src="G5_moo_N3"/>
+            <link label="@Ldom/meep/multi_xref1/baa;/.baz" src="G5_moo_N4"/>
+            <link label="@Ldom/dood/multi_xref3;/.boo" src="G5_moo_N5"/>
             <link label="@Ldom/meep/multi_xref1;/.xref2" src="G5_moo_N7"/>
           </node>
           <node id="G5_moo_N13" kind="receive" type="V">
@@ -117,11 +117,11 @@
       <caller name="Ldom/meep/multi_xref1;.moo()V"/>
       <ast end="239" start="75" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:foo:75:239">
-        <node id="G7_foo_N1" kind="input" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
-        <node id="G7_foo_N2" kind="input" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
-        <node id="G7_foo_N3" kind="input" ref="@Ldom/dood/multi_xref3;/.boo" type="I"/>
-        <node id="G7_foo_N4" kind="input" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;"/>
-        <node id="G7_foo_N5" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
+        <node id="G7_foo_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
+        <node id="G7_foo_N2" kind="input" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;"/>
+        <node id="G7_foo_N3" kind="input" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I"/>
+        <node id="G7_foo_N4" kind="input" ref="@Ldom/dood/multi_xref3;/.boo" type="I"/>
+        <node id="G7_foo_N5" kind="input" ref="@Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;"/>
         <node id="G7_foo_N18" ref="$Ldom/meep/multi_xref2;.:foo:75:239.:B:93:239/$zzz" type="Ldom/meep/multi_xref1/baa;"/>
         <node id="G7_foo_N24" kind="output" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
           <link src="G7_foo_N16"/>
@@ -135,7 +135,7 @@
         <scope name="Ldom/meep/multi_xref2;.:foo:75:239.:B:93:239">
           <node id="G7_foo_N6" kind="ref_var" ref="#this" type="Ldom/meep/multi_xref2;">
             <ast end="100" start="96" type="52"/>
-            <link src="G7_foo_N5"/>
+            <link src="G7_foo_N1"/>
           </node>
           <node id="G7_foo_N7" kind="assign_field" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
             <ast end="106" start="96" type="22"/>
@@ -155,16 +155,16 @@
           </node>
           <node id="G7_foo_N11" kind="ref_field" ref="@Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
             <ast end="134" start="129" type="42"/>
-            <link label="obj" src="G7_foo_N5"/>
+            <link label="obj" src="G7_foo_N1"/>
             <link src="G7_foo_N7"/>
           </node>
           <node data="Ldom/meep/multi_xref1;.moo()V" id="G7_foo_N12" kind="call" type="V">
             <ast end="140" start="129" type="32"/>
             <link label="#this" src="G7_foo_N11"/>
-            <link label="@Ldom/meep/multi_xref1;/.xref2" src="G7_foo_N4"/>
+            <link label="@Ldom/meep/multi_xref1;/.xref2" src="G7_foo_N5"/>
             <link label="@Ldom/meep/multi_xref2;/.xref1" src="G7_foo_N7"/>
-            <link label="@Ldom/meep/multi_xref1/baa;/.baz" src="G7_foo_N2"/>
-            <link label="@Ldom/dood/multi_xref3;/.boo" src="G7_foo_N3"/>
+            <link label="@Ldom/meep/multi_xref1/baa;/.baz" src="G7_foo_N3"/>
+            <link label="@Ldom/dood/multi_xref3;/.boo" src="G7_foo_N4"/>
           </node>
           <node id="G7_foo_N13" kind="receive" type="V">
             <ast end="140" start="129" type="32"/>
@@ -189,7 +189,7 @@
           <node id="G7_foo_N19" kind="ref_field" ref="@Ldom/meep/multi_xref1/baa;/.baz" type="I">
             <ast end="194" start="187" type="40"/>
             <link label="obj" src="G7_foo_N17"/>
-            <link src="G7_foo_N2"/>
+            <link src="G7_foo_N3"/>
           </node>
           <node id="G7_foo_N20" kind="assign_var" ref="$Ldom/meep/multi_xref2;.:foo:75:239.:B:93:239/$b" type="I">
             <ast end="194" start="183" type="59"/>
@@ -215,11 +215,14 @@
       <ast end="295" start="245" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:bam:245:295">
         <node id="G8_bam_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
+        <node id="G8_bam_N4" kind="output" ref="#return" type="I">
+          <link src="G8_bam_N3"/>
+        </node>
         <scope name="Ldom/meep/multi_xref2;.:bam:245:295.:B:269:295">
           <node data="42" id="G8_bam_N2" kind="value" type="I">
             <ast end="288" start="286" type="34"/>
           </node>
-          <node id="G8_bam_N3" kind="output" ref="#return" type="I">
+          <node id="G8_bam_N3" kind="return" ref="#return" type="I">
             <ast end="289" start="279" type="41"/>
             <link src="G8_bam_N2"/>
           </node>

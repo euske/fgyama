@@ -15,6 +15,9 @@
           <link src="G56_foo_N1"/>
         </node>
         <node id="G56_foo_N3" kind="input" ref="#this" type="Lbasic_xfor;"/>
+        <node id="G56_foo_N18" kind="output" ref="#return" type="I">
+          <link src="G56_foo_N17"/>
+        </node>
         <scope name="Lbasic_xfor;.:foo:31:127.:B:62:127">
           <node data="0" id="G56_foo_N4" kind="value" type="I">
             <ast end="74" start="73" type="34"/>
@@ -31,7 +34,7 @@
             <ast end="120" start="119" type="42"/>
             <link src="G56_foo_N15"/>
           </node>
-          <node id="G56_foo_N17" kind="output" ref="#return" type="I">
+          <node id="G56_foo_N17" kind="return" ref="#return" type="I">
             <ast end="121" start="112" type="41"/>
             <link src="G56_foo_N16"/>
           </node>

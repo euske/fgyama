@@ -7,9 +7,9 @@
     <method abstract="false" name="Lbasic_exception;.foo()V" style="instance">
       <ast end="336" start="103" type="31"/>
       <scope name="Lbasic_exception;.:foo:103:336">
-        <node id="G13_foo_N1" kind="input" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
-        <node id="G13_foo_N2" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="G13_foo_N3" kind="input" ref="#this" type="Lbasic_exception;"/>
+        <node id="G13_foo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
+        <node id="G13_foo_N2" kind="input" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
+        <node id="G13_foo_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <scope name="Lbasic_exception;.:foo:103:336.:B:121:336">
           <node data="null" id="G13_foo_N4" kind="value" type="@null">
             <ast end="146" start="142" type="33"/>
@@ -33,7 +33,7 @@
               </node>
               <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="G13_foo_N8" kind="call" type="Ljava/lang/String;">
                 <ast end="183" start="178" type="32"/>
-                <link label="#this" src="G13_foo_N3"/>
+                <link label="#this" src="G13_foo_N1"/>
               </node>
               <node id="G13_foo_N9" kind="receive" type="Ljava/lang/String;">
                 <ast end="183" start="178" type="32"/>
@@ -73,7 +73,7 @@
               <node id="G13_foo_N18" kind="ref_field" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;">
                 <ast end="252" start="246" type="40"/>
                 <link label="obj" src="G13_foo_N17"/>
-                <link src="G13_foo_N1"/>
+                <link src="G13_foo_N2"/>
               </node>
               <node data="=" id="G13_foo_N20" kind="op_assign" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;">
                 <ast end="252" start="242" type="7"/>
@@ -90,7 +90,7 @@
             <scope name="Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330.:B:284:330">
               <node id="G13_foo_N22" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <ast end="308" start="298" type="40"/>
-                <link src="G13_foo_N2"/>
+                <link src="G13_foo_N3"/>
               </node>
               <node id="G13_foo_N24" kind="ref_var" ref="$Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330/$e" type="Ljava/lang/Exception;">
                 <ast end="318" start="317" type="42"/>
@@ -116,6 +116,9 @@
       <scope name="Lbasic_exception;.:moo:342:431">
         <node id="G14_moo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
         <node id="G14_moo_N8" ref="#exception" type="Ljava/lang/Exception;"/>
+        <node id="G14_moo_N11" kind="output" ref="#return" type="Ljava/lang/String;">
+          <link src="G14_moo_N10"/>
+        </node>
         <scope name="Lbasic_exception;.:moo:342:431.:B:371:431">
           <node data="true" id="G14_moo_N2" kind="value" type="Z">
             <ast end="389" start="385" type="9"/>
@@ -141,7 +144,7 @@
           <node data="a" id="G14_moo_N9" kind="value" type="Ljava/lang/String;">
             <ast end="424" start="421" type="45"/>
           </node>
-          <node id="G14_moo_N10" kind="output" ref="#return" type="Ljava/lang/String;">
+          <node id="G14_moo_N10" kind="return" ref="#return" type="Ljava/lang/String;">
             <ast end="425" start="414" type="41"/>
             <link src="G14_moo_N9"/>
           </node>

@@ -29,6 +29,9 @@
           <link src="G12_foo_N5"/>
         </node>
         <node id="G12_foo_N7" kind="input" ref="#this" type="Lbasic_return;"/>
+        <node id="G12_foo_N21" kind="output" ref="#return" type="I">
+          <link src="G12_foo_N20"/>
+        </node>
         <scope name="Lbasic_return;.:foo:104:249.:B:147:249">
           <node id="G12_foo_N8" kind="ref_var" ref="$Lbasic_return;.:foo:104:249/$a" type="I">
             <ast end="193" start="192" type="42"/>
@@ -82,7 +85,7 @@
             <link label="L" src="G12_foo_N15"/>
             <link label="R" src="G12_foo_N18"/>
           </node>
-          <node id="G12_foo_N20" kind="output" ref="#return" type="I">
+          <node id="G12_foo_N20" kind="return" ref="#return" type="I">
             <ast end="243" start="223" type="41"/>
             <link src="G12_foo_N19"/>
           </node>

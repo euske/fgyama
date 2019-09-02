@@ -14,10 +14,13 @@
           <ast end="57" start="52" type="44"/>
           <link src="G3_foo_N1"/>
         </node>
-        <node id="G3_foo_N3" kind="input" ref="%I" type="I"/>
-        <node id="G3_foo_N4" kind="input" ref="#this" type="Lbasic_ops;"/>
+        <node id="G3_foo_N3" kind="input" ref="#this" type="Lbasic_ops;"/>
+        <node id="G3_foo_N4" kind="input" ref="%I" type="I"/>
         <node id="G3_foo_N36" kind="output" ref="%I" type="I">
           <link src="G3_foo_N26"/>
+        </node>
+        <node id="G3_foo_N37" kind="output" ref="#return" type="I">
+          <link src="G3_foo_N35"/>
         </node>
         <scope name="Lbasic_ops;.:foo:30:186.:B:59:186">
           <node id="G3_foo_N5" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186/$x" type="I">
@@ -61,7 +64,7 @@
           </node>
           <node data="Lbasic_ops;.moo(II)?" id="G3_foo_N15" kind="call" type="?">
             <ast end="107" start="98" type="32"/>
-            <link label="#this" src="G3_foo_N4"/>
+            <link label="#this" src="G3_foo_N3"/>
             <link label="#arg0" src="G3_foo_N13"/>
             <link label="#arg1" src="G3_foo_N14"/>
           </node>
@@ -141,7 +144,7 @@
             <ast end="179" start="178" type="42"/>
             <link src="G3_foo_N29"/>
           </node>
-          <node id="G3_foo_N35" kind="output" ref="#return" type="I">
+          <node id="G3_foo_N35" kind="return" ref="#return" type="I">
             <ast end="180" start="171" type="41"/>
             <link src="G3_foo_N34"/>
           </node>
