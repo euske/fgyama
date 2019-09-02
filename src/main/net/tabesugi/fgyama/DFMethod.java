@@ -635,12 +635,26 @@ class OutputNode extends SingleAssignNode {
     }
 }
 
+// ReturnNode:
+class ReturnNode extends SingleAssignNode {
+
+    public ReturnNode(
+        DFGraph graph, DFVarScope scope, ASTNode ast) {
+        super(graph, scope, scope.lookupReturn(), ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "return";
+    }
+}
+
 // ThrowNode
 class ThrowNode extends DFNode {
 
     public ThrowNode(
         DFGraph graph, DFVarScope scope,
-        ASTNode ast, DFNode value) throws VariableNotFound {
+        ASTNode ast, DFNode value) {
         super(graph, scope, DFBuiltinTypes.getExceptionKlass(),
               scope.lookupException(), ast);
         this.accept(value);
@@ -2306,10 +2320,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             if (expr != null) {
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, expr);
-                DFRef ref = scope.lookupReturn();
-                OutputNode output = new OutputNode(graph, scope, ref, rtrnStmt);
-                output.accept(ctx.getRValue());
-                ctx.set(output);
+                ReturnNode ret = new ReturnNode(graph, scope, rtrnStmt);
+                ret.accept(ctx.getRValue());
+                ctx.set(ret);
             }
             for (DFRef ref : dstFrame.getOutputRefs()) {
                 frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
@@ -2533,13 +2546,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             throw new InvalidSyntax(_ast);
         }
 
-        for (DFRef ref : _frame.getInputRefs()) {
-            if (ref.isLocal()) continue;
+        {
+            DFRef ref = _scope.lookupThis();
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
         }
-        {
-            DFRef ref = _scope.lookupThis();
+        for (DFRef ref : _frame.getInputRefs()) {
+            if (ref.isLocal()) continue;
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
         }
@@ -2553,10 +2566,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 processExpression(
                     ctx, this, graph, _finder, _scope, _frame,
                     (Expression)body);
-                DFRef ref = _scope.lookupReturn();
-                OutputNode output = new OutputNode(graph, _scope, ref, body);
-                output.accept(ctx.getRValue());
-                ctx.set(output);
+                ReturnNode ret = new ReturnNode(graph, _scope, body);
+                ret.accept(ctx.getRValue());
+                ctx.set(ret);
             }
         } catch (MethodNotFound e) {
             e.setMethod(this);
@@ -2575,8 +2587,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // Cleanup.
         this.closeFrame(_frame, ctx);
         //_frame.dump();
+
+        DFRef retref = _scope.lookupReturn();
         for (DFRef ref : _frame.getOutputRefs()) {
-            if (ref.isLocal()) continue;
+            if (ref != retref && ref.isLocal()) continue;
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
         }
@@ -2797,15 +2811,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
 
         @Override
-        public DFRef lookupReturn()
-            throws VariableNotFound {
+        public DFRef lookupReturn() {
 	    assert _return != null;
             return _return;
         }
 
         @Override
-        public DFRef lookupException()
-            throws VariableNotFound {
+        public DFRef lookupException() {
 	    assert _exception != null;
             return _exception;
         }
@@ -2881,6 +2893,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             }
         }
 
+        // Special references that are used in a method.
+        // (not a real variable.)
         private class DFInternalRef extends DFRef {
 
             private String _name;
@@ -2892,10 +2906,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
             @Override
             public boolean isLocal() {
-                return true;
-            }
-            @Override
-            public boolean isInternal() {
                 return true;
             }
 

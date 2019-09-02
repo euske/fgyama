@@ -49,10 +49,6 @@ public class DFGlobalScope extends DFVarScope {
         public boolean isLocal() {
             return false;
         }
-        @Override
-        public boolean isInternal() {
-            return false;
-        }
 
         @Override
         public String getFullName() {

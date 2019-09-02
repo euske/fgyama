@@ -55,11 +55,6 @@ public class DFVarScope {
         }
     }
 
-    public DFRef lookupThis() {
-        assert _outer != null;
-        return _outer.lookupThis();
-    }
-
     public DFRef lookupVar(String id)
         throws VariableNotFound {
         if (_outer == null) throw new VariableNotFound(id);
@@ -83,14 +78,17 @@ public class DFVarScope {
         return _outer.lookupArgument(index);
     }
 
-    public DFRef lookupReturn()
-        throws VariableNotFound {
+    public DFRef lookupThis() {
+        assert _outer != null;
+        return _outer.lookupThis();
+    }
+
+    public DFRef lookupReturn() {
         assert _outer != null;
         return _outer.lookupReturn();
     }
 
-    public DFRef lookupException()
-        throws VariableNotFound {
+    public DFRef lookupException() {
         assert _outer != null;
         return _outer.lookupException();
     }

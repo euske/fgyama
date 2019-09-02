@@ -133,6 +133,7 @@ public class DFFrame {
         assert _inputNodes == null;
         _inputNodes = new ConsistentHashSet<DFNode>();
         for (DFRef ref : _inputRefs) {
+            if (ref.isLocal()) continue;
             DFNode node = ctx.getFirst(ref);
             assert node != null;
             _inputNodes.add(node);
@@ -140,6 +141,7 @@ public class DFFrame {
         assert _outputNodes == null;
         _outputNodes = new ConsistentHashSet<DFNode>();
         for (DFRef ref : _outputRefs) {
+            if (ref.isLocal()) continue;
             DFNode node = ctx.get(ref);
             assert node != null;
             _outputNodes.add(node);
@@ -148,26 +150,12 @@ public class DFFrame {
 
     public Iterable<DFNode> getInputNodes() {
         assert _inputNodes != null;
-        List<DFNode> nodes = new ArrayList<DFNode>();
-        for (DFNode node : _inputNodes) {
-            DFRef ref = node.getRef();
-            if (!ref.isLocal() || ref.isInternal()) {
-                nodes.add(node);
-            }
-        }
-        return nodes;
+        return _inputNodes;
     }
 
     public Iterable<DFNode> getOutputNodes() {
         assert _outputNodes != null;
-        List<DFNode> nodes = new ArrayList<DFNode>();
-        for (DFNode node : _outputNodes) {
-            DFRef ref = node.getRef();
-            if (!ref.isLocal() || ref.isInternal()) {
-                nodes.add(node);
-            }
-        }
-        return nodes;
+        return _outputNodes;
     }
 
     @SuppressWarnings("unchecked")
@@ -176,6 +164,7 @@ public class DFFrame {
         MethodDeclaration methodDecl)
         throws InvalidSyntax {
         if (methodDecl.getBody() == null) return;
+        // Reference the arguments.
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>) methodDecl.parameters()) {
@@ -189,6 +178,7 @@ public class DFFrame {
             }
             i++;
         }
+        // Constructor changes all the member fields.
         if (method.getCallStyle() == DFMethod.CallStyle.Constructor) {
             DFKlass klass = method.getKlass();
             for (DFKlass.DFFieldRef ref : klass.getFields()) {
@@ -205,6 +195,7 @@ public class DFFrame {
         DFTypeFinder finder, DFMethod method, DFLocalScope scope,
         LambdaExpression lambda)
         throws InvalidSyntax {
+        // Reference the arguments.
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>) lambda.parameters()) {
@@ -423,13 +414,7 @@ public class DFFrame {
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 this.buildExpr(finder, method, scope, expr);
-            }
-            try {
                 this.addOutputRef(scope.lookupReturn());
-            } catch (VariableNotFound e) {
-                Logger.error(
-                    "DFFrame.buildStmt: VariableNotFound (return)",
-                    this, e.name);
             }
 
         } else if (stmt instanceof BreakStatement) {
@@ -478,19 +463,13 @@ public class DFFrame {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             this.buildExpr(finder, method, scope, throwStmt.getExpression());
-            try {
-                this.addOutputRef(scope.lookupException());
-            } catch (VariableNotFound e) {
-                Logger.error(
-                    "DFFrame.buildStmt: VariableNotFound (throw)",
-                    this, e.name);
-            }
+            this.addOutputRef(scope.lookupException());
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
-	    DFRef ref = scope.lookupThis();
-	    this.addInputRef(ref);
+            DFRef ref = scope.lookupThis();
+            this.addInputRef(ref);
 	    DFKlass klass = ref.getRefType().toKlass();
             klass.load();
             List<DFType> typeList = new ArrayList<DFType>();
@@ -511,8 +490,8 @@ public class DFFrame {
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-	    DFRef ref = scope.lookupThis();
-	    this.addInputRef(ref);
+            DFRef ref = scope.lookupThis();
+            this.addInputRef(ref);
 	    DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             baseKlass.load();
@@ -763,7 +742,9 @@ public class DFFrame {
             }
             DFType[] argTypes = new DFType[typeList.size()];
             typeList.toArray(argTypes);
-            DFKlass klass = scope.lookupThis().getRefType().toKlass();
+            DFRef ref = scope.lookupThis();
+            this.addInputRef(ref);
+            DFKlass klass = ref.getRefType().toKlass();
             klass.load();
             DFKlass baseKlass = klass.getBaseKlass();
             baseKlass.load();
@@ -852,12 +833,14 @@ public class DFFrame {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = scope.lookupThis().getRefType().toKlass().getBaseKlass();
+            DFRef ref = scope.lookupThis();
+            this.addInputRef(ref);
+            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             klass.load();
             try {
-                DFRef ref = klass.lookupField(fieldName);
-                this.addInputRef(ref);
-                return ref.getRefType();
+                DFRef ref2 = klass.lookupField(fieldName);
+                this.addInputRef(ref2);
+                return ref2.getRefType();
             } catch (VariableNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: VariableNotFound (superfieldref)",
@@ -983,6 +966,7 @@ public class DFFrame {
                             return null;
                         }
                     }
+                    this.addInputRef(scope.lookupThis());
                     DFKlass klass = type.toKlass();
                     klass.load();
                     SimpleName fieldName = qname.getName();
@@ -1040,12 +1024,14 @@ public class DFFrame {
 	    // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = scope.lookupThis().getRefType().toKlass().getBaseKlass();
+            DFRef ref = scope.lookupThis();
+            this.addInputRef(ref);
+            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             klass.load();
             try {
-                DFRef ref = klass.lookupField(fieldName);
-                this.addOutputRef(ref);
-                return ref;
+                DFRef ref2 = klass.lookupField(fieldName);
+                this.addOutputRef(ref2);
+                return ref2;
             } catch (VariableNotFound e) {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (superfieldassign)",

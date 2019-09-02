@@ -33,7 +33,5 @@ public abstract class DFRef {
 
     public abstract boolean isLocal();
 
-    public abstract boolean isInternal();
-
     public abstract String getFullName();
 }

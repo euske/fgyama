@@ -1436,10 +1436,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         public boolean isLocal() {
             return false;
         }
-        @Override
-        public boolean isInternal() {
-            return false;
-        }
 
         public boolean isStatic() {
             return _static;
@@ -1460,10 +1456,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         @Override
         public boolean isLocal() {
             return true;
-        }
-        @Override
-        public boolean isInternal() {
-            return false;
         }
 
         @Override
