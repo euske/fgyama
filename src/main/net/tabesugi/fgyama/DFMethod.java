@@ -364,13 +364,15 @@ class LambdaNode extends DFNode {
 // JoinNode
 class JoinNode extends DFNode {
 
-    public boolean recvTrue = false;
-    public boolean recvFalse = false;
+    private DFNode _cond;
+    private DFNode _recvTrue = null;
+    private DFNode _recvFalse = null;
 
     public JoinNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, DFNode cond) {
         super(graph, scope, type, ref, ast);
+        _cond = cond;
         this.accept(cond, "cond");
     }
 
@@ -381,26 +383,53 @@ class JoinNode extends DFNode {
 
     public void recv(boolean cond, DFNode node) {
         if (cond) {
-            assert !this.recvTrue;
-            this.recvTrue = true;
+            assert _recvTrue == null;
+            _recvTrue = node;
             this.accept(node, "true");
         } else {
-            assert !this.recvFalse;
-            this.recvFalse = true;
+            assert _recvFalse == null;
+            _recvFalse = node;
             this.accept(node, "false");
         }
     }
 
     public void merge(DFNode node) {
-        if (!this.recvTrue) {
-            assert this.recvFalse;
-            this.recvTrue = true;
+        if (_recvTrue == null) {
+            assert _recvFalse != null;
+            _recvTrue = node;
             this.accept(node, "true");
         }
-        if (!this.recvFalse) {
-            assert this.recvTrue;
-            this.recvFalse = true;
+        if (_recvFalse == null) {
+            assert _recvTrue != null;
+            _recvFalse = node;
             this.accept(node, "false");
+        }
+    }
+
+    @Override
+    public boolean canPurge() {
+        if (_recvTrue instanceof JoinNode &&
+            ((JoinNode)_recvTrue)._cond == _cond &&
+            ((JoinNode)_recvTrue)._recvFalse == _recvFalse) {
+            return true;
+        } else if (_recvFalse instanceof JoinNode &&
+            ((JoinNode)_recvFalse)._cond == _cond &&
+            ((JoinNode)_recvFalse)._recvTrue == _recvTrue) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void unlink() {
+        if (_recvTrue instanceof JoinNode &&
+            ((JoinNode)_recvTrue)._cond == _cond &&
+            ((JoinNode)_recvTrue)._recvFalse == _recvFalse) {
+            unlink(_recvTrue);
+        } else if (_recvFalse instanceof JoinNode &&
+            ((JoinNode)_recvFalse)._cond == _cond &&
+            ((JoinNode)_recvFalse)._recvTrue == _recvTrue) {
+            unlink(_recvFalse);
         }
     }
 }

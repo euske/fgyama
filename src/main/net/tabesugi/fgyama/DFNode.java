@@ -128,15 +128,20 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public void unlink() {
+        assert _value != null;
+        unlink(_value);
+    }
+
+    protected void unlink(DFNode value) {
         for (DFNode node : _outputs) {
             if (node._value == this) {
-                node._value = _value;
-                _value._outputs.add(node);
+                node._value = value;
+                value._outputs.add(node);
             }
             for (DFLink link : node._links) {
                 if (link.getSrc() == this) {
-                    link.setSrc(_value);
-                    _value._outputs.add(node);
+                    link.setSrc(value);
+                    value._outputs.add(node);
                 }
             }
         }
