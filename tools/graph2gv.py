@@ -107,7 +107,9 @@ def main(argv):
     names = None
     for (k, v) in opts:
         if k == '-H': html = True
-        elif k == '-o': output = open(v, 'w')
+        elif k == '-o':
+            output = open(v, 'w')
+            html = v.endswith('.html')
         elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
         elif k == '-n': names = [v]
     if not args: return usage()
@@ -129,6 +131,8 @@ def main(argv):
         for graph in graphs:
             write_gv(output, graph.root,
                      highlight=highlight, name=graph.name)
+
+    output.close()
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

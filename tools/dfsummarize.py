@@ -130,10 +130,10 @@ def trace(done, vtx, iref0=None, cc=None):
         if iref0 is not None:
             yield (iref0, iref1)
         iref0 = iref1
-    if vtx in done: return
-    done.add(vtx)
+        if vtx in done: return
+        done.add(vtx)
     for (link,v,funcall) in vtx.outputs:
-        if link.startswith('_') and link != '_end': continue
+        if link.startswith('_'): continue
         if v.node.kind == 'input' and funcall is not None:
             if cc is None or funcall not in cc:
                 for z in trace(done, v, iref0, Cons(funcall, cc)):
