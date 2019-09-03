@@ -26,7 +26,7 @@
           </node>
           <node id="G58_foo_N21" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
             <ast end="178" start="177" type="42"/>
-            <link src="G58_foo_N17"/>
+            <link src="G58_foo_N20"/>
           </node>
           <node id="G58_foo_N22" kind="return" ref="#return" type="I">
             <ast end="179" start="170" type="41"/>
