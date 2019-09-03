@@ -128,17 +128,17 @@ def trace(done, vtx, iref0=None, cc=None):
         else:
             iref1 = IRef.get(None, ref)
         if iref0 is not None:
-            yield (iref0, iref1)
+            yield (iref1, iref0)
         iref0 = iref1
         if vtx in done: return
         done.add(vtx)
-    for (link,v,funcall) in vtx.outputs:
+    for (link,v,funcall) in vtx.inputs:
         if link.startswith('_'): continue
-        if v.node.kind == 'input' and funcall is not None:
+        if v.node.kind == 'output' and funcall is not None:
             if cc is None or funcall not in cc:
                 for z in trace(done, v, iref0, Cons(funcall, cc)):
                     yield z
-        elif node.kind == 'output' and funcall is not None:
+        elif node.kind == 'input' and funcall is not None:
             if cc is not None and cc.car is funcall:
                 for z in trace(done, v, iref0, cc.cdr):
                     yield z
