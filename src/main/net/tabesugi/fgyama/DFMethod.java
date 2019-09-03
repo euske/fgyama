@@ -2553,16 +2553,21 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private void closeFrame(
         DFFrame frame, DFContext ctx) {
         for (DFExit exit : frame.getExits()) {
-            if (exit.getFrame() == frame) {
-                //Logger.info("DFMethod.Exit:", this, ":", exit);
-                DFNode node = exit.getNode();
-                if (node instanceof JoinNode) {
-                    ((JoinNode)node).merge(ctx.get(node.getRef()));
-                }
-                ctx.set(node);
+            if (exit.getFrame() != frame) continue;
+            DFNode src = exit.getNode();
+            DFNode dst = ctx.getLast(src.getRef());
+            assert src.getRef() == dst.getRef();
+            assert (src instanceof JoinNode || dst instanceof JoinNode ||
+                    src == dst || dst == null);
+            if (src instanceof JoinNode) {
+                ((JoinNode)src).merge(dst);
+                ctx.set(src);
+            } else if (dst instanceof JoinNode) {
+                ((JoinNode)dst).merge(src);
+            } else if (dst == null) {
+                ctx.set(src);
             }
         }
-        frame.finish(ctx);
     }
 
     /**
@@ -2593,15 +2598,19 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             throw new InvalidSyntax(_ast);
         }
 
+        // Create input nodes.
+        ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
         {
             DFRef ref = _scope.lookupThis();
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
+            preserved.add(input);
         }
         for (DFRef ref : _frame.getInputRefs()) {
             if (ref.isLocal()) continue;
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
+            preserved.add(input);
         }
 
         try {
@@ -2634,14 +2643,17 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // Cleanup.
         this.closeFrame(_frame, ctx);
 
+        // Create output nodes.
         DFRef retref = _scope.lookupReturn();
         for (DFRef ref : _frame.getOutputRefs()) {
             if (ref != retref && ref.isLocal()) continue;
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
+            preserved.add(output);
         }
 
-        this.cleanup();
+        // Do not remove input/output nodes.
+        this.cleanup(preserved);
         return this;
     }
 
@@ -2749,7 +2761,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
         this.closeFrame(_frame, ctx);
 
-        this.cleanup();
+        this.cleanup(null);
         return this;
     }
 
@@ -2774,26 +2786,20 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _nodes.size();
     }
 
-    public void cleanup() {
+    public void cleanup(Set<DFNode> preserved) {
         Set<DFNode> toremove = new HashSet<DFNode>();
         while (true) {
             boolean changed = false;
             for (DFNode node : _nodes) {
-                if (!toremove.contains(node) && node.canPurge()) {
+                if (preserved != null && preserved.contains(node)) continue;
+                if (toremove.contains(node)) continue;
+                if (node.canPurge()) {
                     node.unlink();
                     toremove.add(node);
                     changed = true;
                 }
             }
             if (!changed) break;
-        }
-        // Do not remove input/output nodes.
-        DFFrame frame = this.getFrame();
-        for (DFNode node : frame.getInputNodes()) {
-            toremove.remove(node);
-        }
-        for (DFNode node : frame.getOutputNodes()) {
-            toremove.remove(node);
         }
         for (DFNode node : toremove) {
             _nodes.remove(node);

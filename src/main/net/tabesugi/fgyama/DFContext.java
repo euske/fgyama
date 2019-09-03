@@ -26,6 +26,13 @@ public class DFContext {
         _scope = scope;
     }
 
+    private DFNode create(DFRef ref) {
+        DFNode node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
+        _last.put(ref, node);
+        _first.put(ref, node);
+        return node;
+    }
+
     // get(ref): get a current value of the context if defined.
     public DFNode get(DFRef ref) {
         DFNode node = _last.get(ref);
@@ -43,6 +50,10 @@ public class DFContext {
             node = this.create(ref);
         }
         return node;
+    }
+
+    public DFNode getLast(DFRef ref) {
+        return _last.get(ref);
     }
 
     public DFNode getLValue() {
@@ -91,13 +102,6 @@ public class DFContext {
         DFRef[] a = new DFRef[refs.size()];
         refs.toArray(a);
         return a;
-    }
-
-    private DFNode create(DFRef ref) {
-        DFNode node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
-        _last.put(ref, node);
-        _first.put(ref, node);
-        return node;
     }
 
     // dump: for debugging.

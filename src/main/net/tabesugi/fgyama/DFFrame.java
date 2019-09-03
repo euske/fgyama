@@ -23,10 +23,6 @@ public class DFFrame {
     private List<DFExit> _exits =
         new ArrayList<DFExit>();
 
-    private ConsistentHashSet<DFNode> _inputNodes = null;
-    private ConsistentHashSet<DFNode> _outputNodes = null;
-
-    public static final String ANONYMOUS = "@ANONYMOUS";
     public static final String BREAKABLE = "@BREAKABLE";
     public static final String CATCHABLE = "@CATCHABLE";
     public static final String RETURNABLE = "@RETURNABLE";
@@ -127,35 +123,6 @@ public class DFFrame {
     public void addExit(DFExit exit) {
         //Logger.info("DFFrame.addExit:", this, ":", exit);
         _exits.add(exit);
-    }
-
-    public void finish(DFContext ctx) {
-        assert _inputNodes == null;
-        _inputNodes = new ConsistentHashSet<DFNode>();
-        for (DFRef ref : _inputRefs) {
-            if (ref.isLocal()) continue;
-            DFNode node = ctx.getFirst(ref);
-            assert node != null;
-            _inputNodes.add(node);
-        }
-        assert _outputNodes == null;
-        _outputNodes = new ConsistentHashSet<DFNode>();
-        for (DFRef ref : _outputRefs) {
-            if (ref.isLocal()) continue;
-            DFNode node = ctx.get(ref);
-            assert node != null;
-            _outputNodes.add(node);
-        }
-    }
-
-    public Iterable<DFNode> getInputNodes() {
-        assert _inputNodes != null;
-        return _inputNodes;
-    }
-
-    public Iterable<DFNode> getOutputNodes() {
-        assert _outputNodes != null;
-        return _outputNodes;
     }
 
     @SuppressWarnings("unchecked")
@@ -302,12 +269,12 @@ public class DFFrame {
             IfStatement ifStmt = (IfStatement)stmt;
             this.buildExpr(finder, method, scope, ifStmt.getExpression());
             Statement thenStmt = ifStmt.getThenStatement();
-            DFFrame thenFrame = this.addChild(DFFrame.ANONYMOUS, thenStmt);
+            DFFrame thenFrame = this.addChild("@THEN", thenStmt);
             thenFrame.buildStmt(finder, method, scope, thenStmt);
             this.expandLocalRefs(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                DFFrame elseFrame = this.addChild(DFFrame.ANONYMOUS, elseStmt);
+                DFFrame elseFrame = this.addChild("@ELSE", elseStmt);
                 elseFrame.buildStmt(finder, method, scope, elseStmt);
                 this.expandLocalRefs(elseFrame);
             }
@@ -449,7 +416,7 @@ public class DFFrame {
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 DFLocalScope catchScope = scope.getChildByAST(cc);
-                DFFrame catchFrame = this.addChild(DFFrame.ANONYMOUS, cc);
+                DFFrame catchFrame = this.addChild("@CATCH", cc);
                 catchFrame.buildStmt(finder, method, catchScope, cc.getBody());
                 catchFrame.removeRefs(catchScope);
                 this.expandLocalRefs(catchFrame);
