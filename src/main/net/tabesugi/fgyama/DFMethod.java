@@ -364,14 +364,15 @@ class LambdaNode extends DFNode {
 // JoinNode
 class JoinNode extends DFNode {
 
-    private boolean _recvTrue = false;
-    private boolean _recvFalse = false;
+    private DFNode.Link _linkCond;
+    private DFNode.Link _linkTrue = null;
+    private DFNode.Link _linkFalse = null;
 
     public JoinNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, DFNode cond) {
         super(graph, scope, type, ref, ast);
-        this.accept(cond, "cond");
+        _linkCond = this.accept(cond, "cond");
     }
 
     @Override
@@ -381,74 +382,46 @@ class JoinNode extends DFNode {
 
     public void recv(boolean cond, DFNode node) {
         if (cond) {
-            assert !_recvTrue;
-            _recvTrue = true;
-            this.accept(node, "true");
+            assert _linkTrue == null;
+            _linkTrue = this.accept(node, "true");
         } else {
-            assert !_recvFalse;
-            _recvFalse = true;
-            this.accept(node, "false");
+            assert _linkFalse == null;
+            _linkFalse = this.accept(node, "false");
         }
     }
 
     public void merge(DFNode node) {
-        if (!_recvTrue) {
-            assert _recvFalse;
-            _recvTrue = true;
-            this.accept(node, "true");
+        if (_linkTrue == null) {
+            assert _linkFalse != null;
+            _linkTrue = this.accept(node, "true");
         }
-        if (!_recvFalse) {
-            assert _recvTrue;
-            _recvFalse = true;
-            this.accept(node, "false");
+        if (_linkFalse == null) {
+            assert _linkTrue != null;
+            _linkFalse = this.accept(node, "false");
         }
     }
 
     @Override
-    public boolean canPurge() {
-        if (_recvTrue) {
-            DFNode cond = this.getSrc("cond");
-            DFNode srcTrue = this.getSrc("true");
+    public boolean purge() {
+        if (_linkTrue != null) {
+            DFNode srcTrue = _linkTrue.getSrc();
             if (srcTrue instanceof JoinNode &&
-                ((JoinNode)srcTrue).getSrc("cond") == cond &&
-                ((JoinNode)srcTrue).getSrc("false") == this.getSrc("false")) {
+                ((JoinNode)srcTrue)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcTrue)._linkFalse.getSrc() == _linkFalse.getSrc()) {
+                unlink(srcTrue);
                 return true;
             }
         }
-        if (_recvFalse) {
-            DFNode cond = this.getSrc("cond");
-            DFNode srcFalse = this.getSrc("false");
+        if (_linkFalse != null) {
+            DFNode srcFalse = _linkFalse.getSrc();
             if (srcFalse instanceof JoinNode &&
-                ((JoinNode)srcFalse).getSrc("cond") == cond &&
-                ((JoinNode)srcFalse).getSrc("true") == this.getSrc("true")) {
+                ((JoinNode)srcFalse)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcFalse)._linkTrue.getSrc() == _linkTrue.getSrc()) {
+                unlink(srcFalse);
                 return true;
             }
         }
         return false;
-    }
-
-    @Override
-    public void unlink() {
-        if (_recvTrue) {
-            DFNode cond = this.getSrc("cond");
-            DFNode srcTrue = this.getSrc("true");
-            if (srcTrue instanceof JoinNode &&
-                ((JoinNode)srcTrue).getSrc("cond") == cond &&
-                ((JoinNode)srcTrue).getSrc("false") == this.getSrc("false")) {
-                unlink(srcTrue);
-                return;
-            }
-        }
-        if (_recvFalse) {
-            DFNode cond = this.getSrc("cond");
-            DFNode srcFalse = this.getSrc("false");
-            if (srcFalse instanceof JoinNode &&
-                ((JoinNode)srcFalse).getSrc("cond") == cond &&
-                ((JoinNode)srcFalse).getSrc("true") == this.getSrc("true")) {
-                unlink(srcFalse);
-                return;
-            }
-        }
     }
 }
 
@@ -2793,8 +2766,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             for (DFNode node : _nodes) {
                 if (preserved != null && preserved.contains(node)) continue;
                 if (toremove.contains(node)) continue;
-                if (node.canPurge()) {
-                    node.unlink();
+                if (node.purge()) {
                     toremove.add(node);
                     changed = true;
                 }

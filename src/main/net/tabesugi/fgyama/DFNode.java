@@ -18,6 +18,7 @@ public class DFNode implements Comparable<DFNode> {
     private DFType _type;
     private DFRef _ref;
     private ASTNode _ast;
+    private Link _link0;
 
     private List<Link> _links =
         new ArrayList<Link>();
@@ -101,7 +102,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public boolean hasValue() {
-        return this.getSrc(null) != null;
+        return _link0 != null;
     }
 
     public Link accept(DFNode node) {
@@ -110,36 +111,25 @@ public class DFNode implements Comparable<DFNode> {
 
     public Link accept(DFNode node, String label) {
         assert node != null;
+        Link link = new Link(node, label);
+        _links.add(link);
+        node._outputs.add(this);
         if (label == null) {
             if (_type instanceof DFUnknownType) {
                 _type = node.getNodeType();
             }
+            _link0 = link;
         }
-        assert this.getSrc(label) == null;
-        Link link = new Link(node, label);
-        _links.add(link);
-        node._outputs.add(this);
         return link;
     }
 
-    protected DFNode getSrc(String label) {
-        for (Link link : _links) {
-            if (link.hasLabel(label)) {
-                return link._src;
-            }
+    public boolean purge() {
+        if (this.getKind() == null && this.hasValue()) {
+            assert _link0 != null;
+            this.unlink(_link0._src);
+            return true;
         }
-        return null;
-    }
-
-
-    public boolean canPurge() {
-        return (this.getKind() == null && this.hasValue());
-    }
-
-    public void unlink() {
-        DFNode src = this.getSrc(null);
-        assert src != null;
-        unlink(src);
+        return false;
     }
 
     protected void unlink(DFNode src) {
