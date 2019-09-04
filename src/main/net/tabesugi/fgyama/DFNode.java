@@ -19,8 +19,8 @@ public class DFNode implements Comparable<DFNode> {
     private DFRef _ref;
     private ASTNode _ast;
 
-    private List<DFLink> _links =
-        new ArrayList<DFLink>();
+    private List<Link> _links =
+        new ArrayList<Link>();
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
@@ -70,7 +70,7 @@ public class DFNode implements Comparable<DFNode> {
             east.setAttribute("end", Integer.toString(end));
             elem.appendChild(east);
         }
-        for (DFLink link : _links) {
+        for (Link link : _links) {
             elem.appendChild(link.toXML(document));
         }
         return elem;
@@ -100,15 +100,15 @@ public class DFNode implements Comparable<DFNode> {
         return null;
     }
 
-    protected boolean hasValue() {
+    public boolean hasValue() {
         return this.getSrc(null) != null;
     }
 
-    protected void accept(DFNode node) {
-        this.accept(node, null);
+    public Link accept(DFNode node) {
+        return this.accept(node, null);
     }
 
-    protected void accept(DFNode node, String label) {
+    public Link accept(DFNode node, String label) {
         assert node != null;
         if (label == null) {
             if (_type instanceof DFUnknownType) {
@@ -116,13 +116,14 @@ public class DFNode implements Comparable<DFNode> {
             }
         }
         assert this.getSrc(label) == null;
-        DFLink link = new DFLink(node, label);
+        Link link = new Link(node, label);
         _links.add(link);
         node._outputs.add(this);
+        return link;
     }
 
     protected DFNode getSrc(String label) {
-        for (DFLink link : _links) {
+        for (Link link : _links) {
             if (link.hasLabel(label)) {
                 return link._src;
             }
@@ -142,11 +143,11 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     protected void unlink(DFNode src) {
-        for (DFLink link : _links) {
+        for (Link link : _links) {
             link._src._outputs.remove(this);
         }
         for (DFNode node : _outputs) {
-            for (DFLink link : node._links) {
+            for (Link link : node._links) {
                 if (link._src == this) {
                     link._src = src;
                     src._outputs.add(node);
@@ -189,16 +190,24 @@ public class DFNode implements Comparable<DFNode> {
         }
     }
 
-    //  DFLink
+    //  Link
     //
-    private class DFLink {
+    public class Link {
 
         private DFNode _src;
         private String _label;
 
-        public DFLink(DFNode src, String label) {
+        public Link(DFNode src, String label) {
             _src = src;
             _label = label;
+        }
+
+        public DFNode getSrc() {
+            return _src;
+        }
+
+        public DFNode getDst() {
+            return DFNode.this;
         }
 
         protected boolean hasLabel(String label) {
@@ -208,7 +217,7 @@ public class DFNode implements Comparable<DFNode> {
 
         @Override
         public String toString() {
-            return ("<DFLink "+DFNode.this+"<-"+_src+">");
+            return ("<Link "+DFNode.this+"<-"+_src+">");
         }
 
         public Element toXML(Document document) {
