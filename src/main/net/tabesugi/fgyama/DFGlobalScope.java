@@ -30,10 +30,10 @@ public class DFGlobalScope extends DFVarScope {
         if (type instanceof DFArrayType) {
             elemType = ((DFArrayType)type).getElemType();
         }
-        ref = _arrays.get(type);
+        ref = _arrays.get(elemType);
         if (ref == null) {
             ref = new ElemRef(elemType);
-            _arrays.put(type, ref);
+            _arrays.put(elemType, ref);
         }
         return ref;
     }

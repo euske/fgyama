@@ -11,11 +11,24 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFArrayType implements DFType {
 
+    private static Map<String, DFArrayType> _types =
+        new HashMap<String, DFArrayType>();
+
+    public static DFArrayType getType(DFType elemType, int ndims) {
+        String key = elemType.getTypeName()+":"+ndims;
+        DFArrayType type = _types.get(key);
+        if (type == null) {
+            type = new DFArrayType(elemType, ndims);
+            _types.put(key, type);
+        }
+        return type;
+    }
+
     private DFType _elemType;
     private int _ndims;
 
     // DFArrayType
-    public DFArrayType(DFType elemType, int ndims) {
+    private DFArrayType(DFType elemType, int ndims) {
         assert 0 < ndims;
         _elemType = elemType;
         _ndims = ndims;
@@ -56,7 +69,7 @@ public class DFArrayType implements DFType {
         if (_ndims == 1) {
             return _elemType;
         } else {
-            return new DFArrayType(_elemType, _ndims-1);
+            return DFArrayType.getType(_elemType, _ndims-1);
         }
     }
 }

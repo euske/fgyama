@@ -66,7 +66,7 @@ public class DFTypeFinder {
             ArrayType atype = (ArrayType)type;
             DFType elemType = this.resolve(atype.getElementType());
             int ndims = atype.getDimensions();
-            return new DFArrayType(elemType, ndims);
+            return DFArrayType.getType(elemType, ndims);
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             DFType klassType = this.lookupType(stype.getName());
@@ -151,7 +151,7 @@ public class DFTypeFinder {
                 (org.apache.bcel.generic.ArrayType)type;
             DFType elemType = this.resolve(atype.getElementType());
             int ndims = atype.getDimensions();
-            return new DFArrayType(elemType, ndims);
+            return DFArrayType.getType(elemType, ndims);
         } else if (type instanceof org.apache.bcel.generic.ObjectType) {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;

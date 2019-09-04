@@ -2882,7 +2882,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
-                    argType = new DFArrayType(argType, ndims);
+                    argType = DFArrayType.getType(argType, ndims);
                 }
                 _arguments[i] = new InternalRef(argType, "arg"+i);
                 this.addVar(decl.getName(), argType);

@@ -1269,7 +1269,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             "values", null, false);
 	method.setFinder(finder);
 	method.setFuncType(
-	    new DFFunctionType(new DFType[] {}, new DFArrayType(this, 1)));
+	    new DFFunctionType(new DFType[] {}, DFArrayType.getType(this, 1)));
 	this.addMethod(method, null);
 	this.buildMembers(finder, enumDecl.bodyDeclarations());
     }
@@ -1313,7 +1313,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                     DFType ft = fldType;
                     int ndims = frag.getExtraDimensions();
                     if (ndims != 0) {
-                        ft = new DFArrayType(ft, ndims);
+                        ft = DFArrayType.getType(ft, ndims);
                     }
                     this.addField(frag.getName(), isStatic(decl), ft);
                 }
@@ -1341,7 +1341,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    SingleVariableDeclaration varDecl = varDecls.get(i);
 		    DFType argType = finder2.resolveSafe(varDecl.getType());
 		    if (varDecl.isVarargs()) {
-			argType = new DFArrayType(argType, 1);
+			argType = DFArrayType.getType(argType, 1);
 		    }
 		    argTypes[i] = argType;
 		}
