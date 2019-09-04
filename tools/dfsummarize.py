@@ -186,10 +186,12 @@ def main(argv):
 
     # Enumerate all the flows.
     irefs = set()
+    nlinks = 0
     for graph in builder.graphs:
         (name,_,_) = splitmethodname(graph.name)
         if methods and name not in methods: continue
         if graph.callers: continue
+        print('graph:', graph.name, file=sys.stderr)
         done = set()
         for node in graph:
             if not node.inputs: continue
@@ -201,7 +203,9 @@ def main(argv):
                 iref0.connect(iref1)
                 irefs.add(iref0)
                 irefs.add(iref1)
+                nlinks += 1
     print('irefs:', len(irefs), file=sys.stderr)
+    print('links:', nlinks, file=sys.stderr)
 
     # Discover strong components.
     cpts = IRefComponent.fromitems(irefs)

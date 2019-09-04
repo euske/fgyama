@@ -360,7 +360,7 @@ def main(argv):
                     annot.add(path, start, end)
                 annot.show_text()
             for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
-                data = feat + getsrcs(chain)
+                data = (feat, getsrcs(chain))
                 print('+FEAT', json.dumps(data))
             print()
 

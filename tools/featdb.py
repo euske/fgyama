@@ -259,18 +259,18 @@ def main(argv):
             db.add_path(srcid, path)
 
         elif line.startswith('+ITEM '):
-            data = json.loads(line[6:])
-            item = fid2srcs = None
-            if data[0] == 'REF':
-                item = data[1]
-                fid2srcs = {0: data[2:]}
-                sys.stderr.write('.'); sys.stderr.flush()
-                nitems += 1
+            (_,_,line) = line.partition(' ')
+            data = json.loads(line)
+            (item,srcs) = data
+            fid2srcs = {0: srcs}
+            sys.stderr.write('.'); sys.stderr.flush()
+            nitems += 1
 
         elif item is not None and line.startswith('+FEAT '):
             assert fid2srcs is not None
-            data = json.loads(line[6:])
-            feat = tuple(data[0:3])
+            (_,_,line) = line.partition(' ')
+            data = json.loads(line)
+            feat = tuple(data[0])
             if feat in feat2fid:
                 fid = feat2fid[feat]
             else:
@@ -281,9 +281,9 @@ def main(argv):
                 srcs = fid2srcs[fid]
             else:
                 srcs = fid2srcs[fid] = []
-            srcs.extend(data[3:])
+            srcs.extend(data[1])
             nfeats += 1
-            nsrcs += len(data[3:])
+            nsrcs += len(data[1])
 
         elif item is not None and not line:
             assert fid2srcs is not None
