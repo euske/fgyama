@@ -41,7 +41,7 @@ public class DFNode implements Comparable<DFNode> {
 
     @Override
     public String toString() {
-        return ("<DFNode("+this.getNodeId()+") "+this.getKind()+" "+this.getData()+">");
+        return ("<DFNode("+this.getNodeId()+") "+this.getKind()+">");
     }
 
     @Override
@@ -121,6 +121,10 @@ public class DFNode implements Comparable<DFNode> {
             _link0 = link;
         }
         return link;
+    }
+
+    public boolean merge(DFNode node) {
+        return false;
     }
 
     public boolean purge() {

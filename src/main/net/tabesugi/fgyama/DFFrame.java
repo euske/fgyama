@@ -429,8 +429,8 @@ public class DFFrame {
         } else if (stmt instanceof ThrowStatement) {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
-            this.buildExpr(finder, method, scope, throwStmt.getExpression());
-            this.addOutputRef(scope.lookupException());
+            DFType type = this.buildExpr(finder, method, scope, throwStmt.getExpression());
+            this.addOutputRef(scope.lookupException(type));
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
