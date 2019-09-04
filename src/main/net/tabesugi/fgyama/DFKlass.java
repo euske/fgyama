@@ -66,15 +66,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _klassScope = new DFKlassScope(_outerScope, _name);
     }
 
-    protected DFKlass(
-        String name, DFTypeSpace outerSpace,
-        DFKlass outerKlass, DFVarScope outerScope,
-        DFKlass baseKlass) {
-        this(name, outerSpace, outerKlass, outerScope);
-        _baseKlass = baseKlass;
-        _built = true;
-    }
-
     // Constructor for a parameterized klass.
     @SuppressWarnings("unchecked")
     private DFKlass(
@@ -991,6 +982,24 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 Logger.error(
                     "DFKlass.load: IOException",
                     this, _jarPath+"/"+_entPath);
+            }
+        }
+    }
+
+    protected void buildManually(
+        boolean isInterface, DFKlass baseKlass, DFKlass[] baseIfaces) {
+        assert !_built;
+        _built = true;
+        _interface = isInterface;
+        if (_outerKlass != null) {
+            assert _outerKlass.isBuilt();
+        }
+	_baseKlass = baseKlass;
+	assert _baseKlass.isBuilt();
+        _baseIfaces = baseIfaces;
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                assert iface.isBuilt();
             }
         }
     }

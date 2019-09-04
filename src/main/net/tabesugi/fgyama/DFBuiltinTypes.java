@@ -27,7 +27,6 @@ public class DFBuiltinTypes {
         _double = createKlass(java_lang, "Double");
         _boolean = createKlass(java_lang, "Boolean");
         _exception = createKlass(java_lang, "Exception");
-        _array = new ArrayKlass(java_lang, _object);
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
@@ -45,6 +44,7 @@ public class DFBuiltinTypes {
         _double.load();
         _boolean.load();
         _exception.load();
+        _array = new ArrayKlass(java_lang, _object);
     }
 
     private static DFKlass createKlass(DFTypeSpace typeSpace, String id) {
@@ -54,7 +54,8 @@ public class DFBuiltinTypes {
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
-            super("_Array", typeSpace, null, null, baseKlass);
+            super("_Array", typeSpace, null, null);
+            this.buildManually(false, baseKlass, null);
             this.addField("length", false, DFBasicType.INT);
         }
     }
