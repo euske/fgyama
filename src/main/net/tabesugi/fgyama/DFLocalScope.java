@@ -53,7 +53,7 @@ public class DFLocalScope extends DFVarScope {
         //Logger.info("DFLocalScope.addVar:", this, ":", id, "->", type);
         DFRef ref = _id2var.get(id);
         if (ref == null) {
-            ref = new DFVarRef(type, id);
+            ref = new VarRef(type, id);
             _vars.add(ref);
             _id2var.put(id, ref);
         }
@@ -477,12 +477,12 @@ public class DFLocalScope extends DFVarScope {
         }
     }
 
-    // DFVarRef
-    private class DFVarRef extends DFRef {
+    // VarRef
+    private class VarRef extends DFRef {
 
         private String _name;
 
-        public DFVarRef(DFType type, String name) {
+        public VarRef(DFType type, String name) {
             super(type);
             _name = name;
         }

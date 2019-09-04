@@ -11,14 +11,14 @@ import org.eclipse.jdt.core.dom.*;
 //
 class DFFunctionalKlass extends DFKlass {
 
-    private class DFFunctionalMethod extends DFMethod {
-        public DFFunctionalMethod(String id) {
+    private class FunctionalMethod extends DFMethod {
+        public FunctionalMethod(String id) {
             super(DFFunctionalKlass.this, id, CallStyle.Lambda, id,
                   DFFunctionalKlass.this.getKlassScope(), false);
         }
     }
 
-    private DFFunctionalMethod _funcMethod = null;
+    private FunctionalMethod _funcMethod = null;
 
     public DFFunctionalKlass(
         String name, DFTypeSpace outerSpace,
@@ -45,7 +45,7 @@ class DFFunctionalKlass extends DFKlass {
 	throws InvalidSyntax {
         LambdaExpression lambda = (LambdaExpression)ast;
         String id = "function";
-        _funcMethod = new DFFunctionalMethod(id);
+        _funcMethod = new FunctionalMethod(id);
         this.addMethod(_funcMethod, id);
         ASTNode body = lambda.getBody();
         if (body instanceof Statement) {

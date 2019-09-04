@@ -148,7 +148,7 @@ public class DFFrame {
         // Constructor changes all the member fields.
         if (method.getCallStyle() == DFMethod.CallStyle.Constructor) {
             DFKlass klass = method.getKlass();
-            for (DFKlass.DFFieldRef ref : klass.getFields()) {
+            for (DFKlass.FieldRef ref : klass.getFields()) {
                 if (!ref.isStatic()) {
                     this.addOutputRef(ref);
                 }

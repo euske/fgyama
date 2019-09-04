@@ -763,7 +763,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     private DFKlass _klass;
     private String _name;
     private CallStyle _callStyle;
-    private DFMethodScope _scope;
+    private MethodScope _scope;
     private DFFrame _frame;
     private boolean _abstract;
 
@@ -789,7 +789,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _klass = klass;
         _name = name;
         _callStyle = callStyle;
-        _scope = new DFMethodScope(outer, id);
+        _scope = new MethodScope(outer, id);
         _frame = new DFFrame(DFFrame.RETURNABLE);
         _abstract = isAbstract;
     }
@@ -885,17 +885,17 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return true;
     }
 
-    private void listOverriders(List<DFOverride> overriders, int prio) {
-        overriders.add(new DFOverride(this, prio));
+    private void listOverriders(List<Overrider> overriders, int prio) {
+        overriders.add(new Overrider(this, prio));
         for (DFMethod method : _overriders) {
             method.listOverriders(overriders, prio+1);
         }
     }
 
     public DFMethod[] getOverriders() {
-        List<DFOverride> overriders = new ArrayList<DFOverride>();
+        List<Overrider> overriders = new ArrayList<Overrider>();
         this.listOverriders(overriders, 0);
-        DFOverride[] a = new DFOverride[overriders.size()];
+        Overrider[] a = new Overrider[overriders.size()];
         overriders.toArray(a);
         Arrays.sort(a);
         DFMethod[] methods = new DFMethod[a.length];
@@ -971,28 +971,28 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
     }
 
-    // DFOverride
-    private class DFOverride implements Comparable<DFOverride> {
+    // Overrider
+    private class Overrider implements Comparable<Overrider> {
 
 	public DFMethod method;
 	public int level;
 
-	public DFOverride(DFMethod method, int level) {
+	public Overrider(DFMethod method, int level) {
 	    this.method = method;
 	    this.level = level;
 	}
 
 	@Override
 	public String toString() {
-	    return ("<DFOverride: "+this.method+" ("+this.level+")>");
+	    return ("<Overrider: "+this.method+" ("+this.level+")>");
 	}
 
 	@Override
-	public int compareTo(DFOverride override) {
-	    if (this.level != override.level) {
-		return override.level - this.level;
+	public int compareTo(Overrider overrider) {
+	    if (this.level != overrider.level) {
+		return overrider.level - this.level;
 	    } else {
-		return this.method.compareTo(override.method);
+		return this.method.compareTo(overrider.method);
 	    }
 	}
     }
@@ -2598,7 +2598,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
         for (DFRef ref : _frame.getInputRefs()) {
             if (ref.isLocal()) continue;
-            if (ref instanceof DFMethodScope.DFInternalRef) continue;
+            if (ref instanceof MethodScope.InternalRef) continue;
             DFNode input = new InputNode(graph, _scope, ref, null);
             ctx.set(input);
             preserved.add(input);
@@ -2637,7 +2637,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // Create output nodes.
         for (DFRef ref : _frame.getOutputRefs()) {
             if (ref.isLocal() &&
-                !(ref instanceof DFMethodScope.DFInternalRef)) continue;
+                !(ref instanceof MethodScope.InternalRef)) continue;
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
             preserved.add(output);
@@ -2833,14 +2833,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return elem;
     }
 
-    private class DFMethodScope extends DFLocalScope {
+    private class MethodScope extends DFLocalScope {
 
-        private DFInternalRef _return = null;
-        private DFInternalRef[] _arguments = null;
+        private InternalRef _return = null;
+        private InternalRef[] _arguments = null;
         private Map<DFType, DFRef> _exceptions =
             new HashMap<DFType, DFRef>();
 
-        protected DFMethodScope(DFVarScope outer, String name) {
+        protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
         }
 
@@ -2861,7 +2861,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public DFRef lookupException(DFType type) {
             DFRef ref = _exceptions.get(type);
             if (ref == null) {
-                ref = new DFInternalRef(type, type.getTypeName());
+                ref = new InternalRef(type, type.getTypeName());
                 _exceptions.put(type, ref);
             }
             return ref;
@@ -2870,8 +2870,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         private void buildInternalRefs(List<VariableDeclaration> parameters) {
 	    DFFunctionType funcType = DFMethod.this.getFuncType();
 	    DFType[] argTypes = funcType.getArgTypes();
-            _return = new DFInternalRef(funcType.getReturnType(), "return");
-            _arguments = new DFInternalRef[parameters.size()];
+            _return = new InternalRef(funcType.getReturnType(), "return");
+            _arguments = new InternalRef[parameters.size()];
             int i = 0;
             for (VariableDeclaration decl : parameters) {
                 DFType argType = argTypes[i];
@@ -2879,7 +2879,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (ndims != 0) {
                     argType = new DFArrayType(argType, ndims);
                 }
-                _arguments[i] = new DFInternalRef(argType, "arg"+i);
+                _arguments[i] = new InternalRef(argType, "arg"+i);
                 this.addVar(decl.getName(), argType);
                 i++;
             }
@@ -2892,7 +2892,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public void buildMethodDecl(
             DFTypeFinder finder, MethodDeclaration methodDecl)
             throws InvalidSyntax {
-            //Logger.info("DFMethodScope.buildMethodDecl:", this);
+            //Logger.info("MethodScope.buildMethodDecl:", this);
             Statement stmt = methodDecl.getBody();
             if (stmt == null) return;
             this.buildInternalRefs(methodDecl.parameters());
@@ -2903,7 +2903,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         public void buildLambda(
             DFTypeFinder finder, LambdaExpression lambda)
             throws InvalidSyntax {
-            //Logger.info("DFMethodScope.buildLambda:", this);
+            //Logger.info("MethodScope.buildLambda:", this);
             ASTNode body = lambda.getBody();
             this.buildInternalRefs(lambda.parameters());
             if (body instanceof Statement) {
@@ -2929,11 +2929,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
         // Special references that are used in a method.
         // (not a real variable.)
-        private class DFInternalRef extends DFRef {
+        private class InternalRef extends DFRef {
 
             private String _name;
 
-            public DFInternalRef(DFType type, String name) {
+            public InternalRef(DFType type, String name) {
                 super(type);
                 _name = name;
             }

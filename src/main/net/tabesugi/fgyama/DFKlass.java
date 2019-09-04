@@ -20,7 +20,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFTypeSpace _outerSpace;
     private DFKlass _outerKlass; // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
-    private DFKlassScope _klassScope;
+    private KlassScope _klassScope;
 
     // These fields are set immediately.
     private ASTNode _ast = null;
@@ -48,8 +48,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
-    private List<DFFieldRef> _fields =
-        new ArrayList<DFFieldRef>();
+    private List<FieldRef> _fields =
+        new ArrayList<FieldRef>();
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
@@ -63,7 +63,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _outerSpace = outerSpace;
         _outerKlass = outerKlass;
 	_outerScope = outerScope;
-        _klassScope = new DFKlassScope(_outerScope, _name);
+        _klassScope = new KlassScope(_outerScope, _name);
     }
 
     // Constructor for a parameterized klass.
@@ -81,7 +81,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
         String subname = genericKlass._name + getParamName(paramTypes);
-        _klassScope = new DFKlassScope(_outerScope, subname);
+        _klassScope = new KlassScope(_outerScope, subname);
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
@@ -150,7 +150,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-        for (DFFieldRef field : _fields) {
+        for (FieldRef field : _fields) {
             elem.appendChild(field.toXML(document));
         }
         return elem;
@@ -821,7 +821,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return this.lookupField(name.getIdentifier());
     }
 
-    public List<DFFieldRef> getFields() {
+    public List<FieldRef> getFields() {
         assert _built;
 	return _fields;
     }
@@ -893,7 +893,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     protected DFRef addField(
         String id, boolean isStatic, DFType type) {
         assert _klassScope != null;
-        DFFieldRef ref = _klassScope.addField(id, isStatic, type);
+        FieldRef ref = _klassScope.addField(id, isStatic, type);
         //Logger.info("DFKlass.addField:", ref);
 	_fields.add(ref);
         return ref;
@@ -1417,13 +1417,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
-    // DFFieldRef
-    public class DFFieldRef extends DFRef {
+    // FieldRef
+    public class FieldRef extends DFRef {
 
         private String _name;
         private boolean _static;
 
-        public DFFieldRef(DFType type, String name, boolean isStatic) {
+        public FieldRef(DFType type, String name, boolean isStatic) {
             super(type);
             _name = name;
             _static = isStatic;
@@ -1456,9 +1456,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
-    // DFThisRef
-    private class DFThisRef extends DFRef {
-        public DFThisRef(DFType type) {
+    // ThisRef
+    private class ThisRef extends DFRef {
+        public ThisRef(DFType type) {
             super(type);
         }
 
@@ -1473,16 +1473,16 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
-    // DFKlassScope
-    private class DFKlassScope extends DFVarScope {
+    // KlassScope
+    private class KlassScope extends DFVarScope {
 
         private DFRef _this;
         private Map<String, DFRef> _id2field =
             new HashMap<String, DFRef>();
 
-        public DFKlassScope(DFVarScope outer, String id) {
+        public KlassScope(DFVarScope outer, String id) {
             super(outer, id);
-            _this = new DFThisRef(DFKlass.this);
+            _this = new ThisRef(DFKlass.this);
         }
 
         @Override
@@ -1512,9 +1512,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
             return ref;
         }
 
-        protected DFFieldRef addField(
+        protected FieldRef addField(
             String id, boolean isStatic, DFType type) {
-            DFFieldRef ref = new DFFieldRef(type, id, isStatic);
+            FieldRef ref = new FieldRef(type, id, isStatic);
             _id2field.put(id, ref);
             return ref;
         }

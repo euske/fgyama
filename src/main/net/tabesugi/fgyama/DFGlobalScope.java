@@ -32,15 +32,15 @@ public class DFGlobalScope extends DFVarScope {
         }
         ref = _arrays.get(type);
         if (ref == null) {
-            ref = new DFElemRef(elemType);
+            ref = new ElemRef(elemType);
             _arrays.put(type, ref);
         }
         return ref;
     }
 
-    private class DFElemRef extends DFRef {
+    private class ElemRef extends DFRef {
 
-        public DFElemRef(DFType type) {
+        public ElemRef(DFType type) {
             super(type);
         }
 
