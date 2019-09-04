@@ -18,14 +18,15 @@
             <ast end="146" start="138" type="59"/>
             <link src="G13_foo_N4"/>
           </node>
-          <node id="G13_foo_N27" kind="join" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;">
+          <node id="G13_foo_N28" kind="join" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;">
             <ast end="330" start="156" type="54"/>
             <link src="G13_foo_N11"/>
             <link label="Lbasic_exception/A;" src="G13_foo_N16"/>
-            <link label="Ljava/lang/Exception;" src="G13_foo_N28"/>
+            <link label="Ljava/lang/Exception;" src="G13_foo_N29"/>
           </node>
           <scope name="Lbasic_exception;.:foo:103:336.:B:121:336.:try:156:330">
-            <node id="G13_foo_N14" ref="#exception" type="Ljava/lang/Exception;"/>
+            <node id="G13_foo_N14" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;"/>
+            <node id="G13_foo_N21" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;"/>
             <scope name="Lbasic_exception;.:foo:103:336.:B:121:336.:try:156:330.:B:160:215">
               <node id="G13_foo_N6" kind="assign_var" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;">
                 <ast end="175" start="174" type="42"/>
@@ -82,28 +83,28 @@
             </scope>
           </scope>
           <scope name="Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330">
-            <node id="G13_foo_N21" kind="catch" ref="$Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330/$e" type="Ljava/lang/Exception;">
+            <node id="G13_foo_N22" kind="catch" ref="$Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330/$e" type="Ljava/lang/Exception;">
               <ast end="282" start="271" type="44"/>
-              <link src="G13_foo_N14"/>
+              <link src="G13_foo_N21"/>
             </node>
-            <node id="G13_foo_N28" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;"/>
+            <node id="G13_foo_N29" ref="$Lbasic_exception;.:foo:103:336.:B:121:336/$x" type="Ljava/lang/String;"/>
             <scope name="Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330.:B:284:330">
-              <node id="G13_foo_N22" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+              <node id="G13_foo_N23" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <ast end="308" start="298" type="40"/>
                 <link src="G13_foo_N3"/>
               </node>
-              <node id="G13_foo_N24" kind="ref_var" ref="$Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330/$e" type="Ljava/lang/Exception;">
+              <node id="G13_foo_N25" kind="ref_var" ref="$Lbasic_exception;.:foo:103:336.:B:121:336.:AST12:264:330/$e" type="Ljava/lang/Exception;">
                 <ast end="318" start="317" type="42"/>
-                <link src="G13_foo_N21"/>
+                <link src="G13_foo_N22"/>
               </node>
-              <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="G13_foo_N25" kind="call" type="V">
+              <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="G13_foo_N26" kind="call" type="V">
                 <ast end="319" start="298" type="32"/>
-                <link label="#this" src="G13_foo_N22"/>
-                <link label="#arg0" src="G13_foo_N24"/>
+                <link label="#this" src="G13_foo_N23"/>
+                <link label="#arg0" src="G13_foo_N25"/>
               </node>
-              <node id="G13_foo_N26" kind="receive" type="V">
+              <node id="G13_foo_N27" kind="receive" type="V">
                 <ast end="319" start="298" type="32"/>
-                <link src="G13_foo_N25"/>
+                <link src="G13_foo_N26"/>
               </node>
             </scope>
           </scope>
@@ -115,8 +116,11 @@
       <ast end="431" start="342" type="31"/>
       <scope name="Lbasic_exception;.:moo:342:431">
         <node id="G14_moo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
-        <node id="G14_moo_N8" ref="#exception" type="Ljava/lang/Exception;"/>
-        <node id="G14_moo_N11" kind="output" ref="#return" type="Ljava/lang/String;">
+        <node id="G14_moo_N8" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;"/>
+        <node id="G14_moo_N11" kind="output" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+          <link src="G14_moo_N6"/>
+        </node>
+        <node id="G14_moo_N12" kind="output" ref="#return" type="Ljava/lang/String;">
           <link src="G14_moo_N10"/>
         </node>
         <scope name="Lbasic_exception;.:moo:342:431.:B:371:431">
@@ -130,17 +134,17 @@
             <ast end="404" start="397" type="14"/>
             <link src="G14_moo_N3"/>
           </node>
-          <node id="G14_moo_N5" kind="throw" ref="#exception" type="Ljava/lang/Exception;">
+          <node id="G14_moo_N5" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
             <ast end="405" start="391" type="53"/>
             <link src="G14_moo_N4"/>
           </node>
-          <node id="G14_moo_N6" kind="join" ref="#exception" type="Ljava/lang/Exception;">
+          <node id="G14_moo_N6" kind="join" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
             <ast end="405" start="381" type="25"/>
             <link label="cond" src="G14_moo_N2"/>
             <link label="true" src="G14_moo_N7"/>
             <link label="false" src="G14_moo_N8"/>
           </node>
-          <node id="G14_moo_N7" ref="#exception" type="Ljava/lang/Exception;"/>
+          <node id="G14_moo_N7" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;"/>
           <node data="a" id="G14_moo_N9" kind="value" type="Ljava/lang/String;">
             <ast end="424" start="421" type="45"/>
           </node>
