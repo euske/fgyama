@@ -888,7 +888,13 @@ public class DFFrame {
             // "x -> { ... }"
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
-            return method.getType(id);
+            DFType lambdaType = method.getType(id);
+            assert lambdaType instanceof DFFunctionalKlass;
+            for (DFFunctionalKlass.ExtRef ref :
+                     ((DFFunctionalKlass)lambdaType).getExtRefs()) {
+                this.addInputRef(ref.getCaptured());
+            }
+            return lambdaType;
 
         } else if (expr instanceof MethodReference) {
             // MethodReference

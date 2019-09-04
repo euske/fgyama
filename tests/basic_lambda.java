@@ -6,9 +6,16 @@ interface Moo {
 
 public class basic_lambda {
 
-    Predicate<Integer> isZero = (x -> x == 0);
+    Predicate<Integer> isZero = (i -> i == 0);
 
-    public static void foo(int x) {
+    public static void main(String[] args) {
         Moo a = Integer::toString;
+        String y = "abc";
+        bar(a);
+        bar(z -> y+z);
+    }
+
+    public static void bar(Moo m) {
+        System.out.println(m.moo(123));
     }
 }

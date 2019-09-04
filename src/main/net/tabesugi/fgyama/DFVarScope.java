@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 //  DFVarScope
 //  Mapping from name -> reference.
 //
-public class DFVarScope {
+public abstract class DFVarScope {
 
     private DFVarScope _outer;
     private String _name;

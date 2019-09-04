@@ -1579,9 +1579,14 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = Utils.encodeASTNode(lambda);
                 DFType lambdaType = typeSpace.getType(id);
-		assert lambdaType != null;
-                ctx.setRValue(
-                    new LambdaNode(graph, scope, lambdaType, lambda));
+		assert lambdaType instanceof DFFunctionalKlass;
+                // Capture values.
+                LambdaNode node = new LambdaNode(graph, scope, lambdaType, lambda);
+                for (DFFunctionalKlass.ExtRef ref :
+                         ((DFFunctionalKlass)lambdaType).getExtRefs()) {
+                    node.accept(ctx.get(ref.getCaptured()), ref.getFullName());
+                }
+                ctx.setRValue(node);
 
             } else if (expr instanceof MethodReference) {
                 //  CreationReference
