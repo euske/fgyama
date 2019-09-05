@@ -29,7 +29,7 @@ public class DFExit {
 
     @Override
     public String toString() {
-        return ("<DFExit: "+_frame+" <- "+_node.getRef()+">");
+        return ("<DFExit: "+_frame+"("+_node.getRef()+") <- "+_node+">");
     }
 
     public DFFrame getFrame() {

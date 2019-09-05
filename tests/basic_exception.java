@@ -8,7 +8,7 @@ public class basic_exception {
         String x = null;
         try {
             x = moo();
-            x = "b";
+            throw new Exception();
         } catch (A e) {
             x = e.text;
         } catch (Exception e) {
