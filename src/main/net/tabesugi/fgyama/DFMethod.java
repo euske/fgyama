@@ -2547,6 +2547,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFFrame frame, DFContext ctx) {
         for (DFExit exit : frame.getExits()) {
             if (exit.getFrame() != frame) continue;
+            if (exit.isContinue()) continue;
             DFNode src = exit.getNode();
             DFRef ref = src.getRef();
             DFNode dst = ctx.getLast(ref);
