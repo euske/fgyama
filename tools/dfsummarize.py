@@ -189,7 +189,7 @@ def main(argv):
     nlinks = 0
     for graph in builder.graphs:
         (name,_,_) = splitmethodname(graph.name)
-        if methods and name not in methods: continue
+        if methods and (name not in methods) and (graph.name not in methods): continue
         if graph.callers: continue
         print('graph:', graph.name, file=sys.stderr)
         done = set()
