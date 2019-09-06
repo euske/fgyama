@@ -768,6 +768,7 @@ public class Java2DF {
         // Build method scopes (lambdas).
         for (DFKlass klass : klasses) {
 	    if (!(klass instanceof DFFunctionalKlass)) continue;
+	    if (klass.getBaseKlass() == null) continue; // unused lambda.
 	    DFMethod init = klass.getInitMethod();
 	    if (init != null) {
 		init.buildScope();
@@ -780,6 +781,7 @@ public class Java2DF {
         // Build call graphs (lambdas).
         for (DFKlass klass : klasses) {
 	    if (!(klass instanceof DFFunctionalKlass)) continue;
+	    if (klass.getBaseKlass() == null) continue; // unused lambda.
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildFrame();

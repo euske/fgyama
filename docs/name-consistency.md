@@ -6,7 +6,7 @@ Intuition:
 Let X be a set of features and Y be the feature that is correlated with X.
 
 (Caution:
-Let's not use a term "variable" here because it mix up with programming terms!)
+Let's not use a term "variable" here because it's mixed up with programming terms!)
 
 When the prediction X → Y has a high confidence, an occurance of
 X → Z (or lack of Y) suggests that there's an inconsistency;

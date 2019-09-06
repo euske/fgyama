@@ -430,6 +430,7 @@ public class DFFrame {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             DFType type = this.buildExpr(finder, method, scope, throwStmt.getExpression());
+	    if (type == null) return;
             this.addOutputRef(scope.lookupException(type));
 
         } else if (stmt instanceof ConstructorInvocation) {
