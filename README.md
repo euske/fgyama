@@ -16,7 +16,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 
 ### Output (SVG)
 
-<img src="docs/Hello.svg">
+<img src="docs/img/Hello.svg">
 
 ### Output (XML)
 
