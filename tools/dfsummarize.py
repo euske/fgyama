@@ -44,6 +44,8 @@ class IRef:
         return '<+%s:%s>' % (self.iid, self.ref)
 
     def connect(self, iref):
+        if iref in self.linkto: return
+        assert self not in iref.linkfrom
         self.linkto.append(iref)
         iref.linkfrom.append(self)
         return
@@ -117,9 +119,9 @@ class IRefComponent:
                 visit(iref)
         for c in cpts:
             c.fixate(sc)
-        return cpts
+        return (sc, cpts)
 
-def trace(done, vtx, iref0=None, cc=None, todo=None):
+def trace(vtx2iref, vtx, iref0=None, cc=None, todo=None):
     node = vtx.node
     ref = node.ref
     if ref is not None and ref[0] not in '%#':
@@ -129,13 +131,13 @@ def trace(done, vtx, iref0=None, cc=None, todo=None):
             iref1 = IRef.get(None, ref)
         yield (iref1, iref0)
         iref0 = iref1
-        if vtx in done: return
-        done[vtx] = iref1
+        if vtx in vtx2iref: return
+        vtx2iref[vtx] = iref1
         while todo is not None:
-            done[todo.car] = iref1
+            vtx2iref[todo.car] = iref1
             todo = todo.cdr
-    elif vtx in done:
-        iref1 = done[vtx]
+    elif vtx in vtx2iref:
+        iref1 = vtx2iref[vtx]
         yield (iref1, iref0)
         return
     else:
@@ -144,14 +146,14 @@ def trace(done, vtx, iref0=None, cc=None, todo=None):
         if link.startswith('_'): continue
         if v.node.kind == 'output' and funcall is not None:
             if cc is None or funcall not in cc:
-                for z in trace(done, v, iref0, Cons(funcall, cc), todo):
+                for z in trace(vtx2iref, v, iref0, Cons(funcall, cc), todo):
                     yield z
         elif node.kind == 'input' and funcall is not None:
             if cc is not None and cc.car is funcall:
-                for z in trace(done, v, iref0, cc.cdr, todo):
+                for z in trace(vtx2iref, v, iref0, cc.cdr, todo):
                     yield z
         else:
-            for z in trace(done, v, iref0, cc, todo):
+            for z in trace(vtx2iref, v, iref0, cc, todo):
                 yield z
     return
 
@@ -194,16 +196,16 @@ def main(argv):
 
     # Enumerate all the flows.
     irefs = set()
+    vtx2iref = {}
     nlinks = 0
     for graph in builder.graphs:
         (name,_,_) = splitmethodname(graph.name)
         if methods and (name not in methods) and (graph.name not in methods): continue
         if graph.callers: continue
         print('graph:', graph.name, file=sys.stderr)
-        done = {}
         for node in graph:
             if not node.inputs: continue
-            mat = trace(done, builder.vtxs[node])
+            mat = trace(vtx2iref, builder.vtxs[node])
             for (iref0, iref1) in mat:
                 assert iref0 is not None
                 if iref1 is None: continue
@@ -218,15 +220,15 @@ def main(argv):
     print('links:', nlinks, file=sys.stderr)
 
     # Discover strong components.
-    cpts = IRefComponent.fromitems(irefs)
-    print('cpts:', len(cpts), file=sys.stderr)
+    (ref2cpt, allcpts) = IRefComponent.fromitems(irefs)
+    print('allcpts:', len(allcpts), file=sys.stderr)
 
     # Discover the most significant edges.
     incount = {}
     incoming = {}
     outcount = {}
     outgoing = {}
-    for cpt in cpts:
+    for cpt in allcpts:
         incount[cpt] = len(cpt.linkfrom)
         incoming[cpt] = 0 if cpt.linkfrom else 1
         outcount[cpt] = len(cpt.linkto)
@@ -247,14 +249,14 @@ def main(argv):
             if outcount[cpt0] == 0:
                 count_bacj(cpt0)
         return
-    for cpt in cpts:
+    for cpt in allcpts:
         if not cpt.linkfrom:
             count_forw(cpt)
         if not cpt.linkto:
             count_bacj(cpt)
 
     maxcount = 0
-    for cpt0 in cpts:
+    for cpt0 in allcpts:
         for cpt1 in cpt0.linkto:
             count = incoming[cpt0] + outgoing[cpt1]
             if maxcount < count:
@@ -279,7 +281,7 @@ def main(argv):
                 maxlinks.add((cpt0, cpt1))
                 trav_back(cpt0)
         return
-    for cpt0 in cpts:
+    for cpt0 in allcpts:
         for cpt1 in cpt0.linkto:
             count = incoming[cpt0] + outgoing[cpt1]
             if count == maxcount:
