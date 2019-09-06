@@ -31,8 +31,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
     // These fields are available after setMapTypes().
     private DFMapType[] _mapTypes = null;
     private Map<String, DFType> _mapTypeMap = null;
-    private Map<String, DFKlass> _paramKlasses =
-        new TreeMap<String, DFKlass>();
+    private ConsistentHashMap<String, DFKlass> _paramKlasses =
+        new ConsistentHashMap<String, DFKlass>();
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -150,6 +150,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
+	if (_paramKlasses != null) {
+	    for (DFKlass pklass : _paramKlasses.values()) {
+		Element epklass = document.createElement("parameterized");
+		epklass.setAttribute("type", pklass.getTypeName());
+		elem.appendChild(epklass);
+	    }
+	}
         for (FieldRef field : _fields) {
             elem.appendChild(field.toXML(document));
         }
