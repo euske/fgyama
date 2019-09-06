@@ -1,6 +1,6 @@
 # Dataflow Summarization
 
-Quick way to present the overall "flow" of a large program.
+Quick way to present the overall "rundown" of a large program.
 
 ## Methodology
 
