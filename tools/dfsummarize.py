@@ -119,7 +119,7 @@ class IRefComponent:
             c.fixate(sc)
         return cpts
 
-def trace(done, vtx, iref0=None, cc=None):
+def trace(done, vtx, iref0=None, cc=None, todo=None):
     node = vtx.node
     ref = node.ref
     if ref is not None and ref[0] not in '%#':
@@ -127,23 +127,31 @@ def trace(done, vtx, iref0=None, cc=None):
             iref1 = IRef.get(cc, ref)
         else:
             iref1 = IRef.get(None, ref)
-        if iref0 is not None:
-            yield (iref1, iref0)
+        yield (iref1, iref0)
         iref0 = iref1
         if vtx in done: return
-        done.add(vtx)
+        done[vtx] = iref1
+        while todo is not None:
+            done[todo.car] = iref1
+            todo = todo.cdr
+    elif vtx in done:
+        iref1 = done[vtx]
+        yield (iref1, iref0)
+        return
+    else:
+        todo = Cons(vtx, todo)
     for (link,v,funcall) in vtx.inputs:
         if link.startswith('_'): continue
         if v.node.kind == 'output' and funcall is not None:
             if cc is None or funcall not in cc:
-                for z in trace(done, v, iref0, Cons(funcall, cc)):
+                for z in trace(done, v, iref0, Cons(funcall, cc), todo):
                     yield z
         elif node.kind == 'input' and funcall is not None:
             if cc is not None and cc.car is funcall:
-                for z in trace(done, v, iref0, cc.cdr):
+                for z in trace(done, v, iref0, cc.cdr, todo):
                     yield z
         else:
-            for z in trace(done, v, iref0, cc):
+            for z in trace(done, v, iref0, cc, todo):
                 yield z
     return
 
@@ -192,11 +200,13 @@ def main(argv):
         if methods and (name not in methods) and (graph.name not in methods): continue
         if graph.callers: continue
         print('graph:', graph.name, file=sys.stderr)
-        done = set()
+        done = {}
         for node in graph:
             if not node.inputs: continue
             mat = trace(done, builder.vtxs[node])
             for (iref0, iref1) in mat:
+                assert iref0 is not None
+                if iref1 is None: continue
                 if iref0 == iref1: continue
                 if debug:
                     print(iref0, '->', iref1)
