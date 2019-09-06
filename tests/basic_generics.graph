@@ -119,6 +119,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_generics/Moo&lt;T&gt;;" path="tests/basic_generics.java">
+    <parameterized type="Lbasic_generics/Moo&lt;Ljava/lang/Object;&gt;;"/>
+    <parameterized type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
+    <parameterized type="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;;"/>
     <field name="@Lbasic_generics/Moo&lt;T&gt;;/.x" static="false" type="Ljava/lang/Object;"/>
     <method abstract="false" name="Lbasic_generics/Moo&lt;T&gt;;.&lt;clinit&gt;()V" style="initializer">
       <ast end="294" start="35" type="55"/>
