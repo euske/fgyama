@@ -163,19 +163,21 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-M maxoverrides] [-f method] [graph ...]' % argv[0])
+        print('usage: %s [-d] [-o output] [-M maxoverrides] [-r ratio] [-f method] [graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:M:f:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:M:r:f:')
     except getopt.GetoptError:
         return usage()
     outpath = None
     maxoverrides = 1
+    ratio = 1.0
     methods = set()
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
         elif k == '-M': maxoverrides = int(v)
+        elif k == '-r': ratio = float(v)
         elif k == '-f': methods.update(v.split(','))
     if not args: return usage()
 
@@ -269,7 +271,7 @@ def main(argv):
         if not cpt0.linkto: return
         mc = max( outgoing[cpt1] for cpt1 in cpt0.linkto )
         for cpt1 in cpt0.linkto:
-            if outgoing[cpt1] == mc:
+            if ratio*mc <= outgoing[cpt1]:
                 maxlinks.add((cpt0, cpt1))
                 trav_forw(cpt1)
         return
@@ -277,14 +279,14 @@ def main(argv):
         if not cpt1.linkfrom: return
         mc = max( incoming[cpt0] for cpt0 in cpt1.linkfrom )
         for cpt0 in cpt1.linkfrom:
-            if incoming[cpt0] == mc:
+            if ratio*mc <= incoming[cpt0]:
                 maxlinks.add((cpt0, cpt1))
                 trav_back(cpt0)
         return
     for cpt0 in allcpts:
         for cpt1 in cpt0.linkto:
             count = incoming[cpt0] + outgoing[cpt1]
-            if count == maxcount:
+            if ratio*maxcount <= count:
                 maxlinks.add((cpt0, cpt1))
                 trav_back(cpt0)
                 trav_forw(cpt1)
@@ -295,7 +297,7 @@ def main(argv):
     print('maxcpts:', len(maxcpts), file=sys.stderr)
 
     # Generate a trimmed graph.
-    out.write('digraph %s {\n' % q(name))
+    out.write('digraph %s {\n' % q(path))
     for cpt in maxcpts:
         out.write(' N%d [label=%s, fontname="courier"];\n' %
                   (cpt.cid, q(str(cpt))))
