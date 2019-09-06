@@ -93,6 +93,7 @@
 <dt> Node (<code>DFNode</code>)
 <dd> A Node represents a value in Java in the dataflow graph.
      A Node is usually tied to a Java type and Ref (optionally).
+     A Node has zero or more connections (<em>Links</em>) to other Nodes.
      It can be also associated with a portion of the original source code.
 
 <dt> Context (<code>DFContext</code>)
