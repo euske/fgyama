@@ -7,92 +7,92 @@
     <method abstract="false" name="Lbasic_switch;.foo(I)I" style="static">
       <ast end="185" start="33" type="31"/>
       <scope name="Lbasic_switch;.:foo:33:185">
-        <node id="G58_foo_N1" kind="input" ref="#arg0" type="I">
+        <node id="M2_foo_N1" kind="input" ref="#arg0" type="I">
           <ast end="60" start="55" type="44"/>
         </node>
-        <node id="G58_foo_N2" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185/$n" type="I">
+        <node id="M2_foo_N2" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185/$n" type="I">
           <ast end="60" start="55" type="44"/>
-          <link src="G58_foo_N1"/>
+          <link src="M2_foo_N1"/>
         </node>
-        <node id="G58_foo_N3" kind="input" ref="#this" type="Lbasic_switch;"/>
-        <node id="G58_foo_N9" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I"/>
-        <node id="G58_foo_N23" kind="output" ref="#return" type="I">
-          <link src="G58_foo_N22"/>
+        <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_switch;"/>
+        <node id="M2_foo_N9" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I"/>
+        <node id="M2_foo_N23" kind="output" ref="#return" type="I">
+          <link src="M2_foo_N22"/>
         </node>
         <scope name="Lbasic_switch;.:foo:33:185.:B:62:185">
-          <node id="G58_foo_N4" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185/$n" type="I">
+          <node id="M2_foo_N4" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185/$n" type="I">
             <ast end="82" start="81" type="42"/>
-            <link src="G58_foo_N2"/>
+            <link src="M2_foo_N2"/>
           </node>
-          <node id="G58_foo_N21" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+          <node id="M2_foo_N21" kind="ref_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
             <ast end="178" start="177" type="42"/>
-            <link src="G58_foo_N20"/>
+            <link src="M2_foo_N20"/>
           </node>
-          <node id="G58_foo_N22" kind="return" ref="#return" type="I">
+          <node id="M2_foo_N22" kind="return" ref="#return" type="I">
             <ast end="179" start="170" type="41"/>
-            <link src="G58_foo_N21"/>
+            <link src="M2_foo_N21"/>
           </node>
           <scope name="Lbasic_switch;.:foo:33:185.:B:62:185.:switch:73:168">
-            <node data="case(1)" id="G58_foo_N5" kind="case" type="I">
+            <node data="case(1)" id="M2_foo_N5" kind="case" type="I">
               <ast end="94" start="87" type="49"/>
-              <link src="G58_foo_N4"/>
-              <link label="match0" src="G58_foo_N6"/>
+              <link src="M2_foo_N4"/>
+              <link label="match0" src="M2_foo_N6"/>
             </node>
-            <node data="1" id="G58_foo_N6" kind="value" type="I">
+            <node data="1" id="M2_foo_N6" kind="value" type="I">
               <ast end="93" start="92" type="34"/>
             </node>
-            <node id="G58_foo_N7" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I"/>
-            <node id="G58_foo_N8" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node id="M2_foo_N7" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I"/>
+            <node id="M2_foo_N8" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="94" start="87" type="49"/>
-              <link label="cond" src="G58_foo_N5"/>
-              <link label="true" src="G58_foo_N7"/>
-              <link label="false" src="G58_foo_N9"/>
+              <link label="cond" src="M2_foo_N5"/>
+              <link label="true" src="M2_foo_N7"/>
+              <link label="false" src="M2_foo_N9"/>
             </node>
-            <node data="case(1)" id="G58_foo_N10" kind="case" type="I">
+            <node data="case(1)" id="M2_foo_N10" kind="case" type="I">
               <ast end="103" start="96" type="49"/>
-              <link src="G58_foo_N4"/>
-              <link label="match0" src="G58_foo_N11"/>
+              <link src="M2_foo_N4"/>
+              <link label="match0" src="M2_foo_N11"/>
             </node>
-            <node data="2" id="G58_foo_N11" kind="value" type="I">
+            <node data="2" id="M2_foo_N11" kind="value" type="I">
               <ast end="102" start="101" type="34"/>
             </node>
-            <node id="G58_foo_N12" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node id="M2_foo_N12" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="110" start="109" type="42"/>
-              <link src="G58_foo_N14"/>
+              <link src="M2_foo_N14"/>
             </node>
-            <node data="100" id="G58_foo_N13" kind="value" type="I">
+            <node data="100" id="M2_foo_N13" kind="value" type="I">
               <ast end="116" start="113" type="34"/>
             </node>
-            <node data="=" id="G58_foo_N14" kind="op_assign" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node data="=" id="M2_foo_N14" kind="op_assign" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="116" start="109" type="7"/>
-              <link label="R" src="G58_foo_N13"/>
+              <link label="R" src="M2_foo_N13"/>
             </node>
-            <node id="G58_foo_N15" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node id="M2_foo_N15" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="103" start="96" type="49"/>
-              <link label="cond" src="G58_foo_N10"/>
-              <link label="true" src="G58_foo_N12"/>
-              <link label="false" src="G58_foo_N8"/>
+              <link label="cond" src="M2_foo_N10"/>
+              <link label="true" src="M2_foo_N12"/>
+              <link label="false" src="M2_foo_N8"/>
             </node>
-            <node data="default" id="G58_foo_N16" kind="case" type="I">
+            <node data="default" id="M2_foo_N16" kind="case" type="I">
               <ast end="139" start="131" type="49"/>
-              <link src="G58_foo_N4"/>
+              <link src="M2_foo_N4"/>
             </node>
-            <node id="G58_foo_N17" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node id="M2_foo_N17" kind="assign_var" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="146" start="145" type="42"/>
-              <link src="G58_foo_N19"/>
+              <link src="M2_foo_N19"/>
             </node>
-            <node data="200" id="G58_foo_N18" kind="value" type="I">
+            <node data="200" id="M2_foo_N18" kind="value" type="I">
               <ast end="152" start="149" type="34"/>
             </node>
-            <node data="=" id="G58_foo_N19" kind="op_assign" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node data="=" id="M2_foo_N19" kind="op_assign" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="152" start="145" type="7"/>
-              <link label="R" src="G58_foo_N18"/>
+              <link label="R" src="M2_foo_N18"/>
             </node>
-            <node id="G58_foo_N20" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
+            <node id="M2_foo_N20" kind="join" ref="$Lbasic_switch;.:foo:33:185.:B:62:185/$x" type="I">
               <ast end="139" start="131" type="49"/>
-              <link label="cond" src="G58_foo_N16"/>
-              <link label="true" src="G58_foo_N17"/>
-              <link label="false" src="G58_foo_N15"/>
+              <link label="cond" src="M2_foo_N16"/>
+              <link label="true" src="M2_foo_N17"/>
+              <link label="false" src="M2_foo_N15"/>
             </node>
           </scope>
         </scope>

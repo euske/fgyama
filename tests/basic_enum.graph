@@ -6,44 +6,44 @@
     <method abstract="false" name="LE;.&lt;clinit&gt;()V" style="initializer">
       <ast end="102" start="0" type="71"/>
       <scope name="LE;.&lt;clinit&gt;">
-        <node data="uninitialized" id="G46_&lt;clinit&gt;_N1" kind="value" type="@null"/>
-        <node id="G46_&lt;clinit&gt;_N2" kind="assign_var" ref="@LE;/.x" type="I">
+        <node data="uninitialized" id="K1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref="@LE;/.x" type="I">
           <ast end="50" start="49" type="59"/>
-          <link src="G46_&lt;clinit&gt;_N1"/>
+          <link src="K1_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
     <method abstract="false" name="LE;.&lt;init&gt;(I)LE;" style="constructor">
       <ast end="100" start="56" type="31"/>
       <scope name="LE;.:E:56:100">
-        <node id="G47_&lt;init&gt;_N1" kind="input" ref="#arg0" type="I">
+        <node id="M2_&lt;init&gt;_N1" kind="input" ref="#arg0" type="I">
           <ast end="71" start="66" type="44"/>
         </node>
-        <node id="G47_&lt;init&gt;_N2" kind="assign_var" ref="$LE;.:E:56:100/$x" type="I">
+        <node id="M2_&lt;init&gt;_N2" kind="assign_var" ref="$LE;.:E:56:100/$x" type="I">
           <ast end="71" start="66" type="44"/>
-          <link src="G47_&lt;init&gt;_N1"/>
+          <link src="M2_&lt;init&gt;_N1"/>
         </node>
-        <node id="G47_&lt;init&gt;_N3" kind="input" ref="#this" type="LE;"/>
-        <node id="G47_&lt;init&gt;_N8" kind="output" ref="@LE;/.x" type="I">
-          <link src="G47_&lt;init&gt;_N5"/>
+        <node id="M2_&lt;init&gt;_N3" kind="input" ref="#this" type="LE;"/>
+        <node id="M2_&lt;init&gt;_N8" kind="output" ref="@LE;/.x" type="I">
+          <link src="M2_&lt;init&gt;_N5"/>
         </node>
         <scope name="LE;.:E:56:100.:B:73:100">
-          <node id="G47_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="LE;">
+          <node id="M2_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="LE;">
             <ast end="87" start="83" type="52"/>
-            <link src="G47_&lt;init&gt;_N3"/>
+            <link src="M2_&lt;init&gt;_N3"/>
           </node>
-          <node id="G47_&lt;init&gt;_N5" kind="assign_field" ref="@LE;/.x" type="I">
+          <node id="M2_&lt;init&gt;_N5" kind="assign_field" ref="@LE;/.x" type="I">
             <ast end="89" start="83" type="22"/>
-            <link label="obj" src="G47_&lt;init&gt;_N4"/>
-            <link src="G47_&lt;init&gt;_N7"/>
+            <link label="obj" src="M2_&lt;init&gt;_N4"/>
+            <link src="M2_&lt;init&gt;_N7"/>
           </node>
-          <node id="G47_&lt;init&gt;_N6" kind="ref_var" ref="$LE;.:E:56:100/$x" type="I">
+          <node id="M2_&lt;init&gt;_N6" kind="ref_var" ref="$LE;.:E:56:100/$x" type="I">
             <ast end="93" start="92" type="42"/>
-            <link src="G47_&lt;init&gt;_N2"/>
+            <link src="M2_&lt;init&gt;_N2"/>
           </node>
-          <node data="=" id="G47_&lt;init&gt;_N7" kind="op_assign" ref="@LE;/.x" type="I">
+          <node data="=" id="M2_&lt;init&gt;_N7" kind="op_assign" ref="@LE;/.x" type="I">
             <ast end="93" start="83" type="7"/>
-            <link label="R" src="G47_&lt;init&gt;_N6"/>
+            <link label="R" src="M2_&lt;init&gt;_N6"/>
           </node>
         </scope>
       </scope>
@@ -57,40 +57,40 @@
     <method abstract="false" name="Lbasic_enum;.foo()V" style="static">
       <ast end="292" start="134" type="31"/>
       <scope name="Lbasic_enum;.:foo:134:292">
-        <node id="G48_foo_N1" kind="input" ref="#this" type="Lbasic_enum;"/>
-        <node id="G48_foo_N2" kind="input" ref="@LE;/.Moo" type="LE;"/>
-        <node id="G48_foo_N3" kind="input" ref="@LE;/.Baa" type="LE;"/>
+        <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_enum;"/>
+        <node id="M4_foo_N2" kind="input" ref="@LE;/.Moo" type="LE;"/>
+        <node id="M4_foo_N3" kind="input" ref="@LE;/.Baa" type="LE;"/>
         <scope name="Lbasic_enum;.:foo:134:292.:B:159:292">
-          <node id="G48_foo_N4" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+          <node id="M4_foo_N4" kind="ref_field" ref="@LE;/.Moo" type="LE;">
             <ast end="180" start="175" type="40"/>
-            <link src="G48_foo_N2"/>
+            <link src="M4_foo_N2"/>
           </node>
-          <node id="G48_foo_N5" kind="assign_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
+          <node id="M4_foo_N5" kind="assign_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
             <ast end="180" start="171" type="59"/>
-            <link src="G48_foo_N4"/>
+            <link src="M4_foo_N4"/>
           </node>
-          <node id="G48_foo_N6" kind="ref_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
+          <node id="M4_foo_N6" kind="ref_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
             <ast end="199" start="198" type="42"/>
-            <link src="G48_foo_N5"/>
+            <link src="M4_foo_N5"/>
           </node>
-          <node id="G48_foo_N8" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+          <node id="M4_foo_N8" kind="ref_field" ref="@LE;/.Moo" type="LE;">
             <ast end="219" start="216" type="42"/>
-            <link src="G48_foo_N2"/>
+            <link src="M4_foo_N2"/>
           </node>
-          <node id="G48_foo_N10" kind="ref_field" ref="@LE;/.Baa" type="LE;">
+          <node id="M4_foo_N10" kind="ref_field" ref="@LE;/.Baa" type="LE;">
             <ast end="256" start="253" type="42"/>
-            <link src="G48_foo_N3"/>
+            <link src="M4_foo_N3"/>
           </node>
           <scope name="Lbasic_enum;.:foo:134:292.:B:159:292.:switch:190:286">
-            <node data="case(1)" id="G48_foo_N7" kind="case" type="LE;">
+            <node data="case(1)" id="M4_foo_N7" kind="case" type="LE;">
               <ast end="220" start="211" type="49"/>
-              <link src="G48_foo_N6"/>
-              <link label="match0" src="G48_foo_N8"/>
+              <link src="M4_foo_N6"/>
+              <link label="match0" src="M4_foo_N8"/>
             </node>
-            <node data="case(1)" id="G48_foo_N9" kind="case" type="LE;">
+            <node data="case(1)" id="M4_foo_N9" kind="case" type="LE;">
               <ast end="257" start="248" type="49"/>
-              <link src="G48_foo_N6"/>
-              <link label="match0" src="G48_foo_N10"/>
+              <link src="M4_foo_N6"/>
+              <link label="match0" src="M4_foo_N10"/>
             </node>
           </scope>
         </scope>
