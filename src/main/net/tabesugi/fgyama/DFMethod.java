@@ -2609,6 +2609,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         } else if (_ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)_ast;
             body = lambda.getBody();
+	    if (!_scope.isDefined()) {
+		Logger.error("DFMethod.processMethod: Undefined lambda:", this);
+		return null;
+	    }
             this.processLambda(graph, ctx, lambda);
         } else {
             throw new InvalidSyntax(_ast);
@@ -2867,6 +2871,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
         }
+
+	public boolean isDefined() {
+	    return _return != null && _arguments != null;
+	}
 
         @Override
         public DFRef lookupArgument(int index)
