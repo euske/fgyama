@@ -891,9 +891,9 @@ public class DFFrame {
             String id = Utils.encodeASTNode(lambda);
             DFType lambdaType = method.getType(id);
             assert lambdaType instanceof DFFunctionalKlass;
-            for (DFFunctionalKlass.ExtRef ref :
-                     ((DFFunctionalKlass)lambdaType).getExtRefs()) {
-                this.addInputRef(ref.getCaptured());
+            for (DFFunctionalKlass.CapturedRef captured :
+                     ((DFFunctionalKlass)lambdaType).getCapturedRefs()) {
+                this.addInputRef(captured.getOriginal());
             }
             return lambdaType;
 

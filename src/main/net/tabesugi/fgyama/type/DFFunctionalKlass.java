@@ -20,8 +20,8 @@ class DFFunctionalKlass extends DFKlass {
 
     private class LambdaScope extends DFVarScope {
 
-        private Map<String, ExtRef> _id2ext =
-            new HashMap<String, ExtRef>();
+        private Map<String, CapturedRef> _id2captured =
+            new HashMap<String, CapturedRef>();
 
         public LambdaScope(DFVarScope outer, String id) {
             super(outer, id);
@@ -30,32 +30,33 @@ class DFFunctionalKlass extends DFKlass {
         @Override
         public DFRef lookupVar(String id)
             throws VariableNotFound {
-            DFRef ref = _id2ext.get(id);
+            DFRef ref = _id2captured.get(id);
             if (ref != null) return ref;
             ref = super.lookupVar(id);
             if (ref != null) {
-                // ref is an external variable.
-                ExtRef extref = new ExtRef(ref, id);
-                DFFunctionalKlass.this.addExtRef(extref);
-                _id2ext.put(id, extref);
+                // replace ref with a captured variable.
+                CapturedRef captured = new CapturedRef(ref, id);
+                DFFunctionalKlass.this.addCapturedRef(captured);
+                _id2captured.put(id, captured);
+                ref = captured;
             }
             return ref;
         }
     }
 
-    public class ExtRef extends DFRef {
+    public class CapturedRef extends DFRef {
 
-        private DFRef _captured;
+        private DFRef _original;
         private String _name;
 
-        public ExtRef(DFRef captured, String name) {
-            super(captured.getRefType());
-            _captured = captured;
+        public CapturedRef(DFRef original, String name) {
+            super(original.getRefType());
+            _original = original;
             _name = name;
         }
 
-        public DFRef getCaptured() {
-            return _captured;
+        public DFRef getOriginal() {
+            return _original;
         }
 
         @Override
@@ -70,8 +71,8 @@ class DFFunctionalKlass extends DFKlass {
     }
 
     private LambdaScope _lambdaScope = null;
-    private List<ExtRef> _extrefs =
-        new ArrayList<ExtRef>();
+    private List<CapturedRef> _captured =
+        new ArrayList<CapturedRef>();
     private FunctionalMethod _funcMethod = null;
 
     public DFFunctionalKlass(
@@ -91,13 +92,13 @@ class DFFunctionalKlass extends DFKlass {
         return _funcMethod;
     }
 
-    private void addExtRef(ExtRef ref) {
-        _extrefs.add(ref);
+    private void addCapturedRef(CapturedRef ref) {
+        _captured.add(ref);
     }
 
-    public ExtRef[] getExtRefs() {
-        ExtRef[] refs = new ExtRef[_extrefs.size()];
-        _extrefs.toArray(refs);
+    public CapturedRef[] getCapturedRefs() {
+        CapturedRef[] refs = new CapturedRef[_captured.size()];
+        _captured.toArray(refs);
         return refs;
     }
 

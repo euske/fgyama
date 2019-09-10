@@ -1587,9 +1587,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 		assert lambdaType instanceof DFFunctionalKlass;
                 // Capture values.
                 LambdaNode node = new LambdaNode(graph, scope, lambdaType, lambda);
-                for (DFFunctionalKlass.ExtRef ref :
-                         ((DFFunctionalKlass)lambdaType).getExtRefs()) {
-                    node.accept(ctx.get(ref.getCaptured()), ref.getFullName());
+                for (DFFunctionalKlass.CapturedRef captured :
+                         ((DFFunctionalKlass)lambdaType).getCapturedRefs()) {
+                    node.accept(ctx.get(captured.getOriginal()), captured.getFullName());
                 }
                 ctx.setRValue(node);
 
