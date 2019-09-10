@@ -346,10 +346,10 @@ class ValueSetNode extends DFNode {
     }
 }
 
-// LambdaNode: represents a lambda (functional interface).
-class LambdaNode extends DFNode {
+// CaptureNode: represents variable captures (for lambdas).
+class CaptureNode extends DFNode {
 
-    public LambdaNode(
+    public CaptureNode(
         DFGraph graph, DFVarScope scope, DFType type,
         ASTNode ast) {
         super(graph, scope, type, null, ast);
@@ -357,7 +357,7 @@ class LambdaNode extends DFNode {
 
     @Override
     public String getKind() {
-        return "lambda";
+        return "capture";
     }
 }
 
@@ -1586,7 +1586,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFType lambdaType = typeSpace.getType(id);
 		assert lambdaType instanceof DFFunctionalKlass;
                 // Capture values.
-                LambdaNode node = new LambdaNode(graph, scope, lambdaType, lambda);
+                CaptureNode node = new CaptureNode(graph, scope, lambdaType, lambda);
                 for (DFFunctionalKlass.CapturedRef captured :
                          ((DFFunctionalKlass)lambdaType).getCapturedRefs()) {
                     node.accept(ctx.get(captured.getOriginal()), captured.getFullName());
