@@ -2587,9 +2587,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
      * Performs dataflow analysis for a given method.
      */
     @SuppressWarnings("unchecked")
-    public DFGraph processMethod()
+    public DFGraph processMethod(Counter counter)
         throws InvalidSyntax, EntityNotFound {
         if (_ast == null) return null;
+
+        assert _graphId == null;
+        _graphId = "M"+counter.getNewId()+"_"+_name;
 
         assert _scope != null;
         assert _frame != null;
@@ -2708,7 +2711,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     @SuppressWarnings("unchecked")
-    public DFGraph processKlassBody()
+    public DFGraph processKlassBody(Counter counter)
         throws InvalidSyntax, EntityNotFound {
         // lookup base/inner klasses.
         assert _ast != null;
@@ -2722,6 +2725,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         } else {
             throw new InvalidSyntax(_ast);
         }
+
+        assert _graphId == null;
+        _graphId = "K"+counter.getNewId()+"_"+_name;
 
         assert _scope != null;
         assert _frame != null;
@@ -2781,15 +2787,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     // DFGraph methods.
 
-    private static int _graphIdBase = 1;
-    private int _graphId = 0;
-
+    private String _graphId = null;
     public String getGraphId() {
-        if (_graphId == 0) {
-            // Assign a unique id.
-            _graphId = _graphIdBase++;
-        }
-        return "G"+_graphId+"_"+_name;
+        assert _graphId != null;
+        return _graphId;
     }
 
     private List<DFNode> _nodes =

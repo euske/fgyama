@@ -809,13 +809,13 @@ public class Java2DF {
 
     // Pass5: generate graphs for each method.
     @SuppressWarnings("unchecked")
-    public void buildGraphs(DFKlass klass, boolean strict)
+    public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
         this.startKlass(klass);
         try {
             DFMethod init = klass.getInitMethod();
             if (init != null) {
-                DFGraph graph = init.processKlassBody();
+                DFGraph graph = init.processKlassBody(counter);
                 if (graph != null) {
                     this.exportGraph(graph);
                 }
@@ -825,7 +825,7 @@ public class Java2DF {
         }
         for (DFMethod method : klass.getMethods()) {
             try {
-                DFGraph graph = method.processMethod();
+                DFGraph graph = method.processMethod(counter);
                 if (graph != null) {
                     Logger.debug("Success:", method.getSignature());
                     this.exportGraph(graph);
@@ -948,11 +948,12 @@ public class Java2DF {
 	}
         XmlExporter exporter = new XmlExporter();
         converter.addExporter(exporter);
+        Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
             if (processed != null && !processed.contains(klass.getTypeName())) continue;
             Logger.info("Pass5:", klass);
             try {
-                converter.buildGraphs(klass, strict);
+                converter.buildGraphs(counter, klass, strict);
             } catch (EntityNotFound e) {
                 Logger.error("Pass5: EntityNotFound at", klass,
                              "("+e.name+", method="+e.method+

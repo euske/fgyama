@@ -53,8 +53,9 @@ public class UnitTestDF extends XMLTestCase {
             _converter.loadKlasses(javaPath, cunit, klasses);
         }
         _converter.listMethods(klasses);
+        Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
-            _converter.buildGraphs(klass, false);
+            _converter.buildGraphs(counter, klass, false);
         }
 	exporter.close();
         _converter.removeExporter(exporter);
@@ -152,7 +153,7 @@ public class UnitTestDF extends XMLTestCase {
     }
 
     @Test
-    public void test_19_multi_xref() throws Exception {
+    public void test_20_multi_xref() throws Exception {
 	compareXml(
             new String[] {
                 TESTDATA+"/multi/dom/meep/multi_xref1.java",
@@ -160,5 +161,10 @@ public class UnitTestDF extends XMLTestCase {
                 TESTDATA+"/multi/dom/dood/multi_xref3.java",
             },
             TESTDATA+"/multi/multi_xref.graph");
+    }
+
+    @Test
+    public void test_21_basic_lambda() throws Exception {
+        compareXml(TESTDATA+"/basic_lambda.java", TESTDATA+"/basic_lambda.graph");
     }
 }
