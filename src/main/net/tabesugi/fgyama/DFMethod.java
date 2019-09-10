@@ -795,7 +795,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _name = name;
         _callStyle = callStyle;
         _scope = new MethodScope(outer, id);
-        _frame = new DFFrame(DFFrame.RETURNABLE);
+        _frame = new DFFrame(this, DFFrame.RETURNABLE);
         _abstract = isAbstract;
     }
 

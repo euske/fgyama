@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFFrame {
 
+    private DFMethod _method;
     private String _label;
     private DFFrame _outer;
 
@@ -27,23 +28,24 @@ public class DFFrame {
     public static final String CATCHABLE = "@CATCHABLE";
     public static final String RETURNABLE = "@RETURNABLE";
 
-    public DFFrame(String label) {
-        this(label, null);
+    public DFFrame(DFMethod method, String label) {
+        this(method, label, null);
     }
 
-    public DFFrame(String label, DFFrame outer) {
+    private DFFrame(DFMethod method, String label, DFFrame outer) {
         assert label != null;
+	_method = method;
         _label = label;
         _outer = outer;
     }
 
     @Override
     public String toString() {
-        return ("<DFFrame("+_label+")>");
+        return ("<DFFrame("+_method+":"+_label+")>");
     }
 
     private DFFrame addChild(String label, ASTNode ast) {
-        DFFrame frame = new DFFrame(label, this);
+        DFFrame frame = new DFFrame(_method, label, this);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
