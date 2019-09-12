@@ -2583,103 +2583,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
     }
 
-    /**
-     * Performs dataflow analysis for a given method.
-     */
     @SuppressWarnings("unchecked")
-    public DFGraph processMethod(Counter counter)
-        throws InvalidSyntax, EntityNotFound {
-        if (_ast == null) return null;
-
-        assert _graphId == null;
-        _graphId = "M"+counter.getNewId()+"_"+_name;
-
-        assert _scope != null;
-        assert _frame != null;
-        assert _finder != null;
-        DFGraph graph = this;
-        DFContext ctx = new DFContext(graph, _scope);
-        ASTNode body;
-
-        if (_ast instanceof MethodDeclaration) {
-            MethodDeclaration methodDecl = (MethodDeclaration)_ast;
-            body = methodDecl.getBody();
-            if (body == null) return null;
-            this.processMethodDecl(graph, ctx, methodDecl);
-        } else if (_ast instanceof LambdaExpression) {
-            LambdaExpression lambda = (LambdaExpression)_ast;
-            body = lambda.getBody();
-	    if (!_scope.isDefined()) {
-		Logger.error("DFMethod.processMethod: Undefined lambda:", this);
-		return null;
-	    }
-            this.processLambda(graph, ctx, lambda);
-        } else {
-            throw new InvalidSyntax(_ast);
-        }
-
-        // Create input nodes.
-        ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
-        {
-            DFRef ref = _scope.lookupThis();
-            DFNode input = new InputNode(graph, _scope, ref, null);
-            ctx.set(input);
-            preserved.add(input);
-        }
-        for (DFRef ref : _frame.getInputRefs()) {
-            if (ref.isLocal()) continue;
-            if (ref instanceof MethodScope.InternalRef) continue;
-            DFNode input = new InputNode(graph, _scope, ref, null);
-            ctx.set(input);
-            preserved.add(input);
-        }
-
-        try {
-            if (body instanceof Statement) {
-                processStatement(
-                    ctx, this, graph, _finder, _scope, _frame,
-                    (Statement)body);
-            } else if (body instanceof Expression) {
-                processExpression(
-                    ctx, this, graph, _finder, _scope, _frame,
-                    (Expression)body);
-                ReturnNode ret = new ReturnNode(graph, _scope, body);
-                ret.accept(ctx.getRValue());
-                ctx.set(ret);
-            }
-        } catch (MethodNotFound e) {
-            e.setMethod(this);
-            Logger.error(
-                "DFMethod.processMethod: MethodNotFound",
-                this, e.name+"("+Utils.join(e.argTypes)+")");
-            throw e;
-        } catch (EntityNotFound e) {
-            e.setMethod(this);
-            Logger.error(
-                "DFMethod.processMethod: EntityNotFound",
-                this, e.name);
-            throw e;
-        }
-
-        // Cleanup.
-        this.closeFrame(_frame, ctx);
-
-        // Create output nodes.
-        for (DFRef ref : _frame.getOutputRefs()) {
-            if (ref.isLocal() &&
-                !(ref instanceof MethodScope.InternalRef)) continue;
-            DFNode output = new OutputNode(graph, _scope, ref, null);
-            output.accept(ctx.get(ref));
-            preserved.add(output);
-        }
-
-        // Do not remove input/output nodes.
-        this.cleanup(preserved);
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void processMethodDecl(
+    private void setupMethodDecl(
         DFGraph graph, DFContext ctx, MethodDeclaration methodDecl)
         throws InvalidSyntax, EntityNotFound {
         int i = 0;
@@ -2697,7 +2602,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     @SuppressWarnings("unchecked")
-    private void processLambda(
+    private void setupLambda(
         DFGraph graph, DFContext ctx, LambdaExpression lambda)
         throws InvalidSyntax, EntityNotFound {
         int i = 0;
@@ -2724,8 +2629,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             decls = ((AbstractTypeDeclaration)_ast).bodyDeclarations();
         } else if (_ast instanceof AnonymousClassDeclaration) {
             decls = ((AnonymousClassDeclaration)_ast).bodyDeclarations();
-        } else if (_ast instanceof LambdaExpression) {
-            return null;
         } else {
             throw new InvalidSyntax(_ast);
         }
@@ -2786,6 +2689,99 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         this.closeFrame(_frame, ctx);
 
         this.cleanup(null);
+        return this;
+    }
+
+    /**
+     * Performs dataflow analysis for a given method.
+     */
+    @SuppressWarnings("unchecked")
+    public DFGraph processMethod(Counter counter)
+        throws InvalidSyntax, EntityNotFound {
+        if (_ast == null) return null;
+
+        assert _graphId == null;
+        _graphId = "M"+counter.getNewId()+"_"+_name;
+
+        assert _scope != null;
+        assert _frame != null;
+        assert _finder != null;
+        DFGraph graph = this;
+        DFContext ctx = new DFContext(graph, _scope);
+        ASTNode body;
+
+        if (_ast instanceof MethodDeclaration) {
+            MethodDeclaration methodDecl = (MethodDeclaration)_ast;
+            body = methodDecl.getBody();
+            if (body == null) return null;
+            this.setupMethodDecl(graph, ctx, methodDecl);
+        } else if (_ast instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)_ast;
+            body = lambda.getBody();
+	    if (!_scope.isDefined()) {
+		Logger.error("DFMethod.processMethod: Undefined lambda:", this);
+		return null;
+	    }
+            this.setupLambda(graph, ctx, lambda);
+        } else {
+            throw new InvalidSyntax(_ast);
+        }
+
+        // Create input nodes.
+        ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
+        {
+            DFRef ref = _scope.lookupThis();
+            DFNode input = new InputNode(graph, _scope, ref, null);
+            ctx.set(input);
+            preserved.add(input);
+        }
+        for (DFRef ref : _frame.getInputRefs()) {
+            if (ref.isLocal()) continue;
+            if (ref instanceof MethodScope.InternalRef) continue;
+            DFNode input = new InputNode(graph, _scope, ref, null);
+            ctx.set(input);
+            preserved.add(input);
+        }
+
+        try {
+            if (body instanceof Statement) {
+                processStatement(
+                    ctx, this, graph, _finder, _scope, _frame,
+                    (Statement)body);
+            } else if (body instanceof Expression) {
+                processExpression(
+                    ctx, this, graph, _finder, _scope, _frame,
+                    (Expression)body);
+                ReturnNode ret = new ReturnNode(graph, _scope, body);
+                ret.accept(ctx.getRValue());
+                ctx.set(ret);
+            }
+        } catch (MethodNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "DFMethod.processMethod: MethodNotFound",
+                this, e.name+"("+Utils.join(e.argTypes)+")");
+            throw e;
+        } catch (EntityNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "DFMethod.processMethod: EntityNotFound",
+                this, e.name);
+            throw e;
+        }
+        this.closeFrame(_frame, ctx);
+
+        // Create output nodes.
+        for (DFRef ref : _frame.getOutputRefs()) {
+            if (ref.isLocal() &&
+                !(ref instanceof MethodScope.InternalRef)) continue;
+            DFNode output = new OutputNode(graph, _scope, ref, null);
+            output.accept(ctx.get(ref));
+            preserved.add(output);
+        }
+
+        // Do not remove input/output nodes.
+        this.cleanup(preserved);
         return this;
     }
 

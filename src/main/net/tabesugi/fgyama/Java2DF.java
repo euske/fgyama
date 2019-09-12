@@ -812,17 +812,19 @@ public class Java2DF {
     public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
         this.startKlass(klass);
-        try {
-            DFMethod init = klass.getInitMethod();
-            if (init != null) {
-                DFGraph graph = init.processKlassBody(counter);
-                if (graph != null) {
-                    this.exportGraph(graph);
-                }
-            }
-        } catch (EntityNotFound e) {
-            if (strict) throw e;
-        }
+	if (!(klass instanceof DFFunctionalKlass)) {
+	    try {
+		DFMethod init = klass.getInitMethod();
+		if (init != null) {
+		    DFGraph graph = init.processKlassBody(counter);
+		    if (graph != null) {
+			this.exportGraph(graph);
+		    }
+		}
+	    } catch (EntityNotFound e) {
+		if (strict) throw e;
+	    }
+	}
         for (DFMethod method : klass.getMethods()) {
             try {
                 DFGraph graph = method.processMethod(counter);
@@ -950,7 +952,7 @@ public class Java2DF {
         converter.addExporter(exporter);
         Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
-            if (processed != null && !processed.contains(klass.getTypeName())) continue;
+            if (processed != null && !processed.contains(klass.getFilePath())) continue;
             Logger.info("Pass5:", klass);
             try {
                 converter.buildGraphs(counter, klass, strict);

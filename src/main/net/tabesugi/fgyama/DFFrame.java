@@ -525,9 +525,11 @@ public class DFFrame {
                         try {
                             type = finder.lookupType(qname.getQualifier());
                         } catch (TypeNotFound e) {
-			    Logger.error(
-				"DFFrame.buildExpr: VariableNotFound (name)",
-				this, e.name, name);
+			    // Do not display an error message as this could be
+			    // recursively called from another buildExpr()
+			    //Logger.error(
+			    //    "DFFrame.buildExpr: VariableNotFound (name)",
+			    //    this, e.name, name);
                             return null;
                         }
                     }
@@ -537,9 +539,11 @@ public class DFFrame {
                     ref = klass.lookupField(fieldName);
                 }
             } catch (VariableNotFound e) {
-		Logger.error(
-		    "DFFrame.buildExpr: VariableNotFound (name)",
-		    this, e.name, name);
+		// Do not display an error message as this could be
+		// recursively called from another buildExpr()
+		//Logger.error(
+		//    "DFFrame.buildExpr: VariableNotFound (name)",
+		//    this, e.name, name);
                 return null;
             }
             this.addInputRef(ref);
