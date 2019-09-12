@@ -849,14 +849,13 @@ public class Java2DF {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
-        Set<String> processed = null;
+	List<String> jarfiles = new ArrayList<String>();
+        Set<String> processed = new HashSet<String>();
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
         Logger.LogLevel = 0;
 
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
-	DFBuiltinTypes.initialize(rootSpace);
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--")) {
@@ -891,15 +890,12 @@ public class Java2DF {
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
                 }
-            } else if (arg.equals("-p")) {
-                if (processed == null) {
-                    processed = new HashSet<String>();
-                }
-                processed.add(args[++i]);
             } else if (arg.equals("-C")) {
                 for (String path : args[++i].split(sep)) {
-                    rootSpace.loadJarFile(path);
+		    jarfiles.add(path);
                 }
+            } else if (arg.equals("-p")) {
+                processed.add(args[++i]);
             } else if (arg.equals("-S")) {
                 strict = true;
             } else if (arg.startsWith("-")) {
@@ -913,6 +909,14 @@ public class Java2DF {
                 files.add(arg);
             }
         }
+
+	// Initialize base classes.
+        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
+	DFBuiltinTypes.initialize(rootSpace);
+	for (String path : jarfiles) {
+            Logger.info("Loading:", path);
+	    rootSpace.loadJarFile(path);
+	}
 
         // Process files.
         Java2DF converter = new Java2DF(rootSpace);
@@ -952,7 +956,7 @@ public class Java2DF {
         converter.addExporter(exporter);
         Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
-            if (processed != null && !processed.contains(klass.getFilePath())) continue;
+            if (!processed.isEmpty() && !processed.contains(klass.getFilePath())) continue;
             Logger.info("Pass5:", klass);
             try {
                 converter.buildGraphs(counter, klass, strict);
