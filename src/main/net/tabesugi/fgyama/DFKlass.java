@@ -15,6 +15,12 @@ import org.w3c.dom.*;
 //
 public class DFKlass extends DFTypeSpace implements DFType {
 
+    private enum LoadState {
+	Unloaded,
+	Loading,
+	Loaded,
+    };
+
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
@@ -43,7 +49,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFTypeFinder _finder = null;
 
     // The following fields are available after the klass is loaded.
-    private boolean _built = false;
+    private LoadState _state = LoadState.Unloaded;
     private boolean _interface = false;
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
@@ -111,7 +117,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
 
         // not loaded yet!
-        assert !_built;
+        assert _state == LoadState.Unloaded;
     }
 
     @Override
@@ -187,6 +193,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isFuncInterface() {
+	assert _state == LoadState.Loaded;
         if (!_interface) return false;
         // Count the number of abstract methods.
         int n = 0;
@@ -728,7 +735,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public void setFinder(DFTypeFinder finder) {
-        assert !_built;
+        assert _state == LoadState.Unloaded;
         //assert _finder == null || _finder == finder;
 	_finder = new DFTypeFinder(this, finder);
     }
@@ -776,30 +783,30 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFKlass getBaseKlass() {
-        assert _built;
+        assert _state == LoadState.Loaded;
         return _baseKlass;
     }
 
     public DFKlass[] getBaseIfaces() {
-        assert _built;
+        assert _state == LoadState.Loaded;
         return _baseIfaces;
     }
 
     public boolean isEnum() {
-        assert _built;
+        assert _state == LoadState.Loaded;
         return (_baseKlass != null &&
 		_baseKlass._genericKlass ==
                 DFBuiltinTypes.getEnumKlass());
     }
 
     public DFMethod getInitMethod() {
-        assert _built;
+        assert _state == LoadState.Loaded;
         return _initMethod;
     }
 
     protected DFRef lookupField(String id)
         throws VariableNotFound {
-        assert _built;
+        assert _state == LoadState.Loaded;
         if (_klassScope != null) {
             try {
                 return _klassScope.lookupField(id);
@@ -829,12 +836,12 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public List<FieldRef> getFields() {
-        assert _built;
+        assert _state == LoadState.Loaded;
 	return _fields;
     }
 
     public List<DFMethod> getMethods() {
-        assert _built;
+        assert _state == LoadState.Loaded;
 	return _methods;
     }
 
@@ -863,7 +870,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod lookupMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
-        assert _built;
+        assert _state == LoadState.Loaded;
         DFMethod method = this.lookupMethod1(callStyle, name, argTypes);
         if (method != null) {
             return method;
@@ -950,14 +957,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return false;
     }
 
-    public boolean isBuilt() {
-        return _built;
-    }
-
     public void load()
         throws InvalidSyntax {
-        if (_built) return;
-        _built = true;
+        if (_state != LoadState.Unloaded) return;
+        _state = LoadState.Loading;
         if (_outerKlass != null) {
             _outerKlass.load();
         }
@@ -991,24 +994,25 @@ public class DFKlass extends DFTypeSpace implements DFType {
                     this, _jarPath+"/"+_entPath);
             }
         }
+        _state = LoadState.Loaded;
     }
 
     protected void buildManually(
         boolean isInterface, DFKlass baseKlass, DFKlass[] baseIfaces) {
-        assert !_built;
-        _built = true;
+        assert _state == LoadState.Unloaded;
         _interface = isInterface;
         if (_outerKlass != null) {
-            assert _outerKlass.isBuilt();
+            assert _outerKlass._state == LoadState.Loaded;
         }
 	_baseKlass = baseKlass;
-	assert _baseKlass.isBuilt();
+	assert _baseKlass._state == LoadState.Loaded;
         _baseIfaces = baseIfaces;
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
-                assert iface.isBuilt();
+                assert iface._state == LoadState.Loaded;
             }
         }
+        _state = LoadState.Loaded;
     }
 
     private void buildMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
