@@ -49,12 +49,12 @@ public class DFBuiltinTypes {
 
     private static DFKlass createKlass(DFTypeSpace typeSpace, String id) {
         return typeSpace.addKlass(
-            id, new DFKlass(id, typeSpace, null, null));
+            id, new DFKlass(id, typeSpace, null, null, _object));
     }
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
-            super("_Array", typeSpace, null, null);
+            super("_Array", typeSpace, null, null, baseKlass);
             this.loadManually(false, baseKlass, null);
             this.addField("length", false, DFBasicType.INT);
         }

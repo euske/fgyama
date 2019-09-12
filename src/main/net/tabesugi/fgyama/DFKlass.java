@@ -63,12 +63,15 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     public DFKlass(
         String name, DFTypeSpace outerSpace,
-        DFKlass outerKlass, DFVarScope outerScope) {
+        DFKlass outerKlass, DFVarScope outerScope,
+        DFKlass baseKlass) {
 	super(name, outerSpace);
         _name = name;
         _outerSpace = outerSpace;
         _outerKlass = outerKlass;
 	_outerScope = outerScope;
+        // Set temporary baseKlass until this is fully loaded.
+        _baseKlass = baseKlass;
         _klassScope = new KlassScope(_outerScope, _name);
     }
 
@@ -86,6 +89,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _outerSpace = genericKlass._outerSpace;
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
+        _baseKlass = genericKlass._baseKlass;
         String subname = genericKlass._name + getParamName(paramTypes);
         _klassScope = new KlassScope(_outerScope, subname);
 
@@ -686,8 +690,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 cstr.getAnonymousClassDeclaration();
             if (anonDecl != null) {
                 String id = Utils.encodeASTNode(anonDecl);
-                DFKlass anonKlass = space.addKlass(
-                    id, new DFKlass(id, space, this, outerScope));
+                DFKlass anonKlass = new DFKlass(
+                    id, space, this, outerScope, DFBuiltinTypes.getObjectKlass());
+                space.addKlass(id, anonKlass);
                 anonKlass.setKlassTree(this.getFilePath(), anonDecl);
             }
 
@@ -713,8 +718,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
             //  TypeMethodReference
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
-            DFKlass methodrefKlass = space.addKlass(
-                id, new DFKlass(id, space, this, outerScope));
+            DFKlass methodrefKlass = new DFKlass(
+                id, space, this, outerScope, DFBuiltinTypes.getObjectKlass());
+            space.addKlass(id, methodrefKlass);
             // XXX TODO MethodReference
 
         } else {
@@ -778,7 +784,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     // Only used by DFFunctionalKlass.
     protected void setBaseKlass(DFKlass klass) {
-        assert _baseKlass == null;
         _baseKlass = klass;
     }
 
@@ -1019,7 +1024,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	} else if (sig != null) {
             //Logger.info("jklass:", this, sig);
 	    JNITypeParser parser = new JNITypeParser(sig);
-	    _baseKlass = DFBuiltinTypes.getObjectKlass();
 	    try {
 		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
@@ -1047,7 +1051,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		iface.load();
 	    }
         } else {
-	    _baseKlass = DFBuiltinTypes.getObjectKlass();
 	    String superClass = jklass.getSuperclassName();
 	    if (superClass != null && !superClass.equals(jklass.getClassName())) {
 		try {
@@ -1204,7 +1207,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _interface = typeDecl.isInterface();
         // Load base klasses/interfaces.
 	// Get superclass.
-	_baseKlass = DFBuiltinTypes.getObjectKlass();
 	Type superClass = typeDecl.getSuperclassType();
 	if (superClass != null) {
 	    try {
@@ -1282,9 +1284,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private void buildMembersFromAnnotTypeDecl(
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws InvalidSyntax {
-	// Get superclass.
-	_baseKlass = DFBuiltinTypes.getObjectKlass();
-	_baseKlass.load();
 	this.buildMembers(finder, annotTypeDecl.bodyDeclarations());
     }
 
@@ -1292,9 +1291,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private void buildMembersFromAnonDecl(
         DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
         throws InvalidSyntax {
-	// Get superclass.
-	_baseKlass = DFBuiltinTypes.getObjectKlass();
-	_baseKlass.load();
 	this.buildMembers(finder, anonDecl.bodyDeclarations());
     }
 

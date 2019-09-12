@@ -73,8 +73,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
         // Create a top-level klass.
         DFKlass klass = space.getKlass(klassName);
         if (klass == null) {
-            klass = space.addKlass(
-                klassName, new DFKlass(klassName, space, null, null));
+            klass = new DFKlass(
+                klassName, space, null, null, DFBuiltinTypes.getObjectKlass());
+            space.addKlass(klassName, klass);
         }
         klass.setFinder(_finder);
         while (0 <= i) {
@@ -86,8 +87,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
             if (klass.getKlass(name) != null) {
                 klass = klass.getKlass(name);
             } else {
-                klass = klass.addKlass(
-                    name, new DFKlass(name, klass, klass, klass.getKlassScope()));
+                DFKlass child = new DFKlass(
+                    name, klass, klass, klass.getKlassScope(),
+                    DFBuiltinTypes.getObjectKlass());
+                klass.addKlass(name, child);
+                klass = child;
             }
         }
         klass.setJarPath(jarPath, entPath);

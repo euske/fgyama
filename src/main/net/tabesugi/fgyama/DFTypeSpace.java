@@ -117,8 +117,9 @@ public class DFTypeSpace {
         assert abstTypeDecl != null;
         //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
         String id = abstTypeDecl.getName().getIdentifier();
-        DFKlass klass = this.addKlass(
-            id, new DFKlass(id, this, outerKlass, outerScope));
+        DFKlass klass = new DFKlass(
+            id, this, outerKlass, outerScope, DFBuiltinTypes.getObjectKlass());
+        this.addKlass(id, klass);
         if (abstTypeDecl instanceof TypeDeclaration) {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());

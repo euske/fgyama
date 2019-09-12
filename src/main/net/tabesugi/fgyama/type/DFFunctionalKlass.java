@@ -78,13 +78,24 @@ class DFFunctionalKlass extends DFKlass {
     public DFFunctionalKlass(
         String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
-	super(name, outerSpace, outerKlass, outerScope);
+	super(name, outerSpace, outerKlass, outerScope,
+              DFBuiltinTypes.getObjectKlass());
         _lambdaScope = new LambdaScope(outerScope, name);
+    }
+
+    @Override
+    public String toString() {
+        return ("<DFFunctionalKlass("+this.getTypeName()+")>");
     }
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (klass.isFuncInterface()) return 0;
         return -1;
+    }
+
+    public boolean isDefined() {
+        return (_funcMethod != null &&
+                _funcMethod.getFuncType() != null);
     }
 
     public DFMethod getFuncMethod() {
