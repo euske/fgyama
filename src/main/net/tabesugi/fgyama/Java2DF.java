@@ -768,7 +768,7 @@ public class Java2DF {
         // Build method scopes (lambdas).
         for (DFKlass klass : klasses) {
 	    if (!(klass instanceof DFFunctionalKlass)) continue;
-	    if (klass.getBaseKlass() == null) continue; // unused lambda.
+	    if (!((DFFunctionalKlass)klass).isDefined()) continue; // unused lambda.
 	    DFMethod init = klass.getInitMethod();
 	    if (init != null) {
 		init.buildScope();
@@ -781,7 +781,7 @@ public class Java2DF {
         // Build call graphs (lambdas).
         for (DFKlass klass : klasses) {
 	    if (!(klass instanceof DFFunctionalKlass)) continue;
-	    if (klass.getBaseKlass() == null) continue; // unused lambda.
+	    if (!((DFFunctionalKlass)klass).isDefined()) continue; // unused lambda.
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildFrame();
@@ -811,6 +811,8 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
+	if (klass instanceof DFFunctionalKlass &&
+            !((DFFunctionalKlass)klass).isDefined()) return; // unused lambda.
         this.startKlass(klass);
 	if (!(klass instanceof DFFunctionalKlass)) {
 	    try {

@@ -2721,10 +2721,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         } else if (_ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)_ast;
             body = lambda.getBody();
-	    if (!_scope.isDefined()) {
-		Logger.error("DFMethod.processMethod: Undefined lambda:", this);
-		return null;
-	    }
             this.setupLambda(graph, ctx, lambda);
         } else {
             throw new InvalidSyntax(_ast);
