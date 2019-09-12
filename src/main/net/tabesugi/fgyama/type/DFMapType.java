@@ -74,20 +74,26 @@ public class DFMapType implements DFType {
     public void build(DFTypeFinder finder)
         throws InvalidSyntax {
         assert _sig == null || _ast == null;
-	try {
-	    if (_sig != null) {
-		JNITypeParser parser = new JNITypeParser(_sig);
+	if (_sig != null) {
+	    JNITypeParser parser = new JNITypeParser(_sig);
+	    try {
 		_boundKlass = parser.resolveType(finder).toKlass();
-	    } else if (_ast != null) {
+	    } catch (TypeNotFound e) {
+		Logger.error(
+		    "DFMapType.build: TypeNotFound",
+		    this, e.name, _sig, finder);
+	    }
+	} else if (_ast != null) {
+	    try {
 		for (Type type : _ast) {
 		    _boundKlass = finder.resolve(type).toKlass();
 		    break;
 		}
+	    } catch (TypeNotFound e) {
+		Logger.error(
+		    "DFMapType.build: TypeNotFound",
+		    this, e.name, _ast);
 	    }
-	} catch (TypeNotFound e) {
-	    Logger.error(
-                "DFMapType.build: TypeNotFound",
-                this, e.name, _sig, _ast);
 	}
     }
 }

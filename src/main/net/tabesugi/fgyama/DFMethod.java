@@ -809,6 +809,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         _mapTypes = mapTypes;
         _mapTypeMap = new HashMap<String, DFType>();
         for (DFMapType mapType : _mapTypes) {
+	    // Set the Object type temporarily for circular definition.
+            _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
 	    mapType.build(_finder);
             _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
         }
@@ -867,6 +869,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return _funcType;
     }
 
+    @Override
     public DFType getType(String id) {
         if (_mapTypeMap != null) {
             DFType type = _mapTypeMap.get(id);

@@ -997,21 +997,14 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _state = LoadState.Loaded;
     }
 
-    protected void buildManually(
+    protected void loadManually(
         boolean isInterface, DFKlass baseKlass, DFKlass[] baseIfaces) {
+	// Because this instance is created in such an intermediate state,
+	// not everything might be defined yet.
         assert _state == LoadState.Unloaded;
         _interface = isInterface;
-        if (_outerKlass != null) {
-            assert _outerKlass._state == LoadState.Loaded;
-        }
 	_baseKlass = baseKlass;
-	assert _baseKlass._state == LoadState.Loaded;
         _baseIfaces = baseIfaces;
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                assert iface._state == LoadState.Loaded;
-            }
-        }
         _state = LoadState.Loaded;
     }
 

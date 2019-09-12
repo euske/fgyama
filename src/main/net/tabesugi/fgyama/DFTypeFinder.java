@@ -70,9 +70,7 @@ public class DFTypeFinder {
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             DFType klassType = this.lookupType(stype.getName());
-            if (klassType instanceof DFKlass) {
-                ((DFKlass)klassType).load();
-            }
+	    klassType.toKlass().load();
             return klassType;
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
@@ -127,7 +125,7 @@ public class DFTypeFinder {
     }
 
     public DFType resolve(org.apache.bcel.generic.Type type)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         if (type.equals(org.apache.bcel.generic.BasicType.BOOLEAN)) {
             return DFBasicType.BOOLEAN;
         } else if (type.equals(org.apache.bcel.generic.BasicType.BYTE)) {
@@ -156,7 +154,9 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            return this.lookupType(className);
+            DFType klassType = this.lookupType(className);
+	    klassType.toKlass().load();
+            return klassType;
         } else {
             // ???
             throw new TypeNotFound(type.toString());
