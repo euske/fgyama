@@ -914,7 +914,6 @@ public class Java2DF {
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
 	DFBuiltinTypes.initialize(rootSpace);
 	for (String path : jarfiles) {
-            Logger.info("Loading:", path);
 	    rootSpace.loadJarFile(path);
 	}
 
