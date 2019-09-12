@@ -1,156 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
-    <field name="@Ldom/meep/basic_names;/.y" static="false" type="I"/>
-    <method abstract="false" name="Ldom/meep/basic_names;.&lt;clinit&gt;()V" style="initializer">
-      <ast end="470" start="19" type="55"/>
-      <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
-        <node data="123" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
-          <ast end="72" start="69" type="34"/>
-        </node>
-        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref="@Ldom/meep/basic_names;/.y" type="I">
-          <ast end="72" start="65" type="59"/>
+  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;" path="tests/basic_names.java">
+    <field name="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" static="false" type="I"/>
+    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;()V" style="initializer">
+      <ast end="211" start="144" type="55"/>
+      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;">
+        <node data="uninitialized" id="K1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+          <ast end="173" start="172" type="59"/>
           <link src="K1_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.doit()V" style="instance">
-      <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
-      <ast end="289" start="79" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:doit:79:289">
-        <node id="M2_doit_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="M2_doit_N2" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M2_doit_N3" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
-        <node id="M2_doit_N19" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-          <link src="M2_doit_N12"/>
-        </node>
-        <scope name="Ldom/meep/basic_names;.:doit:79:289.:B:98:289">
-          <node id="M2_doit_N4" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
-            <ast end="118" start="108" type="40"/>
-            <link src="M2_doit_N2"/>
-          </node>
-          <node data="Foo!" id="M2_doit_N5" kind="value" type="Ljava/lang/String;">
-            <ast end="133" start="127" type="45"/>
-          </node>
-          <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="M2_doit_N6" kind="call" type="V">
-            <ast end="134" start="108" type="32"/>
-            <link label="#this" src="M2_doit_N4"/>
-            <link label="#arg0" src="M2_doit_N5"/>
-          </node>
-          <node id="M2_doit_N7" kind="receive" type="V">
-            <ast end="134" start="108" type="32"/>
-            <link src="M2_doit_N6"/>
-          </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_doit_N8" kind="new" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
-            <ast end="239" start="230" type="14"/>
-          </node>
-          <node id="M2_doit_N9" kind="receive" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
-            <ast end="239" start="230" type="14"/>
-            <link src="M2_doit_N8"/>
-          </node>
-          <node id="M2_doit_N10" kind="assign_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
-            <ast end="239" start="224" type="59"/>
-            <link src="M2_doit_N9"/>
-          </node>
-          <node id="M2_doit_N11" kind="ref_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
-            <ast end="252" start="249" type="42"/>
-            <link src="M2_doit_N10"/>
-          </node>
-          <node id="M2_doit_N12" kind="assign_field" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-            <ast end="254" start="249" type="40"/>
-            <link label="obj" src="M2_doit_N11"/>
-            <link src="M2_doit_N15"/>
-          </node>
-          <node id="M2_doit_N13" kind="ref_var" ref="#this" type="Ldom/meep/basic_names;">
-            <ast end="261" start="257" type="52"/>
-            <link src="M2_doit_N1"/>
-          </node>
-          <node id="M2_doit_N14" kind="ref_field" ref="@Ldom/meep/basic_names;/.y" type="I">
-            <ast end="263" start="257" type="22"/>
-            <link label="obj" src="M2_doit_N13"/>
-            <link src="M2_doit_N3"/>
-          </node>
-          <node data="=" id="M2_doit_N15" kind="op_assign" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-            <ast end="263" start="249" type="7"/>
-            <link label="R" src="M2_doit_N14"/>
-          </node>
-          <node id="M2_doit_N16" kind="ref_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
-            <ast end="276" start="273" type="42"/>
-            <link src="M2_doit_N10"/>
-          </node>
-          <node data="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" id="M2_doit_N17" kind="call" type="V">
-            <ast end="282" start="273" type="32"/>
-            <link label="#this" src="M2_doit_N16"/>
-          </node>
-          <node id="M2_doit_N18" kind="receive" type="V">
-            <ast end="282" start="273" type="32"/>
-            <link src="M2_doit_N17"/>
-          </node>
-        </scope>
-      </scope>
-    </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.meh()V" style="instance">
-      <ast end="351" start="295" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:meh:295:351">
-        <node id="M3_meh_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <scope name="Ldom/meep/basic_names;.:meh:295:351.:B:313:351">
-          <node data="Ldom/meep/basic_names;.m33p()?" id="M3_meh_N2" kind="call" type="?">
-            <ast end="329" start="323" type="32"/>
-            <link label="#this" src="M3_meh_N1"/>
-          </node>
-          <node id="M3_meh_N3" kind="receive" type="?">
-            <ast end="329" start="323" type="32"/>
-            <link src="M3_meh_N2"/>
-          </node>
-        </scope>
-      </scope>
-    </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" style="static">
-      <ast end="468" start="357" type="31"/>
-      <scope name="Ldom/meep/basic_names;.:main:357:468">
-        <node id="M4_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
-          <ast end="394" start="381" type="44"/>
-        </node>
-        <node id="M4_main_N2" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468/$args" type="[Ljava/lang/String;">
-          <ast end="394" start="381" type="44"/>
-          <link src="M4_main_N1"/>
-        </node>
-        <node id="M4_main_N3" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
-        <node id="M4_main_N4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M4_main_N5" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
-        <node id="M4_main_N13" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-          <link src="M4_main_N12"/>
-        </node>
-        <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N6" kind="new" type="Ldom/meep/basic_names;">
-            <ast end="441" start="424" type="14"/>
-          </node>
-          <node id="M4_main_N7" kind="receive" type="Ldom/meep/basic_names;">
-            <ast end="441" start="424" type="14"/>
-            <link src="M4_main_N6"/>
-          </node>
-          <node id="M4_main_N8" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
-            <ast end="441" start="418" type="59"/>
-            <link src="M4_main_N7"/>
-          </node>
-          <node id="M4_main_N9" kind="ref_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
-            <ast end="454" start="451" type="42"/>
-            <link src="M4_main_N8"/>
-          </node>
-          <node data="Ldom/meep/basic_names;.doit()V" id="M4_main_N10" kind="call" type="V">
-            <ast end="461" start="451" type="32"/>
-            <link label="#this" src="M4_main_N9"/>
-            <link label="@Ljava/lang/System;/.out" src="M4_main_N4"/>
-            <link label="@Ldom/meep/basic_names;/.y" src="M4_main_N5"/>
-          </node>
-          <node id="M4_main_N11" kind="receive" type="V">
-            <ast end="461" start="451" type="32"/>
-            <link src="M4_main_N10"/>
-          </node>
-          <node id="M4_main_N12" kind="receive" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-            <ast end="461" start="451" type="32"/>
-            <link label="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" src="M4_main_N10"/>
-          </node>
-        </scope>
+    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" style="instance">
+      <caller name="Ldom/meep/basic_names;.doit()V"/>
+      <ast end="201" start="187" type="31"/>
+      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201">
+        <node id="M2_moo_N1" kind="input" ref="#this" type="Ldom/meep/basic_names/:doit:79:289/Baz;"/>
+        <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201.:B:198:201"/>
       </scope>
     </method>
   </class>
@@ -160,24 +26,158 @@
       <scope name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;"/>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;" path="tests/basic_names.java">
-    <field name="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" static="false" type="I"/>
-    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;()V" style="initializer">
-      <ast end="211" start="144" type="55"/>
-      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;">
-        <node data="uninitialized" id="K6_&lt;clinit&gt;_N1" kind="value" type="@null"/>
-        <node id="K6_&lt;clinit&gt;_N2" kind="assign_var" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-          <ast end="173" start="172" type="59"/>
-          <link src="K6_&lt;clinit&gt;_N1"/>
+  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
+    <field name="@Ldom/meep/basic_names;/.y" static="false" type="I"/>
+    <method abstract="false" name="Ldom/meep/basic_names;.&lt;clinit&gt;()V" style="initializer">
+      <ast end="470" start="19" type="55"/>
+      <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
+        <node data="123" id="K4_&lt;clinit&gt;_N1" kind="value" type="I">
+          <ast end="72" start="69" type="34"/>
+        </node>
+        <node id="K4_&lt;clinit&gt;_N2" kind="assign_var" ref="@Ldom/meep/basic_names;/.y" type="I">
+          <ast end="72" start="65" type="59"/>
+          <link src="K4_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" style="instance">
-      <caller name="Ldom/meep/basic_names;.doit()V"/>
-      <ast end="201" start="187" type="31"/>
-      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201">
-        <node id="M7_moo_N1" kind="input" ref="#this" type="Ldom/meep/basic_names/:doit:79:289/Baz;"/>
-        <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201.:B:198:201"/>
+    <method abstract="false" name="Ldom/meep/basic_names;.doit()V" style="instance">
+      <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
+      <ast end="289" start="79" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:doit:79:289">
+        <node id="M5_doit_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
+        <node id="M5_doit_N2" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
+        <node id="M5_doit_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M5_doit_N19" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+          <link src="M5_doit_N12"/>
+        </node>
+        <scope name="Ldom/meep/basic_names;.:doit:79:289.:B:98:289">
+          <node id="M5_doit_N4" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+            <ast end="118" start="108" type="40"/>
+            <link src="M5_doit_N3"/>
+          </node>
+          <node data="Foo!" id="M5_doit_N5" kind="value" type="Ljava/lang/String;">
+            <ast end="133" start="127" type="45"/>
+          </node>
+          <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="M5_doit_N6" kind="call" type="V">
+            <ast end="134" start="108" type="32"/>
+            <link label="#this" src="M5_doit_N4"/>
+            <link label="#arg0" src="M5_doit_N5"/>
+          </node>
+          <node id="M5_doit_N7" kind="receive" type="V">
+            <ast end="134" start="108" type="32"/>
+            <link src="M5_doit_N6"/>
+          </node>
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M5_doit_N8" kind="new" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+            <ast end="239" start="230" type="14"/>
+          </node>
+          <node id="M5_doit_N9" kind="receive" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+            <ast end="239" start="230" type="14"/>
+            <link src="M5_doit_N8"/>
+          </node>
+          <node id="M5_doit_N10" kind="assign_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+            <ast end="239" start="224" type="59"/>
+            <link src="M5_doit_N9"/>
+          </node>
+          <node id="M5_doit_N11" kind="ref_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+            <ast end="252" start="249" type="42"/>
+            <link src="M5_doit_N10"/>
+          </node>
+          <node id="M5_doit_N12" kind="assign_field" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+            <ast end="254" start="249" type="40"/>
+            <link label="obj" src="M5_doit_N11"/>
+            <link src="M5_doit_N15"/>
+          </node>
+          <node id="M5_doit_N13" kind="ref_var" ref="#this" type="Ldom/meep/basic_names;">
+            <ast end="261" start="257" type="52"/>
+            <link src="M5_doit_N1"/>
+          </node>
+          <node id="M5_doit_N14" kind="ref_field" ref="@Ldom/meep/basic_names;/.y" type="I">
+            <ast end="263" start="257" type="22"/>
+            <link label="obj" src="M5_doit_N13"/>
+            <link src="M5_doit_N2"/>
+          </node>
+          <node data="=" id="M5_doit_N15" kind="op_assign" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+            <ast end="263" start="249" type="7"/>
+            <link label="R" src="M5_doit_N14"/>
+          </node>
+          <node id="M5_doit_N16" kind="ref_var" ref="$Ldom/meep/basic_names;.:doit:79:289.:B:98:289/$baz" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+            <ast end="276" start="273" type="42"/>
+            <link src="M5_doit_N10"/>
+          </node>
+          <node data="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" id="M5_doit_N17" kind="call" type="V">
+            <ast end="282" start="273" type="32"/>
+            <link label="#this" src="M5_doit_N16"/>
+          </node>
+          <node id="M5_doit_N18" kind="receive" type="V">
+            <ast end="282" start="273" type="32"/>
+            <link src="M5_doit_N17"/>
+          </node>
+        </scope>
+      </scope>
+    </method>
+    <method abstract="false" name="Ldom/meep/basic_names;.meh()V" style="instance">
+      <ast end="351" start="295" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:meh:295:351">
+        <node id="M6_meh_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
+        <scope name="Ldom/meep/basic_names;.:meh:295:351.:B:313:351">
+          <node data="Ldom/meep/basic_names;.m33p()?" id="M6_meh_N2" kind="call" type="?">
+            <ast end="329" start="323" type="32"/>
+            <link label="#this" src="M6_meh_N1"/>
+          </node>
+          <node id="M6_meh_N3" kind="receive" type="?">
+            <ast end="329" start="323" type="32"/>
+            <link src="M6_meh_N2"/>
+          </node>
+        </scope>
+      </scope>
+    </method>
+    <method abstract="false" name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" style="static">
+      <ast end="468" start="357" type="31"/>
+      <scope name="Ldom/meep/basic_names;.:main:357:468">
+        <node id="M7_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
+          <ast end="394" start="381" type="44"/>
+        </node>
+        <node id="M7_main_N2" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468/$args" type="[Ljava/lang/String;">
+          <ast end="394" start="381" type="44"/>
+          <link src="M7_main_N1"/>
+        </node>
+        <node id="M7_main_N3" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
+        <node id="M7_main_N4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M7_main_N5" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
+        <node id="M7_main_N13" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+          <link src="M7_main_N12"/>
+        </node>
+        <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M7_main_N6" kind="new" type="Ldom/meep/basic_names;">
+            <ast end="441" start="424" type="14"/>
+          </node>
+          <node id="M7_main_N7" kind="receive" type="Ldom/meep/basic_names;">
+            <ast end="441" start="424" type="14"/>
+            <link src="M7_main_N6"/>
+          </node>
+          <node id="M7_main_N8" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
+            <ast end="441" start="418" type="59"/>
+            <link src="M7_main_N7"/>
+          </node>
+          <node id="M7_main_N9" kind="ref_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
+            <ast end="454" start="451" type="42"/>
+            <link src="M7_main_N8"/>
+          </node>
+          <node data="Ldom/meep/basic_names;.doit()V" id="M7_main_N10" kind="call" type="V">
+            <ast end="461" start="451" type="32"/>
+            <link label="#this" src="M7_main_N9"/>
+            <link label="@Ldom/meep/basic_names;/.y" src="M7_main_N5"/>
+            <link label="@Ljava/lang/System;/.out" src="M7_main_N4"/>
+          </node>
+          <node id="M7_main_N11" kind="receive" type="V">
+            <ast end="461" start="451" type="32"/>
+            <link src="M7_main_N10"/>
+          </node>
+          <node id="M7_main_N12" kind="receive" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+            <ast end="461" start="451" type="32"/>
+            <link label="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" src="M7_main_N10"/>
+          </node>
+        </scope>
       </scope>
     </method>
   </class>
