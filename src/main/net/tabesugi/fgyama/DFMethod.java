@@ -822,7 +822,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     @Override
     public String toString() {
-        return ("<DFMethod("+this.getSpaceName()+") "+this.getSignature()+">");
+        return ("<DFMethod("+this.getSignature()+")>");
     }
 
     @Override
@@ -1989,7 +1989,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     private void processCaseStatement(
         DFContext ctx, DFGraph graph, DFLocalScope scope,
-        DFFrame frame, ASTNode apt,
+        DFFrame caseFrame, ASTNode apt,
         DFNode caseNode, DFContext caseCtx) {
 
         for (DFNode src : caseCtx.getFirsts()) {
@@ -1997,7 +1997,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             src.accept(ctx.get(src.getRef()));
         }
 
-        for (DFRef ref : frame.getOutputRefs()) {
+        for (DFRef ref : caseFrame.getOutputRefs()) {
             DFNode dst = caseCtx.get(ref);
             if (dst != null) {
                 JoinNode join = new JoinNode(
@@ -2007,6 +2007,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx.set(join);
             }
         }
+
+        this.closeFrame(caseFrame, caseCtx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2026,22 +2028,24 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             enumKlass = type.toKlass();
         }
         DFLocalScope switchScope = scope.getChildByAST(switchStmt);
-        DFFrame switchFrame = frame.getChildByAST(switchStmt);
-
         SwitchCase switchCase = null;
+        DFFrame caseFrame = null;
         CaseNode caseNode = null;
         DFContext caseCtx = null;
-        for (Statement stmt : (List<Statement>) switchStmt.statements()) {
-            assert stmt != null;
-            if (stmt instanceof SwitchCase) {
-                if (caseCtx != null) {
-                    // switchCase, caseNode and caseCtx must be non-null.
+        for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
+            assert cstmt != null;
+            if (cstmt instanceof SwitchCase) {
+                if (caseFrame != null) {
+                    assert switchCase != null;
+                    assert caseNode != null;
+                    assert caseCtx != null;
                     processCaseStatement(
-                        ctx, graph, switchScope, switchFrame,
+                        ctx, graph, switchScope, caseFrame,
                         switchCase, caseNode, caseCtx);
                 }
-                switchCase = (SwitchCase)stmt;
-                caseNode = new CaseNode(graph, switchScope, stmt);
+                caseFrame = frame.getChildByAST(cstmt);
+                switchCase = (SwitchCase)cstmt;
+                caseNode = new CaseNode(graph, switchScope, cstmt);
                 caseNode.accept(switchValue);
                 caseCtx = new DFContext(graph, switchScope);
                 Expression expr = switchCase.getExpression();
@@ -2054,7 +2058,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         caseNode.addMatch(node);
                     } else {
                         processExpression(
-                            ctx, typeSpace, graph, finder, switchScope, switchFrame,
+                            ctx, typeSpace, graph, finder, switchScope, caseFrame,
 			    expr);
                         caseNode.addMatch(ctx.getRValue());
                     }
@@ -2062,21 +2066,23 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     // "default" case.
                 }
             } else {
-                if (caseCtx == null) {
+                if (caseFrame == null) {
                     // no "case" statement.
-                    throw new InvalidSyntax(stmt);
+                    throw new InvalidSyntax(cstmt);
                 }
                 processStatement(
                     caseCtx, typeSpace, graph, finder, switchScope,
-                    switchFrame, stmt);
+                    caseFrame, cstmt);
             }
         }
-        if (caseCtx != null) {
+        if (caseFrame != null) {
+            assert switchCase != null;
+            assert caseNode != null;
+            assert caseCtx != null;
             processCaseStatement(
-                ctx, graph, switchScope, switchFrame,
+                ctx, graph, switchScope, caseFrame,
                 switchCase, caseNode, caseCtx);
         }
-        this.closeFrame(switchFrame, ctx);
     }
 
     private void processWhileStatement(
@@ -2567,6 +2573,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             List<DFExit> exits = ref2exits.get(ref);
             assert exits != null;
             DFNode dst = ctx.getLast(ref);
+            Logger.error("DFMethod.closeFrame:", frame, ref);
             for (DFExit exit : exits) {
                 DFNode src = exit.getNode();
                 if (dst == null) {
@@ -2574,12 +2581,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 } else if (dst == src) {
                     ;
                 } else if (dst.merge(src)) {
-                    ;
+                    Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
                 } else if (src.merge(dst)) {
+                    Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
                     dst = src;
                 } else {
-                    Logger.error("DFMethod.closeFrame: Conflict",
-                                 this, ref, ":", dst, "<-", src);
+                    Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
                 }
             }
             ctx.set(dst);

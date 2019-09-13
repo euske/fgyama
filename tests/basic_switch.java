@@ -1,7 +1,7 @@
 public class basic_switch {
 
     public static int foo(int n) {
-	int x;
+	int x = 0;
 	switch (n) {
 	case 1:
 	case 2:

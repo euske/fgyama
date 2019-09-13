@@ -41,7 +41,7 @@ public class DFFrame {
 
     @Override
     public String toString() {
-        return ("<DFFrame("+_method+":"+_label+")>");
+        return ("<DFFrame("+_label+") "+_method+">");
     }
 
     private DFFrame addChild(String label, ASTNode ast) {
@@ -296,10 +296,14 @@ public class DFFrame {
                 enumKlass.load();
             }
             DFLocalScope innerScope = scope.getChildByAST(stmt);
-            DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
-            for (Statement cstmt :
-                     (List<Statement>) switchStmt.statements()) {
+            DFFrame caseFrame = null;
+            for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
+                    if (caseFrame != null) {
+                        caseFrame.removeRefs(innerScope);
+                        this.expandLocalRefs(caseFrame);
+                    }
+                    caseFrame = this.addChild(DFFrame.BREAKABLE, cstmt);
                     SwitchCase switchCase = (SwitchCase)cstmt;
                     Expression expr = switchCase.getExpression();
                     if (expr != null) {
@@ -314,15 +318,21 @@ public class DFFrame {
                                     this, e.name, expr);
                             }
                         } else {
-                            innerFrame.buildExpr(finder, method, innerScope, expr);
+                            caseFrame.buildExpr(finder, method, innerScope, expr);
                         }
                     }
                 } else {
-                    innerFrame.buildStmt(finder, method, innerScope, cstmt);
+                    if (caseFrame == null) {
+                        // no "case" statement.
+                        throw new InvalidSyntax(cstmt);
+                    }
+                    caseFrame.buildStmt(finder, method, innerScope, cstmt);
                 }
             }
-            innerFrame.removeRefs(innerScope);
-            this.expandLocalRefs(innerFrame);
+            if (caseFrame != null) {
+                caseFrame.removeRefs(innerScope);
+                this.expandLocalRefs(caseFrame);
+            }
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
