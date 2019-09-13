@@ -5,6 +5,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import org.w3c.dom.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
@@ -856,6 +857,7 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
+        boolean reformat = true;
         Logger.LogLevel = 0;
 
         for (int i = 0; i < args.length; i++) {
@@ -900,11 +902,13 @@ public class Java2DF {
                 processed.add(args[++i]);
             } else if (arg.equals("-S")) {
                 strict = true;
+            } else if (arg.equals("-s")) {
+                reformat = false;
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
 		    "usage: Java2DF [-v] [-S] [-i input] [-o output]" +
-		    " [-C jar] [-p path] [path ...]");
+		    " [-C jar] [-p path] [-s] [path ...]");
                 System.exit(1);
                 return;
             } else {
@@ -953,7 +957,13 @@ public class Java2DF {
 	} catch (InvalidSyntax e) {
 	    throw e;
 	}
-        XmlExporter exporter = new XmlExporter(output);
+
+        ByteArrayOutputStream temp = null;
+        if (reformat) {
+            temp = new ByteArrayOutputStream();
+        }
+
+        XmlExporter exporter = new XmlExporter((temp != null)? temp : output);
         converter.addExporter(exporter);
         Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
@@ -968,8 +978,20 @@ public class Java2DF {
                 throw e;
             }
         }
-
+        converter.removeExporter(exporter);
         exporter.close();
+
+        if (temp != null) {
+            temp.close();
+            try {
+                InputStream in = new ByteArrayInputStream(temp.toByteArray());
+                Document document = Utils.readXml(in);
+                in.close();
+                Utils.printXml(output, document);
+            } catch (Exception e) {
+            }
+        }
+
         output.close();
     }
 }
