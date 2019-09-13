@@ -3,7 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import org.w3c.dom.*;
+import javax.xml.stream.*;
 
 
 //  DFGraph
@@ -11,7 +11,7 @@ import org.w3c.dom.*;
 interface DFGraph {
 
     String getGraphId();
-    Element toXML(Document document);
     int addNode(DFNode node);
 
+    void writeXML(XMLStreamWriter writer) throws XMLStreamException;
 }

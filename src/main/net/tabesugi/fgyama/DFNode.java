@@ -3,9 +3,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFNode
@@ -49,32 +49,27 @@ public class DFNode implements Comparable<DFNode> {
         return _nid - node._nid;
     }
 
-    public Element toXML(Document document) {
-        Element elem = document.createElement("node");
-        elem.setAttribute("id", this.getNodeId());
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeStartElement("node");
+        writer.writeAttribute("id", this.getNodeId());
         if (this.getKind() != null) {
-            elem.setAttribute("kind", this.getKind());
+            writer.writeAttribute("kind", this.getKind());
         }
         if (this.getData() != null) {
-            elem.setAttribute("data", this.getData());
+            writer.writeAttribute("data", this.getData());
         }
-        elem.setAttribute("type", _type.getTypeName());
+        writer.writeAttribute("type", _type.getTypeName());
         if (_ref != null) {
-            elem.setAttribute("ref", _ref.getFullName());
+            writer.writeAttribute("ref", _ref.getFullName());
         }
         if (_ast != null) {
-            Element east = document.createElement("ast");
-            int start = _ast.getStartPosition();
-            int end = start + _ast.getLength();
-            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(start));
-            east.setAttribute("end", Integer.toString(end));
-            elem.appendChild(east);
+            Utils.writeXML(writer, _ast);
         }
         for (Link link : _links) {
-            elem.appendChild(link.toXML(document));
+            link.writeXML(writer);
         }
-        return elem;
+        writer.writeEndElement();
     }
 
     public DFVarScope getScope() {
@@ -214,13 +209,14 @@ public class DFNode implements Comparable<DFNode> {
             return ("<Link "+DFNode.this+"<-"+_src+">");
         }
 
-        public Element toXML(Document document) {
-            Element elem = document.createElement("link");
-            elem.setAttribute("src", _src.getNodeId());
+        public void writeXML(XMLStreamWriter writer)
+            throws XMLStreamException {
+            writer.writeStartElement("link");
+            writer.writeAttribute("src", _src.getNodeId());
             if (_label != null) {
-                elem.setAttribute("label", _label);
+                writer.writeAttribute("label", _label);
             }
-            return elem;
+            writer.writeEndElement();
         }
     }
 }

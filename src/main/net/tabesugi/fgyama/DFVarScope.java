@@ -3,9 +3,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFVarScope
@@ -35,16 +35,21 @@ public abstract class DFVarScope {
         return ("<DFVarScope("+this.getScopeName()+")>");
     }
 
-    public Element toXML(Document document, DFNode[] nodes) {
-        Element elem = document.createElement("scope");
-        elem.setAttribute("name", this.getScopeName());
+    protected void writeInnerXML(XMLStreamWriter writer, DFNode[] nodes)
+        throws XMLStreamException {
         for (DFNode node : nodes) {
             if (node.getScope() == this) {
-		Element e = node.toXML(document);
-                elem.appendChild(e);
+                node.writeXML(writer);
             }
         }
-        return elem;
+    }
+
+    public void writeXML(XMLStreamWriter writer, DFNode[] nodes)
+        throws XMLStreamException {
+        writer.writeStartElement("scope");
+        writer.writeAttribute("name", this.getScopeName());
+        this.writeInnerXML(writer, nodes);
+        writer.writeEndElement();
     }
 
     public String getScopeName() {

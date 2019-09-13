@@ -3,52 +3,69 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
-import javax.xml.parsers.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  XmlExporter
 //
 public class XmlExporter extends Exporter {
 
-    public Document document;
+    private XMLStreamWriter _writer;
+    private DFKlass _klass = null;
 
-    private Element _root;
-    private Element _class;
-
-    public XmlExporter() {
+    public XmlExporter(OutputStream stream) {
         try {
-            this.document = Utils.createXml();
-            _root = this.document.createElement("fgyama");
-        } catch (ParserConfigurationException e) {
+            XMLOutputFactory factory = XMLOutputFactory.newFactory();
+            _writer = factory.createXMLStreamWriter(stream, "utf-8");
+            _writer.writeStartDocument();
+            _writer.writeStartElement("fgyama");
+        } catch (XMLStreamException e) {
             throw new RuntimeException();
         }
     }
 
     @Override
     public void close() {
-        this.document.appendChild(_root);
-        this.document.normalizeDocument();
+        try {
+            _writer.writeEndElement();
+            _writer.writeEndDocument();
+            _writer.close();
+        } catch (XMLStreamException e) {
+            throw new RuntimeException();
+        }
     }
 
     @Override
     public void startKlass(DFKlass klass) {
-        assert _class == null;
-        _class = klass.toXML(this.document);
+        assert _klass == null;
+        _klass = klass;
+        try {
+            klass.writeXML(_writer);
+        } catch (XMLStreamException e) {
+            throw new RuntimeException();
+        }
     }
 
     @Override
     public void endKlass() {
-        assert _class != null;
-        _root.appendChild(_class);
-        _class = null;
+        assert _klass != null;
+        try {
+            _writer.writeEndElement();
+        } catch (XMLStreamException e) {
+            throw new RuntimeException();
+        }
+        _klass = null;
     }
 
     @Override
     public void writeGraph(DFGraph graph) {
-        assert _class != null;
-        _class.appendChild(graph.toXML(this.document));
+        assert _klass != null;
+        try {
+            graph.writeXML(_writer);
+        } catch (XMLStreamException e) {
+            throw new RuntimeException();
+        }
     }
 }

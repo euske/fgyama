@@ -8,7 +8,6 @@ import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFRootTypeSpace

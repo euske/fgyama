@@ -7,7 +7,6 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFFileScope
@@ -820,6 +819,7 @@ public class Java2DF {
 		if (init != null) {
 		    DFGraph graph = init.processKlassBody(counter);
 		    if (graph != null) {
+                        Logger.info("Success:", init.getSignature());
 			this.exportGraph(graph);
 		    }
 		}
@@ -831,7 +831,7 @@ public class Java2DF {
             try {
                 DFGraph graph = method.processMethod(counter);
                 if (graph != null) {
-                    Logger.debug("Success:", method.getSignature());
+                    Logger.info("Success:", method.getSignature());
                     this.exportGraph(graph);
                 }
             } catch (EntityNotFound e) {
@@ -953,7 +953,7 @@ public class Java2DF {
 	} catch (InvalidSyntax e) {
 	    throw e;
 	}
-        XmlExporter exporter = new XmlExporter();
+        XmlExporter exporter = new XmlExporter(output);
         converter.addExporter(exporter);
         Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
@@ -968,10 +968,8 @@ public class Java2DF {
                 throw e;
             }
         }
-        exporter.close();
 
-        Logger.info("Exporting XML...");
-        Utils.printXml(output, exporter.document);
+        exporter.close();
         output.close();
     }
 }

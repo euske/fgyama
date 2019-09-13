@@ -3,9 +3,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFLocalScope
@@ -37,12 +37,13 @@ public class DFLocalScope extends DFVarScope {
         return scope;
     }
 
-    public Element toXML(Document document, DFNode[] nodes) {
-        Element elem = super.toXML(document, nodes);
+    @Override
+    protected void writeInnerXML(XMLStreamWriter writer, DFNode[] nodes)
+        throws XMLStreamException {
+        super.writeInnerXML(writer, nodes);
         for (DFLocalScope child : _ast2child.values()) {
-            elem.appendChild(child.toXML(document, nodes));
+            child.writeXML(writer, nodes);
         }
-        return elem;
     }
 
     protected DFRef addVar(SimpleName name, DFType type) {

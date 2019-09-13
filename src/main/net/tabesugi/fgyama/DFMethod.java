@@ -3,9 +3,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 // SingleAssignNode:
@@ -2819,41 +2819,36 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
     }
 
-    public Element toXML(Document document) {
-        Element elem = document.createElement("method");
-        elem.setAttribute("name", this.getSignature());
-        elem.setAttribute("style", _callStyle.toString());
-        elem.setAttribute("abstract", Boolean.toString(_abstract));
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeStartElement("method");
+        writer.writeAttribute("name", this.getSignature());
+        writer.writeAttribute("style", _callStyle.toString());
+        writer.writeAttribute("abstract", Boolean.toString(_abstract));
         for (DFMethod caller : this.getCallers()) {
-            Element ecaller = document.createElement("caller");
-            ecaller.setAttribute("name", caller.getSignature());
-            elem.appendChild(ecaller);
+            writer.writeStartElement("caller");
+            writer.writeAttribute("name", caller.getSignature());
+            writer.writeEndElement();
         }
         for (DFMethod overrider : this.getOverriders()) {
             if (overrider == this) continue;
-            Element eoverrider = document.createElement("overrider");
-            eoverrider.setAttribute("name", overrider.getSignature());
-            elem.appendChild(eoverrider);
+            writer.writeStartElement("overrider");
+            writer.writeAttribute("name", overrider.getSignature());
+            writer.writeEndElement();
         }
         for (DFMethod overriding : _overriding) {
-            Element eoverriding = document.createElement("overriding");
-            eoverriding.setAttribute("name", overriding.getSignature());
-            elem.appendChild(eoverriding);
+            writer.writeStartElement("overriding");
+            writer.writeAttribute("name", overriding.getSignature());
+            writer.writeEndElement();
         }
         if (_ast != null) {
-            Element east = document.createElement("ast");
-            int start = _ast.getStartPosition();
-            int end = start + _ast.getLength();
-            east.setAttribute("type", Integer.toString(_ast.getNodeType()));
-            east.setAttribute("start", Integer.toString(start));
-            east.setAttribute("end", Integer.toString(end));
-            elem.appendChild(east);
+            Utils.writeXML(writer, _ast);
         }
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
         Arrays.sort(nodes);
-        elem.appendChild(_scope.toXML(document, nodes));
-        return elem;
+        _scope.writeXML(writer, nodes);
+        writer.writeEndElement();
     }
 
     private class MethodScope extends DFLocalScope {

@@ -33,7 +33,8 @@ public class UnitTestDF extends XMLTestCase {
 
     public void compareXml(String[] javaPaths, String xmlPath)
 	throws Exception {
-	XmlExporter exporter = new XmlExporter();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+	XmlExporter exporter = new XmlExporter(out);
         _converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
@@ -58,14 +59,18 @@ public class UnitTestDF extends XMLTestCase {
             _converter.buildGraphs(counter, klass, false);
         }
 	exporter.close();
+        out.close();
         _converter.removeExporter(exporter);
+        InputStream in = new ByteArrayInputStream(out.toByteArray());
+        Document outdoc = Utils.readXml(in);
+        in.close();
         Document refdoc = Utils.readXml(xmlPath);
 	try {
-	    assertXMLEqual(refdoc, exporter.document);
+	    assertXMLEqual(refdoc, outdoc);
 	} catch (junit.framework.AssertionFailedError e) {
-	    OutputStream out = new FileOutputStream(new File(xmlPath+".err"));
-	    Utils.printXml(out, exporter.document);
-	    out.close();
+	    OutputStream errout = new FileOutputStream(new File(xmlPath+".err"));
+	    Utils.printXml(errout, outdoc);
+	    errout.close();
 	    throw e;
 	}
     }

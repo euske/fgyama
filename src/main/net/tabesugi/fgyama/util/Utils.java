@@ -3,12 +3,12 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
-import org.xml.sax.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -152,11 +152,18 @@ public class Utils {
     }
 
     public static Document readXml(String path)
-        throws IOException, ParserConfigurationException, SAXException {
+        throws IOException, ParserConfigurationException, org.xml.sax.SAXException {
         File file = new File(path);
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
         return docBuilder.parse(file);
+    }
+
+    public static Document readXml(InputStream stream)
+        throws IOException, ParserConfigurationException, org.xml.sax.SAXException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+        return docBuilder.parse(stream);
     }
 
     public static void printXml(OutputStream output, Document doc) {
@@ -192,6 +199,18 @@ public class Utils {
             // unsupported.
             return null;
         }
+    }
+
+    public static void writeXML(XMLStreamWriter writer, ASTNode ast)
+        throws XMLStreamException {
+        int type = ast.getNodeType();
+        int start = ast.getStartPosition();
+        int end = start + ast.getLength();
+        writer.writeStartElement("ast");
+        writer.writeAttribute("type", Integer.toString(type));
+        writer.writeAttribute("start", Integer.toString(start));
+        writer.writeAttribute("end", Integer.toString(end));
+        writer.writeEndElement();
     }
 
     public static String encodeASTNode(ASTNode node) {

@@ -5,7 +5,6 @@ import java.io.*;
 import java.util.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFGlobalScope

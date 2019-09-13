@@ -4,11 +4,11 @@ package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
+import javax.xml.stream.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
-import org.w3c.dom.*;
 
 
 //  DFKlass
@@ -129,13 +129,14 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return ("<DFKlass("+this.getTypeName()+")>");
     }
 
-    public Element toXML(Document document) {
-        Element elem = document.createElement("class");
-        elem.setAttribute("path", this.getFilePath());
-        elem.setAttribute("name", this.getTypeName());
-        elem.setAttribute("interface", Boolean.toString(_interface));
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeStartElement("class");
+        writer.writeAttribute("path", this.getFilePath());
+        writer.writeAttribute("name", this.getTypeName());
+        writer.writeAttribute("interface", Boolean.toString(_interface));
         if (_baseKlass != null) {
-            elem.setAttribute("extends", _baseKlass.getTypeName());
+            writer.writeAttribute("extends", _baseKlass.getTypeName());
         }
         if (_baseIfaces != null && 0 < _baseIfaces.length) {
             StringBuilder b = new StringBuilder();
@@ -145,32 +146,32 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
                 b.append(iface.getTypeName());
             }
-            elem.setAttribute("implements", b.toString());
+            writer.writeAttribute("implements", b.toString());
         }
         if (_genericKlass != null) {
-            elem.setAttribute("generic", _genericKlass.getTypeName());
+            writer.writeAttribute("generic", _genericKlass.getTypeName());
             if (_paramTypes != null) {
                 for (int i = 0; i < _paramTypes.length; i++) {
                     DFMapType mapType = _genericKlass._mapTypes[i];
                     DFType paramType = _paramTypes[i];
-                    Element eparam = document.createElement("param");
-                    eparam.setAttribute("name", mapType.getTypeName());
-                    eparam.setAttribute("type", paramType.getTypeName());
-                    elem.appendChild(eparam);
+                    writer.writeStartElement("param");
+                    writer.writeAttribute("name", mapType.getTypeName());
+                    writer.writeAttribute("type", paramType.getTypeName());
+                    writer.writeEndElement();
                 }
             }
         }
 	if (_paramKlasses != null) {
 	    for (DFKlass pklass : _paramKlasses.values()) {
-		Element epklass = document.createElement("parameterized");
-		epklass.setAttribute("type", pklass.getTypeName());
-		elem.appendChild(epklass);
+                writer.writeStartElement("parameterized");
+		writer.writeAttribute("type", pklass.getTypeName());
+                writer.writeEndElement();
 	    }
 	}
         for (FieldRef field : _fields) {
-            elem.appendChild(field.toXML(document));
+            field.writeXML(writer);
         }
-        return elem;
+        //writer.writeEndElement();
     }
 
     public String getTypeName() {
@@ -1429,12 +1430,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
             _static = isStatic;
         }
 
-        public Element toXML(Document document) {
-            Element elem = document.createElement("field");
-            elem.setAttribute("name", this.getFullName());
-            elem.setAttribute("type", this.getRefType().getTypeName());
-            elem.setAttribute("static", Boolean.toString(_static));
-            return elem;
+        public void writeXML(XMLStreamWriter writer)
+            throws XMLStreamException {
+            writer.writeStartElement("field");
+            writer.writeAttribute("name", this.getFullName());
+            writer.writeAttribute("type", this.getRefType().getTypeName());
+            writer.writeAttribute("static", Boolean.toString(_static));
+            writer.writeEndElement();
         }
 
         public String getName() {
