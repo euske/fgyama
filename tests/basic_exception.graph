@@ -35,27 +35,27 @@
             <ast end="146" start="138" type="59"/>
             <link src="M3_foo_N4"/>
           </node>
-          <node id="M3_foo_N29" kind="join" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
+          <node id="M3_foo_N29" kind="catchjoin" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
             <ast end="344" start="156" type="54"/>
             <link src="M3_foo_N15"/>
             <link label="Lbasic_exception/A;" src="M3_foo_N30"/>
             <link label="Ljava/lang/Exception;" src="M3_foo_N31"/>
           </node>
-          <node id="M3_foo_N32" kind="join" ref="$Lbasic_exception;.:foo:103:350.:B:121:350/$x" type="Ljava/lang/String;">
+          <node id="M3_foo_N32" kind="catchjoin" ref="$Lbasic_exception;.:foo:103:350.:B:121:350/$x" type="Ljava/lang/String;">
             <ast end="344" start="156" type="54"/>
             <link src="M3_foo_N6"/>
             <link label="Lbasic_exception/A;" src="M3_foo_N18"/>
             <link label="Ljava/lang/Exception;" src="M3_foo_N33"/>
           </node>
-          <node id="M3_foo_N34" kind="join" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
+          <node id="M3_foo_N34" kind="catchjoin" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
             <ast end="344" start="156" type="54"/>
             <link src="M3_foo_N13"/>
           </node>
-          <node id="M3_foo_N35" kind="join" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
+          <node id="M3_foo_N35" kind="catchjoin" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
             <ast end="344" start="156" type="54"/>
             <link src="M3_foo_N15"/>
           </node>
-          <node id="M3_foo_N36" kind="join" ref="$Lbasic_exception;.:foo:103:350.:B:121:350/$x" type="Ljava/lang/String;">
+          <node id="M3_foo_N36" kind="catchjoin" ref="$Lbasic_exception;.:foo:103:350.:B:121:350/$x" type="Ljava/lang/String;">
             <ast end="344" start="156" type="54"/>
             <link src="M3_foo_N6"/>
           </node>

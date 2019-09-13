@@ -720,7 +720,7 @@ class CatchJoin extends SingleAssignNode {
 
     @Override
     public String getKind() {
-        return "join";
+        return "catchjoin";
     }
 
     public void recv(DFType type, DFNode node) {
