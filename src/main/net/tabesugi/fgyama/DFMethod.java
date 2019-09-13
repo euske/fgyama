@@ -2573,7 +2573,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             List<DFExit> exits = ref2exits.get(ref);
             assert exits != null;
             DFNode dst = ctx.getLast(ref);
-            Logger.error("DFMethod.closeFrame:", frame, ref);
+            //Logger.error("DFMethod.closeFrame:", frame, ref);
             for (DFExit exit : exits) {
                 DFNode src = exit.getNode();
                 if (dst == null) {
@@ -2581,12 +2581,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 } else if (dst == src) {
                     ;
                 } else if (dst.merge(src)) {
-                    Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
+                    //Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
                 } else if (src.merge(dst)) {
-                    Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
+                    //Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
                     dst = src;
                 } else {
-                    Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
+                    //Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
                 }
             }
             ctx.set(dst);
