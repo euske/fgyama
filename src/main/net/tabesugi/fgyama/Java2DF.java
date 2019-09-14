@@ -987,6 +987,7 @@ public class Java2DF {
                 InputStream in = new ByteArrayInputStream(temp.toByteArray());
                 Document document = Utils.readXml(in);
                 in.close();
+                document.setXmlStandalone(true);
                 Utils.printXml(output, document);
             } catch (Exception e) {
             }
