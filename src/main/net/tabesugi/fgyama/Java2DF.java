@@ -116,10 +116,11 @@ public class Java2DF {
             AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
             this.enumKlassesDecls(
                 finder, klass, abstDecl.bodyDeclarations(), klasses);
-        } else if (ast instanceof AnonymousClassDeclaration) {
-            AnonymousClassDeclaration anonDecl = (AnonymousClassDeclaration)ast;
+        } else if (ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
             this.enumKlassesDecls(
-                finder, klass, anonDecl.bodyDeclarations(), klasses);
+                finder, klass,
+		cstr.getAnonymousClassDeclaration().bodyDeclarations(),	klasses);
         } else if (ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)ast;
             DFMethod method = ((DFFunctionalKlass)klass).getFuncMethod();
@@ -556,11 +557,10 @@ public class Java2DF {
 
         } else if (ast instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
-            AnonymousClassDeclaration anonDecl = cstr.getAnonymousClassDeclaration();
             try {
                 DFType instType;
-                if (anonDecl != null) {
-                    String id = Utils.encodeASTNode(anonDecl);
+                if (cstr.getAnonymousClassDeclaration() != null) {
+                    String id = Utils.encodeASTNode(cstr);
                     instType = space.getType(id);
                 } else {
                     instType = finder.resolve(cstr.getType());

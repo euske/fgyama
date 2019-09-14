@@ -946,8 +946,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 	    _scope.buildMethodDecl(_finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof AbstractTypeDeclaration) {
 	    _scope.buildBodyDecls(_finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
-        } else if (_ast instanceof AnonymousClassDeclaration) {
-            _scope.buildBodyDecls(_finder, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
+        } else if (_ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
+            _scope.buildBodyDecls(
+		_finder, cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } else if (_ast instanceof LambdaExpression) {
             _scope.buildLambda(_finder, (LambdaExpression)_ast);
 	}  else {
@@ -968,9 +970,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 	} else if (_ast instanceof AbstractTypeDeclaration) {
             _frame.buildBodyDecls(
                 defined, _scope, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
-        } else if (_ast instanceof AnonymousClassDeclaration) {
+        } else if (_ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
             _frame.buildBodyDecls(
-                defined, _scope, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
+                defined, _scope,
+		cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } else if (_ast instanceof LambdaExpression) {
             _frame.buildLambda(
                 defined, _scope, (LambdaExpression)_ast);
@@ -1488,12 +1492,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             } else if (expr instanceof ClassInstanceCreation) {
 		// "new T()"
                 ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-                AnonymousClassDeclaration anonDecl =
-                    cstr.getAnonymousClassDeclaration();
                 DFKlass instKlass;
-                if (anonDecl != null) {
+                if (cstr.getAnonymousClassDeclaration() != null) {
                     // Anonymous classes are processed separately.
-                    String id = Utils.encodeASTNode(anonDecl);
+                    String id = Utils.encodeASTNode(cstr);
 		    DFType anonType = typeSpace.getType(id);
                     if (anonType == null) {
                         throw new TypeNotFound(id);
@@ -2637,8 +2639,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         List<BodyDeclaration> decls;
         if (_ast instanceof AbstractTypeDeclaration) {
             decls = ((AbstractTypeDeclaration)_ast).bodyDeclarations();
-        } else if (_ast instanceof AnonymousClassDeclaration) {
-            decls = ((AnonymousClassDeclaration)_ast).bodyDeclarations();
+        } else if (_ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
+            decls = cstr.getAnonymousClassDeclaration().bodyDeclarations();
         } else {
             throw new InvalidSyntax(_ast);
         }

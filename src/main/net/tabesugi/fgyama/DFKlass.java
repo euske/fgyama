@@ -332,8 +332,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
         List<BodyDeclaration> decls;
         if (ast instanceof AbstractTypeDeclaration) {
             decls = ((AbstractTypeDeclaration)ast).bodyDeclarations();
-        } else if (ast instanceof AnonymousClassDeclaration) {
-            decls = ((AnonymousClassDeclaration)ast).bodyDeclarations();
+        } else if (ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
+            decls = cstr.getAnonymousClassDeclaration().bodyDeclarations();
         } else {
             throw new InvalidSyntax(ast);
         }
@@ -687,14 +688,12 @@ public class DFKlass extends DFTypeSpace implements DFType {
             for (Expression arg : (List<Expression>) cstr.arguments()) {
                 this.buildTypeFromExpr(arg, space, outerScope);
             }
-            AnonymousClassDeclaration anonDecl =
-                cstr.getAnonymousClassDeclaration();
-            if (anonDecl != null) {
-                String id = Utils.encodeASTNode(anonDecl);
+            if (cstr.getAnonymousClassDeclaration() != null) {
+                String id = Utils.encodeASTNode(cstr);
                 DFKlass anonKlass = new DFKlass(
                     id, space, this, outerScope, DFBuiltinTypes.getObjectKlass());
                 space.addKlass(id, anonKlass);
-                anonKlass.setKlassTree(this.getFilePath(), anonDecl);
+                anonKlass.setKlassTree(this.getFilePath(), cstr);
             }
 
         } else if (expr instanceof ConditionalExpression) {
@@ -1179,8 +1178,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
         if (ast instanceof AbstractTypeDeclaration) {
             this.buildMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
-        } else if (ast instanceof AnonymousClassDeclaration) {
-            this.buildMembersFromAnonDecl(finder, (AnonymousClassDeclaration)ast);
+        } else if (ast instanceof ClassInstanceCreation) {
+            this.buildMembersFromAnonDecl(finder, (ClassInstanceCreation)ast);
 
         } else {
             throw new InvalidSyntax(ast);
@@ -1240,6 +1239,26 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @SuppressWarnings("unchecked")
+    private void buildMembersFromAnonDecl(
+        DFTypeFinder finder, ClassInstanceCreation cstr)
+        throws InvalidSyntax {
+	// Get superclass.
+	Type superClass = cstr.getType();
+	if (superClass != null) {
+	    try {
+		_baseKlass = finder.resolve(superClass).toKlass();
+	    } catch (TypeNotFound e) {
+		Logger.error(
+                    "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
+                    this, e.name);
+	    }
+	}
+	_baseKlass.load();
+	this.buildMembers(
+	    finder, cstr.getAnonymousClassDeclaration().bodyDeclarations());
+    }
+
+    @SuppressWarnings("unchecked")
     private void buildMembersFromEnumDecl(
         DFTypeFinder finder, EnumDeclaration enumDecl)
         throws InvalidSyntax {
@@ -1286,13 +1305,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws InvalidSyntax {
 	this.buildMembers(finder, annotTypeDecl.bodyDeclarations());
-    }
-
-    @SuppressWarnings("unchecked")
-    private void buildMembersFromAnonDecl(
-        DFTypeFinder finder, AnonymousClassDeclaration anonDecl)
-        throws InvalidSyntax {
-	this.buildMembers(finder, anonDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")

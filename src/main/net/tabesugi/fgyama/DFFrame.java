@@ -888,16 +888,14 @@ public class DFFrame {
         } else if (expr instanceof ClassInstanceCreation) {
             // "new T()"
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            AnonymousClassDeclaration anonDecl =
-                cstr.getAnonymousClassDeclaration();
             DFType instType;
-            if (anonDecl != null) {
-                String id = Utils.encodeASTNode(anonDecl);
+            if (cstr.getAnonymousClassDeclaration() != null) {
+                String id = Utils.encodeASTNode(cstr);
                 instType = _method.getType(id);
                 if (instType == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (anondecl)",
-                        this, anonDecl);
+                        this, cstr);
 		    return null;
 		}
             } else {
