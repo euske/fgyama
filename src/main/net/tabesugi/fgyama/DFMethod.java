@@ -410,19 +410,19 @@ class JoinNode extends DFNode {
 
     @Override
     public boolean purge() {
-        if (_linkTrue != null) {
+        if (_linkTrue != null && _linkFalse != null) {
             DFNode srcTrue = _linkTrue.getSrc();
             if (srcTrue instanceof JoinNode &&
                 ((JoinNode)srcTrue)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcTrue)._linkFalse != null &&
                 ((JoinNode)srcTrue)._linkFalse.getSrc() == _linkFalse.getSrc()) {
                 unlink(srcTrue);
                 return true;
             }
-        }
-        if (_linkFalse != null) {
             DFNode srcFalse = _linkFalse.getSrc();
             if (srcFalse instanceof JoinNode &&
                 ((JoinNode)srcFalse)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcFalse)._linkTrue != null &&
                 ((JoinNode)srcFalse)._linkTrue.getSrc() == _linkTrue.getSrc()) {
                 unlink(srcFalse);
                 return true;
