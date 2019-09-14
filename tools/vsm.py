@@ -2,6 +2,14 @@
 import sys
 import math
 
+def calcdot(f1, f2):
+    n1 = sum( v*v for v in f1.values() )
+    n2 = sum( v*v for v in f2.values() )
+    if n1 == 0 or n2 == 0: return 0
+    dot = sum( v1*f2[k] for (k,v1) in f1.items() if k in f2 )
+    return dot/math.sqrt(n1*n2)
+
+
 class VSM:
 
     """
@@ -57,11 +65,7 @@ class VSM:
         D = self.idf[None]
         f1 = { k: v*self.idf.get(k,D) for (k,v) in feats1.items() }
         f2 = { k: v*self.idf.get(k,D) for (k,v) in feats2.items() }
-        n1 = sum( v*v for v in f1.values() )
-        n2 = sum( v*v for v in f2.values() )
-        if n1 == 0 or n2 == 0: return 0
-        dot = sum( v1*f2[k] for (k,v1) in f1.items() if k in f2 )
-        return dot/math.sqrt(n1*n2)
+        return calcdot(f1, f2)
 
     def findsim(self, k0, threshold=0):
         f0 = self.docs[k0]
