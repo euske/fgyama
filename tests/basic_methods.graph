@@ -22,10 +22,10 @@
           <link src="M2_fa_N6"/>
         </node>
         <scope name="Lbasic_methods;.:fa:139:385.:B:156:385">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_fa_N3" kind="new" type="Lbasic_methods/:fa:139:385/:AST1:173:225;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_fa_N3" kind="new" type="Lbasic_methods/:fa:139:385/:AST14:165:225;">
             <ast end="225" start="165" type="14"/>
           </node>
-          <node id="M2_fa_N4" kind="receive" type="Lbasic_methods/:fa:139:385/:AST1:173:225;">
+          <node id="M2_fa_N4" kind="receive" type="Lbasic_methods/:fa:139:385/:AST14:165:225;">
             <ast end="225" start="165" type="14"/>
             <link src="M2_fa_N3"/>
           </node>
@@ -54,7 +54,7 @@
             <ast end="324" start="323" type="42"/>
             <link src="M2_fa_N5"/>
           </node>
-          <node data="Lbasic_methods/A;.toString()Ljava/lang/String;" id="M2_fa_N11" kind="call" type="Ljava/lang/String;">
+          <node data="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String; Lbasic_methods/A;.toString()Ljava/lang/String;" id="M2_fa_N11" kind="call" type="Ljava/lang/String;">
             <ast end="335" start="323" type="32"/>
             <link label="#this" src="M2_fa_N10"/>
           </node>
@@ -124,6 +124,7 @@
     </method>
     <method abstract="false" name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
       <caller name="Lbasic_methods;.fa()V"/>
+      <overrider name="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;"/>
       <overriding name="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
       <ast end="112" start="52" type="31"/>
       <scope name="Lbasic_methods/A;.:toString:52:112">
@@ -143,20 +144,21 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:fa:139:385/:AST1:173:225;" path="tests/basic_methods.java">
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST1:173:225;.&lt;clinit&gt;()V" style="initializer">
-      <ast end="225" start="173" type="1"/>
-      <scope name="Lbasic_methods/:fa:139:385/:AST1:173:225;.&lt;clinit&gt;"/>
+  <class extends="Lbasic_methods/A;" interface="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;" path="tests/basic_methods.java">
+    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;()V" style="initializer">
+      <ast end="225" start="165" type="14"/>
+      <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST1:173:225;.toString()Ljava/lang/String;" style="instance">
-      <overriding name="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
+    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;" style="instance">
+      <caller name="Lbasic_methods;.fa()V"/>
+      <overriding name="Lbasic_methods/A;.toString()Ljava/lang/String;"/>
       <ast end="222" start="180" type="31"/>
-      <scope name="Lbasic_methods/:fa:139:385/:AST1:173:225;.:toString:180:222">
-        <node id="M7_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/:AST1:173:225;"/>
+      <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:toString:180:222">
+        <node id="M7_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/:AST14:165:225;"/>
         <node id="M7_toString_N4" kind="output" ref="#return" type="Ljava/lang/String;">
           <link src="M7_toString_N3"/>
         </node>
-        <scope name="Lbasic_methods/:fa:139:385/:AST1:173:225;.:toString:180:222.:B:205:222">
+        <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:toString:180:222.:B:205:222">
           <node data="AAA" id="M7_toString_N2" kind="value" type="Ljava/lang/String;">
             <ast end="219" start="214" type="45"/>
           </node>
