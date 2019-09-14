@@ -957,23 +957,23 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
     }
 
     @SuppressWarnings("unchecked")
-    public void buildFrame()
+    public void buildFrame(List<DFKlass> defined)
         throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
         assert _frame != null;
         if (_ast instanceof MethodDeclaration) {
             _frame.buildMethodDecl(
-                _finder, this, _scope, (MethodDeclaration)_ast);
+                defined, _scope, (MethodDeclaration)_ast);
 	} else if (_ast instanceof AbstractTypeDeclaration) {
             _frame.buildBodyDecls(
-                _finder, this, _scope, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+                defined, _scope, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof AnonymousClassDeclaration) {
             _frame.buildBodyDecls(
-                _finder, this, _scope, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
+                defined, _scope, ((AnonymousClassDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof LambdaExpression) {
             _frame.buildLambda(
-                _finder, this, _scope, (LambdaExpression)_ast);
+                defined, _scope, (LambdaExpression)_ast);
         } else {
             throw new InvalidSyntax(_ast);
         }

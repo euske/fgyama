@@ -115,6 +115,8 @@ class DFFunctionalKlass extends DFKlass {
 
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
+        assert _funcMethod != null;
+	assert _funcMethod.getFuncType() == null;
 	_funcMethod.setFuncType(klass.getFuncMethod().getFuncType());
     }
 

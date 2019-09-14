@@ -593,7 +593,8 @@ public class Java2DF {
             LambdaExpression lambda = (LambdaExpression)ast;
             String id = Utils.encodeASTNode(lambda);
             DFKlass lambdaKlass = (DFKlass)space.getType(id);
-            enumKlasses(lambdaKlass, klasses);
+	    // Do not use lambda klasses until defined.
+	    lambdaKlass.load();
 
         } else if (ast instanceof MethodReference) {
             //  CreationReference
@@ -742,7 +743,7 @@ public class Java2DF {
 
         // Build method scopes (normal classes).
         for (DFKlass klass : klasses) {
-	    if (klass instanceof DFFunctionalKlass) continue;
+	    assert !(klass instanceof DFFunctionalKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildScope();
@@ -753,44 +754,49 @@ public class Java2DF {
         }
 
         // Build call graphs (normal classes).
+	List<DFKlass> defined = new ArrayList<DFKlass>();
         for (DFKlass klass : klasses) {
-	    if (klass instanceof DFFunctionalKlass) continue;
+	    assert !(klass instanceof DFFunctionalKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
-                init.buildFrame();
+                init.buildFrame(defined);
             }
             for (DFMethod method : klass.getMethods()) {
-		method.buildFrame();
+		method.buildFrame(defined);
 		queue.add(method);
             }
         }
 
-        // Build method scopes (lambdas).
-        for (DFKlass klass : klasses) {
-	    if (!(klass instanceof DFFunctionalKlass)) continue;
-	    if (!((DFFunctionalKlass)klass).isDefined()) continue; // unused lambda.
-	    DFMethod init = klass.getInitMethod();
-	    if (init != null) {
-		init.buildScope();
+	while (!defined.isEmpty()) {
+	    klasses.addAll(defined);
+	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
+	    // Build method scopes (lambdas).
+	    for (DFKlass klass : defined) {
+		assert (klass instanceof DFFunctionalKlass);
+		assert ((DFFunctionalKlass)klass).isDefined();
+		DFMethod init = klass.getInitMethod();
+		if (init != null) {
+		    init.buildScope();
+		}
+		for (DFMethod method : klass.getMethods()) {
+		    method.buildScope();
+		}
 	    }
-	    for (DFMethod method : klass.getMethods()) {
-		method.buildScope();
+	    // Build call graphs (lambdas).
+	    for (DFKlass klass : defined) {
+		assert (klass instanceof DFFunctionalKlass);
+		assert ((DFFunctionalKlass)klass).isDefined();
+		DFMethod init = klass.getInitMethod();
+		if (init != null) {
+		    init.buildFrame(defined2);
+		}
+		for (DFMethod method : klass.getMethods()) {
+		    method.buildFrame(defined2);
+		    queue.add(method);
+		}
 	    }
-        }
-
-        // Build call graphs (lambdas).
-        for (DFKlass klass : klasses) {
-	    if (!(klass instanceof DFFunctionalKlass)) continue;
-	    if (!((DFFunctionalKlass)klass).isDefined()) continue; // unused lambda.
-            DFMethod init = klass.getInitMethod();
-            if (init != null) {
-                init.buildFrame();
-            }
-            for (DFMethod method : klass.getMethods()) {
-		method.buildFrame();
-		queue.add(method);
-            }
-        }
+	    defined = defined2;
+	}
 
         // Expand callee frames recursively.
         while (!queue.isEmpty()) {
@@ -811,8 +817,6 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
-	if (klass instanceof DFFunctionalKlass &&
-            !((DFFunctionalKlass)klass).isDefined()) return; // unused lambda.
         this.startKlass(klass);
 	if (!(klass instanceof DFFunctionalKlass)) {
 	    try {
