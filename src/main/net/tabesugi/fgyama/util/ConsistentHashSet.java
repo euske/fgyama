@@ -24,7 +24,7 @@ public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
     @Override
     public boolean add(E e) {
         if (!_set.contains(e)) {
-            _list.add(0, e);
+            _list.add(e);
         }
         return _set.add(e);
     }

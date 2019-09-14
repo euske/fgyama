@@ -16,11 +16,11 @@
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_ops;"/>
         <node id="M2_foo_N4" kind="input" ref="%I" type="I"/>
-        <node id="M2_foo_N36" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N35"/>
-        </node>
-        <node id="M2_foo_N37" kind="output" ref="%I" type="I">
+        <node id="M2_foo_N36" kind="output" ref="%I" type="I">
           <link src="M2_foo_N26"/>
+        </node>
+        <node id="M2_foo_N37" kind="output" ref="#return" type="I">
+          <link src="M2_foo_N35"/>
         </node>
         <scope name="Lbasic_ops;.:foo:30:186.:B:59:186">
           <node id="M2_foo_N5" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186/$x" type="I">

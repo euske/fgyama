@@ -32,10 +32,10 @@
           <link src="M2_main_N1"/>
         </node>
         <node id="M2_main_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
-        <node id="M2_main_N4" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
-        <node id="M2_main_N5" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
-        <node id="M2_main_N6" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M2_main_N7" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N4" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N5" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M2_main_N6" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
+        <node id="M2_main_N7" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
         <node id="M2_main_N25" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="M2_main_N19"/>
         </node>
@@ -51,7 +51,7 @@
             <ast end="144" start="137" type="2"/>
             <link label="array" src="M2_main_N8"/>
             <link label="index" src="M2_main_N9"/>
-            <link src="M2_main_N7"/>
+            <link src="M2_main_N4"/>
           </node>
           <node id="M2_main_N11" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$a" type="Ljava/lang/String;">
             <ast end="144" start="133" type="59"/>
@@ -81,8 +81,8 @@
             <ast end="205" start="199" type="32"/>
             <link label="#this" src="M2_main_N3"/>
             <link label="#arg0" src="M2_main_N16"/>
-            <link label="@Lbasic_funcs;/.y" src="M2_main_N4"/>
-            <link label="@Lbasic_funcs;/.z" src="M2_main_N5"/>
+            <link label="@Lbasic_funcs;/.z" src="M2_main_N6"/>
+            <link label="@Lbasic_funcs;/.y" src="M2_main_N7"/>
           </node>
           <node id="M2_main_N18" kind="receive" type="I">
             <ast end="205" start="199" type="32"/>
@@ -98,7 +98,7 @@
           </node>
           <node id="M2_main_N21" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="225" start="215" type="40"/>
-            <link src="M2_main_N6"/>
+            <link src="M2_main_N5"/>
           </node>
           <node id="M2_main_N22" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
             <ast end="235" start="234" type="42"/>
@@ -117,8 +117,8 @@
       </scope>
     </method>
     <method abstract="false" name="Lbasic_funcs;.moo(I)I" style="static">
-      <caller name="Lbasic_funcs;.moo(I)I"/>
       <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
+      <caller name="Lbasic_funcs;.moo(I)I"/>
       <ast end="407" start="249" type="31"/>
       <scope name="Lbasic_funcs;.:moo:249:407">
         <node id="M3_moo_N1" kind="input" ref="#arg0" type="I">
@@ -129,8 +129,8 @@
           <link src="M3_moo_N1"/>
         </node>
         <node id="M3_moo_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
-        <node id="M3_moo_N4" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
-        <node id="M3_moo_N5" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
+        <node id="M3_moo_N4" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
+        <node id="M3_moo_N5" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
         <node id="M3_moo_N36" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="M3_moo_N34"/>
         </node>
@@ -148,7 +148,7 @@
           </node>
           <node data="+=" id="M3_moo_N8" kind="op_assign" ref="@Lbasic_funcs;/.z" type="I">
             <ast end="294" start="288" type="7"/>
-            <link label="L" src="M3_moo_N5"/>
+            <link label="L" src="M3_moo_N4"/>
             <link label="R" src="M3_moo_N7"/>
           </node>
           <node id="M3_moo_N9" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
@@ -183,7 +183,7 @@
             <node data="Lbasic_funcs;.foo()I" id="M3_moo_N13" kind="call" type="I">
               <ast end="342" start="337" type="32"/>
               <link label="#this" src="M3_moo_N3"/>
-              <link label="@Lbasic_funcs;/.y" src="M3_moo_N4"/>
+              <link label="@Lbasic_funcs;/.y" src="M3_moo_N5"/>
             </node>
             <node id="M3_moo_N15" kind="receive" type="I">
               <ast end="342" start="337" type="32"/>
@@ -216,8 +216,8 @@
               <ast end="388" start="380" type="32"/>
               <link label="#this" src="M3_moo_N3"/>
               <link label="#arg0" src="M3_moo_N22"/>
-              <link label="@Lbasic_funcs;/.y" src="M3_moo_N4"/>
               <link label="@Lbasic_funcs;/.z" src="M3_moo_N6"/>
+              <link label="@Lbasic_funcs;/.y" src="M3_moo_N5"/>
             </node>
             <node id="M3_moo_N26" kind="receive" type="I">
               <ast end="388" start="380" type="32"/>
@@ -249,11 +249,11 @@
       <scope name="Lbasic_funcs;.:foo:413:477">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M4_foo_N2" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
-        <node id="M4_foo_N8" kind="output" ref="#return" type="I">
-          <link src="M4_foo_N7"/>
-        </node>
-        <node id="M4_foo_N9" kind="output" ref="@Lbasic_funcs;/.z" type="I">
+        <node id="M4_foo_N8" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="M4_foo_N3"/>
+        </node>
+        <node id="M4_foo_N9" kind="output" ref="#return" type="I">
+          <link src="M4_foo_N7"/>
         </node>
         <scope name="Lbasic_funcs;.:foo:413:477.:B:437:477">
           <node id="M4_foo_N3" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
