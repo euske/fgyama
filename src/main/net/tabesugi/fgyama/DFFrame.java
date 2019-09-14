@@ -1097,7 +1097,8 @@ public class DFFrame {
     }
 
     private void fixateType(
-	List<DFKlass> defined, Expression expr, DFType type) {
+	List<DFKlass> defined, Expression expr, DFType type)
+	throws InvalidSyntax {
 	if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
 	    fixateType(defined, paren.getExpression(), type);
@@ -1106,13 +1107,15 @@ public class DFFrame {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFFunctionalKlass lambdaKlass = (DFFunctionalKlass)_method.getType(id);
+	    lambdaKlass.load();
 	    lambdaKlass.setBaseKlass(type.toKlass());
 	    defined.add(lambdaKlass);
 	}
     }
 
     private void fixateType(
-	List<DFKlass> defined, List<Expression> exprs, DFType[] types) {
+	List<DFKlass> defined, List<Expression> exprs, DFType[] types)
+	throws InvalidSyntax {
 	for (int i = 0; i < exprs.size(); i++) {
 	    this.fixateType(defined, exprs.get(i), types[i]);
 	}

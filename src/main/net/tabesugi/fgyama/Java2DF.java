@@ -594,7 +594,6 @@ public class Java2DF {
             String id = Utils.encodeASTNode(lambda);
             DFKlass lambdaKlass = (DFKlass)space.getType(id);
 	    // Do not use lambda klasses until defined.
-	    lambdaKlass.load();
 
         } else if (ast instanceof MethodReference) {
             //  CreationReference
@@ -774,10 +773,6 @@ public class Java2DF {
 	    for (DFKlass klass : defined) {
 		assert (klass instanceof DFFunctionalKlass);
 		assert ((DFFunctionalKlass)klass).isDefined();
-		DFMethod init = klass.getInitMethod();
-		if (init != null) {
-		    init.buildScope();
-		}
 		for (DFMethod method : klass.getMethods()) {
 		    method.buildScope();
 		}
@@ -786,10 +781,6 @@ public class Java2DF {
 	    for (DFKlass klass : defined) {
 		assert (klass instanceof DFFunctionalKlass);
 		assert ((DFFunctionalKlass)klass).isDefined();
-		DFMethod init = klass.getInitMethod();
-		if (init != null) {
-		    init.buildFrame(defined2);
-		}
 		for (DFMethod method : klass.getMethods()) {
 		    method.buildFrame(defined2);
 		    queue.add(method);
