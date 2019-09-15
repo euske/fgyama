@@ -2600,8 +2600,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 DFNode src = exit.getNode();
                 DFRef ref = src.getRef();
                 DFNode dst = ctx.getLast(ref);
-                assert dst != null;
-                if (src == dst) {
+                if (dst == null) {
+                    ctx.set(src);
+                } else if (src == dst) {
                     ;
                 } else if (dst.merge(src)) {
                     ;
@@ -2609,7 +2610,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     ctx.set(src);
                 } else {
                     Logger.error("DFMethod.endBreaks: cannot merge:", ref, src, dst);
-                    assert false;   // ???
+                    //assert false;
                 }
             }
         }
@@ -2645,7 +2646,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx.set(src);
             } else {
                 Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);
-                assert false;   // ???
+                //assert false;
             }
         }
     }

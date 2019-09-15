@@ -443,7 +443,7 @@ public class DFFrame {
         } else if (stmt instanceof TryStatement) {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
-            DFFrame frame = this;
+            DFFrame catchFrame = this;
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
@@ -457,12 +457,13 @@ public class DFFrame {
                         this, e.name, decl);
                 }
                 DFLocalScope catchScope = scope.getChildByAST(cc);
-                DFFrame catchFrame = frame.addChild(catchKlass, cc);
-                catchFrame.buildStmt(defined, catchScope, cc.getBody());
-                catchFrame.removeRefs(catchScope);
-                frame.expandLocalRefs(catchFrame);
-                frame = catchFrame;
+                catchFrame = catchFrame.addChild(catchKlass, cc);
+                this.buildStmt(defined, catchScope, cc.getBody());
+                this.removeRefs(catchScope);
             }
+            DFFrame tryFrame = catchFrame;
+            DFLocalScope tryScope = scope.getChildByAST(tryStmt);
+            tryFrame.buildStmt(defined, tryScope, tryStmt.getBody());
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
                 this.buildStmt(defined, scope, finBlock);
