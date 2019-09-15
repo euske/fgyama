@@ -11,9 +11,10 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFFrame {
 
+    private DFFrame _outer;
     private DFMethod _method;
     private String _label;
-    private DFFrame _outer;
+    private DFKlass _catchKlass;
 
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
@@ -25,18 +26,22 @@ public class DFFrame {
         new ArrayList<DFExit>();
 
     public static final String BREAKABLE = "@BREAKABLE";
-    public static final String CATCHABLE = "@CATCHABLE";
     public static final String RETURNABLE = "@RETURNABLE";
 
     public DFFrame(DFMethod method, String label) {
-        this(method, label, null);
-    }
-
-    private DFFrame(DFMethod method, String label, DFFrame outer) {
         assert label != null;
+        _outer = null;
 	_method = method;
         _label = label;
+        _catchKlass = null;
+    }
+
+    private DFFrame(DFFrame outer, String label, DFKlass catchKlass) {
+        assert label != null;
         _outer = outer;
+	_method = outer._method;
+        _label = label;
+        _catchKlass = catchKlass;
     }
 
     @Override
@@ -45,7 +50,13 @@ public class DFFrame {
     }
 
     private DFFrame addChild(String label, ASTNode ast) {
-        DFFrame frame = new DFFrame(_method, label, this);
+        DFFrame frame = new DFFrame(this, label, null);
+        _ast2child.put(Utils.encodeASTNode(ast), frame);
+        return frame;
+    }
+
+    private DFFrame addChild(DFKlass catchKlass, ASTNode ast) {
+        DFFrame frame = new DFFrame(this, catchKlass.getTypeName(), catchKlass);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
@@ -54,16 +65,32 @@ public class DFFrame {
         return _label;
     }
 
+    public DFKlass getCatchKlass() {
+        return _catchKlass;
+    }
+
     public DFFrame getChildByAST(ASTNode ast) {
         String key = Utils.encodeASTNode(ast);
         assert _ast2child.containsKey(key);
         return _ast2child.get(key);
     }
 
+    // Returns any upper Frame that has a given label.
     public DFFrame find(String label) {
         DFFrame frame = this;
         while (frame != null) {
-            if (frame.getLabel().equals(label)) break;
+            if (frame._label.equals(label)) break;
+            frame = frame._outer;
+        }
+        return frame;
+    }
+
+    // Returns any upper Frame that catches a given type (and its subclasses).
+    public DFFrame find(DFKlass catchKlass) {
+        DFFrame frame = this;
+        while (frame != null) {
+            if (frame._catchKlass != null &&
+                0 <= catchKlass.isSubclassOf(frame._catchKlass, null)) break;
             frame = frame._outer;
         }
         return frame;
@@ -123,7 +150,7 @@ public class DFFrame {
     }
 
     public void addExit(DFExit exit) {
-        //Logger.info("DFFrame.addExit:", this, ":", exit);
+        Logger.info("DFFrame.addExit:", this, ":", exit);
         _exits.add(exit);
     }
 
@@ -416,18 +443,25 @@ public class DFFrame {
         } else if (stmt instanceof TryStatement) {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
-            DFLocalScope tryScope = scope.getChildByAST(stmt);
-            DFFrame tryFrame = this.addChild(DFFrame.CATCHABLE, stmt);
-            tryFrame.buildStmt(defined, tryScope, tryStmt.getBody());
-            tryFrame.removeRefs(tryScope);
-            this.expandLocalRefs(tryFrame);
+            DFFrame frame = this;
             for (CatchClause cc :
                      (List<CatchClause>) tryStmt.catchClauses()) {
+                SingleVariableDeclaration decl = cc.getException();
+                DFKlass catchKlass = DFBuiltinTypes.getExceptionKlass();
+                try {
+                    DFTypeFinder finder = _method.getFinder();
+                    catchKlass = finder.resolve(decl.getType()).toKlass();
+                } catch (TypeNotFound e) {
+                    Logger.error(
+                        "DFFrame.buildExpr: TypeNotFound (catch)",
+                        this, e.name, decl);
+                }
                 DFLocalScope catchScope = scope.getChildByAST(cc);
-                DFFrame catchFrame = this.addChild("@CATCH", cc);
+                DFFrame catchFrame = frame.addChild(catchKlass, cc);
                 catchFrame.buildStmt(defined, catchScope, cc.getBody());
                 catchFrame.removeRefs(catchScope);
-                this.expandLocalRefs(catchFrame);
+                frame.expandLocalRefs(catchFrame);
+                frame = catchFrame;
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {

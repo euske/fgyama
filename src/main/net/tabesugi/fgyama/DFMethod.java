@@ -680,10 +680,9 @@ class ReturnNode extends SingleAssignNode {
 class ThrowNode extends SingleAssignNode {
 
     public ThrowNode(
-        DFGraph graph, DFVarScope scope,
+        DFGraph graph, DFVarScope scope, DFRef ref,
         ASTNode ast, DFNode value) {
-        super(graph, scope, scope.lookupException(value.getNodeType()),
-              ast);
+        super(graph, scope, ref, ast);
         this.accept(value);
     }
 
@@ -698,9 +697,8 @@ class CatchNode extends SingleAssignNode {
 
     public CatchNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode value) {
+        ASTNode ast) {
         super(graph, scope, ref, ast);
-        this.accept(value);
     }
 
     @Override
@@ -710,12 +708,13 @@ class CatchNode extends SingleAssignNode {
 }
 
 // CatchJoin
-class CatchJoin extends SingleAssignNode {
+class CatchJoin extends DFNode {
 
     public CatchJoin(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref, ast);
+        DFGraph graph, DFVarScope scope, ASTNode ast,
+        DFNode node, DFKlass catchKlass) {
+        super(graph, scope, node.getNodeType(), node.getRef(), ast);
+        this.accept(node, catchKlass.getTypeName());
     }
 
     @Override
@@ -723,12 +722,10 @@ class CatchJoin extends SingleAssignNode {
         return "catchjoin";
     }
 
-    public void recv(DFType type, DFNode node) {
-        if (type != null) {
-            this.accept(node, type.getTypeName());
-        } else {
-            this.accept(node);
-        }
+    public boolean merge(DFNode node) {
+        if (this.hasValue()) return false;
+        this.accept(node);
+        return true;
     }
 
 }
@@ -2200,10 +2197,16 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
-        ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
 
+        // Find the innermost catch frame so that
+        // it can catch all the specified Exceptions.
+        DFFrame tryFrame = frame;
+        for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
+            tryFrame = tryFrame.getChildByAST(cc);
+        }
+
+        // Execute the try clause.
         DFLocalScope tryScope = scope.getChildByAST(tryStmt);
-        DFFrame tryFrame = frame.getChildByAST(tryStmt);
         DFContext tryCtx = new DFContext(graph, tryScope);
         processStatement(
             tryCtx, typeSpace, graph, finder, tryScope, tryFrame,
@@ -2212,80 +2215,58 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
         }
-        outRefs.addAll(tryFrame.getOutputRefs());
 
-        List<CatchClause> catches = tryStmt.catchClauses();
-        int ncats = catches.size();
-        DFType[] etypes = new DFType[ncats];
-        DFFrame[] frames = new DFFrame[ncats];
-        DFContext[] ctxs = new DFContext[ncats];
-        for (int i = 0; i < ncats; i++) {
-            CatchClause cc = catches.get(i);
+        // Catch each speficied Exception.
+        DFFrame catchFrame = frame;
+        for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
             SingleVariableDeclaration decl = cc.getException();
-            DFType type = finder.resolve(decl.getType());
             DFLocalScope catchScope = scope.getChildByAST(cc);
-            DFFrame catchFrame = frame.getChildByAST(cc);
             DFContext catchCtx = new DFContext(graph, catchScope);
-            DFRef ref = catchScope.lookupVar(decl.getName());
-            DFNode exc = tryCtx.get(tryScope.lookupException(type));
-            CatchNode cat = new CatchNode(graph, catchScope, ref, decl, exc);
-            catchCtx.set(cat);
             processStatement(
-                catchCtx, typeSpace, graph, finder, catchScope, catchFrame,
+                catchCtx, typeSpace, graph, finder, catchScope, frame,
                 cc.getBody());
             for (DFNode src : catchCtx.getFirsts()) {
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(catchFrame.getOutputRefs());
-            etypes[i] = type;
-            frames[i] = catchFrame;
-            ctxs[i] = catchCtx;
-        }
-
-        // Attach a CatchNode to each variable.
-        for (DFRef ref : outRefs) {
-            CatchJoin join = new CatchJoin(graph, scope, ref, tryStmt);
-            {
-                DFNode dst = tryCtx.getLast(ref);
-                if (dst != null) {
-                    join.recv(null, dst);
-                }
-            }
-            for (int i = 0; i < ncats; i++) {
-                DFNode dst = ctxs[i].get(ref);
-                if (dst != null) {
-                    join.recv(etypes[i], dst);
-                }
-            }
-            ctx.set(join);
-        }
-
-        // Take care of exits.
-        assert frame != tryFrame;
-        for (DFExit exit : tryFrame.getExits()) {
-            DFNode node = exit.getNode();
-            CatchJoin join = new CatchJoin(
-                graph, scope, node.getRef(), tryStmt);
-            join.recv(null, node);
-            exit.setNode(join);
-            frame.addExit(exit);
-        }
-        this.closeFrame(tryFrame, ctx);
-        for (int i = 0; i < ncats; i++) {
-            DFFrame catchFrame = frames[i];
-            assert frame != catchFrame;
+            catchFrame = catchFrame.getChildByAST(cc);
+            DFKlass catchKlass = catchFrame.getCatchKlass();
+            assert catchKlass != null;
+            DFRef catchRef = catchScope.lookupVar(decl.getName());
+            CatchNode cat = new CatchNode(graph, catchScope, catchRef, decl);
+            catchCtx.set(cat);
+            // Take care of exits.
+            DFRef excRef = tryScope.lookupException(catchKlass);
             for (DFExit exit : catchFrame.getExits()) {
-                DFNode node = exit.getNode();
-                CatchJoin join = new CatchJoin(
-                    graph, scope, node.getRef(), tryStmt);
-                join.recv(etypes[i], node);
-                exit.setNode(join);
-                frame.addExit(exit);
+                DFNode src = exit.getNode();
+                if (exit.getFrame() == catchFrame) {
+                    DFRef ref = src.getRef();
+                    if (ref == excRef) {
+                        cat.accept(src);
+                    } else {
+                        DFNode dst = ctx.getLast(ref);
+                        if (dst == null) {
+                            dst = src;
+                        } else if (dst.merge(src)) {
+                            ;
+                        } else if (src.merge(dst)) {
+                            dst = src;
+                        } else {
+                            Logger.error("DFMethod.catch: Conflict:", dst, "<-", src);
+                            continue;
+                        }
+                        ctx.set(dst);
+                    }
+                } else {
+                    CatchJoin join = new CatchJoin(
+                        graph, scope, cc, src, catchKlass);
+                    exit.setNode(join);
+                    frame.addExit(exit);
+                }
             }
-            this.closeFrame(catchFrame, ctx);
         }
 
+        // XXX Take care of ALL exits from tryFrame.
         Block finBlock = tryStmt.getFinally();
         if (finBlock != null) {
             processStatement(
@@ -2434,9 +2415,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             processExpression(
                 ctx, typeSpace, graph, finder, scope, frame,
                 throwStmt.getExpression());
-            ThrowNode thrown = new ThrowNode(
-                graph, scope, stmt, ctx.getRValue());
-            DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
+            DFNode exc = ctx.getRValue();
+            DFKlass excKlass = exc.getNodeType().toKlass();
+            DFRef excRef = scope.lookupException(excKlass);
+            ThrowNode thrown = new ThrowNode(graph, scope, excRef, stmt, exc);
+            // Find out the catch clause. If not, the entire method throws.
+            DFFrame dstFrame = frame.find(excKlass);
             if (dstFrame == null) {
                 dstFrame = frame.find(DFFrame.RETURNABLE);
                 assert dstFrame != null;
@@ -2579,7 +2563,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             List<DFExit> exits = ref2exits.get(ref);
             assert exits != null;
             DFNode dst = ctx.getLast(ref);
-            //Logger.error("DFMethod.closeFrame:", frame, ref);
+            Logger.error("DFMethod.closeFrame:", frame, ref);
             for (DFExit exit : exits) {
                 DFNode src = exit.getNode();
                 if (dst == null) {
@@ -2587,12 +2571,12 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 } else if (dst == src) {
                     ;
                 } else if (dst.merge(src)) {
-                    //Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
+                    Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
                 } else if (src.merge(dst)) {
-                    //Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
+                    Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
                     dst = src;
                 } else {
-                    //Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
+                    Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
                 }
             }
             ctx.set(dst);
