@@ -48,7 +48,7 @@ class DFKlass:
         return
 
     def add_method(self, method):
-        assert isinstance(method, DFGraph)
+        assert isinstance(method, DFGraph), method
         self.methods.append(method)
         return
 
@@ -221,13 +221,13 @@ class DFNode:
 ##  parse_method
 ##
 def parse_method(gid, egraph, klass):
-    assert egraph.tag == 'method'
+    assert egraph.tag == 'method', egraph
     gname = egraph.get('name')
     style = egraph.get('style')
     graph = DFGraph(gid, gname, style, klass)
 
     def parse_node(scope, enode):
-        assert enode.tag == 'node'
+        assert enode.tag == 'node', enode
         nid = enode.get('id')
         kind = enode.get('kind')
         ref = enode.get('ref')
@@ -242,13 +242,13 @@ def parse_method(gid, egraph, klass):
             elif e.tag == 'link':
                 label = e.get('label', '')
                 src = e.get('src')
-                assert label not in node.inputs
-                assert src is not None
+                assert label not in node.inputs, node.inputs
+                assert src is not None, src
                 node.inputs[label] = src
         return node
 
     def parse_scope(sid, escope, parent=None):
-        assert escope.tag == 'scope'
+        assert escope.tag == 'scope', escope
         sname = escope.get('name')
         scope = DFScope(graph, sid, sname, parent)
         sid += 1
@@ -286,7 +286,7 @@ def parse_method(gid, egraph, klass):
 ##  parse_klass
 ##
 def parse_klass(eklass, gid=0):
-    assert eklass.tag == 'class'
+    assert eklass.tag == 'class', eklass
     name = eklass.get('name')
     path = eklass.get('path')
     interface = (eklass.get('interface') == 'true')
