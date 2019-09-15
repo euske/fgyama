@@ -109,20 +109,6 @@ public class Utils {
         return b.toString();
     }
 
-    public static void copyFile(File src, File dst)
-        throws IOException {
-        FileInputStream input = new FileInputStream(src);
-        FileOutputStream output = new FileOutputStream(dst);
-        byte[] buf = new byte[4096];
-        while (true) {
-            int n = input.read(buf);
-            if (n < 0) break;
-            output.write(buf, 0, n);
-        }
-        output.close();
-        input.close();
-    }
-
     public static CompilationUnit parseFile(String path)
         throws IOException {
         return parseFile(new File(path));

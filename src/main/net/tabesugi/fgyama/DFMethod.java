@@ -1971,7 +1971,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 JoinNode join = new JoinNode(
                     graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(true, node);
-                frame.addExit(exit.wrap(join));
+                exit.setNode(join);
+                frame.addExit(exit);
             }
             this.closeFrame(thenFrame, ctx);
         }
@@ -1983,7 +1984,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 JoinNode join = new JoinNode(
                     graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(false, node);
-                frame.addExit(exit.wrap(join));
+                exit.setNode(join);
+                frame.addExit(exit);
             }
             this.closeFrame(elseFrame, ctx);
         }
@@ -2266,7 +2268,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             CatchJoin join = new CatchJoin(
                 graph, scope, node.getRef(), tryStmt);
             join.recv(null, node);
-            frame.addExit(exit.wrap(join));
+            exit.setNode(join);
+            frame.addExit(exit);
         }
         this.closeFrame(tryFrame, ctx);
         for (int i = 0; i < ncats; i++) {
@@ -2277,7 +2280,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 CatchJoin join = new CatchJoin(
                     graph, scope, node.getRef(), tryStmt);
                 join.recv(etypes[i], node);
-                frame.addExit(exit.wrap(join));
+                exit.setNode(join);
+                frame.addExit(exit);
             }
             this.closeFrame(catchFrame, ctx);
         }

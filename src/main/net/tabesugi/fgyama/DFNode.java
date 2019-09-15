@@ -110,6 +110,7 @@ public class DFNode implements Comparable<DFNode> {
         _links.add(link);
         node._outputs.add(this);
         if (label == null) {
+            assert _link0 == null;
             if (_type instanceof DFUnknownType) {
                 _type = node.getNodeType();
             }

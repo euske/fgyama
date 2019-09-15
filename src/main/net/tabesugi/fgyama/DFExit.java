@@ -40,11 +40,11 @@ public class DFExit {
         return _node;
     }
 
-    public boolean isContinue() {
-        return _cont;
+    public void setNode(DFNode node) {
+        _node = node;
     }
 
-    public DFExit wrap(DFNode node) {
-        return new DFExit(_frame, node, _cont);
+    public boolean isContinue() {
+        return _cont;
     }
 }

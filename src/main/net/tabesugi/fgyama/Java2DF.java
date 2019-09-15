@@ -887,7 +887,7 @@ public class Java2DF {
             } else if (arg.equals("-o")) {
                 String path = args[++i];
                 try {
-                    output = new FileOutputStream(path);
+                    output = new BufferedOutputStream(new FileOutputStream(path));
                     Logger.info("Exporting:", path);
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
