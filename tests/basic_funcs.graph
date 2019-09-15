@@ -131,11 +131,11 @@
         <node id="M3_moo_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M3_moo_N4" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
         <node id="M3_moo_N5" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
+        <node id="M3_moo_N35" kind="output" ref="#return" type="I">
+          <link src="M3_moo_N31"/>
+        </node>
         <node id="M3_moo_N36" kind="output" ref="@Lbasic_funcs;/.z" type="I">
           <link src="M3_moo_N34"/>
-        </node>
-        <node id="M3_moo_N37" kind="output" ref="#return" type="I">
-          <link src="M3_moo_N31"/>
         </node>
         <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="M3_moo_N6" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
@@ -164,7 +164,6 @@
             <link label="R" src="M3_moo_N10"/>
           </node>
           <node id="M3_moo_N31" kind="join" ref="#return" type="I">
-            <ast end="401" start="304" type="25"/>
             <link label="cond" src="M3_moo_N11"/>
             <link label="true" src="M3_moo_N17"/>
             <link label="false" src="M3_moo_N30"/>
@@ -249,11 +248,11 @@
       <scope name="Lbasic_funcs;.:foo:413:477">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M4_foo_N2" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
-        <node id="M4_foo_N8" kind="output" ref="@Lbasic_funcs;/.z" type="I">
-          <link src="M4_foo_N3"/>
-        </node>
-        <node id="M4_foo_N9" kind="output" ref="#return" type="I">
+        <node id="M4_foo_N8" kind="output" ref="#return" type="I">
           <link src="M4_foo_N7"/>
+        </node>
+        <node id="M4_foo_N9" kind="output" ref="@Lbasic_funcs;/.z" type="I">
+          <link src="M4_foo_N3"/>
         </node>
         <scope name="Lbasic_funcs;.:foo:413:477.:B:437:477">
           <node id="M4_foo_N3" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">

@@ -150,6 +150,9 @@
           <ast end="154" start="148" type="27"/>
           <link src="M6_function_N6"/>
         </node>
+        <node id="M6_function_N8" kind="output" ref="#return" type="Z">
+          <link src="M6_function_N7"/>
+        </node>
       </scope>
     </method>
   </class>
@@ -183,6 +186,9 @@
         <node id="M7_function_N8" kind="return" ref="#return" type="Ljava/lang/String;">
           <ast end="300" start="297" type="27"/>
           <link src="M7_function_N7"/>
+        </node>
+        <node id="M7_function_N9" kind="output" ref="#return" type="Ljava/lang/String;">
+          <link src="M7_function_N8"/>
         </node>
       </scope>
     </method>
