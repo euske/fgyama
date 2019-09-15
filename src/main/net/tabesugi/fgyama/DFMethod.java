@@ -717,8 +717,9 @@ class OutputNode extends SingleAssignNode {
 class ReturnNode extends SingleAssignNode {
 
     public ReturnNode(
-        DFGraph graph, DFVarScope scope, ASTNode ast) {
-        super(graph, scope, scope.lookupReturn(), ast);
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
     }
 
     @Override
@@ -2272,7 +2273,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             CatchNode cat = new CatchNode(graph, catchScope, catchRef, decl);
             catchCtx.set(cat);
             // Take care of exits.
-            DFRef excRef = tryScope.lookupException(catchKlass);
+            DFRef excRef = _scope.lookupException(catchKlass);
             for (DFExit exit : catchFrame.getExits()) {
                 DFNode src = exit.getNode();
                 if (exit.getFrame() == catchFrame) {
@@ -2398,7 +2399,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             if (expr != null) {
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, expr);
-                ReturnNode ret = new ReturnNode(graph, scope, rtrnStmt);
+                DFRef ref = _scope.lookupReturn();
+                ReturnNode ret = new ReturnNode(graph, scope, ref, rtrnStmt);
                 ret.accept(ctx.getRValue());
                 frame.addExit(new ReturnExit(dstFrame, ret));
             }
@@ -2461,7 +2463,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 throwStmt.getExpression());
             DFNode exc = ctx.getRValue();
             DFKlass excKlass = exc.getNodeType().toKlass();
-            DFRef excRef = scope.lookupException(excKlass);
+            DFRef excRef = _scope.lookupException(excKlass);
             ThrowNode thrown = new ThrowNode(graph, scope, excRef, stmt);
             thrown.accept(exc);
             // Find out the catch clause. If not, the entire method throws.
@@ -2613,8 +2615,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
     }
 
-    private DFRef[] closeFrame(DFContext ctx, DFGraph graph) {
-        List<DFRef> refs = new ArrayList<DFRef>();
+    private void closeFrame(DFContext ctx, DFGraph graph) {
         for (DFExit exit : _frame.getExits()) {
             assert exit.getFrame() == _frame;
             assert (exit instanceof ReturnExit ||
@@ -2622,7 +2623,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFNode src = exit.getNode();
             DFRef ref = src.getRef();
             DFNode dst = ctx.getLast(ref);
-            refs.add(ref);
             if (exit instanceof ThrowExit) {
                 DFKlass excKlass = ((ThrowExit)exit).getExcKlass();
                 if (dst == null) {
@@ -2648,9 +2648,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 assert false;   // ???
             }
         }
-        DFRef[] a = new DFRef[refs.size()];
-        refs.toArray(a);
-        return a;
     }
 
     @SuppressWarnings("unchecked")
@@ -2819,7 +2816,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 processExpression(
                     ctx, this, graph, _finder, _scope, _frame,
                     (Expression)body);
-                ReturnNode ret = new ReturnNode(graph, _scope, body);
+                DFRef ref = _scope.lookupReturn();
+                ReturnNode ret = new ReturnNode(graph, _scope, ref, body);
                 ret.accept(ctx.getRValue());
                 _frame.addExit(new ReturnExit(_frame, ret));
             }
@@ -2836,9 +2834,18 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 this, e.name);
             throw e;
         }
+        this.closeFrame(ctx, graph);
 
         // Create output nodes.
-        for (DFRef ref : this.closeFrame(ctx, graph)) {
+        {
+            DFRef ref = _scope.lookupReturn();
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(graph, _scope, ref, null);
+                output.accept(ctx.getLast(ref));
+                preserved.add(output);
+            }
+        }
+        for (DFRef ref : _scope.getExcRefs()) {
             if (ctx.getLast(ref) != null) {
                 DFNode output = new OutputNode(graph, _scope, ref, null);
                 output.accept(ctx.getLast(ref));
@@ -2929,8 +2936,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
         private InternalRef _return = null;
         private InternalRef[] _arguments = null;
-        private Map<DFType, DFRef> _exceptions =
-            new HashMap<DFType, DFRef>();
+        private ConsistentHashMap<DFType, DFRef> _exceptions =
+            new ConsistentHashMap<DFType, DFRef>();
 
         protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
@@ -2947,13 +2954,11 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             return _arguments[index];
         }
 
-        @Override
         public DFRef lookupReturn() {
 	    assert _return != null;
             return _return;
         }
 
-        @Override
         public DFRef lookupException(DFType type) {
             DFRef ref = _exceptions.get(type);
             if (ref == null) {
@@ -2961,6 +2966,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 _exceptions.put(type, ref);
             }
             return ref;
+        }
+
+        public List<DFRef> getExcRefs() {
+            return _exceptions.values();
         }
 
         private void buildInternalRefs(List<VariableDeclaration> parameters) {
