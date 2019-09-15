@@ -416,8 +416,8 @@ public class DFFrame {
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 this.buildExpr(defined, scope, expr);
-                this.addOutputRef(scope.lookupReturn());
             }
+            // Return is handled as an Exit, not an output.
 
         } else if (stmt instanceof BreakStatement) {
 	    // "break;"
@@ -470,10 +470,7 @@ public class DFFrame {
 
         } else if (stmt instanceof ThrowStatement) {
 	    // "throw e;"
-            ThrowStatement throwStmt = (ThrowStatement)stmt;
-            DFType type = this.buildExpr(defined, scope, throwStmt.getExpression());
-	    if (type == null) return;
-            this.addOutputRef(scope.lookupException(type));
+            // Throw is handled as an Exit, not an output.
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
