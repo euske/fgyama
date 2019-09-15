@@ -586,6 +586,7 @@ abstract class CallNode extends DFNode {
     }
 
     public void setArgs(DFNode[] args) {
+        assert this.args == null;
         for (int i = 0; i < args.length; i++) {
             String label = "#arg"+i;
             this.accept(args[i], label);
@@ -722,10 +723,8 @@ class ReturnNode extends SingleAssignNode {
 class ThrowNode extends SingleAssignNode {
 
     public ThrowNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode value) {
+        DFGraph graph, DFVarScope scope, DFRef ref, ASTNode ast) {
         super(graph, scope, ref, ast);
-        this.accept(value);
     }
 
     @Override
@@ -2395,7 +2394,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     ctx, typeSpace, graph, finder, scope, frame, expr);
                 ReturnNode ret = new ReturnNode(graph, scope, rtrnStmt);
                 ret.accept(ctx.getRValue());
-                ctx.set(ret);
+                frame.addExit(new ReturnExit(dstFrame, ret));
             }
             for (DFRef ref : dstFrame.getOutputRefs()) {
                 frame.addExit(new ReturnExit(dstFrame, ctx.get(ref)));
@@ -2457,7 +2456,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             DFNode exc = ctx.getRValue();
             DFKlass excKlass = exc.getNodeType().toKlass();
             DFRef excRef = scope.lookupException(excKlass);
-            ThrowNode thrown = new ThrowNode(graph, scope, excRef, stmt, exc);
+            ThrowNode thrown = new ThrowNode(graph, scope, excRef, stmt);
+            thrown.accept(exc);
             // Find out the catch clause. If not, the entire method throws.
             DFFrame dstFrame = frame.find(excKlass);
             if (dstFrame == null) {
