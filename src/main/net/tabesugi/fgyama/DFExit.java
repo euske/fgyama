@@ -14,17 +14,11 @@ public class DFExit {
 
     private DFFrame _frame;
     private DFNode _node;
-    private boolean _cont;
 
-    public DFExit(DFFrame frame, DFNode node, boolean cont) {
+    public DFExit(DFFrame frame, DFNode node) {
         assert node.getRef() != null;
         _frame = frame;
         _node = node;
-        _cont = cont;
-    }
-
-    public DFExit(DFFrame frame, DFNode node) {
-        this(frame, node, false);
     }
 
     @Override
@@ -42,9 +36,5 @@ public class DFExit {
 
     public void setNode(DFNode node) {
         _node = node;
-    }
-
-    public boolean isContinue() {
-        return _cont;
     }
 }

@@ -8,6 +8,48 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+// BreakExit
+class BreakExit extends DFExit {
+
+    public BreakExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        assert frame.getLabel() == DFFrame.BREAKABLE;
+    }
+}
+
+// ContinueExit
+class ContinueExit extends DFExit {
+
+    public ContinueExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        assert frame.getLabel() == DFFrame.BREAKABLE;
+    }
+}
+
+// ReturnExit
+class ReturnExit extends DFExit {
+
+    public ReturnExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        assert frame.getLabel() == DFFrame.RETURNABLE;
+    }
+}
+
+// ThrowExit
+class ThrowExit extends DFExit {
+
+    private DFKlass _excKlass;
+
+    public ThrowExit(DFFrame frame, DFNode node, DFKlass excKlass) {
+        super(frame, node);
+        _excKlass = excKlass;
+    }
+
+    public DFKlass getExcKlass() {
+        return _excKlass;
+    }
+}
+
 // SingleAssignNode:
 class SingleAssignNode extends DFNode {
 
@@ -1834,7 +1876,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // Redirect the continue statements.
         assert frame != loopFrame;
         for (DFExit exit : loopFrame.getExits()) {
-            if (exit.isContinue()) {
+            if (exit instanceof ContinueExit) {
                 DFNode node = exit.getNode();
                 DFNode end = ends.get(node.getRef());
                 if (end == null) {
@@ -1971,7 +2013,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 exit.setNode(join);
                 frame.addExit(exit);
             }
-            this.closeFrame(thenFrame, ctx);
         }
         if (elseFrame != null) {
             assert frame != elseFrame;
@@ -1984,7 +2025,6 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 exit.setNode(join);
                 frame.addExit(exit);
             }
-            this.closeFrame(elseFrame, ctx);
         }
     }
 
@@ -2008,8 +2048,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx.set(join);
             }
         }
-
-        this.closeFrame(caseFrame, caseCtx);
+        this.endBreaks(caseFrame, caseCtx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2104,7 +2143,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, whileStmt,
             condValue, loopFrame, loopCtx, true);
-        this.closeFrame(loopFrame, ctx);
+        this.endBreaks(loopFrame, ctx);
     }
 
     private void processDoStatement(
@@ -2125,7 +2164,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, doStmt,
             condValue, loopFrame, loopCtx, false);
-        this.closeFrame(loopFrame, ctx);
+        this.endBreaks(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2160,7 +2199,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, forStmt,
             condValue, loopFrame, loopCtx, true);
-        this.closeFrame(loopFrame, ctx);
+        this.endBreaks(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2188,7 +2227,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         processLoop(
             ctx, graph, loopScope, frame, eForStmt,
             iterValue, loopFrame, loopCtx, true);
-        this.closeFrame(loopFrame, ctx);
+        this.endBreaks(loopFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")
@@ -2359,7 +2398,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 ctx.set(ret);
             }
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new ReturnExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof BreakStatement) {
@@ -2370,7 +2409,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new BreakExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof ContinueStatement) {
@@ -2381,7 +2420,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new DFExit(dstFrame, ctx.get(ref), true));
+                frame.addExit(new ContinueExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof LabeledStatement) {
@@ -2391,7 +2430,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             processStatement(
                 ctx, typeSpace, graph, finder, scope, labeledFrame,
                 labeledStmt.getBody());
-            this.closeFrame(labeledFrame, ctx);
+            this.endBreaks(labeledFrame, ctx);
 
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"
@@ -2425,9 +2464,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 dstFrame = frame.find(DFFrame.RETURNABLE);
                 assert dstFrame != null;
             }
-            frame.addExit(new DFExit(dstFrame, thrown));
+            frame.addExit(new ThrowExit(dstFrame, thrown, excKlass));
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new DFExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new ThrowExit(dstFrame, ctx.get(ref), excKlass));
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
@@ -2542,44 +2581,27 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             initializer.getBody());
     }
 
-    private void closeFrame(
-        DFFrame frame, DFContext ctx) {
-        List<DFRef> refs = new ArrayList<DFRef>();
-        Map<DFRef, List<DFExit>> ref2exits = new HashMap<DFRef, List<DFExit>>();
+    // endBreaks: ends a BREAKABLE Frame.
+    private void endBreaks(DFFrame frame, DFContext ctx) {
+        assert frame.getLabel() == DFFrame.BREAKABLE;
         for (DFExit exit : frame.getExits()) {
             if (exit.getFrame() != frame) continue;
-            if (exit.isContinue()) continue;
-            DFNode node = exit.getNode();
-            DFRef ref = node.getRef();
-            List<DFExit> exits = ref2exits.get(ref);
-            if (exits == null) {
-                exits = new ArrayList<DFExit>();
-                refs.add(ref);
-                ref2exits.put(ref, exits);
-            }
-            exits.add(exit);
-        }
-        for (DFRef ref : refs) {
-            List<DFExit> exits = ref2exits.get(ref);
-            assert exits != null;
+            if (exit instanceof ContinueExit) continue;
+            assert exit instanceof BreakExit;
+            DFNode src = exit.getNode();
+            DFRef ref = src.getRef();
             DFNode dst = ctx.getLast(ref);
-            Logger.error("DFMethod.closeFrame:", frame, ref);
-            for (DFExit exit : exits) {
-                DFNode src = exit.getNode();
-                if (dst == null) {
-                    dst = src;
-                } else if (dst == src) {
-                    ;
-                } else if (dst.merge(src)) {
-                    Logger.error("DFMethod.closeFrame: Merged:", dst, "<-", src);
-                } else if (src.merge(dst)) {
-                    Logger.error("DFMethod.closeFrame: Merged:", src, "<-", dst);
-                    dst = src;
-                } else {
-                    Logger.error("DFMethod.closeFrame: Conflict:", dst, "<-", src);
-                }
+            assert dst != null;
+            if (src == dst) {
+                ;
+            } else if (dst.merge(src)) {
+                ;
+            } else if (src.merge(dst)) {
+                ctx.set(src);
+            } else {
+                Logger.error("DFMethod.endBreaks: cannot merge:", ref, src, dst);
+                assert false;   // ???
             }
-            ctx.set(dst);
         }
     }
 
@@ -2687,7 +2709,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 throw new InvalidSyntax(body);
             }
         }
-        this.closeFrame(_frame, ctx);
+        this.closeFrame(ctx, graph);
 
         this.cleanup(null);
         return this;
@@ -2766,7 +2788,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 this, e.name);
             throw e;
         }
-        this.closeFrame(_frame, ctx);
+        this.closeFrame(ctx, graph);
 
         // Create output nodes.
         for (DFRef ref : _frame.getOutputRefs()) {
@@ -2780,6 +2802,36 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         // Do not remove input/output nodes.
         this.cleanup(preserved);
         return this;
+    }
+
+    private void closeFrame(DFContext ctx, DFGraph graph) {
+        for (DFExit exit : _frame.getExits()) {
+            assert exit.getFrame() == _frame;
+            assert (exit instanceof ReturnExit ||
+                    exit instanceof ThrowExit);
+            DFNode src = exit.getNode();
+            DFRef ref = src.getRef();
+            DFNode dst = ctx.getLast(ref);
+            assert dst != null;
+            if (dst == null) {
+                ctx.set(src);
+            } else if (exit instanceof ThrowExit) {
+                DFKlass excKlass = ((ThrowExit)exit).getExcKlass();
+                CatchJoin join = new CatchJoin(
+                    graph, _scope, null, src, excKlass);
+                join.merge(dst);
+                ctx.set(join);
+            } else if (src == dst) {
+                ;
+            } else if (dst.merge(src)) {
+                ;
+            } else if (src.merge(dst)) {
+                ctx.set(src);
+            } else {
+                Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);
+                assert false;
+            }
+        }
     }
 
     // DFGraph methods.

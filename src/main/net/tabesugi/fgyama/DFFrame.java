@@ -150,7 +150,7 @@ public class DFFrame {
     }
 
     public void addExit(DFExit exit) {
-        Logger.info("DFFrame.addExit:", this, ":", exit);
+        //Logger.info("DFFrame.addExit:", this, ":", exit);
         _exits.add(exit);
     }
 
