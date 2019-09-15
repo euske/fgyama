@@ -808,33 +808,36 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
-        this.startKlass(klass);
-	if (!(klass instanceof DFFunctionalKlass)) {
-	    try {
-		DFMethod init = klass.getInitMethod();
-		if (init != null) {
-		    DFGraph graph = init.processKlassBody(counter);
-		    if (graph != null) {
-                        Logger.info("Success:", init.getSignature());
-			this.exportGraph(graph);
-		    }
-		}
-	    } catch (EntityNotFound e) {
-		if (strict) throw e;
-	    }
-	}
-        for (DFMethod method : klass.getMethods()) {
-            try {
-                DFGraph graph = method.processMethod(counter);
-                if (graph != null) {
-                    Logger.info("Success:", method.getSignature());
-                    this.exportGraph(graph);
+        try {
+            this.startKlass(klass);
+            if (!(klass instanceof DFFunctionalKlass)) {
+                try {
+                    DFMethod init = klass.getInitMethod();
+                    if (init != null) {
+                        DFGraph graph = init.processKlassBody(counter);
+                        if (graph != null) {
+                            Logger.info("Success:", init.getSignature());
+                            this.exportGraph(graph);
+                        }
+                    }
+                } catch (EntityNotFound e) {
+                    if (strict) throw e;
                 }
-            } catch (EntityNotFound e) {
-                if (strict) throw e;
             }
+            for (DFMethod method : klass.getMethods()) {
+                try {
+                    DFGraph graph = method.processMethod(counter);
+                    if (graph != null) {
+                        Logger.info("Success:", method.getSignature());
+                        this.exportGraph(graph);
+                    }
+                } catch (EntityNotFound e) {
+                    if (strict) throw e;
+                }
+            }
+        } finally {
+            this.endKlass();
         }
-        this.endKlass();
     }
 
     /**
