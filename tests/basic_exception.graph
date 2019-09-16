@@ -11,6 +11,7 @@
         <node id="M2_foo_N2" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="M2_foo_N3" kind="input" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
         <node id="M2_foo_N21" ref="$Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:278:344/$e" type="Ljava/lang/Exception;"/>
+        <node id="M2_foo_N28" ref="$Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:230:277/$e" type="Lbasic_exception/A;"/>
         <scope name="Lbasic_exception;.:foo:103:350.:B:121:350">
           <node data="null" id="M2_foo_N4" kind="value" type="@null">
             <ast end="146" start="142" type="33"/>
@@ -57,7 +58,8 @@
           <scope name="Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:230:277">
             <node id="M2_foo_N22" kind="catch" ref="$Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:230:277/$e" type="Lbasic_exception/A;">
               <ast end="240" start="237" type="44"/>
-              <link src="M2_foo_N15"/>
+              <link label="exc0" src="M2_foo_N15"/>
+              <link label="exc1" src="M2_foo_N28"/>
             </node>
             <scope name="Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:230:277.:B:242:277">
               <node id="M2_foo_N23" kind="assign_var" ref="$Lbasic_exception;.:foo:103:350.:B:121:350/$x" type="Ljava/lang/String;">
@@ -82,7 +84,7 @@
           <scope name="Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:278:344">
             <node id="M2_foo_N14" kind="catch" ref="$Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:278:344/$e" type="Ljava/lang/Exception;">
               <ast end="296" start="285" type="44"/>
-              <link src="M2_foo_N21"/>
+              <link label="exc0" src="M2_foo_N21"/>
             </node>
             <scope name="Lbasic_exception;.:foo:103:350.:B:121:350.:AST12:278:344.:B:298:344">
               <node id="M2_foo_N16" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">

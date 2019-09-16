@@ -13,7 +13,7 @@ class BreakExit extends DFExit {
 
     public BreakExit(DFFrame frame, DFNode node) {
         super(frame, node);
-        assert frame.getLabel() == DFFrame.BREAKABLE;
+        // frame.getLabel() can be either @BREAKABLE or a label.
     }
 }
 
@@ -22,7 +22,7 @@ class ContinueExit extends DFExit {
 
     public ContinueExit(DFFrame frame, DFNode node) {
         super(frame, node);
-        assert frame.getLabel() == DFFrame.BREAKABLE;
+        // frame.getLabel() can be either @BREAKABLE or a label.
     }
 }
 
@@ -745,10 +745,18 @@ class ThrowNode extends SingleAssignNode {
 // CatchNode
 class CatchNode extends SingleAssignNode {
 
+    private int _nexcs = 0;
+
     public CatchNode(
         DFGraph graph, DFVarScope scope, DFRef ref,
         ASTNode ast) {
         super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public Link accept(DFNode node) {
+        String label = "exc"+(_nexcs++);
+        return this.accept(node, label);
     }
 
     @Override
