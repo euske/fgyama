@@ -3,6 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import java.lang.management.*;
 import javax.xml.stream.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -437,5 +438,11 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    public static void showHeapStats() {
+        MemoryMXBean mem = ManagementFactory.getMemoryMXBean();
+        MemoryUsage usage = mem.getHeapMemoryUsage();
+        System.err.println("Memory: "+usage);
     }
 }
