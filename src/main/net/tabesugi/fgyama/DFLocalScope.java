@@ -69,10 +69,8 @@ public class DFLocalScope extends DFVarScope {
         return super.lookupVar(id);
     }
 
-    public DFRef[] getRefs() {
-        DFRef[] refs = new DFRef[_vars.size()];
-        _vars.toArray(refs);
-        return refs;
+    public List<DFRef> getRefs() {
+        return _vars;
     }
 
     @Override

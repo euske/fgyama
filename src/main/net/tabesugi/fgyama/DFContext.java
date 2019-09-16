@@ -90,7 +90,7 @@ public class DFContext {
         return values;
     }
 
-    public DFRef[] getChanged() {
+    public List<DFRef> getChanged() {
         List<DFRef> refs = new ArrayList<DFRef>();
         for (DFRef ref : _first.keys()) {
             DFNode node0 = _first.get(ref);
@@ -99,9 +99,7 @@ public class DFContext {
                 refs.add(ref);
             }
         }
-        DFRef[] a = new DFRef[refs.size()];
-        refs.toArray(a);
-        return a;
+        return refs;
     }
 
     // dump: for debugging.

@@ -107,10 +107,8 @@ class DFFunctionalKlass extends DFKlass {
         _captured.add(ref);
     }
 
-    public CapturedRef[] getCapturedRefs() {
-        CapturedRef[] refs = new CapturedRef[_captured.size()];
-        _captured.toArray(refs);
-        return refs;
+    public List<CapturedRef> getCapturedRefs() {
+        return _captured;
     }
 
     public void setBaseKlass(DFKlass klass) {

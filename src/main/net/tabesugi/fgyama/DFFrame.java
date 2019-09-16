@@ -154,10 +154,8 @@ public class DFFrame {
         return _outputRefs;
     }
 
-    public DFExit[] getExits() {
-        DFExit[] exits = new DFExit[_exits.size()];
-        _exits.toArray(exits);
-        return exits;
+    public List<DFExit> getExits() {
+        return _exits;
     }
 
     public void addExit(DFExit exit) {

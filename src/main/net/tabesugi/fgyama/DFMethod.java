@@ -947,15 +947,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
     }
 
-    public DFMethod[] getOverriders() {
+    public List<DFMethod> getOverriders() {
         List<Overrider> overriders = new ArrayList<Overrider>();
         this.listOverriders(overriders, 0);
-        Overrider[] a = new Overrider[overriders.size()];
-        overriders.toArray(a);
-        Arrays.sort(a);
-        DFMethod[] methods = new DFMethod[a.length];
-	for (int i = 0; i < a.length; i++) {
-	    methods[i] = a[i].method;
+        Collections.sort(overriders);
+        List<DFMethod> methods = new ArrayList<DFMethod>();
+        for (Overrider overrider : overriders) {
+	    methods.add(overrider.method);
 	}
         return methods;
     }
@@ -1333,7 +1331,9 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                         method = fallback;
                     }
                 }
-                DFMethod methods[] = method.getOverriders();
+                List<DFMethod> overriders = method.getOverriders();
+                DFMethod[] methods = new DFMethod[overriders.size()];
+                overriders.toArray(methods);
                 DFFunctionType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
                     graph, scope, invoke, funcType, obj, methods);
@@ -1803,7 +1803,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             new HashMap<DFRef, LoopRepeatNode>();
         Map<DFRef, DFNode> ends =
             new HashMap<DFRef, DFNode>();
-        DFRef[] loopRefs = loopCtx.getChanged();
+        List<DFRef> loopRefs = loopCtx.getChanged();
         for (DFRef ref : loopRefs) {
             DFNode src = ctx.get(ref);
             LoopBeginNode begin = new LoopBeginNode(

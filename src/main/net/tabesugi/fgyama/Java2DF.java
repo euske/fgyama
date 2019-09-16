@@ -91,8 +91,8 @@ public class Java2DF {
         new DFGlobalScope();
     private Map<String, DFFileScope> _fileScope =
         new HashMap<String, DFFileScope>();
-    private Map<String, DFKlass[]> _fileKlasses =
-        new HashMap<String, DFKlass[]>();
+    private Map<String, List<DFKlass>> _fileKlasses =
+        new HashMap<String, List<DFKlass>>();
 
     private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
         throws InvalidSyntax {
@@ -645,17 +645,15 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
-        List<DFKlass> klassList = new ArrayList<DFKlass>();
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
 	    DFKlass klass = packageSpace.buildTypeFromTree(
 		key, abstTypeDecl, null, fileScope);
 	    klass.setKlassTree(key, abstTypeDecl);
 	    Logger.debug("Pass1: Created:", klass);
-	    klassList.add(klass);
+	    klasses.add(klass);
 	}
-        DFKlass[] klasses = new DFKlass[klassList.size()];
-        klassList.toArray(klasses);
         _fileKlasses.put(key, klasses);
     }
 
@@ -814,9 +812,9 @@ public class Java2DF {
                 try {
                     DFMethod init = klass.getInitMethod();
                     if (init != null) {
+                        Logger.info("Pass5:", init.getSignature());
                         DFGraph graph = init.processKlassBody(counter);
                         if (graph != null) {
-                            Logger.info("Success:", init.getSignature());
                             this.exportGraph(graph);
                         }
                     }
@@ -826,9 +824,9 @@ public class Java2DF {
             }
             for (DFMethod method : klass.getMethods()) {
                 try {
+                    Logger.info("Pass5:", method.getSignature());
                     DFGraph graph = method.processMethod(counter);
                     if (graph != null) {
-                        Logger.info("Success:", method.getSignature());
                         this.exportGraph(graph);
                     }
                 } catch (EntityNotFound e) {
@@ -966,7 +964,6 @@ public class Java2DF {
         Counter counter = new Counter(1);
         for (DFKlass klass : klasses) {
             if (!processed.isEmpty() && !processed.contains(klass.getFilePath())) continue;
-            Logger.info("Pass5:", klass);
             try {
                 converter.buildGraphs(counter, klass, strict);
             } catch (EntityNotFound e) {
