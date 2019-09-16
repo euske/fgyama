@@ -783,7 +783,7 @@ class CatchJoin extends DFNode {
 
 //  DFMethod
 //
-public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMethod> {
+public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public enum CallStyle {
         Constructor,
@@ -958,6 +958,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         return methods;
     }
 
+    public List<DFMethod> getOverridings() {
+	return _overriding;
+    }
+
     public void addCaller(DFMethod method) {
         _callers.add(method);
     }
@@ -972,6 +976,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
 
     public void setTree(ASTNode ast) {
 	_ast = ast;
+    }
+
+    public ASTNode getTree() {
+	return _ast;
     }
 
     public DFLocalScope getScope() {
@@ -2706,13 +2714,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             throw new InvalidSyntax(_ast);
         }
 
-        assert _graphId == null;
-        _graphId = "K"+counter.getNewId()+"_"+_name;
-
         assert _scope != null;
         assert _frame != null;
         assert _finder != null;
-        DFGraph graph = this;
+        MethodGraph graph = new MethodGraph("K"+counter.getNewId()+"_"+_name);
         DFContext ctx = new DFContext(graph, _scope);
 
         for (BodyDeclaration body : decls) {
@@ -2761,8 +2766,8 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
         this.closeFrame(ctx, graph);
 
-        this.cleanup(null);
-        return this;
+        graph.cleanup(null);
+        return graph;
     }
 
     /**
@@ -2773,13 +2778,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         throws InvalidSyntax, EntityNotFound {
         if (_ast == null) return null;
 
-        assert _graphId == null;
-        _graphId = "M"+counter.getNewId()+"_"+_name;
-
         assert _scope != null;
         assert _frame != null;
         assert _finder != null;
-        DFGraph graph = this;
+        MethodGraph graph = new MethodGraph("M"+counter.getNewId()+"_"+_name);
         DFContext ctx = new DFContext(graph, _scope);
         ASTNode body;
 
@@ -2866,75 +2868,80 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         }
 
         // Do not remove input/output nodes.
-        this.cleanup(preserved);
-        return this;
+        graph.cleanup(preserved);
+        return graph;
     }
 
-    // DFGraph methods.
+    private class MethodGraph implements DFGraph {
 
-    private String _graphId = null;
-    public String getGraphId() {
-        assert _graphId != null;
-        return _graphId;
-    }
+	private String _graphId;
+	private List<DFNode> _nodes =
+	    new ArrayList<DFNode>();
 
-    private List<DFNode> _nodes =
-        new ArrayList<DFNode>();
+	public MethodGraph(String graphId) {
+	    _graphId = graphId;
+	}
 
-    public int addNode(DFNode node) {
-        _nodes.add(node);
-        return _nodes.size();
-    }
+	public String getGraphId() {
+	    return _graphId;
+	}
 
-    public void cleanup(Set<DFNode> preserved) {
-        Set<DFNode> toremove = new HashSet<DFNode>();
-        while (true) {
-            boolean changed = false;
-            for (DFNode node : _nodes) {
-                if (preserved != null && preserved.contains(node)) continue;
-                if (toremove.contains(node)) continue;
-                if (node.purge()) {
-                    toremove.add(node);
-                    changed = true;
-                }
-            }
-            if (!changed) break;
-        }
-        for (DFNode node : toremove) {
-            _nodes.remove(node);
-        }
-    }
+	public int addNode(DFNode node) {
+	    _nodes.add(node);
+	    return _nodes.size();
+	}
 
-    public void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException {
-        writer.writeStartElement("method");
-        writer.writeAttribute("name", this.getSignature());
-        writer.writeAttribute("style", _callStyle.toString());
-        writer.writeAttribute("abstract", Boolean.toString(_abstract));
-        for (DFMethod caller : this.getCallers()) {
-            writer.writeStartElement("caller");
-            writer.writeAttribute("name", caller.getSignature());
-            writer.writeEndElement();
-        }
-        for (DFMethod overrider : this.getOverriders()) {
-            if (overrider == this) continue;
-            writer.writeStartElement("overrider");
-            writer.writeAttribute("name", overrider.getSignature());
-            writer.writeEndElement();
-        }
-        for (DFMethod overriding : _overriding) {
-            writer.writeStartElement("overriding");
-            writer.writeAttribute("name", overriding.getSignature());
-            writer.writeEndElement();
-        }
-        if (_ast != null) {
-            Utils.writeXML(writer, _ast);
-        }
-        DFNode[] nodes = new DFNode[_nodes.size()];
-        _nodes.toArray(nodes);
-        Arrays.sort(nodes);
-        _scope.writeXML(writer, nodes);
-        writer.writeEndElement();
+	public void cleanup(Set<DFNode> preserved) {
+	    Set<DFNode> toremove = new HashSet<DFNode>();
+	    while (true) {
+		boolean changed = false;
+		for (DFNode node : _nodes) {
+		    if (preserved != null && preserved.contains(node)) continue;
+		    if (toremove.contains(node)) continue;
+		    if (node.purge()) {
+			toremove.add(node);
+			changed = true;
+		    }
+		}
+		if (!changed) break;
+	    }
+	    for (DFNode node : toremove) {
+		_nodes.remove(node);
+	    }
+	}
+
+	public void writeXML(XMLStreamWriter writer)
+	    throws XMLStreamException {
+	    DFMethod method = DFMethod.this;
+	    writer.writeStartElement("method");
+	    writer.writeAttribute("name", method.getSignature());
+	    writer.writeAttribute("style", method.getCallStyle().toString());
+	    writer.writeAttribute("abstract", Boolean.toString(method.isAbstract()));
+	    for (DFMethod caller : method.getCallers()) {
+		writer.writeStartElement("caller");
+		writer.writeAttribute("name", caller.getSignature());
+		writer.writeEndElement();
+	    }
+	    for (DFMethod overrider : method.getOverriders()) {
+		if (overrider == method) continue;
+		writer.writeStartElement("overrider");
+		writer.writeAttribute("name", overrider.getSignature());
+		writer.writeEndElement();
+	    }
+	    for (DFMethod overriding : method.getOverridings()) {
+		writer.writeStartElement("overriding");
+		writer.writeAttribute("name", overriding.getSignature());
+		writer.writeEndElement();
+	    }
+	    if (method._ast != null) {
+		Utils.writeXML(writer, method.getTree());
+	    }
+	    DFNode[] nodes = new DFNode[_nodes.size()];
+	    _nodes.toArray(nodes);
+	    Arrays.sort(nodes);
+	    method.getScope().writeXML(writer, nodes);
+	    writer.writeEndElement();
+	}
     }
 
     private class MethodScope extends DFLocalScope {
