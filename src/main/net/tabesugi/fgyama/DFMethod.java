@@ -1312,19 +1312,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     }
                 }
                 DFKlass klass = type.toKlass();
-                List<DFNode> argList = new ArrayList<DFNode>();
-                List<DFType> typeList = new ArrayList<DFType>();
-                for (Expression arg : (List<Expression>) invoke.arguments()) {
+		int nargs = invoke.arguments().size();
+		DFNode[] args = new DFNode[nargs];
+		DFType[] argTypes = new DFType[nargs];
+		for (int i = 0; i < nargs; i++) {
+		    Expression arg = (Expression)invoke.arguments().get(i);
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, arg);
                     DFNode node = ctx.getRValue();
-                    argList.add(node);
-                    typeList.add(node.getNodeType());
+		    args[i] = node;
+		    argTypes[i] = node.getNodeType();
                 }
-                DFNode[] args = new DFNode[argList.size()];
-                argList.toArray(args);
-                DFType[] argTypes = new DFType[typeList.size()];
-                typeList.toArray(argTypes);
                 DFMethod method;
                 try {
                     method = klass.lookupMethod(
@@ -1391,19 +1389,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		// "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
                 DFNode obj = ctx.get(scope.lookupThis());
-                List<DFNode> argList = new ArrayList<DFNode>();
-                List<DFType> typeList = new ArrayList<DFType>();
-                for (Expression arg : (List<Expression>) sinvoke.arguments()) {
+		int nargs = sinvoke.arguments().size();
+		DFNode[] args = new DFNode[nargs];
+		DFType[] argTypes = new DFType[nargs];
+		for (int i = 0; i < nargs; i++) {
+		    Expression arg = (Expression)sinvoke.arguments().get(i);
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, arg);
                     DFNode node = ctx.getRValue();
-                    argList.add(node);
-                    typeList.add(node.getNodeType());
+		    args[i] = node;
+		    argTypes[i] = node.getNodeType();
                 }
-                DFNode[] args = new DFNode[argList.size()];
-                argList.toArray(args);
-                DFType[] argTypes = new DFType[typeList.size()];
-                typeList.toArray(argTypes);
                 DFKlass klass = obj.getNodeType().toKlass();
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
@@ -1574,19 +1570,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                         ctx, typeSpace, graph, finder, scope, frame, expr1);
                     obj = ctx.getRValue();
                 }
-                List<DFNode> argList = new ArrayList<DFNode>();
-                List<DFType> typeList = new ArrayList<DFType>();
-                for (Expression arg : (List<Expression>) cstr.arguments()) {
+		int nargs = cstr.arguments().size();
+		DFNode[] args = new DFNode[nargs];
+		DFType[] argTypes = new DFType[nargs];
+		for (int i = 0; i < nargs; i++) {
+		    Expression arg = (Expression)cstr.arguments().get(i);
                     processExpression(
                         ctx, typeSpace, graph, finder, scope, frame, arg);
                     DFNode node = ctx.getRValue();
-                    argList.add(node);
-                    typeList.add(node.getNodeType());
+		    args[i] = node;
+		    argTypes[i] = node.getNodeType();
                 }
-                DFNode[] args = new DFNode[argList.size()];
-                argList.toArray(args);
-                DFType[] argTypes = new DFType[typeList.size()];
-                typeList.toArray(argTypes);
                 DFMethod constructor = instKlass.lookupMethod(
                     CallStyle.Constructor, null, argTypes);
                 DFFunctionType funcType = constructor.getFuncType();
@@ -2501,19 +2495,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             DFNode obj = ctx.get(scope.lookupThis());
-            List<DFNode> argList = new ArrayList<DFNode>();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) ci.arguments()) {
+	    int nargs = ci.arguments().size();
+	    DFNode[] args = new DFNode[nargs];
+	    DFType[] argTypes = new DFType[nargs];
+	    for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)ci.arguments().get(i);
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, arg);
                 DFNode node = ctx.getRValue();
-                argList.add(node);
-                typeList.add(node.getNodeType());
+		args[i] = node;
+		argTypes[i] = node.getNodeType();
             }
-            DFNode[] args = new DFNode[argList.size()];
-            argList.toArray(args);
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             DFKlass klass = scope.lookupThis().getRefType().toKlass();
             DFMethod constructor = klass.lookupMethod(
                 CallStyle.Constructor, null, argTypes);
@@ -2546,19 +2538,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             DFNode obj = ctx.get(scope.lookupThis());
-            List<DFNode> argList = new ArrayList<DFNode>();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) sci.arguments()) {
+	    int nargs = sci.arguments().size();
+	    DFNode[] args = new DFNode[nargs];
+	    DFType[] argTypes = new DFType[nargs];
+	    for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sci.arguments().get(i);
                 processExpression(
                     ctx, typeSpace, graph, finder, scope, frame, arg);
                 DFNode node = ctx.getRValue();
-                argList.add(node);
-                typeList.add(node.getNodeType());
+		args[i] = node;
+		argTypes[i] = node.getNodeType();
             }
-            DFNode[] args = new DFNode[argList.size()];
-            argList.toArray(args);
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             DFKlass klass = obj.getNodeType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;

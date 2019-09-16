@@ -491,14 +491,19 @@ public class DFFrame {
             this.addInputRef(ref);
 	    DFKlass klass = ref.getRefType().toKlass();
             klass.load();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) ci.arguments()) {
+	    int nargs = ci.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)ci.arguments().get(i);
                 DFType type = this.buildExpr(defined, scope, arg);
-                if (type == null) return;
-                typeList.add(type);
+                if (type == null) {
+		    Logger.error(
+			"DFFrame.buildExpr: Type unknown (ci)",
+			this, arg);
+		    return;
+		}
+                argTypes[i] = type;
             }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             try {
 		DFMethod method1 = klass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
@@ -517,14 +522,19 @@ public class DFFrame {
 	    DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             baseKlass.load();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) sci.arguments()) {
+	    int nargs = sci.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sci.arguments().get(i);
                 DFType type = this.buildExpr(defined, scope, arg);
-                if (type == null) return;
-                typeList.add(type);
+                if (type == null) {
+		    Logger.error(
+			"DFFrame.buildExpr: Type unknown (sci)",
+			this, arg);
+		    return;
+		}
+                argTypes[i] = type;
             }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             try {
 		DFMethod method1 = baseKlass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
@@ -752,8 +762,10 @@ public class DFFrame {
                 }
             }
             klass.load();
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) invoke.arguments()) {
+	    int nargs = invoke.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)invoke.arguments().get(i);
                 DFType type = this.buildExpr(defined, scope, arg);
                 if (type == null) {
 		    Logger.error(
@@ -761,10 +773,8 @@ public class DFFrame {
 			this, arg);
 		    return null;
 		}
-                typeList.add(type);
+                argTypes[i] = type;
             }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             try {
                 DFMethod method1 = klass.lookupMethod(
                     callStyle, invoke.getName(), argTypes);
@@ -783,8 +793,10 @@ public class DFFrame {
         } else if (expr instanceof SuperMethodInvocation) {
             // "super.method()"
             SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) sinvoke.arguments()) {
+	    int nargs = sinvoke.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sinvoke.arguments().get(i);
                 DFType type = this.buildExpr(defined, scope, arg);
                 if (type == null) {
 		    Logger.error(
@@ -792,10 +804,8 @@ public class DFFrame {
 			this, arg);
 		    return null;
 		}
-                typeList.add(type);
+                argTypes[i] = type;
             }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             DFRef ref = scope.lookupThis();
             this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
@@ -958,8 +968,10 @@ public class DFFrame {
             if (expr1 != null) {
                 this.buildExpr(defined, scope, expr1);
             }
-            List<DFType> typeList = new ArrayList<DFType>();
-            for (Expression arg : (List<Expression>) cstr.arguments()) {
+	    int nargs = cstr.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)cstr.arguments().get(i);
                 DFType type = this.buildExpr(defined, scope, arg);
                 if (type == null) {
                     Logger.error(
@@ -967,10 +979,8 @@ public class DFFrame {
                         this, arg);
 		    return null;
 		}
-                typeList.add(type);
+                argTypes[i] = type;
             }
-            DFType[] argTypes = new DFType[typeList.size()];
-            typeList.toArray(argTypes);
             try {
 		DFMethod method1 = instKlass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
