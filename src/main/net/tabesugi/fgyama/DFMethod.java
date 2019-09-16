@@ -2611,7 +2611,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     // endBreaks: ends a BREAKABLE Frame.
     private void endBreaks(DFFrame outerFrame, DFFrame endFrame, DFContext ctx) {
-        assert endFrame.getLabel() == DFFrame.BREAKABLE;
+        // endFrame.getLabel() can be either @BREAKABLE or a label.
         for (DFExit exit : endFrame.getExits()) {
             if (exit.getFrame() != endFrame) {
                 // Pass through the outer frame.
