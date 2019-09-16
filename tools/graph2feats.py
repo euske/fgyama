@@ -11,7 +11,7 @@ from getwords import stripref, splitmethodname, splitwords, gettypewords
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
 ASSIGNS = ('assign_var', 'assign_field', 'assign_array')
-CONDS = ('join', 'begin', 'end', 'case')
+CONDS = ('join', 'begin', 'end', 'case', 'catchjoin')
 
 IGNORED = (None, 'receive', 'input', 'output', 'repeat')
 
