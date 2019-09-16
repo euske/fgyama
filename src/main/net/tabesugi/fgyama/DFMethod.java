@@ -955,15 +955,19 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
+    private List<DFMethod> _allOverriders = null;
     public List<DFMethod> getOverriders() {
-        List<Overrider> overriders = new ArrayList<Overrider>();
-        this.listOverriders(overriders, 0);
-        Collections.sort(overriders);
-        List<DFMethod> methods = new ArrayList<DFMethod>();
-        for (Overrider overrider : overriders) {
-	    methods.add(overrider.method);
+	// Cache for future reference.
+	if (_allOverriders == null) {
+	    List<Overrider> overriders = new ArrayList<Overrider>();
+	    this.listOverriders(overriders, 0);
+	    Collections.sort(overriders);
+	    _allOverriders = new ArrayList<DFMethod>();
+	    for (Overrider overrider : overriders) {
+		_allOverriders.add(overrider.method);
+	    }
 	}
-        return methods;
+        return _allOverriders;
     }
 
     public List<DFMethod> getOverridings() {
