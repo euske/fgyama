@@ -23,8 +23,6 @@ public class DFFrame {
         new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _outputRefs =
         new ConsistentHashSet<DFRef>();
-    private List<DFExit> _exits =
-        new ArrayList<DFExit>();
 
     public static final String BREAKABLE = "@BREAKABLE";
     public static final String RETURNABLE = "@RETURNABLE";
@@ -152,15 +150,6 @@ public class DFFrame {
 
     public Collection<DFRef> getOutputRefs() {
         return _outputRefs;
-    }
-
-    public List<DFExit> getExits() {
-        return _exits;
-    }
-
-    public void addExit(DFExit exit) {
-        //Logger.info("DFFrame.addExit:", this, ":", exit);
-        _exits.add(exit);
     }
 
     @SuppressWarnings("unchecked")
