@@ -2241,11 +2241,13 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
+        List<CatchClause> catches = (List<CatchClause>)tryStmt.catchClauses();
 
         // Find the innermost catch frame so that
         // it can catch all the specified Exceptions.
         DFFrame tryFrame = frame;
-        for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
+        for (int i = catches.size()-1; 0 <= i; i--) {
+            CatchClause cc = catches.get(i);
             tryFrame = tryFrame.getChildByAST(cc);
         }
 
@@ -2260,10 +2262,10 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             src.accept(ctx.get(src.getRef()));
         }
 
-        // Catch each speficied Exception.
-        DFFrame catchFrame = frame;
-        for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
-            catchFrame = catchFrame.getChildByAST(cc);
+        // Catch each speficied Exception in *a reverse order*.
+        DFFrame catchFrame = tryFrame;
+        for (int i = catches.size()-1; 0 <= i; i--) {
+            CatchClause cc = catches.get(i);
             SingleVariableDeclaration decl = cc.getException();
             DFLocalScope catchScope = scope.getChildByAST(cc);
             DFContext catchCtx = new DFContext(graph, catchScope);
@@ -2274,6 +2276,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
             catchCtx.set(cat);
             // Take care of exits.
             DFRef excRef = _scope.lookupException(catchKlass);
+            DFFrame parentFrame = catchFrame.getOuterFrame();
             for (DFExit exit : catchFrame.getExits()) {
                 DFNode src = exit.getNode();
                 if (exit.getFrame() == catchFrame) {
@@ -2299,7 +2302,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                     CatchJoin join = new CatchJoin(
                         graph, scope, cc, src, catchKlass);
                     exit.setNode(join);
-                    frame.addExit(exit);
+                    parentFrame.addExit(exit);
                 }
             }
             processStatement(
@@ -2309,6 +2312,7 @@ public class DFMethod extends DFTypeSpace implements DFGraph, Comparable<DFMetho
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
+            catchFrame = parentFrame;
         }
 
         // XXX Take care of ALL exits from tryFrame.

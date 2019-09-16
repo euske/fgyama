@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     private DFFrame _outer;
+    private ASTNode _ast;
     private DFMethod _method;
     private String _label;
     private DFKlass _catchKlass;
@@ -31,14 +32,16 @@ public class DFFrame {
     public DFFrame(DFMethod method, String label) {
         assert label != null;
         _outer = null;
+        _ast = null;
 	_method = method;
         _label = label;
         _catchKlass = null;
     }
 
-    private DFFrame(DFFrame outer, String label, DFKlass catchKlass) {
+    private DFFrame(DFFrame outer, ASTNode ast, String label, DFKlass catchKlass) {
         assert label != null;
         _outer = outer;
+        _ast = ast;
 	_method = outer._method;
         _label = label;
         _catchKlass = catchKlass;
@@ -46,19 +49,27 @@ public class DFFrame {
 
     @Override
     public String toString() {
-        return ("<DFFrame("+_label+") "+_method+">");
+        if (_ast != null) {
+            return ("<DFFrame("+_label+" "+Utils.encodeASTNode(_ast)+") "+_method+">");
+        } else {
+            return ("<DFFrame("+_label+") "+_method+">");
+        }
     }
 
     private DFFrame addChild(String label, ASTNode ast) {
-        DFFrame frame = new DFFrame(this, label, null);
+        DFFrame frame = new DFFrame(this, ast, label, null);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
 
     private DFFrame addChild(DFKlass catchKlass, ASTNode ast) {
-        DFFrame frame = new DFFrame(this, catchKlass.getTypeName(), catchKlass);
+        DFFrame frame = new DFFrame(this, ast, catchKlass.getTypeName(), catchKlass);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
+    }
+
+    public DFFrame getOuterFrame() {
+        return _outer;
     }
 
     public String getLabel() {
@@ -443,9 +454,11 @@ public class DFFrame {
         } else if (stmt instanceof TryStatement) {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
+            List<CatchClause> catches = (List<CatchClause>) tryStmt.catchClauses();
             DFFrame catchFrame = this;
-            for (CatchClause cc :
-                     (List<CatchClause>) tryStmt.catchClauses()) {
+            // Construct Frames in reverse order.
+            for (int i = catches.size()-1; 0 <= i; i--) {
+                CatchClause cc = catches.get(i);
                 SingleVariableDeclaration decl = cc.getException();
                 DFKlass catchKlass = DFBuiltinTypes.getExceptionKlass();
                 try {
