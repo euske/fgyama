@@ -2,9 +2,10 @@
 import sys
 import os.path
 import sqlite3
+import xml.sax
+import xml.sax.handler
 from subprocess import Popen, PIPE
-from xml.etree.cElementTree import Element
-from xml.etree.cElementTree import ElementTree
+from xml.etree.ElementTree import Element
 
 def ns(x):
     if isinstance(x, str):
@@ -48,7 +49,7 @@ class DFKlass:
         return
 
     def add_method(self, method):
-        assert isinstance(method, DFGraph), method
+        assert isinstance(method, DFMethod), method
         self.methods.append(method)
         return
 
@@ -56,15 +57,15 @@ class DFKlass:
         return self.methods
 
 
-##  DFGraph
+##  DFMethod
 ##
-class DFGraph:
+class DFMethod:
 
-    def __init__(self, gid, name, style, klass):
-        self.gid = gid
+    def __init__(self, name, style, klass, gid=None):
         self.name = name
         self.style = style
         self.klass = klass
+        self.gid = gid
         self.root = None
         self.scopes = {}
         self.nodes = {}
@@ -76,7 +77,7 @@ class DFGraph:
         return
 
     def __repr__(self):
-        return ('<DFGraph(%s), name=%r (%d nodes)>' %
+        return ('<DFMethod(%s), name=%r (%d nodes)>' %
                 (self.gid, self.name, len(self.nodes)))
 
     def __iter__(self):
@@ -92,25 +93,25 @@ class DFGraph:
         return self
 
     def toxml(self):
-        egraph = Element('method')
-        egraph.set('name', self.name)
+        emethod = Element('method')
+        emethod.set('name', self.name)
         if self.ast is not None:
             east = Element('ast')
             (astype,astart,aend) = self.ast
             east.set('type', str(astype))
             east.set('start', str(astart))
             east.set('end', str(aend))
-            egraph.append(east)
-        egraph.append(self.root.toxml())
-        return egraph
+            emethod.append(east)
+        emethod.append(self.root.toxml())
+        return emethod
 
 
 ##  DFScope
 ##
 class DFScope:
 
-    def __init__(self, graph, sid, name, parent=None):
-        self.graph = graph
+    def __init__(self, method, sid, name, parent=None):
+        self.method = method
         self.sid = sid
         self.name = name
         self.nodes = []
@@ -149,8 +150,8 @@ class DFScope:
 ##
 class DFNode:
 
-    def __init__(self, graph, nid, scope, kind, ref, data, ntype):
-        self.graph = graph
+    def __init__(self, method, nid, scope, kind, ref, data, ntype):
+        self.method = method
         self.nid = nid
         self.scope = scope
         self.kind = kind
@@ -220,117 +221,193 @@ class DFNode:
 
 ##  parse_method
 ##
-def parse_method(gid, egraph, klass):
-    assert egraph.tag == 'method', egraph
-    gname = egraph.get('name')
-    style = egraph.get('style')
-    graph = DFGraph(gid, gname, style, klass)
+class FGYamaParser(xml.sax.handler.ContentHandler):
 
-    def parse_node(scope, enode):
-        assert enode.tag == 'node', enode
-        nid = enode.get('id')
-        kind = enode.get('kind')
-        ref = enode.get('ref')
-        data = enode.get('data')
-        ntype = enode.get('type')
-        node = DFNode(graph, nid, scope, kind, ref, data, ntype)
-        for e in enode:
-            if e.tag == 'ast':
-                node.ast = (int(e.get('type')),
-                            int(e.get('start')),
-                            int(e.get('end')))
-            elif e.tag == 'link':
-                label = e.get('label', '')
-                src = e.get('src')
-                assert label not in node.inputs, node.inputs
-                assert src is not None, src
-                node.inputs[label] = src
-        return node
+    def __init__(self, gid=0):
+        xml.sax.handler.ContentHandler.__init__(self)
+        self._stack = []
+        self._cur = self.handleRoot
+        self._result = []
+        self.gid = gid
+        self.sid = None
+        self.klass = None
+        self.method = None
+        self.scope = None
+        self.node = None
+        return
 
-    def parse_scope(sid, escope, parent=None):
-        assert escope.tag == 'scope', escope
-        sname = escope.get('name')
-        scope = DFScope(graph, sid, sname, parent)
-        sid += 1
-        graph.scopes[sname] = scope
-        for elem in escope:
-            if elem.tag == 'scope':
-                (sid,child) = parse_scope(sid, elem, scope)
-            elif elem.tag == 'node':
-                node = parse_node(scope, elem)
-                graph.nodes[node.nid] = node
-                scope.nodes.append(node)
-        return (sid,scope)
+    def parse(self, fp, bufsize=65536):
+        p = xml.sax.make_parser()
+        p.setContentHandler(self)
+        while True:
+            b = fp.read(bufsize)
+            if not b: break
+            p.feed(b)
+            for data in self.flush():
+                yield data
+        for data in self.flush():
+            yield data
+        return
 
-    for e in egraph:
-        if e.tag == 'ast':
-            graph.ast = (
-                int(e.get('type')),
-                int(e.get('start')),
-                int(e.get('end')))
-        elif e.tag == 'scope':
-            (_,graph.root) = parse_scope(1, e)
-        elif e.tag == 'caller':
-            graph.callers.append(e.get('name'))
-        elif e.tag == 'override':
-            graph.overrides.append(e.get('name'))
+    def flush(self):
+        (result, self._result) = (self._result, [])
+        return result
+    
+    def startElement(self, name, attrs):
+        #print('startElement', name, dict(attrs))
+        self._stack.append(self._cur)
+        if self._cur is not None:
+            self._cur = self._cur(name, attrs)
+        return
+    
+    def endElement(self, name):
+        #print('endElement', name)
+        assert self._stack
+        if self._cur is not None:
+            self._cur(None, None)
+        self._cur = self._stack.pop()
+        return
 
-    for node in graph.nodes.values():
-        if node.kind == 'input':
-            graph.ins.append(node)
-        elif node.kind == 'output':
-            graph.outs.append(node)
-    return graph.fixate()
+    def handleRoot(self, name, attrs):
+        if name is None:
+            return
+        elif name == 'fgyama':
+            return self.handleFGYama
+        else:
+            raise ValueError('Invalid tag: %r' % name)
 
+    def handleFGYama(self, name, attrs):
+        if name is None:
+            return
+        elif name == 'class':
+            assert self.klass is None
+            name = attrs.get('name')
+            path = attrs.get('path')
+            interface = (attrs.get('interface') == 'true')
+            extends = attrs.get('extends')
+            generic = attrs.get('generic')
+            impls = attrs.get('implements')
+            if impls is None:
+                implements = []
+            else:
+                implements = impls.split(' ')
+            self.klass = DFKlass(
+                name, path, interface,
+                extends, implements, generic)
+            return self.handleClass
+        else:
+            raise ValueError('Invalid tag: %r' % name)
+    
+    def handleClass(self, name, attrs):
+        if name is None:
+            assert self.klass is not None
+            self.klass = None
+            return
+        elif name == 'param':
+            pname = attrs.get('name')
+            ptype = attrs.get('type')
+            self.klass.add_param(pname, ptype)
+            return
+        elif name == 'field':
+            fname = attrs.get('name')
+            ftype = attrs.get('type')
+            self.klass.add_field(fname, ftype)
+            return
+        elif name == 'method':
+            assert self.method is None
+            self.gid += 1
+            gname = attrs.get('name')
+            style = attrs.get('style')
+            self.method = DFMethod(
+                gname, style, self.klass, gid=self.gid)
+            self.klass.add_method(self.method)
+            return self.handleMethod
+        else:
+            raise ValueError('Invalid tag: %r' % name)
+    
+    def handleMethod(self, name, attrs):
+        if name is None:
+            assert self.method is not None
+            self.method.fixate()
+            self._result.append(self.method)
+            self.method = None
+            self.sid = None
+            return
+        elif name == 'ast':
+            self.method.ast = (
+                int(attrs.get('type')),
+                int(attrs.get('start')),
+                int(attrs.get('end')))
+            return
+        elif name == 'caller':
+            self.method.callers.append(attrs.get('name'))
+            return
+        elif name == 'override':
+            self.method.overrides.append(attrs.get('name'))
+            return
+        elif name == 'scope':
+            assert self.scope is None
+            sname = attrs.get('name')
+            self.sid = 1
+            self.scope = DFScope(
+                self.method, self.sid, sname)
+            self.method.root = self.scope
+            return self.handleScope
+        else:
+            raise ValueError('Invalid tag: %r' % name)
 
-##  parse_klass
-##
-def parse_klass(eklass, gid=0):
-    assert eklass.tag == 'class', eklass
-    name = eklass.get('name')
-    path = eklass.get('path')
-    interface = (eklass.get('interface') == 'true')
-    extends = eklass.get('extends')
-    impls = eklass.get('implements')
-    if impls is None:
-        implements = []
-    else:
-        implements = impls.split(' ')
-    generic = eklass.get('generic')
-    klass = DFKlass(name, path, interface, extends, implements, generic)
-    for e in eklass:
-        if e.tag == 'param':
-            pname = e.get('name')
-            ptype = e.get('type')
-            klass.add_param(pname, ptype)
-        elif e.tag == 'field':
-            fname = e.get('name')
-            ftype = e.get('type')
-            klass.add_field(fname, ftype)
-        elif e.tag == 'method':
-            if gid is not None:
-                gid += 1
-            graph = parse_method(gid, e, klass)
-            klass.add_method(graph)
-    return klass
+    def handleScope(self, name, attrs):
+        if name is None:
+            assert self.scope is not None
+            self.scope = self.scope.parent
+            return
+        elif name == 'scope':
+            sname = attrs.get('name')
+            self.sid += 1
+            self.scope = DFScope(
+                self.method, self.sid, sname, self.scope)
+            return self.handleScope
+        elif name == 'node':
+            assert self.node is None
+            nid = attrs.get('id')
+            kind = attrs.get('kind')
+            ref = attrs.get('ref')
+            data = attrs.get('data')
+            ntype = attrs.get('type')
+            self.node = DFNode(
+                self.method, nid, self.scope, kind, ref, data, ntype)
+            self.method.nodes[self.node.nid] = self.node
+            self.scope.nodes.append(self.node)
+            return self.handleNode
+        else:
+            raise ValueError('Invalid tag: %r' % name)
+    
+    def handleNode(self, name, attrs):
+        if name is None:
+            assert self.node is not None
+            self.node = None
+            return
+        elif name == 'ast':
+            self.node.ast = (
+                int(attrs.get('type')),
+                int(attrs.get('start')),
+                int(attrs.get('end')))
+            return
+        elif name == 'link':
+            label = attrs.get('label', '')
+            src = attrs.get('src')
+            assert label not in self.node.inputs, self.node.inputs
+            assert src is not None, src
+            self.node.inputs[label] = src
+            return
+        else:
+            raise ValueError('Invalid tag: %r' % name)
 
-
-##  load_klasses
-##
-def load_klasses(fp, gid=0):
-    root = ElementTree(file=fp).getroot()
-    for eklass in root:
-        if eklass.tag != 'class': continue
-        yield parse_klass(eklass, gid=gid)
-    return
 
 ##  load_graphs
 ##
 def load_graphs(fp, gid=0):
-    for klass in load_klasses(fp, gid=gid):
-        for graph in klass.get_methods():
-            yield graph
-    return
+    return FGYamaParser(gid).parse(fp)
 
 
 ##  GraphDB
@@ -354,7 +431,7 @@ CREATE TABLE ASTNode (
     End INTEGER
 );
 
-CREATE TABLE DFGraph (
+CREATE TABLE DFMethod (
     Gid INTEGER PRIMARY KEY,
     Cid INTEGER,
     Name TEXT,
@@ -399,7 +476,7 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
 
     def get_gids(self):
         cur1 = self._conn.cursor()
-        for (gid,) in cur1.execute('SELECT Gid FROM DFGraph;'):
+        for (gid,) in cur1.execute('SELECT Gid FROM DFMethod;'):
             yield gid
         return
 
@@ -410,14 +487,13 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
         cid = self._cur.lastrowid
         return cid
 
-    # store_graph
-    def add(self, cid, graph):
+    def add(self, cid, method):
         cur = self._cur
         cur.execute(
-            'INSERT INTO DFGraph VALUES (NULL,?,?,?);',
-            (cid, graph.name, graph.style))
+            'INSERT INTO DFMethod VALUES (NULL,?,?,?);',
+            (cid, method.name, method.style))
         gid = cur.lastrowid
-        graph.gid = gid
+        method.gid = gid
 
         def store_node(sid, node):
             aid = 0
@@ -452,35 +528,34 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             return
 
         nids = {}
-        store_scope(nids, graph.root)
-        for node in graph:
+        store_scope(nids, method.root)
+        for node in method:
             for (label,src) in node.inputs.items():
                 store_link(nids, node, src, label)
         return gid
 
-    # fetch_graph
     def get(self, gid):
         cur = self._cur
         cur.execute(
-            'SELECT Cid,Name,Style FROM DFGraph WHERE Gid=?;',
+            'SELECT Cid,Name,Style FROM DFMethod WHERE Gid=?;',
             (gid,))
         (cid,name,style) = cur.fetchone()
         cur.execute(
             'SELECT FileName FROM SourceFile WHERE Cid=?;',
             (cid,))
         (src,) = cur.fetchone()
-        graph = DFGraph(gid, name, style, src)
+        method = DFMethod(gid, name, style, src)
         rows = cur.execute(
             'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
             (gid,))
         pids = {}
-        scopes = graph.scopes
+        scopes = method.scopes
         for (sid,parent,name) in rows:
-            scope = DFScope(graph, sid, name)
+            scope = DFScope(method, sid, name)
             scopes[sid] = scope
             pids[sid] = parent
             if parent == 0:
-                graph.root = scope
+                method.root = scope
         for (sid,parent) in pids.items():
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
@@ -489,22 +564,22 @@ CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
             (gid,))
         for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
-            node = DFNode(graph, nid, scope, kind, ref, data, ntype)
+            node = DFNode(method, nid, scope, kind, ref, data, ntype)
             rows = cur.execute(
                 'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
                 (aid,))
             for (t,s,e) in rows:
                 node.ast = (t,s,e)
-            graph.nodes[nid] = node
+            method.nodes[nid] = node
             scope.nodes.append(node)
-        for (nid0,node) in graph.nodes.items():
+        for (nid0,node) in method.nodes.items():
             rows = cur.execute(
                 'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
                 (nid0,))
             for (lid,nid1,label) in rows:
                 node.inputs[label] = nid1
-        graph.fixate()
-        return graph
+        method.fixate()
+        return method
 
 
 # get_graphs
@@ -568,7 +643,8 @@ def run_fgyama(path):
 def main(argv):
     import fileinput
     import getopt
-    from xml.etree.cElementTree import dump
+    from xml.etree.ElementTree import ElementTree
+    from xml.etree.ElementTree import dump
     def usage():
         print('usage: %s [-d] [file ...]' % argv[0])
         return 100
@@ -582,21 +658,17 @@ def main(argv):
     if not args: return usage()
 
     for path in args:
-        nclasses = 0
-        ngraphs = 0
+        classes = set()
+        nmethods = 0
         nnodes = 0
-        for graph in get_graphs(path):
-            ngraphs += 1
-            nnodes += len(graph.nodes)
+        for method in get_graphs(path):
+            classes.add(method.klass)
+            nmethods += 1
+            nnodes += len(method.nodes)
             if debug:
-                dump(graph.toxml())
-        with open(path) as fp:
-            root = ElementTree(file=fp).getroot()
-            for efile in root:
-                if efile.tag == 'class':
-                    nclasses += 1
-        print('%s: classes=%r, graphs=%r, nodes=%r' %
-              (path, nclasses, ngraphs, nnodes))
+                dump(method.toxml())
+        print('%s: classes=%r, methods=%r, nodes=%r' %
+              (path, len(classes), nmethods, nnodes))
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
