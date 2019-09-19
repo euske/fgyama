@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph import DFGraph, get_graphs
+from graph import get_graphs
 from getwords import splitmethodname, splitwords
 
 def main(argv):

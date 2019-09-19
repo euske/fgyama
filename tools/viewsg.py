@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 from srcdb import SourceDB, SourceMap
-from graph import DFGraph
 from graph import GraphDB
 
 def isok(n):

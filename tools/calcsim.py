@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph import DFGraph, load_klasses
+from graph import load_klasses
 from getwords import stripid, stripgeneric, splitmethodname, splitwords
 
 # methods:

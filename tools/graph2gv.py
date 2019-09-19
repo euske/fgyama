@@ -2,7 +2,6 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graph import DFGraph
 from graph import get_graphs
 from getwords import stripid, splitmethodname
 

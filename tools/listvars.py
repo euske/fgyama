@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph import DFGraph, get_graphs
+from graph import get_graphs
 
 def main(argv):
     args = argv[1:]

@@ -2,7 +2,7 @@
 import sys
 import os.path
 import sqlite3
-from graph import DFGraph
+from graph import DFMethod
 from graph import GraphDB, get_graphs
 
 
@@ -202,7 +202,7 @@ def main(argv):
     cid = None
     for path in args:
         for graph in get_graphs(path):
-            assert isinstance(graph, DFGraph)
+            assert isinstance(graph, DFMethod)
             path = graph.klass.src
             if path is not None:
                 cid = graphdb.add_src(path)

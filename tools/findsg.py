@@ -2,7 +2,6 @@
 import sys
 import sqlite3
 from srcdb import SourceDB
-from graph import DFGraph
 from graph import GraphDB
 from graph2db import IndexDB, get_nodekey
 

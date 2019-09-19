@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graph import DFGraph, get_graphs
+from graph import DFMethod, get_graphs
 
 
 def clen(x):
@@ -129,7 +129,7 @@ class IDFBuilder:
     # Get a source.
     def getsrc(self, node, resolve=True):
         if node.ast is None: return None
-        if isinstance(node, DFGraph):
+        if isinstance(node, DFMethod):
             path = node.klass.path
         else:
             path = node.graph.klass.path

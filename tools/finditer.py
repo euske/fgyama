@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 from srcdb import SourceDB
-from graph import DFGraph
 from graph import get_graphs
 
 def q(s):
