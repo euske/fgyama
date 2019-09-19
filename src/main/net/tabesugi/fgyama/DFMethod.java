@@ -449,22 +449,17 @@ class JoinNode extends DFNode {
     }
 
     @Override
-    public boolean merge(DFNode node) {
+    public void merge(DFNode node) {
         if (_linkTrue == null) {
             assert _linkFalse != null;
             _linkTrue = this.accept(node, "true");
-            return true;
-        } else if (_linkTrue.getSrc() == node) {
-            return true;
-        }
-        if (_linkFalse == null) {
+        } else if (_linkFalse == null) {
             assert _linkTrue != null;
             _linkFalse = this.accept(node, "false");
-            return true;
-        } else if (_linkFalse.getSrc() == node) {
-            return true;
+        } else {
+            Logger.error("JoinNode: cannot merge:", node);
+            assert false;
         }
-        return false;
     }
 
     @Override
@@ -802,10 +797,9 @@ class CatchJoin extends DFNode {
         return !this.hasValue();
     }
 
-    public boolean merge(DFNode node) {
-        if (this.hasValue()) return false;
+    public void merge(DFNode node) {
+        assert !this.hasValue();
         this.accept(node);
-        return true;
     }
 
 }
@@ -1927,7 +1921,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 if (end == null) {
                     end = ctx.get(node.getRef());
                 }
-                node.merge(end);
+                if (node.canMerge()) {
+                    node.merge(end);
+                }
                 ends.put(node.getRef(), node);
             }
         }
@@ -2324,9 +2320,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                         DFNode dst = ctx.getLast(ref);
                         if (dst == null) {
                             dst = src;
-                        } else if (dst.merge(src)) {
-                            ;
-                        } else if (src.merge(dst)) {
+                        } else if (dst.canMerge()) {
+                            dst.merge(src);
+                        } else if (src.canMerge()) {
+                            src.merge(dst);
                             dst = src;
                         } else {
                             Logger.error("DFMethod.catch: Conflict:", dst, "<-", src);
@@ -2642,9 +2639,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     ctx.set(src);
                 } else if (src == dst) {
                     ;
-                } else if (dst.merge(src)) {
-                    ;
-                } else if (src.merge(dst)) {
+                } else if (dst.canMerge()) {
+                    dst.merge(src);
+                } else if (src.canMerge()) {
+                    src.merge(dst);
                     ctx.set(src);
                 } else {
                     Logger.error("DFMethod.endBreaks: cannot merge:", ref, src, dst);
@@ -2692,10 +2690,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                         ctx.set(src);
                     } else if (src == dst) {
                         ;
-                    } else if (dst.merge(src)) {
+                    } else if (dst.canMerge()) {
+                        dst.merge(src);
                         //Logger.info(" merge", dst, "<-", src);
-                    } else if (src.merge(dst)) {
+                    } else if (src.canMerge()) {
                         //Logger.info(" merge", src, "<-", dst);
+                        src.merge(dst);
                         ctx.set(src);
                     } else {
                         Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);

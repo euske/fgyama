@@ -123,8 +123,7 @@ public class DFNode implements Comparable<DFNode> {
         return false;
     }
 
-    public boolean merge(DFNode node) {
-        return false;
+    public void merge(DFNode node) {
     }
 
     public boolean purge() {
