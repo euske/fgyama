@@ -33,6 +33,17 @@ class ReturnExit extends DFExit {
         super(frame, node);
         assert frame.getLabel() == DFFrame.RETURNABLE;
     }
+
+    @Override
+    public int compareTo(DFExit exit) {
+        if (this.getNode().canMerge() && !exit.getNode().canMerge()) {
+            return +1;
+        } else if (!this.getNode().canMerge() && exit.getNode().canMerge()) {
+            return -1;
+        } else {
+            return super.compareTo(exit);
+        }
+    }
 }
 
 // ThrowExit
@@ -432,6 +443,12 @@ class JoinNode extends DFNode {
         }
     }
 
+    @Override
+    public boolean canMerge() {
+        return (_linkTrue == null || _linkFalse == null);
+    }
+
+    @Override
     public boolean merge(DFNode node) {
         if (_linkTrue == null) {
             assert _linkFalse != null;
@@ -778,6 +795,11 @@ class CatchJoin extends DFNode {
     @Override
     public String getKind() {
         return "catchjoin";
+    }
+
+    @Override
+    public boolean canMerge() {
+        return !this.hasValue();
     }
 
     public boolean merge(DFNode node) {
@@ -2633,36 +2655,53 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void closeFrame(DFContext ctx, MethodGraph graph) {
+        ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
+            new ConsistentHashMap<DFRef, List<DFExit>>();
         for (DFExit exit : graph.getExits(_frame)) {
             assert exit.getFrame() == _frame;
-            assert (exit instanceof ReturnExit ||
-                    exit instanceof ThrowExit);
             DFNode src = exit.getNode();
             DFRef ref = src.getRef();
-            DFNode dst = ctx.getLast(ref);
-            if (exit instanceof ThrowExit) {
-                DFKlass excKlass = ((ThrowExit)exit).getExcKlass();
-                if (dst == null) {
-                    ctx.set(src);
-                } else {
-                    CatchJoin join = new CatchJoin(
-                        graph, _scope, null, src, excKlass);
-                    join.merge(dst);
-                    ctx.set(join);
-                }
-                continue;
+            List<DFExit> a = ref2exits.get(ref);
+            if (a == null) {
+                a = new ArrayList<DFExit>();
+                ref2exits.put(ref, a);
             }
-            if (dst == null) {
-                ctx.set(src);
-            } else if (src == dst) {
-                ;
-            } else if (dst.merge(src)) {
-                ;
-            } else if (src.merge(dst)) {
-                ctx.set(src);
-            } else {
-                Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);
-                //assert false;
+            a.add(exit);
+        }
+        for (DFRef ref : ref2exits.keys()) {
+            List<DFExit> a = ref2exits.get(ref);
+            Collections.sort(a);
+            for (DFExit exit : a) {
+                assert (exit instanceof ReturnExit ||
+                        exit instanceof ThrowExit);
+                DFNode src = exit.getNode();
+                DFNode dst = ctx.getLast(ref);
+                if (exit instanceof ThrowExit) {
+                    DFKlass excKlass = ((ThrowExit)exit).getExcKlass();
+                    if (dst == null) {
+                        ctx.set(src);
+                    } else {
+                        CatchJoin join = new CatchJoin(
+                            graph, _scope, null, src, excKlass);
+                        join.merge(dst);
+                        ctx.set(join);
+                    }
+                } else {
+                    if (dst == null) {
+                        //Logger.info(" set", src);
+                        ctx.set(src);
+                    } else if (src == dst) {
+                        ;
+                    } else if (dst.merge(src)) {
+                        //Logger.info(" merge", dst, "<-", src);
+                    } else if (src.merge(dst)) {
+                        //Logger.info(" merge", src, "<-", dst);
+                        ctx.set(src);
+                    } else {
+                        Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);
+                        //assert false;
+                    }
+                }
             }
         }
     }
@@ -2934,6 +2973,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    for (DFNode node : toremove) {
 		_nodes.remove(node);
 	    }
+            Collections.sort(_nodes);
 	}
 
 	public void writeXML(XMLStreamWriter writer)
@@ -2964,7 +3004,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    }
 	    DFNode[] nodes = new DFNode[_nodes.size()];
 	    _nodes.toArray(nodes);
-	    Arrays.sort(nodes);
 	    method.getScope().writeXML(writer, nodes);
 	    writer.writeEndElement();
 	}

@@ -119,6 +119,10 @@ public class DFNode implements Comparable<DFNode> {
         return link;
     }
 
+    public boolean canMerge() {
+        return false;
+    }
+
     public boolean merge(DFNode node) {
         return false;
     }
