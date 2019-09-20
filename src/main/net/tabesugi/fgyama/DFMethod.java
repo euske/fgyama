@@ -1952,7 +1952,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             repeat.setEnd(end);
         }
 
-        this.endBreaks(graph, frame, loopFrame, ctx);
+        this.endBreaks(ctx, graph, frame, loopFrame);
     }
 
     /// Statement processors.
@@ -1968,7 +1968,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             processStatement(
                 ctx, typeSpace, graph, finder, innerScope, innerFrame, cstmt);
         }
-        this.endBreaks(graph, frame, innerFrame, ctx);
+        this.endBreaks(ctx, graph, frame, innerFrame);
     }
 
     @SuppressWarnings("unchecked")
@@ -2087,29 +2087,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
-    private void processCaseStatement(
-        DFContext ctx, MethodGraph graph, DFLocalScope scope,
-        DFFrame frame, DFFrame caseFrame, ASTNode apt,
-        DFNode caseNode, DFContext caseCtx) {
-
-        for (DFNode src : caseCtx.getFirsts()) {
-            if (src.hasValue()) continue;
-            src.accept(ctx.get(src.getRef()));
-        }
-
-        for (DFRef ref : caseFrame.getOutputRefs()) {
-            DFNode dst = caseCtx.get(ref);
-            if (dst != null) {
-                JoinNode join = new JoinNode(
-                    graph, scope, ref.getRefType(), ref, apt, caseNode);
-                join.recv(true, dst);
-                join.merge(ctx.get(ref));
-                ctx.set(join);
-            }
-        }
-        this.endBreaks(graph, frame, caseFrame, caseCtx);
-    }
-
     @SuppressWarnings("unchecked")
     private void processSwitchStatement(
         DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
@@ -2138,7 +2115,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     assert switchCase != null;
                     assert caseNode != null;
                     assert caseCtx != null;
-                    processCaseStatement(
+                    processSwitchCase(
                         ctx, graph, switchScope, frame,
                         caseFrame, switchCase, caseNode, caseCtx);
                 }
@@ -2178,9 +2155,31 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             assert switchCase != null;
             assert caseNode != null;
             assert caseCtx != null;
-            processCaseStatement(
+            processSwitchCase(
                 ctx, graph, switchScope, frame,
                 caseFrame, switchCase, caseNode, caseCtx);
+        }
+    }
+
+    private void processSwitchCase(
+        DFContext ctx, MethodGraph graph, DFLocalScope scope,
+        DFFrame frame, DFFrame caseFrame, ASTNode apt,
+        DFNode caseNode, DFContext caseCtx) {
+
+        for (DFNode src : caseCtx.getFirsts()) {
+            if (src.hasValue()) continue;
+            src.accept(ctx.get(src.getRef()));
+        }
+
+        for (DFRef ref : caseFrame.getOutputRefs()) {
+            DFNode dst = caseCtx.get(ref);
+            if (dst != null) {
+                JoinNode join = new JoinNode(
+                    graph, scope, ref.getRefType(), ref, apt, caseNode);
+                join.recv(true, dst);
+                join.merge(ctx.get(ref));
+                ctx.set(join);
+            }
         }
     }
 
@@ -2492,7 +2491,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             processStatement(
                 ctx, typeSpace, graph, finder, scope, labeledFrame,
                 labeledStmt.getBody());
-            this.endBreaks(graph, frame, labeledFrame, ctx);
+            this.endBreaks(ctx, graph, frame, labeledFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"
@@ -2642,8 +2641,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     // endBreaks: ends a BREAKABLE Frame.
     private void endBreaks(
-        MethodGraph graph, DFFrame outerFrame,
-        DFFrame endFrame, DFContext ctx) {
+        DFContext ctx, MethodGraph graph, DFFrame outerFrame,
+        DFFrame endFrame) {
         // endFrame.getLabel() can be either @BREAKABLE or a label.
         ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
             new ConsistentHashMap<DFRef, List<DFExit>>();
