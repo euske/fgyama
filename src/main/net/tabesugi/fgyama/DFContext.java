@@ -7,6 +7,17 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+//  RelayNode
+//
+class RelayNode extends DFNode {
+
+    public RelayNode(
+        DFGraph graph, DFVarScope scope, DFRef ref) {
+        super(graph, scope, ref.getRefType(), ref, null);
+    }
+}
+
+
 //  DFContext
 //
 public class DFContext {
@@ -26,30 +37,25 @@ public class DFContext {
         _scope = scope;
     }
 
-    private DFNode create(DFRef ref) {
-        DFNode node = new DFNode(_graph, _scope, ref.getRefType(), ref, null);
-        _last.put(ref, node);
-        _first.put(ref, node);
-        return node;
-    }
-
     // get(ref): get a current value of the context if defined.
     public DFNode get(DFRef ref) {
         DFNode node = _last.get(ref);
         if (node == null) {
             assert !_first.containsKey(ref);
-            node = this.create(ref);
+            node = new RelayNode(_graph, _scope, ref);
+            _last.put(ref, node);
+            _first.put(ref, node);
         }
         return node;
     }
 
-    public DFNode getFirst(DFRef ref) {
-        DFNode node = _first.get(ref);
-        if (node == null) {
-            assert !_last.containsKey(ref);
-            node = this.create(ref);
+    public DFNode[] getFirsts() {
+        DFNode[] values = new DFNode[_first.size()];
+        int i = 0;
+        for (DFRef ref : _first.keys()) {
+            values[i++] = _first.get(ref);
         }
-        return node;
+        return values;
     }
 
     public DFNode getLast(DFRef ref) {
@@ -68,9 +74,6 @@ public class DFContext {
         DFRef ref = node.getRef();
         assert ref != null;
         _last.put(ref, node);
-        if (!_first.containsKey(ref)) {
-            _first.put(ref, node);
-        }
     }
 
     public void setLValue(DFNode node) {
@@ -79,27 +82,6 @@ public class DFContext {
 
     public void setRValue(DFNode node) {
         _rval = node;
-    }
-
-    public DFNode[] getFirsts() {
-        DFNode[] values = new DFNode[_first.size()];
-        int i = 0;
-        for (DFRef ref : _first.keys()) {
-            values[i++] = _first.get(ref);
-        }
-        return values;
-    }
-
-    public List<DFRef> getChanged() {
-        List<DFRef> refs = new ArrayList<DFRef>();
-        for (DFRef ref : _first.keys()) {
-            DFNode node0 = _first.get(ref);
-            DFNode node1 = _last.get(ref);
-            if (node0 != node1) {
-                refs.add(ref);
-            }
-        }
-        return refs;
     }
 
     // dump: for debugging.

@@ -1848,7 +1848,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             new HashMap<DFRef, LoopRepeatNode>();
         Map<DFRef, DFNode> ends =
             new HashMap<DFRef, DFNode>();
-        List<DFRef> loopRefs = loopCtx.getChanged();
+        Collection<DFRef> loopRefs = loopFrame.getOutputRefs();
         for (DFRef ref : loopRefs) {
             DFNode src = ctx.get(ref);
             LoopBeginNode begin = new LoopBeginNode(
