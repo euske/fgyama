@@ -15,6 +15,19 @@ class BreakExit extends DFExit {
         super(frame, node);
         // frame.getLabel() can be either @BREAKABLE or a label.
     }
+
+    @Override
+    public int compareTo(DFExit exit) {
+        boolean m0 = this.getNode().canMerge();
+        boolean m1 = exit.getNode().canMerge();
+        if (m0 && !m1) {
+            return +1;
+        } else if (!m0 && m1) {
+            return -1;
+        } else {
+            return super.compareTo(exit);
+        }
+    }
 }
 
 // ContinueExit
@@ -36,9 +49,11 @@ class ReturnExit extends DFExit {
 
     @Override
     public int compareTo(DFExit exit) {
-        if (this.getNode().canMerge() && !exit.getNode().canMerge()) {
+        boolean m0 = this.getNode().canMerge();
+        boolean m1 = exit.getNode().canMerge();
+        if (m0 && !m1) {
             return +1;
-        } else if (!this.getNode().canMerge() && exit.getNode().canMerge()) {
+        } else if (!m0 && m1) {
             return -1;
         } else {
             return super.compareTo(exit);
@@ -457,7 +472,7 @@ class JoinNode extends DFNode {
             assert _linkTrue != null;
             _linkFalse = this.accept(node, "false");
         } else {
-            Logger.error("JoinNode: cannot merge:", node);
+            Logger.error("JoinNode: cannot merge:", this, node);
             assert false;
         }
     }
@@ -2627,6 +2642,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         MethodGraph graph, DFFrame outerFrame,
         DFFrame endFrame, DFContext ctx) {
         // endFrame.getLabel() can be either @BREAKABLE or a label.
+        ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
+            new ConsistentHashMap<DFRef, List<DFExit>>();
         for (DFExit exit : graph.getExits(endFrame)) {
             if (exit.getFrame() != endFrame) {
                 // Pass through the outer frame.
@@ -2634,6 +2651,19 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             } else if (exit instanceof BreakExit) {
                 DFNode src = exit.getNode();
                 DFRef ref = src.getRef();
+                List<DFExit> a = ref2exits.get(ref);
+                if (a == null) {
+                    a = new ArrayList<DFExit>();
+                    ref2exits.put(ref, a);
+                }
+                a.add(exit);
+            }
+        }
+        for (DFRef ref : ref2exits.keys()) {
+            List<DFExit> a = ref2exits.get(ref);
+            Collections.sort(a);
+            for (DFExit exit : a) {
+                DFNode src = exit.getNode();
                 DFNode dst = ctx.getLast(ref);
                 if (dst == null) {
                     ctx.set(src);
@@ -2645,7 +2675,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     src.merge(dst);
                     ctx.set(src);
                 } else {
-                    Logger.error("DFMethod.endBreaks: cannot merge:", ref, src, dst);
+                    Logger.error("DFMethod.endBreaks: cannot merge:", ref, dst, src);
                     //assert false;
                 }
             }
@@ -2698,7 +2728,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                         src.merge(dst);
                         ctx.set(src);
                     } else {
-                        Logger.error("DFMethod.closeFrame: cannot merge:", ref, src, dst);
+                        Logger.error("DFMethod.closeFrame: cannot merge:", ref, dst, src);
                         //assert false;
                     }
                 }
