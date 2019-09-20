@@ -191,7 +191,6 @@
             <node id="M3_moo_N16" kind="receive" ref="@Lbasic_funcs;/.z" type="I">
               <ast end="342" start="337" type="32"/>
               <link label="@Lbasic_funcs;/.z" src="M3_moo_N13"/>
-              <link src="M3_moo_N6"/>
             </node>
             <node id="M3_moo_N17" kind="return" ref="#return" type="I">
               <ast end="343" start="330" type="41"/>
