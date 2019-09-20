@@ -1077,6 +1077,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         } else {
             throw new InvalidSyntax(_ast);
         }
+        //_frame.dump();
     }
 
     // Overrider
@@ -1962,10 +1963,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	Block block)
         throws InvalidSyntax, EntityNotFound {
         DFLocalScope innerScope = scope.getChildByAST(block);
+        DFFrame innerFrame = frame.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
             processStatement(
-                ctx, typeSpace, graph, finder, innerScope, frame, cstmt);
+                ctx, typeSpace, graph, finder, innerScope, innerFrame, cstmt);
         }
+        this.endBreaks(graph, frame, innerFrame, ctx);
     }
 
     @SuppressWarnings("unchecked")

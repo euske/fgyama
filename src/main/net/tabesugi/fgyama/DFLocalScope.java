@@ -14,8 +14,8 @@ public class DFLocalScope extends DFVarScope {
 
     private Map<String, DFLocalScope> _ast2child =
         new ConsistentHashMap<String, DFLocalScope>();
-    private List<DFRef> _vars =
-        new ArrayList<DFRef>();
+    private Set<DFRef> _vars =
+        new ConsistentHashSet<DFRef>();
     private Map<String, DFRef> _id2var =
         new HashMap<String, DFRef>();
 
@@ -69,8 +69,8 @@ public class DFLocalScope extends DFVarScope {
         return super.lookupVar(id);
     }
 
-    public List<DFRef> getRefs() {
-        return _vars;
+    public boolean hasRef(DFRef ref) {
+        return _vars.contains(ref);
     }
 
     @Override

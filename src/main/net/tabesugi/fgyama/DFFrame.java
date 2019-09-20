@@ -132,15 +132,16 @@ public class DFFrame {
         _outputRefs.add(ref);
     }
 
-    private void expandLocalRefs(DFFrame innerFrame) {
-        _inputRefs.addAll(innerFrame._inputRefs);
-        _outputRefs.addAll(innerFrame._outputRefs);
-    }
-
-    private void removeRefs(DFLocalScope innerScope) {
-        for (DFRef ref : innerScope.getRefs()) {
-            _inputRefs.remove(ref);
-            _outputRefs.remove(ref);
+    private void expandLocalRefs(DFFrame innerFrame, DFLocalScope innerScope) {
+        for (DFRef ref : innerFrame._inputRefs) {
+            if (innerScope == null || !innerScope.hasRef(ref)) {
+                _inputRefs.add(ref);
+            }
+        }
+        for (DFRef ref : innerFrame._outputRefs) {
+            if (innerScope == null || !innerScope.hasRef(ref)) {
+                _outputRefs.add(ref);
+            }
         }
     }
 
@@ -252,13 +253,14 @@ public class DFFrame {
 
         } else if (stmt instanceof Block) {
 	    // "{ ... }"
-            DFLocalScope innerScope = scope.getChildByAST(stmt);
             Block block = (Block)stmt;
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            DFFrame innerFrame = this.addChild("@BLOCK", block);
             for (Statement cstmt :
                      (List<Statement>) block.statements()) {
-                this.buildStmt(defined, innerScope, cstmt);
+                innerFrame.buildStmt(defined, innerScope, cstmt);
             }
-            this.removeRefs(innerScope);
+            this.expandLocalRefs(innerFrame, innerScope);
 
         } else if (stmt instanceof EmptyStatement) {
 
@@ -294,12 +296,12 @@ public class DFFrame {
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = this.addChild("@THEN", thenStmt);
             thenFrame.buildStmt(defined, scope, thenStmt);
-            this.expandLocalRefs(thenFrame);
+            this.expandLocalRefs(thenFrame, null);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = this.addChild("@ELSE", elseStmt);
                 elseFrame.buildStmt(defined, scope, elseStmt);
-                this.expandLocalRefs(elseFrame);
+                this.expandLocalRefs(elseFrame, null);
             }
 
         } else if (stmt instanceof SwitchStatement) {
@@ -321,8 +323,7 @@ public class DFFrame {
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
                     if (caseFrame != null) {
-                        caseFrame.removeRefs(innerScope);
-                        this.expandLocalRefs(caseFrame);
+                        this.expandLocalRefs(caseFrame, innerScope);
                     }
                     caseFrame = this.addChild(DFFrame.BREAKABLE, cstmt);
                     SwitchCase switchCase = (SwitchCase)cstmt;
@@ -351,8 +352,7 @@ public class DFFrame {
                 }
             }
             if (caseFrame != null) {
-                caseFrame.removeRefs(innerScope);
-                this.expandLocalRefs(caseFrame);
+                this.expandLocalRefs(caseFrame, innerScope);
             }
 
         } else if (stmt instanceof SwitchCase) {
@@ -366,8 +366,7 @@ public class DFFrame {
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildExpr(defined, scope, whileStmt.getExpression());
             innerFrame.buildStmt(defined, innerScope, whileStmt.getBody());
-            innerFrame.removeRefs(innerScope);
-            this.expandLocalRefs(innerFrame);
+            this.expandLocalRefs(innerFrame, innerScope);
 
         } else if (stmt instanceof DoStatement) {
 	    // "do { ... } while (c);"
@@ -376,8 +375,7 @@ public class DFFrame {
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(defined, innerScope, doStmt.getBody());
             innerFrame.buildExpr(defined, scope, doStmt.getExpression());
-            innerFrame.removeRefs(innerScope);
-            this.expandLocalRefs(innerFrame);
+            this.expandLocalRefs(innerFrame, innerScope);
 
         } else if (stmt instanceof ForStatement) {
 	    // "for (i = 0; i < 10; i++) { ... }"
@@ -395,8 +393,7 @@ public class DFFrame {
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 innerFrame.buildExpr(defined, innerScope, update);
             }
-            innerFrame.removeRefs(innerScope);
-            this.expandLocalRefs(innerFrame);
+            this.expandLocalRefs(innerFrame, innerScope);
 
         } else if (stmt instanceof EnhancedForStatement) {
 	    // "for (x : array) { ... }"
@@ -405,8 +402,7 @@ public class DFFrame {
             DFLocalScope innerScope = scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             innerFrame.buildStmt(defined, innerScope, eForStmt.getBody());
-            innerFrame.removeRefs(innerScope);
-            this.expandLocalRefs(innerFrame);
+            this.expandLocalRefs(innerFrame, innerScope);
 
         } else if (stmt instanceof ReturnStatement) {
 	    // "return 42;"
@@ -430,7 +426,7 @@ public class DFFrame {
             String label = labelName.getIdentifier();
             DFFrame innerFrame = this.addChild(label, stmt);
             innerFrame.buildStmt(defined, scope, labeledStmt.getBody());
-            this.expandLocalRefs(innerFrame);
+            this.expandLocalRefs(innerFrame, null);
 
         } else if (stmt instanceof SynchronizedStatement) {
 	    // "synchronized (this) { ... }"
@@ -459,7 +455,6 @@ public class DFFrame {
                 DFLocalScope catchScope = scope.getChildByAST(cc);
                 catchFrame = catchFrame.addChild(catchKlass, cc);
                 this.buildStmt(defined, catchScope, cc.getBody());
-                this.removeRefs(catchScope);
             }
             DFFrame tryFrame = catchFrame;
             DFLocalScope tryScope = scope.getChildByAST(tryStmt);
