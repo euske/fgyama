@@ -10,8 +10,8 @@ def main(argv):
     nnames = 0
     words = {}
     for path in args:
-        for graph in get_graphs(path):
-            (name,args,retype) = splitmethodname(graph.name)
+        for method in get_graphs(path):
+            (name,args,retype) = splitmethodname(method.name)
             if name is None: continue
             #print(name)
             nnames += 1

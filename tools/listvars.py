@@ -8,8 +8,8 @@ def main(argv):
 
     refs = {}
     for path in args:
-        for graph in get_graphs(path):
-            for node in graph:
+        for method in get_graphs(path):
+            for node in method:
                 if node.ref is None: continue
                 if node.ntype is None: continue
                 if node.ref[0] not in '$@': continue

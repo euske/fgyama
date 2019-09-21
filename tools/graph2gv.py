@@ -69,12 +69,12 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     out.write(h+'}\n')
     return
 
-def run_dot(graphs, type='svg'):
+def run_dot(methods, type='svg'):
     args = ['dot', '-T'+type]
     print('run_dot: %r' % args, file=sys.stderr)
     data = io.StringIO()
-    for graph in graphs:
-        write_gv(data, graph.root, name=graph.name)
+    for method in methods:
+        write_gv(data, method.root, name=method.name)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
     (stdout, _) = p.communicate(data.getvalue())
     a = []
@@ -113,23 +113,23 @@ def main(argv):
         elif k == '-n': names = [v]
     if not args: return usage()
 
-    graphs = []
+    methods = []
     for path in args:
-        for graph in get_graphs(path):
-            if names and graph.name not in names: continue
-            graphs.append(graph)
+        for method in get_graphs(path):
+            if names and method.name not in names: continue
+            methods.append(method)
 
     if html:
         output.write('<!DOCTYPE html><html><body>\n')
-        for data in run_dot(graphs):
+        for data in run_dot(methods):
             output.write('<div>\n')
             output.write(data)
             output.write('</div><hr>\n')
         output.write('</body>')
     else:
-        for graph in graphs:
-            write_gv(output, graph.root,
-                     highlight=highlight, name=graph.name)
+        for method in methods:
+            write_gv(output, method.root,
+                     highlight=highlight, name=method.name)
 
     output.close()
     return 0

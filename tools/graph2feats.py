@@ -288,15 +288,15 @@ def main(argv):
             db.add_path(srcid, path)
 
     builder.run()
-    print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.graphs),
+    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
+          (len(builder.srcmap), len(builder.methods),
            sum( len(a) for a in builder.funcalls.values() ),
            len(builder.vtxs)),
           file=sys.stderr)
 
     item2nodes = {}
-    for graph in builder.graphs:
-        for node in graph:
+    for method in builder.methods:
+        for node in method:
             item = None
             if itype == 'func':
                 if node.kind in CALLS:

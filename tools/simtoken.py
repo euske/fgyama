@@ -87,12 +87,12 @@ def main(argv):
     freq = {}
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
-        for graph in get_graphs(path):
-            if graph.style == 'initializer': continue
-            if graph.src is None: continue
-            if graph.ast is None: continue
-            (_,start,end) = graph.ast
-            src = srcdb.get(graph.src)
+        for method in get_graphs(path):
+            if method.style == 'initializer': continue
+            if method.src is None: continue
+            if method.ast is None: continue
+            (_,start,end) = method.ast
+            src = srcdb.get(method.src)
             text = src.data[start:end]
             c = {}
             for t in gettokens(text):
@@ -104,7 +104,7 @@ def main(argv):
                 if t not in freq:
                     freq[t] = 0
                 freq[t] += 1
-            tokens.append((graph, c))
+            tokens.append((method, c))
     total = sum(freq.values())
     idf = {}
     for (t,n) in freq.items():
@@ -154,13 +154,13 @@ def main(argv):
             cls[g1] = cls[g2] = c
     for c in sorted(set(cls.values()), key=len, reverse=True):
         fp.write('= %d\n' % len(c))
-        for graph in c:
-            fp.write('+ %s\n' % graph.name)
+        for method in c:
+            fp.write('+ %s\n' % method.name)
             if not verbose: continue
-            if graph.src is None or graph.ast is None: continue
-            src = srcdb.get(graph.src)
-            (_,start,end) = graph.ast
-            fp.write('# %s\n' % graph.src)
+            if method.src is None or method.ast is None: continue
+            src = srcdb.get(method.src)
+            (_,start,end) = method.ast
+            fp.write('# %s\n' % method.src)
             ranges = [(start, end, 0)]
             for (lineno,line) in src.show(ranges):
                 if lineno is None:

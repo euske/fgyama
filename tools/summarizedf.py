@@ -190,8 +190,8 @@ def main(argv):
         print('Loading: %r...' % path, file=sys.stderr)
         builder.load(path)
     builder.run()
-    print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.graphs),
+    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
+          (len(builder.srcmap), len(builder.methods),
            sum( len(a) for a in builder.funcalls.values() ),
            len(builder.vtxs)),
           file=sys.stderr)
@@ -200,12 +200,12 @@ def main(argv):
     irefs = set()
     vtx2iref = {}
     nlinks = 0
-    for graph in builder.graphs:
-        (name,_,_) = splitmethodname(graph.name)
-        if methods and (name not in methods) and (graph.name not in methods): continue
-        if graph.callers: continue
-        print('graph:', graph.name, file=sys.stderr)
-        for node in graph:
+    for method in builder.methods:
+        (name,_,_) = splitmethodname(method.name)
+        if methods and (name not in methods) and (method.name not in methods): continue
+        if method.callers: continue
+        print('method:', method.name, file=sys.stderr)
+        for node in method:
             if not node.inputs: continue
             mat = trace(vtx2iref, builder.vtxs[node])
             for (iref0, iref1) in mat:

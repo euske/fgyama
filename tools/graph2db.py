@@ -68,8 +68,8 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
             self._cache[k] = tid
         return tid
 
-    # stores the index of the graph.
-    def index_graph(self, graph):
+    # stores the index of the method.
+    def index_method(self, method):
         visited = set()
         cur = self._cur
 
@@ -84,7 +84,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                     tid = self.get(pid, key)
                     cur.execute(
                         'INSERT INTO TreeLeaf VALUES (?,?,?);',
-                        (tid, graph.gid, node0.nid))
+                        (tid, method.gid, node0.nid))
                     tids.append(tid)
                 #print ('index:', pids, key, '->', tids)
                 for (label1,src) in node0.get_inputs():
@@ -95,15 +95,15 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                     index_tree(label0, src, pids)
             return
 
-        print (graph)
-        for node in graph:
+        print (method)
+        for node in method:
             if not node.outputs:
                 index_tree('', node, [0])
         return
 
     # searches subgraphs
-    def search_graph(self, graph, minnodes=2, mindepth=2,
-                     checkgid=(lambda graph, gid: True)):
+    def search_method(self, method, minnodes=2, mindepth=2,
+                     checkgid=(lambda method, gid: True)):
         cur = self._cur
 
         # match_tree:
@@ -123,7 +123,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                     'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
                     (tid,))
                 found = [ (gid1,nid1) for (gid1,nid1) in rows
-                          if checkgid(graph, gid1) ]
+                          if checkgid(method, gid1) ]
                 if not found: return (0,0)
                 for (gid1,nid1) in found:
                     if gid1 in result:
@@ -150,7 +150,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
             return (maxnodes,maxdepth)
 
         votes = {}
-        for node in graph:
+        for node in method:
             if node.outputs: continue
             # start from each terminal node.
             result = {}
@@ -201,14 +201,14 @@ def main(argv):
 
     cid = None
     for path in args:
-        for graph in get_graphs(path):
-            assert isinstance(graph, DFMethod)
-            path = graph.klass.src
+        for method in get_graphs(path):
+            assert isinstance(method, DFMethod)
+            path = method.klass.src
             if path is not None:
                 cid = graphdb.add_src(path)
             assert cid is not None
-            graphdb.add(cid, graph)
-            indexdb.index_graph(graph)
+            graphdb.add(cid, method)
+            indexdb.index_method(method)
     graphdb.close()
     indexdb.close()
     return 0

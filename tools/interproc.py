@@ -97,9 +97,9 @@ class IDFBuilder:
     def __init__(self, maxoverrides=1, dbg=None):
         self.maxoverrides = maxoverrides
         self.dbg = dbg
-        self.graphs = []
+        self.methods = []
         self.srcmap = {}
-        self.gid2graph = {}
+        self.gid2method = {}
         self.funcalls = {}
         self.vtxs = {}
         return
@@ -111,19 +111,19 @@ class IDFBuilder:
     def __iter__(self):
         return iter(self.vtxs.values())
 
-    # Load graphs.
+    # Load methods.
     def load(self, path, fp=None):
-        for graph in get_graphs(path):
-            if graph.style == 'initializer': continue
-            path = graph.klass.path
+        for method in get_graphs(path):
+            if method.style == 'initializer': continue
+            path = method.klass.path
             if path not in self.srcmap:
                 fid = len(self.srcmap)
                 self.srcmap[path] = fid
                 src = (fid, path)
                 if fp is not None:
                     fp.write('+SOURCE %r\n' % (src,))
-            self.graphs.append(graph)
-            self.gid2graph[graph.name] = graph
+            self.methods.append(method)
+            self.gid2method[method.name] = method
         return
 
     # Get a source.
@@ -165,7 +165,7 @@ class IDFBuilder:
 
     def run(self):
         # Enumerate caller/callee relationships.
-        for src in self.graphs:
+        for src in self.methods:
             for node in src:
                 if node.is_funcall():
                     funcs = node.data.split(' ')
@@ -173,14 +173,13 @@ class IDFBuilder:
                         self.addcall(node, gid)
 
         # Convert every node to IPVertex.
-        for graph in self.graphs:
-            for node in graph:
+        for method in self.methods:
+            for node in method:
                 if node.is_funcall():
                     funcs = node.data.split(' ')
                     for gid in funcs[:self.maxoverrides]:
-                        if gid not in self.gid2graph: continue
-                        func = self.gid2graph[gid]
-                        for n1 in func:
+                        if gid not in self.gid2method: continue
+                        for n1 in self.gid2method[gid]:
                             if n1.kind == 'input':
                                 label = n1.ref
                                 if label in node.inputs:
@@ -223,8 +222,8 @@ def main(argv):
         builder.load(path)
 
     builder.run()
-    print('Read: %d sources, %d graphs, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.graphs),
+    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
+          (len(builder.srcmap), len(builder.methods),
            sum( len(a) for a in builder.funcalls.values() ),
            len(builder.vtxs)),
           file=sys.stderr)

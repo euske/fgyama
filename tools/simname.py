@@ -61,13 +61,13 @@ def main(argv):
     names = {}
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
-        for graph in get_graphs(path):
-            if graph.style == 'initializer': continue
-            if ';.' in graph.name:
-                (_,_,name) = graph.name.partition(';.')
+        for method in get_graphs(path):
+            if method.style == 'initializer': continue
+            if ';.' in method.name:
+                (_,_,name) = method.name.partition(';.')
                 (name,_,_) = name.partition('(')
             else:
-                name = graph.name
+                name = method.name
             words = splitcamel(name)
             #print(name, words)
             for n in range(1, len(words)):
@@ -76,20 +76,20 @@ def main(argv):
                     a = names[k]
                 else:
                     a = names[k] = []
-                a.append(graph)
+                a.append(method)
 
     done = set()
     for k in sorted(names.keys(), key=lambda k:len(k), reverse=True):
-        a = [ graph for graph in names[k] if graph not in done ]
+        a = [ method for method in names[k] if method not in done ]
         if 2 <= len(a):
             fp.write('= %d\n' % len(a))
-            for graph in a:
-                fp.write('+ %s\n' % graph.name)
+            for method in a:
+                fp.write('+ %s\n' % method.name)
                 if srcdb is None: continue
-                if graph.src is None or graph.ast is None: continue
-                src = srcdb.get(graph.src)
-                (_,start,end) = graph.ast
-                fp.write('# %s\n' % graph.src)
+                if method.src is None or method.ast is None: continue
+                src = srcdb.get(method.src)
+                (_,start,end) = method.ast
+                fp.write('# %s\n' % method.src)
                 ranges = [(start, end, 0)]
                 for (lineno,line) in src.show(ranges):
                     if lineno is None:

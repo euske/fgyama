@@ -597,20 +597,20 @@ def get_graphs(arg):
         gids = None
 
     if path == '-':
-        graphs = load_graphs(sys.stdin)
+        methods = load_graphs(sys.stdin)
     elif path.endswith('.db'):
         db = GraphDB(path)
         if gids is None:
-            graphs = ( db.get(gid) for gid in db.get_gids() )
+            methods = ( db.get(gid) for gid in db.get_gids() )
         else:
-            graphs = [ db.get(gid) for gid in gids ]
+            methods = [ db.get(gid) for gid in gids ]
     else:
         with open(path) as fp:
-            graphs = list(load_graphs(fp))
+            methods = list(load_graphs(fp))
 
-    for graph in graphs:
-        if gids is None or graph.gid in gids:
-            yield graph
+    for method in methods:
+        if gids is None or method.gid in gids:
+            yield method
     return
 
 # run_fgyama
@@ -641,9 +641,9 @@ def run_fgyama(path):
             'net.tabesugi.fgyama.Java2DF', path]
     print('run_fgyama: %r' % args)
     p = Popen(args, stdout=PIPE)
-    graphs = list(load_graphs(p.stdout))
+    methods = list(load_graphs(p.stdout))
     p.wait()
-    return graphs
+    return methods
 
 # main
 def main(argv):
