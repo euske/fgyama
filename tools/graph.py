@@ -34,6 +34,7 @@ class DFKlass:
         self.params = []
         self.fields = []
         self.methods = []
+        self.parameterized = []
         return
 
     def __repr__(self):
@@ -69,10 +70,9 @@ class DFMethod:
         self.root = None
         self.scopes = {}
         self.nodes = {}
-        self.ins = []
-        self.outs = []
         self.callers = []
-        self.overrides = []
+        self.overrider = []
+        self.overriding = []
         self.ast = None
         return
 
@@ -252,14 +252,14 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
     def flush(self):
         (result, self._result) = (self._result, [])
         return result
-    
+
     def startElement(self, name, attrs):
         #print('startElement', name, dict(attrs))
         self._stack.append(self._cur)
         if self._cur is not None:
             self._cur = self._cur(name, attrs)
         return
-    
+
     def endElement(self, name):
         #print('endElement', name)
         assert self._stack
@@ -297,7 +297,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             return self.handleClass
         else:
             raise ValueError('Invalid tag: %r' % name)
-    
+
     def handleClass(self, name, attrs):
         if name is None:
             assert self.klass is not None
@@ -322,9 +322,12 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
                 gname, style, self.klass, gid=self.gid)
             self.klass.add_method(self.method)
             return self.handleMethod
+        elif name == 'parameterized':
+            ptype = attrs.get('type')
+            self.klass.parameterized.append(ptype)
         else:
             raise ValueError('Invalid tag: %r' % name)
-    
+
     def handleMethod(self, name, attrs):
         if name is None:
             assert self.method is not None
@@ -342,8 +345,11 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
         elif name == 'caller':
             self.method.callers.append(attrs.get('name'))
             return
-        elif name == 'override':
-            self.method.overrides.append(attrs.get('name'))
+        elif name == 'overrider':
+            self.method.overrider.append(attrs.get('name'))
+            return
+        elif name == 'overriding':
+            self.method.overriding.append(attrs.get('name'))
             return
         elif name == 'scope':
             assert self.scope is None
@@ -381,7 +387,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             return self.handleNode
         else:
             raise ValueError('Invalid tag: %r' % name)
-    
+
     def handleNode(self, name, attrs):
         if name is None:
             assert self.node is not None

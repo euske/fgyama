@@ -132,7 +132,7 @@ class IDFBuilder:
         if isinstance(node, DFMethod):
             path = node.klass.path
         else:
-            path = node.graph.klass.path
+            path = node.method.klass.path
         (_,start,end) = node.ast
         if resolve:
             fid = self.srcmap[path]
@@ -143,7 +143,7 @@ class IDFBuilder:
     # Register a funcall.
     def addcall(self, x, y): # (caller, callee)
         if self.dbg is not None:
-            self.dbg.write('# addcall %r: %r\n' % (x.graph.name, y))
+            self.dbg.write('# addcall %r: %r\n' % (x.method.name, y))
         if y in self.funcalls:
             a = self.funcalls[y]
         else:
@@ -180,21 +180,20 @@ class IDFBuilder:
                     for gid in funcs[:self.maxoverrides]:
                         if gid not in self.gid2graph: continue
                         func = self.gid2graph[gid]
-                        for n1 in func.ins:
-                            assert n1.kind == 'input'
-                            label = n1.ref
-                            if label in node.inputs:
-                                self.getvtx(node.inputs[label]).connect(
-                                    label, self.getvtx(n1), node)
-                        for n1 in func.outs:
-                            assert n1.kind == 'output'
-                            vtx1 = self.getvtx(n1)
-                            for (label,n2) in node.outputs:
-                                assert n2.kind == 'receive'
-                                assert n2.ref == label or n2.ref is None
-                                if not label: label = '#return'
-                                if n1.ref != label: continue
-                                vtx1.connect(label, self.getvtx(n2), node)
+                        for n1 in func:
+                            if n1.kind == 'input':
+                                label = n1.ref
+                                if label in node.inputs:
+                                    self.getvtx(node.inputs[label]).connect(
+                                        label, self.getvtx(n1), node)
+                            elif n1.kind == 'output':
+                                vtx1 = self.getvtx(n1)
+                                for (label,n2) in node.outputs:
+                                    assert n2.kind == 'receive'
+                                    assert n2.ref == label or n2.ref is None
+                                    if not label: label = '#return'
+                                    if n1.ref != label: continue
+                                    vtx1.connect(label, self.getvtx(n2), node)
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
