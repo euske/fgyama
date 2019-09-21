@@ -123,7 +123,7 @@ public class Java2DF {
 		cstr.getAnonymousClassDeclaration().bodyDeclarations(),	klasses);
         } else if (ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)ast;
-            DFMethod method = ((DFFunctionalKlass)klass).getFuncMethod();
+            DFMethod method = ((DFLambdaKlass)klass).getFuncMethod();
             ASTNode body = lambda.getBody();
             if (body instanceof Statement) {
                 this.enumKlassesStmt(
@@ -740,7 +740,7 @@ public class Java2DF {
 
         // Build method scopes (normal classes).
         for (DFKlass klass : klasses) {
-	    assert !(klass instanceof DFFunctionalKlass);
+	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildScope();
@@ -753,7 +753,7 @@ public class Java2DF {
         // Build call graphs (normal classes).
 	List<DFKlass> defined = new ArrayList<DFKlass>();
         for (DFKlass klass : klasses) {
-	    assert !(klass instanceof DFFunctionalKlass);
+	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildFrame(defined);
@@ -769,16 +769,16 @@ public class Java2DF {
 	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
 	    // Build method scopes (lambdas).
 	    for (DFKlass klass : defined) {
-		assert (klass instanceof DFFunctionalKlass);
-		assert ((DFFunctionalKlass)klass).isDefined();
+		assert (klass instanceof DFLambdaKlass);
+		assert ((DFLambdaKlass)klass).isDefined();
 		for (DFMethod method : klass.getMethods()) {
 		    method.buildScope();
 		}
 	    }
 	    // Build call graphs (lambdas).
 	    for (DFKlass klass : defined) {
-		assert (klass instanceof DFFunctionalKlass);
-		assert ((DFFunctionalKlass)klass).isDefined();
+		assert (klass instanceof DFLambdaKlass);
+		assert ((DFLambdaKlass)klass).isDefined();
 		for (DFMethod method : klass.getMethods()) {
 		    method.buildFrame(defined2);
 		    queue.add(method);
@@ -808,7 +808,7 @@ public class Java2DF {
         throws InvalidSyntax, EntityNotFound {
         try {
             this.startKlass(klass);
-            if (!(klass instanceof DFFunctionalKlass)) {
+            if (!(klass instanceof DFLambdaKlass)) {
                 try {
                     DFMethod init = klass.getInitMethod();
                     if (init != null) {

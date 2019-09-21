@@ -708,7 +708,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFKlass lambdaKlass = space.addKlass(
-                id, new DFFunctionalKlass(id, space, this, outerScope));
+                id, new DFLambdaKlass(id, space, this, outerScope));
             lambdaKlass.setKlassTree(this.getFilePath(), lambda);
 
         } else if (expr instanceof MethodReference) {
@@ -782,7 +782,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return null;
     }
 
-    // Only used by DFFunctionalKlass.
+    // Only used by DFLambdaKlass.
     protected void setBaseKlass(DFKlass klass) {
         _baseKlass = klass;
     }

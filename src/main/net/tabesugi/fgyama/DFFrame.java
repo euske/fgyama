@@ -993,9 +993,9 @@ public class DFFrame {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFType lambdaType = _method.getType(id);
-            assert lambdaType instanceof DFFunctionalKlass;
-            for (DFFunctionalKlass.CapturedRef captured :
-                     ((DFFunctionalKlass)lambdaType).getCapturedRefs()) {
+            assert lambdaType instanceof DFLambdaKlass;
+            for (DFLambdaKlass.CapturedRef captured :
+                     ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
                 this.addInputRef(captured.getOriginal());
             }
             return lambdaType;
@@ -1141,7 +1141,7 @@ public class DFFrame {
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
-            DFFunctionalKlass lambdaKlass = (DFFunctionalKlass)_method.getType(id);
+            DFLambdaKlass lambdaKlass = (DFLambdaKlass)_method.getType(id);
 	    lambdaKlass.load();
 	    lambdaKlass.setBaseKlass(type.toKlass());
 	    defined.add(lambdaKlass);

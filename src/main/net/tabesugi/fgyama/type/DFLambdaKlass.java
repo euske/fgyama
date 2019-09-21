@@ -7,14 +7,14 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFFunctionalKlass
+//  DFLambdaKlass
 //
-class DFFunctionalKlass extends DFKlass {
+class DFLambdaKlass extends DFKlass {
 
     private class FunctionalMethod extends DFMethod {
         public FunctionalMethod(String id) {
-            super(DFFunctionalKlass.this, id, CallStyle.Lambda, id,
-                  DFFunctionalKlass.this._lambdaScope, false);
+            super(DFLambdaKlass.this, id, CallStyle.Lambda, id,
+                  DFLambdaKlass.this._lambdaScope, false);
         }
     }
 
@@ -36,7 +36,7 @@ class DFFunctionalKlass extends DFKlass {
             if (ref != null) {
                 // replace ref with a captured variable.
                 CapturedRef captured = new CapturedRef(ref, id);
-                DFFunctionalKlass.this.addCapturedRef(captured);
+                DFLambdaKlass.this.addCapturedRef(captured);
                 _id2captured.put(id, captured);
                 ref = captured;
             }
@@ -66,7 +66,7 @@ class DFFunctionalKlass extends DFKlass {
 
         @Override
         public String getFullName() {
-            return "@"+DFFunctionalKlass.this.getTypeName()+"/="+_name;
+            return "@"+DFLambdaKlass.this.getTypeName()+"/="+_name;
         }
     }
 
@@ -75,7 +75,7 @@ class DFFunctionalKlass extends DFKlass {
         new ArrayList<CapturedRef>();
     private FunctionalMethod _funcMethod = null;
 
-    public DFFunctionalKlass(
+    public DFLambdaKlass(
         String name, DFTypeSpace outerSpace,
         DFKlass outerKlass, DFVarScope outerScope) {
 	super(name, outerSpace, outerKlass, outerScope,
@@ -85,7 +85,7 @@ class DFFunctionalKlass extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFFunctionalKlass("+this.getTypeName()+")>");
+        return ("<DFLambdaKlass("+this.getTypeName()+")>");
     }
 
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
@@ -115,7 +115,9 @@ class DFFunctionalKlass extends DFKlass {
         super.setBaseKlass(klass);
         assert _funcMethod != null;
 	assert _funcMethod.getFuncType() == null;
-	_funcMethod.setFuncType(klass.getFuncMethod().getFuncType());
+        DFMethod funcMethod = klass.getFuncMethod();
+        assert funcMethod != null;
+	_funcMethod.setFuncType(funcMethod.getFuncType());
     }
 
     protected void buildTypeFromDecls(ASTNode ast)
