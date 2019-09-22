@@ -1972,7 +1972,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
      */
     @SuppressWarnings("unchecked")
     private void processExpression(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame, Expression expr)
         throws InvalidSyntax, EntityNotFound {
         assert expr != null;
@@ -2275,7 +2275,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 // TODO: catch and forward exceptions.
                 // for (DFNode exception : funcType.getExceptions()) {
                 //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     graph.addExit(frame, new DFExit(dstFrame, exception));
+                //     frame.addExit(new DFExit(dstFrame, exception));
                 // }
 
             } else if (expr instanceof SuperMethodInvocation) {
@@ -2332,7 +2332,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 // TODO: catch and forward exceptions.
                 // for (DFNode exception : funcType.getExceptions()) {
                 //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     graph.addExit(frame, new DFExit(dstFrame, exception));
+                //     frame.addExit(new DFExit(dstFrame, exception));
                 // }
 
             } else if (expr instanceof ArrayCreation) {
@@ -2489,7 +2489,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 // TODO: catch and forward exceptions.
                 // for (DFNode exception : funcType.getExceptions()) {
                 //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     graph.addExit(frame, new DFExit(dstFrame, exception));
+                //     frame.addExit(new DFExit(dstFrame, exception));
                 // }
 
             } else if (expr instanceof ConditionalExpression) {
@@ -2566,7 +2566,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
      */
     @SuppressWarnings("unchecked")
     private void processAssignment(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
         Expression expr)
         throws InvalidSyntax, EntityNotFound {
@@ -2658,7 +2658,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
      * Creates a new variable node.
      */
     private void processVariableDeclaration(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	List<VariableDeclarationFragment> frags)
         throws InvalidSyntax, EntityNotFound {
@@ -2683,7 +2683,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
      * Expands the graph for the loop variables.
      */
     private void processLoop(
-        DFContext ctx, MethodGraph graph, DFLocalScope scope,
+        DFContext ctx, DFGraph graph, DFLocalScope scope,
         DFFrame frame, ASTNode ast, DFNode condValue,
         DFFrame loopFrame, DFContext loopCtx, boolean preTest)
         throws InvalidSyntax {
@@ -2776,7 +2776,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
         // Redirect the continue statements.
         assert frame != loopFrame;
-        for (DFExit exit : graph.getExits(loopFrame)) {
+        for (DFExit exit : loopFrame.getExits()) {
             if (exit.getFrame() != loopFrame) continue;
             if (exit instanceof ContinueExit) {
                 DFNode node = exit.getNode();
@@ -2805,7 +2805,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     /// Statement processors.
     @SuppressWarnings("unchecked")
     private void processBlock(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	Block block)
         throws InvalidSyntax, EntityNotFound {
@@ -2820,7 +2820,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void processVariableDeclarationStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	VariableDeclarationStatement varStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -2830,7 +2830,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void processExpressionStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	ExpressionStatement exprStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -2840,7 +2840,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void processIfStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	IfStatement ifStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -2910,33 +2910,33 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         // Take care of exits.
         if (thenFrame != null) {
             assert frame != thenFrame;
-            for (DFExit exit : graph.getExits(thenFrame)) {
+            for (DFExit exit : thenFrame.getExits()) {
                 DFNode node = exit.getNode();
                 DFRef ref = node.getRef();
                 JoinNode join = new JoinNode(
                     graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(true, node);
                 exit.setNode(join);
-                graph.addExit(frame, exit);
+                frame.addExit(exit);
             }
         }
         if (elseFrame != null) {
             assert frame != elseFrame;
-            for (DFExit exit : graph.getExits(elseFrame)) {
+            for (DFExit exit : elseFrame.getExits()) {
                 DFNode node = exit.getNode();
                 DFRef ref = node.getRef();
                 JoinNode join = new JoinNode(
                     graph, scope, ref.getRefType(), ref, null, condValue);
                 join.recv(false, node);
                 exit.setNode(join);
-                graph.addExit(frame, exit);
+                frame.addExit(exit);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
     private void processSwitchStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	SwitchStatement switchStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3009,7 +3009,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void processSwitchCase(
-        DFContext ctx, MethodGraph graph, DFLocalScope scope,
+        DFContext ctx, DFGraph graph, DFLocalScope scope,
         DFFrame frame, DFFrame caseFrame, ASTNode apt,
         DFNode caseNode, DFContext caseCtx) {
 
@@ -3031,7 +3031,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void processWhileStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	WhileStatement whileStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3051,7 +3051,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void processDoStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	DoStatement doStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3072,7 +3072,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void processForStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	ForStatement forStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3106,7 +3106,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void processEnhancedForStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
 	DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	EnhancedForStatement eForStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3133,7 +3133,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void processTryStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3173,7 +3173,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // Take care of exits.
             DFRef excRef = _scope.lookupException(catchKlass);
             DFFrame parentFrame = catchFrame.getOuterFrame();
-            for (DFExit exit : graph.getExits(catchFrame)) {
+            for (DFExit exit : catchFrame.getExits()) {
                 DFNode src = exit.getNode();
                 if (exit.getFrame() == catchFrame) {
                     assert exit instanceof ThrowExit;
@@ -3199,7 +3199,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     CatchJoin join = new CatchJoin(
                         graph, scope, cc, src, catchKlass);
                     exit.setNode(join);
-                    graph.addExit(parentFrame, exit);
+                    parentFrame.addExit(exit);
                 }
             }
             processStatement(
@@ -3222,7 +3222,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void processStatement(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
+        DFContext ctx, DFTypeSpace typeSpace, DFGraph graph,
         DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
 	Statement stmt)
         throws InvalidSyntax, EntityNotFound {
@@ -3303,10 +3303,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 DFRef ref = _scope.lookupReturn();
                 ReturnNode ret = new ReturnNode(graph, scope, ref, rtrnStmt);
                 ret.accept(ctx.getRValue());
-                graph.addExit(frame, new ReturnExit(dstFrame, ret));
+                frame.addExit(new ReturnExit(dstFrame, ret));
             }
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                graph.addExit(frame, new ReturnExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new ReturnExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof BreakStatement) {
@@ -3317,7 +3317,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                graph.addExit(frame, new BreakExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new BreakExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof ContinueStatement) {
@@ -3328,7 +3328,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 labelName.getIdentifier() : DFFrame.BREAKABLE;
             DFFrame dstFrame = frame.find(dstLabel);
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                graph.addExit(frame, new ContinueExit(dstFrame, ctx.get(ref)));
+                frame.addExit(new ContinueExit(dstFrame, ctx.get(ref)));
             }
 
         } else if (stmt instanceof LabeledStatement) {
@@ -3373,9 +3373,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 dstFrame = frame.find(DFFrame.RETURNABLE);
                 assert dstFrame != null;
             }
-            graph.addExit(frame, new ThrowExit(dstFrame, thrown, excKlass));
+            frame.addExit(new ThrowExit(dstFrame, thrown, excKlass));
             for (DFRef ref : dstFrame.getOutputRefs()) {
-                graph.addExit(frame, new ThrowExit(dstFrame, ctx.get(ref), excKlass));
+                frame.addExit(new ThrowExit(dstFrame, ctx.get(ref), excKlass));
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
@@ -3413,7 +3413,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // TODO: catch and forward exceptions.
             // for (DFNode exception : funcType.getExceptions()) {
             //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-            //     graph.addExit(frame, new DFExit(dstFrame, exception));
+            //     frame.addExit(new DFExit(dstFrame, exception));
             // }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -3453,7 +3453,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // TODO: catch and forward exceptions.
             // for (DFNode exception : funcType.getExceptions()) {
             //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-            //     graph.addExit(frame, new DFExit(dstFrame, exception));
+            //     frame.addExit(new DFExit(dstFrame, exception));
             // }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -3465,28 +3465,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
-    private void processInitializer(
-        DFContext ctx, DFTypeSpace typeSpace, MethodGraph graph,
-        DFTypeFinder finder, DFLocalScope scope, DFFrame frame,
-	Initializer initializer)
-        throws InvalidSyntax, EntityNotFound {
-        DFLocalScope innerScope = scope.getChildByAST(initializer);
-        processStatement(
-            ctx, typeSpace, graph, finder, innerScope, frame,
-            initializer.getBody());
-    }
-
     // endBreaks: ends a BREAKABLE Frame.
     private void endBreaks(
-        DFContext ctx, MethodGraph graph, DFFrame outerFrame,
+        DFContext ctx, DFGraph graph, DFFrame outerFrame,
         DFFrame endFrame) {
         // endFrame.getLabel() can be either @BREAKABLE or a label.
         ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
             new ConsistentHashMap<DFRef, List<DFExit>>();
-        for (DFExit exit : graph.getExits(endFrame)) {
+        for (DFExit exit : endFrame.getExits()) {
             if (exit.getFrame() != endFrame) {
                 // Pass through the outer frame.
-                graph.addExit(outerFrame, exit);
+                outerFrame.addExit(exit);
             } else if (exit instanceof BreakExit) {
                 DFNode src = exit.getNode();
                 DFRef ref = src.getRef();
@@ -3522,10 +3511,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void closeFrame(
-        DFFrame frame, DFContext ctx, MethodGraph graph) {
+        DFFrame frame, DFContext ctx, DFGraph graph) {
         ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
             new ConsistentHashMap<DFRef, List<DFExit>>();
-        for (DFExit exit : graph.getExits(frame)) {
+        for (DFExit exit : frame.getExits()) {
             assert exit.getFrame() == frame;
             DFNode src = exit.getNode();
             DFRef ref = src.getRef();
@@ -3716,7 +3705,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 DFRef ref = _scope.lookupReturn();
                 ReturnNode ret = new ReturnNode(graph, _scope, ref, body);
                 ret.accept(ctx.getRValue());
-                graph.addExit(frame, new ReturnExit(frame, ret));
+                frame.addExit(new ReturnExit(frame, ret));
             }
         } catch (MethodNotFound e) {
             e.setMethod(this);
@@ -3756,7 +3745,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void addInputMethodDecl(
-        DFContext ctx, MethodGraph graph, MethodDeclaration methodDecl)
+        DFContext ctx, DFGraph graph, MethodDeclaration methodDecl)
         throws InvalidSyntax, EntityNotFound {
         int i = 0;
         for (VariableDeclaration decl :
@@ -3774,7 +3763,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void addInputLambda(
-        DFContext ctx, MethodGraph graph, LambdaExpression lambda)
+        DFContext ctx, DFGraph graph, LambdaExpression lambda)
         throws InvalidSyntax, EntityNotFound {
         int i = 0;
         for (VariableDeclaration decl :
@@ -3796,8 +3785,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
 	private List<DFNode> _nodes =
 	    new ArrayList<DFNode>();
-        private Map<DFFrame, List<DFExit>> _exits =
-            new HashMap<DFFrame, List<DFExit>>();
 
 	public MethodGraph(String graphId) {
 	    _graphId = graphId;
@@ -3811,25 +3798,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    _nodes.add(node);
 	    return _nodes.size();
 	}
-
-        public void addExit(DFFrame frame, DFExit exit) {
-            //Logger.info("DFFrame.addExit:", frame, ":", exit);
-            List<DFExit> a = _exits.get(frame);
-            if (a == null) {
-                a = new ArrayList<DFExit>();
-                _exits.put(frame, a);
-            }
-            a.add(exit);
-        }
-
-        public List<DFExit> getExits(DFFrame frame) {
-            List<DFExit> a = _exits.get(frame);
-            if (a == null) {
-                a = new ArrayList<DFExit>();
-                _exits.put(frame, a);
-            }
-            return a;
-        }
 
 	public void cleanup(Set<DFNode> preserved) {
 	    Set<DFNode> toremove = new HashSet<DFNode>();
