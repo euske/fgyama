@@ -863,6 +863,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     private Map<String, DFType> _mapTypeMap = null;
     private DFFunctionType _funcType = null;
 
+    private ConsistentHashSet<DFRef> _inputRefs = null;
+    private ConsistentHashSet<DFRef> _outputRefs = null;
     private ConsistentHashSet<DFMethod> _callers =
         new ConsistentHashSet<DFMethod>();
 
@@ -1052,6 +1054,891 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    throw new InvalidSyntax(_ast);
 	}
         //_scope.dump();
+    }
+
+    @SuppressWarnings("unchecked")
+    public void enumRefs(List<DFLambdaKlass> defined) 
+        throws InvalidSyntax {
+	if (_ast == null) return;
+	assert _scope != null;
+        assert _inputRefs == null;
+        assert _outputRefs == null;
+        _inputRefs = new ConsistentHashSet<DFRef>();
+        _outputRefs = new ConsistentHashSet<DFRef>();
+	if (_ast instanceof MethodDeclaration) {
+	    this.enumRefsMethodDecl(
+                defined, _scope, (MethodDeclaration)_ast);
+	} else if (_ast instanceof AbstractTypeDeclaration) {
+	    this.enumRefsBodyDecls(
+                defined, _scope,
+                ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+        } else if (_ast instanceof ClassInstanceCreation) {
+	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
+	    this.enumRefsBodyDecls(
+		defined, _scope,
+                cstr.getAnonymousClassDeclaration().bodyDeclarations());
+        } else if (_ast instanceof LambdaExpression) {
+            this.enumRefsLambda(
+                defined, _scope, (LambdaExpression)_ast);
+	}  else {
+	    throw new InvalidSyntax(_ast);
+	}
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void enumRefsMethodDecl(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, MethodDeclaration methodDecl)
+        throws InvalidSyntax {
+        if (methodDecl.getBody() == null) return;
+        // Constructor changes all the member fields.
+        if (_callStyle == CallStyle.Constructor) {
+            for (DFKlass.FieldRef ref : _klass.getFields()) {
+                if (!ref.isStatic()) {
+                    _outputRefs.add(ref);
+                }
+            }
+        }
+        this.enumRefsStmt(defined, scope, methodDecl.getBody());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enumRefsLambda(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, LambdaExpression lambda)
+        throws InvalidSyntax {
+        ASTNode body = lambda.getBody();
+        if (body instanceof Statement) {
+            this.enumRefsStmt(defined, scope, (Statement)body);
+        } else if (body instanceof Expression) {
+            this.enumRefsExpr(defined, scope, (Expression)body);
+        } else {
+            throw new InvalidSyntax(body);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enumRefsBodyDecls(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, List<BodyDeclaration> decls)
+        throws InvalidSyntax {
+        for (BodyDeclaration body : decls) {
+	    if (body instanceof FieldDeclaration) {
+                FieldDeclaration fieldDecl = (FieldDeclaration)body;
+                for (VariableDeclarationFragment frag :
+                         (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
+		    try {
+			DFRef ref = scope.lookupVar(frag.getName());
+			Expression init = frag.getInitializer();
+			if (init != null) {
+			    this.enumRefsExpr(defined, scope, init);
+			    this.fixateLambda(defined, init, ref.getRefType());
+			}
+		    } catch (VariableNotFound e) {
+		    }
+		}
+            } else if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                DFLocalScope innerScope = scope.getChildByAST(body);
+                this.enumRefsStmt(defined, innerScope, initializer.getBody());
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void enumRefsStmt(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, Statement stmt)
+        throws InvalidSyntax {
+        assert stmt != null;
+
+        if (stmt instanceof AssertStatement) {
+	    // "assert x;"
+
+        } else if (stmt instanceof Block) {
+	    // "{ ... }"
+            Block block = (Block)stmt;
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            for (Statement cstmt :
+                     (List<Statement>) block.statements()) {
+                this.enumRefsStmt(defined, innerScope, cstmt);
+            }
+
+        } else if (stmt instanceof EmptyStatement) {
+
+        } else if (stmt instanceof VariableDeclarationStatement) {
+	    // "int a = 2;"
+            VariableDeclarationStatement varStmt =
+                (VariableDeclarationStatement)stmt;
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) varStmt.fragments()) {
+                //_outputRefs.add(scope.lookupVar(frag.getName()));
+                Expression init = frag.getInitializer();
+                if (init != null) {
+                    this.enumRefsExpr(defined, scope, init);
+                }
+            }
+
+        } else if (stmt instanceof ExpressionStatement) {
+	    // "foo();"
+            ExpressionStatement exprStmt = (ExpressionStatement)stmt;
+            this.enumRefsExpr(defined, scope, exprStmt.getExpression());
+
+        } else if (stmt instanceof IfStatement) {
+	    // "if (c) { ... } else { ... }"
+            IfStatement ifStmt = (IfStatement)stmt;
+            this.enumRefsExpr(defined, scope, ifStmt.getExpression());
+            Statement thenStmt = ifStmt.getThenStatement();
+            this.enumRefsStmt(defined, scope, thenStmt);
+            Statement elseStmt = ifStmt.getElseStatement();
+            if (elseStmt != null) {
+                this.enumRefsStmt(defined, scope, elseStmt);
+            }
+
+        } else if (stmt instanceof SwitchStatement) {
+	    // "switch (x) { case 0: ...; }"
+            SwitchStatement switchStmt = (SwitchStatement)stmt;
+            DFType type = this.enumRefsExpr(
+                defined, scope, switchStmt.getExpression());
+            if (type == null) {
+                type = DFUnknownType.UNKNOWN;
+            }
+            DFKlass enumKlass = null;
+            if (type instanceof DFKlass &&
+                ((DFKlass)type).isEnum()) {
+                enumKlass = type.toKlass();
+                enumKlass.load();
+            }
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
+                if (cstmt instanceof SwitchCase) {
+                    SwitchCase switchCase = (SwitchCase)cstmt;
+                    Expression expr = switchCase.getExpression();
+                    if (expr != null) {
+                        if (enumKlass != null && expr instanceof SimpleName) {
+                            // special treatment for enum.
+                            try {
+                                DFRef ref = enumKlass.lookupField((SimpleName)expr);
+                                _outputRefs.add(ref);
+                            } catch (VariableNotFound e) {
+                            }
+                        } else {
+                            this.enumRefsExpr(defined, innerScope, expr);
+                        }
+                    }
+                } else {
+                    this.enumRefsStmt(defined, innerScope, cstmt);
+                }
+            }
+
+        } else if (stmt instanceof SwitchCase) {
+            // Invalid "case" placement.
+            throw new InvalidSyntax(stmt);
+
+        } else if (stmt instanceof WhileStatement) {
+	    // "while (c) { ... }"
+            WhileStatement whileStmt = (WhileStatement)stmt;
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            this.enumRefsExpr(defined, scope, whileStmt.getExpression());
+            this.enumRefsStmt(defined, innerScope, whileStmt.getBody());
+
+        } else if (stmt instanceof DoStatement) {
+	    // "do { ... } while (c);"
+            DoStatement doStmt = (DoStatement)stmt;
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            this.enumRefsStmt(defined, innerScope, doStmt.getBody());
+            this.enumRefsExpr(defined, scope, doStmt.getExpression());
+
+        } else if (stmt instanceof ForStatement) {
+	    // "for (i = 0; i < 10; i++) { ... }"
+            ForStatement forStmt = (ForStatement)stmt;
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            for (Expression init : (List<Expression>) forStmt.initializers()) {
+                this.enumRefsExpr(defined, innerScope, init);
+            }
+            Expression expr = forStmt.getExpression();
+            if (expr != null) {
+                this.enumRefsExpr(defined, innerScope, expr);
+            }
+            this.enumRefsStmt(defined, innerScope, forStmt.getBody());
+            for (Expression update : (List<Expression>) forStmt.updaters()) {
+                this.enumRefsExpr(defined, innerScope, update);
+            }
+
+        } else if (stmt instanceof EnhancedForStatement) {
+	    // "for (x : array) { ... }"
+            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
+            this.enumRefsExpr(defined, scope, eForStmt.getExpression());
+            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            this.enumRefsStmt(defined, innerScope, eForStmt.getBody());
+
+        } else if (stmt instanceof ReturnStatement) {
+	    // "return 42;"
+            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+            Expression expr = rtrnStmt.getExpression();
+            if (expr != null) {
+                this.enumRefsExpr(defined, scope, expr);
+            }
+            // Return is handled as an Exit, not an output.
+
+        } else if (stmt instanceof BreakStatement) {
+	    // "break;"
+
+        } else if (stmt instanceof ContinueStatement) {
+	    // "continue;"
+
+        } else if (stmt instanceof LabeledStatement) {
+	    // "here:"
+            LabeledStatement labeledStmt = (LabeledStatement)stmt;
+            this.enumRefsStmt(defined, scope, labeledStmt.getBody());
+
+        } else if (stmt instanceof SynchronizedStatement) {
+	    // "synchronized (this) { ... }"
+            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+            this.enumRefsExpr(defined, scope, syncStmt.getExpression());
+            this.enumRefsStmt(defined, scope, syncStmt.getBody());
+
+        } else if (stmt instanceof TryStatement) {
+	    // "try { ... } catch (e) { ... }"
+            TryStatement tryStmt = (TryStatement)stmt;
+            for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
+                DFLocalScope catchScope = scope.getChildByAST(cc);
+                this.enumRefsStmt(defined, catchScope, cc.getBody());
+            }
+            DFLocalScope tryScope = scope.getChildByAST(tryStmt);
+            this.enumRefsStmt(defined, tryScope, tryStmt.getBody());
+            Block finBlock = tryStmt.getFinally();
+            if (finBlock != null) {
+                this.enumRefsStmt(defined, scope, finBlock);
+            }
+
+        } else if (stmt instanceof ThrowStatement) {
+	    // "throw e;"
+            ThrowStatement throwStmt = (ThrowStatement)stmt;
+            DFType type = this.enumRefsExpr(
+                defined, scope, throwStmt.getExpression());
+            DFRef ref = _scope.lookupException(type.toKlass());
+            _outputRefs.add(ref);
+
+        } else if (stmt instanceof ConstructorInvocation) {
+	    // "this(args)"
+            ConstructorInvocation ci = (ConstructorInvocation)stmt;
+            DFRef ref = scope.lookupThis();
+            //_inputRefs.add(ref);
+	    DFKlass klass = ref.getRefType().toKlass();
+            klass.load();
+	    int nargs = ci.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)ci.arguments().get(i);
+                DFType type = this.enumRefsExpr(defined, scope, arg);
+                if (type == null) return;
+                argTypes[i] = type;
+            }
+            try {
+		DFMethod method1 = klass.lookupMethod(
+		    CallStyle.Constructor, null, argTypes);
+		this.fixateLambda(
+                    defined,
+                    ci.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
+
+        } else if (stmt instanceof SuperConstructorInvocation) {
+	    // "super(args)"
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
+            DFRef ref = scope.lookupThis();
+            //_inputRefs.add(ref);
+	    DFKlass klass = ref.getRefType().toKlass();
+            DFKlass baseKlass = klass.getBaseKlass();
+            baseKlass.load();
+	    int nargs = sci.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sci.arguments().get(i);
+                DFType type = this.enumRefsExpr(defined, scope, arg);
+                if (type == null) return;
+                argTypes[i] = type;
+            }
+            try {
+		DFMethod method1 = baseKlass.lookupMethod(
+		    CallStyle.Constructor, null, argTypes);
+                method1.addCaller(this);
+		this.fixateLambda(
+                    defined,
+                    sci.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
+
+        } else if (stmt instanceof TypeDeclarationStatement) {
+	    // "class K { ... }"
+            // Inline classes are processed separately.
+
+        } else {
+            throw new InvalidSyntax(stmt);
+
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private DFType enumRefsExpr(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, Expression expr)
+        throws InvalidSyntax {
+        assert expr != null;
+
+        if (expr instanceof Annotation) {
+            // "@Annotation"
+            return null;
+
+        } else if (expr instanceof Name) {
+            // "a.b"
+            Name name = (Name)expr;
+            DFRef ref;
+            try {
+                if (name.isSimpleName()) {
+                    ref = scope.lookupVar((SimpleName)name);
+                } else {
+                    QualifiedName qname = (QualifiedName)name;
+                    // Try assuming it's a variable access.
+                    DFType type = this.enumRefsExpr(
+                        defined, scope, qname.getQualifier());
+                    if (type == null) {
+                        // Turned out it's a class variable.
+                        try {
+			    type = _finder.lookupType(qname.getQualifier());
+                        } catch (TypeNotFound e) {
+                            return null;
+                        }
+                    }
+                    DFKlass klass = type.toKlass();
+                    klass.load();
+                    SimpleName fieldName = qname.getName();
+                    ref = klass.lookupField(fieldName);
+                }
+            } catch (VariableNotFound e) {
+                return null;
+            }
+            if (!ref.isLocal()) {
+                _inputRefs.add(ref);
+            }
+            return ref.getRefType();
+
+        } else if (expr instanceof ThisExpression) {
+            // "this"
+            ThisExpression thisExpr = (ThisExpression)expr;
+            Name name = thisExpr.getQualifier();
+            DFRef ref;
+            if (name != null) {
+                try {
+                    DFType type = _finder.lookupType(name);
+                    ref = type.toKlass().getKlassScope().lookupThis();
+                } catch (TypeNotFound e) {
+                    return null;
+                }
+            } else {
+                ref = scope.lookupThis();
+            }
+            //_inputRefs.add(ref);
+            return ref.getRefType();
+
+        } else if (expr instanceof BooleanLiteral) {
+            // "true", "false"
+            return DFBasicType.BOOLEAN;
+
+        } else if (expr instanceof CharacterLiteral) {
+            // "'c'"
+            return DFBasicType.CHAR;
+
+        } else if (expr instanceof NullLiteral) {
+            // "null"
+            return DFNullType.NULL;
+
+        } else if (expr instanceof NumberLiteral) {
+            // "42"
+            return DFBasicType.INT;
+
+        } else if (expr instanceof StringLiteral) {
+            // ""abc""
+            return DFBuiltinTypes.getStringKlass();
+
+        } else if (expr instanceof TypeLiteral) {
+            // "A.class"
+            return DFBuiltinTypes.getClassKlass();
+
+        } else if (expr instanceof PrefixExpression) {
+            // "++x"
+            PrefixExpression prefix = (PrefixExpression)expr;
+            PrefixExpression.Operator op = prefix.getOperator();
+            Expression operand = prefix.getOperand();
+            if (op == PrefixExpression.Operator.INCREMENT ||
+                op == PrefixExpression.Operator.DECREMENT) {
+                this.enumRefsAssignment(defined, scope, operand);
+            }
+            return DFNode.inferPrefixType(
+                this.enumRefsExpr(defined, scope, operand), op);
+
+        } else if (expr instanceof PostfixExpression) {
+            // "y--"
+            PostfixExpression postfix = (PostfixExpression)expr;
+            PostfixExpression.Operator op = postfix.getOperator();
+            Expression operand = postfix.getOperand();
+            if (op == PostfixExpression.Operator.INCREMENT ||
+                op == PostfixExpression.Operator.DECREMENT) {
+                this.enumRefsAssignment(defined, scope, operand);
+            }
+            return this.enumRefsExpr(defined, scope, operand);
+
+        } else if (expr instanceof InfixExpression) {
+            // "a+b"
+            InfixExpression infix = (InfixExpression)expr;
+            InfixExpression.Operator op = infix.getOperator();
+            DFType left = this.enumRefsExpr(
+                defined, scope, infix.getLeftOperand());
+            DFType right = this.enumRefsExpr(
+                defined, scope, infix.getRightOperand());
+            if (left == null || right == null) return null;
+            return DFNode.inferInfixType(left, op, right);
+
+        } else if (expr instanceof ParenthesizedExpression) {
+            // "(expr)"
+            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+            return this.enumRefsExpr(defined, scope, paren.getExpression());
+
+        } else if (expr instanceof Assignment) {
+            // "p = q"
+            Assignment assn = (Assignment)expr;
+            Assignment.Operator op = assn.getOperator();
+            if (op != Assignment.Operator.ASSIGN) {
+                this.enumRefsExpr(defined, scope, assn.getLeftHandSide());
+            }
+            DFRef ref = this.enumRefsAssignment(
+                defined, scope, assn.getLeftHandSide());
+            if (ref != null) {
+                this.fixateLambda(
+                    defined, assn.getRightHandSide(), ref.getRefType());
+            }
+            return this.enumRefsExpr(defined, scope, assn.getRightHandSide());
+
+        } else if (expr instanceof VariableDeclarationExpression) {
+            // "int a=2"
+            VariableDeclarationExpression decl =
+                (VariableDeclarationExpression)expr;
+            for (VariableDeclarationFragment frag :
+                     (List<VariableDeclarationFragment>) decl.fragments()) {
+                try {
+                    DFRef ref = scope.lookupVar(frag.getName());
+                    //_outputRefs.add(ref);
+                    Expression init = frag.getInitializer();
+                    if (init != null) {
+                        this.enumRefsExpr(defined, scope, init);
+                    }
+                } catch (VariableNotFound e) {
+                }
+            }
+            return null; // XXX what type?
+
+        } else if (expr instanceof MethodInvocation) {
+            MethodInvocation invoke = (MethodInvocation)expr;
+            Expression expr1 = invoke.getExpression();
+            CallStyle callStyle;
+            DFKlass klass = null;
+            if (expr1 == null) {
+                // "method()"
+                DFRef ref = scope.lookupThis();
+                //_inputRefs.add(ref);
+                klass = ref.getRefType().toKlass();
+                callStyle = CallStyle.InstanceOrStatic;
+            } else {
+                callStyle = CallStyle.InstanceMethod;
+                if (expr1 instanceof Name) {
+                    // "ClassName.method()"
+                    try {
+                        klass = _finder.lookupType((Name)expr1).toKlass();
+                        callStyle = CallStyle.StaticMethod;
+                    } catch (TypeNotFound e) {
+                    }
+                }
+                if (klass == null) {
+                    // "expr.method()"
+                    DFType type = this.enumRefsExpr(defined, scope, expr1);
+                    if (type == null) return null;
+                    klass = type.toKlass();
+                }
+            }
+            klass.load();
+	    int nargs = invoke.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)invoke.arguments().get(i);
+                DFType type = this.enumRefsExpr(defined, scope, arg);
+                if (type == null) return null;
+                argTypes[i] = type;
+            }
+            try {
+                DFMethod method1 = klass.lookupMethod(
+                    callStyle, invoke.getName(), argTypes);
+		for (DFMethod m : method1.getOverriders()) {
+		    m.addCaller(this);
+		}
+                this.fixateLambda(
+                    defined,
+                    invoke.arguments(), method1.getFuncType().getArgTypes());
+                return method1.getFuncType().getReturnType();
+            } catch (MethodNotFound e) {
+                return DFUnknownType.UNKNOWN;
+            }
+
+        } else if (expr instanceof SuperMethodInvocation) {
+            // "super.method()"
+            SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
+	    int nargs = sinvoke.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sinvoke.arguments().get(i);
+                DFType type = this.enumRefsExpr(defined, scope, arg);
+                if (type == null) return null;
+                argTypes[i] = type;
+            }
+            DFRef ref = scope.lookupThis();
+            //_inputRefs.add(ref);
+            DFKlass klass = ref.getRefType().toKlass();
+            klass.load();
+            DFKlass baseKlass = klass.getBaseKlass();
+            baseKlass.load();
+            try {
+                DFMethod method1 = baseKlass.lookupMethod(
+                    CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                method1.addCaller(this);
+                this.fixateLambda(
+                    defined,
+                    sinvoke.arguments(), method1.getFuncType().getArgTypes());
+                return method1.getFuncType().getReturnType();
+            } catch (MethodNotFound e) {
+                return DFUnknownType.UNKNOWN;
+            }
+
+        } else if (expr instanceof ArrayCreation) {
+            // "new int[10]"
+            ArrayCreation ac = (ArrayCreation)expr;
+            for (Expression dim : (List<Expression>) ac.dimensions()) {
+                this.enumRefsExpr(defined, scope, dim);
+            }
+            ArrayInitializer init = ac.getInitializer();
+            if (init != null) {
+                this.enumRefsExpr(defined, scope, init);
+            }
+            try {
+                DFType type = _finder.resolve(ac.getType().getElementType());
+                type.toKlass().load();
+                return type;
+            } catch (TypeNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof ArrayInitializer) {
+            // "{ 5,9,4,0 }"
+            ArrayInitializer init = (ArrayInitializer)expr;
+            DFType type = null;
+            for (Expression expr1 : (List<Expression>) init.expressions()) {
+                type = this.enumRefsExpr(defined, scope, expr1);
+            }
+            return type;
+
+        } else if (expr instanceof ArrayAccess) {
+            // "a[0]"
+            ArrayAccess aa = (ArrayAccess)expr;
+            this.enumRefsExpr(defined, scope, aa.getIndex());
+            DFType type = this.enumRefsExpr(defined, scope, aa.getArray());
+            if (type instanceof DFArrayType) {
+                DFRef ref = scope.lookupArray(type);
+                _inputRefs.add(ref);
+                type = ((DFArrayType)type).getElemType();
+            }
+            return type;
+
+        } else if (expr instanceof FieldAccess) {
+            // "(expr).foo"
+            FieldAccess fa = (FieldAccess)expr;
+            Expression expr1 = fa.getExpression();
+            DFType type = null;
+            if (expr1 instanceof Name) {
+                try {
+                    type = _finder.lookupType((Name)expr1);
+                } catch (TypeNotFound e) {
+                }
+            }
+            if (type == null) {
+                type = this.enumRefsExpr(defined, scope, expr1);
+                if (type == null) return null;
+            }
+            DFKlass klass = type.toKlass();
+            klass.load();
+            SimpleName fieldName = fa.getName();
+            try {
+                DFRef ref = klass.lookupField(fieldName);
+                _inputRefs.add(ref);
+                return ref.getRefType();
+            } catch (VariableNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof SuperFieldAccess) {
+            // "super.baa"
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
+            SimpleName fieldName = sfa.getName();
+            DFRef ref = scope.lookupThis();
+            //_inputRefs.add(ref);
+            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
+            klass.load();
+            try {
+                DFRef ref2 = klass.lookupField(fieldName);
+                _inputRefs.add(ref2);
+                return ref2.getRefType();
+            } catch (VariableNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof CastExpression) {
+            // "(String)"
+            CastExpression cast = (CastExpression)expr;
+            this.enumRefsExpr(defined, scope, cast.getExpression());
+            try {
+                DFType type = _finder.resolve(cast.getType());
+                type.toKlass().load();
+                return type;
+            } catch (TypeNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof ClassInstanceCreation) {
+            // "new T()"
+            ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
+            DFType instType;
+            if (cstr.getAnonymousClassDeclaration() != null) {
+                String id = Utils.encodeASTNode(cstr);
+                instType = this.getType(id);
+                if (instType == null) {
+		    return null;
+		}
+            } else {
+                try {
+                    instType = _finder.resolve(cstr.getType());
+                } catch (TypeNotFound e) {
+                    return null;
+                }
+            }
+            DFKlass instKlass = instType.toKlass();
+            instKlass.load();
+            Expression expr1 = cstr.getExpression();
+            if (expr1 != null) {
+                this.enumRefsExpr(defined, scope, expr1);
+            }
+	    int nargs = cstr.arguments().size();
+	    DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)cstr.arguments().get(i);
+                DFType type = this.enumRefsExpr(defined, scope, arg);
+                if (type == null) return null;
+                argTypes[i] = type;
+            }
+            try {
+		DFMethod method1 = instKlass.lookupMethod(
+		    CallStyle.Constructor, null, argTypes);
+                method1.addCaller(this);
+		this.fixateLambda(
+                    defined,
+                    cstr.arguments(), method1.getFuncType().getArgTypes());
+            } catch (MethodNotFound e) {
+	    }
+	    return instType;
+
+        } else if (expr instanceof ConditionalExpression) {
+            // "c? a : b"
+            ConditionalExpression cond = (ConditionalExpression)expr;
+            this.enumRefsExpr(defined, scope, cond.getExpression());
+            this.enumRefsExpr(defined, scope, cond.getThenExpression());
+            return this.enumRefsExpr(defined, scope, cond.getElseExpression());
+
+        } else if (expr instanceof InstanceofExpression) {
+            // "a instanceof A"
+            return DFBasicType.BOOLEAN;
+
+        } else if (expr instanceof LambdaExpression) {
+            // "x -> { ... }"
+            LambdaExpression lambda = (LambdaExpression)expr;
+            String id = Utils.encodeASTNode(lambda);
+            DFType lambdaType = this.getType(id);
+            assert lambdaType instanceof DFLambdaKlass;
+            for (DFLambdaKlass.CapturedRef captured :
+                     ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
+                _inputRefs.add(captured.getOriginal());
+            }
+            return lambdaType;
+
+        } else if (expr instanceof MethodReference) {
+            // MethodReference
+            MethodReference methodref = (MethodReference)expr;
+            //  CreationReference
+            //  ExpressionMethodReference
+            //  SuperMethodReference
+            //  TypeMethodReference
+            String id = Utils.encodeASTNode(methodref);
+            // XXX TODO MethodReference
+            return this.getType(id);
+
+        } else {
+            // ???
+            throw new InvalidSyntax(expr);
+        }
+    }
+
+    private DFRef enumRefsAssignment(
+	List<DFLambdaKlass> defined,
+        DFLocalScope scope, Expression expr)
+        throws InvalidSyntax {
+        assert expr != null;
+
+        if (expr instanceof Name) {
+	    // "a.b"
+            Name name = (Name)expr;
+            DFRef ref;
+            try {
+                if (name.isSimpleName()) {
+                    ref = scope.lookupVar((SimpleName)name);
+                } else {
+                    QualifiedName qname = (QualifiedName)name;
+                    // Try assuming it's a variable access.
+                    DFType type = this.enumRefsExpr(
+                        defined, scope, qname.getQualifier());
+                    if (type == null) {
+                        // Turned out it's a class variable.
+                        try {
+                            type = _finder.lookupType(qname.getQualifier());
+                        } catch (TypeNotFound e) {
+                            return null;
+                        }
+                    }
+                    //_inputRefs.add(scope.lookupThis());
+                    DFKlass klass = type.toKlass();
+                    klass.load();
+                    SimpleName fieldName = qname.getName();
+                    ref = klass.lookupField(fieldName);
+                }
+            } catch (VariableNotFound e) {
+                return null;
+            }
+            if (!ref.isLocal()) {
+                _outputRefs.add(ref);
+            }
+            return ref;
+
+        } else if (expr instanceof ArrayAccess) {
+	    // "a[0]"
+            ArrayAccess aa = (ArrayAccess)expr;
+            DFType type = this.enumRefsExpr(defined, scope, aa.getArray());
+            this.enumRefsExpr(defined, scope, aa.getIndex());
+            if (type instanceof DFArrayType) {
+                DFRef ref = scope.lookupArray(type);
+                _outputRefs.add(ref);
+                return ref;
+            }
+            return null;
+
+        } else if (expr instanceof FieldAccess) {
+	    // "(expr).foo"
+            FieldAccess fa = (FieldAccess)expr;
+            Expression expr1 = fa.getExpression();
+            DFType type = null;
+            if (expr1 instanceof Name) {
+                try {
+                    type = _finder.lookupType((Name)expr1);
+                } catch (TypeNotFound e) {
+                }
+            }
+            if (type == null) {
+                type = this.enumRefsExpr(defined, scope, expr1);
+                if (type == null) return null;
+            }
+            DFKlass klass = type.toKlass();
+            klass.load();
+            SimpleName fieldName = fa.getName();
+            try {
+                DFRef ref = klass.lookupField(fieldName);
+                _outputRefs.add(ref);
+                return ref;
+            } catch (VariableNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof SuperFieldAccess) {
+	    // "super.baa"
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
+            SimpleName fieldName = sfa.getName();
+            DFRef ref = scope.lookupThis();
+            //_inputRefs.add(ref);
+            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
+            klass.load();
+            try {
+                DFRef ref2 = klass.lookupField(fieldName);
+                _outputRefs.add(ref2);
+                return ref2;
+            } catch (VariableNotFound e) {
+                return null;
+            }
+
+        } else if (expr instanceof ParenthesizedExpression) {
+	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    return this.enumRefsAssignment(
+                defined, scope, paren.getExpression());
+
+        } else {
+            throw new InvalidSyntax(expr);
+        }
+    }
+
+    private void fixateLambda(
+	List<DFLambdaKlass> defined,
+        List<Expression> exprs, DFType[] types)
+	throws InvalidSyntax {
+	for (int i = 0; i < exprs.size(); i++) {
+	    this.fixateLambda(defined, exprs.get(i), types[i]);
+	}
+    }
+
+    private void fixateLambda(
+	List<DFLambdaKlass> defined,
+        Expression expr, DFType type)
+	throws InvalidSyntax {
+	if (expr instanceof ParenthesizedExpression) {
+            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+	    fixateLambda(defined, paren.getExpression(), type);
+
+        } else if (expr instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)expr;
+            String id = Utils.encodeASTNode(lambda);
+            DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getType(id);
+	    lambdaKlass.load();
+	    lambdaKlass.setBaseKlass(type.toKlass());
+	    defined.add(lambdaKlass);
+	}
+    }
+
+    public boolean expandRefs(DFMethod callee) {
+        boolean added = false;
+        for (DFRef ref : callee._inputRefs) {
+            if (!_inputRefs.contains(ref)) {
+                _inputRefs.add(ref);
+                added = true;
+            }
+        }
+        for (DFRef ref : callee._outputRefs) {
+            if (!_outputRefs.contains(ref)) {
+                _outputRefs.add(ref);
+                added = true;
+            }
+        }
+        return added;
     }
 
     @SuppressWarnings("unchecked")
