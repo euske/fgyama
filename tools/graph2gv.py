@@ -14,6 +14,9 @@ def q(s):
 def qp(props):
     return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
 
+def r(s):
+    return ''.join( c for c in s if c == '_' or c.isalnum() )
+
 def write_gv(out, scope, highlight=None, level=0, name=None):
     h = ' '*level
     if name is None:
@@ -49,7 +52,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                 styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
-        out.write(h+' N%s [%s];\n' % (node.nid, qp(styles)))
+        out.write(h+' N%s [%s];\n' % (r(node.nid), qp(styles)))
     for child in scope.children:
         write_gv(out, child, highlight, level=level+1)
     if level == 0:
@@ -65,7 +68,8 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                     continue
                 else:
                     styles = {'label': label}
-                out.write(h+' N%s -> N%s [%s];\n' % (src.nid, node.nid, qp(styles)))
+                out.write(h+' N%s -> N%s [%s];\n' %
+                          (r(src.nid), r(node.nid), qp(styles)))
     out.write(h+'}\n')
     return
 
