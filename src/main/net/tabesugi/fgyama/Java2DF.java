@@ -751,51 +751,45 @@ public class Java2DF {
         }
 
         // Build call graphs (normal classes).
-	List<DFKlass> defined = new ArrayList<DFKlass>();
+	List<DFLambdaKlass> defined = new ArrayList<DFLambdaKlass>();
         for (DFKlass klass : klasses) {
 	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
-                init.buildFrame(defined);
+                init.enumRefs(defined);
             }
             for (DFMethod method : klass.getMethods()) {
-		method.buildFrame(defined);
+		method.enumRefs(defined);
 		queue.add(method);
             }
         }
 
 	while (!defined.isEmpty()) {
 	    klasses.addAll(defined);
-	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
+	    List<DFLambdaKlass> defined2 = new ArrayList<DFLambdaKlass>();
 	    // Build method scopes (lambdas).
-	    for (DFKlass klass : defined) {
-		assert (klass instanceof DFLambdaKlass);
-		assert ((DFLambdaKlass)klass).isDefined();
-		for (DFMethod method : klass.getMethods()) {
+	    for (DFLambdaKlass lambdaKlass : defined) {
+		assert lambdaKlass.isDefined();
+		for (DFMethod method : lambdaKlass.getMethods()) {
 		    method.buildScope();
 		}
 	    }
 	    // Build call graphs (lambdas).
-	    for (DFKlass klass : defined) {
-		assert (klass instanceof DFLambdaKlass);
-		assert ((DFLambdaKlass)klass).isDefined();
-		for (DFMethod method : klass.getMethods()) {
-		    method.buildFrame(defined2);
+	    for (DFLambdaKlass lambdaKlass : defined) {
+		assert lambdaKlass.isDefined();
+		for (DFMethod method : lambdaKlass.getMethods()) {
+		    method.enumRefs(defined2);
 		    queue.add(method);
 		}
 	    }
 	    defined = defined2;
 	}
 
-        // Expand callee frames recursively.
+        // Expand callee refs recursively.
         while (!queue.isEmpty()) {
             DFMethod method = queue.remove();
-            DFFrame fcallee = method.getFrame();
-            if (fcallee == null) continue;
             for (DFMethod caller : method.getCallers()) {
-                DFFrame fcaller = caller.getFrame();
-                if (fcaller == null) continue;
-                if (fcaller.expandRefs(fcallee)) {
+                if (caller.expandRefs(method)) {
                     queue.add(caller);
                 }
             }

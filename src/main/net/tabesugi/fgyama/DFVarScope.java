@@ -77,12 +77,6 @@ public abstract class DFVarScope {
 	return _outer.lookupStaticMethod(name, argTypes);
     }
 
-    public DFRef lookupArgument(int index)
-        throws VariableNotFound {
-        assert _outer != null;
-        return _outer.lookupArgument(index);
-    }
-
     public DFRef lookupThis() {
         assert _outer != null;
         return _outer.lookupThis();
