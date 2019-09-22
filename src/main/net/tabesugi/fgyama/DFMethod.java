@@ -3643,7 +3643,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
                 DFLocalScope innerScope = _scope.getChildByAST(initializer);
-                frame.buildStmt(_scope, initializer.getBody());
+                frame.buildStmt(innerScope, initializer.getBody());
                 processStatement(
                     ctx, this, graph, _finder, innerScope, frame,
                     initializer.getBody());
