@@ -50,7 +50,6 @@ class DFKlass:
         return
 
     def add_method(self, method):
-        assert isinstance(method, DFMethod), method
         self.methods.append(method)
         return
 
@@ -79,6 +78,9 @@ class DFMethod:
     def __repr__(self):
         return ('<DFMethod(%s), name=%r (%d nodes)>' %
                 (self.gid, self.name, len(self.nodes)))
+
+    def __len__(self):
+        return len(self.nodes)
 
     def __iter__(self):
         return iter(self.nodes.values())
@@ -320,7 +322,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             style = attrs.get('style')
             self.method = DFMethod(
                 gname, style, self.klass, gid=self.gid)
-            self.klass.add_method(self.method)
+            self.klass.add_method(gname)
             return self.handleMethod
         elif name == 'parameterized':
             ptype = attrs.get('type')
@@ -596,6 +598,7 @@ def get_graphs(arg):
     else:
         gids = None
 
+    fp = None
     if path == '-':
         methods = load_graphs(sys.stdin)
     elif path.endswith('.db'):
@@ -603,14 +606,17 @@ def get_graphs(arg):
         if gids is None:
             methods = ( db.get(gid) for gid in db.get_gids() )
         else:
-            methods = [ db.get(gid) for gid in gids ]
+            methods = ( db.get(gid) for gid in gids )
     else:
-        with open(path) as fp:
-            methods = list(load_graphs(fp))
+        fp = open(path)
+        methods = load_graphs(fp)
 
     for method in methods:
         if gids is None or method.gid in gids:
             yield method
+
+    if fp is not None:
+        fp.close()
     return
 
 # run_fgyama
@@ -668,7 +674,8 @@ def main(argv):
         nmethods = 0
         nnodes = 0
         for method in get_graphs(path):
-            classes.add(method.klass)
+            print(method)
+            classes.add(method.klass.name)
             nmethods += 1
             nnodes += len(method.nodes)
             if debug:
