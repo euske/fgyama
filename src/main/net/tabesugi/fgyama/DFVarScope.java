@@ -87,6 +87,16 @@ public abstract class DFVarScope {
         return _outer.lookupArray(type);
     }
 
+    public DFRef lookupReturn() {
+        assert _outer != null;
+        return _outer.lookupReturn();
+    }
+    
+    public DFRef lookupException(DFType type) {
+        assert _outer != null;
+        return _outer.lookupException(type);
+    }
+    
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");

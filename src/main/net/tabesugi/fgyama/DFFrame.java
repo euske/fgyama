@@ -13,7 +13,7 @@ public class DFFrame {
 
     private DFFrame _outer;
     private ASTNode _ast;
-    private DFMethod _method;
+    private DFTypeFinder _finder;
     private String _label;
     private DFKlass _catchKlass;
 
@@ -29,11 +29,11 @@ public class DFFrame {
     public static final String BREAKABLE = "@BREAKABLE";
     public static final String RETURNABLE = "@RETURNABLE";
 
-    public DFFrame(DFMethod method, String label) {
+    public DFFrame(DFTypeFinder finder, String label) {
         assert label != null;
         _outer = null;
         _ast = null;
-	_method = method;
+	_finder = finder;
         _label = label;
         _catchKlass = null;
     }
@@ -42,7 +42,7 @@ public class DFFrame {
         assert label != null;
         _outer = outer;
         _ast = ast;
-	_method = outer._method;
+	_finder = outer._finder;
         _label = label;
         _catchKlass = catchKlass;
     }
@@ -50,9 +50,9 @@ public class DFFrame {
     @Override
     public String toString() {
         if (_ast != null) {
-            return ("<DFFrame("+_label+" "+Utils.encodeASTNode(_ast)+") "+_method+">");
+            return ("<DFFrame("+_label+" "+Utils.encodeASTNode(_ast)+")>");
         } else {
-            return ("<DFFrame("+_label+") "+_method+">");
+            return ("<DFFrame("+_label+")>");
         }
     }
 
@@ -327,8 +327,7 @@ public class DFFrame {
                 SingleVariableDeclaration decl = cc.getException();
                 DFKlass catchKlass = DFBuiltinTypes.getExceptionKlass();
                 try {
-                    DFTypeFinder finder = _method.getFinder();
-                    catchKlass = finder.resolve(decl.getType()).toKlass();
+                    catchKlass = _finder.resolve(decl.getType()).toKlass();
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (catch)",
@@ -448,8 +447,7 @@ public class DFFrame {
                     if (type == null) {
                         // Turned out it's a class variable.
                         try {
-			    DFTypeFinder finder = _method.getFinder();
-			    type = finder.lookupType(qname.getQualifier());
+			    type = _finder.lookupType(qname.getQualifier());
                         } catch (TypeNotFound e) {
 			    // Do not display an error message as this could be
 			    // recursively called from another buildExpr()
@@ -482,8 +480,7 @@ public class DFFrame {
             DFRef ref;
             if (name != null) {
                 try {
-		    DFTypeFinder finder = _method.getFinder();
-                    DFType type = finder.lookupType(name);
+                    DFType type = _finder.lookupType(name);
                     ref = type.toKlass().getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
                     Logger.error(
@@ -604,8 +601,7 @@ public class DFFrame {
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
-			DFTypeFinder finder = _method.getFinder();
-                        klass = finder.lookupType((Name)expr1).toKlass();
+                        klass = _finder.lookupType((Name)expr1).toKlass();
                         callStyle = DFMethod.CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
@@ -695,8 +691,7 @@ public class DFFrame {
                 this.buildExpr(scope, init);
             }
             try {
-		DFTypeFinder finder = _method.getFinder();
-                DFType type = finder.resolve(ac.getType().getElementType());
+                DFType type = _finder.resolve(ac.getType().getElementType());
                 type.toKlass().load();
                 return type;
             } catch (TypeNotFound e) {
@@ -734,8 +729,7 @@ public class DFFrame {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-		    DFTypeFinder finder = _method.getFinder();
-                    type = finder.lookupType((Name)expr1);
+                    type = _finder.lookupType((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }
@@ -786,8 +780,7 @@ public class DFFrame {
             CastExpression cast = (CastExpression)expr;
             this.buildExpr(scope, cast.getExpression());
             try {
-		DFTypeFinder finder = _method.getFinder();
-                DFType type = finder.resolve(cast.getType());
+                DFType type = _finder.resolve(cast.getType());
                 type.toKlass().load();
                 return type;
             } catch (TypeNotFound e) {
@@ -803,17 +796,17 @@ public class DFFrame {
             DFType instType;
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
-                instType = _method.getType(id);
-                if (instType == null) {
+                try {
+                    instType = _finder.lookupType(id);
+                } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (anondecl)",
-                        this, cstr);
+                        this, e.name, cstr);
 		    return null;
 		}
             } else {
                 try {
-		    DFTypeFinder finder = _method.getFinder();
-                    instType = finder.resolve(cstr.getType());
+                    instType = _finder.resolve(cstr.getType());
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (new)",
@@ -868,13 +861,20 @@ public class DFFrame {
             // "x -> { ... }"
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
-            DFType lambdaType = _method.getType(id);
-            assert lambdaType instanceof DFLambdaKlass;
-            for (DFLambdaKlass.CapturedRef captured :
-                     ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
-                _inputRefs.add(captured.getOriginal());
+            try {
+                DFType lambdaType = _finder.lookupType(id);
+                assert lambdaType instanceof DFLambdaKlass;
+                for (DFLambdaKlass.CapturedRef captured :
+                         ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
+                    _inputRefs.add(captured.getOriginal());
+                }
+                return lambdaType;
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (lambda)",
+                    this, e.name, lambda);
+                return null;
             }
-            return lambdaType;
 
         } else if (expr instanceof MethodReference) {
             // MethodReference
@@ -885,7 +885,14 @@ public class DFFrame {
             //  TypeMethodReference
             String id = Utils.encodeASTNode(methodref);
             // XXX TODO MethodReference
-            return _method.getType(id);
+            try {
+                return _finder.lookupType(id);
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (methodref)",
+                    this, e.name, methodref);
+                return null;
+            }
 
         } else {
             // ???
@@ -913,8 +920,7 @@ public class DFFrame {
                     if (type == null) {
                         // Turned out it's a class variable.
                         try {
-			    DFTypeFinder finder = _method.getFinder();
-                            type = finder.lookupType(qname.getQualifier());
+                            type = _finder.lookupType(qname.getQualifier());
                         } catch (TypeNotFound e) {
 			    Logger.error(
 				"DFFrame.buildAssignment: VariableNotFound (name)",
@@ -956,8 +962,7 @@ public class DFFrame {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-		    DFTypeFinder finder = _method.getFinder();
-                    type = finder.lookupType((Name)expr1);
+                    type = _finder.lookupType((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }
