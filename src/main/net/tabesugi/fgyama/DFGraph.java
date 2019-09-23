@@ -1603,7 +1603,6 @@ public abstract class DFGraph {
             ctx.set(end);
             repeat.setEnd(end);
         }
-
         this.endBreaks(ctx, frame, loopFrame);
     }
 
@@ -1744,6 +1743,7 @@ public abstract class DFGraph {
             enumKlass = type.toKlass();
         }
         DFLocalScope switchScope = scope.getChildByAST(switchStmt);
+        DFFrame switchFrame = frame.getChildByAST(switchStmt);
         SwitchCase switchCase = null;
         DFFrame caseFrame = null;
         CaseNode caseNode = null;
@@ -1756,11 +1756,11 @@ public abstract class DFGraph {
                     assert caseNode != null;
                     assert caseCtx != null;
                     processSwitchCase(
-                        ctx, switchScope, frame, switchCase,
-                        caseFrame, caseNode, caseCtx);
+                        ctx, switchScope, switchFrame, switchCase,
+                        caseNode, caseCtx, caseFrame);
                 }
-                caseFrame = frame.getChildByAST(cstmt);
                 switchCase = (SwitchCase)cstmt;
+                caseFrame = switchFrame.getChildByAST(switchCase);
                 caseNode = new CaseNode(this, switchScope, cstmt);
                 caseNode.accept(switchValue);
                 caseCtx = new DFContext(this, switchScope);
@@ -1794,30 +1794,32 @@ public abstract class DFGraph {
             assert caseNode != null;
             assert caseCtx != null;
             processSwitchCase(
-                ctx, switchScope, frame, switchCase,
-                caseFrame, caseNode, caseCtx);
+                ctx, switchScope, switchFrame, switchCase,
+                caseNode, caseCtx, caseFrame);
         }
+        this.endBreaks(ctx, frame, switchFrame);
     }
 
     private void processSwitchCase(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-        ASTNode apt, DFFrame caseFrame, 
-        DFNode caseNode, DFContext caseCtx) {
+        SwitchCase switchCase, DFNode caseNode, 
+        DFContext caseCtx, DFFrame caseFrame) {
 
         for (DFNode src : caseCtx.getFirsts()) {
             if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
         }
 
-        for (DFRef ref : caseFrame.getOutputRefs()) {
-            DFNode dst = caseCtx.get(ref);
-            if (dst != null) {
-                JoinNode join = new JoinNode(
-                    this, scope, ref.getRefType(), ref, apt, caseNode);
-                join.recv(true, dst);
-                join.merge(ctx.get(ref));
-                ctx.set(join);
-            }
+        // Take care of exits.
+        for (DFExit exit : caseFrame.getExits()) {
+            assert exit.getFrame() != caseFrame;
+            DFNode node = exit.getNode();
+            DFRef ref = node.getRef();
+            JoinNode join = new JoinNode(
+                this, scope, ref.getRefType(), ref, switchCase, caseNode);
+            join.recv(true, node);
+            exit.setNode(join);
+            frame.addExit(exit);
         }
     }
 
@@ -2224,13 +2226,18 @@ public abstract class DFGraph {
     private void endBreaks(
         DFContext ctx, DFFrame outerFrame, DFFrame endFrame) {        
         // endFrame.getLabel() can be either @BREAKABLE or a label.
+        assert outerFrame != endFrame;
         ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
             new ConsistentHashMap<DFRef, List<DFExit>>();
         for (DFExit exit : endFrame.getExits()) {
             if (exit.getFrame() != endFrame) {
                 // Pass through the outer frame.
                 outerFrame.addExit(exit);
-            } else if (exit instanceof BreakExit) {
+            } else if (exit instanceof ContinueExit) {
+                // Ignore continueExit.
+                ;
+            } else {
+                assert exit instanceof BreakExit;
                 DFNode src = exit.getNode();
                 DFRef ref = src.getRef();
                 List<DFExit> a = ref2exits.get(ref);

@@ -200,14 +200,15 @@ public class DFFrame {
                 enumKlass = type.toKlass();
                 enumKlass.load();
             }
-            DFLocalScope innerScope = scope.getChildByAST(stmt);
+            DFLocalScope switchScope = scope.getChildByAST(stmt);
+            DFFrame switchFrame = this.addChild(DFFrame.BREAKABLE, stmt);
             DFFrame caseFrame = null;
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
                     if (caseFrame != null) {
-                        this.expandLocalRefs(caseFrame, innerScope);
+                        switchFrame.expandLocalRefs(caseFrame, null);
                     }
-                    caseFrame = this.addChild(DFFrame.BREAKABLE, cstmt);
+                    caseFrame = switchFrame.addChild("@CASE", cstmt);
                     SwitchCase switchCase = (SwitchCase)cstmt;
                     Expression expr = switchCase.getExpression();
                     if (expr != null) {
@@ -222,7 +223,7 @@ public class DFFrame {
                                     this, e.name, expr);
                             }
                         } else {
-                            caseFrame.buildExpr(innerScope, expr);
+                            caseFrame.buildExpr(switchScope, expr);
                         }
                     }
                 } else {
@@ -230,12 +231,13 @@ public class DFFrame {
                         // no "case" statement.
                         throw new InvalidSyntax(cstmt);
                     }
-                    caseFrame.buildStmt(innerScope, cstmt);
+                    caseFrame.buildStmt(switchScope, cstmt);
                 }
             }
             if (caseFrame != null) {
-                this.expandLocalRefs(caseFrame, innerScope);
+                switchFrame.expandLocalRefs(caseFrame, null);
             }
+            this.expandLocalRefs(switchFrame, switchScope);
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
@@ -1030,18 +1032,17 @@ public class DFFrame {
         dump(System.err, "");
     }
     public void dump(PrintStream out, String indent) {
-        out.println(indent+_label+" {");
+        out.println(indent+this+" {");
         String i2 = indent + "  ";
-        StringBuilder inputs = new StringBuilder();
         for (DFRef ref : this.getInputRefs()) {
-            inputs.append(" "+ref);
+            out.println(i2+"input: "+ref);
         }
-        out.println(i2+"inputs:"+inputs);
-        StringBuilder outputs = new StringBuilder();
         for (DFRef ref : this.getOutputRefs()) {
-            outputs.append(" "+ref);
+            out.println(i2+"output: "+ref);
         }
-        out.println(i2+"outputs:"+outputs);
+        for (DFExit exit : this.getExits()) {
+            out.println(i2+"exit: "+exit);
+        }
         for (DFFrame frame : _ast2child.values()) {
             frame.dump(out, i2);
         }
