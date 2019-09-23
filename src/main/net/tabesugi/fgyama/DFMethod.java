@@ -453,7 +453,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                             // special treatment for enum.
                             try {
                                 DFRef ref = enumKlass.lookupField((SimpleName)expr);
-                                _outputRefs.add(ref);
+                                _inputRefs.add(ref);
                             } catch (VariableNotFound e) {
                             }
                         } else {
