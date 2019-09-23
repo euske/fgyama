@@ -1644,17 +1644,18 @@ public abstract class DFGraph {
         processExpression(
 	    ctx, scope, frame, ifStmt.getExpression());
         DFNode condValue = ctx.getRValue();
+        DFFrame ifFrame = frame.getChildByAST(ifStmt);
 
         Statement thenStmt = ifStmt.getThenStatement();
         DFContext thenCtx = new DFContext(this, scope);
-        DFFrame thenFrame = frame.getChildByAST(thenStmt);
+        DFFrame thenFrame = ifFrame.getChildByAST(thenStmt);
         processStatement(thenCtx, scope, thenFrame, thenStmt);
 
         Statement elseStmt = ifStmt.getElseStatement();
         DFContext elseCtx = null;
         DFFrame elseFrame = null;
         if (elseStmt != null) {
-            elseFrame = frame.getChildByAST(elseStmt);
+            elseFrame = ifFrame.getChildByAST(elseStmt);
             elseCtx = new DFContext(this, scope);
             processStatement(elseCtx, scope, elseFrame, elseStmt);                
         }
@@ -1662,25 +1663,21 @@ public abstract class DFGraph {
         // Combines two contexts into one.
         // A JoinNode is added to each variable.
 
-        // outRefs: all the references from both contexts.
-        ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
-        if (thenFrame != null && thenCtx != null) {
+        if (thenCtx != null) {
             for (DFNode src : thenCtx.getFirsts()) {
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(thenFrame.getOutputRefs());
         }
-        if (elseFrame != null && elseCtx != null) {
+        if (elseCtx != null) {
             for (DFNode src : elseCtx.getFirsts()) {
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
             }
-            outRefs.addAll(elseFrame.getOutputRefs());
         }
 
         // Attach a JoinNode to each variable.
-        for (DFRef ref : outRefs) {
+        for (DFRef ref : ifFrame.getOutputRefs()) {
             JoinNode join = new JoinNode(
                 this, scope, ref.getRefType(), ref, ifStmt, condValue);
             if (thenCtx != null) {

@@ -29,6 +29,8 @@ public class DFFrame {
     public static final String BREAKABLE = "@BREAKABLE";
     public static final String RETURNABLE = "@RETURNABLE";
 
+    // Frame whose name starts with '@'
+    // is not selectable with labels and therefore anonymous.
     public DFFrame(DFTypeFinder finder, String label) {
         assert label != null;
         _outer = null;
@@ -174,17 +176,19 @@ public class DFFrame {
         } else if (stmt instanceof IfStatement) {
 	    // "if (c) { ... } else { ... }"
             IfStatement ifStmt = (IfStatement)stmt;
-            this.buildExpr(scope, ifStmt.getExpression());
+            DFFrame ifFrame = this.addChild("@IF", ifStmt);
+            ifFrame.buildExpr(scope, ifStmt.getExpression());
             Statement thenStmt = ifStmt.getThenStatement();
-            DFFrame thenFrame = this.addChild("@THEN", thenStmt);
+            DFFrame thenFrame = ifFrame.addChild("@THEN", thenStmt);
             thenFrame.buildStmt(scope, thenStmt);
-            this.expandLocalRefs(thenFrame, null);
+            ifFrame.expandLocalRefs(thenFrame, null);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
-                DFFrame elseFrame = this.addChild("@ELSE", elseStmt);
+                DFFrame elseFrame = ifFrame.addChild("@ELSE", elseStmt);
                 elseFrame.buildStmt(scope, elseStmt);
-                this.expandLocalRefs(elseFrame, null);
+                ifFrame.expandLocalRefs(elseFrame, null);
             }
+            this.expandLocalRefs(ifFrame, null);
 
         } else if (stmt instanceof SwitchStatement) {
 	    // "switch (x) { case 0: ...; }"
