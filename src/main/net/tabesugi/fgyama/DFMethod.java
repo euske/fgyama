@@ -269,9 +269,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	if (_ast == null) return;
 	assert _scope != null;
 	if (_ast instanceof MethodDeclaration) {
-	    _scope.buildMethodDecl(_finder, (MethodDeclaration)_ast);
+	    _scope.buildMethodDecl(
+                _finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof AbstractTypeDeclaration) {
-	    _scope.buildBodyDecls(_finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
+	    _scope.buildBodyDecls(
+                _finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
             _scope.buildBodyDecls(
@@ -1229,8 +1231,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
 
         graph.processBodyDecls(
-            ctx, this, graph, _finder, _scope, 
-            _klass, decls);
+            ctx, _scope, _klass, decls);            
 
         // Create output nodes.
         for (DFRef ref : _outputRefs) {
@@ -1280,8 +1281,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
 
         try {
-            graph.processMethodBody(
-                ctx, this, graph, _finder, _scope, body);
+            graph.processMethodBody(ctx, _scope, body);
         } catch (MethodNotFound e) {
             e.setMethod(this);
             Logger.error(
@@ -1360,6 +1360,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    new ArrayList<DFNode>();
 
 	public MethodGraph(String graphId) {
+            super(DFMethod.this._finder);
 	    _graphId = graphId;
 	}
 
