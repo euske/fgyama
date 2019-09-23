@@ -807,7 +807,7 @@ public abstract class DFGraph {
     public DFGraph(DFTypeFinder finder) {
         _finder = finder;
     }
-    
+
     /**
      * Creates a value node.
      */
@@ -1206,7 +1206,7 @@ public abstract class DFGraph {
                     ctx, scope, frame, aa.getArray());
                 DFNode array = ctx.getRValue();
                 processExpression(
-                    ctx, scope, frame, aa.getIndex());		    
+                    ctx, scope, frame, aa.getIndex());
                 DFRef ref = scope.lookupArray(array.getNodeType());
                 DFNode index = ctx.getRValue();
                 DFNode node = new ArrayRefNode(
@@ -1422,10 +1422,10 @@ public abstract class DFGraph {
 	    // "a[0]"
             ArrayAccess aa = (ArrayAccess)expr;
             processExpression(
-                ctx, scope, frame, aa.getArray());		
+                ctx, scope, frame, aa.getArray());
             DFNode array = ctx.getRValue();
             processExpression(
-                ctx, scope, frame, aa.getIndex());		
+                ctx, scope, frame, aa.getIndex());
             DFRef ref = scope.lookupArray(array.getNodeType());
             DFNode index = ctx.getRValue();
             DFNode node = new ArrayAssignNode(
@@ -1615,7 +1615,7 @@ public abstract class DFGraph {
         DFLocalScope innerScope = scope.getChildByAST(block);
         DFFrame innerFrame = frame.getChildByAST(block);
         for (Statement cstmt : (List<Statement>) block.statements()) {
-            processStatement(ctx, innerScope, innerFrame, cstmt);                
+            processStatement(ctx, innerScope, innerFrame, cstmt);
         }
         this.endBreaks(ctx, frame, innerFrame);
     }
@@ -1626,7 +1626,7 @@ public abstract class DFGraph {
 	VariableDeclarationStatement varStmt)
         throws InvalidSyntax, EntityNotFound {
         processVariableDeclaration(
-            ctx, scope, frame, varStmt.fragments());            
+            ctx, scope, frame, varStmt.fragments());
     }
 
     private void processExpressionStatement(
@@ -1634,7 +1634,7 @@ public abstract class DFGraph {
 	ExpressionStatement exprStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
-            ctx, scope, frame, exprStmt.getExpression());            
+            ctx, scope, frame, exprStmt.getExpression());
     }
 
     private void processIfStatement(
@@ -1657,7 +1657,7 @@ public abstract class DFGraph {
         if (elseStmt != null) {
             elseFrame = ifFrame.getChildByAST(elseStmt);
             elseCtx = new DFContext(this, scope);
-            processStatement(elseCtx, scope, elseFrame, elseStmt);                
+            processStatement(elseCtx, scope, elseFrame, elseStmt);
         }
 
         // Combines two contexts into one.
@@ -1731,7 +1731,7 @@ public abstract class DFGraph {
 	SwitchStatement switchStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
-            ctx, scope, frame, switchStmt.getExpression());            
+            ctx, scope, frame, switchStmt.getExpression());
         DFNode switchValue = ctx.getRValue();
         DFType type = switchValue.getNodeType();
         DFKlass enumKlass = null;
@@ -1771,7 +1771,7 @@ public abstract class DFGraph {
                         caseNode.addMatch(node);
                     } else {
                         processExpression(
-                            ctx, switchScope, caseFrame, expr);			    
+                            ctx, switchScope, caseFrame, expr);
                         caseNode.addMatch(ctx.getRValue());
                     }
                 } else {
@@ -1783,7 +1783,7 @@ public abstract class DFGraph {
                     throw new InvalidSyntax(cstmt);
                 }
                 processStatement(
-                    caseCtx, switchScope, caseFrame, cstmt);                    
+                    caseCtx, switchScope, caseFrame, cstmt);
             }
         }
         if (caseFrame != null) {
@@ -1799,7 +1799,7 @@ public abstract class DFGraph {
 
     private void processSwitchCase(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-        SwitchCase switchCase, DFNode caseNode, 
+        SwitchCase switchCase, DFNode caseNode,
         DFContext caseCtx, DFFrame caseFrame) {
 
         for (DFNode src : caseCtx.getFirsts()) {
@@ -1828,7 +1828,7 @@ public abstract class DFGraph {
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
         processExpression(
-            loopCtx, scope, loopFrame, whileStmt.getExpression());            
+            loopCtx, scope, loopFrame, whileStmt.getExpression());
         DFNode condValue = loopCtx.getRValue();
         processStatement(
             loopCtx, loopScope, loopFrame, whileStmt.getBody());
@@ -1845,7 +1845,7 @@ public abstract class DFGraph {
         DFFrame loopFrame = frame.getChildByAST(doStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
         processStatement(
-            loopCtx, loopScope, loopFrame, doStmt.getBody());            
+            loopCtx, loopScope, loopFrame, doStmt.getBody());
         processExpression(
             loopCtx, loopScope, loopFrame, doStmt.getExpression());
         DFNode condValue = loopCtx.getRValue();
@@ -1862,7 +1862,7 @@ public abstract class DFGraph {
         DFLocalScope loopScope = scope.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
         for (Expression init : (List<Expression>) forStmt.initializers()) {
-            processExpression(ctx, loopScope, frame, init);                
+            processExpression(ctx, loopScope, frame, init);
         }
         DFFrame loopFrame = frame.getChildByAST(forStmt);
         Expression expr = forStmt.getExpression();
@@ -1874,7 +1874,7 @@ public abstract class DFGraph {
             condValue = new ConstNode(this, loopScope, DFBasicType.BOOLEAN, null, "true");
         }
         processStatement(
-            loopCtx, loopScope, loopFrame, forStmt.getBody());            
+            loopCtx, loopScope, loopFrame, forStmt.getBody());
         for (Expression update : (List<Expression>) forStmt.updaters()) {
             processExpression(
                 loopCtx, loopScope, loopFrame, update);
@@ -1890,7 +1890,7 @@ public abstract class DFGraph {
 	EnhancedForStatement eForStmt)
         throws InvalidSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
-        processExpression(ctx, scope, frame, expr);            
+        processExpression(ctx, scope, frame, expr);
         DFLocalScope loopScope = scope.getChildByAST(eForStmt);
         DFFrame loopFrame = frame.getChildByAST(eForStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
@@ -1902,7 +1902,7 @@ public abstract class DFGraph {
         assign.accept(iterValue);
         loopCtx.set(assign);
         processStatement(
-            loopCtx, loopScope, loopFrame, eForStmt.getBody());            
+            loopCtx, loopScope, loopFrame, eForStmt.getBody());
         processLoop(
             ctx, loopScope, frame, eForStmt,
             iterValue, loopFrame, loopCtx, true);
@@ -1927,7 +1927,7 @@ public abstract class DFGraph {
         DFLocalScope tryScope = scope.getChildByAST(tryStmt);
         DFContext tryCtx = new DFContext(this, tryScope);
         processStatement(
-            tryCtx, tryScope, tryFrame, tryStmt.getBody());            
+            tryCtx, tryScope, tryFrame, tryStmt.getBody());
         for (DFNode src : tryCtx.getFirsts()) {
             if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
@@ -1978,7 +1978,7 @@ public abstract class DFGraph {
                 }
             }
             processStatement(
-                catchCtx, catchScope, frame, cc.getBody());                
+                catchCtx, catchScope, frame, cc.getBody());
             for (DFNode src : catchCtx.getFirsts()) {
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
@@ -1989,7 +1989,7 @@ public abstract class DFGraph {
         // XXX Take care of ALL exits from tryFrame.
         Block finBlock = tryStmt.getFinally();
         if (finBlock != null) {
-            processStatement(ctx, scope, frame, finBlock);                
+            processStatement(ctx, scope, frame, finBlock);
         }
     }
 
@@ -2097,7 +2097,7 @@ public abstract class DFGraph {
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
             processStatement(
-                ctx, scope, labeledFrame, labeledStmt.getBody());                
+                ctx, scope, labeledFrame, labeledStmt.getBody());
             this.endBreaks(ctx, frame, labeledFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
@@ -2111,13 +2111,13 @@ public abstract class DFGraph {
         } else if (stmt instanceof TryStatement) {
 	    // "try { ... } catch (e) { ... }"
             processTryStatement(
-                ctx, scope, frame, (TryStatement)stmt);                
+                ctx, scope, frame, (TryStatement)stmt);
 
         } else if (stmt instanceof ThrowStatement) {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             processExpression(
-                ctx, scope, frame, throwStmt.getExpression());                
+                ctx, scope, frame, throwStmt.getExpression());
             DFNode exc = ctx.getRValue();
             DFKlass excKlass = exc.getNodeType().toKlass();
             DFRef excRef = scope.lookupException(excKlass);
@@ -2221,7 +2221,7 @@ public abstract class DFGraph {
 
     // endBreaks: ends a BREAKABLE Frame.
     private void endBreaks(
-        DFContext ctx, DFFrame outerFrame, DFFrame endFrame) {        
+        DFContext ctx, DFFrame outerFrame, DFFrame endFrame) {
         // endFrame.getLabel() can be either @BREAKABLE or a label.
         assert outerFrame != endFrame;
         ConsistentHashMap<DFRef, List<DFExit>> ref2exits =
@@ -2325,12 +2325,12 @@ public abstract class DFGraph {
 
     @SuppressWarnings("unchecked")
     public void processBodyDecls(
-        DFContext ctx, DFLocalScope scope, 
+        DFContext ctx, DFLocalScope scope,
         DFKlass klass, List<BodyDeclaration> decls)
         throws InvalidSyntax, EntityNotFound {
-        
+
         DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE);
-        
+
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 // Inner classes are processed separately.
@@ -2344,7 +2344,7 @@ public abstract class DFGraph {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         processExpression(
-                            ctx, scope, frame, init);                            
+                            ctx, scope, frame, init);
                         value = ctx.getRValue();
                     }
                     if (value == null) {
@@ -2370,36 +2370,36 @@ public abstract class DFGraph {
                 frame.buildStmt(innerScope, initializer.getBody());
                 processStatement(
                     ctx, innerScope, frame, initializer.getBody());
-                
+
             } else {
                 throw new InvalidSyntax(body);
             }
         }
-        
+
         this.closeFrame(ctx, scope, frame);
     }
 
     public void processMethodBody(
-        DFContext ctx, DFLocalScope scope, 
-        ASTNode body) 
+        DFContext ctx, DFLocalScope scope,
+        ASTNode body)
         throws InvalidSyntax, EntityNotFound {
-        
+
         DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE);
-            
+
         if (body instanceof Statement) {
             frame.buildStmt(scope, (Statement)body);
             processStatement(
-                ctx, scope, frame, (Statement)body);                
+                ctx, scope, frame, (Statement)body);
         } else if (body instanceof Expression) {
             frame.buildExpr(scope, (Expression)body);
             processExpression(
-                ctx, scope, frame, (Expression)body);                
+                ctx, scope, frame, (Expression)body);
             DFRef ref = scope.lookupReturn();
             ReturnNode ret = new ReturnNode(this, scope, ref, body);
             ret.accept(ctx.getRValue());
             frame.addExit(new ReturnExit(frame, ret));
         }
-        
+
         this.closeFrame(ctx, scope, frame);
     }
 }

@@ -289,13 +289,13 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     public Collection<DFRef> getInputRefs() {
         return _inputRefs;
     }
-    
+
     public Collection<DFRef> getOutputRefs() {
         return _outputRefs;
     }
-    
+
     @SuppressWarnings("unchecked")
-    public void enumRefs(List<DFLambdaKlass> defined) 
+    public void enumRefs(List<DFLambdaKlass> defined)
         throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
@@ -318,7 +318,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    throw new InvalidSyntax(_ast);
 	}
     }
-    
+
     @SuppressWarnings("unchecked")
     private void enumRefsMethodDecl(
 	List<DFLambdaKlass> defined,
@@ -551,8 +551,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             DFType type = this.enumRefsExpr(
                 defined, scope, throwStmt.getExpression());
-            DFRef ref = _scope.lookupException(type.toKlass());
-            _outputRefs.add(ref);
+            // Because an exception can be catched, throw does not
+            // necessarily mean this method actually throws as a whole.
+            // This should be taken cared of by the "throws" clause.
+            //DFRef ref = _scope.lookupException(type.toKlass());
+            //_outputRefs.add(ref);
 
         } else if (stmt instanceof ConstructorInvocation) {
 	    // "this(args)"
@@ -1231,7 +1234,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
 
         graph.processBodyDecls(
-            ctx, _scope, _klass, decls);            
+            ctx, _scope, _klass, decls);
 
         // Create output nodes.
         for (DFRef ref : _outputRefs) {
@@ -1309,6 +1312,13 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             DFNode output = new OutputNode(graph, _scope, ref, null);
             output.accept(ctx.get(ref));
             preserved.add(output);
+        }
+        for (DFRef ref : _scope.getExcRefs()) {
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(graph, _scope, ref, null);
+                output.accept(ctx.getLast(ref));
+                preserved.add(output);
+            }
         }
 
         // Do not remove input/output nodes.
