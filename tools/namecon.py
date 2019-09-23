@@ -14,16 +14,18 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o path] [-i path] [-t threshold] [-f nfeats] feats.db' % argv[0])
+        print(f'usage: {argv[0]} '
+              '[-d] [-o path] [-i path] [-t threshold] [-f nfeats] '
+              'feats.db [items ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dfo:i:w:t:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:t:f:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     outpath = None
     inpath = None
-    threshold = 0.99
+    threshold = 0.75
     nfeats = 3
     C = 0.7
     for (k, v) in opts:
@@ -40,6 +42,9 @@ def main(argv):
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
     nallitems = len(db.get_items())
+    items = db.get_items()
+    if args:
+        items = [ (tid,item) for (tid,item) in items if item in args ]
 
     def learn(tid, item, fids):
         name = stripid(item)
@@ -116,7 +121,7 @@ def main(argv):
             proc = predict
 
     n = m = 0
-    for (tid,item) in db:
+    for (tid,item) in items:
         fids = db.get_feats(tid)
         fids = [ fid for fid in fids if fid != 0 ]
         n += 1
@@ -131,7 +136,7 @@ def main(argv):
             nb.save(fp)
 
     if inpath is None and outpath is None:
-        for (tid,item) in db.get_items():
+        for (tid,item) in items:
             fids = db.get_feats(tid)
             predict(tid, item, fids)
 

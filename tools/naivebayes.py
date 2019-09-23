@@ -104,15 +104,16 @@ class NaiveBayes:
         for f in feats:
             if f not in self.fcount: continue
             for k in self.fcount[f]:
+                if k is None: continue
                 if k in key2feats:
                     a = key2feats[k]
                 else:
                     a = key2feats[k] = []
                 a.append(f)
-        m = max( len(a) for a in key2feats.values() )
+        m = ratio * max( len(a) for a in key2feats.values() )
         f2 = set()
         for (k,a) in key2feats.items():
-            if len(a) < m*ratio: continue
+            if len(a) < m: continue
             if not f2:
                 f2 = set(a)
             else:
