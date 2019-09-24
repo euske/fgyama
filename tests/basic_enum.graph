@@ -24,9 +24,6 @@
           <link src="M2_&lt;init&gt;_N1"/>
         </node>
         <node id="M2_&lt;init&gt;_N3" kind="input" ref="#this" type="LE;"/>
-        <node id="M2_&lt;init&gt;_N8" kind="output" ref="@LE;/.x" type="I">
-          <link src="M2_&lt;init&gt;_N5"/>
-        </node>
         <scope name="LE;.:E:56:100.:B:73:100">
           <node id="M2_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="LE;">
             <ast end="87" start="83" type="52"/>
@@ -58,39 +55,39 @@
       <ast end="292" start="134" type="31"/>
       <scope name="Lbasic_enum;.:foo:134:292">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_enum;"/>
-        <node id="M4_foo_N2" kind="input" ref="@LE;/.Moo" type="LE;"/>
-        <node id="M4_foo_N3" kind="input" ref="@LE;/.Baa" type="LE;"/>
+        <node id="M4_foo_N3" ref="@LE;/.Moo" type="LE;"/>
+        <node id="M4_foo_N10" ref="@LE;/.Baa" type="LE;"/>
         <scope name="Lbasic_enum;.:foo:134:292.:B:159:292">
-          <node id="M4_foo_N4" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+          <node id="M4_foo_N2" kind="ref_field" ref="@LE;/.Moo" type="LE;">
             <ast end="180" start="175" type="40"/>
-            <link src="M4_foo_N2"/>
-          </node>
-          <node id="M4_foo_N5" kind="assign_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
-            <ast end="180" start="171" type="59"/>
-            <link src="M4_foo_N4"/>
-          </node>
-          <node id="M4_foo_N6" kind="ref_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
-            <ast end="199" start="198" type="42"/>
-            <link src="M4_foo_N5"/>
-          </node>
-          <node id="M4_foo_N8" kind="ref_field" ref="@LE;/.Moo" type="LE;">
-            <ast end="219" start="216" type="42"/>
-            <link src="M4_foo_N2"/>
-          </node>
-          <node id="M4_foo_N10" kind="ref_field" ref="@LE;/.Baa" type="LE;">
-            <ast end="256" start="253" type="42"/>
             <link src="M4_foo_N3"/>
           </node>
+          <node id="M4_foo_N4" kind="assign_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
+            <ast end="180" start="171" type="59"/>
+            <link src="M4_foo_N2"/>
+          </node>
+          <node id="M4_foo_N5" kind="ref_var" ref="$Lbasic_enum;.:foo:134:292.:B:159:292/$x" type="LE;">
+            <ast end="199" start="198" type="42"/>
+            <link src="M4_foo_N4"/>
+          </node>
+          <node id="M4_foo_N7" kind="ref_field" ref="@LE;/.Moo" type="LE;">
+            <ast end="219" start="216" type="42"/>
+            <link src="M4_foo_N3"/>
+          </node>
+          <node id="M4_foo_N9" kind="ref_field" ref="@LE;/.Baa" type="LE;">
+            <ast end="256" start="253" type="42"/>
+            <link src="M4_foo_N10"/>
+          </node>
           <scope name="Lbasic_enum;.:foo:134:292.:B:159:292.:switch:190:286">
-            <node data="case(1)" id="M4_foo_N7" kind="case" type="LE;">
+            <node data="case(1)" id="M4_foo_N6" kind="case" type="LE;">
               <ast end="220" start="211" type="49"/>
-              <link src="M4_foo_N6"/>
-              <link label="match0" src="M4_foo_N8"/>
+              <link src="M4_foo_N5"/>
+              <link label="match0" src="M4_foo_N7"/>
             </node>
-            <node data="case(1)" id="M4_foo_N9" kind="case" type="LE;">
+            <node data="case(1)" id="M4_foo_N8" kind="case" type="LE;">
               <ast end="257" start="248" type="49"/>
-              <link src="M4_foo_N6"/>
-              <link label="match0" src="M4_foo_N10"/>
+              <link src="M4_foo_N5"/>
+              <link label="match0" src="M4_foo_N9"/>
             </node>
           </scope>
         </scope>
