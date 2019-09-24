@@ -13,6 +13,7 @@ public class DFFunctionType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
+    private boolean _varargs;
     private DFType[] _exceptions = new DFType[] {};
 
     public DFFunctionType(DFType[] argTypes, DFType returnType) {
@@ -30,6 +31,7 @@ public class DFFunctionType implements DFType {
         if (!(type instanceof DFFunctionType)) return false;
         DFFunctionType mtype = (DFFunctionType)type;
         if (_returnType != null && !_returnType.equals(mtype._returnType)) return false;
+        // Should we check if it's varargs??
         if (_argTypes.length != mtype._argTypes.length) return false;
         for (int i = 0; i < _argTypes.length; i++) {
             if (!_argTypes[i].equals(mtype._argTypes[i])) return false;
@@ -59,12 +61,19 @@ public class DFFunctionType implements DFType {
     }
 
     public int canAccept(DFType[] argTypes, Map<DFMapType, DFType> typeMap) {
+        // Always accept if the signature is unknown.
         if (_argTypes == null || argTypes == null) return 0;
-        if (_argTypes.length != argTypes.length) return -1;
+        if (_varargs) {
+            // For varargs methods, the minimum number of arguments is required.
+            if (argTypes.length < _argTypes.length-1) return -1;
+        } else {
+            // For fixed-args methods, the exact number of arguments is required.
+            if (argTypes.length != _argTypes.length) return -1;
+        }
         int dist = 0;
-        for (int i = 0; i < _argTypes.length; i++) {
-            DFType typeRecv = _argTypes[i];
+        for (int i = 0; i < argTypes.length; i++) {
             DFType typePassed = argTypes[i];
+            DFType typeRecv = this.getArgType(i);
             if (typeRecv == null || typePassed == null) continue;
             int d = typeRecv.canConvertFrom(typePassed, typeMap);
             if (d < 0) return -1;
@@ -73,8 +82,21 @@ public class DFFunctionType implements DFType {
         return dist;
     }
 
-    public DFType[] getArgTypes() {
-        return _argTypes;
+    public DFType getArgType(int i) {
+        if (_varargs) {
+            int lastrecv = _argTypes.length - 1;
+            if (lastrecv <= i) {
+                // For varargs methods, the last argument is declared as an array.
+                DFType type = _argTypes[lastrecv];
+                assert type instanceof DFArrayType;
+                return ((DFArrayType)type).getElemType();
+            }
+        }
+        return _argTypes[i];
+    }
+
+    public DFType getRealArgType(int i) {
+        return _argTypes[i];
     }
 
     public DFType getReturnType() {
@@ -106,5 +128,13 @@ public class DFFunctionType implements DFType {
 
     public DFType[] getExceptions() {
         return _exceptions;
+    }
+
+    public void setVarArgs(boolean varargs) {
+        _varargs = varargs;
+    }
+
+    public boolean isVarArgs() {
+        return _varargs;
     }
 }

@@ -366,7 +366,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 			Expression init = frag.getInitializer();
 			if (init != null) {
 			    this.enumRefsExpr(defined, scope, init);
-			    this.fixateLambda(defined, init, ref.getRefType());
+			    this.fixateLambda(defined, ref.getRefType(), init);
 			}
 		    } catch (VariableNotFound e) {
 		    }
@@ -576,8 +576,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		DFMethod method1 = klass.lookupMethod(
 		    CallStyle.Constructor, null, argTypes);
 		this.fixateLambda(
-                    defined,
-                    ci.arguments(), method1.getFuncType().getArgTypes());
+                    defined, method1.getFuncType(), ci.arguments());
             } catch (MethodNotFound e) {
 	    }
 
@@ -602,8 +601,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		    CallStyle.Constructor, null, argTypes);
                 method1.addCaller(this);
 		this.fixateLambda(
-                    defined,
-                    sci.arguments(), method1.getFuncType().getArgTypes());
+                    defined, method1.getFuncType(), sci.arguments());
             } catch (MethodNotFound e) {
 	    }
 
@@ -753,7 +751,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 defined, scope, assn.getLeftHandSide());
             if (ref != null) {
                 this.fixateLambda(
-                    defined, assn.getRightHandSide(), ref.getRefType());
+                    defined, ref.getRefType(), assn.getRightHandSide());
             }
             return this.enumRefsExpr(defined, scope, assn.getRightHandSide());
 
@@ -819,8 +817,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		    m.addCaller(this);
 		}
                 this.fixateLambda(
-                    defined,
-                    invoke.arguments(), method1.getFuncType().getArgTypes());
+                    defined, method1.getFuncType(), invoke.arguments());
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
                 return DFUnknownType.UNKNOWN;
@@ -848,8 +845,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 method1.addCaller(this);
                 this.fixateLambda(
-                    defined,
-                    sinvoke.arguments(), method1.getFuncType().getArgTypes());
+                    defined, method1.getFuncType(), sinvoke.arguments());
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
                 return DFUnknownType.UNKNOWN;
@@ -984,8 +980,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		    CallStyle.Constructor, null, argTypes);
                 method1.addCaller(this);
 		this.fixateLambda(
-                    defined,
-                    cstr.arguments(), method1.getFuncType().getArgTypes());
+                    defined, method1.getFuncType(), cstr.arguments());
             } catch (MethodNotFound e) {
 	    }
 	    return instType;
@@ -1136,20 +1131,22 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     private void fixateLambda(
 	List<DFLambdaKlass> defined,
-        List<Expression> exprs, DFType[] types)
+        DFFunctionType funcType, List<Expression> exprs)
 	throws InvalidSyntax {
+        // types or exprs might be shorter than the other. (due to varargs calls)
 	for (int i = 0; i < exprs.size(); i++) {
-	    this.fixateLambda(defined, exprs.get(i), types[i]);
+            DFType type = funcType.getArgType(i);
+	    this.fixateLambda(defined, type, exprs.get(i));
 	}
     }
 
     private void fixateLambda(
 	List<DFLambdaKlass> defined,
-        Expression expr, DFType type)
+        DFType type, Expression expr)
 	throws InvalidSyntax {
 	if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    fixateLambda(defined, paren.getExpression(), type);
+	    fixateLambda(defined, type, paren.getExpression());
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
@@ -1481,17 +1478,23 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
         private void buildInternalRefs(List<VariableDeclaration> parameters) {
 	    DFFunctionType funcType = DFMethod.this.getFuncType();
-	    DFType[] argTypes = funcType.getArgTypes();
             _return = new InternalRef(funcType.getReturnType(), "return");
             _arguments = new InternalRef[parameters.size()];
+            int lastarg = parameters.size()-1;
             int i = 0;
             for (VariableDeclaration decl : parameters) {
-                DFType argType = argTypes[i];
+                DFType argType = funcType.getRealArgType(i);
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     argType = DFArrayType.getType(argType, ndims);
                 }
-                _arguments[i] = new InternalRef(argType, "arg"+i);
+                String name;
+                if (funcType.isVarArgs() && i == lastarg) {
+                    name = "varargs";
+                } else {
+                    name = "arg"+i;
+                }
+                _arguments[i] = new InternalRef(argType, name);
                 this.addVar(decl.getName(), argType);
                 i++;
             }

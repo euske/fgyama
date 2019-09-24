@@ -1148,6 +1148,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		DFType returnType = finder.resolveSafe(meth.getReturnType());
                 funcType = new DFFunctionType(argTypes, returnType);
 	    }
+            // For varargs methods, the last argument is declared as an array
+            // so no special treatment is required here.
+            funcType.setVarArgs(meth.isVarArgs());
             ExceptionTable excTable = meth.getExceptionTable();
             if (excTable != null) {
                 String[] excNames = excTable.getExceptionNames();
@@ -1373,6 +1376,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                     }
                     funcType.setExceptions(exceptions);
                 }
+                funcType.setVarArgs(decl.isVarargs());
                 method.setFuncType(funcType);
                 method.setTree(decl);
 
