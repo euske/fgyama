@@ -379,7 +379,10 @@ public class DFFrame {
 		DFMethod method1 = klass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
-                    _inputRefs.addAll(m.getInputRefs());
+                    if (m.isTransparent()) {
+                        _inputRefs.addAll(m.getInputRefs());
+                        _outputRefs.addAll(m.getOutputRefs());
+                    }
                 }
             } catch (MethodNotFound e) {
 		Logger.error(
@@ -411,7 +414,10 @@ public class DFFrame {
             try {
 		DFMethod method1 = baseKlass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
-                _inputRefs.addAll(method1.getInputRefs());
+                if (method1.isTransparent()) {
+                    _inputRefs.addAll(method1.getInputRefs());
+                    _outputRefs.addAll(method1.getOutputRefs());
+                }
             } catch (MethodNotFound e) {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (sci)",
@@ -642,7 +648,10 @@ public class DFFrame {
                 DFMethod method1 = klass.lookupMethod(
                     callStyle, invoke.getName(), argTypes);
                 for (DFMethod m : method1.getOverriders()) {
-                    _inputRefs.addAll(m.getInputRefs());
+                    if (m.isTransparent()) {
+                        _inputRefs.addAll(m.getInputRefs());
+                        _outputRefs.addAll(m.getOutputRefs());
+                    }
                 }
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
@@ -677,7 +686,10 @@ public class DFFrame {
             try {
                 DFMethod method1 = baseKlass.lookupMethod(
                     DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
-                _inputRefs.addAll(method1.getInputRefs());
+                if (method1.isTransparent()) {
+                    _inputRefs.addAll(method1.getInputRefs());
+                    _outputRefs.addAll(method1.getOutputRefs());
+                }
                 return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
 		Logger.error(
@@ -843,7 +855,10 @@ public class DFFrame {
 		DFMethod method1 = instKlass.lookupMethod(
 		    DFMethod.CallStyle.Constructor, null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
-                    _inputRefs.addAll(m.getInputRefs());
+                    if (m.isTransparent()) {
+                        _inputRefs.addAll(m.getInputRefs());
+                        _outputRefs.addAll(m.getOutputRefs());
+                    }
                 }
             } catch (MethodNotFound e) {
 		Logger.error(

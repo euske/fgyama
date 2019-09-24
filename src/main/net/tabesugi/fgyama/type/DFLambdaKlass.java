@@ -12,9 +12,15 @@ import org.eclipse.jdt.core.dom.*;
 class DFLambdaKlass extends DFKlass {
 
     private class FunctionalMethod extends DFMethod {
+
         public FunctionalMethod(String id) {
             super(DFLambdaKlass.this, id, CallStyle.Lambda, id,
                   DFLambdaKlass.this._lambdaScope, false);
+        }
+
+        @Override
+        public boolean isTransparent() {
+            return true;
         }
     }
 

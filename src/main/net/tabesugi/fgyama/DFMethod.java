@@ -286,11 +286,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         //_scope.dump();
     }
 
+    public boolean isTransparent() {
+        return false;
+    }
+
     public Collection<DFRef> getInputRefs() {
+        assert this.isTransparent();
         return _inputRefs;
     }
 
     public Collection<DFRef> getOutputRefs() {
+        assert this.isTransparent();
         return _outputRefs;
     }
 
@@ -1225,18 +1231,22 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         DFContext ctx = new DFContext(graph, _scope);
 
         // Create input nodes.
-        for (DFRef ref : _inputRefs) {
-            DFNode input = new InputNode(graph, _scope, ref, null);
-            ctx.set(input);
+        if (this.isTransparent()) {
+            for (DFRef ref : this.getInputRefs()) {
+                DFNode input = new InputNode(graph, _scope, ref, null);
+                ctx.set(input);
+            }
         }
 
         graph.processBodyDecls(
             ctx, _scope, _klass, decls);
 
         // Create output nodes.
-        for (DFRef ref : _outputRefs) {
-            DFNode output = new OutputNode(graph, _scope, ref, null);
-            output.accept(ctx.get(ref));
+        if (this.isTransparent()) {
+            for (DFRef ref : this.getOutputRefs()) {
+                DFNode output = new OutputNode(graph, _scope, ref, null);
+                output.accept(ctx.get(ref));
+            }
         }
 
         graph.cleanup(null);
@@ -1274,10 +1284,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             ctx.set(input);
             preserved.add(input);
         }
-        for (DFRef ref : _inputRefs) {
-            DFNode input = new InputNode(graph, _scope, ref, null);
-            ctx.set(input);
-            preserved.add(input);
+        if (this.isTransparent()) {
+            for (DFRef ref : this.getInputRefs()) {
+                DFNode input = new InputNode(graph, _scope, ref, null);
+                ctx.set(input);
+                preserved.add(input);
+            }
         }
 
         try {
@@ -1305,15 +1317,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 preserved.add(output);
             }
         }
-        for (DFRef ref : _outputRefs) {
-            DFNode output = new OutputNode(graph, _scope, ref, null);
-            output.accept(ctx.get(ref));
-            preserved.add(output);
-        }
         for (DFRef ref : _scope.getExcRefs()) {
             if (ctx.getLast(ref) != null) {
                 DFNode output = new OutputNode(graph, _scope, ref, null);
                 output.accept(ctx.getLast(ref));
+                preserved.add(output);
+            }
+        }
+        if (this.isTransparent()) {
+            for (DFRef ref : this.getOutputRefs()) {
+                DFNode output = new OutputNode(graph, _scope, ref, null);
+                output.accept(ctx.get(ref));
                 preserved.add(output);
             }
         }

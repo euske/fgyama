@@ -1081,10 +1081,11 @@ public abstract class DFGraph {
                 {
                     ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
                     for (DFMethod method1 : methods) {
-                        refs.addAll(method1.getInputRefs());
+                        if (method1.isTransparent()) {
+                            refs.addAll(method1.getInputRefs());
+                        }
                     }
                     for (DFRef ref : refs) {
-                        assert !ref.isLocal();
                         call.accept(ctx.get(ref), ref.getFullName());
                     }
                 }
@@ -1093,10 +1094,11 @@ public abstract class DFGraph {
                 {
                     ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
                     for (DFMethod method1 : methods) {
-                        refs.addAll(method1.getOutputRefs());
+                        if (method1.isTransparent()) {
+                            refs.addAll(method1.getOutputRefs());
+                        }
                     }
                     for (DFRef ref : refs) {
-                        assert !ref.isLocal();
                         ctx.set(new ReceiveNode(
                                     this, scope, call, invoke, ref));
                     }
@@ -1148,16 +1150,18 @@ public abstract class DFGraph {
                 MethodCallNode call = new MethodCallNode(
                     this, scope, sinvoke, funcType, obj, methods);
                 call.setArgs(args);
-                for (DFRef ref : method.getInputRefs()) {
-                    assert !ref.isLocal();
-                    call.accept(ctx.get(ref), ref.getFullName());
+                if (method.isTransparent()) {
+                    for (DFRef ref : method.getInputRefs()) {
+                        call.accept(ctx.get(ref), ref.getFullName());
+                    }
                 }
                 ctx.setRValue(new ReceiveNode(
                                   this, scope, call, sinvoke));
-                for (DFRef ref : method.getOutputRefs()) {
-                    assert !ref.isLocal();
-                    ctx.set(new ReceiveNode(
-                                this, scope, call, sinvoke, ref));
+                if (method.isTransparent()) {
+                    for (DFRef ref : method.getOutputRefs()) {
+                        ctx.set(new ReceiveNode(
+                                    this, scope, call, sinvoke, ref));
+                    }
                 }
                 // TODO: catch and forward exceptions.
                 // for (DFNode exception : funcType.getExceptions()) {
@@ -1293,16 +1297,18 @@ public abstract class DFGraph {
                 CreateObjectNode call = new CreateObjectNode(
                     this, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);
-                for (DFRef ref : constructor.getInputRefs()) {
-                    assert !ref.isLocal();
-                    call.accept(ctx.get(ref), ref.getFullName());
+                if (constructor.isTransparent()) {
+                    for (DFRef ref : constructor.getInputRefs()) {
+                        call.accept(ctx.get(ref), ref.getFullName());
+                    }
                 }
                 ctx.setRValue(new ReceiveNode(
                                   this, scope, call, cstr));
-                for (DFRef ref : constructor.getOutputRefs()) {
-                    assert !ref.isLocal();
-                    ctx.set(new ReceiveNode(
-                                this, scope, call, cstr, ref));
+                if (constructor.isTransparent()) {
+                    for (DFRef ref : constructor.getOutputRefs()) {
+                        ctx.set(new ReceiveNode(
+                                    this, scope, call, cstr, ref));
+                    }
                 }
                 // TODO: catch and forward exceptions.
                 // for (DFNode exception : funcType.getExceptions()) {
@@ -2156,14 +2162,14 @@ public abstract class DFGraph {
             MethodCallNode call = new MethodCallNode(
                 this, scope, ci, funcType, obj, methods);
             call.setArgs(args);
-            for (DFRef ref : constructor.getInputRefs()) {
-                assert !ref.isLocal();
-                call.accept(ctx.get(ref), ref.getFullName());
-            }
-            for (DFRef ref : constructor.getOutputRefs()) {
-                assert !ref.isLocal();
-                ctx.set(new ReceiveNode(
-                            this, scope, call, ci, ref));
+            if (constructor.isTransparent()) {
+                for (DFRef ref : constructor.getInputRefs()) {
+                    call.accept(ctx.get(ref), ref.getFullName());
+                }
+                for (DFRef ref : constructor.getOutputRefs()) {
+                    ctx.set(new ReceiveNode(
+                                this, scope, call, ci, ref));
+                }
             }
             // TODO: catch and forward exceptions.
             // for (DFNode exception : funcType.getExceptions()) {
@@ -2195,14 +2201,14 @@ public abstract class DFGraph {
             MethodCallNode call = new MethodCallNode(
                 this, scope, sci, funcType, obj, methods);
             call.setArgs(args);
-            for (DFRef ref : constructor.getInputRefs()) {
-                assert !ref.isLocal();
-                call.accept(ctx.get(ref), ref.getFullName());
-            }
-            for (DFRef ref : constructor.getOutputRefs()) {
-                assert !ref.isLocal();
-                ctx.set(new ReceiveNode(
-                            this, scope, call, sci, ref));
+            if (constructor.isTransparent()) {
+                for (DFRef ref : constructor.getInputRefs()) {
+                    call.accept(ctx.get(ref), ref.getFullName());
+                }
+                for (DFRef ref : constructor.getOutputRefs()) {
+                    ctx.set(new ReceiveNode(
+                                this, scope, call, sci, ref));
+                }
             }
             // TODO: catch and forward exceptions.
             // for (DFNode exception : funcType.getExceptions()) {
