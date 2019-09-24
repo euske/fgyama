@@ -112,9 +112,10 @@ class IDFBuilder:
         return iter(self.vtxs.values())
 
     # Load methods.
-    def load(self, path, fp=None):
+    def load(self, path, fp=None, filter=None):
         for method in get_graphs(path):
             if method.style == 'initializer': continue
+            if filter is not None and not filter(method): continue
             path = method.klass.path
             if path not in self.srcmap:
                 fid = len(self.srcmap)

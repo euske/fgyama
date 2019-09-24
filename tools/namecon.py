@@ -69,7 +69,7 @@ def main(argv):
         (_,topword) = cands[0]
         if topword in words: return True
         cands = cands[:len(words)+1]
-        print('#', words, cands)
+        print('#', words, '->', cands)
         print('+ITEM', json.dumps(item))
         print('+CANDS', json.dumps(cands))
         feats = []

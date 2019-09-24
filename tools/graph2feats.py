@@ -30,11 +30,11 @@ class FeatGenerator:
 
     node_cost = 10
 
-    def __init__(self, direction, count,
+    def __init__(self, direction, tracecount,
                  interproc=True, namefeat=True, typefeat=True,
                  debug=0):
         self.direction = direction
-        self.count = count
+        self.tracecount = tracecount
         self.interproc = interproc
         self.namefeat = namefeat
         self.typefeat = typefeat
@@ -46,9 +46,9 @@ class FeatGenerator:
         self.ref0 = ref0
         self.done = set()
         if self.direction <= 0:
-            self.enum_back(self.count, vtx)
+            self.enum_back(self.tracecount, vtx)
         if 0 <= self.direction:
-            self.enum_forw(self.count, vtx)
+            self.enum_forw(self.tracecount, vtx)
         return
 
     def getbasefeats(self, n):
@@ -238,18 +238,19 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-C count] '
-              '[-M maxoverrides] [-B srcdb] [-f|-b] '
+        print('usage: %s [-d] [-o output] [-C tracecount] '
+              '[-n maxnodes] [-M maxoverrides] [-B srcdb] [-f|-b] '
               '[-F)unction] [-I)nterproc] [-N)amefeat] [-T)ypefeat] '
               '[graph ...]' % argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:C:M:B:fbFINT')
+        (opts, args) = getopt.getopt(argv[1:], 'do:C:n:M:B:fbFINT')
     except getopt.GetoptError:
         return usage()
     debug = 0
     outpath = None
-    count = 50
+    tracecount = 50
+    maxnodes = 0
     maxoverrides = 1
     srcdb = None
     direction = 0
@@ -260,7 +261,8 @@ def main(argv):
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
-        elif k == '-C': count = int(v)
+        elif k == '-C': tracecount = int(v)
+        elif k == '-n': maxnodes = int(v)
         elif k == '-M': maxoverrides = int(v)
         elif k == '-B': srcdb = SourceDB(v)
         elif k == '-f': direction = +1
@@ -279,10 +281,23 @@ def main(argv):
         db = FeatDB(outpath)
         db.init()
 
+    def filtermethod(method):
+        if maxnodes == 0: return True
+        ins = outs = 0
+        for node in method:
+            if node.kind == 'input':
+                ins += 1
+            elif node.kind == 'output':
+                outs += 1
+        ok = (max(ins, outs) <= maxnodes)
+        if not ok:
+            print('Skipped:', method, file=sys.stderr)
+        return ok
+
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
         print('Loading: %r...' % path, file=sys.stderr)
-        builder.load(path)
+        builder.load(path, filter=filtermethod)
     if db is not None:
         for (path,srcid) in builder.srcmap.items():
             db.add_path(srcid, path)
@@ -321,7 +336,7 @@ def main(argv):
         srcs = set( builder.getsrc(n) for n in nodes if n.ast is not None )
         return tuple(srcs)
 
-    gen = FeatGenerator(direction, count, interproc,
+    gen = FeatGenerator(direction, tracecount, interproc,
                         namefeat, typefeat, debug=debug)
     nfeats = 0
     feat2fid = {}

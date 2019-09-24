@@ -27,11 +27,13 @@ def splitmethodname(name):
         name = name[:-8]
     return (stripid(name), args, retype)
 
-WORD = re.compile(r'[a-z]+[A-Z]?|[A-Z]+')
+WORD = re.compile(r'[0-9]*[a-z]+[A-Z]?|[0-9]*[A-Z]+')
 def splitwords(s):
     """
     >>> splitwords('name')
     ['name']
+    >>> splitwords('name123abc')
+    ['abc', 'name123']
     >>> splitwords('this_is_name_!')
     ['name', 'is', 'this']
     >>> splitwords('thisIsName')
