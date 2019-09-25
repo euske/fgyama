@@ -204,18 +204,18 @@ function toggle(id) {
         with open(path) as fp:
             fp = fileinput.input(args)
             recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
+        for rec in recs:
+            feats = rec['FEATS']
+            score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
+            rec['SCORE'] = score
         (name,_) = os.path.splitext(os.path.basename(path))
         mtime = time.strftime('%Y%m%d', time.localtime(os.stat(path)[stat.ST_MTIME]))
         title = f'{name}_{mtime}'
         if html:
             showhtmlheaders(title)
         if randomized:
-            random.randomized(recs)
+            random.shuffle(recs)
         else:
-            for rec in recs:
-                feats = rec['FEATS']
-                score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
-                rec['SCORE'] = score
             recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         if limit:
             recs = recs[:limit]
