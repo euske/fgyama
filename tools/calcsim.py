@@ -77,7 +77,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] graph [feats ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] graph [feats ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'd')
@@ -89,7 +89,7 @@ def main(argv):
     if not args: return usage()
 
     path = args.pop(0)
-    print('Loading: %r...' % path, file=sys.stderr)
+    print(f'Loading: {path!r}...' % path)
     db = ClassDB()
     with open(path) as fp:
         for klass in load_klasses(fp):

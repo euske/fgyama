@@ -11,7 +11,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n feats] srcdb featdb [word ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] [-n feats] srcdb featdb [word ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dc:n:')
@@ -67,7 +67,7 @@ def main(argv):
                 if item not in iscore:
                     iscore[item] = 0
                 iscore[item] += score
-        print('*** word: %r, items: %r, feats: %r\n' % (word, nitems, len(fscore)))
+        print(f'*** word: {word:r}, items: {nitems}, feats: {len(fscore)}\n')
         fscore.sort(reverse=True)
         for (score,fid,items) in fscore[:ntop]:
             feat = db.get_feat(fid)

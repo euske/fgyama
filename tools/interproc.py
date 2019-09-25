@@ -78,7 +78,7 @@ class IPVertex:
         return
 
     def __repr__(self):
-        return ('<IPVertex(%d)>' % (self.vid))
+        return (f'<IPVertex({self.vid})>')
 
     def connect(self, label, output, funcall=None):
         #print('# connect: %r-%s-%r' % (self, label, output))
@@ -122,7 +122,7 @@ class IDFBuilder:
                 self.srcmap[path] = fid
                 src = (fid, path)
                 if fp is not None:
-                    fp.write('+SOURCE %r\n' % (src,))
+                    fp.write(f'+SOURCE {src}\n')
             self.methods.append(method)
             self.gid2method[method.name] = method
         return
@@ -144,7 +144,7 @@ class IDFBuilder:
     # Register a funcall.
     def addcall(self, x, y): # (caller, callee)
         if self.dbg is not None:
-            self.dbg.write('# addcall %r: %r\n' % (x.method.name, y))
+            self.dbg.write(f'# addcall {x.method.name}: {y}\n')
         if y in self.funcalls:
             a = self.funcalls[y]
         else:
@@ -160,8 +160,7 @@ class IDFBuilder:
         else:
             vtx = self.vtxs[node] = IPVertex(node)
             if self.dbg is not None:
-                self.dbg.write('# getvtx %r: %s(%r)\n' %
-                               (vtx, node.kind, node.data))
+                self.dbg.write(f'# getvtx {vtx}: {node.kind}({node.data!r})\n')
         return vtx
 
     def run(self):
@@ -204,7 +203,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-M maxoverrides] [graph ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dM:')
@@ -219,14 +218,12 @@ def main(argv):
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        print('Loading: %r...' % path, file=sys.stderr)
+        print(f'Loading: {path!r}...', file=sys.stderr)
         builder.load(path)
 
     builder.run()
-    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.methods),
-           sum( len(a) for a in builder.funcalls.values() ),
-           len(builder.vtxs)),
+    nfuncalls = sum( len(a) for a in builder.funcalls.values() )
+    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
           file=sys.stderr)
     return 0
 

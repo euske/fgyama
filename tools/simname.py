@@ -37,8 +37,8 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-B basedir] [-c encoding] '
-              'out.graph ...' % argv[0])
+        print(f'usage: {argv[0]} [-o output] [-B basedir] [-c encoding] '
+              'out.graph ...')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'o:B:c:')
@@ -60,7 +60,7 @@ def main(argv):
 
     names = {}
     for path in args:
-        print('Loading: %r...' % path, file=sys.stderr)
+        print(f'Loading: {path!r}...', file=sys.stderr)
         for method in get_graphs(path):
             if method.style == 'initializer': continue
             if ';.' in method.name:
@@ -82,20 +82,20 @@ def main(argv):
     for k in sorted(names.keys(), key=lambda k:len(k), reverse=True):
         a = [ method for method in names[k] if method not in done ]
         if 2 <= len(a):
-            fp.write('= %d\n' % len(a))
+            fp.write(f'= {len(a)}\n')
             for method in a:
-                fp.write('+ %s\n' % method.name)
+                fp.write(f'+ {method.name}\n')
                 if srcdb is None: continue
                 if method.src is None or method.ast is None: continue
                 src = srcdb.get(method.src)
                 (_,start,end) = method.ast
-                fp.write('# %s\n' % method.src)
+                fp.write(f'# {method.src}\n')
                 ranges = [(start, end, 0)]
                 for (lineno,line) in src.show(ranges):
                     if lineno is None:
                         fp.write(line.rstrip()+'\n')
                     else:
-                        fp.write('%4d: %s\n' % (lineno, line.rstrip()))
+                        fp.write(f'{lineno:4d}: {line.rstrip()}\n')
             fp.write('\n')
         done.update(a)
 

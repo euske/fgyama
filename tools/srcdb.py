@@ -46,7 +46,7 @@ CREATE INDEX SourceMapIndex ON SourceMap(FileName);
 
     def geturl(self, key):
         (reponame,commit,srcpath) = self.get(key)
-        url = 'https://github.com/%s/tree/%s/%s' % (reponame, commit, srcpath)
+        url = f'https://github.com/{reponame}/tree/{commit}/{srcpath}'
         return url
 
 
@@ -61,8 +61,7 @@ class SourceFile:
         return
 
     def __repr__(self):
-        return ('<SourceFile(%s)>' %
-                (self.name,))
+        return (f'<SourceFile({self.name})>')
 
     def show_nodes(self, nodes,
                    astart=(lambda _: '['),
@@ -251,13 +250,12 @@ class SourceAnnot:
         for (src,ranges) in self:
             url = src.name
             def astart(nid):
-                return '<span class="p%s">' % nid
+                return f'<span class="p{nid}">'
             def aend(anno):
                 return '</span>'
             def abody(annos, s):
                 return q(s.replace('\n',''))
-            fp.write('<div class=src><a href="%s">%s</a></div>\n' %
-                     (furl(url), src.name))
+            fp.write(f'<div class=src><a href="{furl(url)}">{src.name}</a></div>\n')
             fp.write('<pre>\n')
             for (lineno,s) in src.show(
                     ranges, astart=astart, aend=aend, abody=abody,
@@ -266,19 +264,18 @@ class SourceAnnot:
                     fp.write('     '+s+'\n')
                 else:
                     lineno += 1
-                    fp.write('<a href="%s#L%d">%5d</a>:%s\n' %
-                             (furl(url), lineno, lineno, s))
+                    fp.write(f'<a href="{furl(url)}#L{lineno}">{lineno:5d}</a>:{s}\n')
             fp.write('</pre>\n')
         return
 
     def show_text(self, fp=sys.stdout, ncontext=3,
                   showline=lambda line: line):
         for (src,ranges) in self:
-            fp.write(showline('# %s' % src.name)+'\n')
+            fp.write(showline(f'# {src.name}')+'\n')
             for (lineno,line) in src.show(ranges, ncontext=ncontext):
                 if lineno is None:
                     fp.write(showline('    '+line.rstrip())+'\n')
                 else:
-                    fp.write(showline('%4d: %s' % (lineno, line.rstrip()))+'\n')
+                    fp.write(showline(f'{lineno:4d}: {line.rstrip()}')+'\n')
             fp.write('\n')
         return

@@ -5,31 +5,29 @@ from xml.etree.cElementTree import Element
 from xml.etree.cElementTree import ElementTree
 
 def attrib(e):
-    return ''.join( ' %s="%s"' % (k, v) for (k,v) in e.attrib.items() )
+    return ''.join( f' {k}="{v}"' for (k,v) in e.attrib.items() )
 
 def dump(output, elem, indent=''):
     output.write(indent)
     tag = re.sub(r'{[^}]*}', '', elem.tag)
     children = list(elem)
     if children:
-        output.write('<%s%s>\n' % (tag, attrib(elem)))
+        output.write(f'<{tag}{attrib(elem)}>\n')
         for e in children:
             dump(output, e, indent+'  ')
-        output.write('%s</%s>\n' % (indent, tag))
+        output.write(f'{indent}</{tag}>\n')
     else:
         if elem.text:
-            output.write('<%s%s>%s</%s>' %
-                         (tag, attrib(elem), elem.text, tag))
+            output.write(f'<{tag}{attrib(elem)}>{elem.text}</{tag}>')
         else:
-            output.write('<%s%s />' %
-                         (tag, attrib(elem)))
+            output.write(f'<{tag}{attrib(elem)} />')
         output.write('\n')
     return
 
 def main(argv):
     import getopt
     def usage():
-        print ('usage: %s [-o output] [file ...]' % argv[0])
+        print(f'usage: {argv[0]} [-o output] [file ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:')

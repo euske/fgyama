@@ -12,7 +12,7 @@ def q(s):
         return '""'
 
 def qp(props):
-    return ', '.join( '%s=%s' % (k,q(v)) for (k,v) in props.items() )
+    return ', '.join( f'{k}={q(v)}' for (k,v) in props.items() )
 
 def r(s):
     return ''.join( c for c in s if c == '_' or c.isalnum() )
@@ -22,24 +22,24 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     if name is None:
         name = scope.name
     if level == 0:
-        out.write('digraph %s {\n' % q(name))
+        out.write(f'digraph {q(name)} {{\n')
     else:
-        out.write(h+'subgraph %s {\n' % q("cluster_"+name))
-    out.write(h+' label=%s;\n' % q(name))
+        out.write(h+f'subgraph {q("cluster_"+name)} {{\n')
+    out.write(h+f' label={q(name)};\n')
     for node in scope.nodes:
         kind = node.kind
         styles = { 'label':kind }
         if kind in ('join','begin','end','repeat','case'):
             styles['shape'] = 'diamond'
             if node.ref is not None:
-                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
+                styles['label'] = f'{kind} ({stripid(node.ref)})'
         elif kind in ('value', 'valueset'):
             styles['shape'] = 'box'
             styles['fontname'] = 'courier'
             styles['label'] = node.data
         elif kind in ('input','output','receive'):
             if node.ref is not None:
-                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
+                styles['label'] = f'{kind} ({stripid(node.ref)})'
         elif kind in ('call','new'):
             (name,_,_) = splitmethodname(node.data)
             styles['fontname'] = 'courier'
@@ -49,10 +49,10 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
             styles['label'] = (node.data or kind)
         else:
             if node.ref is not None:
-                styles['label'] = '%s (%s)' % (kind, stripid(node.ref))
+                styles['label'] = f'{kind} ({stripid(node.ref)})'
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
-        out.write(h+' N%s [%s];\n' % (r(node.nid), qp(styles)))
+        out.write(h+f' N{r(node.nid)} [{qp(styles)}];\n')
     for child in scope.children:
         write_gv(out, child, highlight, level=level+1)
     if level == 0:
@@ -68,14 +68,13 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                     continue
                 else:
                     styles = {'label': label}
-                out.write(h+' N%s -> N%s [%s];\n' %
-                          (r(src.nid), r(node.nid), qp(styles)))
+                out.write(h+' N{r(src.nid)} -> N{r(node.nid)} [{qp(styles)}];\n')
     out.write(h+'}\n')
     return
 
 def run_dot(methods, type='svg'):
     args = ['dot', '-T'+type]
-    print('run_dot: %r' % args, file=sys.stderr)
+    print(f'run_dot: {args!r}', file=sys.stderr)
     data = io.StringIO()
     for method in methods:
         write_gv(data, method.root, name=method.name)
@@ -98,7 +97,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-H] [-o output] [-n name] [-h nid] [graph ...]' % argv[0])
+        print(f'usage: {argv[0]} [-H] [-o output] [-n name] [-h nid] [graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'Ho:h:n:')

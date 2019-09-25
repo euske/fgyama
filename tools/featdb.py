@@ -213,7 +213,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o dbpath] [-s] [feats ...]' % argv[0])
+        print(f'usage: {argv[0]} [-o dbpath] [-s] [feats ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'o:s')
@@ -228,7 +228,7 @@ def main(argv):
 
     if outpath is None:
         dbpath = args.pop(0)
-        print('Reading from: %r' % dbpath)
+        print(f'Reading from: {dbpath!r}')
         db = FeatDB(dbpath)
         items = db.get_items()
         if args:
@@ -245,10 +245,10 @@ def main(argv):
         return
 
     if os.path.exists(outpath):
-        print('Already exists: %r' % outpath)
+        print(f'Already exists: {outpath!r}')
         return 1
 
-    print('Writing to: %r' % outpath)
+    print(f'Writing to: {outpath!r}')
     db = FeatDB(outpath)
     db.init()
 
@@ -293,8 +293,7 @@ def main(argv):
             db.add_item(item, fid2srcs)
             item = fid2srcs = None
 
-    print('Items=%r, Feats=%r, Srcs=%r' %
-          (nitems, nfeats, nsrcs))
+    print(f'Items={nitems}, Feats={nfeats}, Srcs={nsrcs}')
 
     db.close()
     return 0

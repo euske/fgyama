@@ -41,7 +41,7 @@ class IRef:
         return stripid(self.ref)
 
     def __repr__(self):
-        return '<+%s:%s>' % (self.iid, self.ref)
+        return f'<+{self.iid}:{self.ref}>'
 
     def connect(self, iref):
         if iref in self.linkto: return
@@ -163,7 +163,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-M maxoverrides] [-r ratio] [-f method] [graph ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] [-o output] [-M maxoverrides] [-r ratio] [-f method] [graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:M:r:f:')
@@ -187,13 +187,11 @@ def main(argv):
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        print('Loading: %r...' % path, file=sys.stderr)
+        print(f'Loading: {path}...', file=sys.stderr)
         builder.load(path)
     builder.run()
-    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.methods),
-           sum( len(a) for a in builder.funcalls.values() ),
-           len(builder.vtxs)),
+    nfuncalls = sum( len(a) for a in builder.funcalls.values() )
+    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
           file=sys.stderr)
 
     # Enumerate all the flows.
@@ -297,12 +295,11 @@ def main(argv):
     print('maxcpts:', len(maxcpts), file=sys.stderr)
 
     # Generate a trimmed graph.
-    out.write('digraph %s {\n' % q(path))
+    out.write(f'digraph {q(path)} {{\n')
     for cpt in maxcpts:
-        out.write(' N%d [label=%s, fontname="courier"];\n' %
-                  (cpt.cid, q(str(cpt))))
+        out.write(f' N{cpt.cid} [label={q(str(cpt))}, fontname="courier"];\n')
     for (cpt0,cpt1) in maxlinks:
-        out.write(' N%d -> N%d;\n' % (cpt0.cid, cpt1.cid))
+        out.write(f' N{cpt0.cid} -> N{cpt1.cid};\n')
     out.write('}\n')
 
     return 0

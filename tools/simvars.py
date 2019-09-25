@@ -29,8 +29,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-n minpairs] [-r refs] [-i items] [-t threshold] featdb [var ...]' %
-              argv[0])
+        print(f'usage: {argv[0]} [-d] [-n minpairs] [-r refs] [-i items] [-t threshold] featdb [var ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dn:r:i:t:')
@@ -67,13 +66,13 @@ def main(argv):
         sp.add(tid, { feat:exp(-abs(feat[0])) for feat in feats.keys()
                       if feat is not None })
     sp.commit()
-    print('Docs: %r' % len(sp), file=sys.stderr)
+    print(f'Docs: {len(sp)}', file=sys.stderr)
 
     if args:
         items.update(args)
 
     if items:
-        print('Items: %r' % len(items), file=sys.stderr)
+        print(f'Items: {len(items)}', file=sys.stderr)
         tids = [ db.get_tid(item) for item in items ]
         pairs = sp.findall(tids, threshold=threshold, verbose=True)
     elif minpairs:
@@ -145,8 +144,7 @@ def main(argv):
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
 
-    print('\nNPairs=%r, NameType=%r, NameOnly=%r, TypeOnly=%r, AvgWordSim=%.2f' %
-          (npairs, nametype, nameonly, typeonly, totalwordsim/npairs),
+    print(f'\nNPairs={npairs}, NameType={nametype}, NameOnly={nameonly}, TypeOnly={typeonly}, AvgWordSim={totalwordsim/npairs:.2f}',
           file=sys.stderr)
 
     return 0

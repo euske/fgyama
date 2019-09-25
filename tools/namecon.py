@@ -115,7 +115,7 @@ def main(argv):
     nb = NaiveBayes()
     proc = learn
     if inpath is not None:
-        print('Importing model: %r' % inpath, file=sys.stderr)
+        print(f'Importing model: {inpath!r}', file=sys.stderr)
         with open(inpath, 'rb') as fp:
             nb.load(fp)
             proc = predict
@@ -128,10 +128,10 @@ def main(argv):
         if proc(tid, item, fids):
             m += 1
         sys.stderr.write('.'); sys.stderr.flush()
-    print('\nProcessed: %d/%d' % (m,n), file=sys.stderr)
+    print(f'\nProcessed: {m}/{n}', file=sys.stderr)
 
     if outpath is not None:
-        print('Exporting model: %r' % outpath, file=sys.stderr)
+        print(f'Exporting model: {outpath!r}', file=sys.stderr)
         with open(outpath, 'wb') as fp:
             nb.save(fp)
 

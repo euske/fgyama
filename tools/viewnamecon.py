@@ -30,7 +30,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-o output] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]' % argv[0])
+        print(f'usage: {argv[0]} [-o output] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'o:S:n:Re:c:')
@@ -64,7 +64,7 @@ def main(argv):
     out = sys.stdout
     if output is not None:
         if os.path.exists(output):
-            print('Already exists: %r' % output)
+            print(f'Already exists: {output!r}')
             return 1
         out = open(output, 'w')
 
@@ -124,10 +124,10 @@ function toggle(id) {
         for (path,s,e) in srcs:
             annot.add(path,s,e)
         if html:
-            out.write('<div class=%s style="margin: 1em;">\n' % klass)
+            out.write(f'<div class={klass} style="margin: 1em;">\n')
             for (src,ranges) in annot:
                 url = src.name
-                out.write('<div>%s <pre>\n' % q(src.name))
+                out.write(f'<div>{q(src.name)} <pre>\n')
                 for (lineno,line) in src.show(
                         ranges,
                         astart=lambda nid: '<mark>',
@@ -136,7 +136,7 @@ function toggle(id) {
                     if lineno is None:
                         out.write('     '+line+'\n')
                     else:
-                        out.write('%5d:%s\n' % (lineno+1, line))
+                        out.write(f'{lineno:5d}:{line}\n')
                 out.write('</pre></div>\n')
             out.write('</div>\n')
         else:
@@ -148,7 +148,7 @@ function toggle(id) {
         score = rec['SCORE']
         name = stripid(item)
         if html:
-            key = ('R%003d' % rid)
+            key = (f'R{rid:003d}')
             words = list(reversed(splitwords(name)))
             cands = [ k for (_,k) in rec['CANDS'] ]
             wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
@@ -157,35 +157,34 @@ function toggle(id) {
                 cands[i] = w
             def f(w):
                 s = 'old' if w in words else 'new'
-                return '<code class=%s><mark>%s</mark></code>' % (s, q(w))
+                return f'<code class={s}><mark>{q(w)}</mark></code>'
             old = ' / '.join( f(w) for w in words )
             new = ' / '.join( f(k) for k in cands )
-            footer = ' &nbsp; (%.3f)' % score
+            footer = f' &nbsp; ({score:.3f})'
             if randomized:
                 footer = ''
                 print(title, key, score)
-            out.write('<h2>Proposal %d: %s &rarr; %s%s</h2>\n' %
-                      (rid, old, new, footer))
+            out.write(f'<h2>Proposal {rid}: {old} &rarr; {new}{footer}</h2>\n')
             if script is not None:
-                out.write('<div class=cat>Evaluation: <span id="%s" class=ui> </span></div>\n' % (key))
-            out.write('<h3><code class=old><mark>%s</mark></code></h3>' % stripid(item))
+                out.write(f'<div class=cat><span id="{key}" class=ui></span></div>\n')
+            out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
                 out.write('<div class=support>\n')
-                out.write('<h3><code class=new><mark>%s</mark></code> &nbsp; (<code>%s</code>)</h3>\n' %
-                          (stripid(evidence), feat))
+                out.write(f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
+                          f'&nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
-                id = ('S_%s_%s' % (rid,sid))
-                out.write('<a href="javascript:void(0)" onclick="toggle(\'%s\')">[+]</a> Match<br>\n' % id)
-                out.write('<div id=%s hidden>\n' % id)
+                id = f'S_{rid}_{sid}'
+                out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
+                out.write(f'<div id={id} hidden>\n')
                 showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
-            out.write('*** %r\n\n' % item)
-            out.write('%r %r %r\n\n' % (score, name, rec['CANDS']))
+            out.write(f'*** {item:r}\n\n')
+            out.write(f'{score} {name} {rec["CANDS"]}\n\n')
             showsrc(rec['SOURCE'], ' ')
             for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
-                out.write('+ %r %r\n' % (evidence, feat))
+                out.write(f'+ {evidence} {feat}\n')
                 showsrc(srcs1, 'E')
                 showsrc(srcs0, 'S')
         return

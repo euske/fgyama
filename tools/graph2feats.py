@@ -56,27 +56,27 @@ class FeatGenerator:
             return []
         elif n.kind in REFS or n.kind in ASSIGNS:
             if n.ref is self.ref0:
-                return [ '%s:SELF' % n.kind ]
+                return [ f'{n.kind}:SELF' ]
             elif n.ref.startswith('%'):
-                return [ '%s:%%%s' % (n.kind, w) for w in gettypewords(n.ref[1:]) ]
+                return [ f'{n.kind}:%{w}' for w in gettypewords(n.ref[1:]) ]
             else:
                 return []
         elif n.kind in CONDS:
             return [ n.kind ]
         elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
-            return [ '%s:STRING' % (n.kind) ]
+            return [ f'{n.kind}:STRING' ]
         elif n.kind in ('op_typecast', 'op_typecheck'):
-            return [ '%s:%s' % (n.kind, w) for w in gettypewords(n.data) ]
+            return [ f'{n.kind}:{w}' for w in gettypewords(n.data) ]
         elif n.data is None:
             return [ n.kind ]
         else:
-            return [ '%s:%s' % (n.kind, n.data) ]
+            return [ f'{n.kind}:{n.data}' ]
 
     def getnamefeats(self, n):
         if n.kind in CALLS:
             (data,_,_) = n.data.partition(' ')
             (name,_,_) = splitmethodname(data)
-            return [ '%s:%s' % (n.kind, w) for w in splitwords(name) ]
+            return [ f'{n.kind}:{w}' for w in splitwords(name) ]
         elif n.kind in REFS or n.kind in ASSIGNS:
             if n.ref is self.ref0:
                 return []
@@ -84,7 +84,7 @@ class FeatGenerator:
                 return []
             else:
                 if self.namefeat:
-                    return [ '%s:%s' % (n.kind, w) for w in splitwords(stripref(n.ref)) ]
+                    return [ f'{n.kind}:{w}' for w in splitwords(stripref(n.ref)) ]
                 else:
                     return [ n.kind ]
         else:
@@ -100,8 +100,7 @@ class FeatGenerator:
             self.done.add((v0,v1))
         n1 = v1.node
         if self.debug:
-            print('back: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
-                  (n1.nid, n1.kind, len(v1.inputs), fprev, lprev, count, len(self.done)))
+            print(f'back: {n1.nid}({n1.kind}), kids={len(v1.inputs)}, fprev={fprev}, lprev={lprev}, count={count}, done={len(self.done)}')
         chain = Cons(n1, chain)
         # list the input nodes to visit.
         inputs = []
@@ -175,8 +174,7 @@ class FeatGenerator:
             self.done.add((v0,v1))
         n1 = v1.node
         if self.debug:
-            print('forw: %s(%s), kids=%r, fprev=%r, lprev=%r, count=%r, done=%r' %
-                  (n1.nid, n1.kind, len(v1.outputs), fprev, lprev, count, len(self.done)))
+            print(f'forw: {n1.nid}({n1.kind}), kids={len(v1.outputs)}, fprev={fprev}, lprev={lprev}, count={count}, done={len(self.done)}')
         chain = Cons(n1, chain)
         # list the output nodes to visit.
         outputs = []
@@ -246,10 +244,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-d] [-o output] [-C tracecount] '
+        print(f'usage: {argv[0]} [-d] [-o output] [-C tracecount] '
               '[-n maxnodes] [-M maxoverrides] [-B srcdb] [-f|-b] '
               '[-F)unction] [-I)nterproc] [-N)amefeat] [-T)ypefeat] '
-              '[graph ...]' % argv[0])
+              '[graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'do:C:n:M:B:fbFINT')
@@ -284,7 +282,7 @@ def main(argv):
     db = None
     if outpath is not None:
         if os.path.exists(outpath):
-            print('Already exists: %r' % outpath)
+            print(f'Already exists: {outpath}')
             return 1
         db = FeatDB(outpath)
         db.init()
@@ -299,22 +297,20 @@ def main(argv):
                 outs += 1
         ok = (max(ins, outs) <= maxnodes)
         if not ok:
-            print('Skipped:', method, file=sys.stderr)
+            print(f'Skipped: {method}', file=sys.stderr)
         return ok
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        print('Loading: %r...' % path, file=sys.stderr)
+        print(f'Loading: {path}...', file=sys.stderr)
         builder.load(path, filter=filtermethod)
     if db is not None:
         for (path,srcid) in builder.srcmap.items():
             db.add_path(srcid, path)
 
     builder.run()
-    print('Read: %d sources, %d methods, %d funcalls, %d IPVertexes' %
-          (len(builder.srcmap), len(builder.methods),
-           sum( len(a) for a in builder.funcalls.values() ),
-           len(builder.vtxs)),
+    nfuncalls = sum( len(a) for a in builder.funcalls.values() )
+    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
           file=sys.stderr)
 
     item2nodes = {}
@@ -336,8 +332,8 @@ def main(argv):
             else:
                 nodes = item2nodes[item] = []
             nodes.append(node)
-    print('Items: %r, Nodes: %r' %
-          (len(item2nodes), sum( len(nodes) for nodes in item2nodes.values() )),
+    n = sum( len(nodes) for nodes in item2nodes.values() )
+    print(f'Items: {len(item2nodes)}, Nodes: {n}',
           file=sys.stderr)
 
     def getsrcs(nodes):
@@ -350,7 +346,7 @@ def main(argv):
     feat2fid = {}
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         if debug:
-            print('item: %r' % item)
+            print(f'Item: {item}')
         feats = {}
         for node in nodes:
             v0 = builder.vtxs[node]
@@ -397,7 +393,8 @@ def main(argv):
                 print('+FEAT', json.dumps(data))
             print()
 
-    print('\nTotal: %r (avg: %r)' % (nfeats, nfeats//len(item2nodes)),
+    avg = nfeats//len(item2nodes)
+    print(f'\nTotal: {nfeats} (avg: {avg})',
           file=sys.stderr)
 
     if db is not None:

@@ -174,7 +174,7 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-c)ontinue] graph.db index.db [graph ...]' % argv[0])
+        print(f'usage: {argv[0]} [-c)ontinue] graph.db index.db [graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'c')
@@ -186,7 +186,7 @@ def main(argv):
         if k == '-c': isnew = False
 
     def exists(path):
-        print('already exists: %r' % path)
+        print(f'already exists: {path}')
         return 111
 
     if not args: return usage()

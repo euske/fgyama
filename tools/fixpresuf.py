@@ -11,9 +11,7 @@ def get(d, k):
 
 def showtop(d, n=5):
     keys = sorted(d.keys(), key=lambda k:len(d[k]), reverse=True)
-    return ', '.join(
-        '%s(%d)' % (k[0], len(d[k]))
-        for k in keys[:n] )
+    return ', '.join( f'{k[0]}({len(d[k])})' for k in keys[:n] )
 
 def doit(refs):
     prefix = {}

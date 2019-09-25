@@ -50,8 +50,8 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print('usage: %s [-v] [-o output] {-T|-N} [-B basedir] [-c encoding] [-t threshold] '
-              'out.graph ...' % argv[0])
+        print(f'usage: {argv[0]} [-v] [-o output] {{-T|-N}} [-B basedir] [-c encoding] [-t threshold] '
+              'out.graph ...')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'vo:TNB:c:t:')
@@ -86,7 +86,7 @@ def main(argv):
     tokens = []
     freq = {}
     for path in args:
-        print('Loading: %r...' % path, file=sys.stderr)
+        print(f'Loading: {path!r}...', file=sys.stderr)
         for method in get_graphs(path):
             if method.style == 'initializer': continue
             if method.src is None: continue
@@ -153,20 +153,20 @@ def main(argv):
             c.add(g2)
             cls[g1] = cls[g2] = c
     for c in sorted(set(cls.values()), key=len, reverse=True):
-        fp.write('= %d\n' % len(c))
+        fp.write(f'= {len(c)}\n')
         for method in c:
-            fp.write('+ %s\n' % method.name)
+            fp.write(f'+ {method.name}\n')
             if not verbose: continue
             if method.src is None or method.ast is None: continue
             src = srcdb.get(method.src)
             (_,start,end) = method.ast
-            fp.write('# %s\n' % method.src)
+            fp.write(f'# {method.src}\n')
             ranges = [(start, end, 0)]
             for (lineno,line) in src.show(ranges):
                 if lineno is None:
                     fp.write(line.rstrip()+'\n')
                 else:
-                    fp.write('%4d: %s\n' % (lineno, line.rstrip()))
+                    fp.write(f'{lineno:4d}: {line.rstrip()}\n')
         fp.write('\n')
 
     if fp is not sys.stdout:

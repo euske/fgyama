@@ -38,8 +38,7 @@ class DFKlass:
         return
 
     def __repr__(self):
-        return ('<DFKlass(%s) methods=%r>' %
-                (self.name, len(self.methods)))
+        return (f'<DFKlass({self.name}) methods={len(self.methods)}>')
 
     def add_param(self, pname, ptype):
         self.params.append((pname, ptype))
@@ -76,8 +75,7 @@ class DFMethod:
         return
 
     def __repr__(self):
-        return ('<DFMethod(%s), name=%r (%d nodes)>' %
-                (self.gid, self.name, len(self.nodes)))
+        return (f'<DFMethod({self.gid}), name={self.name} ({len(self.nodes)} nodes)>')
 
     def __len__(self):
         return len(self.nodes)
@@ -122,7 +120,7 @@ class DFScope:
         return
 
     def __repr__(self):
-        return ('<DFScope(%s)>' % self.sid)
+        return (f'<DFScope({self.sid})>')
 
     def set_parent(self, parent):
         self.parent = parent
@@ -166,8 +164,7 @@ class DFNode:
         return
 
     def __repr__(self):
-        return ('<DFNode(%s): kind=%s, ref=%r, data=%r, ntype=%r, inputs=%r>' %
-                (self.nid, self.kind, self.ref, self.data, self.ntype, len(self.inputs)))
+        return (f'<DFNode({self.nid}): kind={self.kind}, ref={self.ref}, data={self.data}, ntype={self.ntype}, inputs={len(self.inputs)}>')
 
     def toxml(self):
         enode = Element('node')
@@ -276,7 +273,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
         elif name == 'fgyama':
             return self.handleFGYama
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
     def handleFGYama(self, name, attrs):
         if name is None:
@@ -298,7 +295,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
                 extends, implements, generic)
             return self.handleClass
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
     def handleClass(self, name, attrs):
         if name is None:
@@ -328,7 +325,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             ptype = attrs.get('type')
             self.klass.parameterized.append(ptype)
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
     def handleMethod(self, name, attrs):
         if name is None:
@@ -362,7 +359,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             self.method.root = self.scope
             return self.handleScope
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
     def handleScope(self, name, attrs):
         if name is None:
@@ -388,7 +385,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             self.scope.nodes.append(self.node)
             return self.handleNode
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
     def handleNode(self, name, attrs):
         if name is None:
@@ -409,7 +406,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             self.node.inputs[label] = src
             return
         else:
-            raise ValueError('Invalid tag: %r' % name)
+            raise ValueError(f'Invalid tag: {name}')
 
 
 ##  load_graphs
@@ -645,7 +642,7 @@ CLASSPATH.append(os.path.join(BASEDIR, 'target'))
 def run_fgyama(path):
     args = ['java', '-cp', ':'.join(CLASSPATH),
             'net.tabesugi.fgyama.Java2DF', path]
-    print('run_fgyama: %r' % args)
+    print(f'run_fgyama: {args!r}')
     p = Popen(args, stdout=PIPE)
     methods = list(load_graphs(p.stdout))
     p.wait()
@@ -658,7 +655,7 @@ def main(argv):
     from xml.etree.ElementTree import ElementTree
     from xml.etree.ElementTree import dump
     def usage():
-        print('usage: %s [-d] [file ...]' % argv[0])
+        print(f'usage: {argv[0]} [-d] [file ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'd')
@@ -680,8 +677,7 @@ def main(argv):
             nnodes += len(method.nodes)
             if debug:
                 dump(method.toxml())
-        print('%s: classes=%r, methods=%r, nodes=%r' %
-              (path, len(classes), nmethods, nnodes))
+        print(f'{path}: classes={len(classes)}, methods={nmethods}, nodes={nnodes}')
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
