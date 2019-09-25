@@ -190,7 +190,7 @@ function toggle(id) {
                 showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
-            out.write(f'*** {item:r}\n\n')
+            out.write(f'*** {item!r}\n\n')
             out.write(f'{score} {name} {rec["CANDS"]}\n\n')
             showsrc(rec['SOURCE'], ' ')
             for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
@@ -208,17 +208,18 @@ function toggle(id) {
             feats = rec['FEATS']
             score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
             rec['SCORE'] = score
+        recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
+        if randomized:
+            n = len(recs)
+            recs = [ recs[n*i//limit] for i in range(limit) ]
+            random.shuffle(recs)
+        elif limit:
+            recs = recs[:limit]
         (name,_) = os.path.splitext(os.path.basename(path))
         mtime = time.strftime('%Y%m%d', time.localtime(os.stat(path)[stat.ST_MTIME]))
         title = f'{name}_{mtime}'
         if html:
             showhtmlheaders(title)
-        if randomized:
-            random.shuffle(recs)
-        else:
-            recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
-        if limit:
-            recs = recs[:limit]
         for (rid,rec) in enumerate(recs):
             showrec(title, rid, rec)
 
