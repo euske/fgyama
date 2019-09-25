@@ -230,7 +230,10 @@ def main(argv):
         dbpath = args.pop(0)
         print('Reading from: %r' % dbpath)
         db = FeatDB(dbpath)
-        for (tid,item) in db:
+        items = db.get_items()
+        if args:
+            items = [ (tid,item) for (tid,item) in items if item in args ]
+        for (tid,item) in items:
             print('+ITEM', item)
             feat2srcs = db.get_feats(tid, resolve=True, source=source)
             for (feat,srcs) in feat2srcs.items():

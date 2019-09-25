@@ -142,7 +142,11 @@ class FeatGenerator:
             fs += [ lprev+':'+f for f in gettypefeats(n1) ]
         for f in fs:
             feat = (-(dist+1),fprev,f)
-            self.feats[feat] = chain
+            if feat in self.feats:
+                a = self.feats[feat]
+            else:
+                a = self.feats[feat] = []
+            a.append(chain)
             if self.debug:
                 print('  feat:', feat)
         # if this is a ref_var node, the fact that it refers to a certain variable
@@ -213,7 +217,11 @@ class FeatGenerator:
             fs += gettypefeats(v0.node)
         for f in fs:
             feat = ((dist+1),fprev,f)
-            self.feats[feat] = chain
+            if feat in self.feats:
+                a = self.feats[feat]
+            else:
+                a = self.feats[feat] = []
+            a.append(chain)
             if self.debug:
                 print('  feat:', feat)
         # if this is a assign_var node, the fact that it assigns to a certain variable
@@ -351,15 +359,25 @@ def main(argv):
         nfeats += len(feats)
 
         if db is not None:
+            fidcount = {}
             fid2srcs = { 0:getsrcs(nodes) }
-            for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
+            for (feat,chains) in sorted(feats.items(), key=lambda x:x[0]):
                 if feat in feat2fid:
                     fid = feat2fid[feat]
                 else:
                     fid = len(feat2fid)+1
                     feat2fid[feat] = fid
                     db.add_feat(feat, fid)
-                fid2srcs[fid] = getsrcs(chain)
+                if fid not in fidcount:
+                    fidcount[fid] = 0
+                fidcount[fid] += len(chains)
+                fid2srcs[fid] = getsrcs(chains[0])
+            # only keep major features. (threshold = max/2)
+            threshold = max(fidcount.values()) // 2
+            #threshold = sum(fidcount.values()) / len(fidcount) # avg
+            for (fid,c) in fidcount.items():
+                if c < threshold:
+                    del fid2srcs[fid]
             db.add_item(item, fid2srcs)
             sys.stderr.write('.'); sys.stderr.flush()
         else:
@@ -374,8 +392,8 @@ def main(argv):
                     (path,start,end) = src
                     annot.add(path, start, end)
                 annot.show_text()
-            for (feat,chain) in sorted(feats.items(), key=lambda x:x[0]):
-                data = (feat, getsrcs(chain))
+            for (feat,chains) in sorted(feats.items(), key=lambda x:x[0]):
+                data = (feat, getsrcs(chains[0]))
                 print('+FEAT', json.dumps(data))
             print()
 
