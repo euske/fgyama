@@ -2,12 +2,21 @@
 import sys
 import re
 import os.path
+import stat
 import json
+import time
 import math
 import random
 from srcdb import SourceDB, SourceAnnot
 from srcdb import q
 from getwords import stripid, splitwords
+
+CHOICES = [
+    'a:GOOD',
+    'b:ACCEPTABLE',
+    'c:BAD',
+    'z:UNDECIDABLE'
+]
 
 def getrecs(fp):
     rec = {}
@@ -96,8 +105,9 @@ function toggle(id) {
             return
         out.write('<script>\n')
         out.write(script)
+        out.write(f'CHOICES={json.dumps(CHOICES)};\n')
         out.write('</script>\n')
-        out.write('''<body onload="run('{title}', 'results')">
+        out.write('''<body onload="run('results', '{title}_eval', CHOICES)">
 <h1>Variable Rewrite Experiment: {title}</h1>
 <h2>Your Mission</h2>
 <ul>
@@ -194,7 +204,9 @@ function toggle(id) {
         with open(path) as fp:
             fp = fileinput.input(args)
             recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
-        (title,_) = os.path.splitext(os.path.basename(path))
+        (name,_) = os.path.splitext(os.path.basename(path))
+        mtime = time.strftime('%Y%m%d', time.localtime(os.stat(path)[stat.ST_MTIME]))
+        title = f'{name}_{mtime}'
         if html:
             showhtmlheaders(title)
         if randomized:
