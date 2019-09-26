@@ -68,7 +68,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                     continue
                 else:
                     styles = {'label': label}
-                out.write(h+' N{r(src.nid)} -> N{r(node.nid)} [{qp(styles)}];\n')
+                out.write(h+f' N{r(src.nid)} -> N{r(node.nid)} [{qp(styles)}];\n')
     out.write(h+'}\n')
     return
 
