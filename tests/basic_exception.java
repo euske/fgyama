@@ -4,13 +4,14 @@ public class basic_exception {
         public String text;
     }
 
-    public void foo() {
+    public void foo() throws A {
         String x = null;
         try {
             x = moo();
             throw new Exception();
         } catch (A e) {
             x = e.text;
+            throw e;
         } catch (Exception e) {
             System.out.println(e);
         }
