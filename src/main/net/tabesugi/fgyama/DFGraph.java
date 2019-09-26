@@ -1917,10 +1917,8 @@ public abstract class DFGraph {
         // it can catch all the specified Exceptions.
         DFFrame tryFrame = frame;
         for (int i = catches.size()-1; 0 <= i; i--) {
-            CatchClause cc = catches.get(i);
-            tryFrame = tryFrame.getChildByAST(cc);
+            tryFrame = tryFrame.getChildByAST(tryStmt);
         }
-
         // Execute the try clause.
         DFLocalScope tryScope = scope.getChildByAST(tryStmt);
         DFContext tryCtx = new DFContext(this, tryScope);
@@ -1930,24 +1928,22 @@ public abstract class DFGraph {
             if (src.hasValue()) continue;
             src.accept(ctx.get(src.getRef()));
         }
-
         // Catch each specified Exception in order.
-        DFFrame catchFrame = tryFrame;
         List<CatchNode> cats = new ArrayList<CatchNode>();
         for (CatchClause cc : catches) {
             SingleVariableDeclaration decl = cc.getException();
             DFLocalScope catchScope = scope.getChildByAST(cc);
-            DFKlass catchKlass = catchFrame.getCatchKlass();
+            DFKlass catchKlass = tryFrame.getCatchKlass();
             assert catchKlass != null;
             DFRef catchRef = catchScope.lookupVar(decl.getName());
             CatchNode cat = new CatchNode(this, catchScope, catchRef, decl);
             cats.add(cat);
             // Take care of exits.
             DFRef excRef = scope.lookupException(catchKlass);
-            DFFrame parentFrame = catchFrame.getOuterFrame();
-            for (DFExit exit : catchFrame.getExits()) {
+            DFFrame parentFrame = tryFrame.getOuterFrame();
+            for (DFExit exit : tryFrame.getExits()) {
                 DFNode src = exit.getNode();
-                if (exit.getFrame() == catchFrame) {
+                if (exit.getFrame() == tryFrame) {
                     // Exception caught.
                     assert exit instanceof ThrowExit;
                     DFRef ref = src.getRef();
@@ -1970,27 +1966,34 @@ public abstract class DFGraph {
                     }
                 } else {
                     // Further thrown outwards.
-                    CatchJoin join = new CatchJoin(
-                        this, scope, cc, src, catchKlass);
-                    exit.setNode(join);
                     parentFrame.addExit(exit);
                 }
             }
-            catchFrame = parentFrame;
+            tryFrame = parentFrame;
         }
+        assert tryFrame == frame;
 
         // Actual execution of catch clauses are performed in the outside frame.
         for (int i = 0; i < catches.size(); i++) {
             CatchClause cc = catches.get(i);
             DFLocalScope catchScope = scope.getChildByAST(cc);
+            DFFrame catchFrame = frame.getChildByAST(cc);
             DFContext catchCtx = new DFContext(this, catchScope);
-            catchCtx.set(cats.get(i));
+            CatchNode cat = cats.get(i);
+            catchCtx.set(cat);
             // Execute the catch clause.
             processStatement(
-                catchCtx, catchScope, frame, cc.getBody());
+                catchCtx, catchScope, catchFrame, cc.getBody());
             for (DFNode src : catchCtx.getFirsts()) {
                 if (src.hasValue()) continue;
                 src.accept(ctx.get(src.getRef()));
+            }
+            for (DFExit exit : catchFrame.getExits()) {
+                DFNode src = exit.getNode();
+                CatchJoin join = new CatchJoin(
+                    this, scope, cc, src, cat.getNodeType().toKlass());
+                exit.setNode(join);
+                frame.addExit(exit);
             }
         }
 

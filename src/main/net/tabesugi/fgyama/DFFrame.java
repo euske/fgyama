@@ -326,7 +326,7 @@ public class DFFrame {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
             List<CatchClause> catches = (List<CatchClause>) tryStmt.catchClauses();
-            DFFrame catchFrame = this;
+            DFFrame tryFrame = this;
             // Construct Frames in reverse order.
             for (int i = catches.size()-1; 0 <= i; i--) {
                 CatchClause cc = catches.get(i);
@@ -339,14 +339,14 @@ public class DFFrame {
                         "DFFrame.buildExpr: TypeNotFound (catch)",
                         this, e.name, decl);
                 }
-                catchFrame = catchFrame.addChild(catchKlass, cc);
+                tryFrame = tryFrame.addChild(catchKlass, tryStmt);
             }
-            DFFrame tryFrame = catchFrame;
             DFLocalScope tryScope = scope.getChildByAST(tryStmt);
             tryFrame.buildStmt(tryScope, tryStmt.getBody());
             for (CatchClause cc : catches) {
                 DFLocalScope catchScope = scope.getChildByAST(cc);
-                this.buildStmt(catchScope, cc.getBody());
+                DFFrame catchFrame = this.addChild("@CATCH", cc);
+                catchFrame.buildStmt(catchScope, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
