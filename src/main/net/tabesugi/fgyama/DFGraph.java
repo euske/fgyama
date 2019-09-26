@@ -1931,9 +1931,9 @@ public abstract class DFGraph {
             src.accept(ctx.get(src.getRef()));
         }
 
-        // Catch each speficied Exception in *a reverse order*.
+        // Catch each speficied Exception in order.
         DFFrame catchFrame = tryFrame;
-        for (int i = catches.size()-1; 0 <= i; i--) {
+        for (int i = 0; i < catches.size(); i++) {
             CatchClause cc = catches.get(i);
             SingleVariableDeclaration decl = cc.getException();
             DFLocalScope catchScope = scope.getChildByAST(cc);
@@ -1943,12 +1943,20 @@ public abstract class DFGraph {
             DFRef catchRef = catchScope.lookupVar(decl.getName());
             CatchNode cat = new CatchNode(this, catchScope, catchRef, decl);
             catchCtx.set(cat);
+            // Execute the catch clause.
+            processStatement(
+                catchCtx, catchScope, catchFrame, cc.getBody());
+            for (DFNode src : catchCtx.getFirsts()) {
+                if (src.hasValue()) continue;
+                src.accept(ctx.get(src.getRef()));
+            }
             // Take care of exits.
             DFRef excRef = scope.lookupException(catchKlass);
             DFFrame parentFrame = catchFrame.getOuterFrame();
             for (DFExit exit : catchFrame.getExits()) {
                 DFNode src = exit.getNode();
                 if (exit.getFrame() == catchFrame) {
+                    // Exception caught.
                     assert exit instanceof ThrowExit;
                     DFRef ref = src.getRef();
                     if (ref == excRef) {
@@ -1969,17 +1977,12 @@ public abstract class DFGraph {
                         ctx.set(dst);
                     }
                 } else {
+                    // Further thrown outwards.
                     CatchJoin join = new CatchJoin(
                         this, scope, cc, src, catchKlass);
                     exit.setNode(join);
                     parentFrame.addExit(exit);
                 }
-            }
-            processStatement(
-                catchCtx, catchScope, frame, cc.getBody());
-            for (DFNode src : catchCtx.getFirsts()) {
-                if (src.hasValue()) continue;
-                src.accept(ctx.get(src.getRef()));
             }
             catchFrame = parentFrame;
         }

@@ -341,7 +341,7 @@ public class DFFrame {
                 }
                 DFLocalScope catchScope = scope.getChildByAST(cc);
                 catchFrame = catchFrame.addChild(catchKlass, cc);
-                this.buildStmt(catchScope, cc.getBody());
+                catchFrame.buildStmt(catchScope, cc.getBody());
             }
             DFFrame tryFrame = catchFrame;
             DFLocalScope tryScope = scope.getChildByAST(tryStmt);
