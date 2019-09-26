@@ -1059,15 +1059,11 @@ public abstract class DFGraph {
                     } catch (MethodNotFound ee) {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
-                        DFMethod fallback = new DFMethod(
-                            klass, id, DFMethod.CallStyle.InstanceMethod,
-                            id, null, false);
-                        fallback.setFuncType(
-                            new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
+                        DFMethod fallback = klass.addFallbackMethod(id, argTypes);
                         Logger.error(
                             "DFMethod.processExpression: MethodNotFound",
                             this, klass, expr);
-                        Logger.info("Fallback method:", klass, ":", fallback);
+                        Logger.info("Fallback method:", fallback);
                         method = fallback;
                     }
                 }
@@ -1134,15 +1130,11 @@ public abstract class DFGraph {
                 } catch (MethodNotFound e) {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
-                    DFMethod fallback = new DFMethod(
-                        baseKlass, id, DFMethod.CallStyle.InstanceMethod,
-                        id, null, false);
-                    fallback.setFuncType(
-                        new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
+                    DFMethod fallback = baseKlass.addFallbackMethod(id, argTypes);
                     Logger.error(
                         "DFMethod.processExpression: MethodNotFound",
                         this, baseKlass, expr);
-                    Logger.info("Fallback method:", baseKlass, ":", fallback);
+                    Logger.info("Fallback method:", fallback);
                     method = fallback;
                 }
                 DFMethod methods[] = new DFMethod[] { method };

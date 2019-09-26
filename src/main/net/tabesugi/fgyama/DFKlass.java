@@ -931,6 +931,16 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return method;
     }
 
+    public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
+        DFMethod method = new DFMethod(
+            this, name, DFMethod.CallStyle.InstanceMethod, name,
+            _klassScope, false);
+        method.setFuncType(new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
+        // Do not adds to _methods because it might be being referenced.
+        _id2method.put(name, method);
+        return method;
+    }
+
     public void overrideMethods() {
         // override the methods.
         for (DFMethod method : _methods) {
