@@ -339,13 +339,15 @@ public class DFFrame {
                         "DFFrame.buildExpr: TypeNotFound (catch)",
                         this, e.name, decl);
                 }
-                DFLocalScope catchScope = scope.getChildByAST(cc);
                 catchFrame = catchFrame.addChild(catchKlass, cc);
-                catchFrame.buildStmt(catchScope, cc.getBody());
             }
             DFFrame tryFrame = catchFrame;
             DFLocalScope tryScope = scope.getChildByAST(tryStmt);
             tryFrame.buildStmt(tryScope, tryStmt.getBody());
+            for (CatchClause cc : catches) {
+                DFLocalScope catchScope = scope.getChildByAST(cc);
+                this.buildStmt(catchScope, cc.getBody());
+            }
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
                 this.buildStmt(scope, finBlock);
