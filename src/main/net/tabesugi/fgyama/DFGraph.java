@@ -2345,7 +2345,7 @@ public abstract class DFGraph {
         DFKlass klass, List<BodyDeclaration> decls)
         throws InvalidSyntax, EntityNotFound {
 
-        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE);
+        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -2382,10 +2382,8 @@ public abstract class DFGraph {
 
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFLocalScope innerScope = scope.getChildByAST(initializer);
-                frame.buildStmt(innerScope, initializer.getBody());
-                processStatement(
-                    ctx, innerScope, frame, initializer.getBody());
+                frame.buildStmt(initializer.getBody());
+                processStatement(ctx, scope, frame, initializer.getBody());
 
             } else {
                 throw new InvalidSyntax(body);
@@ -2400,14 +2398,14 @@ public abstract class DFGraph {
         ASTNode body)
         throws InvalidSyntax, EntityNotFound {
 
-        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE);
+        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
 
         if (body instanceof Statement) {
-            frame.buildStmt(scope, (Statement)body);
+            frame.buildStmt((Statement)body);
             processStatement(
                 ctx, scope, frame, (Statement)body);
         } else if (body instanceof Expression) {
-            frame.buildExpr(scope, (Expression)body);
+            frame.buildExpr((Expression)body);
             processExpression(
                 ctx, scope, frame, (Expression)body);
             DFRef ref = scope.lookupReturn();
