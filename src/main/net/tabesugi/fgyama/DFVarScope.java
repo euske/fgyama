@@ -60,6 +60,11 @@ public abstract class DFVarScope {
         }
     }
 
+    public boolean hasRef(DFRef ref) {
+        if (_outer == null) return false;
+        return _outer.hasRef(ref);
+    }
+
     public DFRef lookupVar(String id)
         throws VariableNotFound {
         if (_outer == null) throw new VariableNotFound(id);
@@ -91,12 +96,12 @@ public abstract class DFVarScope {
         assert _outer != null;
         return _outer.lookupReturn();
     }
-    
+
     public DFRef lookupException(DFType type) {
         assert _outer != null;
         return _outer.lookupException(type);
     }
-    
+
     // dump: for debugging.
     public void dump() {
         dump(System.err, "");

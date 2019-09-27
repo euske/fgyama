@@ -1035,14 +1035,13 @@ public class DFFrame {
     }
 
     private void expandLocalRefs(DFFrame innerFrame) {
-        DFLocalScope innerScope = innerFrame._scope;
         for (DFRef ref : innerFrame._inputRefs) {
-            if (innerScope == _scope || !innerScope.hasRef(ref)) {
+            if (_scope.hasRef(ref)) {
                 _inputRefs.add(ref);
             }
         }
         for (DFRef ref : innerFrame._outputRefs) {
-            if (innerScope == _scope || !innerScope.hasRef(ref)) {
+            if (_scope.hasRef(ref)) {
                 _outputRefs.add(ref);
             }
         }

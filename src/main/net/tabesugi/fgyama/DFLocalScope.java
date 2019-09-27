@@ -62,15 +62,17 @@ public class DFLocalScope extends DFVarScope {
     }
 
     @Override
+    public boolean hasRef(DFRef ref) {
+        if (_vars.contains(ref)) return true;
+        return super.hasRef(ref);
+    }
+
+    @Override
     public DFRef lookupVar(String id)
         throws VariableNotFound {
         DFRef ref = _id2var.get(id);
         if (ref != null) return ref;
         return super.lookupVar(id);
-    }
-
-    public boolean hasRef(DFRef ref) {
-        return _vars.contains(ref);
     }
 
     @Override
