@@ -1492,7 +1492,7 @@ public abstract class DFGraph {
         throws InvalidSyntax {
 
         String loopId = Utils.encodeASTNode(ast);
-        // Add four nodes for each loop variable.
+        // Add three nodes (Begin, Repeat and End) for each variable.
         Map<DFRef, LoopBeginNode> begins =
             new HashMap<DFRef, LoopBeginNode>();
         Map<DFRef, LoopRepeatNode> repeats =
@@ -1580,17 +1580,22 @@ public abstract class DFGraph {
         // Redirect the continue statements.
         assert frame != loopFrame;
         for (DFExit exit : loopFrame.getExits()) {
-            if (exit.getFrame() != loopFrame) continue;
-            if (exit instanceof ContinueExit) {
-                DFNode node = exit.getNode();
-                DFNode end = ends.get(node.getRef());
+            DFNode node = exit.getNode();
+            DFRef ref = node.getRef();
+            if (exit.getFrame() != loopFrame) {
+                JoinNode join = new JoinNode(
+                    this, scope, ref.getRefType(), ref, null, condValue);
+                join.recv(true, node);
+                exit.setNode(join);
+            } else if (exit instanceof ContinueExit) {
+                DFNode end = ends.get(ref);
                 if (end == null) {
-                    end = ctx.get(node.getRef());
+                    end = ctx.get(ref);
                 }
                 if (node.canMerge()) {
                     node.merge(end);
                 }
-                ends.put(node.getRef(), node);
+                ends.put(ref, node);
             }
         }
 
