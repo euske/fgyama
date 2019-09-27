@@ -119,8 +119,8 @@
         </node>
         <node id="M3_moo_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M3_moo_N6" ref="@Lbasic_funcs;/.z" type="I"/>
-        <node id="M3_moo_N31" kind="output" ref="#return" type="I">
-          <link src="M3_moo_N27"/>
+        <node id="M3_moo_N27" kind="output" ref="#return" type="I">
+          <link src="M3_moo_N25"/>
         </node>
         <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="M3_moo_N4" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
@@ -148,15 +148,10 @@
             <link label="L" src="M3_moo_N8"/>
             <link label="R" src="M3_moo_N9"/>
           </node>
-          <node id="M3_moo_N27" kind="join" ref="#return" type="I">
+          <node id="M3_moo_N25" kind="join" ref="#return" type="I">
             <link label="cond" src="M3_moo_N10"/>
             <link label="true" src="M3_moo_N14"/>
-            <link label="false" src="M3_moo_N25"/>
-          </node>
-          <node id="M3_moo_N28" kind="join" ref="@Lbasic_funcs;/.z" type="I">
-            <link label="cond" src="M3_moo_N10"/>
-            <link label="true" src="M3_moo_N4"/>
-            <link label="false" src="M3_moo_N4"/>
+            <link label="false" src="M3_moo_N24"/>
           </node>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:316:353">
             <node data="Lbasic_funcs;.foo()I" id="M3_moo_N12" kind="call" type="I">
@@ -173,38 +168,38 @@
             </node>
           </scope>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:359:401">
-            <node id="M3_moo_N17" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
+            <node id="M3_moo_N16" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
               <ast end="385" start="384" type="42"/>
               <link src="M3_moo_N2"/>
             </node>
-            <node data="1" id="M3_moo_N19" kind="value" type="I">
+            <node data="1" id="M3_moo_N18" kind="value" type="I">
               <ast end="387" start="386" type="34"/>
             </node>
-            <node data="-" id="M3_moo_N20" kind="op_infix" type="I">
+            <node data="-" id="M3_moo_N19" kind="op_infix" type="I">
               <ast end="387" start="384" type="27"/>
-              <link label="L" src="M3_moo_N17"/>
-              <link label="R" src="M3_moo_N19"/>
+              <link label="L" src="M3_moo_N16"/>
+              <link label="R" src="M3_moo_N18"/>
             </node>
-            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N21" kind="call" type="I">
+            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N20" kind="call" type="I">
               <ast end="388" start="380" type="32"/>
               <link label="#this" src="M3_moo_N3"/>
-              <link label="#arg0" src="M3_moo_N20"/>
+              <link label="#arg0" src="M3_moo_N19"/>
             </node>
-            <node id="M3_moo_N22" kind="receive" type="I">
+            <node id="M3_moo_N21" kind="receive" type="I">
               <ast end="388" start="380" type="32"/>
-              <link src="M3_moo_N21"/>
+              <link src="M3_moo_N20"/>
             </node>
-            <node data="2" id="M3_moo_N23" kind="value" type="I">
+            <node data="2" id="M3_moo_N22" kind="value" type="I">
               <ast end="390" start="389" type="34"/>
             </node>
-            <node data="+" id="M3_moo_N24" kind="op_infix" type="I">
+            <node data="+" id="M3_moo_N23" kind="op_infix" type="I">
               <ast end="390" start="380" type="27"/>
-              <link label="L" src="M3_moo_N22"/>
-              <link label="R" src="M3_moo_N23"/>
+              <link label="L" src="M3_moo_N21"/>
+              <link label="R" src="M3_moo_N22"/>
             </node>
-            <node id="M3_moo_N25" kind="return" ref="#return" type="I">
+            <node id="M3_moo_N24" kind="return" ref="#return" type="I">
               <ast end="391" start="373" type="41"/>
-              <link src="M3_moo_N24"/>
+              <link src="M3_moo_N23"/>
             </node>
           </scope>
         </scope>
