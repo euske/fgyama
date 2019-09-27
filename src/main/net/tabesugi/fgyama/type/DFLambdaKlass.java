@@ -122,7 +122,9 @@ class DFLambdaKlass extends DFKlass {
         assert _funcMethod != null;
 	assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
-        assert funcMethod != null;
+        // BaseKlass does not have a function method.
+        // This happens when baseKlass type is undefined.
+        if (funcMethod == null) return;
 	_funcMethod.setFuncType(funcMethod.getFuncType());
     }
 

@@ -1159,7 +1159,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getType(id);
 	    lambdaKlass.load();
 	    lambdaKlass.setBaseKlass(type.toKlass());
-	    defined.add(lambdaKlass);
+            if (lambdaKlass.isDefined()) {
+                defined.add(lambdaKlass);
+            }
 	}
     }
 
