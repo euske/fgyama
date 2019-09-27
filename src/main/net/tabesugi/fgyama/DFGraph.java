@@ -1920,7 +1920,7 @@ public abstract class DFGraph {
 
         // Find the innermost catch frame so that
         // it can catch all the specified Exceptions.
-        DFFrame tryFrame = frame;
+        DFFrame tryFrame = frame.getChildByAST(tryStmt);
         for (int i = catches.size()-1; 0 <= i; i--) {
             tryFrame = tryFrame.getChildByAST(tryStmt);
         }
@@ -1976,7 +1976,7 @@ public abstract class DFGraph {
             }
             tryFrame = parentFrame;
         }
-        assert tryFrame == frame;
+        assert tryFrame.getOuterFrame() == frame;
 
         // Actual execution of catch clauses are performed in the outside frame.
         for (int i = 0; i < catches.size(); i++) {

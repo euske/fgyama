@@ -379,8 +379,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 		}
             } else if (body instanceof Initializer) {
                 Initializer initializer = (Initializer)body;
-                DFLocalScope innerScope = scope.getChildByAST(body);
-                this.enumRefsStmt(defined, innerScope, initializer.getBody());
+                this.enumRefsStmt(defined, scope, initializer.getBody());
             }
         }
     }
@@ -1550,8 +1549,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             for (BodyDeclaration body : decls) {
                 if (body instanceof Initializer) {
                     Initializer initializer = (Initializer)body;
-                    DFLocalScope innerScope = this.getChildByAST(body);
-                    innerScope.buildStmt(finder, initializer.getBody());
+                    this.buildStmt(finder, initializer.getBody());
                 }
             }
         }

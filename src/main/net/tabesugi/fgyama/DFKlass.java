@@ -391,10 +391,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
 	    } else if (body instanceof Initializer) {
 		Initializer initializer = (Initializer)body;
-                DFLocalScope innerScope = _initMethod.getScope().addChild(body);
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
-                    this.buildTypeFromStmt(stmt, _initMethod, innerScope);
+                    this.buildTypeFromStmt(stmt, _initMethod, _initMethod.getScope());
                 }
 
 	    } else {

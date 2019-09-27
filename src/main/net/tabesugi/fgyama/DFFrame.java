@@ -331,8 +331,8 @@ public class DFFrame {
 	    // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
             List<CatchClause> catches = (List<CatchClause>) tryStmt.catchClauses();
-            DFFrame tryFrame = this;
             DFLocalScope tryScope = _scope.getChildByAST(tryStmt);
+            DFFrame tryFrame = this.addChild("@TRY", tryStmt, tryScope);
             // Construct Frames in reverse order.
             for (int i = catches.size()-1; 0 <= i; i--) {
                 CatchClause cc = catches.get(i);
