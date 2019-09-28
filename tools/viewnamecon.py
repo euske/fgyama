@@ -18,67 +18,8 @@ CHOICES = [
     'z:UNDECIDABLE'
 ]
 
-def getrecs(fp):
-    rec = {}
-    for line in fp:
-        line = line.strip()
-        if line.startswith('+'):
-            (k,_,v) = line[1:].partition(' ')
-            rec[k] = json.loads(v)
-        elif not line:
-            yield rec
-            rec = {}
-    return
-
-def tocamelcase(words):
-    return ''.join(
-        (w if i == 0 else w[0].upper()+w[1:])
-        for (i,w) in enumerate(words) )
-
-def main(argv):
-    import fileinput
-    import getopt
-    def usage():
-        print(f'usage: {argv[0]} [-o output] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
-        return 100
-    try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:S:n:Re:c:')
-    except getopt.GetoptError:
-        return usage()
-    output = None
-    html = False
-    script = None
-    encoding = None
-    randomized = False
-    excluded = set()
-    limit = 10
-    for (k, v) in opts:
-        if k == '-o':
-            output = v
-            html = output.endswith('.html')
-        elif k == '-S':
-            with open(v) as fp:
-                script = fp.read()
-        elif k == '-n': limit = int(v)
-        elif k == '-R': randomized = True
-        elif k == '-e':
-            with open(v) as fp:
-                for rec in getrecs(fp):
-                    excluded.update(rec['ITEMS'])
-        elif k == '-c': encoding = v
-    if not args: return usage()
-    path = args.pop(0)
-    srcdb = SourceDB(path, encoding)
-
-    out = sys.stdout
-    if output is not None:
-        if os.path.exists(output):
-            print(f'Already exists: {output!r}')
-            return 1
-        out = open(output, 'w')
-
-    def showhtmlheaders(title):
-        out.write('''<!DOCTYPE html>
+def showhtmlheaders(out, title, script=None):
+    out.write('''<!DOCTYPE html>
 <meta charset="UTF-8" />
 <style>
 h1 { border-bottom: 4px solid black; }
@@ -100,14 +41,14 @@ function toggle(id) {
 }
 </script>
 ''')
-        if script is None:
-            out.write('<body>\n')
-            return
-        out.write('<script>\n')
-        out.write(script)
-        out.write(f'CHOICES={json.dumps(CHOICES)};\n')
-        out.write('</script>\n')
-        out.write('''<body onload="run('results', '{title}_eval', CHOICES)">
+    if script is None:
+        out.write('<body>\n')
+        return
+    out.write('<script>\n')
+    out.write(script)
+    out.write(f'CHOICES={json.dumps(CHOICES)};\n')
+    out.write('</script>\n')
+    out.write('''<body onload="run('results', '{title}_eval', CHOICES)">
 <h1>Variable Rewrite Experiment: {title}</h1>
 <h2>Your Mission</h2>
 <ul>
@@ -128,6 +69,70 @@ function toggle(id) {
 <li> <u>Do not consult others about the code during this experiment.</u>
 </ul>
 '''.format(title=title))
+    return
+
+def getrecs(fp):
+    rec = {}
+    for line in fp:
+        line = line.strip()
+        if line.startswith('+'):
+            (k,_,v) = line[1:].partition(' ')
+            rec[k] = json.loads(v)
+        elif not line:
+            yield rec
+            rec = {}
+    return
+
+def tocamelcase(words):
+    return ''.join(
+        (w if i == 0 else w[0].upper()+w[1:])
+        for (i,w) in enumerate(words) )
+
+def main(argv):
+    import fileinput
+    import getopt
+    def usage():
+        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
+        return 100
+    try:
+        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:Re:c:')
+    except getopt.GetoptError:
+        return usage()
+    output = None
+    html = False
+    title = None
+    script = None
+    encoding = None
+    randomized = False
+    excluded = set()
+    limit = 10
+    timestamp = time.strftime('%Y%m%d')
+    for (k, v) in opts:
+        if k == '-o':
+            output = v
+            html = output.endswith('.html')
+        elif k == '-T':
+            title = v
+        elif k == '-S':
+            with open(v) as fp:
+                script = fp.read()
+        elif k == '-n': limit = int(v)
+        elif k == '-R': randomized = True
+        elif k == '-e':
+            with open(v) as fp:
+                for rec in getrecs(fp):
+                    excluded.update(rec['ITEMS'])
+        elif k == '-c': encoding = v
+    if not args: return usage()
+    path = args.pop(0)
+    srcdb = SourceDB(path, encoding)
+
+    out = sys.stdout
+    if output is not None:
+        if os.path.exists(output):
+            print(f'Already exists: {output!r}')
+            return 1
+        out = open(output, 'w')
 
     def showsrc(srcs, klass):
         annot = SourceAnnot(srcdb)
@@ -158,7 +163,7 @@ function toggle(id) {
         score = rec['SCORE']
         name = stripid(item)
         if html:
-            key = (f'R{rid:003d}')
+            key = (f'R{title}_{rid:003d}')
             words = list(reversed(splitwords(name)))
             cands = [ k for (_,k) in rec['CANDS'] ]
             wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
@@ -173,7 +178,7 @@ function toggle(id) {
             footer = f' &nbsp; ({score:.3f})'
             if randomized:
                 footer = ''
-                print(title, key, score)
+                print(key, score)
             out.write(f'<h2>Proposal {rid}: {old} &rarr; {new}{footer}</h2>\n')
             if script is not None:
                 out.write(f'<div class=cat><span id="{key}" class=ui></span></div>\n')
@@ -184,7 +189,7 @@ function toggle(id) {
                 out.write(f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
                           f'&nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
-                id = f'S_{rid}_{sid}'
+                id = f'S_{key}_{sid}'
                 out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
                 out.write(f'<div id={id} hidden>\n')
                 showsrc(srcs0, 'match')
@@ -200,9 +205,13 @@ function toggle(id) {
         return
 
     #
+    if html:
+        if title is None:
+            title = f'{args[0]}_{timestamp}'
+        showhtmlheaders(out, title, script)
+
     for path in args:
         with open(path) as fp:
-            fp = fileinput.input(args)
             recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
         for rec in recs:
             feats = rec['FEATS']
@@ -216,12 +225,8 @@ function toggle(id) {
         elif limit:
             recs = recs[:limit]
         (name,_) = os.path.splitext(os.path.basename(path))
-        mtime = time.strftime('%Y%m%d', time.localtime(os.stat(path)[stat.ST_MTIME]))
-        title = f'{name}_{mtime}'
-        if html:
-            showhtmlheaders(title)
         for (rid,rec) in enumerate(recs):
-            showrec(title, rid, rec)
+            showrec(name, rid, rec)
 
     return 0
 
