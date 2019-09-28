@@ -32,34 +32,34 @@ def main(argv):
         elif k == '-t': threshold = float(v)
 
     fp = fileinput.input(args)
-    i2c = {}
+    ic = {}
     clusters = []
     for rec in getrecs(fp):
         t = rec['SIM']
         if t < threshold: continue
         (i1, i2) = rec['ITEMS']
-        if i1 in i2c and i2 in i2c:
-            c1 = i2c[i1]
-            c2 = i2c[i2]
+        if i1 in ic and i2 in ic:
+            c1 = ic[i1]
+            c2 = ic[i2]
             if c1 is not c2:
                 c1.update(c2)
-                for i in c:
-                    i2c[i] = c1
+                for i in c2:
+                    ic[i] = c1
                 clusters.remove(c2)
-        elif i1 in i2c:
-            c = i2c[i1]
+        elif i1 in ic:
+            c = ic[i1]
             c.add(i2)
-            i2c[i2] = c
-        elif i2 in i2c:
-            c = i2c[i2]
+            ic[i2] = c
+        elif i2 in ic:
+            c = ic[i2]
             c.add(i1)
-            i2c[i1] = c
+            ic[i1] = c
         else:
             c = set([i1, i2])
-            i2c[i1] = i2c[i2] = c
+            ic[i1] = ic[i2] = c
             clusters.append(c)
 
-    assert len(i2c) == sum( len(c) for c in clusters )
+    assert len(ic) == sum( len(c) for c in clusters )
     for c in clusters:
         print('+CLUSTER', len(c))
         for i in c:
