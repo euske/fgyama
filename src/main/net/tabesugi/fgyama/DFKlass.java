@@ -1491,7 +1491,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         @Override
         public boolean isLocal() {
-            return true;
+            return false;
         }
 
         @Override
