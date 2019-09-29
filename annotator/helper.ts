@@ -13,40 +13,6 @@ function toArray(coll: HTMLCollectionOf<Element>): Element[] {
     return a;
 }
 
-function makeSelect(e: Element, id: string, choices: string[]) {
-    let select = document.createElement('select');
-    select.id = id;
-    for (let k of choices) {
-        let i = k.indexOf(':');
-        let option = document.createElement('option');
-        let v = k.substr(0, i);
-        option.setAttribute('value', v);
-        option.innerText = v+') '+k.substr(i+1);
-        select.appendChild(option);
-    }
-    e.appendChild(select);
-    return select;
-}
-
-function makeInput(e: Element, id: string, size: number) {
-    let input = document.createElement('input');
-    input.id = id;
-    input.size = size;
-    e.appendChild(input);
-    return input;
-}
-
-function makeCheckbox(e: Element, id: string, caption: string) {
-    let label = document.createElement('label');
-    let checkbox = document.createElement('input');
-    checkbox.id = id;
-    checkbox.setAttribute('type', 'checkbox');
-    label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(' '+caption));
-    e.appendChild(label);
-    return checkbox;
-}
-
 
 //  Item
 //
@@ -110,19 +76,19 @@ class ItemDB {
 	this.items = {};
     }
 
-    init(choices: string[]) {
+    init() {
 	for (let e of toArray(document.getElementsByClassName('ui'))) {
             let cid = e.id;
-	    e.appendChild(document.createTextNode('Evaluation: '));
-            let sel1 = makeSelect(e, 'SC'+cid, choices);
-            sel1.addEventListener(
-		'change', (ev) => { this.onChoiceChanged(ev); });
-	    e.appendChild(document.createTextNode(' \xa0 Comment: '));
-            let fld1 = makeInput(e, 'IC'+cid, 30);
-            fld1.addEventListener(
-		'change', (ev) => { this.onCommentChanged(ev); });
-            e.appendChild(document.createTextNode(' '));
-            this.items[cid] = new Item(cid);
+            let item = new Item(cid);
+            this.items[cid] = item;
+            for (let sel of toArray(e.getElementsByTagName('select'))) {
+                sel.addEventListener(
+		    'change', (ev) => { this.onChoiceChanged(item, ev); });
+            }
+            for (let fld of toArray(e.getElementsByTagName('input'))) {
+                fld.addEventListener(
+		    'change', (ev) => { this.onCommentChanged(item, ev); });
+            }
 	}
 	this.loadTextArea();
 	this.textarea.addEventListener(
@@ -139,24 +105,20 @@ class ItemDB {
 	console.info("onTextChanged");
     }
 
-    onChoiceChanged(ev: Event) {
+    onChoiceChanged(item: Item, ev: Event) {
         let e = ev.target as HTMLSelectElement;
-        let cid = e.id.substr(2);
-        let item = this.items[cid];
 	item.setChoice(e.value);
         this.exportData();
 	this.saveTextArea();
-	console.info("onChoiceChanged: ", cid);
+	console.info("onChoiceChanged: ", item);
     }
 
-    onCommentChanged(ev: Event) {
+    onCommentChanged(item: Item, ev: Event) {
         let e = ev.target as HTMLInputElement;
-        let cid = e.id.substr(2);
-        let item = this.items[cid];
 	item.setComment(e.value);
         this.exportData();
 	this.saveTextArea();
-	console.info("onCommentChanged: ", cid);
+	console.info("onCommentChanged: ", item);
     }
 
     saveTextArea() {
@@ -214,8 +176,8 @@ class ItemDB {
 }
 
 // main
-function run(id: string, fieldName: string, choices: string[]) {
+function run(id: string, fieldName: string) {
     let textarea = document.getElementById(id) as HTMLTextAreaElement;
     let db = new ItemDB(textarea, fieldName);
-    db.init(choices);
+    db.init();
 }

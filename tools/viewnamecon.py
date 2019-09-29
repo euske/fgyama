@@ -19,6 +19,10 @@ CHOICES = [
     'z:UNDECIDABLE'
 ]
 
+def camelCase(words):
+    return ''.join(
+        (w[0].upper()+w[1:] if 0 < i else w) for (i,w) in enumerate(words))
+
 def showhtmlheaders(out, title, script=None):
     out.write('''<!DOCTYPE html>
 <meta charset="UTF-8" />
@@ -46,11 +50,8 @@ function toggle(id) {
     if script is None:
         out.write('<body>\n')
         return
-    out.write('<script>\n')
-    out.write(script)
-    out.write(f'CHOICES={json.dumps(CHOICES)};\n')
-    out.write('</script>\n')
-    out.write('''<body onload="run('results', '{title}_eval', CHOICES)">
+    out.write(f'<script>\n{script}\n</script>\n')
+    out.write('''<body onload="run('results', '{title}_eval')">
 <h1>Variable Rewrite Experiment: {title}</h1>
 <h2>Your Mission</h2>
 <ul>
@@ -174,28 +175,35 @@ def main(argv):
             wordincands = [ w for w in words if w in cands ]
             for (i,w) in zip(wordidx, wordincands):
                 cands[i] = w
-            def f(w):
-                s = 'old' if w in words else 'new'
-                return f'<code class={s}><mark>{q(w)}</mark></code>'
-            old = ' / '.join( f(w) for w in words )
-            new = ' / '.join( f(k) for k in cands )
+            old = camelCase(words)
+            new = camelCase(cands)
+            baseline = 'base'
             footer = f' &nbsp; ({score:.3f})'
             if randomized:
                 footer = ''
                 print(key, score)
             out.write(f'<h2>Proposal {rid}: {old} &rarr; {new}{footer}</h2>\n')
             if script is not None:
-                out.write(f'<div class=cat><span id="{key}" class=ui></span></div>\n')
+                choices = [ ('a',new), ('b',old), ('c',baseline), ('z','(none)') ]
+                options = ''.join(
+                    f'<option value="{q(v)}">{q(c)}</option>' for (v,c) in choices)
+                out.write(
+                    f'<div class=cat><span id="{key}" class=ui>'
+                    f'Choice: <select>{options}</select> &nbsp; '
+                    'Comment: <input size="30" /></span></div>\n')
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
                 out.write('<div class=support>\n')
-                out.write(f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
-                          f'&nbsp; (<code>{feat}</code>)</h3>\n')
+                out.write(
+                    f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
+                    f'&nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
                 id = f'{key}_{sid}'
-                out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
-                out.write(f'<div id={id} hidden>\n')
+                out.write(
+                    f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
+                out.write(
+                    f'<div id={id} hidden>\n')
                 showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
