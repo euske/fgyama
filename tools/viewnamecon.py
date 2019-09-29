@@ -11,14 +11,6 @@ from srcdb import SourceDB, SourceAnnot
 from srcdb import q
 from getwords import stripid, splitwords
 
-CHOICES = [
-    'a:GOOD',
-    'b:ACCEPTABLE',
-    'c:BAD-1',
-    'd:BAD-2',
-    'z:UNDECIDABLE'
-]
-
 def camelCase(words):
     return ''.join(
         (w[0].upper()+w[1:] if 0 < i else w) for (i,w) in enumerate(words))
@@ -32,6 +24,7 @@ h1 { border-bottom: 4px solid black; }
 h2 { color: white; background: black; padding: 4px; }
 h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
 pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
+ul > li { margin-bottom: 0.5em; }
 .support { margin: 1em; padding: 1em; border: 2px solid black; }
 .old { background: #ccccff; }
 .old mark { color: white; background: blue; }
@@ -56,17 +49,10 @@ function toggle(id) {
 <h2>Your Mission</h2>
 <ul>
 <li> For each <span class=old>blue</span> snippet, look at the <code class=old><mark>variable</mark></code>
-    and choose if one of the <code class=new><mark>rewrites</mark></code> helps understanding the code.<br>
-  Choose either:
-  <ol type=a>
-  <li> The rewrite is GOOD.
-  <li> The rewrite is ACCEPTABLE.
-  <li> The rewrite is BAD-1. (no relation)
-  <li> The rewrite is BAD-2. (name conflict)
-  </ol><ol type=a start="26">
-  <li> UNDECIDABLE (not enough information).
-  </ol>
-  <p> (Notice: only 10 to 20% of the rewrites are GOOD or ACCEPTABLE.)
+    and choose which candidate improves the readability of the code.
+<li> The proposed <code class=new><mark>name</mark></code> is highlighted yellow.
+<li> Click the <a href="javascript:void(0)">[+]</a> to see the <span class=new>supports</span> of the rewrite.
+<li> If there's not enough information, choose <code>???</code>.
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
@@ -177,26 +163,31 @@ def main(argv):
                 cands[i] = w
             old = camelCase(words)
             new = camelCase(cands)
-            baseline = 'base'
-            footer = f' &nbsp; ({score:.3f})'
+            footer = ''
             if randomized:
-                footer = ''
                 print(key, score)
-            out.write(f'<h2>Proposal {rid}: {old} &rarr; {new}{footer}</h2>\n')
+            else:
+                footer = f' ({score:.3f})'
+            out.write(f'<h2>Proposal {rid}: <span class=old><mark>{old}</mark></span> &rarr; <span class=new><mark>{new}</mark></span>{footer}</h2>\n')
             if script is not None:
-                choices = [ ('a',new), ('b',old), ('c',baseline), ('z','(none)') ]
+                choices = [('z','???'), ('a',new), ('b',old)]
+                if 'DEFAULT' in rec:
+                    base = rec['DEFAULT']
+                    if base != new and base != old:
+                        choices.append(('c', base))
                 options = ''.join(
                     f'<option value="{q(v)}">{q(c)}</option>' for (v,c) in choices)
                 out.write(
                     f'<div class=cat><span id="{key}" class=ui>'
-                    f'Choice: <select>{options}</select> &nbsp; '
+                    f'Choice: <code class=old><mark>{old}</mark></code> &rarr; '
+                    f'<select>{options}</select> &nbsp; '
                     'Comment: <input size="30" /></span></div>\n')
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
                 out.write('<div class=support>\n')
                 out.write(
-                    f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
+                    f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> '
                     f'&nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
                 id = f'{key}_{sid}'

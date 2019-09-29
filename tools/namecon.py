@@ -45,18 +45,18 @@ def main(argv):
     import getopt
     def usage():
         print(f'usage: {argv[0]} '
-              '[-d] [-o path] [-i path] [-t threshold] [-f nfeats] [-v vars] '
+              '[-d] [-o path] [-i path] [-t threshold] [-s supports] [-v vars] '
               'feats.db [items ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:t:f:v:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:t:s:v:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     outpath = None
     inpath = None
     threshold = 0.75
-    nfeats = 3
+    maxsupports = 3
     defaults = {}
     C = 0.7
     for (k, v) in opts:
@@ -64,7 +64,7 @@ def main(argv):
         elif k == '-o': outpath = v
         elif k == '-i': inpath = v
         elif k == '-t': threshold = float(v)
-        elif k == '-f': nfeats = int(v)
+        elif k == '-s': maxsupports = int(v)
         elif k == '-v': defaults = getdefaults(v)
     assert inpath is None or outpath is None
     if outpath is not None and os.path.exists(outpath):
@@ -98,9 +98,10 @@ def main(argv):
         for w in words:
             nb.add(w, fids)
         if not cands: return False
-        (_,topword) = cands[0]
-        if topword in words: return True
         cands = cands[:len(words)+1]
+        cwords = [ w for (_,w) in cands ]
+        topword = cwords[0]
+        if topword in words: return True
         print('#', words, '->', cands)
         print('+ITEM', json.dumps(item))
         print('+CANDS', json.dumps(cands))
@@ -108,7 +109,7 @@ def main(argv):
             print('+DEFAULT', json.dumps(defaults[item]))
         feats = []
         fscore = {}
-        for fid in fids:
+        for fid in f2:
             d = nb.fcount[fid]
             if topword not in d: continue
             # A rarer feature overall means stronger indication.
@@ -124,24 +125,26 @@ def main(argv):
         print('+SOURCE', json.dumps(fid2srcs0[0]))
         supports = []
         fids2 = sorted(fscore.keys(), key=lambda fid:fscore[fid], reverse=True)
-        for fid in fids2[:nfeats]:
-            srcs0 = fid2srcs0[fid]
-            srcs1 = []
-            evidence = None
-            tids = db.get_featitems(fid)
-            for tid1 in tids.keys():
-                if tid1 == tid: continue
-                item1 = db.get_item(tid1)
-                name = stripid(item1)
-                words = splitwords(name)
-                if topword not in words: continue
-                fid2srcs1 = db.get_feats(tid1, source=True)
-                srcs1 = fid2srcs1[0] + fid2srcs1[fid]
-                evidence = item1
-                break
-            if evidence is None: continue
-            feat = db.get_feat(fid)
-            supports.append((feat, srcs0, evidence, srcs1))
+        for cw in cwords:
+            for fid in fids2:
+                srcs0 = fid2srcs0[fid]
+                srcs1 = []
+                evidence = None
+                tids = db.get_featitems(fid)
+                for tid1 in tids.keys():
+                    if tid1 == tid: continue
+                    item1 = db.get_item(tid1)
+                    name1 = stripid(item1)
+                    if cw not in splitwords(name1): continue
+                    fid2srcs1 = db.get_feats(tid1, source=True)
+                    srcs1 = fid2srcs1[0] + fid2srcs1[fid]
+                    evidence = item1
+                    break
+                if evidence is None: continue
+                feat = db.get_feat(fid)
+                supports.append((feat, srcs0, evidence, srcs1))
+                if maxsupports <= len(supports): break
+            if maxsupports <= len(supports): break
         print('+SUPPORT', json.dumps(supports))
         print()
         return False
