@@ -14,7 +14,8 @@ from getwords import stripid, splitwords
 CHOICES = [
     'a:GOOD',
     'b:ACCEPTABLE',
-    'c:BAD',
+    'c:BAD-1',
+    'd:BAD-2',
     'z:UNDECIDABLE'
 ]
 
@@ -59,10 +60,12 @@ function toggle(id) {
   <ol type=a>
   <li> The rewrite is GOOD.
   <li> The rewrite is ACCEPTABLE.
-  <li> The rewrite is BAD.
+  <li> The rewrite is BAD-1. (no relation)
+  <li> The rewrite is BAD-2. (name conflict)
   </ol><ol type=a start="26">
-  <li> UNDECIDABLE (cannot determine after <u>3 minutes</u>).
+  <li> UNDECIDABLE (not enough information).
   </ol>
+  <p> (Notice: only 10 to 20% of the rewrites are GOOD or ACCEPTABLE.)
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
@@ -159,12 +162,12 @@ def main(argv):
             annot.show_text(out, showline=lambda line: klass+' '+line)
         return
 
-    def showrec(title, rid, rec):
+    def showrec(rid, rec):
         item = rec['ITEM']
         score = rec['SCORE']
         name = stripid(item)
         if html:
-            key = (f'R{title}_{rid:003d}')
+            key = (f'R{rid:003d}')
             words = list(reversed(splitwords(name)))
             cands = [ k for (_,k) in rec['CANDS'] ]
             wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
@@ -190,7 +193,7 @@ def main(argv):
                 out.write(f'<h3><code class=new><mark>{stripid(evidence)}</mark></code> '
                           f'&nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
-                id = f'S_{key}_{sid}'
+                id = f'{key}_{sid}'
                 out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
                 out.write(f'<div id={id} hidden>\n')
                 showsrc(srcs0, 'match')
@@ -211,6 +214,7 @@ def main(argv):
             title = f'{args[0]}_{timestamp}'
         showhtmlheaders(out, title, script)
 
+    rid = 0
     for path in args:
         with open(path) as fp:
             recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
@@ -226,8 +230,9 @@ def main(argv):
         elif limit:
             recs = recs[:limit]
         (name,_) = os.path.splitext(os.path.basename(path))
-        for (rid,rec) in enumerate(recs):
-            showrec(name, rid, rec)
+        for rec in recs:
+            rid += 1
+            showrec(rid, rec)
 
     return 0
 
