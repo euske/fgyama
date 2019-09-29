@@ -83,10 +83,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
+        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-m supports] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:Re:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:m:Re:c:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -97,6 +97,7 @@ def main(argv):
     randomized = False
     excluded = set()
     limit = 10
+    maxsupports = 0
     timestamp = time.strftime('%Y%m%d')
     for (k, v) in opts:
         if k == '-o':
@@ -108,6 +109,7 @@ def main(argv):
             with open(v) as fp:
                 script = fp.read()
         elif k == '-n': limit = int(v)
+        elif k == '-m': maxsupports = int(v)
         elif k == '-R': randomized = True
         elif k == '-e':
             with open(v) as fp:
@@ -154,6 +156,7 @@ def main(argv):
         score = rec['SCORE']
         base = rec.get('DEFAULT')
         name = stripid(item)
+        supports = rec['SUPPORT'][:maxsupports]
         if html:
             key = (f'R{rid:003d}')
             words = list(reversed(splitwords(name)))
@@ -167,6 +170,7 @@ def main(argv):
             assert old != new
             if randomized:
                 if base == new or base == old: return False
+                if len(new) < len(old) or len(base) < len(old): return False
                 if random.random() < 0.5:
                     choices = [('a',new), ('b',base)]
                     print(key, 'a')
@@ -182,7 +186,7 @@ def main(argv):
                     f'<div class=cat><span id="{key}" class=ui>Choice: <code class=old><mark>{old}</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
-            for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
+            for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(supports):
                 out.write('<div class=support>\n')
                 out.write(
                     f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
@@ -196,7 +200,7 @@ def main(argv):
             out.write(f'*** {item!r}\n\n')
             out.write(f'{score} {name} {rec["CANDS"]}\n\n')
             showsrc(rec['SOURCE'], ' ')
-            for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
+            for (feat,srcs0,evidence,srcs1) in supports:
                 out.write(f'+ {evidence} {feat}\n')
                 showsrc(srcs1, 'E')
                 showsrc(srcs0, 'S')

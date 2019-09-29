@@ -98,7 +98,7 @@ def main(argv):
         for w in words:
             nb.add(w, fids)
         if not cands: return False
-        cands = cands[:len(words)+1]
+        cands = cands[:len(words)]
         cwords = [ w for (_,w) in cands ]
         topword = cwords[0]
         if topword in words: return True
