@@ -49,7 +49,7 @@ function toggle(id) {
 <h2>Your Mission</h2>
 <ul>
 <li> For each <span class=old>blue</span> snippet, look at the <code class=old><mark>variable</mark></code>
-    and choose which candidate improves the readability of the code.
+    and choose which candidate best explains the working of the code.
 <li> The proposed <code class=new><mark>name</mark></code> is highlighted yellow.
 <li> Click the <a href="javascript:void(0)">[+]</a> to see the <span class=new>supports</span> of the rewrite.
 <li> If there's not enough information, choose <code>???</code>.
@@ -152,6 +152,7 @@ def main(argv):
     def showrec(rid, rec):
         item = rec['ITEM']
         score = rec['SCORE']
+        base = rec.get('DEFAULT')
         name = stripid(item)
         if html:
             key = (f'R{rid:003d}')
@@ -163,38 +164,32 @@ def main(argv):
                 cands[i] = w
             old = camelCase(words)
             new = camelCase(cands)
-            footer = ''
+            assert old != new
             if randomized:
-                print(key, score)
-            else:
-                footer = f' ({score:.3f})'
-            out.write(f'<h2>Proposal {rid}: <span class=old><mark>{old}</mark></span> &rarr; <span class=new><mark>{new}</mark></span>{footer}</h2>\n')
+                if base == new or base == old: return False
+                if random.random() < 0.5:
+                    choices = [('a',new), ('b',base)]
+                    print(key, 'a')
+                else:
+                    choices = [('a',base), ('b',new)]
+                    print(key, 'b')
+            out.write(f'<h2>Proposal {rid}: {old} ({score:.3f})</h2>\n')
             if script is not None:
-                choices = [('z','???'), ('a',new), ('b',old)]
-                if 'DEFAULT' in rec:
-                    base = rec['DEFAULT']
-                    if base != new and base != old:
-                        choices.append(('c', base))
+                choices = [('x','???')] + choices + [('z',old)]
                 options = ''.join(
                     f'<option value="{q(v)}">{q(c)}</option>' for (v,c) in choices)
                 out.write(
-                    f'<div class=cat><span id="{key}" class=ui>'
-                    f'Choice: <code class=old><mark>{old}</mark></code> &rarr; '
-                    f'<select>{options}</select> &nbsp; '
-                    'Comment: <input size="30" /></span></div>\n')
+                    f'<div class=cat><span id="{key}" class=ui>Choice: <code class=old><mark>{old}</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(rec['SUPPORT']):
                 out.write('<div class=support>\n')
                 out.write(
-                    f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> '
-                    f'&nbsp; (<code>{feat}</code>)</h3>\n')
+                    f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
                 showsrc(srcs1, 'new')
                 id = f'{key}_{sid}'
                 out.write(
-                    f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br>\n')
-                out.write(
-                    f'<div id={id} hidden>\n')
+                    f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br><div id={id} hidden>\n')
                 showsrc(srcs0, 'match')
                 out.write('</div></div>\n')
         else:
@@ -205,7 +200,7 @@ def main(argv):
                 out.write(f'+ {evidence} {feat}\n')
                 showsrc(srcs1, 'E')
                 showsrc(srcs0, 'S')
-        return
+        return True
 
     #
     if html:
@@ -222,16 +217,13 @@ def main(argv):
             score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
             rec['SCORE'] = score
         recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
-        if randomized:
-            n = len(recs)
-            recs = [ recs[n*i//limit] for i in range(limit) ]
-            random.shuffle(recs)
-        elif limit:
-            recs = recs[:limit]
+        n = limit
         (name,_) = os.path.splitext(os.path.basename(path))
         for rec in recs:
-            rid += 1
-            showrec(rid, rec)
+            if showrec(rid, rec):
+                rid += 1
+                n -= 1
+            if n == 0: break
 
     return 0
 
