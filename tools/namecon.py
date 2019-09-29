@@ -9,23 +9,27 @@ from featdb import FeatDB
 from getwords import stripid, splitwords
 from naivebayes import NaiveBayes
 
-def getdefaults(path):
+def getvars(path):
     types = {}
-    names = {}
     with open(path) as fp:
         for line in fp:
             line = line.strip()
             if not line: continue
             (v,_,t) = line.partition(' ')
             types[v] = t
-            v = stripid(v)
-            if t in names:
-                c = names[t]
-            else:
-                c = names[t] = {}
-            if v not in c:
-                c[v] = 0
-            c[v] += 1
+    return types
+
+def getdefaultnames(types):
+    names = {}
+    for (v,t) in types.items():
+        v = stripid(v)
+        if t in names:
+            c = names[t]
+        else:
+            c = names[t] = {}
+        if v not in c:
+            c[v] = 0
+        c[v] += 1
     for (t,c) in names.items():
         maxn = -1
         maxv = None
@@ -57,7 +61,7 @@ def main(argv):
     inpath = None
     threshold = 0.75
     maxsupports = 3
-    defaults = {}
+    types = {}
     C = 0.7
     for (k, v) in opts:
         if k == '-d': debug += 1
@@ -65,7 +69,7 @@ def main(argv):
         elif k == '-i': inpath = v
         elif k == '-t': threshold = float(v)
         elif k == '-s': maxsupports = int(v)
-        elif k == '-v': defaults = getdefaults(v)
+        elif k == '-v': types = getvars(v)
     assert inpath is None or outpath is None
     if outpath is not None and os.path.exists(outpath):
         print('Already exists: %r' % outpath)
@@ -74,6 +78,7 @@ def main(argv):
     dbpath = args.pop(0)
     db = FeatDB(dbpath)
     nallitems = len(db.get_items())
+    defaultnames = getdefaultnames(types)
     items = db.get_items()
     if args:
         items = [ (tid,item) for (tid,item) in items if item in args ]
@@ -105,8 +110,8 @@ def main(argv):
         print('#', words, '->', cands)
         print('+ITEM', json.dumps(item))
         print('+CANDS', json.dumps(cands))
-        if item in defaults:
-            print('+DEFAULT', json.dumps(defaults[item]))
+        if item in defaultnames:
+            print('+DEFAULT', json.dumps(defaultnames[item]))
         feats = []
         fscore = {}
         for fid in f2:

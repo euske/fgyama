@@ -11,6 +11,21 @@ from srcdb import SourceDB, SourceAnnot
 from srcdb import q
 from getwords import stripid, splitwords
 
+TYPES = {
+    'B', 'C', 'S', 'I', 'J', 'F', 'D', 'Z',
+    'Ljava/lang/String;'
+}
+
+def getvars(path):
+    types = {}
+    with open(path) as fp:
+        for line in fp:
+            line = line.strip()
+            if not line: continue
+            (v,_,t) = line.partition(' ')
+            types[v] = t
+    return types
+
 def camelCase(words):
     return ''.join(
         (w[0].upper()+w[1:] if 0 < i else w) for (i,w) in enumerate(words))
@@ -83,10 +98,10 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-m supports] [-R] [-e simvars] [-c encoding] srcdb [namecon]')
+        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-m supports] [-R] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:m:Re:c:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:m:Re:c:v:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -96,6 +111,7 @@ def main(argv):
     encoding = None
     randomized = False
     excluded = set()
+    types = {}
     limit = 10
     maxsupports = 0
     timestamp = time.strftime('%Y%m%d')
@@ -116,6 +132,7 @@ def main(argv):
                 for rec in getrecs(fp):
                     excluded.update(rec['ITEMS'])
         elif k == '-c': encoding = v
+        elif k == '-v': types = getvars(v)
     if not args: return usage()
     path = args.pop(0)
     srcdb = SourceDB(path, encoding)
@@ -153,6 +170,7 @@ def main(argv):
 
     def showrec(rid, rec):
         item = rec['ITEM']
+        if types and types.get(item) not in TYPES: return False
         score = rec['SCORE']
         base = rec.get('DEFAULT')
         name = stripid(item)
@@ -170,7 +188,6 @@ def main(argv):
             assert old != new
             if randomized:
                 if base == new or base == old: return False
-                if len(new) < len(old) or len(base) < len(old): return False
                 if random.random() < 0.5:
                     choices = [('a',new), ('b',base)]
                     print(key, 'a')
