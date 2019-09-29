@@ -21,6 +21,7 @@ CHOICES = [
 def showhtmlheaders(out, title, script=None):
     out.write('''<!DOCTYPE html>
 <meta charset="UTF-8" />
+<title>%s</title>
 <style>
 h1 { border-bottom: 4px solid black; }
 h2 { color: white; background: black; padding: 4px; }
@@ -40,7 +41,7 @@ function toggle(id) {
   return false;
 }
 </script>
-''')
+''' % q(title))
     if script is None:
         out.write('<body>\n')
         return
@@ -68,7 +69,7 @@ function toggle(id) {
   the experiment organizer.<br>
 <li> <u>Do not consult others about the code during this experiment.</u>
 </ul>
-'''.format(title=title))
+'''.format(title=q(title)))
     return
 
 def getrecs(fp):
