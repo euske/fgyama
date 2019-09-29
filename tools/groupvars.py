@@ -62,8 +62,7 @@ def main(argv):
     assert len(ic) == sum( len(c) for c in clusters )
     for c in sorted(clusters, key=len, reverse=True):
         print('+CLUSTER', len(c))
-        for i in c:
-            print(i)
+        print('+ITEMS', json.dumps(list(c)))
         print()
     return 0
 
