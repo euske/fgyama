@@ -2,7 +2,6 @@
 import sys
 import re
 import os.path
-import stat
 import json
 import time
 import math
@@ -16,22 +15,35 @@ TYPES = {
     'Ljava/lang/String;'
 }
 
-def getvars(path):
+def getrecs(fp):
+    rec = {}
+    for line in fp:
+        line = line.strip()
+        if line.startswith('+'):
+            (k,_,v) = line[1:].partition(' ')
+            rec[k] = json.loads(v)
+        elif not line:
+            yield rec
+            rec = {}
+    return
+
+def getvars(fp):
     types = {}
-    with open(path) as fp:
-        for line in fp:
-            line = line.strip()
-            if not line: continue
-            (v,_,t) = line.partition(' ')
-            types[v] = t
+    for line in fp:
+        line = line.strip()
+        if not line: continue
+        (v,_,t) = line.partition(' ')
+        types[v] = t
     return types
 
-def camelCase(words):
+def tocamelcase(words):
     return ''.join(
-        (w[0].upper()+w[1:] if 0 < i else w) for (i,w) in enumerate(words))
+        (w if i == 0 else w[0].upper()+w[1:])
+        for (i,w) in enumerate(words) )
 
 def showhtmlheaders(out, title, script=None):
     out.write('''<!DOCTYPE html>
+<html>
 <meta charset="UTF-8" />
 <title>%s</title>
 <style>
@@ -40,6 +52,7 @@ h2 { color: white; background: black; padding: 4px; }
 h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
 pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
+.cat { border: 1px solid black; padding: 2px; background: #eeeeee; margin: 1em; }
 .support { margin: 1em; padding: 1em; border: 2px solid black; }
 .old { background: #ccccff; }
 .old mark { color: white; background: blue; }
@@ -77,25 +90,7 @@ function toggle(id) {
 '''.format(title=q(title)))
     return
 
-def getrecs(fp):
-    rec = {}
-    for line in fp:
-        line = line.strip()
-        if line.startswith('+'):
-            (k,_,v) = line[1:].partition(' ')
-            rec[k] = json.loads(v)
-        elif not line:
-            yield rec
-            rec = {}
-    return
-
-def tocamelcase(words):
-    return ''.join(
-        (w if i == 0 else w[0].upper()+w[1:])
-        for (i,w) in enumerate(words) )
-
 def main(argv):
-    import fileinput
     import getopt
     def usage():
         print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-m supports] [-R] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
@@ -132,7 +127,9 @@ def main(argv):
                 for rec in getrecs(fp):
                     excluded.update(rec['ITEMS'])
         elif k == '-c': encoding = v
-        elif k == '-v': types = getvars(v)
+        elif k == '-v':
+            with open(v) as fp:
+                types = getvars(fp)
     if not args: return usage()
     path = args.pop(0)
     srcdb = SourceDB(path, encoding)
@@ -151,7 +148,6 @@ def main(argv):
         if html:
             out.write(f'<div class={klass} style="margin: 1em;">\n')
             for (src,ranges) in annot:
-                url = src.name
                 out.write(f'<div>{q(src.name)} <pre>\n')
                 for (lineno,line) in src.show(
                         ranges,
@@ -183,8 +179,8 @@ def main(argv):
             wordincands = [ w for w in words if w in cands ]
             for (i,w) in zip(wordidx, wordincands):
                 cands[i] = w
-            old = camelCase(words)
-            new = camelCase(cands)
+            old = tocamelcase(words)
+            new = tocamelcase(cands)
             assert old != new
             if randomized:
                 if base == new or base == old: return False
@@ -198,7 +194,7 @@ def main(argv):
             if script is not None:
                 choices = [('x','???')] + choices + [('z',old)]
                 options = ''.join(
-                    f'<option value="{q(v)}">{q(c)}</option>' for (v,c) in choices)
+                    f'<option value="{v}">{v}. {q(c)}</option>' for (v,c) in choices)
                 out.write(
                     f'<div class=cat><span id="{key}" class=ui>Choice: <code class=old><mark>{old}</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
@@ -239,7 +235,6 @@ def main(argv):
             rec['SCORE'] = score
         recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         n = limit
-        (name,_) = os.path.splitext(os.path.basename(path))
         for rec in recs:
             if showrec(rid, rec):
                 rid += 1
