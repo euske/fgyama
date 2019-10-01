@@ -384,7 +384,7 @@ public class DFFrame {
             }
             try {
 		DFMethod method1 = klass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
                     if (m.isTransparent()) {
                         _inputRefs.addAll(m.getInputRefs());
@@ -420,7 +420,7 @@ public class DFFrame {
             }
             try {
 		DFMethod method1 = baseKlass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 if (method1.isTransparent()) {
                     _inputRefs.addAll(method1.getInputRefs());
                     _outputRefs.addAll(method1.getOutputRefs());
@@ -856,7 +856,7 @@ public class DFFrame {
             }
             try {
 		DFMethod method1 = instKlass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, null, argTypes);
+		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
                     if (m.isTransparent()) {
                         _inputRefs.addAll(m.getInputRefs());

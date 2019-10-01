@@ -968,7 +968,7 @@ public abstract class DFGraph {
             }
             DFKlass klass = scope.lookupThis().getRefType().toKlass();
             DFMethod constructor = klass.lookupMethod(
-                DFMethod.CallStyle.Constructor, null, argTypes);
+                DFMethod.CallStyle.Constructor, (String)null, argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -995,7 +995,7 @@ public abstract class DFGraph {
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
             DFMethod constructor = baseKlass.lookupMethod(
-                DFMethod.CallStyle.Constructor, null, argTypes);
+                DFMethod.CallStyle.Constructor, (String)null, argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -1444,7 +1444,7 @@ public abstract class DFGraph {
 		    argTypes[i] = node.getNodeType();
                 }
                 DFMethod constructor = instKlass.lookupMethod(
-                    DFMethod.CallStyle.Constructor, null, argTypes);
+                    DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(

@@ -579,7 +579,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             }
             try {
 		DFMethod method1 = klass.lookupMethod(
-		    CallStyle.Constructor, null, argTypes);
+		    CallStyle.Constructor, (String)null, argTypes);
 		this.fixateLambda(
                     defined, method1.getFuncType(), ci.arguments());
             } catch (MethodNotFound e) {
@@ -603,7 +603,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             }
             try {
 		DFMethod method1 = baseKlass.lookupMethod(
-		    CallStyle.Constructor, null, argTypes);
+		    CallStyle.Constructor, (String)null, argTypes);
                 method1.addCaller(this);
 		this.fixateLambda(
                     defined, method1.getFuncType(), sci.arguments());
@@ -982,7 +982,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             }
             try {
 		DFMethod method1 = instKlass.lookupMethod(
-		    CallStyle.Constructor, null, argTypes);
+		    CallStyle.Constructor, (String)null, argTypes);
                 method1.addCaller(this);
 		this.fixateLambda(
                     defined, method1.getFuncType(), cstr.arguments());

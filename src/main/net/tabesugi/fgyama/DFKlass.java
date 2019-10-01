@@ -850,8 +850,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     private DFMethod lookupMethod1(
-        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
-        String id = (name == null)? null : name.getIdentifier();
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -874,33 +873,40 @@ public class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod lookupMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
+        String id = (name == null)? null : name.getIdentifier();
+        return this.lookupMethod(callStyle, id, argTypes);
+    }
+
+    public DFMethod lookupMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes)
+        throws MethodNotFound {
         assert _state == LoadState.Loaded;
-        DFMethod method = this.lookupMethod1(callStyle, name, argTypes);
+        DFMethod method = this.lookupMethod1(callStyle, id, argTypes);
         if (method != null) {
             return method;
         }
         if (_outerKlass != null) {
             try {
-                return _outerKlass.lookupMethod(callStyle, name, argTypes);
+                return _outerKlass.lookupMethod(callStyle, id, argTypes);
             } catch (MethodNotFound e) {
             }
         }
         if (_baseKlass != null) {
             try {
-                return _baseKlass.lookupMethod(callStyle, name, argTypes);
+                return _baseKlass.lookupMethod(callStyle, id, argTypes);
             } catch (MethodNotFound e) {
             }
         }
         if (_baseIfaces != null) {
             for (DFKlass iface : _baseIfaces) {
                 try {
-                    return iface.lookupMethod(callStyle, name, argTypes);
+                    return iface.lookupMethod(callStyle, id, argTypes);
                 } catch (MethodNotFound e) {
                 }
             }
         }
-        String id = (name == null)? callStyle.toString() : name.getIdentifier();
-        throw new MethodNotFound(id, argTypes);
+        throw new MethodNotFound(
+            (id == null)? callStyle.toString() : id, argTypes);
     }
 
     protected DFRef addField(
