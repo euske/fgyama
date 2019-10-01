@@ -812,6 +812,208 @@ public abstract class DFGraph {
      * Creates a value node.
      */
     @SuppressWarnings("unchecked")
+    private void processStatement(
+        DFContext ctx, DFLocalScope scope, DFFrame frame,
+	Statement stmt)
+        throws InvalidSyntax, EntityNotFound {
+        assert stmt != null;
+
+        if (stmt instanceof AssertStatement) {
+	    // "assert x;"
+
+        } else if (stmt instanceof Block) {
+	    // "{ ... }"
+            processBlock(ctx, scope, frame, (Block)stmt);
+
+        } else if (stmt instanceof EmptyStatement) {
+
+        } else if (stmt instanceof VariableDeclarationStatement) {
+	    // "int a = 2;"
+            processVariableDeclarationStatement(
+                ctx, scope, frame, (VariableDeclarationStatement)stmt);
+
+        } else if (stmt instanceof ExpressionStatement) {
+	    // "foo();"
+            processExpressionStatement(
+                ctx, scope, frame, (ExpressionStatement)stmt);
+
+        } else if (stmt instanceof IfStatement) {
+	    // "if (c) { ... } else { ... }"
+            processIfStatement(
+                ctx, scope, frame, (IfStatement)stmt);
+
+        } else if (stmt instanceof SwitchStatement) {
+	    // "switch (x) { case 0: ...; }"
+            processSwitchStatement(
+                ctx, scope, frame, (SwitchStatement)stmt);
+
+        } else if (stmt instanceof SwitchCase) {
+            // Invalid "case" placement.
+            throw new InvalidSyntax(stmt);
+
+        } else if (stmt instanceof WhileStatement) {
+	    // "while (c) { ... }"
+            processWhileStatement(
+                ctx, scope, frame, (WhileStatement)stmt);
+
+        } else if (stmt instanceof DoStatement) {
+	    // "do { ... } while (c);"
+            processDoStatement(
+                ctx, scope, frame, (DoStatement)stmt);
+
+        } else if (stmt instanceof ForStatement) {
+	    // "for (i = 0; i < 10; i++) { ... }"
+            processForStatement(
+                ctx, scope, frame, (ForStatement)stmt);
+
+        } else if (stmt instanceof EnhancedForStatement) {
+	    // "for (x : array) { ... }"
+            processEnhancedForStatement(
+                ctx, scope, frame, (EnhancedForStatement)stmt);
+
+        } else if (stmt instanceof ReturnStatement) {
+	    // "return 42;"
+            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
+            DFFrame dstFrame = frame.find(DFFrame.RETURNABLE);
+            assert dstFrame != null;
+            Expression expr = rtrnStmt.getExpression();
+            if (expr != null) {
+                processExpression(ctx, scope, frame, expr);
+                DFRef ref = scope.lookupReturn();
+                ReturnNode ret = new ReturnNode(this, scope, ref, rtrnStmt);
+                ret.accept(ctx.getRValue());
+                frame.addExit(new ReturnExit(dstFrame, ret));
+            }
+            for (DFRef ref : dstFrame.getOutputRefs()) {
+                frame.addExit(new ReturnExit(dstFrame, ctx.get(ref)));
+            }
+
+        } else if (stmt instanceof BreakStatement) {
+	    // "break;"
+            BreakStatement breakStmt = (BreakStatement)stmt;
+            SimpleName labelName = breakStmt.getLabel();
+            String dstLabel = (labelName != null)?
+                labelName.getIdentifier() : DFFrame.BREAKABLE;
+            DFFrame dstFrame = frame.find(dstLabel);
+            for (DFRef ref : dstFrame.getOutputRefs()) {
+                frame.addExit(new BreakExit(dstFrame, ctx.get(ref)));
+            }
+
+        } else if (stmt instanceof ContinueStatement) {
+	    // "continue;"
+            ContinueStatement contStmt = (ContinueStatement)stmt;
+            SimpleName labelName = contStmt.getLabel();
+            String dstLabel = (labelName != null)?
+                labelName.getIdentifier() : DFFrame.BREAKABLE;
+            DFFrame dstFrame = frame.find(dstLabel);
+            for (DFRef ref : dstFrame.getOutputRefs()) {
+                frame.addExit(new ContinueExit(dstFrame, ctx.get(ref)));
+            }
+
+        } else if (stmt instanceof LabeledStatement) {
+	    // "here:"
+            LabeledStatement labeledStmt = (LabeledStatement)stmt;
+            DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
+            processStatement(
+                ctx, scope, labeledFrame, labeledStmt.getBody());
+            this.endBreaks(ctx, frame, labeledFrame);
+
+        } else if (stmt instanceof SynchronizedStatement) {
+	    // "synchronized (this) { ... }"
+            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
+            processExpression(
+                ctx, scope, frame, syncStmt.getExpression());
+            processStatement(
+                ctx, scope, frame, syncStmt.getBody());
+
+        } else if (stmt instanceof TryStatement) {
+	    // "try { ... } catch (e) { ... }"
+            processTryStatement(
+                ctx, scope, frame, (TryStatement)stmt);
+
+        } else if (stmt instanceof ThrowStatement) {
+	    // "throw e;"
+            ThrowStatement throwStmt = (ThrowStatement)stmt;
+            processExpression(
+                ctx, scope, frame, throwStmt.getExpression());
+            DFNode exc = ctx.getRValue();
+            DFKlass excKlass = exc.getNodeType().toKlass();
+            DFRef excRef = scope.lookupException(excKlass);
+            ThrowNode thrown = new ThrowNode(this, scope, excRef, stmt);
+            thrown.accept(exc);
+            // Find out the catch clause. If not, the entire method throws.
+            DFFrame dstFrame = frame.find(excKlass);
+            if (dstFrame == null) {
+                dstFrame = frame.find(DFFrame.RETURNABLE);
+                assert dstFrame != null;
+            }
+            frame.addExit(new ThrowExit(dstFrame, thrown, excKlass));
+            for (DFRef ref : dstFrame.getOutputRefs()) {
+                frame.addExit(new ThrowExit(dstFrame, ctx.get(ref), excKlass));
+            }
+
+        } else if (stmt instanceof ConstructorInvocation) {
+	    // "this(args)"
+            ConstructorInvocation ci = (ConstructorInvocation)stmt;
+            DFNode obj = ctx.get(scope.lookupThis());
+	    int nargs = ci.arguments().size();
+	    DFNode[] args = new DFNode[nargs];
+	    DFType[] argTypes = new DFType[nargs];
+	    for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)ci.arguments().get(i);
+                processExpression(ctx, scope, frame, arg);
+                DFNode node = ctx.getRValue();
+		args[i] = node;
+		argTypes[i] = node.getNodeType();
+            }
+            DFKlass klass = scope.lookupThis().getRefType().toKlass();
+            DFMethod constructor = klass.lookupMethod(
+                DFMethod.CallStyle.Constructor, null, argTypes);
+            DFMethod[] methods = new DFMethod[] { constructor };
+            DFFunctionType funcType = constructor.getFuncType();
+            MethodCallNode call = new MethodCallNode(
+                this, scope, ci, funcType, obj, methods);
+            call.setArgs(args);
+            this.connectInsAndOuts(ctx, scope, call, methods);
+            this.catchExceptions(scope, frame, call, funcType.getExceptions());
+
+        } else if (stmt instanceof SuperConstructorInvocation) {
+	    // "super(args)"
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
+            DFNode obj = ctx.get(scope.lookupThis());
+	    int nargs = sci.arguments().size();
+	    DFNode[] args = new DFNode[nargs];
+	    DFType[] argTypes = new DFType[nargs];
+	    for (int i = 0; i < nargs; i++) {
+		Expression arg = (Expression)sci.arguments().get(i);
+                processExpression(ctx, scope, frame, arg);
+                DFNode node = ctx.getRValue();
+		args[i] = node;
+		argTypes[i] = node.getNodeType();
+            }
+            DFKlass klass = obj.getNodeType().toKlass();
+            DFKlass baseKlass = klass.getBaseKlass();
+            assert baseKlass != null;
+            DFMethod constructor = baseKlass.lookupMethod(
+                DFMethod.CallStyle.Constructor, null, argTypes);
+            DFMethod[] methods = new DFMethod[] { constructor };
+            DFFunctionType funcType = constructor.getFuncType();
+            MethodCallNode call = new MethodCallNode(
+                this, scope, sci, funcType, obj, methods);
+            call.setArgs(args);
+            this.connectInsAndOuts(ctx, scope, call, methods);
+            this.catchExceptions(scope, frame, call, funcType.getExceptions());
+
+        } else if (stmt instanceof TypeDeclarationStatement) {
+	    // "class K { ... }"
+            // Inline classes are processed separately.
+
+        } else {
+            throw new InvalidSyntax(stmt);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private void processExpression(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
         Expression expr)
@@ -1074,31 +1276,8 @@ public abstract class DFGraph {
                 MethodCallNode call = new MethodCallNode(
                     this, scope, invoke, funcType, obj, methods);
                 call.setArgs(args);
-                {
-                    ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
-                    for (DFMethod method1 : methods) {
-                        if (method1.isTransparent()) {
-                            refs.addAll(method1.getInputRefs());
-                        }
-                    }
-                    for (DFRef ref : refs) {
-                        call.accept(ctx.get(ref), ref.getFullName());
-                    }
-                }
-                ctx.setRValue(new ReceiveNode(
-                                  this, scope, call, invoke));
-                {
-                    ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
-                    for (DFMethod method1 : methods) {
-                        if (method1.isTransparent()) {
-                            refs.addAll(method1.getOutputRefs());
-                        }
-                    }
-                    for (DFRef ref : refs) {
-                        ctx.set(new ReceiveNode(
-                                    this, scope, call, invoke, ref));
-                    }
-                }
+                this.connectInsAndOuts(ctx, scope, call, methods);
+                ctx.setRValue(new ReceiveNode(this, scope, call, invoke));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof SuperMethodInvocation) {
@@ -1133,24 +1312,13 @@ public abstract class DFGraph {
                     Logger.info("Fallback method:", fallback);
                     method = fallback;
                 }
-                DFMethod methods[] = new DFMethod[] { method };
+                DFMethod[] methods = new DFMethod[] { method };
                 DFFunctionType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
                     this, scope, sinvoke, funcType, obj, methods);
                 call.setArgs(args);
-                if (method.isTransparent()) {
-                    for (DFRef ref : method.getInputRefs()) {
-                        call.accept(ctx.get(ref), ref.getFullName());
-                    }
-                }
-                ctx.setRValue(new ReceiveNode(
-                                  this, scope, call, sinvoke));
-                if (method.isTransparent()) {
-                    for (DFRef ref : method.getOutputRefs()) {
-                        ctx.set(new ReceiveNode(
-                                    this, scope, call, sinvoke, ref));
-                    }
-                }
+                this.connectInsAndOuts(ctx, scope, call, methods);
+                ctx.setRValue(new ReceiveNode(this, scope, call, sinvoke));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof ArrayCreation) {
@@ -1277,23 +1445,13 @@ public abstract class DFGraph {
                 }
                 DFMethod constructor = instKlass.lookupMethod(
                     DFMethod.CallStyle.Constructor, null, argTypes);
+                DFMethod[] methods = new DFMethod[] { constructor };
                 DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
                     this, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);
-                if (constructor.isTransparent()) {
-                    for (DFRef ref : constructor.getInputRefs()) {
-                        call.accept(ctx.get(ref), ref.getFullName());
-                    }
-                }
-                ctx.setRValue(new ReceiveNode(
-                                  this, scope, call, cstr));
-                if (constructor.isTransparent()) {
-                    for (DFRef ref : constructor.getOutputRefs()) {
-                        ctx.set(new ReceiveNode(
-                                    this, scope, call, cstr, ref));
-                    }
-                }
+                this.connectInsAndOuts(ctx, scope, call, methods);
+                ctx.setRValue(new ReceiveNode(this, scope, call, cstr));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof ConditionalExpression) {
@@ -1997,225 +2155,30 @@ public abstract class DFGraph {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void processStatement(
-        DFContext ctx, DFLocalScope scope, DFFrame frame,
-	Statement stmt)
-        throws InvalidSyntax, EntityNotFound {
-        assert stmt != null;
-
-        if (stmt instanceof AssertStatement) {
-	    // "assert x;"
-
-        } else if (stmt instanceof Block) {
-	    // "{ ... }"
-            processBlock(ctx, scope, frame, (Block)stmt);
-
-        } else if (stmt instanceof EmptyStatement) {
-
-        } else if (stmt instanceof VariableDeclarationStatement) {
-	    // "int a = 2;"
-            processVariableDeclarationStatement(
-                ctx, scope, frame, (VariableDeclarationStatement)stmt);
-
-        } else if (stmt instanceof ExpressionStatement) {
-	    // "foo();"
-            processExpressionStatement(
-                ctx, scope, frame, (ExpressionStatement)stmt);
-
-        } else if (stmt instanceof IfStatement) {
-	    // "if (c) { ... } else { ... }"
-            processIfStatement(
-                ctx, scope, frame, (IfStatement)stmt);
-
-        } else if (stmt instanceof SwitchStatement) {
-	    // "switch (x) { case 0: ...; }"
-            processSwitchStatement(
-                ctx, scope, frame, (SwitchStatement)stmt);
-
-        } else if (stmt instanceof SwitchCase) {
-            // Invalid "case" placement.
-            throw new InvalidSyntax(stmt);
-
-        } else if (stmt instanceof WhileStatement) {
-	    // "while (c) { ... }"
-            processWhileStatement(
-                ctx, scope, frame, (WhileStatement)stmt);
-
-        } else if (stmt instanceof DoStatement) {
-	    // "do { ... } while (c);"
-            processDoStatement(
-                ctx, scope, frame, (DoStatement)stmt);
-
-        } else if (stmt instanceof ForStatement) {
-	    // "for (i = 0; i < 10; i++) { ... }"
-            processForStatement(
-                ctx, scope, frame, (ForStatement)stmt);
-
-        } else if (stmt instanceof EnhancedForStatement) {
-	    // "for (x : array) { ... }"
-            processEnhancedForStatement(
-                ctx, scope, frame, (EnhancedForStatement)stmt);
-
-        } else if (stmt instanceof ReturnStatement) {
-	    // "return 42;"
-            ReturnStatement rtrnStmt = (ReturnStatement)stmt;
-            DFFrame dstFrame = frame.find(DFFrame.RETURNABLE);
-            assert dstFrame != null;
-            Expression expr = rtrnStmt.getExpression();
-            if (expr != null) {
-                processExpression(ctx, scope, frame, expr);
-                DFRef ref = scope.lookupReturn();
-                ReturnNode ret = new ReturnNode(this, scope, ref, rtrnStmt);
-                ret.accept(ctx.getRValue());
-                frame.addExit(new ReturnExit(dstFrame, ret));
+    // connectInsAndOuts: connect input/output nodes for methods.
+    private void connectInsAndOuts(
+        DFContext ctx, DFLocalScope scope, CallNode call, DFMethod[] methods) {
+        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
+        for (DFMethod method1 : methods) {
+            if (method1.isTransparent()) {
+                refs.addAll(method1.getInputRefs());
             }
-            for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new ReturnExit(dstFrame, ctx.get(ref)));
+        }
+        for (DFRef ref : refs) {
+            call.accept(ctx.get(ref), ref.getFullName());
+        }
+        refs = new ConsistentHashSet<DFRef>();
+        for (DFMethod method1 : methods) {
+            if (method1.isTransparent()) {
+                refs.addAll(method1.getOutputRefs());
             }
-
-        } else if (stmt instanceof BreakStatement) {
-	    // "break;"
-            BreakStatement breakStmt = (BreakStatement)stmt;
-            SimpleName labelName = breakStmt.getLabel();
-            String dstLabel = (labelName != null)?
-                labelName.getIdentifier() : DFFrame.BREAKABLE;
-            DFFrame dstFrame = frame.find(dstLabel);
-            for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new BreakExit(dstFrame, ctx.get(ref)));
-            }
-
-        } else if (stmt instanceof ContinueStatement) {
-	    // "continue;"
-            ContinueStatement contStmt = (ContinueStatement)stmt;
-            SimpleName labelName = contStmt.getLabel();
-            String dstLabel = (labelName != null)?
-                labelName.getIdentifier() : DFFrame.BREAKABLE;
-            DFFrame dstFrame = frame.find(dstLabel);
-            for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new ContinueExit(dstFrame, ctx.get(ref)));
-            }
-
-        } else if (stmt instanceof LabeledStatement) {
-	    // "here:"
-            LabeledStatement labeledStmt = (LabeledStatement)stmt;
-            DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
-            processStatement(
-                ctx, scope, labeledFrame, labeledStmt.getBody());
-            this.endBreaks(ctx, frame, labeledFrame);
-
-        } else if (stmt instanceof SynchronizedStatement) {
-	    // "synchronized (this) { ... }"
-            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
-            processExpression(
-                ctx, scope, frame, syncStmt.getExpression());
-            processStatement(
-                ctx, scope, frame, syncStmt.getBody());
-
-        } else if (stmt instanceof TryStatement) {
-	    // "try { ... } catch (e) { ... }"
-            processTryStatement(
-                ctx, scope, frame, (TryStatement)stmt);
-
-        } else if (stmt instanceof ThrowStatement) {
-	    // "throw e;"
-            ThrowStatement throwStmt = (ThrowStatement)stmt;
-            processExpression(
-                ctx, scope, frame, throwStmt.getExpression());
-            DFNode exc = ctx.getRValue();
-            DFKlass excKlass = exc.getNodeType().toKlass();
-            DFRef excRef = scope.lookupException(excKlass);
-            ThrowNode thrown = new ThrowNode(this, scope, excRef, stmt);
-            thrown.accept(exc);
-            // Find out the catch clause. If not, the entire method throws.
-            DFFrame dstFrame = frame.find(excKlass);
-            if (dstFrame == null) {
-                dstFrame = frame.find(DFFrame.RETURNABLE);
-                assert dstFrame != null;
-            }
-            frame.addExit(new ThrowExit(dstFrame, thrown, excKlass));
-            for (DFRef ref : dstFrame.getOutputRefs()) {
-                frame.addExit(new ThrowExit(dstFrame, ctx.get(ref), excKlass));
-            }
-
-        } else if (stmt instanceof ConstructorInvocation) {
-	    // "this(args)"
-            ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            DFNode obj = ctx.get(scope.lookupThis());
-	    int nargs = ci.arguments().size();
-	    DFNode[] args = new DFNode[nargs];
-	    DFType[] argTypes = new DFType[nargs];
-	    for (int i = 0; i < nargs; i++) {
-		Expression arg = (Expression)ci.arguments().get(i);
-                processExpression(ctx, scope, frame, arg);
-                DFNode node = ctx.getRValue();
-		args[i] = node;
-		argTypes[i] = node.getNodeType();
-            }
-            DFKlass klass = scope.lookupThis().getRefType().toKlass();
-            DFMethod constructor = klass.lookupMethod(
-                DFMethod.CallStyle.Constructor, null, argTypes);
-            DFMethod methods[] = new DFMethod[] { constructor };
-            DFFunctionType funcType = constructor.getFuncType();
-            MethodCallNode call = new MethodCallNode(
-                this, scope, ci, funcType, obj, methods);
-            call.setArgs(args);
-            if (constructor.isTransparent()) {
-                for (DFRef ref : constructor.getInputRefs()) {
-                    call.accept(ctx.get(ref), ref.getFullName());
-                }
-                for (DFRef ref : constructor.getOutputRefs()) {
-                    ctx.set(new ReceiveNode(
-                                this, scope, call, ci, ref));
-                }
-            }
-            this.catchExceptions(scope, frame, call, funcType.getExceptions());
-
-        } else if (stmt instanceof SuperConstructorInvocation) {
-	    // "super(args)"
-            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            DFNode obj = ctx.get(scope.lookupThis());
-	    int nargs = sci.arguments().size();
-	    DFNode[] args = new DFNode[nargs];
-	    DFType[] argTypes = new DFType[nargs];
-	    for (int i = 0; i < nargs; i++) {
-		Expression arg = (Expression)sci.arguments().get(i);
-                processExpression(ctx, scope, frame, arg);
-                DFNode node = ctx.getRValue();
-		args[i] = node;
-		argTypes[i] = node.getNodeType();
-            }
-            DFKlass klass = obj.getNodeType().toKlass();
-            DFKlass baseKlass = klass.getBaseKlass();
-            assert baseKlass != null;
-            DFMethod constructor = baseKlass.lookupMethod(
-                DFMethod.CallStyle.Constructor, null, argTypes);
-            DFMethod methods[] = new DFMethod[] { constructor };
-            DFFunctionType funcType = constructor.getFuncType();
-            MethodCallNode call = new MethodCallNode(
-                this, scope, sci, funcType, obj, methods);
-            call.setArgs(args);
-            if (constructor.isTransparent()) {
-                for (DFRef ref : constructor.getInputRefs()) {
-                    call.accept(ctx.get(ref), ref.getFullName());
-                }
-                for (DFRef ref : constructor.getOutputRefs()) {
-                    ctx.set(new ReceiveNode(
-                                this, scope, call, sci, ref));
-                }
-            }
-            this.catchExceptions(scope, frame, call, funcType.getExceptions());
-
-        } else if (stmt instanceof TypeDeclarationStatement) {
-	    // "class K { ... }"
-            // Inline classes are processed separately.
-
-        } else {
-            throw new InvalidSyntax(stmt);
+        }
+        for (DFRef ref : refs) {
+            ctx.set(new ReceiveNode(this, scope, call, null, ref));
         }
     }
 
-    // catchExceptions:
+    // catchExceptions: catch exceptions raised by a calling method.
     private void catchExceptions(
         DFLocalScope scope, DFFrame frame, DFNode node, DFKlass[] exceptions) {
         for (DFKlass excKlass : exceptions) {
