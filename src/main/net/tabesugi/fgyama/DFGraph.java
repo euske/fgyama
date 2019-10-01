@@ -1099,11 +1099,7 @@ public abstract class DFGraph {
                                     this, scope, call, invoke, ref));
                     }
                 }
-                // TODO: catch and forward exceptions.
-                // for (DFNode exception : funcType.getExceptions()) {
-                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     frame.addExit(new DFExit(dstFrame, exception));
-                // }
+                this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof SuperMethodInvocation) {
 		// "super.method()"
@@ -1155,11 +1151,7 @@ public abstract class DFGraph {
                                     this, scope, call, sinvoke, ref));
                     }
                 }
-                // TODO: catch and forward exceptions.
-                // for (DFNode exception : funcType.getExceptions()) {
-                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     frame.addExit(new DFExit(dstFrame, exception));
-                // }
+                this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof ArrayCreation) {
 		// "new int[10]"
@@ -1302,11 +1294,7 @@ public abstract class DFGraph {
                                     this, scope, call, cstr, ref));
                     }
                 }
-                // TODO: catch and forward exceptions.
-                // for (DFNode exception : funcType.getExceptions()) {
-                //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-                //     frame.addExit(new DFExit(dstFrame, exception));
-                // }
+                this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
             } else if (expr instanceof ConditionalExpression) {
 		// "c? a : b"
@@ -2181,11 +2169,7 @@ public abstract class DFGraph {
                                 this, scope, call, ci, ref));
                 }
             }
-            // TODO: catch and forward exceptions.
-            // for (DFNode exception : funcType.getExceptions()) {
-            //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-            //     frame.addExit(new DFExit(dstFrame, exception));
-            // }
+            this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof SuperConstructorInvocation) {
 	    // "super(args)"
@@ -2220,11 +2204,7 @@ public abstract class DFGraph {
                                 this, scope, call, sci, ref));
                 }
             }
-            // TODO: catch and forward exceptions.
-            // for (DFNode exception : funcType.getExceptions()) {
-            //     DFFrame dstFrame = frame.find(DFFrame.CATCHABLE);
-            //     frame.addExit(new DFExit(dstFrame, exception));
-            // }
+            this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof TypeDeclarationStatement) {
 	    // "class K { ... }"
@@ -2232,6 +2212,21 @@ public abstract class DFGraph {
 
         } else {
             throw new InvalidSyntax(stmt);
+        }
+    }
+
+    // catchExceptions:
+    private void catchExceptions(
+        DFLocalScope scope, DFFrame frame, DFNode node, DFKlass[] exceptions) {
+        for (DFKlass excKlass : exceptions) {
+            DFRef excRef = scope.lookupException(excKlass);
+            DFFrame dstFrame = frame.find(excKlass);
+            if (dstFrame == null) {
+                dstFrame = frame.find(DFFrame.RETURNABLE);
+            }
+            DFNode thrown = new ThrowNode(this, scope, excRef, null);
+            thrown.accept(node, excRef.getFullName());
+            frame.addExit(new ThrowExit(dstFrame, thrown, excKlass));
         }
     }
 

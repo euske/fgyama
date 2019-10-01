@@ -1163,7 +1163,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             ExceptionTable excTable = meth.getExceptionTable();
             if (excTable != null) {
                 String[] excNames = excTable.getExceptionNames();
-                DFType[] exceptions = new DFType[excNames.length];
+                DFKlass[] exceptions = new DFKlass[excNames.length];
                 for (int i = 0; i < excNames.length; i++) {
 		    DFType type;
 		    try {
@@ -1174,7 +1174,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                             this, e.name);
 			type = DFUnknownType.UNKNOWN;
 		    }
-		    exceptions[i] = type;
+		    exceptions[i] = type.toKlass();
                 }
                 funcType.setExceptions(exceptions);
             }
@@ -1379,9 +1379,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 DFFunctionType funcType = new DFFunctionType(argTypes, returnType);
                 List<Type> excs = decl.thrownExceptionTypes();
                 if (0 < excs.size()) {
-                    DFType[] exceptions = new DFType[excs.size()];
+                    DFKlass[] exceptions = new DFKlass[excs.size()];
                     for (int i = 0; i < excs.size(); i++) {
-			exceptions[i] = finder.resolveSafe(excs.get(i));
+			exceptions[i] = finder.resolveSafe(excs.get(i)).toKlass();
                     }
                     funcType.setExceptions(exceptions);
                 }

@@ -14,7 +14,7 @@ public class DFFunctionType implements DFType {
     private DFType[] _argTypes;
     private DFType _returnType;
     private boolean _varargs;
-    private DFType[] _exceptions = new DFType[] {};
+    private DFKlass[] _exceptions = new DFKlass[] {};
 
     public DFFunctionType(DFType[] argTypes, DFType returnType) {
         assert returnType != null;
@@ -122,11 +122,11 @@ public class DFFunctionType implements DFType {
         return b.toString();
     }
 
-    public void setExceptions(DFType[] exceptions) {
+    public void setExceptions(DFKlass[] exceptions) {
         _exceptions = exceptions;
     }
 
-    public DFType[] getExceptions() {
+    public DFKlass[] getExceptions() {
         return _exceptions;
     }
 
