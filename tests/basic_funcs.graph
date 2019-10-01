@@ -33,7 +33,10 @@
         </node>
         <node id="M2_main_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M2_main_N7" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
-        <node id="M2_main_N18" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M2_main_N19" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M2_main_N23" kind="output" ref="#Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
+          <link src="M2_main_N12"/>
+        </node>
         <scope name="Lbasic_funcs;.:main:77:243.:B:116:243">
           <node id="M2_main_N4" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243/$args" type="[Ljava/lang/String;">
             <ast end="141" start="137" type="42"/>
@@ -64,43 +67,46 @@
             <ast end="181" start="162" type="32"/>
             <link src="M2_main_N10"/>
           </node>
-          <node id="M2_main_N12" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
+          <node id="M2_main_N12" kind="throw" ref="#Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
+            <link label="#Ljava/lang/NumberFormatException;" src="M2_main_N10"/>
+          </node>
+          <node id="M2_main_N13" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="181" start="158" type="59"/>
             <link src="M2_main_N11"/>
           </node>
-          <node id="M2_main_N13" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
+          <node id="M2_main_N14" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="204" start="203" type="42"/>
-            <link src="M2_main_N12"/>
+            <link src="M2_main_N13"/>
           </node>
-          <node data="Lbasic_funcs;.moo(I)I" id="M2_main_N14" kind="call" type="I">
+          <node data="Lbasic_funcs;.moo(I)I" id="M2_main_N15" kind="call" type="I">
             <ast end="205" start="199" type="32"/>
             <link label="#this" src="M2_main_N3"/>
-            <link label="#arg0" src="M2_main_N13"/>
+            <link label="#arg0" src="M2_main_N14"/>
           </node>
-          <node id="M2_main_N15" kind="receive" type="I">
+          <node id="M2_main_N16" kind="receive" type="I">
             <ast end="205" start="199" type="32"/>
-            <link src="M2_main_N14"/>
-          </node>
-          <node id="M2_main_N16" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
-            <ast end="205" start="195" type="59"/>
             <link src="M2_main_N15"/>
           </node>
-          <node id="M2_main_N17" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
-            <ast end="225" start="215" type="40"/>
-            <link src="M2_main_N18"/>
-          </node>
-          <node id="M2_main_N19" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
-            <ast end="235" start="234" type="42"/>
+          <node id="M2_main_N17" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
+            <ast end="205" start="195" type="59"/>
             <link src="M2_main_N16"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(I)V" id="M2_main_N20" kind="call" type="V">
-            <ast end="236" start="215" type="32"/>
-            <link label="#this" src="M2_main_N17"/>
-            <link label="#arg0" src="M2_main_N19"/>
+          <node id="M2_main_N18" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+            <ast end="225" start="215" type="40"/>
+            <link src="M2_main_N19"/>
           </node>
-          <node id="M2_main_N21" kind="receive" type="V">
+          <node id="M2_main_N20" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
+            <ast end="235" start="234" type="42"/>
+            <link src="M2_main_N17"/>
+          </node>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="M2_main_N21" kind="call" type="V">
             <ast end="236" start="215" type="32"/>
-            <link src="M2_main_N20"/>
+            <link label="#this" src="M2_main_N18"/>
+            <link label="#arg0" src="M2_main_N20"/>
+          </node>
+          <node id="M2_main_N22" kind="receive" type="V">
+            <ast end="236" start="215" type="32"/>
+            <link src="M2_main_N21"/>
           </node>
         </scope>
       </scope>
