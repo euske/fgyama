@@ -188,7 +188,7 @@ class IDFBuilder:
                             elif n1.kind == 'output':
                                 vtx1 = self.getvtx(n1)
                                 for (label,n2) in node.outputs:
-                                    assert n2.kind == 'receive'
+                                    assert n2.kind in ('receive', 'throw')
                                     assert n2.ref == label or n2.ref is None
                                     if not label: label = '#return'
                                     if n1.ref != label: continue
