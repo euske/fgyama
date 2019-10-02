@@ -49,7 +49,8 @@ CREATE TABLE ItemFeats (
     Sid0 INTEGER PRIMARY KEY,
     Sid1 INTEGER,
     Tid INTEGER,
-    Fid INTEGER
+    Fid INTEGER,
+    Count INTEGER
 );
 CREATE INDEX ItemFeatsByTid ON ItemFeats(Tid);
 CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
@@ -113,13 +114,15 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
             self._featmap[fid] = feat
         return feat
 
-    def add_item(self, item, fid2srcs):
+    def add_item(self, item, fids):
         self._cur.execute(
             'INSERT INTO Items VALUES (NULL,?);',
             (item,))
         tid = self._cur.lastrowid
+        self._items.append((tid, item))
         assert tid not in self._itemmap
-        for (fid,srcs) in fid2srcs.items():
+        self._itemmap[tid] = item
+        for (fid,(fc,srcs)) in fids.items():
             if srcs:
                 sid0 = 0
                 for (srcid,start,end) in srcs:
@@ -136,10 +139,8 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
                     (-1, 0, 0))
                 sid0 = sid1 = self._cur.lastrowid
             self._cur.execute(
-                'INSERT INTO ItemFeats VALUES (?,?,?,?);',
-                (sid0, sid1, tid, fid))
-        self._items.append((tid, item))
-        self._itemmap[tid] = item
+                'INSERT INTO ItemFeats VALUES (?,?,?,?,?);',
+                (sid0, sid1, tid, fid, fc))
         return
 
     def get_item(self, tid):
@@ -169,10 +170,10 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
 
     def get_feats(self, tid, resolve=False, source=False):
         self._cur.execute(
-            'SELECT Sid0,Sid1,Fid FROM ItemFeats WHERE Tid=?;',
+            'SELECT Sid0,Sid1,Fid,Count FROM ItemFeats WHERE Tid=?;',
             (tid,))
         feat2srcs = {}
-        for (sid0,sid1,fid) in list(self._cur.fetchall()):
+        for (sid0,sid1,fid,fc) in list(self._cur.fetchall()):
             if resolve:
                 feat = self.get_feat(fid)
             else:
@@ -181,15 +182,15 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
                 srcs = self.get_sources(sid0, sid1)
             else:
                 srcs = None
-            feat2srcs[feat] = srcs
+            feat2srcs[feat] = (fc, srcs)
         return feat2srcs
 
     def get_featitems(self, fid, resolve=False, source=False):
         self._cur.execute(
-            'SELECT Sid0,Sid1,Tid FROM ItemFeats WHERE Fid=?;',
+            'SELECT Sid0,Sid1,Tid,Count FROM ItemFeats WHERE Fid=?;',
             (fid,))
         item2srcs = {}
-        for (sid0,sid1,tid) in list(self._cur.fetchall()):
+        for (sid0,sid1,tid,fc) in list(self._cur.fetchall()):
             if resolve:
                 item = self.get_item(tid)
             else:
@@ -198,12 +199,12 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
                 srcs = self.get_sources(sid0, sid1)
             else:
                 srcs = None
-            item2srcs[item] = srcs
+            item2srcs[item] = (fc, srcs)
         return item2srcs
 
     def get_numfeatitems(self, fid, resolve=False, source=False):
         self._cur.execute(
-            'SELECT count(*) FROM ItemFeats WHERE Fid=?;',
+            'SELECT sum(Count) FROM ItemFeats WHERE Fid=?;',
             (fid,))
         (n,) = self._cur.fetchone()
         return n
@@ -254,6 +255,7 @@ def main(argv):
 
     feat2fid = {}
     nitems = nfeats = nsrcs = 0
+    fids = None
 
     for line in fileinput.input(args):
         line = line.strip()
@@ -264,34 +266,32 @@ def main(argv):
         elif line.startswith('+ITEM '):
             (_,_,line) = line.partition(' ')
             data = json.loads(line)
-            (item,srcs) = data
-            fid2srcs = {0: srcs}
+            (item,count,srcs) = data
+            fids = {0: (count,srcs)}
             sys.stderr.write('.'); sys.stderr.flush()
             nitems += 1
 
         elif item is not None and line.startswith('+FEAT '):
-            assert fid2srcs is not None
+            assert fids is not None
             (_,_,line) = line.partition(' ')
             data = json.loads(line)
             feat = tuple(data[0])
+            fc = data[1]
+            srcs = data[2]
             if feat in feat2fid:
                 fid = feat2fid[feat]
             else:
                 fid = len(feat2fid)+1
                 feat2fid[feat] = fid
                 db.add_feat(feat, fid)
-            if fid in fid2srcs:
-                srcs = fid2srcs[fid]
-            else:
-                srcs = fid2srcs[fid] = []
-            srcs.extend(data[1])
+            fids[fid] = (fc, srcs)
             nfeats += 1
-            nsrcs += len(data[1])
+            nsrcs += len(data[2])
 
         elif item is not None and not line:
-            assert fid2srcs is not None
-            db.add_item(item, fid2srcs)
-            item = fid2srcs = None
+            assert fids is not None
+            db.add_item(item, fids)
+            item = fids = None
 
     print(f'Items={nitems}, Feats={nfeats}, Srcs={nsrcs}')
 

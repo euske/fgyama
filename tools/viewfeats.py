@@ -67,7 +67,7 @@ def main(argv):
                 if item not in iscore:
                     iscore[item] = 0
                 iscore[item] += score
-        print(f'*** word: {word:r}, items: {nitems}, feats: {len(fscore)}\n')
+        print(f'*** word: {word!r}, items: {nitems}, feats: {len(fscore)}\n')
         fscore.sort(reverse=True)
         for (score,fid,items) in fscore[:ntop]:
             feat = db.get_feat(fid)
@@ -76,7 +76,7 @@ def main(argv):
             for item in items[:1]:
                 print('+ITEM', db.get_item(item))
                 feats = db.get_feats(item, resolve=True, source=True)
-                srcs = feats[feat]
+                (fc,srcs) = feats[feat]
                 if not srcs: continue
                 #srcs.extend(feats[None])
                 annot = SourceAnnot(srcdb)

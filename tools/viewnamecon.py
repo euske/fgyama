@@ -170,7 +170,6 @@ def main(argv):
         score = rec['SCORE']
         base = rec.get('DEFAULT')
         name = stripid(item)
-        supports = rec['SUPPORT'][:maxsupports]
         if html:
             key = (f'R{rid:003d}')
             words = list(reversed(splitwords(name)))
@@ -190,13 +189,16 @@ def main(argv):
                 else:
                     choices = [('a',base), ('b',new)]
                     print(key, 'b')
-            out.write(f'<h2>Proposal {rid}: {old} ({score:.3f})</h2>\n')
-            if script is not None:
+                out.write(f'<h2>Proposal {rid}: {old} ({score:.3f})</h2>\n')
                 choices = [('x','???')] + choices + [('z',old)]
                 options = ''.join(
                     f'<option value="{v}">{v}. {q(c)}</option>' for (v,c) in choices)
                 out.write(
                     f'<div class=cat><span id="{key}" class=ui>Choice: <code class=old><mark>{old}</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
+                supports = []
+            else:
+                out.write(f'<h2>Proposal {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
+                supports = rec['SUPPORT']
             out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
             showsrc(rec['SOURCE'], 'old')
             for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(supports):
@@ -213,7 +215,7 @@ def main(argv):
             out.write(f'*** {item!r}\n\n')
             out.write(f'{score} {name} {rec["CANDS"]}\n\n')
             showsrc(rec['SOURCE'], ' ')
-            for (feat,srcs0,evidence,srcs1) in supports:
+            for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
                 out.write(f'+ {evidence} {feat}\n')
                 showsrc(srcs1, 'E')
                 showsrc(srcs0, 'S')

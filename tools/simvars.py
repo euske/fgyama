@@ -63,7 +63,7 @@ def main(argv):
     sp = VSM()
     for (tid,_) in db:
         feats = db.get_feats(tid, resolve=True)
-        sp.add(tid, { feat:exp(-abs(feat[0])) for feat in feats.keys()
+        sp.add(tid, { feat:fc*exp(-abs(feat[0])) for (feat,(fc,_)) in feats.items()
                       if feat is not None })
     sp.commit()
     print(f'Docs: {len(sp)}', file=sys.stderr)
@@ -102,8 +102,8 @@ def main(argv):
                 type0 = refs[item0]
                 type1 = refs[item1]
                 print('+TYPES', json.dumps([type0, type1]))
-            srcs0 = db.get_feats(tid0, source=True)[0]
-            srcs1 = db.get_feats(tid1, source=True)[0]
+            (_,srcs0) = db.get_feats(tid0, source=True)[0]
+            (_,srcs1) = db.get_feats(tid1, source=True)[0]
             print('+SRCS', json.dumps([srcs0, srcs1]))
             print()
         return
@@ -139,8 +139,8 @@ def main(argv):
         wordsim = jaccard(words0, words1)
         print('+WORDSIM', json.dumps(wordsim))
         totalwordsim += wordsim
-        srcs0 = db.get_feats(tid0, source=True)[0]
-        srcs1 = db.get_feats(tid1, source=True)[0]
+        (_,srcs0) = db.get_feats(tid0, source=True)[0]
+        (_,srcs1) = db.get_feats(tid1, source=True)[0]
         print('+SRCS', json.dumps([srcs0, srcs1]))
         print()
 

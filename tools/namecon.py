@@ -86,22 +86,24 @@ def main(argv):
     def learn(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
+        (count,_) = fids[0]
+        feats = { feat:fc for (feat,(fc,_)) in fids.items() }
         for w in words:
-            nb.add(w, fids)
+            nb.adddict(w, count, feats)
         return True
 
     def predict(tid, item, fids):
         name = stripid(item)
         words = splitwords(name)
+        (count,_) = fids[0]
+        feats = { fid:fc for (fid,(fc,_)) in fids.items() if fid != 0 }
         for w in words:
-            nb.remove(w, fids)
-        f2 = nb.narrow(fids, threshold)
-        if f2:
-            cands = nb.getkeys(f2)
-        else:
-            cands = []
+            nb.removedict(w, count, feats)
+        threshold = max(feats.values()) // 2
+        f2 = [ feat for (feat,fc) in feats.items() if threshold <= fc ]
+        cands = nb.getkeys(f2)
         for w in words:
-            nb.add(w, fids)
+            nb.adddict(w, count, feats)
         if not cands: return False
         cands = cands[:len(words)]
         cwords = [ w for (_,w) in cands ]
@@ -123,16 +125,18 @@ def main(argv):
             ff = d[topword] / d[None]
             # Discount a "distant" feature from the subject.
             feat = db.get_feat(fid)
+            assert feat is not None
             fscore[fid] = math.exp(-C*abs(feat[0])) * df * ff
             feats.append((feat, df, ff))
         print('+FEATS', json.dumps(feats))
-        fid2srcs0 = db.get_feats(tid, source=True)
-        print('+SOURCE', json.dumps(fid2srcs0[0]))
+        fids0 = db.get_feats(tid, source=True)
+        (_,srcs) = fids0[0]
+        print('+SOURCE', json.dumps(srcs))
         supports = []
         fids2 = sorted(fscore.keys(), key=lambda fid:fscore[fid], reverse=True)
         for cw in cwords:
             for fid in fids2:
-                srcs0 = fid2srcs0[fid]
+                (_,srcs0) = fids0[fid]
                 srcs1 = []
                 evidence = None
                 tids = db.get_featitems(fid)
@@ -141,8 +145,10 @@ def main(argv):
                     item1 = db.get_item(tid1)
                     name1 = stripid(item1)
                     if cw not in splitwords(name1): continue
-                    fid2srcs1 = db.get_feats(tid1, source=True)
-                    srcs1 = fid2srcs1[0] + fid2srcs1[fid]
+                    fids1 = db.get_feats(tid1, source=True)
+                    (_,srcs1a) = fids1[0]
+                    (_,srcs1b) = fids1[fid]
+                    srcs1 = srcs1a + srcs1b
                     evidence = item1
                     break
                 if evidence is None: continue
@@ -165,7 +171,6 @@ def main(argv):
     n = m = 0
     for (tid,item) in items:
         fids = db.get_feats(tid)
-        fids = [ fid for fid in fids if fid != 0 ]
         n += 1
         if proc(tid, item, fids):
             m += 1

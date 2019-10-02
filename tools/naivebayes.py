@@ -35,11 +35,15 @@ class NaiveBayes:
         return len(self.kcount)
 
     def add(self, key, feats, c=1):
+        self.adddict(key, c, { f:c for f in feats })
+        return
+
+    def adddict(self, key, count, feats):
         assert key is not None
         if key not in self.kcount:
             self.kcount[key] = 0
-        self.kcount[key] += c
-        for f in set(feats):
+        self.kcount[key] += count
+        for (f,c) in feats.items():
             if f in self.fcount:
                 d = self.fcount[f]
             else:
@@ -48,20 +52,22 @@ class NaiveBayes:
                 d[key] = 0
             d[key] += c
             d[None] += c
-            assert d[key] <= self.kcount[key]
         return
 
     def remove(self, key, feats, c=1):
+        self.removedict(key, c, { f:c for f in feats })
+        return
+
+    def removedict(self, key, count, feats):
         assert key is not None
         assert key in self.kcount
-        self.kcount[key] -= c
-        for f in set(feats):
+        self.kcount[key] -= count
+        for (f,c) in feats.items():
             assert f in self.fcount
             d = self.fcount[f]
             assert key in d
             d[key] -= c
             d[None] -= c
-            assert d[key] <= self.kcount[key]
         return
 
     def dump(self, threshold=2, ntop=10):

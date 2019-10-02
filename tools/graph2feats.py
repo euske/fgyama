@@ -41,15 +41,15 @@ class FeatGenerator:
         self.debug = debug
         return
 
-    def enum_feats(self, feats, vtx, ref0=None):
-        self.feats = feats
+    def enum_feats(self, vtx, ref0=None):
+        self.feats = {}
         self.ref0 = ref0
         self.done = set()
         if self.direction <= 0:
             self.enum_back(self.tracecount, vtx)
         if 0 <= self.direction:
             self.enum_forw(self.tracecount, vtx)
-        return
+        return self.feats
 
     def getbasefeats(self, n):
         if n.kind in CALLS:
@@ -141,11 +141,7 @@ class FeatGenerator:
             fs += [ lprev+':'+f for f in gettypefeats(n1) ]
         for f in fs:
             feat = (-(dist+1),fprev,f)
-            if feat in self.feats:
-                a = self.feats[feat]
-            else:
-                a = self.feats[feat] = []
-            a.append(chain)
+            self.feats[feat] = chain
             if self.debug:
                 print('  feat:', feat)
         # if this is a ref_var node, the fact that it refers to a certain variable
@@ -215,11 +211,7 @@ class FeatGenerator:
             fs += gettypefeats(v0.node)
         for f in fs:
             feat = ((dist+1),fprev,f)
-            if feat in self.feats:
-                a = self.feats[feat]
-            else:
-                a = self.feats[feat] = []
-            a.append(chain)
+            self.feats[feat] = chain
             if self.debug:
                 print('  feat:', feat)
         # if this is a assign_var node, the fact that it assigns to a certain variable
@@ -347,37 +339,32 @@ def main(argv):
     for (item,nodes) in sorted(item2nodes.items(), key=lambda x:x[0]):
         if debug:
             print(f'Item: {item}')
-        feats = {}
+        fcount = {}
+        fsrc = {}
         for node in nodes:
             v0 = builder.vtxs[node]
-            gen.enum_feats(feats, v0, item)
-        if not feats: continue
-        nfeats += len(feats)
+            f = gen.enum_feats(v0, item)
+            for (feat,chain) in f.items():
+                fcount[feat] = fcount.get(feat,0) + 1
+                fsrc[feat] = chain
+        if not fcount: continue
+        count = len(nodes)
+        nfeats += len(fcount)
 
         if db is not None:
-            fidcount = {}
-            fid2srcs = { 0:getsrcs(nodes) }
-            for (feat,chains) in sorted(feats.items(), key=lambda x:x[0]):
+            fids = { 0:(count, getsrcs(nodes)) }
+            for (feat,fc) in sorted(fcount.items(), key=lambda x:x[0]):
                 if feat in feat2fid:
                     fid = feat2fid[feat]
                 else:
                     fid = len(feat2fid)+1
                     feat2fid[feat] = fid
                     db.add_feat(feat, fid)
-                if fid not in fidcount:
-                    fidcount[fid] = 0
-                fidcount[fid] += len(chains)
-                fid2srcs[fid] = getsrcs(chains[0])
-            # only keep major features. (threshold = max/2)
-            threshold = max(fidcount.values()) // 2
-            #threshold = sum(fidcount.values()) / len(fidcount) # avg
-            for (fid,c) in fidcount.items():
-                if c < threshold:
-                    del fid2srcs[fid]
-            db.add_item(item, fid2srcs)
+                fids[fid] = (fc, getsrcs(fsrc[feat]))
+            db.add_item(item, fids)
             sys.stderr.write('.'); sys.stderr.flush()
         else:
-            data = (item, getsrcs(nodes))
+            data = (item, count, getsrcs(nodes))
             print('+ITEM', json.dumps(data))
             if srcdb is not None:
                 annot = SourceAnnot(srcdb)
@@ -388,8 +375,8 @@ def main(argv):
                     (path,start,end) = src
                     annot.add(path, start, end)
                 annot.show_text()
-            for (feat,chains) in sorted(feats.items(), key=lambda x:x[0]):
-                data = (feat, getsrcs(chains[0]))
+            for (feat,fc) in sorted(fcount.items(), key=lambda x:x[0]):
+                data = (feat, fc, getsrcs(fsrc[feat]))
                 print('+FEAT', json.dumps(data))
             print()
 
