@@ -49,17 +49,17 @@ def main(argv):
     import getopt
     def usage():
         print(f'usage: {argv[0]} '
-              '[-d] [-o path] [-i path] [-t threshold] [-s supports] [-v vars] '
+              '[-d] [-o path] [-i path] [-r ratio] [-s supports] [-v vars] '
               'feats.db [items ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:i:t:s:v:')
+        (opts, args) = getopt.getopt(argv[1:], 'do:i:r:s:v:')
     except getopt.GetoptError:
         return usage()
     debug = 0
     outpath = None
     inpath = None
-    threshold = 0.75
+    ratio = 0.5
     maxsupports = 3
     types = {}
     C = 0.7
@@ -67,7 +67,7 @@ def main(argv):
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
         elif k == '-i': inpath = v
-        elif k == '-t': threshold = float(v)
+        elif k == '-r': ratio = float(v)
         elif k == '-s': maxsupports = int(v)
         elif k == '-v': types = getvars(v)
     assert inpath is None or outpath is None
@@ -99,7 +99,7 @@ def main(argv):
         feats = { fid:fc for (fid,(fc,_)) in fids.items() if fid != 0 }
         for w in words:
             nb.removedict(w, count, feats)
-        threshold = max(feats.values()) // 2
+        threshold = int(max(feats.values()) * ratio)
         f2 = [ feat for (feat,fc) in feats.items() if threshold <= fc ]
         cands = nb.getkeys(f2)
         for w in words:
