@@ -220,6 +220,8 @@ public class Utils {
             label = "clinit";
         } else if (node instanceof LambdaExpression) {
             label = "lambda";
+        } else if (node instanceof MethodReference) {
+            label = "methodref";
         } else if (node instanceof MethodDeclaration) {
             label = ((MethodDeclaration)node).getName().getIdentifier();
         } else if (node instanceof VariableDeclaration) {
@@ -232,6 +234,8 @@ public class Utils {
             label = "synchronized";
         } else if (node instanceof TryStatement) {
             label = "try";
+        } else if (node instanceof CatchClause) {
+            label = "catch";
         } else if (node instanceof WhileStatement) {
             label = "while";
         } else {
