@@ -116,11 +116,13 @@ public class Java2DF {
             AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
             this.enumKlassesDecls(
                 finder, klass, abstDecl.bodyDeclarations(), klasses);
+
         } else if (ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
             this.enumKlassesDecls(
                 finder, klass,
 		cstr.getAnonymousClassDeclaration().bodyDeclarations(),	klasses);
+
         } else if (ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)ast;
             DFMethod method = ((DFLambdaKlass)klass).getFuncMethod();
@@ -751,7 +753,7 @@ public class Java2DF {
         }
 
         // Build call graphs (normal classes).
-	List<DFLambdaKlass> defined = new ArrayList<DFLambdaKlass>();
+	List<DFKlass> defined = new ArrayList<DFKlass>();
         for (DFKlass klass : klasses) {
 	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
@@ -766,18 +768,18 @@ public class Java2DF {
 
 	while (!defined.isEmpty()) {
 	    klasses.addAll(defined);
-	    List<DFLambdaKlass> defined2 = new ArrayList<DFLambdaKlass>();
+	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
 	    // Build method scopes (lambdas).
-	    for (DFLambdaKlass lambdaKlass : defined) {
-		assert lambdaKlass.isDefined();
-		for (DFMethod method : lambdaKlass.getMethods()) {
+	    for (DFKlass klass : defined) {
+		assert klass.isDefined();
+		for (DFMethod method : klass.getMethods()) {
 		    method.buildScope();
 		}
 	    }
 	    // Build call graphs (lambdas).
-	    for (DFLambdaKlass lambdaKlass : defined) {
-		assert lambdaKlass.isDefined();
-		for (DFMethod method : lambdaKlass.getMethods()) {
+	    for (DFKlass klass : defined) {
+		assert klass.isDefined();
+		for (DFMethod method : klass.getMethods()) {
 		    method.enumRefs(defined2);
 		    queue.add(method);
 		}

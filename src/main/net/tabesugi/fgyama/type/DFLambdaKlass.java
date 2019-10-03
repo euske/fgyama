@@ -76,10 +76,12 @@ class DFLambdaKlass extends DFKlass {
         }
     }
 
-    private LambdaScope _lambdaScope = null;
+    private final String FUNC_NAME = "#f";
+
+    private LambdaScope _lambdaScope;
+    private FunctionalMethod _funcMethod;
     private List<CapturedRef> _captured =
         new ArrayList<CapturedRef>();
-    private FunctionalMethod _funcMethod = null;
 
     public DFLambdaKlass(
         String name, DFTypeSpace outerSpace,
@@ -87,6 +89,8 @@ class DFLambdaKlass extends DFKlass {
 	super(name, outerSpace, outerKlass, outerScope,
               DFBuiltinTypes.getObjectKlass());
         _lambdaScope = new LambdaScope(outerScope, name);
+        _funcMethod = new FunctionalMethod(FUNC_NAME);
+        this.addMethod(_funcMethod, FUNC_NAME);
     }
 
     @Override
@@ -94,32 +98,25 @@ class DFLambdaKlass extends DFKlass {
         return ("<DFLambdaKlass("+this.getTypeName()+")>");
     }
 
+    @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
         if (klass.isFuncInterface()) return 0;
         return -1;
     }
 
+    @Override
     public boolean isDefined() {
-        return (_funcMethod != null &&
-                _funcMethod.getFuncType() != null);
+        return (_funcMethod.getFuncType() != null);
     }
 
+    @Override
     public DFMethod getFuncMethod() {
-        assert _funcMethod != null;
         return _funcMethod;
     }
 
-    private void addCapturedRef(CapturedRef ref) {
-        _captured.add(ref);
-    }
-
-    public List<CapturedRef> getCapturedRefs() {
-        return _captured;
-    }
-
+    @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
-        assert _funcMethod != null;
 	assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
@@ -128,12 +125,10 @@ class DFLambdaKlass extends DFKlass {
 	_funcMethod.setFuncType(funcMethod.getFuncType());
     }
 
+    @Override
     protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
         LambdaExpression lambda = (LambdaExpression)ast;
-        String id = "function";
-        _funcMethod = new FunctionalMethod(id);
-        this.addMethod(_funcMethod, id);
         ASTNode body = lambda.getBody();
         if (body instanceof Statement) {
             this.buildTypeFromStmt((Statement)body, _funcMethod, _funcMethod.getScope());
@@ -144,10 +139,19 @@ class DFLambdaKlass extends DFKlass {
         }
     }
 
+    @Override
     protected void buildMembersFromTree(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
         // _baseKlass is left undefined.
         _funcMethod.setFinder(finder);
         _funcMethod.setTree(ast);
+    }
+
+    private void addCapturedRef(CapturedRef ref) {
+        _captured.add(ref);
+    }
+
+    public List<CapturedRef> getCapturedRefs() {
+        return _captured;
     }
 }

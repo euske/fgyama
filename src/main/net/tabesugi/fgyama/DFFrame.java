@@ -888,6 +888,7 @@ public class DFFrame {
             try {
                 DFType lambdaType = _finder.lookupType(id);
                 assert lambdaType instanceof DFLambdaKlass;
+                ((DFLambdaKlass)lambdaType).load();
                 for (DFLambdaKlass.CapturedRef captured :
                          ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
                     _inputRefs.add(captured.getOriginal());

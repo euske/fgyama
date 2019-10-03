@@ -210,6 +210,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
+    public boolean isDefined() {
+        return (_state == LoadState.Loaded);
+    }
+
     public DFMethod getFuncMethod() {
         for (DFMethod method : _methods) {
             if (method.isAbstract()) return method;

@@ -301,7 +301,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     @SuppressWarnings("unchecked")
-    public void enumRefs(List<DFLambdaKlass> defined)
+    public void enumRefs(List<DFKlass> defined)
         throws InvalidSyntax {
 	if (_ast == null) return;
 	assert _scope != null;
@@ -327,7 +327,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void enumRefsMethodDecl(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, MethodDeclaration methodDecl)
         throws InvalidSyntax {
         if (methodDecl.getBody() == null) return;
@@ -344,7 +344,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void enumRefsLambda(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, LambdaExpression lambda)
         throws InvalidSyntax {
         ASTNode body = lambda.getBody();
@@ -359,7 +359,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void enumRefsBodyDecls(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         for (BodyDeclaration body : decls) {
@@ -386,7 +386,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private void enumRefsStmt(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, Statement stmt)
         throws InvalidSyntax {
         assert stmt != null;
@@ -622,7 +622,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @SuppressWarnings("unchecked")
     private DFType enumRefsExpr(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
         assert expr != null;
@@ -1007,6 +1007,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             String id = Utils.encodeASTNode(lambda);
             DFType lambdaType = this.getType(id);
             assert lambdaType instanceof DFLambdaKlass;
+            ((DFLambdaKlass)lambdaType).load();
             for (DFLambdaKlass.CapturedRef captured :
                      ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
                 _inputRefs.add(captured.getOriginal());
@@ -1031,7 +1032,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private DFRef enumRefsAssignment(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
         assert expr != null;
@@ -1135,7 +1136,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void fixateLambda(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFFunctionType funcType, List<Expression> exprs)
 	throws InvalidSyntax {
         // types or exprs might be shorter than the other. (due to varargs calls)
@@ -1146,7 +1147,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     private void fixateLambda(
-	List<DFLambdaKlass> defined,
+	List<DFKlass> defined,
         DFType type, Expression expr)
 	throws InvalidSyntax {
 	if (expr instanceof ParenthesizedExpression) {
