@@ -195,7 +195,7 @@ def q(s):
 
 def show_html_headers(fp=sys.stdout):
     fp.write('''<style>
-pre { margin: 1em; border: 1px solid gray;}
+pre { margin: 1em; outline: 1px solid gray;}
 h2 { border-bottom: 2px solid black; color: red; }
 h3 { border-bottom: 1px solid black; }
 .src { font-size: 75%; font-weight: bold; margin: 1em; }

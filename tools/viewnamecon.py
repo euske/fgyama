@@ -50,10 +50,10 @@ def showhtmlheaders(out, title, script=None):
 h1 { border-bottom: 4px solid black; }
 h2 { color: white; background: black; padding: 4px; }
 h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
-pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
+pre { margin: 0 1em 1em 1em; outline: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
-.cat { border: 1px solid black; padding: 2px; background: #eeeeee; margin: 1em; }
-.support { margin: 1em; padding: 1em; border: 2px solid black; }
+.cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
+.support { margin: 1em; padding: 1em; outline: 2px solid black; }
 .old { background: #ccccff; }
 .old mark { color: white; background: blue; }
 .new { background: #88ff88; }
@@ -141,19 +141,26 @@ def main(argv):
             return 1
         out = open(output, 'w')
 
-    def showsrc(srcs, klass):
+    def showsrc(srcs, klass, name=None):
+        pat = None
+        if name is not None:
+            pat = re.compile(r'\b'+re.escape(name)+r'\b')
         annot = SourceAnnot(srcdb)
         for (path,s,e) in srcs:
             annot.add(path,s,e)
         if html:
             out.write(f'<div class={klass} style="margin: 1em;">\n')
+            def abody(annos, s):
+                if pat is not None:
+                    s = pat.sub('xxx', s)
+                return q(s.replace('\n',''))
             for (src,ranges) in annot:
-                out.write(f'<div>{q(src.name)} <pre>\n')
+                out.write(f'<div>{q(src.name)} <pre class=src>\n')
                 for (lineno,line) in src.show(
                         ranges,
                         astart=lambda nid: '<mark>',
                         aend=lambda anno: '</mark>',
-                        abody=lambda annos, s: q(s.replace('\n',''))):
+                        abody=abody):
                     if lineno is None:
                         out.write('     '+line+'\n')
                     else:
@@ -171,46 +178,46 @@ def main(argv):
         base = rec.get('DEFAULT')
         name = stripid(item)
         if html:
-            key = (f'R{rid:003d}')
+            respid = (f'R{rid:003d}')
             words = list(reversed(splitwords(name)))
             cands = [ k for (_,k) in rec['CANDS'] ]
             wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
             wordincands = [ w for w in words if w in cands ]
             for (i,w) in zip(wordidx, wordincands):
                 cands[i] = w
-            old = tocamelcase(words)
+            old = name
             new = tocamelcase(cands)
             assert old != new
             if randomized:
-                if base == new or base == old: return False
-                if random.random() < 0.5:
-                    choices = [('a',new), ('b',base)]
-                    print(key, 'a')
-                else:
-                    choices = [('a',base), ('b',new)]
-                    print(key, 'b')
-                out.write(f'<h2>Proposal {rid}: {old} ({score:.3f})</h2>\n')
-                choices = [('x','???')] + choices + [('z',old)]
+                names = [new, old]
+                keys = ['a','b']
+                if base is not None and new != base and old != base:
+                    names.append(base)
+                    keys.append('c')
+                random.shuffle(keys)
+                print(respid, keys[0])
+                out.write(f'<h2>Proposal {rid} ({score:.3f})</h2>\n')
+                choices = [('x','???')] + list(sorted(zip(keys, names)))
                 options = ''.join(
                     f'<option value="{v}">{v}. {q(c)}</option>' for (v,c) in choices)
                 out.write(
-                    f'<div class=cat><span id="{key}" class=ui>Choice: <code class=old><mark>{old}</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
-                supports = []
+                    f'<div class=cat><span id="{respid}" class=ui>Choice: <code class=old><mark>xxx</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
+                showsrc(rec['SOURCE'], 'old', old)
             else:
                 out.write(f'<h2>Proposal {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
+                out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
+                showsrc(rec['SOURCE'], 'old')
                 supports = rec['SUPPORT']
-            out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
-            showsrc(rec['SOURCE'], 'old')
-            for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(supports):
-                out.write('<div class=support>\n')
-                out.write(
-                    f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
-                showsrc(srcs1, 'new')
-                id = f'{key}_{sid}'
-                out.write(
-                    f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br><div id={id} hidden>\n')
-                showsrc(srcs0, 'match')
-                out.write('</div></div>\n')
+                for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(supports):
+                    out.write('<div class=support>\n')
+                    out.write(
+                        f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
+                    showsrc(srcs1, 'new')
+                    id = f'{respid}_{sid}'
+                    out.write(
+                        f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br><div id={id} hidden>\n')
+                    showsrc(srcs0, 'match')
+                    out.write('</div></div>\n')
         else:
             out.write(f'*** {item!r}\n\n')
             out.write(f'{score} {name} {rec["CANDS"]}\n\n')

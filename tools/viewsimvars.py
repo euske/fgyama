@@ -40,9 +40,9 @@ def showhtmlheaders(out, title, script=None):
 h1 { border-bottom: 4px solid black; }
 h2 { background: #ffccff; padding: 2px; }
 h3 { background: #000088; color: white; padding: 2px; }
-pre { margin: 0 1em 1em 1em; border: 1px solid gray; }
+pre { margin: 0 1em 1em 1em; outline: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
-.cat { border: 1px solid black; padding: 2px; background: #eeeeee; margin: 1em; }
+.cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
 .src0 { background:#eeffff; }
 .src0 mark { background:#ff88ff; }
 .src1 { background:#ffffee; }
@@ -130,10 +130,9 @@ def main(argv):
         for (src,ranges) in annot:
             out.write(f'<div>{q(src.name)} <pre class=src{i}>\n')
             def abody(annos, s):
-                s = q(s.replace('\n',''))
                 if annos:
                     s = pat.sub(VARS[i], s)
-                return s
+                return q(s.replace('\n',''))
             for (lineno,line) in src.show(
                     ranges, astart=dummy, aend=dummy, abody=abody):
                 if lineno is None:
