@@ -901,17 +901,33 @@ public class DFFrame {
                 return null;
             }
 
+        } else if (expr instanceof ExpressionMethodReference) {
+            ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
+            this.buildExpr(methodref.getExpression());
+            String id = Utils.encodeASTNode(methodref);
+            try {
+                DFType methodRefType = _finder.lookupType(id);
+                assert methodRefType instanceof DFMethodRefKlass;
+                ((DFMethodRefKlass)methodRefType).load();
+                return methodRefType;
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (methodref)",
+                    this, e.name, methodref);
+                return null;
+            }
+
         } else if (expr instanceof MethodReference) {
-            // MethodReference
             MethodReference methodref = (MethodReference)expr;
             //  CreationReference
-            //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
             String id = Utils.encodeASTNode(methodref);
-            // XXX TODO MethodReference
             try {
-                return _finder.lookupType(id);
+                DFType methodRefType = _finder.lookupType(id);
+                assert methodRefType instanceof DFMethodRefKlass;
+                ((DFMethodRefKlass)methodRefType).load();
+                return methodRefType;
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (methodref)",

@@ -433,12 +433,16 @@ public class DFLocalScope extends DFVarScope {
         } else if (ast instanceof LambdaExpression) {
             // Lambda classes are processed separately.
 
+        } else if (ast instanceof ExpressionMethodReference) {
+            // MethodRef classes are processed separately.
+            ExpressionMethodReference methodRef = (ExpressionMethodReference)ast;
+            this.buildExpr(finder, methodRef.getExpression());
+
         } else if (ast instanceof MethodReference) {
             //  CreationReference
-            //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            // XXX TODO MethodReference
+            // MethodRef classes are processed separately.
 
 	} else {
             throw new InvalidSyntax(ast);

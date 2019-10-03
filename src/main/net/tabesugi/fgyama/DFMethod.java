@@ -412,9 +412,14 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 //_outputRefs.add(scope.lookupVar(frag.getName()));
-                Expression init = frag.getInitializer();
-                if (init != null) {
-                    this.enumRefsExpr(defined, scope, init);
+                try {
+                    DFRef ref = scope.lookupVar(frag.getName());
+                    Expression init = frag.getInitializer();
+                    if (init != null) {
+                        this.enumRefsExpr(defined, scope, init);
+                        this.fixateLambda(defined, ref.getRefType(), init);
+                    }
+                } catch (VariableNotFound e) {
                 }
             }
 
@@ -772,6 +777,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.enumRefsExpr(defined, scope, init);
+                        this.fixateLambda(defined, ref.getRefType(), init);
                     }
                 } catch (VariableNotFound e) {
                 }
@@ -1005,25 +1011,84 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // "x -> { ... }"
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
-            DFType lambdaType = this.getType(id);
-            assert lambdaType instanceof DFLambdaKlass;
-            ((DFLambdaKlass)lambdaType).load();
+            DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getType(id);
+            lambdaKlass.load();
             for (DFLambdaKlass.CapturedRef captured :
-                     ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
+                     lambdaKlass.getCapturedRefs()) {
                 _inputRefs.add(captured.getOriginal());
             }
-            return lambdaType;
+            return lambdaKlass;
 
-        } else if (expr instanceof MethodReference) {
-            // MethodReference
-            MethodReference methodref = (MethodReference)expr;
-            //  CreationReference
-            //  ExpressionMethodReference
-            //  SuperMethodReference
-            //  TypeMethodReference
+        } else if (expr instanceof ExpressionMethodReference) {
+            ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
-            // XXX TODO MethodReference
-            return this.getType(id);
+            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getType(id);
+            methodRefKlass.load();
+            Expression expr1 = methodref.getExpression();
+            DFType type = null;
+            if (expr1 instanceof Name) {
+                try {
+                    type = _finder.lookupType((Name)expr1);
+                } catch (TypeNotFound e) {
+                }
+            }
+            if (type == null) {
+                type = this.enumRefsExpr(defined, scope, expr1);
+            }
+            if (type != null) {
+                DFKlass klass = type.toKlass();
+                methodRefKlass.setRefKlass(klass);
+                if (methodRefKlass.isDefined()) {
+                    defined.add(methodRefKlass);
+                }
+            }
+            return methodRefKlass;
+
+        } else if (expr instanceof CreationReference) {
+            CreationReference methodref = (CreationReference)expr;
+            String id = Utils.encodeASTNode(methodref);
+            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getType(id);
+            methodRefKlass.load();
+            try {
+                DFKlass klass = _finder.resolve(methodref.getType()).toKlass();
+                methodRefKlass.setRefKlass(klass);
+                if (methodRefKlass.isDefined()) {
+                    defined.add(methodRefKlass);
+                }
+            } catch (TypeNotFound e) {
+            }
+            return methodRefKlass;
+
+        } else if (expr instanceof SuperMethodReference) {
+            SuperMethodReference methodref = (SuperMethodReference)expr;
+            String id = Utils.encodeASTNode(methodref);
+            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getType(id);
+            methodRefKlass.load();
+            try {
+                DFKlass klass = _finder.lookupType(methodref.getQualifier()).toKlass();
+                klass = klass.getBaseKlass();
+                methodRefKlass.setRefKlass(klass);
+                if (methodRefKlass.isDefined()) {
+                    defined.add(methodRefKlass);
+                }
+            } catch (TypeNotFound e) {
+            }
+            return methodRefKlass;
+
+        } else if (expr instanceof TypeMethodReference) {
+            TypeMethodReference methodref = (TypeMethodReference)expr;
+            String id = Utils.encodeASTNode(methodref);
+            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getType(id);
+            methodRefKlass.load();
+            try {
+                DFKlass klass = _finder.resolve(methodref.getType()).toKlass();
+                methodRefKlass.setRefKlass(klass);
+                if (methodRefKlass.isDefined()) {
+                    defined.add(methodRefKlass);
+                }
+            } catch (TypeNotFound e) {
+            }
+            return methodRefKlass;
 
         } else {
             // ???
@@ -1163,6 +1228,17 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             if (lambdaKlass.isDefined()) {
                 defined.add(lambdaKlass);
             }
+
+        } else if (expr instanceof MethodReference) {
+            MethodReference methodref = (MethodReference)expr;
+            String id = Utils.encodeASTNode(methodref);
+            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getType(id);
+	    methodRefKlass.load();
+	    methodRefKlass.setBaseKlass(type.toKlass());
+            if (methodRefKlass.isDefined()) {
+                defined.add(methodRefKlass);
+            }
+
 	}
     }
 
@@ -1496,16 +1572,16 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    DFFunctionType funcType = DFMethod.this.getFuncType();
             _return = new InternalRef(funcType.getReturnType(), "return");
             _arguments = new InternalRef[parameters.size()];
-            int lastarg = parameters.size()-1;
+            DFType[] argTypes = funcType.getRealArgTypes();
             int i = 0;
             for (VariableDeclaration decl : parameters) {
-                DFType argType = funcType.getRealArgType(i);
+                DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     argType = DFArrayType.getType(argType, ndims);
                 }
                 String name;
-                if (funcType.isVarArgs() && i == lastarg) {
+                if (funcType.isVarArg(i)) {
                     name = "varargs";
                 } else {
                     name = "arg"+i;

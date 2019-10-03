@@ -721,10 +721,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
             //  TypeMethodReference
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
-            DFKlass methodrefKlass = new DFKlass(
-                id, space, this, outerScope, DFBuiltinTypes.getObjectKlass());
-            space.addKlass(id, methodrefKlass);
-            // XXX TODO MethodReference
+            DFKlass methodRefKlass = space.addKlass(
+                id, new DFMethodRefKlass(id, space, this, outerScope));
+            methodRefKlass.setKlassTree(this.getFilePath(), methodref);
 
         } else {
             // ???

@@ -83,20 +83,25 @@ public class DFFunctionType implements DFType {
     }
 
     public DFType getArgType(int i) {
-        if (_varargs) {
-            int lastrecv = _argTypes.length - 1;
-            if (lastrecv <= i) {
-                // For varargs methods, the last argument is declared as an array.
-                DFType type = _argTypes[lastrecv];
-                assert type instanceof DFArrayType;
-                return ((DFArrayType)type).getElemType();
-            }
+        if (isVarArg(i)) {
+            // For varargs methods, the last argument is declared as an array.
+            DFType type = _argTypes[_argTypes.length - 1];
+            assert type instanceof DFArrayType;
+            return ((DFArrayType)type).getElemType();
         }
         return _argTypes[i];
     }
 
-    public DFType getRealArgType(int i) {
-        return _argTypes[i];
+    public DFType[] getRealArgTypes() {
+        return _argTypes;
+    }
+
+    public void setVarArgs(boolean varargs) {
+        _varargs = varargs;
+    }
+
+    public boolean isVarArg(int i) {
+        return (_varargs && (_argTypes.length-1) <= i);
     }
 
     public DFType getReturnType() {
@@ -128,13 +133,5 @@ public class DFFunctionType implements DFType {
 
     public DFKlass[] getExceptions() {
         return _exceptions;
-    }
-
-    public void setVarArgs(boolean varargs) {
-        _varargs = varargs;
-    }
-
-    public boolean isVarArgs() {
-        return _varargs;
     }
 }

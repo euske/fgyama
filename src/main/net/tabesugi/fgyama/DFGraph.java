@@ -1497,18 +1497,33 @@ public abstract class DFGraph {
                 }
                 ctx.setRValue(node);
 
+            } else if (expr instanceof ExpressionMethodReference) {
+                ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
+                String id = Utils.encodeASTNode(methodref);
+                DFType methodRefType = _finder.lookupType(id);
+		assert methodRefType instanceof DFMethodRefKlass;
+                CaptureNode node = new CaptureNode(this, scope, methodRefType, methodref);
+                try {
+                    // Try assuming it's an ExpresionMethodReference.
+                    // Capture "this".
+                    processExpression(
+                        ctx, scope, frame, methodref.getExpression());
+                    node.accept(ctx.getRValue(), "#this");
+                } catch (EntityNotFound e) {
+                    // Turned out it's a TypeMethodReference.
+                }
+                ctx.setRValue(node);
+
             } else if (expr instanceof MethodReference) {
                 //  CreationReference
-                //  ExpressionMethodReference
                 //  SuperMethodReference
                 //  TypeMethodReference
                 MethodReference methodref = (MethodReference)expr;
-                // XXX TODO MethodReference
-		Logger.error("Unsupported: MethodReference", expr);
                 String id = Utils.encodeASTNode(methodref);
-                DFType methodrefType = _finder.lookupType(id);
-                ctx.setRValue(
-                    new DFNode(this, scope, methodrefType, null, null));
+                DFType methodRefType = _finder.lookupType(id);
+		assert methodRefType instanceof DFMethodRefKlass;
+                CaptureNode node = new CaptureNode(this, scope, methodRefType, methodref);
+                ctx.setRValue(node);
 
             } else {
                 throw new InvalidSyntax(expr);

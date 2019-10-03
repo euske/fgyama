@@ -136,6 +136,38 @@ public class Java2DF {
             } else {
                 throw new InvalidSyntax(body);
             }
+
+        } else if (ast instanceof CreationReference) {
+            DFType type = finder.resolveSafe(
+                ((CreationReference)ast).getType());
+            if (type instanceof DFKlass) {
+                enumKlasses(type.toKlass(), klasses);
+            }
+
+        } else if (ast instanceof SuperMethodReference) {
+            try {
+                DFType type = finder.lookupType(
+                    ((SuperMethodReference)ast).getQualifier());
+                if (type instanceof DFKlass) {
+                    enumKlasses(type.toKlass(), klasses);
+                }
+            } catch (TypeNotFound e) {
+            }
+
+        } else if (ast instanceof TypeMethodReference) {
+            DFType type = finder.resolveSafe(
+                ((TypeMethodReference)ast).getType());
+            if (type instanceof DFKlass) {
+                enumKlasses(type.toKlass(), klasses);
+            }
+
+        } else if (ast instanceof ExpressionMethodReference) {
+            // XXX ignored mref.typeArguments() for method refs.
+            this.enumKlassesExpr(
+                finder, klass,
+                ((ExpressionMethodReference)ast).getExpression(),
+                klasses);
+
         } else {
             throw new InvalidSyntax(ast);
         }
@@ -602,7 +634,10 @@ public class Java2DF {
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-	    // XXX TODO MethodReference
+            MethodReference methodref = (MethodReference)ast;
+            String id = Utils.encodeASTNode(methodref);
+            DFKlass methodRefKlass = (DFKlass)space.getType(id);
+	    // Do not use methodref klasses until defined.
 
         } else {
 	    throw new InvalidSyntax(ast);
@@ -769,6 +804,9 @@ public class Java2DF {
 	while (!defined.isEmpty()) {
 	    klasses.addAll(defined);
 	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
+            for (DFKlass klass : defined) {
+                klass.overrideMethods();
+            }
 	    // Build method scopes (lambdas).
 	    for (DFKlass klass : defined) {
 		assert klass.isDefined();
