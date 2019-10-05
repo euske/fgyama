@@ -160,17 +160,18 @@ class ItemDB {
     }
 
     updateHTML() {
-	let cids = Object.getOwnPropertyNames(this.items);
-	for (let cid of cids) {
+	for (let e of toArray(document.getElementsByClassName('ui'))) {
+            let cid = e.id;
             let item = this.items[cid];
-            let sel = document.getElementById('SC'+cid) as HTMLSelectElement;
-            if (sel !== null) {
-		sel.value = item.choice;
+            if (item === undefined) continue;
+            for (let sel of toArray(e.getElementsByTagName('select'))) {
+                if (item.choice) {
+		    (sel as HTMLSelectElement).value = item.choice;
+                }
             }
-            let fld = document.getElementById('IC'+cid) as HTMLInputElement;
-	    if (fld !== null) {
-		fld.value = item.comment;
-	    }
+            for (let fld of toArray(e.getElementsByTagName('input'))) {
+		(fld as HTMLInputElement).value = item.comment;
+            }
 	}
     }
 }
