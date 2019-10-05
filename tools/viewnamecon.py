@@ -15,6 +15,10 @@ TYPES = {
     'Ljava/lang/String;'
 }
 
+CONTEXT_CHOICES = (
+    ('x','???'), ('a','Good'), ('b', 'Acceptable'), ('c','Bad'),
+)
+
 def getrecs(fp):
     rec = {}
     for line in fp:
@@ -36,27 +40,42 @@ def getvars(fp):
         types[v] = t
     return types
 
+def getnewname(name, cands):
+    words = list(reversed(splitwords(name)))
+    cands = [ k for (_,k) in cands ]
+    wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
+    wordincands = [ w for w in words if w in cands ]
+    for (i,w) in zip(wordidx, wordincands):
+        cands[i] = w
+    return tocamelcase(cands)
+
 def tocamelcase(words):
     return ''.join(
         (w if i == 0 else w[0].upper()+w[1:])
         for (i,w) in enumerate(words) )
 
-def showhtmlheaders(out, title, script=None):
-    out.write('''<!DOCTYPE html>
+def showchoices(choices):
+    opts = [ f'<option value="{v}">{v}. {q(s)}</option>' for (v,s) in choices ]
+    return f'<select>{"".join(opts)}</select>'
+
+def showhtmlheader(out, title, script=None):
+    out.write(f'''<!DOCTYPE html>
 <html>
 <meta charset="UTF-8" />
-<title>%s</title>
-<style>
+<title>{q(title)}</title>
+<style>''' '''
 h1 { border-bottom: 4px solid black; }
 h2 { color: white; background: black; padding: 4px; }
 h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
 pre { margin: 0 1em 1em 1em; outline: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
+.mission { background: brown; }
 .cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
-.support { margin: 1em; padding: 1em; outline: 2px solid black; }
+.cand { margin: 1em; padding: 1em; outline: 2px solid black; }
 .old { background: #ccccff; }
 .old mark { color: white; background: blue; }
 .new { background: #88ff88; }
+.new mark { color: black; background: yellow; }
 .match { background: #ffcccc; }
 .match mark { color: white; background: red; }
 </style>
@@ -67,61 +86,48 @@ function toggle(id) {
   return false;
 }
 </script>
-''' % q(title))
-    if script is None:
+''')
+    if script is not None:
+        out.write(f'<script>\n{script}\n</script>\n')
+        out.write('<body onload="run(\'results\', \'%s_eval\')">\n' % title)
+    else:
         out.write('<body>\n')
-        return
-    out.write(f'<script>\n{script}\n</script>\n')
-    out.write('''<body onload="run('results', '{title}_eval')">
-<h1>Variable Rewrite Experiment: {title}</h1>
-<h2>Your Mission</h2>
-<ul>
-<li> For each <span class=old>blue</span> snippet, look at the <code class=old><mark>variable</mark></code>
-    and choose which candidate best explains the working of the code.
-<li> The proposed <code class=new><mark>name</mark></code> is highlighted yellow.
-<li> Click the <a href="javascript:void(0)">[+]</a> to see the <span class=new>supports</span> of the rewrite.
-<li> If there's not enough information, choose <code>???</code>.
-<li> Your choices are saved in the follwoing textbox:<br>
-  <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
-  When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
-  the experiment organizer.<br>
-<li> <u>Do not consult others about the code during this experiment.</u>
-</ul>
-'''.format(title=q(title)))
+    out.write(f'<h1>Variable Rewrite Experiment: {title}</h1>\n')
     return
 
 def main(argv):
     import getopt
+    import fileinput
     def usage():
-        print(f'usage: {argv[0]} [-o output] [-T title] [-S script] [-n limit] [-m supports] [-R] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
+        print(f'usage: {argv[0]} [-o output] [-H|-E|-C] [-T title] [-S script] [-n limit] [-m maxcands] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:T:S:n:m:Re:c:v:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HECT:S:n:m:e:c:v:')
     except getopt.GetoptError:
         return usage()
     output = None
-    html = False
     title = None
     script = None
     encoding = None
-    randomized = False
+    mode = None
     excluded = set()
     types = {}
     limit = 10
-    maxsupports = 0
+    maxcands = 0
     timestamp = time.strftime('%Y%m%d')
     for (k, v) in opts:
         if k == '-o':
             output = v
-            html = output.endswith('.html')
+        elif k == '-H': mode = k[1:]
+        elif k == '-E': mode = k[1:]
+        elif k == '-C': mode = k[1:]
         elif k == '-T':
             title = v
         elif k == '-S':
             with open(v) as fp:
                 script = fp.read()
         elif k == '-n': limit = int(v)
-        elif k == '-m': maxsupports = int(v)
-        elif k == '-R': randomized = True
+        elif k == '-m': maxcands = int(v)
         elif k == '-e':
             with open(v) as fp:
                 for rec in getrecs(fp):
@@ -141,114 +147,179 @@ def main(argv):
             return 1
         out = open(output, 'w')
 
-    def showsrc(srcs, klass, name=None):
+    def showsrc_plain(srcs, klass):
+        annot = SourceAnnot(srcdb)
+        for (path,s,e) in srcs:
+            annot.add(path,s,e)
+        annot.show_text(out, showline=lambda line: klass+' '+line)
+        return
+
+    def showsrc_html(srcs, klass, name=None):
         pat = None
         if name is not None:
             pat = re.compile(r'\b'+re.escape(name)+r'\b')
         annot = SourceAnnot(srcdb)
         for (path,s,e) in srcs:
             annot.add(path,s,e)
-        if html:
-            out.write(f'<div class={klass} style="margin: 1em;">\n')
-            def abody(annos, s):
-                if pat is not None:
-                    s = pat.sub('xxx', s)
-                return q(s.replace('\n',''))
-            for (src,ranges) in annot:
-                out.write(f'<div>{q(src.name)} <pre class=src>\n')
-                for (lineno,line) in src.show(
-                        ranges,
-                        astart=lambda nid: '<mark>',
-                        aend=lambda anno: '</mark>',
-                        abody=abody):
-                    if lineno is None:
-                        out.write('     '+line+'\n')
-                    else:
-                        out.write(f'{lineno:5d}:{line}\n')
-                out.write('</pre></div>\n')
-            out.write('</div>\n')
-        else:
-            annot.show_text(out, showline=lambda line: klass+' '+line)
+        out.write(f'<div class={klass} style="margin: 1em;">\n')
+        def abody(annos, s):
+            if pat is not None:
+                s = pat.sub('xxx', s)
+            return q(s.replace('\n',''))
+        for (src,ranges) in annot:
+            out.write(f'<div>{q(src.name)} <pre class=src>\n')
+            for (lineno,line) in src.show(
+                    ranges,
+                    astart=lambda nid: '<mark>',
+                    aend=lambda anno: '</mark>',
+                    abody=abody):
+                if lineno is None:
+                    out.write('     '+line+'\n')
+                else:
+                    out.write(f'{lineno:5d}:{line}\n')
+            out.write('</pre></div>\n')
+        out.write('</div>\n')
         return
 
-    def showrec(rid, rec):
+    def showcands_html(rid, cands):
+        for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(cands):
+            out.write('<div class=cand>\n')
+            out.write(f'<h3>Candidate {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
+            showsrc_html(srcs1, 'new')
+            id = f'{rid}_{sid}'
+            out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Show Proof<br><div id={id} hidden>\n')
+            showsrc_html(srcs0, 'match')
+            out.write('</div></div>\n')
+        return
+
+    def showrec_plain(rid, rec):
         item = rec['ITEM']
-        if types and types.get(item) not in TYPES: return False
+        name = stripid(item)
+        out.write(f'*** {item!r}\n\n')
+        out.write(f'{rec["SCORE"]} {name} {rec["CANDS"]}\n\n')
+        showsrc_plain(rec['SOURCE'], ' ')
+        for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
+            out.write(f'+ {evidence} {feat}\n')
+            showsrc_plain(srcs1, 'E')
+            showsrc_plain(srcs0, 'S')
+        return
+
+    def showrec_html(rid, rec):
+        item = rec['ITEM']
+        score = rec['SCORE']
+        name = stripid(item)
+        old = name
+        new = getnewname(name, rec['CANDS'])
+        assert old != new
+        out.write(f'<h2>Rewrite {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
+        out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
+        showsrc_html(rec['SOURCE'], 'old')
+        showcands_html(rid, rec['SUPPORT'])
+        return
+
+    def showrec_eval(rid, rec):
+        item = rec['ITEM']
         score = rec['SCORE']
         base = rec.get('DEFAULT')
         name = stripid(item)
-        if html:
-            respid = (f'R{rid:003d}')
-            words = list(reversed(splitwords(name)))
-            cands = [ k for (_,k) in rec['CANDS'] ]
-            wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
-            wordincands = [ w for w in words if w in cands ]
-            for (i,w) in zip(wordidx, wordincands):
-                cands[i] = w
-            old = name
-            new = tocamelcase(cands)
-            assert old != new
-            if randomized:
-                names = [new, old]
-                keys = ['a','b']
-                if base is not None and new != base and old != base:
-                    names.append(base)
-                    keys.append('c')
-                random.shuffle(keys)
-                print(respid, keys[0])
-                out.write(f'<h2>Proposal {rid} ({score:.3f})</h2>\n')
-                choices = [('x','???')] + list(sorted(zip(keys, names)))
-                options = ''.join(
-                    f'<option value="{v}">{v}. {q(c)}</option>' for (v,c) in choices)
-                out.write(
-                    f'<div class=cat><span id="{respid}" class=ui>Choice: <code class=old><mark>xxx</mark></code> &rarr; <select>{options}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
-                showsrc(rec['SOURCE'], 'old', old)
-            else:
-                out.write(f'<h2>Proposal {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
-                out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
-                showsrc(rec['SOURCE'], 'old')
-                supports = rec['SUPPORT']
-                for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(supports):
-                    out.write('<div class=support>\n')
-                    out.write(
-                        f'<h3>Support {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
-                    showsrc(srcs1, 'new')
-                    id = f'{respid}_{sid}'
-                    out.write(
-                        f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Match<br><div id={id} hidden>\n')
-                    showsrc(srcs0, 'match')
-                    out.write('</div></div>\n')
-        else:
-            out.write(f'*** {item!r}\n\n')
-            out.write(f'{score} {name} {rec["CANDS"]}\n\n')
-            showsrc(rec['SOURCE'], ' ')
-            for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
-                out.write(f'+ {evidence} {feat}\n')
-                showsrc(srcs1, 'E')
-                showsrc(srcs0, 'S')
-        return True
+        old = name
+        new = getnewname(name, rec['CANDS'])
+        assert old != new
+        names = [new, old]
+        keys = ['a','b']
+        if base is not None and new != base and old != base:
+            names.append(base)
+            keys.append('c')
+        random.shuffle(keys)
+        out.write(f'<h2>Rewrite {rid} ({score:.3f})</h2>\n')
+        choices = [('x','???')] + list(sorted(zip(keys, names)))
+        out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: <code class=old><mark>xxx</mark></code> &rarr; {showchoices(choices)} &nbsp; Comment: <input size="30" /></span></div>\n')
+        showsrc_html(rec['SOURCE'], 'old', old)
+        print(rid, keys[0])
+        return
+
+    def showrec_context(rid, rec):
+        item = rec['ITEM']
+        score = rec['SCORE']
+        name = stripid(item)
+        old = name
+        new = getnewname(name, rec['CANDS'])
+        assert old != new
+        out.write(f'<h2>Rewrite {rid}: <code class=old><mark>{old}</mark></code> &rarr; <code class=new><mark>{new}</mark></code></h2>\n')
+        out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: {showchoices(CONTEXT_CHOICES)}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
+        out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
+        showsrc_html(rec['SOURCE'], 'old')
+        showcands_html(rid, rec['SUPPORT'])
+        print(rid, rec['RANK'], score)
+        return
 
     #
-    if html:
+    if mode is not None:
         if title is None:
             title = f'{args[0]}_{timestamp}'
-        showhtmlheaders(out, title, script)
+        showhtmlheader(out, title, script)
+    if mode == 'H':
+        showrec = showrec_html
+    elif mode == 'E':
+        showrec = showrec_eval
+        out.write('''<h2 class=mission>Your Mission</h2>
+<ul>
+<li> For each <code class=old>blue</code> snippet, look at the variable
+    <code class=old><mark>xxx</mark></code> and choose which name fits the best.
+<li> Try to think about each snippet for at least one minute.
+    If there's not enough information, choose "<code>???</code>".
+<li> Your choices are saved in the follwoing textbox:<br>
+  <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
+  When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
+  the experiment organizer.<br>
+<li> <u style="color:red;">Do not consult others about the code during this experiment.</u>
+</ul>
+''')
+    elif mode == 'C':
+        showrec = showrec_context
+        out.write('''<h2 class=mission>Your Mission</h2>
+<ul>
+<li> For each <code class=old>blue</code> snippet, look at the
+    <code class=old><mark>variable</mark></code> and its proposed
+    <code class=new><mark>rewrite</mark></code>.
+<li> Look at each <code class=new>Candidate</code> and determine
+    if the rewrite is good, bad or acceptable.
+    Click the <a href="javascript:void(0)">[+]</a> to see how it matches the original code.
+<li> Try to think about each snippet for at least one minute.
+    If there's not enough information, choose "<code>???</code>".
+<li> Your choices are saved in the follwoing textbox:<br>
+  <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
+  When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
+  the experiment organizer.<br>
+<li> <u style="color:red;">Do not consult others about the code during this experiment.</u>
+</ul>
+''')
+    else:
+        showrec = showrec_plain
 
-    rid = 0
-    for path in args:
-        with open(path) as fp:
-            recs = [ rec for rec in getrecs(fp) if rec['ITEM'] not in excluded ]
-        for rec in recs:
+    allrecs = []
+    with fileinput.input(args) as fp:
+        recs = []
+        for rec in getrecs(fp):
+            if rec['ITEM'] in excluded: continue
+            if types and types.get(rec['ITEM']) not in TYPES: continue
             feats = rec['FEATS']
             score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
             rec['SCORE'] = score
+            recs.append(rec)
         recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
-        n = limit
-        for rec in recs:
-            if showrec(rid, rec):
-                rid += 1
-                n -= 1
-            if n == 0: break
+        for (i,rec) in enumerate(recs):
+            rec['RANK'] = i/len(recs)
+        if mode == 'C':
+            n = len(recs)
+            recs = [ recs[i*n//limit] for i in range(limit) ]
+            random.shuffle(recs)
+        else:
+            recs = recs[:limit]
+        allrecs.extend(recs)
+
+    for (rid, rec) in enumerate(allrecs):
+        showrec(f'R{rid:003d}', rec)
 
     return 0
 
