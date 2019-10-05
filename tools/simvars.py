@@ -53,7 +53,9 @@ def main(argv):
             with open(v) as fp:
                 for rec in getrecs(fp):
                     items.add(rec['ITEM'])
-                    items.update( x[2] for x in rec['SUPPORT'] )
+                    for (_,_,feats) in rec['SUPPORTS']:
+                        for (_,(_,item1,_)) in feats:
+                            items.add(item1)
         elif k == '-t': threshold = float(v)
     if not args: return usage()
 

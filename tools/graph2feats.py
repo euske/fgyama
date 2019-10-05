@@ -276,6 +276,7 @@ def main(argv):
         if os.path.exists(outpath):
             print(f'Already exists: {outpath}')
             return 1
+        print(f'Output FeatDB: {outpath}', file=sys.stderr)
         db = FeatDB(outpath)
         db.init()
 

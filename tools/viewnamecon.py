@@ -40,9 +40,7 @@ def getvars(fp):
         types[v] = t
     return types
 
-def getnewname(name, cands):
-    words = list(reversed(splitwords(name)))
-    cands = [ k for (_,k) in cands ]
+def getnewname(words, cands):
     wordidx = [ i for (i,w) in enumerate(cands) if w in words ]
     wordincands = [ w for w in words if w in cands ]
     for (i,w) in zip(wordidx, wordincands):
@@ -145,6 +143,7 @@ def main(argv):
         if os.path.exists(output):
             print(f'Already exists: {output!r}')
             return 1
+        print(f'Output: {output}', file=sys.stderr)
         out = open(output, 'w')
 
     def showsrc_plain(srcs, klass):
@@ -181,10 +180,11 @@ def main(argv):
         out.write('</div>\n')
         return
 
-    def showcands_html(rid, cands):
-        for (sid,(feat,srcs0,evidence,srcs1)) in enumerate(cands):
+    def showsupports_html(rid, w, feats):
+        for (sid, ((fscore,fid,feat),(srcs0,item1,srcs1))) in enumerate(feats):
+            name1 = stripid(item1)
             out.write('<div class=cand>\n')
-            out.write(f'<h3>Candidate {sid+1}: <code class=new><mark>{stripid(evidence)}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
+            out.write(f'<h3>Support {sid} for "{w}": <code class=new><mark>{name1}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
             showsrc_html(srcs1, 'new')
             id = f'{rid}_{sid}'
             out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Show Proof<br><div id={id} hidden>\n')
@@ -198,32 +198,33 @@ def main(argv):
         out.write(f'*** {item!r}\n\n')
         out.write(f'{rec["SCORE"]} {name} {rec["CANDS"]}\n\n')
         showsrc_plain(rec['SOURCE'], ' ')
-        for (feat,srcs0,evidence,srcs1) in rec['SUPPORT']:
-            out.write(f'+ {evidence} {feat}\n')
-            showsrc_plain(srcs1, 'E')
-            showsrc_plain(srcs0, 'S')
+        for (w, wscore, feats) in rec['SUPPORTS']:
+            out.write(f'* {w}\n')
+            for ((fscore,fid,feat),(srcs0,item1,srcs1)) in feats:
+                out.write(f'+ {feat}\n')
+                showsrc_plain(srcs1, 'E')
+                showsrc_plain(srcs0, 'S')
         return
 
     def showrec_html(rid, rec):
         item = rec['ITEM']
         score = rec['SCORE']
-        name = stripid(item)
-        old = name
-        new = getnewname(name, rec['CANDS'])
+        old = stripid(item)
+        new = getnewname(rec['WORDS'], rec['CANDS'])
         assert old != new
         out.write(f'<h2>Rewrite {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
-        out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
+        out.write(f'<h3><code class=old><mark>{old}</mark></code></h3>')
         showsrc_html(rec['SOURCE'], 'old')
-        showcands_html(rid, rec['SUPPORT'])
+        for (w, wscore, feats) in rec['SUPPORTS']:
+            showsupports_html(rid, w, feats)
         return
 
     def showrec_eval(rid, rec):
         item = rec['ITEM']
         score = rec['SCORE']
         base = rec.get('DEFAULT')
-        name = stripid(item)
-        old = name
-        new = getnewname(name, rec['CANDS'])
+        old = stripid(item)
+        new = getnewname(rec['WORDS'], rec['CANDS'])
         assert old != new
         names = [new, old]
         keys = ['a','b']
@@ -240,17 +241,16 @@ def main(argv):
 
     def showrec_context(rid, rec):
         item = rec['ITEM']
-        score = rec['SCORE']
-        name = stripid(item)
-        old = name
-        new = getnewname(name, rec['CANDS'])
+        old = stripid(item)
+        new = getnewname(rec['WORDS'], rec['CANDS'])
         assert old != new
         out.write(f'<h2>Rewrite {rid}: <code class=old><mark>{old}</mark></code> &rarr; <code class=new><mark>{new}</mark></code></h2>\n')
         out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: {showchoices(CONTEXT_CHOICES)}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
-        out.write(f'<h3><code class=old><mark>{stripid(item)}</mark></code></h3>')
+        out.write(f'<h3><code class=old><mark>{old}</mark></code></h3>')
         showsrc_html(rec['SOURCE'], 'old')
-        showcands_html(rid, rec['SUPPORT'])
-        print(rid, rec['RANK'], score)
+        for (w, wscore, feats) in rec['SUPPORTS']:
+            showsupports_html(rid, w, feats)
+        print(rid, rec['SCORE'], rec['RANK'])
         return
 
     #
@@ -282,7 +282,7 @@ def main(argv):
 <li> For each <code class=old>blue</code> snippet, look at the
     <code class=old><mark>variable</mark></code> and its proposed
     <code class=new><mark>rewrite</mark></code>.
-<li> Look at each <code class=new>Candidate</code> and determine
+<li> Look at each <code class=new>Support</code> and determine
     if the rewrite is good, bad or acceptable.
     Click the <a href="javascript:void(0)">[+]</a> to see how it matches the original code.
 <li> Try to think about each snippet for at least one minute.
@@ -303,9 +303,6 @@ def main(argv):
         for rec in getrecs(fp):
             if rec['ITEM'] in excluded: continue
             if types and types.get(rec['ITEM']) not in TYPES: continue
-            feats = rec['FEATS']
-            score = sum( math.exp(-abs(feat[0]))*df*ff for (feat,df,ff) in feats )
-            rec['SCORE'] = score
             recs.append(rec)
         recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         for (i,rec) in enumerate(recs):

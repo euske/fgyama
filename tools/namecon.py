@@ -101,62 +101,57 @@ def main(argv):
             nb.removedict(w, count, feats)
         threshold = int(max(feats.values()) * ratio)
         f2 = [ feat for (feat,fc) in feats.items() if threshold <= fc ]
-        cands = nb.getkeys(f2)
+        cands = nb.getkeyfeats(f2)[:len(words)]
         for w in words:
             nb.adddict(w, count, feats)
         if not cands: return False
-        cands = cands[:len(words)]
-        cwords = [ w for (_,w) in cands ]
+        cwords = [ w for (_,w,_) in cands ]
         topword = cwords[0]
         if topword in words: return True
-        print('#', words, '->', cands)
         print('+ITEM', json.dumps(item))
-        print('+CANDS', json.dumps(cands))
+        print('+WORDS', json.dumps(words))
+        print('+CANDS', json.dumps(cwords))
         if item in defaultnames:
             print('+DEFAULT', json.dumps(defaultnames[item]))
-        feats = []
-        fscore = {}
-        for fid in f2:
-            d = nb.fcount[fid]
-            if topword not in d: continue
-            # A rarer feature overall means stronger indication.
-            df = math.log(nallitems / db.get_numfeatitems(fid))
-            # A frequent feature for this category means stronger indication.
-            ff = d[topword] / d[None]
-            # Discount a "distant" feature from the subject.
-            feat = db.get_feat(fid)
-            assert feat is not None
-            fscore[fid] = math.exp(-C*abs(feat[0])) * df * ff
-            feats.append((feat, df, ff))
-        print('+FEATS', json.dumps(feats))
         fids0 = db.get_feats(tid, source=True)
-        (_,srcs) = fids0[0]
-        print('+SOURCE', json.dumps(srcs))
+        (_,srcs0) = fids0[0]
+        print('+SOURCE', json.dumps(srcs0))
         supports = []
-        fids2 = sorted(fscore.keys(), key=lambda fid:fscore[fid], reverse=True)
-        for cw in cwords:
-            for fid in fids2:
+        for (_,w,a) in cands:
+            # Find top N features for each word.
+            fs = []
+            for (fid,c) in a[1:]:
+                feat = db.get_feat(fid)
+                assert feat is not None
+                # A rarer feature overall means stronger indication.
+                df = math.log(nallitems / db.get_numfeatitems(fid))
+                # A frequent feature for this category means stronger indication.
+                ff = c / nb.fcount[fid][None]
+                # Discount a "distant" feature from the subject.
+                ds = math.exp(-C*abs(feat[0]))
+                fs.append((ds * df * ff, fid, feat))
+            fs = sorted(fs, reverse=True)[:maxsupports]
+            score = sum( s for (s,_,_) in fs )
+            # Find the variables that contains the same feature.
+            ss = []
+            for (_,fid,_) in fs:
+                found = None
                 (_,srcs0) = fids0[fid]
-                srcs1 = []
-                evidence = None
                 tids = db.get_featitems(fid)
                 for tid1 in tids.keys():
                     if tid1 == tid: continue
                     item1 = db.get_item(tid1)
                     name1 = stripid(item1)
-                    if cw not in splitwords(name1): continue
+                    if w not in splitwords(name1): continue
                     fids1 = db.get_feats(tid1, source=True)
                     (_,srcs1a) = fids1[0]
                     (_,srcs1b) = fids1[fid]
-                    srcs1 = srcs1a + srcs1b
-                    evidence = item1
+                    found = (srcs0, item1, srcs1a+srcs1b)
                     break
-                if evidence is None: continue
-                feat = db.get_feat(fid)
-                supports.append((feat, srcs0, evidence, srcs1))
-                if maxsupports <= len(supports): break
-            if maxsupports <= len(supports): break
-        print('+SUPPORT', json.dumps(supports))
+                ss.append(found)
+            supports.append((w, score, list(zip(fs, ss))))
+        print('+SCORE', json.dumps(sum( score for (_,score,_) in supports )))
+        print('+SUPPORTS', json.dumps(supports))
         print()
         return False
 

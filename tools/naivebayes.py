@@ -21,9 +21,14 @@ class NaiveBayes:
 {'banana': 50, 'orange': 30, 'other': 20}
 >>> b.fcount
 {'yellow': {None: 80, 'banana': 45, 'orange': 30, 'other': 5}, 'long': {None: 50, 'banana': 40, 'other': 10}, 'sweet': {None: 65, 'banana': 35, 'orange': 15, 'other': 15}}
->>> a = b.getkeys(['long','sweet','yellow'])
->>> [ k for (_,k) in a ]
+>>> keys = b.getkeys(['long','sweet','yellow'])
+>>> [ k for (_,k) in keys ]
 ['banana', 'other']
+>>> keyfeats = b.getkeyfeats(['long','sweet','yellow'])
+>>> [ (k,a) for (_,k,a) in keyfeats ]
+[('banana', [50, ('long', 40), ('sweet', 35), ('yellow', 45)]), ('other', [20, ('long', 10), ('sweet', 15), ('yellow', 5)])]
+>>> [ p for (p,_) in keys ] == [ p for (p,_,_) in keyfeats ]
+True
 """
 
     def __init__(self):
@@ -154,6 +159,35 @@ class NaiveBayes:
         if n:
             a = a[:n]
         return a
+
+    def getkeyfeats(self, feats):
+        # keyp = { k1:[P(k), P(f1|k), P(f2|k), ...], k2:[ ... ] }
+        keyp = {}
+        m = 0
+        for f in feats:
+            if f not in self.fcount: continue
+            for (k,c) in self.fcount[f].items():
+                if k is None or c == 0: continue
+                if k in keyp:
+                    a = keyp[k]
+                else:
+                    a = keyp[k] = [self.kcount[k]]
+                a.append((f, c))
+                m = max(m, len(a))
+        # compute P(k) P(f1|k) P(f2|k) for each k.
+        # keyfeats = [(p1,k1,feats1), (p2,k2,feats2), ...]
+        keyfeats = []
+        for (k,a) in keyp.items():
+            if len(a) != m: continue
+            pk = p = math.log(a[0])
+            for (_,c) in a[1:]:
+                p += math.log(c) - pk
+            keyfeats.append((p, k, a))
+        if not keyfeats: return []
+        keyfeats.sort(reverse=True)
+        # prevent exp(x) overflow by adjusting the maximum log to zero.
+        pm = max( p for (p,_,_) in keyfeats )
+        return [ (p-pm, k, a) for (p,k,a) in keyfeats ]
 
     # for debugging
     def getkeysd(self, feats, n=0, fallback=False):

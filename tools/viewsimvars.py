@@ -116,6 +116,7 @@ def main(argv):
         if os.path.exists(output):
             print(f'Already exists: {output!r}')
             return 1
+        print(f'Output: {output}', file=sys.stderr)
         out = open(output, 'w')
 
     VARS = ['<mark>aa</mark>', '<mark>bb</mark>']
