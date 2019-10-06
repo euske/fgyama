@@ -10,10 +10,10 @@ from srcdb import q
 from getwords import stripid
 
 CHOICES = [
-    ('a', 'MUST HAVE the same name'),
-    ('b', 'CAN HAVE the same name'),
-    ('c', 'MUST NOT HAVE the same name'),
-    ('z', 'UNDECIDABLE'),
+    ('x', '???'),
+    ('a', 'MUST BE the same name'),
+    ('b', 'CAN BE the same name'),
+    ('c', 'MUST NOT BE the same name'),
 ]
 
 def dummy(x): return ''
@@ -32,49 +32,30 @@ def getrecs(fp):
 
 
 def showhtmlheaders(out, title, script=None):
-    out.write('''<!DOCTYPE html>
+    out.write(f'''<!DOCTYPE html>
 <html>
 <meta charset="utf-8" />
-<title>%s</title>
-<style>
+<title>{q(title)}</title>
+<style>''' '''
 h1 { border-bottom: 4px solid black; }
 h2 { background: #ffccff; padding: 2px; }
 h3 { background: #000088; color: white; padding: 2px; }
 pre { margin: 0 1em 1em 1em; outline: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
+.mission { background: green; color: white; }
 .cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
 .src0 { background:#eeffff; }
 .src0 mark { background:#ff88ff; }
 .src1 { background:#ffffee; }
 .src1 mark { background:#44cc44; }
 </style>
-''' % q(title))
-    if script is None:
+''')
+    if script is not None:
+        out.write(f'<script>\n{script}\n</script>\n')
+        out.write(f"<body onload=\"run('results', '{title}_eval')\">\n")
+    else:
         out.write('<body>\n')
-        return
-    out.write(f'<script>\n{script}\n</script>\n')
-    out.write('''<body onload="run('results', '{title}_eval')">
-<h1>Similar Variable Tagging Experiment: {title}</h1>
-<h2>Your Mission</h2>
-<ul>
-<li> For each code snippet, look at the variable marked as
-    <code class=var0>aa</code> / <code class=var1>bb</code>
-    and choose their relationship from the menu.
-  <ol type=a>
-  <li> They MUST BE the same name.
-  <li> They CAN BE the same name.
-  <li> They SHOULD BE similar but different.
-  <li> They MUST BE completely different.
-  </ol>
-<li> When it's undecidable after <u>3 minutes</u> with the given snippet,
- choose UNDECIDABLE.
-<li> <u>Do not consult others about the code during this experiment.</u>
-<li> Your choices are saved in the follwoing textbox:<br>
-  <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
-  When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
-  the experiment organizer.<br>
-</ul>
-'''.format(title=q(title)))
+    out.write(f'<h1>Similar Variable Tagging Experiment: {title}</h1>\n')
     return
 
 def main(argv):
@@ -119,6 +100,30 @@ def main(argv):
         print(f'Output: {output}', file=sys.stderr)
         out = open(output, 'w')
 
+    if title is None:
+        title = f'{args[0]}_{timestamp}'
+    showhtmlheaders(out, title, script)
+    out.write('''
+<h2 class=mission>Your Mission</h2>
+<ul>
+<li> For each code snippet, look at the variables marked as
+    <code class=src0>aa</code> / <code class=src1>bb</code>
+    and choose their relationship from the menu:
+  <ol type=a>
+  <li> They <code>MUST BE</code> the same name.
+  <li> They <code>CAN BE</code> the same name.
+  <li> They <code>MUST NOT BE</code> the same name.
+  </ol>
+<li> Try to think about each snippet for at least one minute.
+    If there's not enough information, choose "<code>???</code>".
+<li> Your choices are saved in the follwoing textbox:<br>
+  <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
+  When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
+  the experiment organizer.<br>
+<li> <u style="color:red;">Do not consult others about the code during this experiment.</u>
+</ul>
+''')
+
     VARS = ['<mark>aa</mark>', '<mark>bb</mark>']
     OPTIONS = ''.join(
         f'<option value="{v}">{v}. {q(c)}</option>' for (v,c) in CHOICES)
@@ -131,9 +136,10 @@ def main(argv):
         for (src,ranges) in annot:
             out.write(f'<div>{q(src.name)} <pre class=src{i}>\n')
             def abody(annos, s):
+                s = q(s.replace('\n',''))
                 if annos:
                     s = pat.sub(VARS[i], s)
-                return q(s.replace('\n',''))
+                return s
             for (lineno,line) in src.show(
                     ranges, astart=dummy, aend=dummy, abody=abody):
                 if lineno is None:
@@ -154,10 +160,6 @@ def main(argv):
         if randomized:
             print(key, rec['SIM'])
         return
-
-    if title is None:
-        title = f'{args[0]}_{timestamp}'
-    showhtmlheaders(out, title, script)
 
     rid = 0
     for path in args:

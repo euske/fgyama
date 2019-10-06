@@ -62,7 +62,7 @@ def main(argv):
     ratio = 0.5
     maxsupports = 3
     types = {}
-    C = 0.7
+    C = 0.4   # distance weight should be (1.5**d) ~= exp(0.4*d)
     for (k, v) in opts:
         if k == '-d': debug += 1
         elif k == '-o': outpath = v
@@ -97,10 +97,11 @@ def main(argv):
         words = splitwords(name)
         (count,_) = fids[0]
         feats = { fid:fc for (fid,(fc,_)) in fids.items() if fid != 0 }
-        for w in words:
-            nb.removedict(w, count, feats)
+        # Use only prominent features that appears more than a certain threshold.
         threshold = int(max(feats.values()) * ratio)
         f2 = [ feat for (feat,fc) in feats.items() if threshold <= fc ]
+        for w in words:
+            nb.removedict(w, count, feats)
         cands = nb.getkeyfeats(f2)[:len(words)]
         for w in words:
             nb.adddict(w, count, feats)
@@ -125,7 +126,7 @@ def main(argv):
                 assert feat is not None
                 # A rarer feature overall means stronger indication.
                 df = math.log(nallitems / db.get_numfeatitems(fid))
-                # A frequent feature for this category means stronger indication.
+                # A more prominent feature for this category means stronger indication.
                 ff = c / nb.fcount[fid][None]
                 # Discount a "distant" feature from the subject.
                 ds = math.exp(-C*abs(feat[0]))

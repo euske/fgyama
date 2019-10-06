@@ -234,15 +234,19 @@ def main(argv):
         items = db.get_items()
         if args:
             items = [ (tid,item) for (tid,item) in items if item in args ]
+        dcount = {}
         for (tid,item) in items:
             print('+ITEM', item)
             feat2srcs = db.get_feats(tid, resolve=True, source=source)
             for (feat,srcs) in feat2srcs.items():
                 if feat is None: continue
+                d = abs(feat[0])
+                dcount[d] = dcount.get(d, 0)+1
                 print('+FEAT', feat)
                 if srcs:
                     print('#', srcs)
             print()
+        print('#', sum(dcount.values()), dcount)
         return
 
     if os.path.exists(outpath):

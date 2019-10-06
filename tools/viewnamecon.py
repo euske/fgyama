@@ -67,7 +67,7 @@ h2 { color: white; background: black; padding: 4px; }
 h3 { border-bottom: 1px solid black; margin-top: 0.5em; }
 pre { margin: 0 1em 1em 1em; outline: 1px solid gray; }
 ul > li { margin-bottom: 0.5em; }
-.mission { background: brown; }
+.mission { background: purple; color: white; }
 .cat { outline: 1px dashed black; padding: 2px; background: #eeeeee; margin: 1em; }
 .cand { margin: 1em; padding: 1em; outline: 2px solid black; }
 .old { background: #ccccff; }
@@ -76,6 +76,7 @@ ul > li { margin-bottom: 0.5em; }
 .new mark { color: black; background: yellow; }
 .match { background: #ffcccc; }
 .match mark { color: white; background: red; }
+.support { background: green; color: white; }
 </style>
 <script>
 function toggle(id) {
@@ -87,7 +88,7 @@ function toggle(id) {
 ''')
     if script is not None:
         out.write(f'<script>\n{script}\n</script>\n')
-        out.write('<body onload="run(\'results\', \'%s_eval\')">\n' % title)
+        out.write(f"<body onload=\"run('results', '{title}_eval')\">\n")
     else:
         out.write('<body>\n')
     out.write(f'<h1>Variable Rewrite Experiment: {title}</h1>\n')
@@ -184,7 +185,7 @@ def main(argv):
         for (sid, ((fscore,fid,feat),(srcs0,item1,srcs1))) in enumerate(feats):
             name1 = stripid(item1)
             out.write('<div class=cand>\n')
-            out.write(f'<h3>Support {sid} for "{w}": <code class=new><mark>{name1}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
+            out.write(f'<h3 class=support>Support ({sid}) for "<code>{w}</code>": <code class=new><mark>{name1}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
             showsrc_html(srcs1, 'new')
             id = f'{rid}_{sid}'
             out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Show Proof<br><div id={id} hidden>\n')
@@ -262,7 +263,8 @@ def main(argv):
         showrec = showrec_html
     elif mode == 'E':
         showrec = showrec_eval
-        out.write('''<h2 class=mission>Your Mission</h2>
+        out.write('''
+<h2 class=mission>Your Mission</h2>
 <ul>
 <li> For each <code class=old>blue</code> snippet, look at the variable
     <code class=old><mark>xxx</mark></code> and choose which name fits the best.
@@ -277,14 +279,18 @@ def main(argv):
 ''')
     elif mode == 'C':
         showrec = showrec_context
-        out.write('''<h2 class=mission>Your Mission</h2>
+        out.write('''
+<h2 class=mission>Your Mission</h2>
 <ul>
 <li> For each <code class=old>blue</code> snippet, look at the
     <code class=old><mark>variable</mark></code> and its proposed
     <code class=new><mark>rewrite</mark></code>.
-<li> Look at each <code class=new>Support</code> and determine
-    if the rewrite is good, bad or acceptable.
+<li> Look at a <span class=support>Support (0)</span> and determine
+    if the rewrite is "<code>good</code>" or "<code>acceptable</code>".
     Click the <a href="javascript:void(0)">[+]</a> to see how it matches the original code.
+    If the support is not convincing, try further looking at
+    <span class=support>Support (1)</span> and <span class=support>Support (2)</span>.
+    If none of them looks convincing, choose "<code>bad</code>".
 <li> Try to think about each snippet for at least one minute.
     If there's not enough information, choose "<code>???</code>".
 <li> Your choices are saved in the follwoing textbox:<br>
