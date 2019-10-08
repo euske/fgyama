@@ -115,8 +115,15 @@ def main(argv):
         if item in defaultnames:
             print('+DEFAULT', json.dumps(defaultnames[item]))
         fids0 = db.get_feats(tid, source=True)
-        (_,srcs0) = fids0[0]
-        print('+SOURCE', json.dumps(srcs0))
+        srcs0 = {0:[], 1:[], -1:[]}
+        for (fid,(_,srcs)) in fids0.items():
+            if fid == 0:
+                d = 0
+            else:
+                d = db.get_feat(fid)[0]
+            if d in srcs0:
+                srcs0[d].extend(srcs)
+        print('+SOURCE', json.dumps([ (d,list(set(srcs))) for (d,srcs) in srcs0.items() ]))
         supports = []
         for (_,w,a) in cands:
             # Find top N features for each word.

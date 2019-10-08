@@ -52,6 +52,13 @@ def tocamelcase(words):
         (w if i == 0 else w[0].upper()+w[1:])
         for (i,w) in enumerate(words) )
 
+def overlap(src0, src1):
+    (name0,b0,e0) = src0
+    assert b0 <= e0
+    (name1,b1,e1) = src1
+    assert b1 <= e1
+    return (name0 == name1 and b0 < e1 and b1 < e0)
+
 def showchoices(choices):
     opts = [ f'<option value="{v}">{v}. {q(s)}</option>' for (v,s) in choices ]
     return f'<select>{"".join(opts)}</select>'
@@ -198,7 +205,8 @@ def main(argv):
         name = stripid(item)
         out.write(f'*** {item!r}\n\n')
         out.write(f'{rec["SCORE"]} {name} {rec["CANDS"]}\n\n')
-        showsrc_plain(rec['SOURCE'], ' ')
+        srcs = dict(rec['SOURCE'])
+        showsrc_plain(srcs[0], ' ')
         for (w, wscore, feats) in rec['SUPPORTS']:
             out.write(f'* {w}\n')
             for ((fscore,fid,feat),(srcs0,item1,srcs1)) in feats:
@@ -215,7 +223,8 @@ def main(argv):
         assert old != new
         out.write(f'<h2>Rewrite {rid}: {old} &rarr; {new} ({score:.3f})</h2>\n')
         out.write(f'<h3><code class=old><mark>{old}</mark></code></h3>')
-        showsrc_html(rec['SOURCE'], 'old')
+        srcs = dict(rec['SOURCE'])
+        showsrc_html(srcs[0], 'old')
         for (w, wscore, feats) in rec['SUPPORTS']:
             showsupports_html(rid, w, feats)
         return
@@ -236,7 +245,19 @@ def main(argv):
         out.write(f'<h2>Rewrite {rid} ({score:.3f})</h2>\n')
         choices = [('x','???')] + list(sorted(zip(keys, names)))
         out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: <code class=old><mark>xxx</mark></code> &rarr; {showchoices(choices)} &nbsp; Comment: <input size="30" /></span></div>\n')
-        showsrc_html(rec['SOURCE'], 'old', old)
+        srcs = dict(rec['SOURCE'])
+        showsrc_html(srcs[0], 'old', old)
+        srcs0 = srcs[0]
+        for (d,srcs1) in rec['SOURCE']:
+            if d == 0: continue
+            srcs1 = [ src1 for src1 in srcs1
+                      if not any( overlap(src1,src0) for src0 in srcs0 ) ]
+            if not srcs1: continue
+            if d < 0:
+                out.write(f'<h3>Source</h3>\n')
+            else:
+                out.write(f'<h3>Destination</h3>\n')
+            showsrc_html(srcs1, 'new')
         print(rid, keys[0])
         return
 
@@ -248,7 +269,7 @@ def main(argv):
         out.write(f'<h2>Rewrite {rid}: <code class=old><mark>{old}</mark></code> &rarr; <code class=new><mark>{new}</mark></code></h2>\n')
         out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: {showchoices(CONTEXT_CHOICES)}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
         out.write(f'<h3><code class=old><mark>{old}</mark></code></h3>')
-        showsrc_html(rec['SOURCE'], 'old')
+        showsrc_html(rec['SOURCE'][0], 'old')
         for (w, wscore, feats) in rec['SUPPORTS']:
             showsupports_html(rid, w, feats)
         print(rid, rec['SCORE'], rec['RANK'])
@@ -267,7 +288,10 @@ def main(argv):
 <h2 class=mission>Your Mission</h2>
 <ul>
 <li> For each <code class=old>blue</code> snippet, look at the variable
-    <code class=old><mark>xxx</mark></code> and choose which name fits the best.
+    <code class=old><mark>xxx</mark></code> and its use.
+    Then look at the <code class=new>green</code> snippets for its Source and Destination
+    <code class=new><mark>expressions</mark></code>.
+<li> From the dropdown menu, choose which name best fits the code.
 <li> Try to think about each snippet for at least one minute.
     If there's not enough information, choose "<code>???</code>".
 <li> Your choices are saved in the follwoing textbox:<br>
