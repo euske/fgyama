@@ -329,12 +329,13 @@ def main(argv):
         showrec = showrec_plain
 
     allrecs = []
-    with fileinput.input(args) as fp:
+    for path in args:
         recs = []
-        for rec in getrecs(fp):
-            if rec['ITEM'] in excluded: continue
-            if types and types.get(rec['ITEM']) not in TYPES: continue
-            recs.append(rec)
+        with open(path) as fp:
+            for rec in getrecs(fp):
+                if rec['ITEM'] in excluded: continue
+                if types and types.get(rec['ITEM']) not in TYPES: continue
+                recs.append(rec)
         recs.sort(key=lambda rec:rec['SCORE'], reverse=True)
         for (i,rec) in enumerate(recs):
             rec['RANK'] = i/len(recs)

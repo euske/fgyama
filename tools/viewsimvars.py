@@ -150,18 +150,17 @@ def main(argv):
         return
 
     def showrec(rid, rec):
-        key = (f'R{rid:003d}')
         out.write(f'<h3 class=pair>Pair {rid}</h3>\n')
         out.write(
-            f'<div class=cat><span id="{key}" class=ui>Choice: <select>{OPTIONS}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
+            f'<div class=cat><span id="{rid}" class=ui>Choice: <select>{OPTIONS}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
         for (i,(item,srcs)) in enumerate(zip(rec['ITEMS'], rec['SRCS'])):
             name = stripid(item)
             showsrc(i, name, srcs)
         if randomized:
-            print(key, rec['SIM'])
+            print(rid, rec['SIM'])
         return
 
-    rid = 0
+    allrecs = []
     for path in args:
         with open(path) as fp:
             recs = [ rec for rec in getrecs(fp) if threshold <= rec['SIM'] ]
@@ -172,9 +171,10 @@ def main(argv):
             random.shuffle(recs)
         else:
             recs = recs[:limit]
-        for rec in recs:
-            showrec(rid, rec)
-            rid += 1
+        allrecs.extend(recs)
+
+    for (rid, rec) in enumerate(allrecs):
+        showrec(f'R{rid:003d}', rec)
 
     return 0
 
