@@ -114,8 +114,8 @@ def main(argv):
   <li> They <code>CAN BE</code> the same name.
   <li> They <code>MUST NOT BE</code> the same name.
   </ol>
-<li> Try to think about each snippet for at least one minute.
-    If there's not enough information, choose "<code>???</code>".
+<li> If it's undecidable, you can skip it by choosing "<code>???</code>".
+     However, try to think about it for at least one minute before skipping.
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to

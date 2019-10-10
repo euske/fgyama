@@ -269,7 +269,8 @@ def main(argv):
         out.write(f'<h2>Rewrite {rid}: <code class=old><mark>{old}</mark></code> &rarr; <code class=new><mark>{new}</mark></code></h2>\n')
         out.write(f'<div class=cat><span id="{rid}" class=ui>Choice: {showchoices(CONTEXT_CHOICES)}</select> &nbsp; Comment: <input size="30" /></span></div>\n')
         out.write(f'<h3><code class=old><mark>{old}</mark></code></h3>')
-        showsrc_html(rec['SOURCE'][0], 'old')
+        srcs = dict(rec['SOURCE'])
+        showsrc_html(srcs[0], 'old')
         for (w, wscore, feats) in rec['SUPPORTS']:
             showsupports_html(rid, w, feats)
         print(rid, rec['SCORE'], rec['RANK'])
@@ -292,8 +293,8 @@ def main(argv):
     Then look at the <code class=new>green</code> snippets for its Source and Destination
     <code class=new><mark>expressions</mark></code>.
 <li> From the dropdown menu, choose which name best fits the code.
-<li> Try to think about each snippet for at least one minute.
-    If there's not enough information, choose "<code>???</code>".
+<li> If it's undecidable, you can skip it by choosing "<code>???</code>".
+     However, try to think about it for at least one minute before skipping.
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
@@ -315,8 +316,8 @@ def main(argv):
     If the support is not convincing, try further looking at
     <span class=support>Support (1)</span> and <span class=support>Support (2)</span>.
     If none of them looks convincing, choose "<code>bad</code>".
-<li> Try to think about each snippet for at least one minute.
-    If there's not enough information, choose "<code>???</code>".
+<li> If it's undecidable, you can skip it by choosing "<code>???</code>".
+     However, try to think about it for at least one minute before skipping.
 <li> Your choices are saved in the follwoing textbox:<br>
   <textarea id="results" cols="80" rows="4" spellcheck="false" autocomplete="off"></textarea><br>
   When finished, send the above content (from <code>#START</code> to <code>#END</code>) to
