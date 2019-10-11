@@ -144,7 +144,8 @@ def main(argv):
             ss = []
             for (_,fid,_) in fs:
                 found = None
-                (_,srcs0) = fids0[fid]
+                (_,srcs0a) = fids0[0]
+                (_,srcs0b) = fids0[fid]
                 tids = db.get_featitems(fid)
                 for tid1 in tids.keys():
                     if tid1 == tid: continue
@@ -154,7 +155,7 @@ def main(argv):
                     fids1 = db.get_feats(tid1, source=True)
                     (_,srcs1a) = fids1[0]
                     (_,srcs1b) = fids1[fid]
-                    found = (srcs0, item1, srcs1a+srcs1b)
+                    found = (srcs0a+srcs0b, item1, srcs1a+srcs1b)
                     break
                 ss.append(found)
             supports.append((w, score, list(zip(fs, ss))))

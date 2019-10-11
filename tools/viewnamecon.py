@@ -194,7 +194,7 @@ def main(argv):
             out.write('<div class=cand>\n')
             out.write(f'<h3 class=support>Support ({sid}) for "<code>{w}</code>": <code class=new><mark>{name1}</mark></code> &nbsp; (<code>{feat}</code>)</h3>\n')
             showsrc_html(srcs1, 'new')
-            id = f'{rid}_{sid}'
+            id = f'{rid}_{w}_{sid}'
             out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Show Proof<br><div id={id} hidden>\n')
             showsrc_html(srcs0, 'match')
             out.write('</div></div>\n')
