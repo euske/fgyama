@@ -140,9 +140,9 @@ class ItemDB {
             if (line.length == 0) continue;
             if (line.substr(0,1) == '#') continue;
 	    let obj = JSON.parse(line);
-            let item = new Item(obj['cid']);
+            let cid = obj['cid'];
+            let item = this.items[cid];
             item.load(obj);
-            this.items[item.cid] = item;
 	}
     }
 
