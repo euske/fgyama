@@ -27,6 +27,27 @@ public class DFFunctionType implements DFType {
         return ("<DFFunctionType("+this.getTypeName()+")>");
     }
 
+    @Override
+    public String getTypeName() {
+        StringBuilder b = new StringBuilder();
+        b.append("(");
+        for (DFType type : _argTypes) {
+            if (type == null) {
+                b.append("?");
+            } else {
+                b.append(type.getTypeName());
+            }
+        }
+        b.append(")");
+        if (_returnType == null) {
+            b.append("?");
+        } else {
+            b.append(_returnType.getTypeName());
+        }
+        return b.toString();
+    }
+
+    @Override
     public boolean equals(DFType type) {
         if (!(type instanceof DFFunctionType)) return false;
         DFFunctionType mtype = (DFFunctionType)type;
@@ -43,10 +64,12 @@ public class DFFunctionType implements DFType {
         return true;
     }
 
+    @Override
     public DFKlass toKlass() {
         return null;
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (!(type instanceof DFFunctionType)) return -1;
         DFFunctionType mtype = (DFFunctionType)type;
@@ -106,25 +129,6 @@ public class DFFunctionType implements DFType {
 
     public DFType getReturnType() {
         return _returnType;
-    }
-
-    public String getTypeName() {
-        StringBuilder b = new StringBuilder();
-        b.append("(");
-        for (DFType type : _argTypes) {
-            if (type == null) {
-                b.append("?");
-            } else {
-                b.append(type.getTypeName());
-            }
-        }
-        b.append(")");
-        if (_returnType == null) {
-            b.append("?");
-        } else {
-            b.append(_returnType.getTypeName());
-        }
-        return b.toString();
     }
 
     public void setExceptions(DFKlass[] exceptions) {

@@ -782,6 +782,7 @@ class CatchJoin extends DFNode {
         return !this.hasValue();
     }
 
+    @Override
     public void merge(DFNode node) {
         assert !this.hasValue();
         this.accept(node);

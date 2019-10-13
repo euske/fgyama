@@ -16,18 +16,22 @@ public class DFNullType implements DFType {
         return ("<DFNullType>");
     }
 
+    @Override
     public String getTypeName() {
         return "@null";
     }
 
+    @Override
     public boolean equals(DFType type) {
         return (type instanceof DFNullType);
     }
 
+    @Override
     public DFKlass toKlass() {
         return DFBuiltinTypes.getObjectKlass();
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         return -1;

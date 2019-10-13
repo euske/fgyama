@@ -174,6 +174,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         //writer.writeEndElement();
     }
 
+    @Override
     public String getTypeName() {
         String name = "L"+_outerSpace.getSpaceName()+_name;
         if (_mapTypes != null) {
@@ -185,42 +186,17 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return name+";";
     }
 
+    @Override
     public boolean equals(DFType type) {
         return (this == type);
     }
 
+    @Override
     public DFKlass toKlass() {
         return this;
     }
 
-    public boolean isInterface() {
-        return _interface;
-    }
-
-    public boolean isFuncInterface() {
-	assert _state == LoadState.Loaded;
-        if (!_interface) return false;
-        // Count the number of abstract methods.
-        int n = 0;
-        for (DFMethod method : _methods) {
-            if (method.isAbstract()) {
-                n++;
-            }
-        }
-        return (n == 1);
-    }
-
-    public boolean isDefined() {
-        return (_state == LoadState.Loaded);
-    }
-
-    public DFMethod getFuncMethod() {
-        for (DFMethod method : _methods) {
-            if (method.isAbstract()) return method;
-        }
-	return null;
-    }
-
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
@@ -757,6 +733,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+    @Override
     public DFType getType(String id) {
         DFType type;
         if (_mapTypeMap != null) {
@@ -804,6 +781,34 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return (_baseKlass != null &&
 		_baseKlass._genericKlass ==
                 DFBuiltinTypes.getEnumKlass());
+    }
+
+    public boolean isDefined() {
+        return (_state == LoadState.Loaded);
+    }
+
+    public boolean isInterface() {
+        return _interface;
+    }
+
+    public boolean isFuncInterface() {
+	assert _state == LoadState.Loaded;
+        if (!_interface) return false;
+        // Count the number of abstract methods.
+        int n = 0;
+        for (DFMethod method : _methods) {
+            if (method.isAbstract()) {
+                n++;
+            }
+        }
+        return (n == 1);
+    }
+
+    public DFMethod getFuncMethod() {
+        for (DFMethod method : _methods) {
+            if (method.isAbstract()) return method;
+        }
+	return null;
     }
 
     public DFMethod getInitMethod() {

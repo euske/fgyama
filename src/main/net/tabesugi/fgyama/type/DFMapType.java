@@ -33,18 +33,22 @@ public class DFMapType implements DFType {
         }
     }
 
+    @Override
     public String getTypeName() {
         return _name;
     }
 
+    @Override
     public boolean equals(DFType type) {
         return (this == type);
     }
 
+    @Override
     public DFKlass toKlass() {
         return _boundKlass;
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         assert !(type instanceof DFMapType);
         if (typeMap == null) {

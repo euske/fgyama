@@ -23,6 +23,7 @@ public class DFGlobalScope extends DFVarScope {
         return ("<DFGlobalScope>");
     }
 
+    @Override
     public DFRef lookupArray(DFType type) {
         DFRef ref;
         DFType elemType = DFUnknownType.UNKNOWN;

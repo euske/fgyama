@@ -16,18 +16,22 @@ public class DFUnknownType implements DFType {
         return ("<DFUnknownType>");
     }
 
+    @Override
     public String getTypeName() {
         return "?";
     }
 
+    @Override
     public boolean equals(DFType type) {
         return false;
     }
 
+    @Override
     public DFKlass toKlass() {
         return DFBuiltinTypes.getObjectKlass();
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
         return -1;
     }

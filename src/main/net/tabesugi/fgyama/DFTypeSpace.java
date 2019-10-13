@@ -33,32 +33,12 @@ public class DFTypeSpace {
         return ("<DFTypeSpace("+this.getSpaceName()+")>");
     }
 
-    public int compareTo(DFTypeSpace space) {
-        if (this == space) return 0;
-	if (!(space instanceof DFTypeSpace)) return -1;
-        if (_outerSpace != null) {
-            if (space._outerSpace != null) {
-                int x = _outerSpace.compareTo(space._outerSpace);
-                if (x != 0) return x;
-            } else {
-                return +1;
-            }
-        } else if (space._outerSpace != null) {
-            return -1;
-        }
-        return _name.compareTo(space._name);
-    }
-
     public String getSpaceName() {
         if (_outerSpace == null) {
             return _name+"/";
         } else {
             return _outerSpace.getSpaceName()+_name+"/";
         }
-    }
-
-    public DFTypeSpace lookupSpace(SimpleName name) {
-        return this.lookupSpace(name.getIdentifier());
     }
 
     public DFTypeSpace lookupSpace(String id) {
@@ -92,13 +72,10 @@ public class DFTypeSpace {
         return klass;
     }
 
-    protected Collection<DFKlass> getInnerKlasses() {
-        return _id2klass.values();
-    }
-
     public DFType getType(Name name) {
         return this.getType(name.getFullyQualifiedName());
     }
+
     public DFType getType(String id) {
         //Logger.info("DFTypeSpace.getType:", this, ":", id);
         int i = id.lastIndexOf('.');
@@ -137,6 +114,10 @@ public class DFTypeSpace {
             mapTypes[i].setTypeBounds(tp.typeBounds());
         }
         return mapTypes;
+    }
+
+    protected Collection<DFKlass> getInnerKlasses() {
+        return _id2klass.values();
     }
 
     // dump: for debugging.

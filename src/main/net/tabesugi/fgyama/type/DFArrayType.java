@@ -39,6 +39,7 @@ public class DFArrayType implements DFType {
         return ("<DFArrayType("+this.getTypeName()+")>");
     }
 
+    @Override
     public String getTypeName() {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < _ndims; i++) {
@@ -47,16 +48,19 @@ public class DFArrayType implements DFType {
         return b.toString()+_elemType.getTypeName();
     }
 
+    @Override
     public boolean equals(DFType type) {
         return ((type instanceof DFArrayType) &&
                 _elemType.equals(((DFArrayType)type)._elemType) &&
                 _ndims == ((DFArrayType)type)._ndims);
     }
 
+    @Override
     public DFKlass toKlass() {
         return DFBuiltinTypes.getArrayKlass();
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) return -1;

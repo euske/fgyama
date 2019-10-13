@@ -24,6 +24,7 @@ public class DFBasicType implements DFType {
         return ("<DFBasicType("+this.getTypeName()+")>");
     }
 
+    @Override
     public String getTypeName() {
         if (_code == PrimitiveType.BYTE) {
             return "B";
@@ -46,10 +47,12 @@ public class DFBasicType implements DFType {
         }
     }
 
+    @Override
     public boolean equals(DFType type) {
         return (this == type);
     }
 
+    @Override
     public DFKlass toKlass() {
 	if (_code == PrimitiveType.BYTE) {
             return DFBuiltinTypes.getByteKlass();
@@ -72,6 +75,7 @@ public class DFBasicType implements DFType {
         }
     }
 
+    @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	// Auto-unboxing.
         if (this == type) return 0;

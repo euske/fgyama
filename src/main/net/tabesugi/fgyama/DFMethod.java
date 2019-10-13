@@ -119,27 +119,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _abstract = isAbstract;
     }
 
-    public void setFinder(DFTypeFinder finder) {
-        _finder = new DFTypeFinder(this, finder);
-    }
-
-    public void setMapTypes(DFMapType[] mapTypes)
-	throws InvalidSyntax {
-	assert _finder != null;
-        _mapTypes = mapTypes;
-        _mapTypeMap = new HashMap<String, DFType>();
-        for (DFMapType mapType : _mapTypes) {
-	    // Set the Object type temporarily for circular definition.
-            _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
-	    mapType.build(_finder);
-            _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
-        }
-    }
-
-    public void setFuncType(DFFunctionType funcType) {
-        _funcType = funcType;
-    }
-
     @Override
     public String toString() {
         return ("<DFMethod("+this.getSignature()+")>");
@@ -173,16 +152,16 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return name;
     }
 
-    public DFKlass getKlass() {
-        return _klass;
-    }
-
     public CallStyle getCallStyle() {
         return _callStyle;
     }
 
     public boolean isAbstract() {
         return _abstract;
+    }
+
+    public void setFuncType(DFFunctionType funcType) {
+        _funcType = funcType;
     }
 
     public DFFunctionType getFuncType() {
@@ -201,6 +180,23 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     public int canAccept(DFType[] argTypes) {
         Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
         return _funcType.canAccept(argTypes, typeMap);
+    }
+
+    public void setFinder(DFTypeFinder finder) {
+        _finder = new DFTypeFinder(this, finder);
+    }
+
+    public void setMapTypes(DFMapType[] mapTypes)
+	throws InvalidSyntax {
+	assert _finder != null;
+        _mapTypes = mapTypes;
+        _mapTypeMap = new HashMap<String, DFType>();
+        for (DFMapType mapType : _mapTypes) {
+	    // Set the Object type temporarily for circular definition.
+            _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
+	    mapType.build(_finder);
+            _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+        }
     }
 
     public boolean addOverrider(DFMethod method) {
