@@ -146,15 +146,12 @@ def trace(vtx2iref, vtx, iref0=None, cc=None, todo=None):
         if link.startswith('_'): continue
         if v.node.kind == 'output' and funcall is not None:
             if cc is None or funcall not in cc:
-                for z in trace(vtx2iref, v, iref0, Cons(funcall, cc), todo):
-                    yield z
+                yield from trace(vtx2iref, v, iref0, Cons(funcall, cc), todo)
         elif node.kind == 'input' and funcall is not None:
             if cc is not None and cc.car is funcall:
-                for z in trace(vtx2iref, v, iref0, cc.cdr, todo):
-                    yield z
+                yield from trace(vtx2iref, v, iref0, cc.cdr, todo)
         else:
-            for z in trace(vtx2iref, v, iref0, cc, todo):
-                yield z
+            yield from trace(vtx2iref, v, iref0, cc, todo)
     return
 
 # main

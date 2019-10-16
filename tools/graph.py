@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
 import os.path
-import sqlite3
 import xml.sax
 import xml.sax.handler
 from subprocess import Popen, PIPE
@@ -24,13 +23,14 @@ def sp(x):
 ##
 class DFKlass:
 
-    def __init__(self, name, path, interface, extends, implements, generic):
+    def __init__(self, name, path, interface, extends, implements, generic, kid=None):
         self.name = name
         self.path = path
         self.interface = interface
         self.extends = extends
         self.implements = implements
         self.generic = generic
+        self.kid = kid
         self.params = []
         self.fields = []
         self.methods = []
@@ -38,7 +38,7 @@ class DFKlass:
         return
 
     def __repr__(self):
-        return (f'<DFKlass({self.name}) methods={len(self.methods)}>')
+        return (f'<DFKlass({self.kid}): name={self.name}, methods={len(self.methods)}>')
 
     def add_param(self, pname, ptype):
         self.params.append((pname, ptype))
@@ -60,10 +60,10 @@ class DFKlass:
 ##
 class DFMethod:
 
-    def __init__(self, name, style, klass, gid=None):
+    def __init__(self, klass, name, style, gid=None):
+        self.klass = klass
         self.name = name
         self.style = style
-        self.klass = klass
         self.gid = gid
         self.root = None
         self.scopes = {}
@@ -75,7 +75,7 @@ class DFMethod:
         return
 
     def __repr__(self):
-        return (f'<DFMethod({self.gid}), name={self.name} ({len(self.nodes)} nodes)>')
+        return (f'<DFMethod({self.gid}): name={self.name} ({len(self.nodes)} nodes)>')
 
     def __len__(self):
         return len(self.nodes)
@@ -168,7 +168,7 @@ class DFNode:
 
     def toxml(self):
         enode = Element('node')
-        enode.set('id', self.nid)
+        enode.set('id', str(self.nid))
         if self.kind is not None:
             enode.set('kind', self.kind)
         if self.data is not None:
@@ -318,7 +318,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             gname = attrs.get('name')
             style = attrs.get('style')
             self.method = DFMethod(
-                gname, style, self.klass, gid=self.gid)
+                self.klass, gname, style, gid=self.gid)
             self.klass.add_method(gname)
             return self.handleMethod
         elif name == 'parameterized':
@@ -415,178 +415,6 @@ def load_graphs(fp, gid=0):
     return FGYamaParser(gid).parse(fp)
 
 
-##  GraphDB
-##
-class GraphDB:
-
-    def __init__(self, path):
-        self._conn = sqlite3.connect(path)
-        self._cur = self._conn.cursor()
-        try:
-            self._cur.executescript('''
-CREATE TABLE SourceFile (
-    Cid INTEGER PRIMARY KEY,
-    FileName TEXT
-);
-
-CREATE TABLE ASTNode (
-    Aid INTEGER PRIMARY KEY,
-    Type INTEGER,
-    Start INTEGER,
-    End INTEGER
-);
-
-CREATE TABLE DFMethod (
-    Gid INTEGER PRIMARY KEY,
-    Cid INTEGER,
-    Name TEXT,
-    Style TEXT
-);
-
-CREATE TABLE DFScope (
-    Sid INTEGER PRIMARY KEY,
-    Gid INTEGER,
-    Parent INTEGER,
-    Name TEXT
-);
-CREATE INDEX DFScopeGidIndex ON DFScope(Gid);
-
-CREATE TABLE DFNode (
-    Nid INTEGER PRIMARY KEY,
-    Gid INTEGER,
-    Sid INTEGER,
-    Aid INTEGER,
-    Kind TEXT,
-    Ref TEXT,
-    Data TEXT,
-    Type TEXT
-);
-CREATE INDEX DFNodeGidIndex ON DFNode(Gid);
-
-CREATE TABLE DFLink (
-    Lid INTEGER PRIMARY KEY,
-    Nid0 INTEGER,
-    Nid1 INTEGER,
-    Label TEXT
-);
-CREATE INDEX DFLinkNid0Index ON DFLink(Nid0);
-''')
-        except sqlite3.OperationalError:
-            pass
-        return
-
-    def close(self):
-        self._conn.commit()
-        return
-
-    def get_gids(self):
-        cur1 = self._conn.cursor()
-        for (gid,) in cur1.execute('SELECT Gid FROM DFMethod;'):
-            yield gid
-        return
-
-    def add_src(self, src):
-        self._cur.execute(
-            'INSERT INTO SourceFile VALUES (NULL,?)',
-            (src,))
-        cid = self._cur.lastrowid
-        return cid
-
-    def add(self, cid, method):
-        cur = self._cur
-        cur.execute(
-            'INSERT INTO DFMethod VALUES (NULL,?,?,?);',
-            (cid, method.name, method.style))
-        gid = cur.lastrowid
-        method.gid = gid
-
-        def store_node(sid, node):
-            aid = 0
-            if node.ast is not None:
-                cur.execute(
-                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);',
-                    node.ast)
-                aid = cur.lastrowid
-            cur.execute(
-                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
-                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
-            nid = cur.lastrowid
-            node.nid = nid
-            return nid
-
-        def store_scope(nids, scope, parent=0):
-            cur.execute(
-                'INSERT INTO DFScope VALUES (NULL,?,?,?);',
-                (gid, parent, scope.name))
-            sid = cur.lastrowid
-            scope.sid = sid
-            for node in scope.nodes:
-                nids[node] = store_node(sid, node)
-            for child in scope.children:
-                store_scope(nids, child, sid)
-            return
-
-        def store_link(nids, node, src, label):
-            cur.execute(
-                'INSERT INTO DFLink VALUES (NULL,?,?,?);',
-                (nids[node], nids[src], label))
-            return
-
-        nids = {}
-        store_scope(nids, method.root)
-        for node in method:
-            for (label,src) in node.inputs.items():
-                store_link(nids, node, src, label)
-        return gid
-
-    def get(self, gid):
-        cur = self._cur
-        cur.execute(
-            'SELECT Cid,Name,Style FROM DFMethod WHERE Gid=?;',
-            (gid,))
-        (cid,name,style) = cur.fetchone()
-        cur.execute(
-            'SELECT FileName FROM SourceFile WHERE Cid=?;',
-            (cid,))
-        (src,) = cur.fetchone()
-        method = DFMethod(gid, name, style, src)
-        rows = cur.execute(
-            'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
-            (gid,))
-        pids = {}
-        scopes = method.scopes
-        for (sid,parent,name) in rows:
-            scope = DFScope(method, sid, name)
-            scopes[sid] = scope
-            pids[sid] = parent
-            if parent == 0:
-                method.root = scope
-        for (sid,parent) in pids.items():
-            if parent != 0:
-                scopes[sid].set_parent(scopes[parent])
-        rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
-            (gid,))
-        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
-            scope = scopes[sid]
-            node = DFNode(method, nid, scope, kind, ref, data, ntype)
-            rows = cur.execute(
-                'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
-                (aid,))
-            for (t,s,e) in rows:
-                node.ast = (t,s,e)
-            method.nodes[nid] = node
-            scope.nodes.append(node)
-        for (nid0,node) in method.nodes.items():
-            rows = cur.execute(
-                'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
-                (nid0,))
-            for (lid,nid1,label) in rows:
-                node.inputs[label] = nid1
-        method.fixate()
-        return method
-
-
 # get_graphs
 def get_graphs(arg):
     (path,_,ext) = arg.partition(':')
@@ -648,36 +476,291 @@ def run_fgyama(path):
     p.wait()
     return methods
 
+
+##  GraphDB
+##
+def fetch1(cur, name):
+    x = cur.fetchone()
+    if x is None:
+        raise ValueError(name)
+    return x
+
+class GraphDB:
+
+    def __init__(self, conn):
+        self._conn = conn
+        self._cur = self._conn.cursor()
+        self._cur.executescript('''
+CREATE TABLE IF NOT EXISTS ASTNode (
+    Aid INTEGER PRIMARY KEY,
+    Type INTEGER,
+    Start INTEGER,
+    End INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS DFKlass (
+    Kid INTEGER PRIMARY KEY,
+    Name TEXT,
+    Path TEXT,
+    Interface INTEGER,
+    Extends TEXT,
+    Implements TEXT,
+    Generic INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS DFMethod (
+    Gid INTEGER PRIMARY KEY,
+    Kid INTEGER,
+    Name TEXT,
+    Style TEXT
+);
+
+CREATE TABLE IF NOT EXISTS DFScope (
+    Sid INTEGER PRIMARY KEY,
+    Gid INTEGER,
+    Parent INTEGER,
+    Name TEXT
+);
+CREATE INDEX IF NOT EXISTS DFScopeGidIndex ON DFScope(Gid);
+
+CREATE TABLE IF NOT EXISTS DFNode (
+    Nid INTEGER PRIMARY KEY,
+    Gid INTEGER,
+    Sid INTEGER,
+    Aid INTEGER,
+    Kind TEXT,
+    Ref TEXT,
+    Data TEXT,
+    Type TEXT
+);
+CREATE INDEX IF NOT EXISTS DFNodeGidIndex ON DFNode(Gid);
+
+CREATE TABLE IF NOT EXISTS DFLink (
+    Lid INTEGER PRIMARY KEY,
+    Nid0 INTEGER,
+    Nid1 INTEGER,
+    Label TEXT
+);
+CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
+''')
+        return
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        self.close()
+        return
+
+    def close(self):
+        self._conn.commit()
+        return
+
+    def add_klass(self, klass):
+        cur = self._cur
+        cur.execute(
+            'INSERT INTO DFKlass VALUES (NULL,?,?,?,?,?,?)',
+            (klass.name, klass.path, klass.interface, klass.extends,
+             ' '.join(klass.implements), klass.generic))
+        kid = cur.lastrowid
+        klass.kid = kid
+        return kid
+
+    def add_method(self, method):
+        assert method.klass.kid is not None
+        cur = self._cur
+        cur.execute(
+            'INSERT INTO DFMethod VALUES (NULL,?,?,?);',
+            (method.klass.kid, method.name, method.style))
+        gid = cur.lastrowid
+        method.gid = gid
+        nids = {}
+
+        def add_node(sid, node):
+            aid = 0
+            if node.ast is not None:
+                cur.execute(
+                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);',
+                    node.ast)
+                aid = cur.lastrowid
+            cur.execute(
+                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
+                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
+            nid = cur.lastrowid
+            node.nid = nid
+            return nid
+
+        def add_scope(scope, parent=0):
+            cur.execute(
+                'INSERT INTO DFScope VALUES (NULL,?,?,?);',
+                (gid, parent, scope.name))
+            sid = cur.lastrowid
+            scope.sid = sid
+            for node in scope.nodes:
+                nids[node] = add_node(sid, node)
+            for child in scope.children:
+                add_scope(child, sid)
+            return
+
+        def add_link(node, src, label):
+            cur.execute(
+                'INSERT INTO DFLink VALUES (NULL,?,?,?);',
+                (nids[node], nids[src], label))
+            return
+
+        add_scope(method.root)
+        for node in method:
+            for (label,src) in node.inputs.items():
+                add_link(node, src, label)
+        return gid
+
+    def get_kids(self):
+        cur = self._conn.cursor()
+        for (kid,) in cur.execute('SELECT Kid FROM DFKlass;'):
+            yield kid
+        return
+
+    def get_gids(self):
+        cur = self._conn.cursor()
+        for (gid,) in cur.execute('SELECT Gid FROM DFMethod;'):
+            yield gid
+        return
+
+    def get_klass(self, kid):
+        cur = self._cur
+        cur.execute(
+            'SELECT Name,Path,Interface,Extends,Implements,Generic FROM DFKlass WHERE Kid=?;',
+            (kid,))
+        (name,path,interface,extends,impls,generic) = fetch1(cur, f'DFKlass({kid})')
+        if impls:
+            implements = impls.split(' ')
+        else:
+            implements = []
+        return DFKlass(name, path, interface, extends, implements, generic, kid)
+
+    def get_method(self, gid, klasses=None):
+        cur = self._cur
+        cur.execute(
+            'SELECT Kid,Name,Style FROM DFMethod WHERE Gid=?;',
+            (gid,))
+        (kid,name,style) = fetch1(cur, f'DFMethod({gid})')
+        if klasses is None:
+            klass = self.get_klass(kid)
+        else:
+            klass = klasses[kid]
+        method = DFMethod(klass, name, style, gid)
+        rows = cur.execute(
+            'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
+            (gid,))
+        pids = {}
+        scopes = method.scopes
+        for (sid,parent,name) in rows:
+            scope = DFScope(method, sid, name)
+            scopes[sid] = scope
+            pids[sid] = parent
+            if parent == 0:
+                method.root = scope
+        for (sid,parent) in pids.items():
+            if parent != 0:
+                scopes[sid].set_parent(scopes[parent])
+        rows = cur.execute(
+            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
+            (gid,))
+        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
+            scope = scopes[sid]
+            node = DFNode(method, nid, scope, kind, ref, data, ntype)
+            rows = cur.execute(
+                'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
+                (aid,))
+            for (t,s,e) in rows:
+                node.ast = (t,s,e)
+            method.nodes[nid] = node
+            scope.nodes.append(node)
+        for (nid0,node) in method.nodes.items():
+            rows = cur.execute(
+                'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
+                (nid0,))
+            for (lid,nid1,label) in rows:
+                node.inputs[label] = nid1
+        method.fixate()
+        return method
+
+    def get_methods(self):
+        klasses = {}
+        for kid in self.get_kids():
+            klasses[kid] = self.get_klass(kid)
+        for gid in self.get_gids():
+            yield self.get_method(gid, klasses)
+        return
+
+
 # main
 def main(argv):
-    import fileinput
     import getopt
-    from xml.etree.ElementTree import ElementTree
+    import sqlite3
     from xml.etree.ElementTree import dump
     def usage():
-        print(f'usage: {argv[0]} [-d] [file ...]')
+        print(f'usage: {argv[0]} [-d] [-o output.db] [file ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'd')
+        (opts, args) = getopt.getopt(argv[1:], 'do:')
     except getopt.GetoptError:
         return usage()
     debug = 0
+    output = None
     for (k, v) in opts:
         if k == '-d': debug += 1
+        elif k == '-o': output = v
     if not args: return usage()
 
+    nklasses = nmethods = nnodes = 0
+
+    outconn = outdb = None
+    if output is not None:
+        if os.path.exists(output):
+            print(f'Already exists: {output!r}')
+            return 1
+        print(f'Output GraphDB: {output!r}', file=sys.stderr)
+        outconn = sqlite3.connect(output)
+        outdb = GraphDB(outconn)
+
     for path in args:
-        classes = set()
-        nmethods = 0
-        nnodes = 0
-        for method in get_graphs(path):
-            print(method)
-            classes.add(method.klass.name)
+        rconn = rdb = None
+        if path.endswith('.db'):
+            if not os.path.exists(path):
+                print(f'Not found: {path!r}')
+                return 1
+            rconn = sqlite3.connect(path)
+            rdb = GraphDB(rconn)
+            methods = rdb.get_methods()
+        else:
+            methods = get_graphs(path)
+        klass = None
+        for method in methods:
+            if klass is not method.klass:
+                klass = method.klass
+                nklasses += 1
+                if outdb is not None:
+                    outdb.add_klass(klass)
             nmethods += 1
             nnodes += len(method.nodes)
             if debug:
                 dump(method.toxml())
-        print(f'{path}: classes={len(classes)}, methods={nmethods}, nodes={nnodes}')
+            if outdb is not None:
+                outdb.add_method(method)
+                sys.stderr.write('.'); sys.stderr.flush()
+        print(f'\n{path}: {nklasses} classes, {nmethods} methods, {nnodes} nodes',
+              file=sys.stderr)
+        if rdb is not None:
+            rdb.close()
+        if rconn is not None:
+            rconn.close()
+
+    if outdb is not None:
+        outdb.close()
+    if outconn is not None:
+        outconn.close()
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
