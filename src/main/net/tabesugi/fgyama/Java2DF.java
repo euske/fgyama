@@ -934,10 +934,12 @@ public class Java2DF {
                 strict = true;
             } else if (arg.equals("-s")) {
                 reformat = false;
+            } else if (arg.equals("-a")) {
+                DFMethod.setDefaultTransparent(true);
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
-		    "usage: Java2DF [-v] [-S] [-i input] [-o output]" +
+		    "usage: Java2DF [-v] [-a] [-S] [-i input] [-o output]" +
 		    " [-C jar] [-p path] [-s] [path ...]");
                 System.exit(1);
                 return;

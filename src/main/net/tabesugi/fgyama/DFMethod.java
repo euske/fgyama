@@ -108,6 +108,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     // List of superclass' methods being overriden by this method.
     private List<DFMethod> _overriding = new ArrayList<DFMethod>();
 
+    private static boolean _defaultTransparent = false;
+
+    public static void setDefaultTransparent(boolean transparent) {
+        _defaultTransparent = transparent;
+    }
+
     public DFMethod(
         DFKlass klass, String id, CallStyle callStyle,
         String name, DFVarScope outer, boolean isAbstract) {
@@ -283,7 +289,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public boolean isTransparent() {
-        return false;
+        return _defaultTransparent;
     }
 
     public Collection<DFRef> getInputRefs() {
