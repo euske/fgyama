@@ -258,7 +258,10 @@ def main(argv):
             else:
                 out.write(f'<h3>Destination</h3>\n')
             showsrc_html(srcs1, 'new')
-        print(rid, keys[0])
+        if len(keys) == 3:
+            print(rid, keys[0], keys[2])
+        else:
+            print(rid, keys[0], 'null')
         return
 
     def showrec_context(rid, rec):
