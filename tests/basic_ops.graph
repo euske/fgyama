@@ -15,8 +15,8 @@
           <link src="M2_foo_N1"/>
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_ops;"/>
-        <node id="M2_foo_N35" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N34"/>
+        <node id="M2_foo_N41" kind="output" ref="#return" type="I">
+          <link src="M2_foo_N40"/>
         </node>
         <scope name="Lbasic_ops;.:foo:30:186.:B:59:186">
           <node id="M2_foo_N4" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186/$x" type="I">
@@ -78,11 +78,8 @@
           <node data="44" id="M2_foo_N18" kind="value" type="I">
             <ast end="136" start="134" type="34"/>
           </node>
-          <node data="3" id="M2_foo_N19" kind="valueset" type="I">
+          <node id="M2_foo_N19" kind="valueset" type="[I">
             <ast end="146" start="132" type="4"/>
-            <link label="value0" src="M2_foo_N18"/>
-            <link label="value1" src="M2_foo_N20"/>
-            <link label="value2" src="M2_foo_N21"/>
           </node>
           <node data="55" id="M2_foo_N20" kind="value" type="I">
             <ast end="140" start="138" type="34"/>
@@ -90,59 +87,80 @@
           <node data="66" id="M2_foo_N21" kind="value" type="I">
             <ast end="144" start="142" type="34"/>
           </node>
-          <node id="M2_foo_N22" kind="assign_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
+          <node data="0" id="M2_foo_N22" kind="value" type="I"/>
+          <node id="M2_foo_N23" kind="assign_array" ref="%I" type="I">
+            <ast end="136" start="134" type="34"/>
+            <link label="array" src="M2_foo_N19"/>
+            <link label="index" src="M2_foo_N22"/>
+            <link src="M2_foo_N18"/>
+          </node>
+          <node data="1" id="M2_foo_N24" kind="value" type="I"/>
+          <node id="M2_foo_N25" kind="assign_array" ref="%I" type="I">
+            <ast end="140" start="138" type="34"/>
+            <link label="array" src="M2_foo_N19"/>
+            <link label="index" src="M2_foo_N24"/>
+            <link src="M2_foo_N20"/>
+          </node>
+          <node data="2" id="M2_foo_N26" kind="value" type="I"/>
+          <node id="M2_foo_N27" kind="assign_array" ref="%I" type="I">
+            <ast end="144" start="142" type="34"/>
+            <link label="array" src="M2_foo_N19"/>
+            <link label="index" src="M2_foo_N26"/>
+            <link src="M2_foo_N21"/>
+          </node>
+          <node id="M2_foo_N28" kind="assign_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
             <ast end="146" start="116" type="59"/>
             <link src="M2_foo_N19"/>
           </node>
-          <node id="M2_foo_N23" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
+          <node id="M2_foo_N29" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
             <ast end="150" start="149" type="42"/>
-            <link src="M2_foo_N22"/>
+            <link src="M2_foo_N28"/>
           </node>
-          <node data="1" id="M2_foo_N24" kind="value" type="I">
+          <node data="1" id="M2_foo_N30" kind="value" type="I">
             <ast end="152" start="151" type="34"/>
           </node>
-          <node id="M2_foo_N25" kind="assign_array" ref="%I" type="I">
+          <node id="M2_foo_N31" kind="assign_array" ref="%I" type="I">
             <ast end="153" start="149" type="2"/>
-            <link label="array" src="M2_foo_N23"/>
-            <link label="index" src="M2_foo_N24"/>
-            <link src="M2_foo_N27"/>
+            <link label="array" src="M2_foo_N29"/>
+            <link label="index" src="M2_foo_N30"/>
+            <link src="M2_foo_N33"/>
           </node>
-          <node id="M2_foo_N26" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
+          <node id="M2_foo_N32" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
             <ast end="157" start="156" type="42"/>
             <link src="M2_foo_N11"/>
           </node>
-          <node data="=" id="M2_foo_N27" kind="op_assign" ref="%I" type="I">
+          <node data="=" id="M2_foo_N33" kind="op_assign" ref="%I" type="I">
             <ast end="157" start="149" type="7"/>
-            <link label="R" src="M2_foo_N26"/>
+            <link label="R" src="M2_foo_N32"/>
           </node>
-          <node id="M2_foo_N28" kind="assign_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
+          <node id="M2_foo_N34" kind="assign_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
             <ast end="161" start="160" type="42"/>
-            <link src="M2_foo_N32"/>
+            <link src="M2_foo_N38"/>
           </node>
-          <node id="M2_foo_N29" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
+          <node id="M2_foo_N35" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
             <ast end="165" start="164" type="42"/>
-            <link src="M2_foo_N22"/>
-          </node>
-          <node data="2" id="M2_foo_N30" kind="value" type="I">
-            <ast end="167" start="166" type="34"/>
-          </node>
-          <node id="M2_foo_N31" kind="ref_array" ref="%I" type="I">
-            <ast end="168" start="164" type="2"/>
-            <link label="array" src="M2_foo_N29"/>
-            <link label="index" src="M2_foo_N30"/>
-            <link src="M2_foo_N25"/>
-          </node>
-          <node data="=" id="M2_foo_N32" kind="op_assign" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
-            <ast end="168" start="160" type="7"/>
-            <link label="R" src="M2_foo_N31"/>
-          </node>
-          <node id="M2_foo_N33" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
-            <ast end="179" start="178" type="42"/>
             <link src="M2_foo_N28"/>
           </node>
-          <node id="M2_foo_N34" kind="return" ref="#return" type="I">
+          <node data="2" id="M2_foo_N36" kind="value" type="I">
+            <ast end="167" start="166" type="34"/>
+          </node>
+          <node id="M2_foo_N37" kind="ref_array" ref="%I" type="I">
+            <ast end="168" start="164" type="2"/>
+            <link label="array" src="M2_foo_N35"/>
+            <link label="index" src="M2_foo_N36"/>
+            <link src="M2_foo_N31"/>
+          </node>
+          <node data="=" id="M2_foo_N38" kind="op_assign" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
+            <ast end="168" start="160" type="7"/>
+            <link label="R" src="M2_foo_N37"/>
+          </node>
+          <node id="M2_foo_N39" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
+            <ast end="179" start="178" type="42"/>
+            <link src="M2_foo_N34"/>
+          </node>
+          <node id="M2_foo_N40" kind="return" ref="#return" type="I">
             <ast end="180" start="171" type="41"/>
-            <link src="M2_foo_N33"/>
+            <link src="M2_foo_N39"/>
           </node>
         </scope>
       </scope>
