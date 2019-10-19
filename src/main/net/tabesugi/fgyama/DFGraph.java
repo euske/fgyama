@@ -389,8 +389,6 @@ class ConstNode extends DFNode {
 // ValueSetNode: represents an array.
 class ValueSetNode extends DFNode {
 
-    public List<DFNode> values = new ArrayList<DFNode>();
-
     public ValueSetNode(
         DFGraph graph, DFVarScope scope, DFType type,
         ASTNode ast) {
@@ -400,17 +398,6 @@ class ValueSetNode extends DFNode {
     @Override
     public String getKind() {
         return "valueset";
-    }
-
-    @Override
-    public String getData() {
-        return Integer.toString(this.values.size());
-    }
-
-    public void addValue(DFNode value) {
-        String label = "value"+this.values.size();
-        this.accept(value, label);
-        this.values.add(value);
     }
 }
 
@@ -1325,36 +1312,58 @@ public abstract class DFGraph {
             } else if (expr instanceof ArrayCreation) {
 		// "new int[10]"
                 ArrayCreation ac = (ArrayCreation)expr;
-                DFType arrayType = _finder.resolve(ac.getType());
+                DFType elemType = _finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
                     // XXX ctx.getRValue() is not used (for now).
                     processExpression(ctx, scope, frame, dim);
                 }
+                int ndims = ac.dimensions().size();
+                // zero dimensions [] are treated as 1.
+                ndims = Math.max(1, ndims);
+                DFType arrayType = DFArrayType.getType(elemType, ndims);
+                DFRef ref = scope.lookupArray(arrayType);
                 ArrayInitializer init = ac.getInitializer();
                 if (init != null) {
                     processExpression(ctx, scope, frame, init);
-                }
-                if (init == null || ctx.getRValue() == null) {
-                    ctx.setRValue(new ValueSetNode(this, scope, arrayType, ac));
+                } else {
+                    DFNode array = new ValueSetNode(
+                        this, scope, arrayType, expr);
+                    ctx.setRValue(array);
                 }
 
             } else if (expr instanceof ArrayInitializer) {
 		// "{ 5,9,4,0 }"
                 ArrayInitializer init = (ArrayInitializer)expr;
-                ValueSetNode arr = null;
-                for (Expression expr1 : (List<Expression>) init.expressions()) {
+                DFNode array = null;
+                List<DFNode> values = new ArrayList<DFNode>();
+                List<Expression> exprs = (List<Expression>) init.expressions();
+                for (Expression expr1 : exprs) {
                     processExpression(ctx, scope, frame, expr1);
                     DFNode value = ctx.getRValue();
-                    if (arr == null) {
-                        arr = new ValueSetNode(
-                            this, scope, value.getNodeType(), init);
+                    if (array == null) {
+                        DFType elemType = value.getNodeType();
+                        DFType arrayType = DFArrayType.getType(elemType, 1);
+                        array = new ValueSetNode(
+                            this, scope, arrayType, expr);
                     }
-                    arr.addValue(value);
+                    values.add(value);
                 }
-                if (arr != null) {
-                    ctx.setRValue(arr);
+                if (array == null) {
+                    DFType arrayType = DFArrayType.getType(DFUnknownType.UNKNOWN, 1);
+                    array = new ValueSetNode(
+                        this, scope, arrayType, expr);
                 }
-                // XXX array ref is not used.
+                ctx.setRValue(array);
+                DFRef ref = scope.lookupArray(array.getNodeType());
+                for (int i = 0; i < values.size(); i++) {
+                    Expression expr1 = exprs.get(i);
+                    DFNode value = values.get(i);
+                    DFNode index = new ConstNode(
+                        this, scope, DFBasicType.INT, null, Integer.toString(i));
+                    DFNode node = new ArrayAssignNode(
+                        this, scope, ref, expr1, array, index);
+                    node.accept(value);
+                }
 
             } else if (expr instanceof ArrayAccess) {
 		// "a[0]"
