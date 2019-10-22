@@ -1321,49 +1321,23 @@ public abstract class DFGraph {
                 // zero dimensions [] are treated as 1.
                 ndims = Math.max(1, ndims);
                 DFType arrayType = DFArrayType.getType(elemType, ndims);
-                DFRef ref = scope.lookupArray(arrayType);
+                DFNode array = new ValueSetNode(this, scope, arrayType, expr);
+                DFRef ref = scope.lookupArray(elemType);
                 ArrayInitializer init = ac.getInitializer();
                 if (init != null) {
-                    processExpression(ctx, scope, frame, init);
-                } else {
-                    DFNode array = new ValueSetNode(
-                        this, scope, arrayType, expr);
-                    ctx.setRValue(array);
-                }
-
-            } else if (expr instanceof ArrayInitializer) {
-		// "{ 5,9,4,0 }"
-                ArrayInitializer init = (ArrayInitializer)expr;
-                DFNode array = null;
-                List<DFNode> values = new ArrayList<DFNode>();
-                List<Expression> exprs = (List<Expression>) init.expressions();
-                for (Expression expr1 : exprs) {
-                    processExpression(ctx, scope, frame, expr1);
-                    DFNode value = ctx.getRValue();
-                    if (array == null) {
-                        DFType elemType = value.getNodeType();
-                        DFType arrayType = DFArrayType.getType(elemType, 1);
-                        array = new ValueSetNode(
-                            this, scope, arrayType, expr);
+                    List<Expression> exprs = (List<Expression>) init.expressions();
+                    int i = 0;
+                    for (Expression expr1 : exprs) {
+                        processExpression(ctx, scope, frame, expr1);
+                        DFNode value = ctx.getRValue();
+                        DFNode index = new ConstNode(
+                            this, scope, DFBasicType.INT, null, Integer.toString(i++));
+                        DFNode node = new ArrayAssignNode(
+                            this, scope, ref, expr1, array, index);
+                        node.accept(value);
                     }
-                    values.add(value);
-                }
-                if (array == null) {
-                    DFType arrayType = DFArrayType.getType(DFUnknownType.UNKNOWN, 1);
-                    array = new ValueSetNode(
-                        this, scope, arrayType, expr);
                 }
                 ctx.setRValue(array);
-                DFRef ref = scope.lookupArray(array.getNodeType());
-                for (int i = 0; i < values.size(); i++) {
-                    Expression expr1 = exprs.get(i);
-                    DFNode value = values.get(i);
-                    DFNode index = new ConstNode(
-                        this, scope, DFBasicType.INT, null, Integer.toString(i));
-                    DFNode node = new ArrayAssignNode(
-                        this, scope, ref, expr1, array, index);
-                    node.accept(value);
-                }
 
             } else if (expr instanceof ArrayAccess) {
 		// "a[0]"
