@@ -75,42 +75,42 @@
           <node data="10" id="M2_foo_N17" kind="value" type="I">
             <ast end="130" start="128" type="34"/>
           </node>
-          <node data="44" id="M2_foo_N18" kind="value" type="I">
+          <node id="M2_foo_N18" kind="valueset" type="[[I">
+            <ast end="146" start="120" type="3"/>
+          </node>
+          <node data="44" id="M2_foo_N19" kind="value" type="I">
             <ast end="136" start="134" type="34"/>
           </node>
-          <node id="M2_foo_N19" kind="valueset" type="[I">
-            <ast end="146" start="132" type="4"/>
+          <node data="0" id="M2_foo_N20" kind="value" type="I"/>
+          <node id="M2_foo_N21" kind="assign_array" ref="%I" type="I">
+            <ast end="136" start="134" type="34"/>
+            <link label="array" src="M2_foo_N18"/>
+            <link label="index" src="M2_foo_N20"/>
+            <link src="M2_foo_N19"/>
           </node>
-          <node data="55" id="M2_foo_N20" kind="value" type="I">
+          <node data="55" id="M2_foo_N22" kind="value" type="I">
             <ast end="140" start="138" type="34"/>
           </node>
-          <node data="66" id="M2_foo_N21" kind="value" type="I">
+          <node data="1" id="M2_foo_N23" kind="value" type="I"/>
+          <node id="M2_foo_N24" kind="assign_array" ref="%I" type="I">
+            <ast end="140" start="138" type="34"/>
+            <link label="array" src="M2_foo_N18"/>
+            <link label="index" src="M2_foo_N23"/>
+            <link src="M2_foo_N22"/>
+          </node>
+          <node data="66" id="M2_foo_N25" kind="value" type="I">
             <ast end="144" start="142" type="34"/>
-          </node>
-          <node data="0" id="M2_foo_N22" kind="value" type="I"/>
-          <node id="M2_foo_N23" kind="assign_array" ref="%I" type="I">
-            <ast end="136" start="134" type="34"/>
-            <link label="array" src="M2_foo_N19"/>
-            <link label="index" src="M2_foo_N22"/>
-            <link src="M2_foo_N18"/>
-          </node>
-          <node data="1" id="M2_foo_N24" kind="value" type="I"/>
-          <node id="M2_foo_N25" kind="assign_array" ref="%I" type="I">
-            <ast end="140" start="138" type="34"/>
-            <link label="array" src="M2_foo_N19"/>
-            <link label="index" src="M2_foo_N24"/>
-            <link src="M2_foo_N20"/>
           </node>
           <node data="2" id="M2_foo_N26" kind="value" type="I"/>
           <node id="M2_foo_N27" kind="assign_array" ref="%I" type="I">
             <ast end="144" start="142" type="34"/>
-            <link label="array" src="M2_foo_N19"/>
+            <link label="array" src="M2_foo_N18"/>
             <link label="index" src="M2_foo_N26"/>
-            <link src="M2_foo_N21"/>
+            <link src="M2_foo_N25"/>
           </node>
           <node id="M2_foo_N28" kind="assign_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
             <ast end="146" start="116" type="59"/>
-            <link src="M2_foo_N19"/>
+            <link src="M2_foo_N18"/>
           </node>
           <node id="M2_foo_N29" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$a" type="[I">
             <ast end="150" start="149" type="42"/>
