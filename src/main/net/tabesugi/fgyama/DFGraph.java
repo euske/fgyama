@@ -1120,8 +1120,7 @@ public abstract class DFGraph {
                     op == PrefixExpression.Operator.DECREMENT) {
 		    // "++x"
                     processExpression(ctx, scope, frame, operand);
-                    processAssignment(ctx, scope, frame, operand);
-                    DFNode assign = ctx.getLValue();
+                    DFNode assign = processAssignment(ctx, scope, frame, operand);
                     DFRef ref = assign.getRef();
                     DFNode node = new PrefixNode(
                         this, scope, ref.getRefType(), ref, expr, op);
@@ -1148,8 +1147,7 @@ public abstract class DFGraph {
                 Expression operand = postfix.getOperand();
                 if (op == PostfixExpression.Operator.INCREMENT ||
                     op == PostfixExpression.Operator.DECREMENT) {
-                    processAssignment(ctx, scope, frame, operand);
-                    DFNode assign = ctx.getLValue();
+                    DFNode assign = processAssignment(ctx, scope, frame, operand);
                     processExpression(ctx, scope, frame, operand);
                     DFNode node = new PostfixNode(
                         this, scope, assign.getRef(), expr, op);
@@ -1183,9 +1181,8 @@ public abstract class DFGraph {
 		// "p = q"
                 Assignment assn = (Assignment)expr;
                 Assignment.Operator op = assn.getOperator();
-                processAssignment(
+                DFNode assign = processAssignment(
                     ctx, scope, frame, assn.getLeftHandSide());
-                DFNode assign = ctx.getLValue();
                 processExpression(
                     ctx, scope, frame, assn.getRightHandSide(), assign.getNodeType());
                 DFNode rvalue = ctx.getRValue();
@@ -1539,7 +1536,7 @@ public abstract class DFGraph {
      * Creates an assignment node.
      */
     @SuppressWarnings("unchecked")
-    private void processAssignment(
+    private DFNode processAssignment(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
         Expression expr)
         throws InvalidSyntax, EntityNotFound {
@@ -1552,12 +1549,11 @@ public abstract class DFGraph {
                 DFRef ref = scope.lookupVar((SimpleName)name);
                 DFNode node;
                 if (ref.isLocal()) {
-                    node = new VarAssignNode(this, scope, ref, expr);
+                    return new VarAssignNode(this, scope, ref, expr);
                 } else {
                     DFNode obj = ctx.get(scope.lookupThis());
-                    node = new FieldAssignNode(this, scope, ref, expr, obj);
+                    return new FieldAssignNode(this, scope, ref, expr, obj);
                 }
-                ctx.setLValue(node);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFNode obj = null;
@@ -1575,7 +1571,7 @@ public abstract class DFGraph {
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
                 DFRef ref = klass.lookupField(fieldName);
-                ctx.setLValue(new FieldAssignNode(this, scope, ref, expr, obj));
+                return new FieldAssignNode(this, scope, ref, expr, obj);
             }
 
         } else if (expr instanceof ArrayAccess) {
@@ -1588,9 +1584,8 @@ public abstract class DFGraph {
                 ctx, scope, frame, aa.getIndex());
             DFRef ref = scope.lookupArray(array.getNodeType());
             DFNode index = ctx.getRValue();
-            DFNode node = new ArrayAssignNode(
+            return new ArrayAssignNode(
                 this, scope, ref, expr, array, index);
-            ctx.setLValue(node);
 
         } else if (expr instanceof FieldAccess) {
 	    // "(expr).foo"
@@ -1601,7 +1596,7 @@ public abstract class DFGraph {
             DFKlass klass = obj.getNodeType().toKlass();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.lookupField(fieldName);
-            ctx.setLValue(new FieldAssignNode(this, scope, ref, expr, obj));
+            return new FieldAssignNode(this, scope, ref, expr, obj);
 
         } else if (expr instanceof SuperFieldAccess) {
 	    // "super.baa"
@@ -1610,12 +1605,13 @@ public abstract class DFGraph {
             DFNode obj = ctx.get(scope.lookupThis());
             DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
             DFRef ref = klass.lookupField(fieldName);
-            ctx.setLValue(new FieldAssignNode(this, scope, ref, expr, obj));
+            return new FieldAssignNode(this, scope, ref, expr, obj);
 
 	} else if (expr instanceof ParenthesizedExpression) {
 	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    processAssignment(
+	    return processAssignment(
 		ctx, scope, frame, paren.getExpression());
+
         } else {
             throw new InvalidSyntax(expr);
         }
