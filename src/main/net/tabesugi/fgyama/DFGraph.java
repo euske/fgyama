@@ -867,9 +867,8 @@ public abstract class DFGraph {
             Expression expr = rtrnStmt.getExpression();
             if (expr != null) {
                 DFRef ref = scope.lookupReturn();
-                processExpression(ctx, scope, frame, expr, ref.getRefType());
                 ReturnNode ret = new ReturnNode(this, scope, ref, rtrnStmt);
-                ret.accept(ctx.getRValue());
+                ret.accept(processExpression(ctx, scope, frame, expr, ref.getRefType()));
                 frame.addExit(new ReturnExit(dstFrame, ret));
             }
             for (DFRef ref : dstFrame.getOutputRefs()) {
@@ -922,9 +921,8 @@ public abstract class DFGraph {
         } else if (stmt instanceof ThrowStatement) {
 	    // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
-            processExpression(
+            DFNode exc = processExpression(
                 ctx, scope, frame, throwStmt.getExpression());
-            DFNode exc = ctx.getRValue();
             DFKlass excKlass = exc.getNodeType().toKlass();
             DFRef excRef = scope.lookupException(excKlass);
             ThrowNode thrown = new ThrowNode(this, scope, excRef, stmt);
@@ -949,8 +947,7 @@ public abstract class DFGraph {
 	    DFType[] argTypes = new DFType[nargs];
 	    for (int i = 0; i < nargs; i++) {
 		Expression arg = (Expression)ci.arguments().get(i);
-                processExpression(ctx, scope, frame, arg);
-                DFNode node = ctx.getRValue();
+                DFNode node = processExpression(ctx, scope, frame, arg);
 		args[i] = node;
 		argTypes[i] = node.getNodeType();
             }
@@ -974,8 +971,7 @@ public abstract class DFGraph {
 	    DFType[] argTypes = new DFType[nargs];
 	    for (int i = 0; i < nargs; i++) {
 		Expression arg = (Expression)sci.arguments().get(i);
-                processExpression(ctx, scope, frame, arg);
-                DFNode node = ctx.getRValue();
+                DFNode node = processExpression(ctx, scope, frame, arg);
 		args[i] = node;
 		argTypes[i] = node.getNodeType();
             }
@@ -1001,15 +997,15 @@ public abstract class DFGraph {
         }
     }
 
-    private void processExpression(
+    private DFNode processExpression(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
         Expression expr)
         throws InvalidSyntax, EntityNotFound {
-        processExpression(ctx, scope, frame, expr, null);
+        return processExpression(ctx, scope, frame, expr, null);
     }
 
     @SuppressWarnings("unchecked")
-    private void processExpression(
+    private DFNode processExpression(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
         Expression expr, DFType type)
         throws InvalidSyntax, EntityNotFound {
@@ -1018,6 +1014,7 @@ public abstract class DFGraph {
         try {
             if (expr instanceof Annotation) {
 		// "@Annotation"
+                return null;
 
             } else if (expr instanceof Name) {
 		// "a.b"
@@ -1032,16 +1029,16 @@ public abstract class DFGraph {
                         node = new FieldRefNode(this, scope, ref, expr, obj);
                     }
                     node.accept(ctx.get(ref));
-                    ctx.setRValue(node);
+                    return node;
+
                 } else {
                     QualifiedName qname = (QualifiedName)name;
                     DFNode obj = null;
                     DFKlass klass;
                     try {
                         // Try assuming it's a variable access.
-                        processExpression(
+                        obj = processExpression(
 			    ctx, scope, frame, qname.getQualifier());
-                        obj = ctx.getRValue();
                         klass = obj.getNodeType().toKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
@@ -1051,7 +1048,7 @@ public abstract class DFGraph {
                     DFRef ref = klass.lookupField(fieldName);
                     DFNode node = new FieldRefNode(this, scope, ref, qname, obj);
                     node.accept(ctx.get(ref));
-                    ctx.setRValue(node);
+                    return node;
                 }
 
             } else if (expr instanceof ThisExpression) {
@@ -1067,50 +1064,50 @@ public abstract class DFGraph {
                 }
                 DFNode node = new VarRefNode(this, scope, ref, expr);
                 node.accept(ctx.get(ref));
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof BooleanLiteral) {
 		// "true", "false"
                 boolean value = ((BooleanLiteral)expr).booleanValue();
-                ctx.setRValue(new ConstNode(
-                                  this, scope, DFBasicType.BOOLEAN,
-                                  expr, Boolean.toString(value)));
+                return new ConstNode(
+                    this, scope, DFBasicType.BOOLEAN,
+                    expr, Boolean.toString(value));
 
             } else if (expr instanceof CharacterLiteral) {
 		// "'c'"
                 char value = ((CharacterLiteral)expr).charValue();
-                ctx.setRValue(new ConstNode(
-                                  this, scope, DFBasicType.CHAR,
-                                  expr, Utils.quote(value)));
+                return new ConstNode(
+                    this, scope, DFBasicType.CHAR,
+                    expr, Utils.quote(value));
 
             } else if (expr instanceof NullLiteral) {
 		// "null"
-                ctx.setRValue(new ConstNode(
-                                  this, scope, DFNullType.NULL,
-                                  expr, "null"));
+                return new ConstNode(
+                    this, scope, DFNullType.NULL,
+                    expr, "null");
 
             } else if (expr instanceof NumberLiteral) {
 		// "42"
                 String value = ((NumberLiteral)expr).getToken();
-                ctx.setRValue(new ConstNode(
-                                  this, scope, DFBasicType.INT,
-                                  expr, value));
+                return new ConstNode(
+                    this, scope, DFBasicType.INT,
+                    expr, value);
 
             } else if (expr instanceof StringLiteral) {
 		// ""abc""
                 String value = ((StringLiteral)expr).getLiteralValue();
-                ctx.setRValue(new ConstNode(
-                                  this, scope,
-                                  DFBuiltinTypes.getStringKlass(),
-                                  expr, Utils.quote(value)));
+                return new ConstNode(
+                    this, scope,
+                    DFBuiltinTypes.getStringKlass(),
+                    expr, Utils.quote(value));
 
             } else if (expr instanceof TypeLiteral) {
 		// "A.class"
                 Type value = ((TypeLiteral)expr).getType();
-                ctx.setRValue(new ConstNode(
-                                  this, scope,
-                                  DFBuiltinTypes.getClassKlass(),
-                                  expr, Utils.getTypeName(value)));
+                return new ConstNode(
+                    this, scope,
+                    DFBuiltinTypes.getClassKlass(),
+                    expr, Utils.getTypeName(value));
 
             } else if (expr instanceof PrefixExpression) {
                 PrefixExpression prefix = (PrefixExpression)expr;
@@ -1119,25 +1116,23 @@ public abstract class DFGraph {
                 if (op == PrefixExpression.Operator.INCREMENT ||
                     op == PrefixExpression.Operator.DECREMENT) {
 		    // "++x"
-                    processExpression(ctx, scope, frame, operand);
                     DFNode assign = processAssignment(ctx, scope, frame, operand);
                     DFRef ref = assign.getRef();
                     DFNode node = new PrefixNode(
                         this, scope, ref.getRefType(), ref, expr, op);
-                    node.accept(ctx.getRValue());
+                    node.accept(processExpression(ctx, scope, frame, operand));
                     assign.accept(node);
                     ctx.set(assign);
-                    ctx.setRValue(node);
+                    return node;
+
                 } else {
 		    // "!a", "+a", "-a", "~a"
-                    processExpression(ctx, scope, frame, operand);
-                    DFNode value = ctx.getRValue();
-                    DFType type2 = DFNode.inferPrefixType(
-                        value.getNodeType(), op);
+                    DFNode value = processExpression(ctx, scope, frame, operand);
+                    DFType type2 = DFNode.inferPrefixType(value.getNodeType(), op);
                     DFNode node = new PrefixNode(
                         this, scope, type2, null, expr, op);
                     node.accept(value);
-                    ctx.setRValue(node);
+                    return node;
                 }
 
             } else if (expr instanceof PostfixExpression) {
@@ -1145,36 +1140,33 @@ public abstract class DFGraph {
                 PostfixExpression postfix = (PostfixExpression)expr;
                 PostfixExpression.Operator op = postfix.getOperator();
                 Expression operand = postfix.getOperand();
-                if (op == PostfixExpression.Operator.INCREMENT ||
-                    op == PostfixExpression.Operator.DECREMENT) {
-                    DFNode assign = processAssignment(ctx, scope, frame, operand);
-                    processExpression(ctx, scope, frame, operand);
-                    DFNode node = new PostfixNode(
-                        this, scope, assign.getRef(), expr, op);
-                    node.accept(ctx.getRValue());
-                    assign.accept(node);
-                    ctx.set(assign);
-                }
+                assert (op == PostfixExpression.Operator.INCREMENT ||
+                        op == PostfixExpression.Operator.DECREMENT);
+                DFNode assign = processAssignment(ctx, scope, frame, operand);
+                DFNode node = new PostfixNode(
+                    this, scope, assign.getRef(), expr, op);
+                node.accept(processExpression(ctx, scope, frame, operand));
+                assign.accept(node);
+                ctx.set(assign);
+                return node;
 
             } else if (expr instanceof InfixExpression) {
 		// "a+b"
                 InfixExpression infix = (InfixExpression)expr;
                 InfixExpression.Operator op = infix.getOperator();
-                processExpression(
+                DFNode lvalue = processExpression(
                     ctx, scope, frame, infix.getLeftOperand());
-                DFNode lvalue = ctx.getRValue();
-                processExpression(
+                DFNode rvalue = processExpression(
                     ctx, scope, frame, infix.getRightOperand());
-                DFNode rvalue = ctx.getRValue();
                 DFType type2 = DFNode.inferInfixType(
                     lvalue.getNodeType(), op, rvalue.getNodeType());
-                ctx.setRValue(new InfixNode(
-                                  this, scope, type2, expr, op, lvalue, rvalue));
+                return new InfixNode(
+                    this, scope, type2, expr, op, lvalue, rvalue);
 
             } else if (expr instanceof ParenthesizedExpression) {
 		// "(expr)"
                 ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-                processExpression(
+                return processExpression(
                     ctx, scope, frame, paren.getExpression());
 
             } else if (expr instanceof Assignment) {
@@ -1183,9 +1175,8 @@ public abstract class DFGraph {
                 Assignment.Operator op = assn.getOperator();
                 DFNode assign = processAssignment(
                     ctx, scope, frame, assn.getLeftHandSide());
-                processExpression(
+                DFNode rvalue = processExpression(
                     ctx, scope, frame, assn.getRightHandSide(), assign.getNodeType());
-                DFNode rvalue = ctx.getRValue();
                 DFNode lvalue = null;
                 if (op != Assignment.Operator.ASSIGN) {
                     lvalue = ctx.get(assign.getRef());
@@ -1194,13 +1185,13 @@ public abstract class DFGraph {
                                   this, scope, assign.getRef(), assn,
                                   op, lvalue, rvalue));
                 ctx.set(assign);
-                ctx.setRValue(assign);
+                return assign;
 
             } else if (expr instanceof VariableDeclarationExpression) {
 		// "int a=2"
                 VariableDeclarationExpression decl =
                     (VariableDeclarationExpression)expr;
-                processVariableDeclaration(
+                return processVariableDeclaration(
                     ctx, scope, frame, decl.fragments());
 
             } else if (expr instanceof MethodInvocation) {
@@ -1226,8 +1217,7 @@ public abstract class DFGraph {
                     }
                     if (instType == null) {
                         // "expr.method()"
-                        processExpression(ctx, scope, frame, expr1);
-                        obj = ctx.getRValue();
+                        obj = processExpression(ctx, scope, frame, expr1);
                         instType = obj.getNodeType();
                     }
                 }
@@ -1237,8 +1227,7 @@ public abstract class DFGraph {
 		DFType[] argTypes = new DFType[nargs];
 		for (int i = 0; i < nargs; i++) {
 		    Expression arg = (Expression)invoke.arguments().get(i);
-                    processExpression(ctx, scope, frame, arg);
-                    DFNode node = ctx.getRValue();
+                    DFNode node = processExpression(ctx, scope, frame, arg);
 		    args[i] = node;
 		    argTypes[i] = node.getNodeType();
                 }
@@ -1270,8 +1259,8 @@ public abstract class DFGraph {
                     this, scope, invoke, funcType, obj, methods);
                 call.setArgs(args);
                 this.connectInsAndOuts(ctx, scope, call, methods);
-                ctx.setRValue(new ReceiveNode(this, scope, call, invoke));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
+                return new ReceiveNode(this, scope, call, invoke);
 
             } else if (expr instanceof SuperMethodInvocation) {
 		// "super.method()"
@@ -1282,8 +1271,7 @@ public abstract class DFGraph {
 		DFType[] argTypes = new DFType[nargs];
 		for (int i = 0; i < nargs; i++) {
 		    Expression arg = (Expression)sinvoke.arguments().get(i);
-                    processExpression(ctx, scope, frame, arg);
-                    DFNode node = ctx.getRValue();
+                    DFNode node = processExpression(ctx, scope, frame, arg);
 		    args[i] = node;
 		    argTypes[i] = node.getNodeType();
                 }
@@ -1311,15 +1299,15 @@ public abstract class DFGraph {
                     this, scope, sinvoke, funcType, obj, methods);
                 call.setArgs(args);
                 this.connectInsAndOuts(ctx, scope, call, methods);
-                ctx.setRValue(new ReceiveNode(this, scope, call, sinvoke));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
+                return new ReceiveNode(this, scope, call, sinvoke);
 
             } else if (expr instanceof ArrayCreation) {
 		// "new int[10]"
                 ArrayCreation ac = (ArrayCreation)expr;
                 DFType elemType = _finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
-                    // XXX ctx.getRValue() is not used (for now).
+                    // XXX value is not used (for now).
                     processExpression(ctx, scope, frame, dim);
                 }
                 int ndims = ac.dimensions().size();
@@ -1328,10 +1316,9 @@ public abstract class DFGraph {
                 DFType arrayType = DFArrayType.getType(elemType, ndims);
                 ArrayInitializer init = ac.getInitializer();
                 if (init != null) {
-                    processExpression(ctx, scope, frame, init, arrayType);
+                    return processExpression(ctx, scope, frame, init, arrayType);
                 } else {
-                    DFNode array = new ValueSetNode(this, scope, arrayType, expr);
-                    ctx.setRValue(array);
+                    return new ValueSetNode(this, scope, arrayType, expr);
                 }
 
             } else if (expr instanceof ArrayInitializer) {
@@ -1343,30 +1330,27 @@ public abstract class DFGraph {
                 List<Expression> exprs = (List<Expression>) init.expressions();
                 int i = 0;
                 for (Expression expr1 : exprs) {
-                    processExpression(ctx, scope, frame, expr1, elemType);
-                    DFNode value = ctx.getRValue();
+                    DFNode value = processExpression(ctx, scope, frame, expr1, elemType);
                     DFNode index = new ConstNode(
                         this, scope, DFBasicType.INT, null, Integer.toString(i++));
                     DFNode node = new ArrayAssignNode(
                         this, scope, ref, expr1, array, index);
                     node.accept(value);
                 }
-                ctx.setRValue(array);
+                return array;
 
             } else if (expr instanceof ArrayAccess) {
 		// "a[0]"
                 ArrayAccess aa = (ArrayAccess)expr;
-                processExpression(
+                DFNode array = processExpression(
                     ctx, scope, frame, aa.getArray());
-                DFNode array = ctx.getRValue();
-                processExpression(
+                DFNode index = processExpression(
                     ctx, scope, frame, aa.getIndex());
                 DFRef ref = scope.lookupArray(array.getNodeType());
-                DFNode index = ctx.getRValue();
                 DFNode node = new ArrayRefNode(
                     this, scope, ref, aa, array, index);
                 node.accept(ctx.get(ref));
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof FieldAccess) {
 		// "(expr).foo"
@@ -1381,8 +1365,7 @@ public abstract class DFGraph {
                     }
                 }
                 if (instType == null) {
-                    processExpression(ctx, scope, frame, expr1);
-                    obj = ctx.getRValue();
+                    obj = processExpression(ctx, scope, frame, expr1);
                     instType = obj.getNodeType();
                 }
                 DFKlass klass = instType.toKlass();
@@ -1390,7 +1373,7 @@ public abstract class DFGraph {
                 DFRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, fa, obj);
                 node.accept(ctx.get(ref));
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof SuperFieldAccess) {
 		// "super.baa"
@@ -1401,17 +1384,16 @@ public abstract class DFGraph {
                 DFRef ref = klass.lookupField(fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof CastExpression) {
 		// "(String)"
                 CastExpression cast = (CastExpression)expr;
                 DFType castType = _finder.resolve(cast.getType());
-                processExpression(
-                    ctx, scope, frame, cast.getExpression());
                 DFNode node = new TypeCastNode(this, scope, castType, cast);
-                node.accept(ctx.getRValue());
-                ctx.setRValue(node);
+                node.accept(processExpression(
+                                ctx, scope, frame, cast.getExpression()));
+                return node;
 
             } else if (expr instanceof ClassInstanceCreation) {
 		// "new T()"
@@ -1428,16 +1410,14 @@ public abstract class DFGraph {
                 Expression expr1 = cstr.getExpression();
                 DFNode obj = null;
                 if (expr1 != null) {
-                    processExpression(ctx, scope, frame, expr1);
-                    obj = ctx.getRValue();
+                    obj = processExpression(ctx, scope, frame, expr1);
                 }
 		int nargs = cstr.arguments().size();
 		DFNode[] args = new DFNode[nargs];
 		DFType[] argTypes = new DFType[nargs];
 		for (int i = 0; i < nargs; i++) {
 		    Expression arg = (Expression)cstr.arguments().get(i);
-                    processExpression(ctx, scope, frame, arg);
-                    DFNode node = ctx.getRValue();
+                    DFNode node = processExpression(ctx, scope, frame, arg);
 		    args[i] = node;
 		    argTypes[i] = node.getNodeType();
                 }
@@ -1449,36 +1429,32 @@ public abstract class DFGraph {
                     this, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);
                 this.connectInsAndOuts(ctx, scope, call, methods);
-                ctx.setRValue(new ReceiveNode(this, scope, call, cstr));
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
+                return new ReceiveNode(this, scope, call, cstr);
 
             } else if (expr instanceof ConditionalExpression) {
 		// "c? a : b"
                 ConditionalExpression cond = (ConditionalExpression)expr;
-                processExpression(
+                DFNode condValue = processExpression(
                     ctx, scope, frame, cond.getExpression());
-                DFNode condValue = ctx.getRValue();
-                processExpression(
+                DFNode trueValue = processExpression(
                     ctx, scope, frame, cond.getThenExpression());
-                DFNode trueValue = ctx.getRValue();
-                processExpression(
+                DFNode falseValue = processExpression(
                     ctx, scope, frame, cond.getElseExpression());
-                DFNode falseValue = ctx.getRValue();
                 JoinNode join = new JoinNode(
                     this, scope, trueValue.getNodeType(), null, expr, condValue);
                 join.recv(true, trueValue);
                 join.recv(false, falseValue);
-                ctx.setRValue(join);
+                return join;
 
             } else if (expr instanceof InstanceofExpression) {
 		// "a instanceof A"
                 InstanceofExpression instof = (InstanceofExpression)expr;
                 DFType instType = _finder.resolve(instof.getRightOperand());
-                processExpression(
-                    ctx, scope, frame, instof.getLeftOperand());
                 DFNode node = new TypeCheckNode(this, scope, instof, instType);
-                node.accept(ctx.getRValue());
-                ctx.setRValue(node);
+                node.accept(processExpression(
+                                ctx, scope, frame, instof.getLeftOperand()));
+                return node;
 
             } else if (expr instanceof LambdaExpression) {
 		// "x -> { ... }"
@@ -1493,7 +1469,7 @@ public abstract class DFGraph {
                     node.accept(ctx.get(captured.getOriginal()),
                                 captured.getFullName());
                 }
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof ExpressionMethodReference) {
                 ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
@@ -1504,13 +1480,13 @@ public abstract class DFGraph {
                 try {
                     // Try assuming it's an ExpresionMethodReference.
                     // Capture "this".
-                    processExpression(
-                        ctx, scope, frame, methodref.getExpression());
-                    node.accept(ctx.getRValue(), "#this");
+                    node.accept(processExpression(
+                                    ctx, scope, frame, methodref.getExpression()),
+                                "#this");
                 } catch (EntityNotFound e) {
                     // Turned out it's a TypeMethodReference.
                 }
-                ctx.setRValue(node);
+                return node;
 
             } else if (expr instanceof MethodReference) {
                 //  CreationReference
@@ -1520,12 +1496,12 @@ public abstract class DFGraph {
                 String id = Utils.encodeASTNode(methodref);
                 DFType methodRefType = _finder.lookupType(id);
 		assert methodRefType instanceof DFMethodRefKlass;
-                CaptureNode node = new CaptureNode(this, scope, methodRefType, methodref);
-                ctx.setRValue(node);
+                return new CaptureNode(this, scope, methodRefType, methodref);
 
             } else {
                 throw new InvalidSyntax(expr);
             }
+
         } catch (EntityNotFound e) {
             e.setAst(expr);
             throw e;
@@ -1560,9 +1536,8 @@ public abstract class DFGraph {
                 DFType type = null;
                 try {
                     // Try assuming it's a variable access.
-                    processExpression(
+                    obj = processExpression(
                         ctx, scope, frame, qname.getQualifier());
-                    obj = ctx.getRValue();
                     type = obj.getNodeType();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
@@ -1577,13 +1552,11 @@ public abstract class DFGraph {
         } else if (expr instanceof ArrayAccess) {
 	    // "a[0]"
             ArrayAccess aa = (ArrayAccess)expr;
-            processExpression(
+            DFNode array = processExpression(
                 ctx, scope, frame, aa.getArray());
-            DFNode array = ctx.getRValue();
-            processExpression(
+            DFNode index = processExpression(
                 ctx, scope, frame, aa.getIndex());
             DFRef ref = scope.lookupArray(array.getNodeType());
-            DFNode index = ctx.getRValue();
             return new ArrayAssignNode(
                 this, scope, ref, expr, array, index);
 
@@ -1591,8 +1564,7 @@ public abstract class DFGraph {
 	    // "(expr).foo"
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            processExpression(ctx, scope, frame, expr1);
-            DFNode obj = ctx.getRValue();
+            DFNode obj = processExpression(ctx, scope, frame, expr1);
             DFKlass klass = obj.getNodeType().toKlass();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.lookupField(fieldName);
@@ -1620,17 +1592,18 @@ public abstract class DFGraph {
     /**
      * Creates a new variable node.
      */
-    private void processVariableDeclaration(
+    private DFNode processVariableDeclaration(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
 	List<VariableDeclarationFragment> frags)
         throws InvalidSyntax, EntityNotFound {
 
+        DFNode value = null;
         for (VariableDeclarationFragment frag : frags) {
             DFRef ref = scope.lookupVar(frag.getName());
             Expression init = frag.getInitializer();
             if (init != null) {
-                processExpression(ctx, scope, frame, init, ref.getRefType());
-                DFNode value = ctx.getRValue();
+                value = processExpression(
+                    ctx, scope, frame, init, ref.getRefType());
                 if (value != null) {
                     DFNode assign = new VarAssignNode(this, scope, ref, frag);
                     assign.accept(value);
@@ -1638,6 +1611,7 @@ public abstract class DFGraph {
                 }
             }
         }
+        return value;
     }
 
     /**
@@ -1802,9 +1776,8 @@ public abstract class DFGraph {
         DFContext ctx, DFLocalScope scope, DFFrame frame,
 	IfStatement ifStmt)
         throws InvalidSyntax, EntityNotFound {
-        processExpression(
+        DFNode condValue = processExpression(
 	    ctx, scope, frame, ifStmt.getExpression());
-        DFNode condValue = ctx.getRValue();
         DFFrame ifFrame = frame.getChildByAST(ifStmt);
 
         Statement thenStmt = ifStmt.getThenStatement();
@@ -1891,9 +1864,8 @@ public abstract class DFGraph {
         DFContext ctx, DFLocalScope scope, DFFrame frame,
 	SwitchStatement switchStmt)
         throws InvalidSyntax, EntityNotFound {
-        processExpression(
+        DFNode switchValue = processExpression(
             ctx, scope, frame, switchStmt.getExpression());
-        DFNode switchValue = ctx.getRValue();
         DFType type = switchValue.getNodeType();
         DFKlass enumKlass = null;
         if (type instanceof DFKlass &&
@@ -1931,9 +1903,9 @@ public abstract class DFGraph {
                         node.accept(ctx.get(ref));
                         caseNode.addMatch(node);
                     } else {
-                        processExpression(
-                            ctx, switchScope, caseFrame, expr);
-                        caseNode.addMatch(ctx.getRValue());
+                        caseNode.addMatch(
+                            processExpression(
+                                ctx, switchScope, caseFrame, expr));
                     }
                 } else {
                     // "default" case.
@@ -1988,9 +1960,8 @@ public abstract class DFGraph {
         DFLocalScope loopScope = scope.getChildByAST(whileStmt);
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
-        processExpression(
+        DFNode condValue = processExpression(
             loopCtx, scope, loopFrame, whileStmt.getExpression());
-        DFNode condValue = loopCtx.getRValue();
         processStatement(
             loopCtx, loopScope, loopFrame, whileStmt.getBody());
         processLoop(
@@ -2007,9 +1978,8 @@ public abstract class DFGraph {
         DFContext loopCtx = new DFContext(this, loopScope);
         processStatement(
             loopCtx, loopScope, loopFrame, doStmt.getBody());
-        processExpression(
+        DFNode condValue = processExpression(
             loopCtx, loopScope, loopFrame, doStmt.getExpression());
-        DFNode condValue = loopCtx.getRValue();
         processLoop(
             ctx, loopScope, frame, doStmt,
             condValue, loopFrame, loopCtx, false);
@@ -2029,8 +1999,7 @@ public abstract class DFGraph {
         Expression expr = forStmt.getExpression();
         DFNode condValue;
         if (expr != null) {
-            processExpression(loopCtx, loopScope, loopFrame, expr);
-            condValue = loopCtx.getRValue();
+            condValue = processExpression(loopCtx, loopScope, loopFrame, expr);
         } else {
             condValue = new ConstNode(this, loopScope, DFBasicType.BOOLEAN, null, "true");
         }
@@ -2051,14 +2020,13 @@ public abstract class DFGraph {
 	EnhancedForStatement eForStmt)
         throws InvalidSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
-        processExpression(ctx, scope, frame, expr);
         DFLocalScope loopScope = scope.getChildByAST(eForStmt);
         DFFrame loopFrame = frame.getChildByAST(eForStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
         SingleVariableDeclaration decl = eForStmt.getParameter();
         DFRef ref = loopScope.lookupVar(decl.getName());
         DFNode iterValue = new IterNode(this, loopScope, ref, expr);
-        iterValue.accept(ctx.getRValue());
+        iterValue.accept(processExpression(ctx, scope, frame, expr));
         VarAssignNode assign = new VarAssignNode(this, loopScope, ref, expr);
         assign.accept(iterValue);
         loopCtx.set(assign);
@@ -2329,9 +2297,8 @@ public abstract class DFGraph {
                     DFNode value = null;
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        processExpression(
+                        value = processExpression(
                             ctx, scope, frame, init, ref.getRefType());
-                        value = ctx.getRValue();
                     }
                     if (value == null) {
                         // uninitialized field: default = null.
@@ -2376,11 +2343,10 @@ public abstract class DFGraph {
                 ctx, scope, frame, (Statement)body);
         } else if (body instanceof Expression) {
             frame.buildExpr((Expression)body);
-            processExpression(
-                ctx, scope, frame, (Expression)body);
             DFRef ref = scope.lookupReturn();
             ReturnNode ret = new ReturnNode(this, scope, ref, body);
-            ret.accept(ctx.getRValue());
+            ret.accept(processExpression(
+                           ctx, scope, frame, (Expression)body));
             frame.addExit(new ReturnExit(frame, ret));
         }
 

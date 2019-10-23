@@ -29,7 +29,6 @@ public class DFContext {
         new ConsistentHashMap<DFRef, DFNode>();
     private Map<DFRef, DFNode> _last =
         new HashMap<DFRef, DFNode>();
-    private DFNode _rval = null;
 
     public DFContext(DFGraph graph, DFVarScope scope) {
         _graph = graph;
@@ -61,18 +60,10 @@ public class DFContext {
         return _last.get(ref);
     }
 
-    public DFNode getRValue() {
-        return _rval;
-    }
-
     public void set(DFNode node) {
         DFRef ref = node.getRef();
         assert ref != null;
         _last.put(ref, node);
-    }
-
-    public void setRValue(DFNode node) {
-        _rval = node;
     }
 
     // dump: for debugging.
@@ -88,9 +79,6 @@ public class DFContext {
         out.println("  lasts:");
         for (Map.Entry<DFRef, DFNode> ent : _last.entrySet()) {
             out.println("    "+ent.getKey()+" = "+ent.getValue());
-        }
-        if (_rval != null) {
-            out.println("  rval: "+_rval);
         }
     }
 }
