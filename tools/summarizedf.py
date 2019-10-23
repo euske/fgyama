@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from interproc import IDFBuilder, Cons, clen
+from interproc import IDFBuilder, Cons
 from getwords import splitmethodname, stripid
 
 debug = 0
