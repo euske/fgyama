@@ -429,9 +429,9 @@ def get_graphs(arg):
     elif path.endswith('.db'):
         db = GraphDB(path)
         if gids is None:
-            methods = ( db.get(gid) for gid in db.get_gids() )
+            methods = db.get_allmethods()
         else:
-            methods = ( db.get(gid) for gid in gids )
+            methods = ( db.get_method(gid) for gid in gids )
     else:
         fp = open(path)
         methods = load_graphs(fp)
@@ -507,6 +507,7 @@ CREATE TABLE IF NOT EXISTS DFKlass (
     Implements TEXT,
     Generic INTEGER
 );
+CREATE INDEX IF NOT EXISTS DFKlassNameIndex ON DFKlass(Name);
 
 CREATE TABLE IF NOT EXISTS DFMethod (
     Gid INTEGER PRIMARY KEY,
@@ -514,6 +515,8 @@ CREATE TABLE IF NOT EXISTS DFMethod (
     Name TEXT,
     Style TEXT
 );
+CREATE INDEX IF NOT EXISTS DFMethodKidIndex ON DFMethod(Kid);
+CREATE INDEX IF NOT EXISTS DFMethodNameIndex ON DFMethod(Name);
 
 CREATE TABLE IF NOT EXISTS DFScope (
     Sid INTEGER PRIMARY KEY,
@@ -620,11 +623,35 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
             yield kid
         return
 
+    def get_kidbyname(self, name):
+        cur = self._cur
+        cur.execute(
+            'SELECT Kid FROM DFKlass WHERE Name=?;',
+            (name,))
+        (kid,) = fetch1(cur, f'DFKlass({name})')
+        return kid
+
     def get_gids(self):
         cur = self._conn.cursor()
         for (gid,) in cur.execute('SELECT Gid FROM DFMethod;'):
             yield gid
         return
+
+    def get_gidsbykid(self, kid):
+        cur = self._conn.cursor()
+        for (gid,) in cur.execute(
+            'SELECT Gid FROM DFMethod WHERE Kid=?;',
+            (kid,)):
+            yield gid
+        return
+
+    def get_gidbyname(self, name):
+        cur = self._cur
+        cur.execute(
+            'SELECT Gid FROM DFMethod WHERE Name=?;',
+            (name,))
+        (gid,) = fetch1(cur, f'DFMethod({name})')
+        return gid
 
     def get_klass(self, kid):
         cur = self._cur
@@ -638,16 +665,14 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
             implements = []
         return DFKlass(name, path, interface, extends, implements, generic, kid)
 
-    def get_method(self, gid, klasses=None):
+    def get_method(self, gid, klass=None):
         cur = self._cur
         cur.execute(
             'SELECT Kid,Name,Style FROM DFMethod WHERE Gid=?;',
             (gid,))
         (kid,name,style) = fetch1(cur, f'DFMethod({gid})')
-        if klasses is None:
+        if klass is None:
             klass = self.get_klass(kid)
-        else:
-            klass = klasses[kid]
         method = DFMethod(klass, name, style, gid)
         rows = cur.execute(
             'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
@@ -685,12 +710,11 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         method.fixate()
         return method
 
-    def get_methods(self):
-        klasses = {}
+    def get_allmethods(self):
         for kid in self.get_kids():
-            klasses[kid] = self.get_klass(kid)
-        for gid in self.get_gids():
-            yield self.get_method(gid, klasses)
+            klass = self.get_klass(kid)
+            for gid in self.get_gidsbykid(kid):
+                yield self.get_method(gid, klass)
         return
 
 
@@ -732,7 +756,7 @@ def main(argv):
                 return 1
             rconn = sqlite3.connect(path)
             rdb = GraphDB(rconn)
-            methods = rdb.get_methods()
+            methods = rdb.get_allmethods()
         else:
             methods = get_graphs(path)
         klass = None
