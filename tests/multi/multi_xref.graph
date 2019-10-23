@@ -160,15 +160,15 @@
       <scope name="Ldom/meep/multi_xref2;.:bam:245:295">
         <node id="M5_bam_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
         <node id="M5_bam_N4" kind="output" ref="#return" type="I">
-          <link src="M5_bam_N3"/>
+          <link src="M5_bam_N2"/>
         </node>
         <scope name="Ldom/meep/multi_xref2;.:bam:245:295.:B:269:295">
-          <node data="42" id="M5_bam_N2" kind="value" type="I">
-            <ast end="288" start="286" type="34"/>
-          </node>
-          <node id="M5_bam_N3" kind="return" ref="#return" type="I">
+          <node id="M5_bam_N2" kind="return" ref="#return" type="I">
             <ast end="289" start="279" type="41"/>
-            <link src="M5_bam_N2"/>
+            <link src="M5_bam_N3"/>
+          </node>
+          <node data="42" id="M5_bam_N3" kind="value" type="I">
+            <ast end="288" start="286" type="34"/>
           </node>
         </scope>
       </scope>

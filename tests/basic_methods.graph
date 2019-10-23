@@ -90,7 +90,7 @@
       <scope name="Lbasic_methods;.:fb:390:450">
         <node id="M3_fb_N1" kind="input" ref="#this" type="Lbasic_methods;"/>
         <node id="M3_fb_N6" kind="output" ref="#return" type="I">
-          <link src="M3_fb_N5"/>
+          <link src="M3_fb_N4"/>
         </node>
         <scope name="Lbasic_methods;.:fb:390:450.:B:413:450">
           <node data="0" id="M3_fb_N2" kind="value" type="I">
@@ -100,13 +100,13 @@
             <ast end="425" start="420" type="59"/>
             <link src="M3_fb_N2"/>
           </node>
-          <node id="M3_fb_N4" kind="ref_var" ref="$Lbasic_methods;.:fb:390:450.:B:413:450/$a" type="I">
+          <node id="M3_fb_N4" kind="return" ref="#return" type="I">
+            <ast end="444" start="435" type="41"/>
+            <link src="M3_fb_N5"/>
+          </node>
+          <node id="M3_fb_N5" kind="ref_var" ref="$Lbasic_methods;.:fb:390:450.:B:413:450/$a" type="I">
             <ast end="443" start="442" type="42"/>
             <link src="M3_fb_N3"/>
-          </node>
-          <node id="M3_fb_N5" kind="return" ref="#return" type="I">
-            <ast end="444" start="435" type="41"/>
-            <link src="M3_fb_N4"/>
           </node>
         </scope>
       </scope>
@@ -125,15 +125,15 @@
       <scope name="Lbasic_methods/A;.:toString:52:112">
         <node id="M5_toString_N1" kind="input" ref="#this" type="Lbasic_methods/A;"/>
         <node id="M5_toString_N4" kind="output" ref="#return" type="Ljava/lang/String;">
-          <link src="M5_toString_N3"/>
+          <link src="M5_toString_N2"/>
         </node>
         <scope name="Lbasic_methods/A;.:toString:52:112.:B:77:112">
-          <node data="A" id="M5_toString_N2" kind="value" type="Ljava/lang/String;">
-            <ast end="101" start="98" type="45"/>
-          </node>
-          <node id="M5_toString_N3" kind="return" ref="#return" type="Ljava/lang/String;">
+          <node id="M5_toString_N2" kind="return" ref="#return" type="Ljava/lang/String;">
             <ast end="102" start="91" type="41"/>
-            <link src="M5_toString_N2"/>
+            <link src="M5_toString_N3"/>
+          </node>
+          <node data="A" id="M5_toString_N3" kind="value" type="Ljava/lang/String;">
+            <ast end="101" start="98" type="45"/>
           </node>
         </scope>
       </scope>
@@ -151,15 +151,15 @@
       <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:toString:180:222">
         <node id="M7_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/:AST14:165:225;"/>
         <node id="M7_toString_N4" kind="output" ref="#return" type="Ljava/lang/String;">
-          <link src="M7_toString_N3"/>
+          <link src="M7_toString_N2"/>
         </node>
         <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:toString:180:222.:B:205:222">
-          <node data="AAA" id="M7_toString_N2" kind="value" type="Ljava/lang/String;">
-            <ast end="219" start="214" type="45"/>
-          </node>
-          <node id="M7_toString_N3" kind="return" ref="#return" type="Ljava/lang/String;">
+          <node id="M7_toString_N2" kind="return" ref="#return" type="Ljava/lang/String;">
             <ast end="220" start="207" type="41"/>
-            <link src="M7_toString_N2"/>
+            <link src="M7_toString_N3"/>
+          </node>
+          <node data="AAA" id="M7_toString_N3" kind="value" type="Ljava/lang/String;">
+            <ast end="219" start="214" type="45"/>
           </node>
         </scope>
       </scope>
@@ -175,24 +175,24 @@
       <ast end="293" start="245" type="31"/>
       <scope name="Lbasic_methods/:fa:139:385/moo;.:fc:245:293">
         <node id="M9_fc_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/moo;"/>
-        <node id="M9_fc_N3" ref="#this" type="Lbasic_methods;"/>
-        <node id="M9_fc_N5" ref="@Lbasic_methods;/.x" type="I"/>
+        <node id="M9_fc_N4" ref="#this" type="Lbasic_methods;"/>
+        <node id="M9_fc_N6" ref="@Lbasic_methods;/.x" type="I"/>
         <node id="M9_fc_N7" kind="output" ref="#return" type="I">
-          <link src="M9_fc_N6"/>
+          <link src="M9_fc_N2"/>
         </node>
         <scope name="Lbasic_methods/:fa:139:385/moo;.:fc:245:293.:B:261:293">
-          <node id="M9_fc_N2" kind="ref_var" ref="#this" type="Lbasic_methods;">
-            <ast end="288" start="270" type="52"/>
-            <link src="M9_fc_N3"/>
-          </node>
-          <node id="M9_fc_N4" kind="ref_field" ref="@Lbasic_methods;/.x" type="I">
-            <ast end="290" start="270" type="22"/>
-            <link label="obj" src="M9_fc_N2"/>
+          <node id="M9_fc_N2" kind="return" ref="#return" type="I">
+            <ast end="291" start="263" type="41"/>
             <link src="M9_fc_N5"/>
           </node>
-          <node id="M9_fc_N6" kind="return" ref="#return" type="I">
-            <ast end="291" start="263" type="41"/>
+          <node id="M9_fc_N3" kind="ref_var" ref="#this" type="Lbasic_methods;">
+            <ast end="288" start="270" type="52"/>
             <link src="M9_fc_N4"/>
+          </node>
+          <node id="M9_fc_N5" kind="ref_field" ref="@Lbasic_methods;/.x" type="I">
+            <ast end="290" start="270" type="22"/>
+            <link label="obj" src="M9_fc_N3"/>
+            <link src="M9_fc_N6"/>
           </node>
         </scope>
       </scope>

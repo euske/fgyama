@@ -30,15 +30,15 @@
           </node>
           <node id="M2_foo_N14" kind="assign_var" ref="$Lbasic_while;.:foo:32:109/$x" type="I">
             <ast end="100" start="99" type="42"/>
+            <link src="M2_foo_N15"/>
+          </node>
+          <node data="++" id="M2_foo_N15" kind="op_postfix" ref="$Lbasic_while;.:foo:32:109/$x" type="I">
+            <ast end="102" start="99" type="37"/>
             <link src="M2_foo_N16"/>
           </node>
-          <node id="M2_foo_N15" kind="ref_var" ref="$Lbasic_while;.:foo:32:109/$x" type="I">
+          <node id="M2_foo_N16" kind="ref_var" ref="$Lbasic_while;.:foo:32:109/$x" type="I">
             <ast end="100" start="99" type="42"/>
             <link src="M2_foo_N13"/>
-          </node>
-          <node data="++" id="M2_foo_N16" kind="op_postfix" ref="$Lbasic_while;.:foo:32:109/$x" type="I">
-            <ast end="102" start="99" type="37"/>
-            <link src="M2_foo_N15"/>
           </node>
           <scope name="Lbasic_while;.:foo:32:109.:B:62:109.:while:65:97">
             <node data=":while:65:97" id="M2_foo_N11" kind="begin" ref="$Lbasic_while;.:foo:32:109/$x" type="I">

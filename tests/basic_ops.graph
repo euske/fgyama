@@ -16,7 +16,7 @@
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_ops;"/>
         <node id="M2_foo_N41" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N40"/>
+          <link src="M2_foo_N39"/>
         </node>
         <scope name="Lbasic_ops;.:foo:30:186.:B:59:186">
           <node id="M2_foo_N4" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186/$x" type="I">
@@ -154,13 +154,13 @@
             <ast end="168" start="160" type="7"/>
             <link label="R" src="M2_foo_N37"/>
           </node>
-          <node id="M2_foo_N39" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
+          <node id="M2_foo_N39" kind="return" ref="#return" type="I">
+            <ast end="180" start="171" type="41"/>
+            <link src="M2_foo_N40"/>
+          </node>
+          <node id="M2_foo_N40" kind="ref_var" ref="$Lbasic_ops;.:foo:30:186.:B:59:186/$z" type="I">
             <ast end="179" start="178" type="42"/>
             <link src="M2_foo_N34"/>
-          </node>
-          <node id="M2_foo_N40" kind="return" ref="#return" type="I">
-            <ast end="180" start="171" type="41"/>
-            <link src="M2_foo_N39"/>
           </node>
         </scope>
       </scope>

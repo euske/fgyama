@@ -16,7 +16,7 @@
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_xfor;"/>
         <node id="M2_foo_N18" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N17"/>
+          <link src="M2_foo_N16"/>
         </node>
         <scope name="Lbasic_xfor;.:foo:31:127.:B:62:127">
           <node data="0" id="M2_foo_N4" kind="value" type="I">
@@ -26,26 +26,26 @@
             <ast end="74" start="69" type="59"/>
             <link src="M2_foo_N4"/>
           </node>
-          <node id="M2_foo_N6" kind="ref_var" ref="$Lbasic_xfor;.:foo:31:127/$a" type="[I">
+          <node id="M2_foo_N7" kind="ref_var" ref="$Lbasic_xfor;.:foo:31:127/$a" type="[I">
             <ast end="91" start="90" type="42"/>
             <link src="M2_foo_N2"/>
           </node>
-          <node id="M2_foo_N16" kind="ref_var" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127/$s" type="I">
+          <node id="M2_foo_N16" kind="return" ref="#return" type="I">
+            <ast end="121" start="112" type="41"/>
+            <link src="M2_foo_N17"/>
+          </node>
+          <node id="M2_foo_N17" kind="ref_var" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127/$s" type="I">
             <ast end="120" start="119" type="42"/>
             <link src="M2_foo_N15"/>
           </node>
-          <node id="M2_foo_N17" kind="return" ref="#return" type="I">
-            <ast end="121" start="112" type="41"/>
-            <link src="M2_foo_N16"/>
-          </node>
           <scope name="Lbasic_xfor;.:foo:31:127.:B:62:127.:efor:77:110">
-            <node id="M2_foo_N7" kind="op_iter" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127.:efor:77:110/$x" type="I">
+            <node id="M2_foo_N6" kind="op_iter" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127.:efor:77:110/$x" type="I">
               <ast end="91" start="90" type="42"/>
-              <link src="M2_foo_N6"/>
+              <link src="M2_foo_N7"/>
             </node>
             <node id="M2_foo_N8" kind="assign_var" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127.:efor:77:110/$x" type="I">
               <ast end="91" start="90" type="42"/>
-              <link src="M2_foo_N7"/>
+              <link src="M2_foo_N6"/>
             </node>
             <node data=":efor:77:110" id="M2_foo_N13" kind="begin" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127/$s" type="I">
               <ast end="110" start="77" type="70"/>
@@ -58,7 +58,7 @@
             </node>
             <node data=":efor:77:110" id="M2_foo_N15" kind="end" ref="$Lbasic_xfor;.:foo:31:127.:B:62:127/$s" type="I">
               <ast end="110" start="77" type="70"/>
-              <link label="cond" src="M2_foo_N7"/>
+              <link label="cond" src="M2_foo_N6"/>
               <link label="_repeat" src="M2_foo_N14"/>
               <link src="M2_foo_N13"/>
             </node>

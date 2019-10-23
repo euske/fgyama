@@ -27,23 +27,23 @@
           <link src="M2_moo_N1"/>
         </node>
         <node id="M2_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
-        <node id="M2_moo_N6" ref="@Lbasic_poly_Foo;/.x" type="I"/>
+        <node id="M2_moo_N7" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="M2_moo_N8" kind="output" ref="#return" type="I">
-          <link src="M2_moo_N7"/>
+          <link src="M2_moo_N4"/>
         </node>
         <scope name="Lbasic_poly_Foo;.:moo:42:106.:B:77:106">
-          <node id="M2_moo_N4" kind="ref_var" ref="$Lbasic_poly_Foo;.:moo:42:106/$obj" type="Lbasic_poly_Foo;">
+          <node id="M2_moo_N4" kind="return" ref="#return" type="I">
+            <ast end="100" start="87" type="41"/>
+            <link src="M2_moo_N6"/>
+          </node>
+          <node id="M2_moo_N5" kind="ref_var" ref="$Lbasic_poly_Foo;.:moo:42:106/$obj" type="Lbasic_poly_Foo;">
             <ast end="97" start="94" type="42"/>
             <link src="M2_moo_N2"/>
           </node>
-          <node id="M2_moo_N5" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="M2_moo_N6" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
             <ast end="99" start="94" type="40"/>
-            <link label="obj" src="M2_moo_N4"/>
-            <link src="M2_moo_N6"/>
-          </node>
-          <node id="M2_moo_N7" kind="return" ref="#return" type="I">
-            <ast end="100" start="87" type="41"/>
-            <link src="M2_moo_N5"/>
+            <link label="obj" src="M2_moo_N5"/>
+            <link src="M2_moo_N7"/>
           </node>
         </scope>
       </scope>
@@ -67,9 +67,9 @@
           <link src="M4_moo_N1"/>
         </node>
         <node id="M4_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
-        <node id="M4_moo_N9" ref="@Lbasic_poly_Foo;/.x" type="I"/>
+        <node id="M4_moo_N10" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="M4_moo_N13" kind="output" ref="#return" type="I">
-          <link src="M4_moo_N12"/>
+          <link src="M4_moo_N7"/>
         </node>
         <scope name="Lbasic_poly_Baa;.:moo:160:273.:B:195:273">
           <node id="M4_moo_N4" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
@@ -85,26 +85,26 @@
             <ast end="219" start="205" type="48"/>
             <link src="M4_moo_N5"/>
           </node>
-          <node id="M4_moo_N7" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
+          <node id="M4_moo_N7" kind="return" ref="#return" type="I">
+            <ast end="267" start="252" type="41"/>
+            <link src="M4_moo_N12"/>
+          </node>
+          <node id="M4_moo_N8" kind="ref_var" ref="$Lbasic_poly_Baa;.:moo:160:273/$obj" type="Lbasic_poly_Foo;">
             <ast end="262" start="259" type="42"/>
             <link src="M4_moo_N2"/>
           </node>
-          <node id="M4_moo_N8" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
+          <node id="M4_moo_N9" kind="ref_field" ref="@Lbasic_poly_Foo;/.x" type="I">
             <ast end="264" start="259" type="40"/>
-            <link label="obj" src="M4_moo_N7"/>
-            <link src="M4_moo_N9"/>
+            <link label="obj" src="M4_moo_N8"/>
+            <link src="M4_moo_N10"/>
           </node>
-          <node data="1" id="M4_moo_N10" kind="value" type="I">
+          <node data="1" id="M4_moo_N11" kind="value" type="I">
             <ast end="266" start="265" type="34"/>
           </node>
-          <node data="+" id="M4_moo_N11" kind="op_infix" type="I">
+          <node data="+" id="M4_moo_N12" kind="op_infix" type="I">
             <ast end="266" start="259" type="27"/>
-            <link label="L" src="M4_moo_N8"/>
-            <link label="R" src="M4_moo_N10"/>
-          </node>
-          <node id="M4_moo_N12" kind="return" ref="#return" type="I">
-            <ast end="267" start="252" type="41"/>
-            <link src="M4_moo_N11"/>
+            <link label="L" src="M4_moo_N9"/>
+            <link label="R" src="M4_moo_N11"/>
           </node>
         </scope>
       </scope>

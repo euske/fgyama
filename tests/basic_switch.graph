@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<fgyama>
+<?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_switch;" path="tests/basic_switch.java">
     <method abstract="false" name="Lbasic_switch;.&lt;clinit&gt;()V" style="initializer">
       <ast end="191" start="0" type="55"/>
@@ -17,7 +16,7 @@
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_switch;"/>
         <node id="M2_foo_N22" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N21"/>
+          <link src="M2_foo_N20"/>
         </node>
         <scope name="Lbasic_switch;.:foo:33:189.:B:62:189">
           <node data="0" id="M2_foo_N4" kind="value" type="I">
@@ -31,13 +30,13 @@
             <ast end="86" start="85" type="42"/>
             <link src="M2_foo_N2"/>
           </node>
-          <node id="M2_foo_N20" kind="ref_var" ref="$Lbasic_switch;.:foo:33:189.:B:62:189/$x" type="I">
+          <node id="M2_foo_N20" kind="return" ref="#return" type="I">
+            <ast end="183" start="174" type="41"/>
+            <link src="M2_foo_N21"/>
+          </node>
+          <node id="M2_foo_N21" kind="ref_var" ref="$Lbasic_switch;.:foo:33:189.:B:62:189/$x" type="I">
             <ast end="182" start="181" type="42"/>
             <link src="M2_foo_N19"/>
-          </node>
-          <node id="M2_foo_N21" kind="return" ref="#return" type="I">
-            <ast end="183" start="174" type="41"/>
-            <link src="M2_foo_N20"/>
           </node>
           <scope name="Lbasic_switch;.:foo:33:189.:B:62:189.:switch:77:172">
             <node data="case(1)" id="M2_foo_N7" kind="case" type="I">

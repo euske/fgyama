@@ -16,7 +16,7 @@
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_for;"/>
         <node id="M2_foo_N28" kind="output" ref="#return" type="I">
-          <link src="M2_foo_N27"/>
+          <link src="M2_foo_N26"/>
         </node>
         <scope name="Lbasic_for;.:foo:30:139.:B:59:139">
           <node data="0" id="M2_foo_N4" kind="value" type="I">
@@ -26,13 +26,13 @@
             <ast end="71" start="66" type="59"/>
             <link src="M2_foo_N4"/>
           </node>
-          <node id="M2_foo_N26" kind="ref_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
+          <node id="M2_foo_N26" kind="return" ref="#return" type="I">
+            <ast end="133" start="124" type="41"/>
+            <link src="M2_foo_N27"/>
+          </node>
+          <node id="M2_foo_N27" kind="ref_var" ref="$Lbasic_for;.:foo:30:139.:B:59:139/$x" type="I">
             <ast end="132" start="131" type="42"/>
             <link src="M2_foo_N25"/>
-          </node>
-          <node id="M2_foo_N27" kind="return" ref="#return" type="I">
-            <ast end="133" start="124" type="41"/>
-            <link src="M2_foo_N26"/>
           </node>
           <scope name="Lbasic_for;.:foo:30:139.:B:59:139.:for:74:122">
             <node data="0" id="M2_foo_N6" kind="value" type="I">
