@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from interproc import IDFBuilder, Cons
+from interproc import IDFBuilder, Cons, clen
 from getwords import splitmethodname, stripid
 
 debug = 0
@@ -38,7 +38,7 @@ class IRef:
         return
 
     def __str__(self):
-        return stripid(self.ref)
+        return (stripid(self.ref) or self.ref)
 
     def __repr__(self):
         return f'<+{self.iid}:{self.ref}>'
@@ -66,6 +66,9 @@ class IRefComponent:
         if MAXNAMES < len(names):
             names = list(names)[:MAXNAMES] + ['...']
         return '[%s]' % ', '.join(names)
+
+    def __len__(self):
+        return len(self.irefs)
 
     def __iter__(self):
         return iter(self.irefs)
@@ -121,37 +124,47 @@ class IRefComponent:
             c.fixate(sc)
         return (sc, cpts)
 
-def trace(vtx2iref, vtx, iref0=None, cc=None, todo=None):
-    node = vtx.node
-    ref = node.ref
-    if ref is not None and ref[0] not in '%#':
-        if ref[0] == '$':
-            iref1 = IRef.get(cc, ref)
-        else:
-            iref1 = IRef.get(None, ref)
-        yield (iref1, iref0)
-        iref0 = iref1
-        if vtx in vtx2iref: return
-        vtx2iref[vtx] = iref1
-        while todo is not None:
-            vtx2iref[todo.car] = iref1
-            todo = todo.cdr
-    elif vtx in vtx2iref:
-        iref1 = vtx2iref[vtx]
-        yield (iref1, iref0)
+# trace()
+IGNORED = {
+    'value', 'valueset',
+    'op_assign', 'op_prefix', 'op_infix', 'op_postfix',
+    'op_typecast', 'op_typecheck', 'op_iter',
+    'ref_array', 'ref_field',
+}
+def trace(ctx2iref, v1, iref0=None, cc=None):
+    k = (cc,v1)
+    if k in ctx2iref:
+        iref1 = ctx2iref[k]
+        if iref0 is not None:
+            yield (iref1, iref0)
         return
+    n1 = v1.node
+    ref1 = n1.ref
+    if n1.kind in IGNORED:
+        iref1 = iref0
+    elif ref1 is None or ref1.startswith('#'):
+        iref1 = iref0
     else:
-        todo = Cons(vtx, todo)
-    for (link,v,funcall) in vtx.inputs:
-        if link.startswith('_'): continue
-        if v.node.kind == 'output' and funcall is not None:
-            if cc is None or funcall not in cc:
-                yield from trace(vtx2iref, v, iref0, Cons(funcall, cc), todo)
-        elif node.kind == 'input' and funcall is not None:
-            if cc is not None and cc.car is funcall:
-                yield from trace(vtx2iref, v, iref0, cc.cdr, todo)
+        if ref1[0] == '$':
+            iref1 = IRef.get(cc, ref1)
         else:
-            yield from trace(vtx2iref, v, iref0, cc, todo)
+            iref1 = IRef.get(None, ref1)
+        if iref0 is not None:
+            if debug:
+                print(f'{clen(cc)} {iref1!r} <- {iref0!r}')
+            yield (iref1, iref0)
+        ctx2iref[k] = iref1
+    for (link,v2,funcall) in v1.inputs:
+        if link.startswith('_'): continue
+        n2 = v2.node
+        if n2.kind == 'output' and funcall is not None:
+            if cc is None or funcall not in cc:
+                yield from trace(ctx2iref, v2, iref1, Cons(funcall, cc))
+        elif n1.kind == 'input' and funcall is not None:
+            if cc is not None and cc.car is funcall:
+                yield from trace(ctx2iref, v2, iref1, cc.cdr)
+        else:
+            yield from trace(ctx2iref, v2, iref1, cc)
     return
 
 # main
@@ -168,7 +181,8 @@ def main(argv):
         return usage()
     outpath = None
     maxoverrides = 1
-    ratio = 1.0
+    ratio = 0.9
+    maxfan = 5
     methods = set()
     for (k, v) in opts:
         if k == '-d': debug += 1
@@ -193,32 +207,32 @@ def main(argv):
 
     # Enumerate all the flows.
     irefs = set()
-    vtx2iref = {}
+    ctx2iref = {}
     nlinks = 0
     for method in builder.methods:
+        # Filter "top-level" methods only which aren't called by anyone else.
+        if method.callers: continue
         (name,_,_) = splitmethodname(method.name)
         if methods and (name not in methods) and (method.name not in methods): continue
-        if method.callers: continue
-        print('method:', method.name, file=sys.stderr)
+        print(f'method: {method.name}', file=sys.stderr)
         for node in method:
-            if not node.inputs: continue
-            mat = trace(vtx2iref, builder.vtxs[node])
-            for (iref0, iref1) in mat:
+            vtx = builder.vtxs[node]
+            if vtx.outputs: continue
+            # Filter the output nodes only.
+            for (iref0, iref1) in trace(ctx2iref, vtx):
                 assert iref0 is not None
                 if iref1 is None: continue
                 if iref0 == iref1: continue
-                if debug:
-                    print(iref0, '->', iref1)
                 iref0.connect(iref1)
                 irefs.add(iref0)
                 irefs.add(iref1)
                 nlinks += 1
-    print('irefs:', len(irefs), file=sys.stderr)
-    print('links:', nlinks, file=sys.stderr)
+    print(f'irefs: {len(irefs)}', file=sys.stderr)
+    print(f'links: {nlinks}', file=sys.stderr)
 
     # Discover strong components.
     (ref2cpt, allcpts) = IRefComponent.fromitems(irefs)
-    print('allcpts:', len(allcpts), file=sys.stderr)
+    print(f'allcpts: {len(allcpts)}', file=sys.stderr)
 
     # Discover the most significant edges.
     incount = {}
@@ -258,25 +272,26 @@ def main(argv):
             count = incoming[cpt0] + outgoing[cpt1]
             if maxcount < count:
                 maxcount = count
-    print('maxcount:', maxcount, file=sys.stderr)
+        if len(cpt0) < 2: continue
+        if debug:
+            print(f'cpt: {cpt0}', file=sys.stderr)
+            for iref in cpt0:
+                print(f'  {iref!r}', file=sys.stderr)
+    print(f'maxcount: {maxcount}', file=sys.stderr)
 
     # Traverse the edges.
     maxlinks = set()
     def trav_forw(cpt0):
-        if not cpt0.linkto: return
-        mc = max( outgoing[cpt1] for cpt1 in cpt0.linkto )
-        for cpt1 in cpt0.linkto:
-            if ratio*mc <= outgoing[cpt1]:
-                maxlinks.add((cpt0, cpt1))
-                trav_forw(cpt1)
+        linkto = sorted(cpt0.linkto, key=lambda cpt1: outgoing[cpt1], reverse=True)
+        for cpt1 in linkto[:maxfan]:
+            maxlinks.add((cpt0, cpt1))
+            trav_forw(cpt1)
         return
     def trav_back(cpt1):
-        if not cpt1.linkfrom: return
-        mc = max( incoming[cpt0] for cpt0 in cpt1.linkfrom )
-        for cpt0 in cpt1.linkfrom:
-            if ratio*mc <= incoming[cpt0]:
-                maxlinks.add((cpt0, cpt1))
-                trav_back(cpt0)
+        linkfrom = sorted(cpt1.linkfrom, key=lambda cpt0: incoming[cpt0], reverse=True)
+        for cpt0 in linkfrom[:maxfan]:
+            maxlinks.add((cpt0, cpt1))
+            trav_back(cpt0)
         return
     for cpt0 in allcpts:
         for cpt1 in cpt0.linkto:
@@ -285,11 +300,11 @@ def main(argv):
                 maxlinks.add((cpt0, cpt1))
                 trav_back(cpt0)
                 trav_forw(cpt1)
-    print('maxlinks:', len(maxlinks), file=sys.stderr)
+    print(f'maxlinks: {len(maxlinks)}', file=sys.stderr)
 
     maxcpts = set( cpt0 for (cpt0,_) in maxlinks )
     maxcpts.update( cpt1 for (_,cpt1) in maxlinks )
-    print('maxcpts:', len(maxcpts), file=sys.stderr)
+    print(f'maxcpts: {len(maxcpts)}', file=sys.stderr)
 
     # Generate a trimmed graph.
     out.write(f'digraph {q(path)} {{\n')

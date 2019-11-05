@@ -1,9 +1,29 @@
 #!/usr/bin/env python
 import sys
 from interproc import IDFBuilder, Cons
-from getwords import splitmethodname, stripid
+from getwords import splitmethodname, stripid, splitwords
 
 debug = 0
+
+def count(d, v):
+    if v not in d:
+        d[v] = 0
+    d[v] += 1
+    return
+
+def group(d, f):
+    t = {}
+    for (k,v) in d.items():
+        (k1,k2) = f(k)
+        if k1 in t:
+            a = t[k1]
+        else:
+            a = t[k1] = {}
+        a[k2] = a.get(k2, 0) + v
+    r = [ (sum(v.values()), k,
+           sorted(v.items(), key=lambda x:x[1], reverse=True))
+          for (k,v) in t.items() ]
+    return sorted(r, reverse=True)
 
 def f(n):
     return f'<{n.nid}({n.kind})>'
@@ -46,9 +66,10 @@ def trace(v1, ref0=None, done=None):
     kind = n1.kind
     if kind not in ALLOWED: return
     if kind == 'op_assign' and n1.data != '=': return
+    links = LINK.get(kind)
     for (link,v2,_) in v1.inputs:
         if link.startswith('_'): continue
-        if kind in LINK and link not in LINK[kind]: continue
+        if links is not None and link not in links: continue
         yield from trace(v2, ref0, done)
     return
 
@@ -89,20 +110,54 @@ def main(argv):
     links = set()
     for method in builder.methods:
         (name,_,_) = splitmethodname(method.name)
-        print('method:', method.name, file=sys.stderr)
+        if debug:
+            print(f'method: {method.name}', file=sys.stderr)
         for node in method:
             if not node.inputs: continue
             for (ref1, ref0) in trace(builder.vtxs[node]):
                 if ref1 == ref0: continue
                 links.add((ref1, ref0))
                 if debug:
-                    print(ref1, '<-', ref0)
-    print('links:', len(links), file=sys.stderr)
+                    print(f'{ref1!r} <- {ref0!r}')
+    print(f'links: {len(links)}', file=sys.stderr)
+
+    srcs = {}
+    dsts = {}
     for (ref1, ref0) in links:
         name1 = stripid(ref1)
         name0 = stripid(ref0)
         if name1 == name0: continue
-        print(name1, name0)
+        #print(name1, '=', name0)
+        if name1 in srcs:
+            a = srcs[name1]
+        else:
+            a = srcs[name1] = set()
+        a.add(name0)
+        if name0 in dsts:
+            a = dsts[name0]
+        else:
+            a = dsts[name0] = set()
+        a.add(name1)
+
+    for (name,a) in srcs.items():
+        if len(a) == 1: continue
+        print(name, '=', a)
+    print()
+    for (name,a) in dsts.items():
+        if len(a) == 1: continue
+        print(a, '=', name)
+    print()
+
+    pairs = []
+    for (name,a) in srcs.items():
+        if len(a) < 2: continue
+        if name not in dsts: continue
+        b = dsts[name]
+        if len(b) < 2: continue
+        pairs.append((name, a, b))
+    pairs.sort(key=lambda x:len(x[1])*len(x[2]), reverse=True)
+    for (name,a,b) in pairs:
+        print(name, a, b)
 
     return 0
 
