@@ -105,10 +105,10 @@ def main(argv):
     import getopt
     import fileinput
     def usage():
-        print(f'usage: {argv[0]} [-o output] [-H|-E|-C] [-T title] [-S script] [-n limit] [-m maxcands] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
+        print(f'usage: {argv[0]} [-o output] [-H|-E|-C] [-T title] [-S script] [-n limit] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:HECT:S:n:m:e:c:v:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:HECT:S:n:e:c:v:')
     except getopt.GetoptError:
         return usage()
     output = None
@@ -119,7 +119,6 @@ def main(argv):
     excluded = set()
     types = {}
     limit = 10
-    maxcands = 0
     timestamp = time.strftime('%Y%m%d')
     for (k, v) in opts:
         if k == '-o':
@@ -133,7 +132,6 @@ def main(argv):
             with open(v) as fp:
                 script = fp.read()
         elif k == '-n': limit = int(v)
-        elif k == '-m': maxcands = int(v)
         elif k == '-e':
             with open(v) as fp:
                 for rec in getrecs(fp):
@@ -233,8 +231,9 @@ def main(argv):
         item = rec['ITEM']
         score = rec['SCORE']
         base = rec.get('DEFAULT')
+        cands = rec['CANDS']
         old = stripid(item)
-        new = getnewname(rec['WORDS'], rec['CANDS'])
+        new = getnewname(rec['WORDS'], cands)
         assert old != new
         names = [new, old]
         keys = ['a','b']
@@ -259,9 +258,9 @@ def main(argv):
                 out.write(f'<h3>Destination</h3>\n')
             showsrc_html(srcs1, 'new')
         if len(keys) == 3:
-            print(rid, keys[0], keys[2])
+            print(rid, item, old, new, keys[0], keys[2])
         else:
-            print(rid, keys[0], 'null')
+            print(rid, item, old, new, keys[0], 'null')
         return
 
     def showrec_context(rid, rec):
