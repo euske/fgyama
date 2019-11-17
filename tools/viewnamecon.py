@@ -105,16 +105,17 @@ def main(argv):
     import getopt
     import fileinput
     def usage():
-        print(f'usage: {argv[0]} [-o output] [-H|-E|-C] [-T title] [-S script] [-n limit] [-e simvars] [-c encoding] [-v vars] srcdb [namecon]')
+        print(f'usage: {argv[0]} [-o output] [-P|-H|-E|-C] [-c encoding] [-B srcdb] [-T title] [-S script] [-n limit] [-e simvars] [-v vars] [namecon]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'o:HECT:S:n:e:c:v:')
+        (opts, args) = getopt.getopt(argv[1:], 'o:PHECc:B:T:S:n:e:v:')
     except getopt.GetoptError:
         return usage()
     output = None
     title = None
     script = None
     encoding = None
+    srcdb = None
     mode = None
     excluded = set()
     types = {}
@@ -123,9 +124,13 @@ def main(argv):
     for (k, v) in opts:
         if k == '-o':
             output = v
+        elif k == '-P': mode = k[1:]
         elif k == '-H': mode = k[1:]
         elif k == '-E': mode = k[1:]
         elif k == '-C': mode = k[1:]
+        elif k == '-c': encoding = v
+        elif k == '-B':
+            srcdb = SourceDB(v, encoding)
         elif k == '-T':
             title = v
         elif k == '-S':
@@ -136,13 +141,9 @@ def main(argv):
             with open(v) as fp:
                 for rec in getrecs(fp):
                     excluded.update(rec['ITEMS'])
-        elif k == '-c': encoding = v
         elif k == '-v':
             with open(v) as fp:
                 types = getvars(fp)
-    if not args: return usage()
-    path = args.pop(0)
-    srcdb = SourceDB(path, encoding)
 
     out = sys.stdout
     if output is not None:
@@ -153,6 +154,7 @@ def main(argv):
         out = open(output, 'w')
 
     def showsrc_plain(srcs, klass):
+        assert srcdb is not None
         annot = SourceAnnot(srcdb)
         for (path,s,e) in srcs:
             annot.add(path,s,e)
@@ -160,6 +162,7 @@ def main(argv):
         return
 
     def showsrc_html(srcs, klass, name=None):
+        assert srcdb is not None
         pat = None
         if name is not None:
             pat = re.compile(r'\b'+re.escape(name)+r'\b')
@@ -196,6 +199,14 @@ def main(argv):
             out.write(f'<a href="javascript:void(0)" onclick="toggle(\'{id}\')">[+]</a> Show Proof<br><div id={id} hidden>\n')
             showsrc_html(srcs0, 'match')
             out.write('</div></div>\n')
+        return
+
+    def showrec_default(rid, rec):
+        item = rec['ITEM']
+        cands = rec['CANDS']
+        old = stripid(item)
+        new = getnewname(rec['WORDS'], cands)
+        print(rid, item, old, new)
         return
 
     def showrec_plain(rid, rec):
@@ -279,11 +290,13 @@ def main(argv):
         return
 
     #
-    if mode is not None:
+    if mode in ('H','E','C'):
         if title is None:
             title = f'{args[0]}_{timestamp}'
         showhtmlheader(out, title, script)
-    if mode == 'H':
+    if mode == 'P':
+        showrec = showrec_plain
+    elif mode == 'H':
         showrec = showrec_html
     elif mode == 'E':
         showrec = showrec_eval
@@ -328,7 +341,7 @@ def main(argv):
 </ul>
 ''')
     else:
-        showrec = showrec_plain
+        showrec = showrec_default
 
     allrecs = []
     for path in args:
