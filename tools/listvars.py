@@ -24,7 +24,6 @@ def main(argv):
         elif k == '-n': limit = int(v)
 
     refs = {}
-    words = {}
     for path in args:
         for method in get_graphs(path):
             for node in method:
@@ -32,19 +31,19 @@ def main(argv):
                 if ref is None: continue
                 if node.ntype is None: continue
                 if ref[0] not in '$@': continue
-                if wordstat:
-                    name = stripid(ref)
-                    if name is None: continue
-                    for (pos,w) in postag(reversed(splitwords(name))):
-                        if pos in words:
-                            d = words[pos]
-                        else:
-                            d = words[pos] = {}
-                        d[w] = d.get(w, 0) + 1
-                else:
-                    refs[ref] = node.ntype
+                refs[ref] = node.ntype
 
     if wordstat:
+        words = {}
+        for ref in refs.keys():
+            name = stripid(ref)
+            if name is None: continue
+            for (pos,w) in postag(reversed(splitwords(name))):
+                if pos in words:
+                    d = words[pos]
+                else:
+                    d = words[pos] = {}
+                d[w] = d.get(w, 0) + 1
         print('counts', { pos:sum(d.values()) for (pos,d) in words.items() })
         print('words', { pos:len(d) for (pos,d) in words.items() })
         for (pos,d) in sorted(words.items(), key=lambda x:len(x[1]), reverse=True):
