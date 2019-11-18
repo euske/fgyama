@@ -59,6 +59,24 @@ def gettypewords(name):
     else:
         return [ header+name ]
 
+def postag(words):
+    from nltk.corpus import wordnet
+    for (i,w) in enumerate(words):
+        w = w.lower()
+        d = {}
+        for syn in wordnet.synsets(w):
+            n = 0
+            for lem in syn.lemmas():
+                if w == lem.name().lower():
+                    n += lem.count()
+            pos = syn.pos()
+            d[pos] = d.get(pos, 0) + n
+        if i == 0 and d.get('v',0) > d.get('n',0):
+            yield ('v', w)
+        else:
+            yield ('n', w)
+    return
+
 def main(argv):
     import fileinput
 
