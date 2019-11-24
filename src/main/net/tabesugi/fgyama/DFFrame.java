@@ -533,7 +533,19 @@ public class DFFrame {
 
         } else if (expr instanceof TypeLiteral) {
             // "A.class"
-            return DFBuiltinTypes.getClassKlass();
+	    Type value = ((TypeLiteral)expr).getType();
+            try {
+                DFType typeval = _finder.resolve(value);
+                DFKlass klass = DFBuiltinTypes.getClassKlass().parameterize(
+		    new DFType[] { typeval });
+		klass.load();
+		return klass;
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFFrame.buildExpr: TypeNotFound (const)",
+                    this, e.name, expr);
+		return null;
+            }
 
         } else if (expr instanceof PrefixExpression) {
             // "++x"

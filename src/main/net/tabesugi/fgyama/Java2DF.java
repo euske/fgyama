@@ -465,6 +465,12 @@ public class Java2DF {
         } else if (ast instanceof StringLiteral) {
 
         } else if (ast instanceof TypeLiteral) {
+	    Type value = ((TypeLiteral)ast).getType();
+            try {
+		DFKlass klass = finder.resolve(value).toKlass();
+		enumKlasses(klass, klasses);
+            } catch (TypeNotFound e) {
+            }
 
         } else if (ast instanceof PrefixExpression) {
             PrefixExpression prefix = (PrefixExpression)ast;
