@@ -136,6 +136,8 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
     if k in ctx2iref:
         iref1 = ctx2iref[k]
         if iref0 is not None:
+            if debug:
+                print(f'{clen(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         return
     n1 = v1.node
@@ -151,7 +153,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
             iref1 = IRef.get(None, ref1)
         if iref0 is not None:
             if debug:
-                print(f'{clen(cc)} {iref1!r} <- {iref0!r}')
+                print(f'{clen(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         ctx2iref[k] = iref1
     for (link,v2,funcall) in v1.inputs:
@@ -219,11 +221,12 @@ def main(argv):
             vtx = builder.vtxs[node]
             if vtx.outputs: continue
             # Filter the output nodes only.
-            for (iref0, iref1) in trace(ctx2iref, vtx):
-                assert iref0 is not None
-                if iref1 is None: continue
+            for (iref1, iref0) in trace(ctx2iref, vtx):
+                # iref1 -> iref0
+                assert iref1 is not None
+                if iref0 is None: continue
                 if iref0 == iref1: continue
-                iref0.connect(iref1)
+                iref1.connect(iref0)
                 irefs.add(iref0)
                 irefs.add(iref1)
                 nlinks += 1
