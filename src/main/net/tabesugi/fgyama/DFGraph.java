@@ -1104,9 +1104,11 @@ public abstract class DFGraph {
             } else if (expr instanceof TypeLiteral) {
 		// "A.class"
                 Type value = ((TypeLiteral)expr).getType();
+                DFType typeval = _finder.resolve(value);
+                DFKlass klass = DFBuiltinTypes.getClassKlass();
                 return new ConstNode(
                     this, scope,
-                    DFBuiltinTypes.getClassKlass(),
+                    klass.parameterize(new DFType[] { typeval }),
                     expr, Utils.getTypeName(value));
 
             } else if (expr instanceof PrefixExpression) {
