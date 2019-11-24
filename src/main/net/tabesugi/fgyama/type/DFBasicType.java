@@ -71,7 +71,7 @@ public class DFBasicType implements DFType {
         } else if (_code == PrimitiveType.BOOLEAN) {
             return DFBuiltinTypes.getBooleanKlass();
         } else {
-	    return null;
+            return DFBuiltinTypes.getVoidKlass();
         }
     }
 

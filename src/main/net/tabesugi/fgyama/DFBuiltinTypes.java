@@ -26,6 +26,7 @@ public class DFBuiltinTypes {
         _float = createKlass(java_lang, "Float");
         _double = createKlass(java_lang, "Double");
         _boolean = createKlass(java_lang, "Boolean");
+        _void = createKlass(java_lang, "Void");
         _exception = createKlass(java_lang, "Exception");
         _array = new ArrayKlass(java_lang, _object);
         File homeDir = new File(System.getProperty("java.home"));
@@ -44,6 +45,7 @@ public class DFBuiltinTypes {
         _float.load();
         _double.load();
         _boolean.load();
+	_void.load();
         _exception.load();
     }
 
@@ -130,6 +132,12 @@ public class DFBuiltinTypes {
     public static DFKlass getBooleanKlass() {
         assert _boolean != null;
         return _boolean;
+    }
+
+    private static DFKlass _void = null;
+    public static DFKlass getVoidKlass() {
+        assert _void != null;
+        return _void;
     }
 
     private static DFKlass _exception = null;
