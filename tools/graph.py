@@ -164,7 +164,10 @@ class DFNode:
         return
 
     def __repr__(self):
-        return (f'<DFNode({self.nid}): kind={self.kind}, ref={self.ref}, data={self.data}, ntype={self.ntype}, inputs={len(self.inputs)}>')
+        if self.data is not None:
+            return (f'<DFNode({self.nid}): {self.kind}({self.ntype}) {self.ref}, data={self.data}>')
+        else:
+            return (f'<DFNode({self.nid}): {self.kind}({self.ntype}) {self.ref}>')
 
     def toxml(self):
         enode = Element('node')

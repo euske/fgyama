@@ -81,7 +81,7 @@ class IPVertex:
         return (f'<IPVertex({self.vid})>')
 
     def connect(self, label, output, funcall=None):
-        #print('# connect: %r-%s-%r' % (self, label, output))
+        #print(f'# connect: {self}-{label}-{output}')
         #assert output is not self
         assert isinstance(label, str)
         assert isinstance(output, IPVertex)
@@ -177,14 +177,16 @@ class IDFBuilder:
             for node in method:
                 if node.is_funcall():
                     funcs = node.data.split(' ')
-                    for gid in funcs[:self.maxoverrides]:
-                        if gid not in self.gid2method: continue
-                        for n1 in self.gid2method[gid]:
+                    for callee in funcs[:self.maxoverrides]:
+                        if callee not in self.gid2method: continue
+                        for n1 in self.gid2method[callee]:
                             if n1.kind == 'input':
                                 label = n1.ref
                                 if label in node.inputs:
-                                    self.getvtx(node.inputs[label]).connect(
-                                        label, self.getvtx(n1), node)
+                                    n0 = node.inputs[label]
+                                    vtx0 = self.getvtx(n0)
+                                    vtx0.connect(label, self.getvtx(n1), node)
+                                    #print(f'# send: {n0} {label} -> {n1}')
                             elif n1.kind == 'output':
                                 vtx1 = self.getvtx(n1)
                                 for (label,n2) in node.outputs:
@@ -193,6 +195,7 @@ class IDFBuilder:
                                     if not label: label = '#return'
                                     if n1.ref != label: continue
                                     vtx1.connect(label, self.getvtx(n2), node)
+                                    #print(f'# recv: {n1} -> {label} {n2}')
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
