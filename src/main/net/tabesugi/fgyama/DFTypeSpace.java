@@ -18,6 +18,8 @@ public class DFTypeSpace {
         new HashMap<String, DFTypeSpace>();
     private Map<String, DFKlass> _id2klass =
         new ConsistentHashMap<String, DFKlass>();
+    private Map<String, DFMapType> _id2maptype =
+        new ConsistentHashMap<String, DFMapType>();
 
     public DFTypeSpace(String name, DFTypeSpace outerSpace) {
         _name = name;
@@ -110,10 +112,19 @@ public class DFTypeSpace {
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            mapTypes[i] = new DFMapType(id, this);
+            mapTypes[i] = this.getMapType(id);
             mapTypes[i].setTypeBounds(tp.typeBounds());
         }
         return mapTypes;
+    }
+
+    private DFMapType getMapType(String id) {
+	DFMapType mapType = _id2maptype.get(id);
+	if (mapType == null) {
+	    mapType = new DFMapType(id, this);
+	    _id2maptype.put(id, mapType);
+	}
+	return mapType;
     }
 
     protected Collection<DFKlass> getInnerKlasses() {

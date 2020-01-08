@@ -99,7 +99,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             DFType paramType = paramTypes[i];
             assert mapType != null;
             assert paramType != null;
-            _paramTypes.put(mapType.getTypeName(), paramType);
+            _paramTypes.put(mapType.getName(), paramType);
         }
 
         _ast = genericKlass._ast;
@@ -155,7 +155,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    DFMapType mapType = mapTypes.get(i);
                     DFType paramType = paramTypes.get(i);
                     writer.writeStartElement("param");
-                    writer.writeAttribute("name", mapType.getTypeName());
+                    writer.writeAttribute("name", mapType.getName());
                     writer.writeAttribute("type", paramType.getTypeName());
                     writer.writeEndElement();
                 }
@@ -244,22 +244,22 @@ public class DFKlass extends DFTypeSpace implements DFType {
         // Get type parameters.
         assert _mapTypes == null;
         assert _paramTypes == null;
-	DFMapType[] mapTypes = DFTypeSpace.getMapTypes(tps);
+	DFMapType[] mapTypes = this.getMapTypes(tps);
 	if (mapTypes == null) return;
 	_mapTypes = new ConsistentHashMap<String, DFMapType>();
 	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getTypeName(), mapType);
+	    _mapTypes.put(mapType.getName(), mapType);
         }
     }
 
     public void setMapTypes(String sig) {
         assert _mapTypes == null;
         assert _paramTypes == null;
-        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
+        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
 	if (mapTypes == null) return;
 	_mapTypes = new ConsistentHashMap<String, DFMapType>();
 	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getTypeName(), mapType);
+	    _mapTypes.put(mapType.getName(), mapType);
         }
     }
 
@@ -735,7 +735,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     public DFType getType(String id) {
         if (_mapTypes != null) {
             DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType.toKlass();
+            if (mapType != null) return mapType;
         }
         if (_paramTypes != null) {
             DFType paramType = _paramTypes.get(id);
@@ -865,11 +865,15 @@ public class DFKlass extends DFTypeSpace implements DFType {
                    (callStyle1 == DFMethod.CallStyle.InstanceMethod ||
                     callStyle1 == DFMethod.CallStyle.StaticMethod)))) continue;
             if (id != null && !id.equals(method1.getName())) continue;
-            int dist = method1.canAccept(argTypes);
+	    Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
+            int dist = method1.canAccept(argTypes, typeMap);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
                 bestDist = dist;
-                bestMethod = method1;
+		try {
+		    bestMethod = method1.parameterize(typeMap);
+		} catch (InvalidSyntax e) {
+		}
             }
         }
         return bestMethod;

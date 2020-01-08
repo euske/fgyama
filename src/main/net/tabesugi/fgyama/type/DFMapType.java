@@ -26,18 +26,14 @@ public class DFMapType implements DFType {
 
     @Override
     public String toString() {
+        String name = _outerSpace.getSpaceName()+_name;
         if (_sig != null) {
-            return ("<DFMapType("+_name+":"+_sig+")>");
+            return ("<DFMapType("+name+":"+_sig+")>");
         } else if (_types != null) {
-            return ("<DFMapType("+_name+":"+_types+")>");
+            return ("<DFMapType("+name+":"+_types+")>");
         } else {
-            return ("<DFMapType("+_name+")>");
+            return ("<DFMapType("+name+")>");
         }
-    }
-
-    @Override
-    public String getTypeName() {
-        return _name;
     }
 
     @Override
@@ -50,6 +46,15 @@ public class DFMapType implements DFType {
         return _boundKlass;
     }
 
+    @Override
+    public String getTypeName() {
+	return _name;
+    }
+
+    public String getName() {
+	return _name;
+    }
+    
     @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	if (this == type) return 0;
