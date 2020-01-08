@@ -168,6 +168,11 @@ CREATE INDEX ItemFeatsByFid ON ItemFeats(Fid);
                 self._itemmap[tid] = item
         return self._items
 
+    def count_allfeats(self):
+        self._cur.execute('SELECT count(*) FROM ItemFeats;')
+        (n,) = self._cur.fetchone()
+        return n
+    
     def get_feats(self, tid, resolve=False, source=False):
         self._cur.execute(
             'SELECT Sid0,Sid1,Fid,Count FROM ItemFeats WHERE Tid=?;',
@@ -235,6 +240,7 @@ def main(argv):
         if args:
             items = [ (tid,item) for (tid,item) in items if item in args ]
         dcount = {}
+        print(f'# Items: {len(items)}, Feats: {db.count_allfeats()}')
         for (tid,item) in items:
             print('+ITEM', item)
             feat2srcs = db.get_feats(tid, resolve=True, source=source)
