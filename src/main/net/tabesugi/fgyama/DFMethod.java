@@ -192,10 +192,27 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _finder = new DFTypeFinder(this, finder);
     }
 
-    public void setMapTypes(DFMapType[] mapTypes)
-	throws InvalidSyntax {
+    public void setMapTypes(List<TypeParameter> tps)
+        throws InvalidSyntax {
 	assert _finder != null;
-        _mapTypes = mapTypes;
+        assert _mapTypes == null;
+        _mapTypes = DFTypeSpace.getMapTypes(tps);
+        if (_mapTypes == null) return;
+	_mapTypeMap = new HashMap<String, DFType>();
+	for (DFMapType mapType : _mapTypes) {
+	    // Set the Object type temporarily for circular definition.
+	    _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
+	    mapType.build(_finder);
+	    _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+        }
+    }
+    
+    public void setMapTypes(String sig)
+        throws InvalidSyntax {
+	assert _finder != null;
+        assert _mapTypes == null;
+	_mapTypes = JNITypeParser.getMapTypes(sig);
+	if (_mapTypes == null) return;
         _mapTypeMap = new HashMap<String, DFType>();
         for (DFMapType mapType : _mapTypes) {
 	    // Set the Object type temporarily for circular definition.
@@ -204,7 +221,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
         }
     }
-
+    
     public boolean addOverrider(DFMethod method) {
         if (method._callStyle != CallStyle.Lambda &&
             !_name.equals(method._name)) return false;

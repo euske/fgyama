@@ -248,6 +248,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         if (_mapTypes != null) {
             _mapTypeMap = new HashMap<String, DFType>();
             for (DFMapType mapType : _mapTypes) {
+		// Set the Object type temporarily for circular definition.
                 _mapTypeMap.put(
                     mapType.getTypeName(),
                     DFBuiltinTypes.getObjectKlass());
@@ -262,6 +263,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         if (_mapTypes != null) {
             _mapTypeMap = new HashMap<String, DFType>();
             for (DFMapType mapType : _mapTypes) {
+		// Set the Object type temporarily for circular definition.
                 _mapTypeMap.put(
                     mapType.getTypeName(),
                     DFBuiltinTypes.getObjectKlass());
@@ -1149,10 +1151,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             DFFunctionType funcType;
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
-                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
-                if (mapTypes != null) {
-                    method.setMapTypes(mapTypes);
-                }
+		method.setMapTypes(sig);
 		JNITypeParser parser = new JNITypeParser(sig);
 		try {
 		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
@@ -1362,17 +1361,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 String id = Utils.encodeASTNode(decl);
                 DFMethod method = this.getMethod(id);
                 method.setFinder(finder);
+		method.setMapTypes(decl.typeParameters());
                 List<TypeParameter> tps = decl.typeParameters();
-                if (0 < tps.size()) {
-                    DFMapType[] mapTypes = new DFMapType[tps.size()];
-                    for (int i = 0; i < tps.size(); i++) {
-                        TypeParameter tp = tps.get(i);
-                        String id2 = tp.getName().getIdentifier();
-                        mapTypes[i] = new DFMapType(id2);
-                        mapTypes[i].setTypeBounds(tp.typeBounds());
-                    }
-                    method.setMapTypes(mapTypes);
-                }
                 DFTypeFinder finder2 = method.getFinder();
 		List<SingleVariableDeclaration> varDecls = decl.parameters();
                 DFType[] argTypes = new DFType[varDecls.size()];
