@@ -681,7 +681,7 @@ public class Java2DF {
         }
     }
 
-    // Pass1: populate TypeSpaces.
+    // Stage1: populate TypeSpaces.
     @SuppressWarnings("unchecked")
     public void buildTypeSpace(String key, CompilationUnit cunit)
         throws InvalidSyntax {
@@ -694,13 +694,13 @@ public class Java2DF {
 	    DFKlass klass = packageSpace.buildTypeFromTree(
 		key, abstTypeDecl, null, fileScope);
 	    klass.setKlassTree(key, abstTypeDecl);
-	    Logger.debug("Pass1: Created:", klass);
+	    Logger.debug("Stage1: Created:", klass);
 	    klasses.add(klass);
 	}
         _fileKlasses.put(key, klasses);
     }
 
-    // Pass2: set references to external Klasses.
+    // Stage2: set references to external Klasses.
     @SuppressWarnings("unchecked")
     public void setTypeFinder(String key, CompilationUnit cunit) {
 	// Search path for types: ROOT -> java.lang -> package -> imports.
@@ -736,7 +736,7 @@ public class Java2DF {
 	}
     }
 
-    // Pass3: load class definitions and define parameterized Klasses.
+    // Stage3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(
         String key, CompilationUnit cunit, Set<DFKlass> klasses)
@@ -769,7 +769,7 @@ public class Java2DF {
         }
     }
 
-    // Pass4: list all methods.
+    // Stage4: list all methods.
     public void listMethods(Set<DFKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
@@ -842,7 +842,7 @@ public class Java2DF {
         }
     }
 
-    // Pass5: generate graphs for each method.
+    // Stage5: generate graphs for each method.
     @SuppressWarnings("unchecked")
     public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
@@ -852,7 +852,7 @@ public class Java2DF {
                 try {
                     DFMethod init = klass.getInitMethod();
                     if (init != null) {
-                        Logger.info("Pass5:", init.getSignature());
+                        Logger.info("Stage5:", init.getSignature());
                         DFGraph graph = init.processKlassBody(counter);
                         if (graph != null) {
                             this.exportGraph(graph);
@@ -864,7 +864,7 @@ public class Java2DF {
             }
             for (DFMethod method : klass.getMethods()) {
                 try {
-                    Logger.info("Pass5:", method.getSignature());
+                    Logger.info("Stage5:", method.getSignature());
                     DFGraph graph = method.processMethod(counter);
                     if (graph != null) {
                         this.exportGraph(graph);
@@ -966,30 +966,30 @@ public class Java2DF {
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
         for (String path : files) {
-            Logger.info("Pass1:", path);
+            Logger.info("Stage1:", path);
             try {
                 CompilationUnit cunit = Utils.parseFile(path);
                 srcs.put(path, cunit);
                 converter.buildTypeSpace(path, cunit);
             } catch (IOException e) {
-                Logger.error("Pass1: IOException at "+path);
+                Logger.error("Stage1: IOException at "+path);
                 throw e;
 	    } catch (InvalidSyntax e) {
                 throw e;
             }
         }
         for (String path : files) {
-            Logger.info("Pass2:", path);
+            Logger.info("Stage2:", path);
             CompilationUnit cunit = srcs.get(path);
             converter.setTypeFinder(path, cunit);
         }
         ConsistentHashSet<DFKlass> klasses = new ConsistentHashSet<DFKlass>();
         for (String path : files) {
-            Logger.info("Pass3:", path);
+            Logger.info("Stage3:", path);
             CompilationUnit cunit = srcs.get(path);
 	    converter.loadKlasses(path, cunit, klasses);
         }
-        Logger.info("Pass4.");
+        Logger.info("Stage4.");
 	try {
 	    converter.listMethods(klasses);
 	} catch (InvalidSyntax e) {
@@ -1009,7 +1009,7 @@ public class Java2DF {
             try {
                 converter.buildGraphs(counter, klass, strict);
             } catch (EntityNotFound e) {
-                Logger.error("Pass5: EntityNotFound at", klass,
+                Logger.error("Stage5: EntityNotFound at", klass,
                              "("+e.name+", method="+e.method+
                              ", ast="+e.ast+")");
                 throw e;
