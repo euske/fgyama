@@ -157,7 +157,7 @@ public class JNITypeParser {
         _pos++;
     }
 
-    public static DFMapType[] getMapTypes(String text) {
+    public static DFMapType[] getMapTypes(String text, DFTypeSpace outerSpace) {
 	int pos = 0;
         if (text.charAt(pos) != '<') return null;
         pos++;
@@ -169,7 +169,7 @@ public class JNITypeParser {
 	    if (text.charAt(pos) == ':') {
 		pos++;	 // ???
 	    }
-            DFMapType pt = new DFMapType(id);
+            DFMapType pt = new DFMapType(id, outerSpace);
             params.add(pt);
 	    i = skipType(text, pos);
             pt.setTypeBounds(text.substring(pos, i));

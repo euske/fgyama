@@ -12,13 +12,15 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType implements DFType {
 
     private String _name;
+    private DFTypeSpace _outerSpace;
     private DFKlass _boundKlass;
 
     private String _sig = null;
-    private List<Type> _ast = null;
+    private List<Type> _types = null;
 
-    public DFMapType(String name) {
+    public DFMapType(String name, DFTypeSpace outerSpace) {
         _name = name;
+	_outerSpace = outerSpace;
         _boundKlass = DFBuiltinTypes.getObjectKlass();
     }
 
@@ -26,8 +28,8 @@ public class DFMapType implements DFType {
     public String toString() {
         if (_sig != null) {
             return ("<DFMapType("+_name+":"+_sig+")>");
-        } else if (_ast != null) {
-            return ("<DFMapType("+_name+":"+_ast+")>");
+        } else if (_types != null) {
+            return ("<DFMapType("+_name+":"+_types+")>");
         } else {
             return ("<DFMapType("+_name+")>");
         }
@@ -50,6 +52,7 @@ public class DFMapType implements DFType {
 
     @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
+	if (this == type) return 0;
         assert !(type instanceof DFMapType);
         if (typeMap == null) {
             return _boundKlass.canConvertFrom(type, typeMap);
@@ -66,18 +69,18 @@ public class DFMapType implements DFType {
     }
 
     public void setTypeBounds(String sig) {
-        assert _sig == null && _ast == null;
+        assert _sig == null && _types == null;
         _sig = sig;
     }
 
-    public void setTypeBounds(List<Type> ast) {
-        assert _sig == null && _ast == null;
-        _ast = ast;
+    public void setTypeBounds(List<Type> types) {
+        assert _sig == null && _types == null;
+        _types = types;
     }
 
     public void build(DFTypeFinder finder)
         throws InvalidSyntax {
-        assert _sig == null || _ast == null;
+        assert _sig == null || _types == null;
 	if (_sig != null) {
 	    JNITypeParser parser = new JNITypeParser(_sig);
 	    try {
@@ -87,16 +90,16 @@ public class DFMapType implements DFType {
 		    "DFMapType.build: TypeNotFound",
 		    this, e.name, _sig, finder);
 	    }
-	} else if (_ast != null) {
+	} else if (_types != null) {
 	    try {
-		for (Type type : _ast) {
+		for (Type type : _types) {
 		    _boundKlass = finder.resolve(type).toKlass();
 		    break;
 		}
 	    } catch (TypeNotFound e) {
 		Logger.error(
 		    "DFMapType.build: TypeNotFound",
-		    this, e.name, _ast);
+		    this, e.name, _types);
 	    }
 	}
     }

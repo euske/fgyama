@@ -104,13 +104,13 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public static DFMapType[] getMapTypes(List<TypeParameter> tps) {
+    public DFMapType[] getMapTypes(List<TypeParameter> tps) {
         if (tps.size() == 0) return null;
         DFMapType[] mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            mapTypes[i] = new DFMapType(id);
+            mapTypes[i] = new DFMapType(id, this);
             mapTypes[i].setTypeBounds(tp.typeBounds());
         }
         return mapTypes;
