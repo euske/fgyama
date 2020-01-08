@@ -14,8 +14,8 @@ class DFLambdaKlass extends DFKlass {
     private class FunctionalMethod extends DFMethod {
 
         public FunctionalMethod(String id) {
-            super(DFLambdaKlass.this, id, CallStyle.Lambda, id,
-                  DFLambdaKlass.this._lambdaScope, false);
+            super(DFLambdaKlass.this, CallStyle.Lambda, false,
+		  id, id, DFLambdaKlass.this._lambdaScope);
         }
 
         @Override

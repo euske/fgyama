@@ -85,23 +85,31 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
     }
 
+    // These fields are available upon construction.
     private DFKlass _klass;
-    private String _name;
     private CallStyle _callStyle;
-    private MethodScope _scope;
     private boolean _abstract;
+    private String _methodId;
+    private String _methodName;
+    private DFVarScope _outerScope;
+    private MethodScope _methodScope;
+    private ConsistentHashMap<String, DFMethod> _paramMethods =
+        new ConsistentHashMap<String, DFMethod>();
 
+    // These fields are set immediately after construction.
+    private ASTNode _ast = null;
+    
+    // The following fields are available after the klass is loaded. (Stage3)
     private DFTypeFinder _finder = null;
-    private DFMapType[] _mapTypes = null;
-    private Map<String, DFType> _mapTypeMap = null;
     private DFFunctionType _funcType = null;
+
+    // These fields are available after setMapTypes(). (Stage3)
+    private ConsistentHashMap<String, DFMapType> _mapTypes = null;
 
     private ConsistentHashSet<DFRef> _inputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _outputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFMethod> _callers =
         new ConsistentHashSet<DFMethod>();
-
-    private ASTNode _ast = null;
 
     // List of subclass' methods overriding this method.
     private List<DFMethod> _overriders = new ArrayList<DFMethod>();
@@ -115,14 +123,16 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public DFMethod(
-        DFKlass klass, String id, CallStyle callStyle,
-        String name, DFVarScope outer, boolean isAbstract) {
-        super(id, klass);
+        DFKlass klass, CallStyle callStyle, boolean isAbstract,
+        String methodId, String methodName, DFVarScope outerScope) {
+        super(methodId, klass);
         _klass = klass;
-        _name = name;
         _callStyle = callStyle;
-        _scope = new MethodScope(outer, id);
         _abstract = isAbstract;
+	_methodId = methodId;
+        _methodName = methodName;
+	_outerScope = outerScope;
+        _methodScope = new MethodScope(outerScope, methodId);
     }
 
     @Override
@@ -133,24 +143,24 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     @Override
     public int compareTo(DFMethod method) {
         if (this == method) return 0;
-        return _name.compareTo(method._name);
+        return _methodName.compareTo(method._methodName);
     }
 
     public boolean equals(DFMethod method) {
-        if (!_name.equals(method._name)) return false;
+        if (!_methodName.equals(method._methodName)) return false;
         return _funcType.equals(method._funcType);
     }
 
     public String getName() {
-        return _name;
+        return _methodName;
     }
 
     public String getSignature() {
         String name;
         if (_klass != null) {
-            name = _klass.getTypeName()+"."+_name;
+            name = _klass.getTypeName()+"."+_methodName;
         } else {
-            name = "!"+_name;
+            name = "!"+_methodName;
         }
         if (_funcType != null) {
             name += _funcType.getTypeName();
@@ -162,8 +172,20 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _callStyle;
     }
 
+    public DFLocalScope getScope() {
+        return _methodScope;
+    }
+
     public boolean isAbstract() {
         return _abstract;
+    }
+
+    public void setTree(ASTNode ast) {
+	_ast = ast;
+    }
+
+    public ASTNode getTree() {
+	return _ast;
     }
 
     public void setFuncType(DFFunctionType funcType) {
@@ -176,9 +198,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     @Override
     public DFType getType(String id) {
-        if (_mapTypeMap != null) {
-            DFType type = _mapTypeMap.get(id);
-            if (type != null) return type;
+        if (_mapTypes != null) {
+            DFMapType mapType = _mapTypes.get(id);
+            if (mapType != null) return mapType.toKlass();
         }
         return super.getType(id);
     }
@@ -194,37 +216,29 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     public void setMapTypes(List<TypeParameter> tps)
         throws InvalidSyntax {
-	assert _finder != null;
         assert _mapTypes == null;
-        _mapTypes = DFTypeSpace.getMapTypes(tps);
-        if (_mapTypes == null) return;
-	_mapTypeMap = new HashMap<String, DFType>();
-	for (DFMapType mapType : _mapTypes) {
-	    // Set the Object type temporarily for circular definition.
-	    _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
-	    mapType.build(_finder);
-	    _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+	DFMapType[] mapTypes = DFTypeSpace.getMapTypes(tps);
+        if (mapTypes == null) return;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getTypeName(), mapType);
         }
     }
     
     public void setMapTypes(String sig)
         throws InvalidSyntax {
-	assert _finder != null;
         assert _mapTypes == null;
-	_mapTypes = JNITypeParser.getMapTypes(sig);
-	if (_mapTypes == null) return;
-        _mapTypeMap = new HashMap<String, DFType>();
-        for (DFMapType mapType : _mapTypes) {
-	    // Set the Object type temporarily for circular definition.
-            _mapTypeMap.put(mapType.getTypeName(), DFBuiltinTypes.getObjectKlass());
-	    mapType.build(_finder);
-            _mapTypeMap.put(mapType.getTypeName(), mapType.toKlass());
+	DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
+        if (mapTypes == null) return;
+        _mapTypes = new ConsistentHashMap<String, DFMapType>();
+        for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getTypeName(), mapType);
         }
     }
     
     public boolean addOverrider(DFMethod method) {
         if (method._callStyle != CallStyle.Lambda &&
-            !_name.equals(method._name)) return false;
+            !_methodName.equals(method._methodName)) return false;
         if (!_funcType.equals(method._funcType)) return false;
 	//Logger.info("DFMethod.addOverrider:", this, "<-", method);
         _overriders.add(method);
@@ -270,39 +284,33 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _finder;
     }
 
-    public void setTree(ASTNode ast) {
-	_ast = ast;
-    }
-
-    public ASTNode getTree() {
-	return _ast;
-    }
-
-    public DFLocalScope getScope() {
-        return _scope;
-    }
-
     @SuppressWarnings("unchecked")
     public void buildScope()
         throws InvalidSyntax {
 	if (_ast == null) return;
-	assert _scope != null;
+	assert _finder != null;
+	if (_mapTypes != null) {
+	    for (DFMapType mapType : _mapTypes.values()) {
+		mapType.build(_finder);
+	    }
+	}
+	assert _methodScope != null;
 	if (_ast instanceof MethodDeclaration) {
-	    _scope.buildMethodDecl(
+	    _methodScope.buildMethodDecl(
                 _finder, (MethodDeclaration)_ast);
 	} else if (_ast instanceof AbstractTypeDeclaration) {
-	    _scope.buildBodyDecls(
+	    _methodScope.buildBodyDecls(
                 _finder, ((AbstractTypeDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
-            _scope.buildBodyDecls(
+            _methodScope.buildBodyDecls(
 		_finder, cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } else if (_ast instanceof LambdaExpression) {
-            _scope.buildLambda(_finder, (LambdaExpression)_ast);
+            _methodScope.buildLambda(_finder, (LambdaExpression)_ast);
 	}  else {
 	    throw new InvalidSyntax(_ast);
 	}
-        //_scope.dump();
+        //_methodScope.dump();
     }
 
     public boolean isTransparent() {
@@ -323,22 +331,22 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     public void enumRefs(List<DFKlass> defined)
         throws InvalidSyntax {
 	if (_ast == null) return;
-	assert _scope != null;
+	assert _methodScope != null;
 	if (_ast instanceof MethodDeclaration) {
 	    this.enumRefsMethodDecl(
-                defined, _scope, (MethodDeclaration)_ast);
+                defined, _methodScope, (MethodDeclaration)_ast);
 	} else if (_ast instanceof AbstractTypeDeclaration) {
 	    this.enumRefsBodyDecls(
-                defined, _scope,
+                defined, _methodScope,
                 ((AbstractTypeDeclaration)_ast).bodyDeclarations());
         } else if (_ast instanceof ClassInstanceCreation) {
 	    ClassInstanceCreation cstr = (ClassInstanceCreation)_ast;
 	    this.enumRefsBodyDecls(
-		defined, _scope,
+		defined, _methodScope,
                 cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } else if (_ast instanceof LambdaExpression) {
             this.enumRefsLambda(
-                defined, _scope, (LambdaExpression)_ast);
+                defined, _methodScope, (LambdaExpression)_ast);
 	}  else {
 	    throw new InvalidSyntax(_ast);
 	}
@@ -583,7 +591,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // Because an exception can be catched, throw does not
             // necessarily mean this method actually throws as a whole.
             // This should be taken cared of by the "throws" clause.
-            //DFRef ref = _scope.lookupException(type.toKlass());
+            //DFRef ref = _methodScope.lookupException(type.toKlass());
             //_outputRefs.add(ref);
 
         } else if (stmt instanceof ConstructorInvocation) {
@@ -1331,26 +1339,26 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             throw new InvalidSyntax(_ast);
         }
 
-        assert _scope != null;
+        assert _methodScope != null;
         assert _finder != null;
-        MethodGraph graph = new MethodGraph("K"+counter.getNewId()+"_"+_name);
-        DFContext ctx = new DFContext(graph, _scope);
+        MethodGraph graph = new MethodGraph("K"+counter.getNewId()+"_"+_methodName);
+        DFContext ctx = new DFContext(graph, _methodScope);
 
         // Create input nodes.
         if (this.isTransparent()) {
             for (DFRef ref : this.getInputRefs()) {
-                DFNode input = new InputNode(graph, _scope, ref, null);
+                DFNode input = new InputNode(graph, _methodScope, ref, null);
                 ctx.set(input);
             }
         }
 
         graph.processBodyDecls(
-            ctx, _scope, _klass, decls);
+            ctx, _methodScope, _klass, decls);
 
         // Create output nodes.
         if (this.isTransparent()) {
             for (DFRef ref : this.getOutputRefs()) {
-                DFNode output = new OutputNode(graph, _scope, ref, null);
+                DFNode output = new OutputNode(graph, _methodScope, ref, null);
                 output.accept(ctx.get(ref));
             }
         }
@@ -1364,10 +1372,10 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         throws InvalidSyntax, EntityNotFound {
         if (_ast == null) return null;
 
-        assert _scope != null;
+        assert _methodScope != null;
         assert _finder != null;
-        MethodGraph graph = new MethodGraph("M"+counter.getNewId()+"_"+_name);
-        DFContext ctx = new DFContext(graph, _scope);
+        MethodGraph graph = new MethodGraph("M"+counter.getNewId()+"_"+_methodName);
+        DFContext ctx = new DFContext(graph, _methodScope);
 
         ASTNode body;
         // Create input nodes.
@@ -1385,21 +1393,21 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         }
         ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
         {
-            DFRef ref = _scope.lookupThis();
-            DFNode input = new InputNode(graph, _scope, ref, null);
+            DFRef ref = _methodScope.lookupThis();
+            DFNode input = new InputNode(graph, _methodScope, ref, null);
             ctx.set(input);
             preserved.add(input);
         }
         if (this.isTransparent()) {
             for (DFRef ref : this.getInputRefs()) {
-                DFNode input = new InputNode(graph, _scope, ref, null);
+                DFNode input = new InputNode(graph, _methodScope, ref, null);
                 ctx.set(input);
                 preserved.add(input);
             }
         }
 
         try {
-            graph.processMethodBody(ctx, _scope, body);
+            graph.processMethodBody(ctx, _methodScope, body);
         } catch (MethodNotFound e) {
             e.setMethod(this);
             Logger.error(
@@ -1416,23 +1424,23 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
         // Create output nodes.
         {
-            DFRef ref = _scope.lookupReturn();
+            DFRef ref = _methodScope.lookupReturn();
             if (ctx.getLast(ref) != null) {
-                DFNode output = new OutputNode(graph, _scope, ref, null);
+                DFNode output = new OutputNode(graph, _methodScope, ref, null);
                 output.accept(ctx.getLast(ref));
                 preserved.add(output);
             }
         }
-        for (DFRef ref : _scope.getExcRefs()) {
+        for (DFRef ref : _methodScope.getExcRefs()) {
             if (ctx.getLast(ref) != null) {
-                DFNode output = new OutputNode(graph, _scope, ref, null);
+                DFNode output = new OutputNode(graph, _methodScope, ref, null);
                 output.accept(ctx.getLast(ref));
                 preserved.add(output);
             }
         }
         if (this.isTransparent()) {
             for (DFRef ref : this.getOutputRefs()) {
-                DFNode output = new OutputNode(graph, _scope, ref, null);
+                DFNode output = new OutputNode(graph, _methodScope, ref, null);
                 output.accept(ctx.get(ref));
                 preserved.add(output);
             }
@@ -1450,11 +1458,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)methodDecl.parameters()) {
-            DFRef ref = _scope.lookupArgument(i);
-            DFNode input = new InputNode(graph, _scope, ref, decl);
+            DFRef ref = _methodScope.lookupArgument(i);
+            DFNode input = new InputNode(graph, _methodScope, ref, decl);
             ctx.set(input);
             DFNode assign = new AssignNode(
-                graph, _scope, _scope.lookupVar(decl.getName()), decl);
+                graph, _methodScope, _methodScope.lookupVar(decl.getName()), decl);
             assign.accept(input);
             ctx.set(assign);
             i++;
@@ -1468,11 +1476,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)lambda.parameters()) {
-            DFRef ref = _scope.lookupArgument(i);
-            DFNode input = new InputNode(graph, _scope, ref, decl);
+            DFRef ref = _methodScope.lookupArgument(i);
+            DFNode input = new InputNode(graph, _methodScope, ref, decl);
             ctx.set(input);
             DFNode assign = new AssignNode(
-                graph, _scope, _scope.lookupVar(decl.getName()), decl);
+                graph, _methodScope, _methodScope.lookupVar(decl.getName()), decl);
             assign.accept(input);
             ctx.set(assign);
             i++;

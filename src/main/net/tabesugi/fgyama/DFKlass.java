@@ -27,26 +27,22 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _outerKlass; // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
     private KlassScope _klassScope;
+    private ConsistentHashMap<String, DFKlass> _paramKlasses =
+        new ConsistentHashMap<String, DFKlass>();
 
-    // These fields are set immediately.
+    // These fields are set immediately after construction.
     private ASTNode _ast = null;
     private String _filePath = null;
     private String _jarPath = null;
     private String _entPath = null;
 
-    // These fields are available after setMapTypes().
+    // These fields are available after setMapTypes(). (Stage1)
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
-    private ConsistentHashMap<String, DFKlass> _paramKlasses =
-        new ConsistentHashMap<String, DFKlass>();
 
-    // These fields are available only for parameterized klasses.
-    private DFKlass _genericKlass = null;
-    private ConsistentHashMap<String, DFType> _paramTypes = null;
-
-    // This field is available after setFinder(). (Pass2)
+    // This field is available after setFinder(). (Stage2)
     private DFTypeFinder _finder = null;
 
-    // The following fields are available after the klass is loaded.
+    // The following fields are available after the klass is loaded. (Stage3)
     private LoadState _state = LoadState.Unloaded;
     private boolean _interface = false;
     private DFKlass _baseKlass = null;
@@ -58,6 +54,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
         new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
         new HashMap<String, DFMethod>();
+
+    // These fields are available only for parameterized klasses.
+    private DFKlass _genericKlass = null;
+    private ConsistentHashMap<String, DFType> _paramTypes = null;
 
     public DFKlass(
         String name, DFTypeSpace outerSpace,
@@ -161,12 +161,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-	if (_paramKlasses != null) {
-	    for (DFKlass pklass : _paramKlasses.values()) {
-                writer.writeStartElement("parameterized");
-		writer.writeAttribute("type", pklass.getTypeName());
-                writer.writeEndElement();
-	    }
+	for (DFKlass pklass : _paramKlasses.values()) {
+	    writer.writeStartElement("parameterized");
+	    writer.writeAttribute("type", pklass.getTypeName());
+	    writer.writeEndElement();
 	}
         for (FieldRef field : _fields) {
             field.writeXML(writer);
@@ -247,11 +245,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
         assert _mapTypes == null;
         assert _paramTypes == null;
 	DFMapType[] mapTypes = DFTypeSpace.getMapTypes(tps);
-        if (mapTypes != null) {
-            _mapTypes = new ConsistentHashMap<String, DFMapType>();
-            for (DFMapType mapType : mapTypes) {
-                _mapTypes.put(mapType.getTypeName(), mapType);
-            }
+	if (mapTypes == null) return;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getTypeName(), mapType);
         }
     }
 
@@ -259,11 +256,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
         assert _mapTypes == null;
         assert _paramTypes == null;
         DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig);
-        if (mapTypes != null) {
-            _mapTypes = new ConsistentHashMap<String, DFMapType>();
-            for (DFMapType mapType : mapTypes) {
-                _mapTypes.put(mapType.getTypeName(), mapType);
-            }
+	if (mapTypes == null) return;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getTypeName(), mapType);
         }
     }
 
@@ -319,11 +315,11 @@ public class DFKlass extends DFTypeSpace implements DFType {
         }
 
         _initMethod = new DFMethod(
-            this, "<clinit>", DFMethod.CallStyle.Initializer,
-            "<clinit>", _klassScope, false);
+            this, DFMethod.CallStyle.Initializer, false,
+            "<clinit>", "<clinit>", _klassScope);
+        _initMethod.setTree(ast);
         _initMethod.setFuncType(
             new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
-        _initMethod.setTree(ast);
 
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
@@ -359,7 +355,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
                 Statement stmt = methodDecl.getBody();
                 DFMethod method = new DFMethod(
-                    this, id, callStyle, name, _klassScope, (stmt == null));
+                    this, callStyle, (stmt == null),
+		    id, name, _klassScope);
+                method.setTree(body);
+		method.setMapTypes(methodDecl.typeParameters());
                 this.addMethod(method, id);
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, method, method.getScope());
@@ -944,8 +943,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
         DFMethod method = new DFMethod(
-            this, name, DFMethod.CallStyle.InstanceMethod, name,
-            _klassScope, false);
+            this, DFMethod.CallStyle.InstanceMethod, false,
+	    name, name, _klassScope);
         method.setFuncType(new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
         // Do not adds to _methods because it might be being referenced.
         _id2method.put(name, method);
@@ -1140,7 +1139,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 callStyle = DFMethod.CallStyle.InstanceMethod;
             }
             DFMethod method = new DFMethod(
-                this, sig, callStyle, name, null, meth.isAbstract());
+                this, callStyle, meth.isAbstract(),
+		sig, name, null);
             method.setFinder(finder);
             DFFunctionType funcType;
 	    if (sig != null) {
@@ -1310,8 +1310,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	}
 	// Enum has a special method "values()".
 	DFMethod method = new DFMethod(
-	    this, "values", DFMethod.CallStyle.InstanceMethod,
-            "values", null, false);
+	    this, DFMethod.CallStyle.InstanceMethod, false,
+            "values", "values", null);
 	method.setFinder(finder);
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, DFArrayType.getType(this, 1)));
@@ -1355,8 +1355,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 String id = Utils.encodeASTNode(decl);
                 DFMethod method = this.getMethod(id);
                 method.setFinder(finder);
-		method.setMapTypes(decl.typeParameters());
-                List<TypeParameter> tps = decl.typeParameters();
                 DFTypeFinder finder2 = method.getFinder();
 		List<SingleVariableDeclaration> varDecls = decl.parameters();
                 DFType[] argTypes = new DFType[varDecls.size()];
@@ -1385,7 +1383,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
                 funcType.setVarArgs(decl.isVarargs());
                 method.setFuncType(funcType);
-                method.setTree(decl);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
