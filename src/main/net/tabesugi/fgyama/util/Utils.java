@@ -25,12 +25,14 @@ public class Utils {
     }
     public static <T> String join(String delim, T[] a) {
         StringBuilder b = new StringBuilder();
+	b.append("[");
 	for (T v : a) {
-            if (0 < b.length()) {
+            if (1 < b.length()) {
                 b.append(delim);
             }
             b.append((v == null)? "null" : v.toString());
         }
+	b.append("]");
 	return b.toString();
     }
 
@@ -39,25 +41,14 @@ public class Utils {
     }
     public static <T> String join(String delim, List<T> a) {
         StringBuilder b = new StringBuilder();
+	b.append("[");
         for (T v : a) {
-            if (0 < b.length()) {
+            if (1 < b.length()) {
                 b.append(delim);
             }
             b.append((v == null)? "null" : v.toString());
         }
-	return b.toString();
-    }
-
-    public static <K,V> String join(Map<K,V> m) {
-        StringBuilder b = new StringBuilder();
-	b.append("{");
-        for (Map.Entry<K,V> e : m.entrySet()) {
-            if (0 < b.length()) {
-                b.append(", ");
-            }
-            b.append(e.getKey()+": "+e.getValue());
-        }
-	b.append("}");
+	b.append("]");
 	return b.toString();
     }
 

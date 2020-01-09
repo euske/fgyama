@@ -22,6 +22,11 @@ public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
     }
 
     @Override
+    public String toString() {
+	return _set.toString();
+    }
+
+    @Override
     public boolean add(E e) {
         if (!_set.contains(e)) {
             _list.add(e);
