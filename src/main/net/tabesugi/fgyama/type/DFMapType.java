@@ -48,6 +48,7 @@ public class DFMapType implements DFType {
 
     @Override
     public String getTypeName() {
+	//return _outerSpace.getSpaceName()+_name;
 	return _name;
     }
 

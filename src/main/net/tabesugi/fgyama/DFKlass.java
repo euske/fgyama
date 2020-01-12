@@ -83,13 +83,12 @@ public class DFKlass extends DFTypeSpace implements DFType {
         assert paramTypes != null;
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
-        _name = genericKlass._name;
+        _name = genericKlass._name + getParamName(paramTypes);
         _outerSpace = genericKlass._outerSpace;
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
         _baseKlass = genericKlass._baseKlass;
-        String subname = genericKlass._name + getParamName(paramTypes);
-        _klassScope = new KlassScope(_outerScope, subname);
+        _klassScope = new KlassScope(_outerScope, _name);
 
         _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFType>();
@@ -176,10 +175,9 @@ public class DFKlass extends DFTypeSpace implements DFType {
     public String getTypeName() {
         String name = "L"+_outerSpace.getSpaceName()+_name;
         if (_mapTypes != null) {
-            name = name + getParamName(getMappedTypes(_mapTypes.values()));
-        }
-        if (_paramTypes != null) {
-            name = name + getParamName(_paramTypes.values());
+            DFType[] types = new DFType[_mapTypes.size()];
+            _mapTypes.values().toArray(types);
+            name = name + getParamName(types);
         }
         return name+";";
     }
@@ -869,10 +867,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
             int dist = method1.canAccept(argTypes, typeMap);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
-                bestDist = dist;
-		try {
-		    bestMethod = method1.parameterize(typeMap);
-		} catch (InvalidSyntax e) {
+		DFMethod method = method1.parameterize(typeMap);
+		if (method != null) {
+		    bestDist = dist;
+		    bestMethod = method;
 		}
             }
         }
@@ -1411,13 +1409,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	}
 	return types;
     }
-    
+
     public static String getParamName(List<DFType> paramTypes) {
 	DFType[] a = new DFType[paramTypes.size()];
 	paramTypes.toArray(a);
 	return getParamName(a);
     }
-    
+
     public static String getParamName(DFType[] paramTypes) {
         StringBuilder b = new StringBuilder();
         for (DFType type : paramTypes) {

@@ -98,7 +98,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
     // These fields are set immediately after construction.
     private ASTNode _ast = null;
-    
+
     // The following fields are available after the klass is loaded. (Stage3)
     private DFTypeFinder _finder = null;
     private DFFunctionType _funcType = null;
@@ -166,8 +166,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
         _ast = genericMethod._ast;
         _finder = genericMethod._finder;
-    }	
-    
+    }
+
     @Override
     public String toString() {
         return ("<DFMethod("+this.getSignature()+")>");
@@ -243,7 +243,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    _mapTypes.put(mapType.getName(), mapType);
         }
     }
-    
+
     public void setMapTypes(String sig)
         throws InvalidSyntax {
         assert _mapTypes == null;
@@ -254,23 +254,24 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    _mapTypes.put(mapType.getName(), mapType);
         }
     }
-    
-    public DFMethod parameterize(Map<DFMapType, DFType> typeMap)
-	throws InvalidSyntax {
+
+    public DFMethod parameterize(Map<DFMapType, DFType> typeMap) {
         if (_mapTypes == null) return this;
 	List<DFMapType> mapTypes = _mapTypes.values();
 	DFType[] paramTypes = new DFType[mapTypes.size()];
-	Logger.info("!!! parameterize:", typeMap, mapTypes);
 	for (int i = 0; i < mapTypes.size(); i++) {
 	    DFMapType mapType = mapTypes.get(i);
-	    assert typeMap.containsKey(mapType);
+	    if (!typeMap.containsKey(mapType)) return null;
 	    paramTypes[i] = typeMap.get(mapType);
 	}
         String name = DFKlass.getParamName(paramTypes);
         DFMethod method = _paramMethods.get(name);
         if (method == null) {
-            method = new DFMethod(this, paramTypes);
-            _paramMethods.put(name, method);
+	    try {
+		method = new DFMethod(this, paramTypes);
+		_paramMethods.put(name, method);
+	    } catch (InvalidSyntax e) {
+	    }
         }
         return method;
     }
