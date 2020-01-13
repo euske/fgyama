@@ -57,7 +57,7 @@ public class DFBuiltinTypes {
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
             super("_Array", typeSpace, null, null, baseKlass);
-            this.loadManually(false, baseKlass, null);
+            this.buildTypeManually(false, baseKlass, null);
             this.addField("length", false, DFBasicType.INT);
         }
     }

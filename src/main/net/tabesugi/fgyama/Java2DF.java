@@ -104,6 +104,7 @@ public class Java2DF {
         ASTNode ast = klass.getTree();
         if (ast == null) return;
         if (klasses.contains(klass)) return;
+        if (klass.isGeneric()) return;
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
         DFTypeFinder finder = klass.getFinder();
@@ -695,7 +696,7 @@ public class Java2DF {
         List<DFKlass> klasses = new ArrayList<DFKlass>();
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    DFKlass klass = packageSpace.buildTypeFromTree(
+	    DFKlass klass = packageSpace.buildTypeFromAST(
 		key, abstTypeDecl, null, fileScope);
 	    klass.setKlassTree(key, abstTypeDecl);
 	    Logger.debug("Stage1: Created:", klass);

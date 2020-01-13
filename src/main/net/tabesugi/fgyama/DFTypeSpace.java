@@ -89,7 +89,7 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public DFKlass buildTypeFromTree(
+    public DFKlass buildTypeFromAST(
         String filePath, AbstractTypeDeclaration abstTypeDecl,
         DFKlass outerKlass, DFVarScope outerScope) {
         assert abstTypeDecl != null;

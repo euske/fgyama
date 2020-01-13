@@ -27,8 +27,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _outerKlass; // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
     private KlassScope _klassScope;
-    private ConsistentHashMap<String, DFKlass> _paramKlasses =
-        new ConsistentHashMap<String, DFKlass>();
 
     // These fields are set immediately after construction.
     private ASTNode _ast = null;
@@ -38,6 +36,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     // These fields are available after setMapTypes(). (Stage1)
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
+    private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
     // This field is available after setFinder(). (Stage2)
     private DFTypeFinder _finder = null;
@@ -48,12 +47,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
-    private List<FieldRef> _fields =
-        new ArrayList<FieldRef>();
-    private List<DFMethod> _methods =
-        new ArrayList<DFMethod>();
-    private Map<String, DFMethod> _id2method =
-        new HashMap<String, DFMethod>();
+
+    private List<FieldRef> _fields = null;
+    private List<DFMethod> _methods = null;
+    private Map<String, DFMethod> _id2method = null;
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -71,6 +68,94 @@ public class DFKlass extends DFTypeSpace implements DFType {
         // Set temporary baseKlass until this is fully loaded.
         _baseKlass = baseKlass;
         _klassScope = new KlassScope(_outerScope, _name);
+    }
+
+    @Override
+    public String toString() {
+        if (_mapTypes != null) {
+            String name = "L"+_outerSpace.getSpaceName()+_name;
+            return ("<DFKlass("+name+":"+Utils.join(_mapTypes.keys())+")>");
+        }
+        return ("<DFKlass("+this.getTypeName()+")>");
+    }
+
+    @Override
+    public boolean equals(DFType type) {
+        return (this == type);
+    }
+
+    // Set the klass AST from a source code.
+    public void setKlassTree(String filePath, ASTNode ast)
+	throws InvalidSyntax {
+        _filePath = filePath;
+        _ast = ast;
+    }
+
+    // Set the klass code from a JAR.
+    public void setJarPath(String jarPath, String entPath) {
+        _jarPath = jarPath;
+        _entPath = entPath;
+    }
+
+    public boolean isGeneric() {
+        return _mapTypes != null;
+    }
+
+    // Set the map types from a source code.
+    @SuppressWarnings("unchecked")
+    public void setMapTypes(List<TypeParameter> tps) {
+        assert _mapTypes == null;
+        assert _paramTypes == null;
+        assert _concreteKlasses == null;
+	DFMapType[] mapTypes = this.getMapTypes(tps);
+	if (mapTypes == null) return;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getName(), mapType);
+        }
+        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+    }
+
+    // Set the map types from a JAR.
+    public void setMapTypes(String sig) {
+        assert _mapTypes == null;
+        assert _paramTypes == null;
+        assert _concreteKlasses == null;
+        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
+	if (mapTypes == null) return;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getName(), mapType);
+        }
+        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+    }
+
+    // Creates a parameterized klass.
+    public DFKlass parameterize(DFType[] paramTypes)
+	throws InvalidSyntax {
+        //Logger.info("DFKlass.parameterize:", this, Utils.join(paramTypes));
+        assert _mapTypes != null;
+        assert _paramTypes == null;
+        assert paramTypes.length <= _mapTypes.size();
+        if (paramTypes.length < _mapTypes.size()) {
+	    List<DFMapType> mapTypes = _mapTypes.values();
+            DFType[] types = new DFType[mapTypes.size()];
+            for (int i = 0; i < mapTypes.size(); i++) {
+                if (i < paramTypes.length) {
+                    types[i] = paramTypes[i];
+                } else {
+                    types[i] = mapTypes.get(i).toKlass();
+                }
+            }
+            paramTypes = types;
+        }
+        String name = getParamName(paramTypes);
+        DFKlass klass = _concreteKlasses.get(name);
+        if (klass == null) {
+            klass = new DFKlass(this, paramTypes);
+            _concreteKlasses.put(name, klass);
+        }
+        return klass;
     }
 
     // Constructor for a parameterized klass.
@@ -109,6 +194,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _finder = genericKlass._finder;
         // Recreate the entire subspace.
 	if (_ast != null) {
+            this.initBuild();
 	    this.buildTypeFromDecls(_ast);
 	} else {
             // In case of a .jar class, refer to the same inner classes.
@@ -119,11 +205,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
         // not loaded yet!
         assert _state == LoadState.Unloaded;
-    }
-
-    @Override
-    public String toString() {
-        return ("<DFKlass("+this.getTypeName()+")>");
     }
 
     public void writeXML(XMLStreamWriter writer)
@@ -160,11 +241,13 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-	for (DFKlass pklass : _paramKlasses.values()) {
-	    writer.writeStartElement("parameterized");
-	    writer.writeAttribute("type", pklass.getTypeName());
-	    writer.writeEndElement();
-	}
+        if (_concreteKlasses != null) {
+            for (DFKlass pklass : _concreteKlasses.values()) {
+                writer.writeStartElement("parameterized");
+                writer.writeAttribute("type", pklass.getTypeName());
+                writer.writeEndElement();
+            }
+        }
         for (FieldRef field : _fields) {
             field.writeXML(writer);
         }
@@ -173,18 +256,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public String getTypeName() {
-        String name = "L"+_outerSpace.getSpaceName()+_name;
-        if (_mapTypes != null) {
-            DFType[] types = new DFType[_mapTypes.size()];
-            _mapTypes.values().toArray(types);
-            name = name + getParamName(types);
-        }
-        return name+";";
-    }
-
-    @Override
-    public boolean equals(DFType type) {
-        return (this == type);
+        return "L"+_outerSpace.getSpaceName()+_name+";";
     }
 
     @Override
@@ -237,65 +309,22 @@ public class DFKlass extends DFTypeSpace implements DFType {
         return -1;
     }
 
-    @SuppressWarnings("unchecked")
-    public void setMapTypes(List<TypeParameter> tps) {
-        // Get type parameters.
-        assert _mapTypes == null;
-        assert _paramTypes == null;
-	DFMapType[] mapTypes = this.getMapTypes(tps);
-	if (mapTypes == null) return;
-	_mapTypes = new ConsistentHashMap<String, DFMapType>();
-	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getName(), mapType);
-        }
+    protected void initBuild() {
+        _fields = new ArrayList<FieldRef>();
+        _methods = new ArrayList<DFMethod>();
+        _id2method = new HashMap<String, DFMethod>();
     }
 
-    public void setMapTypes(String sig) {
-        assert _mapTypes == null;
-        assert _paramTypes == null;
-        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
-	if (mapTypes == null) return;
-	_mapTypes = new ConsistentHashMap<String, DFMapType>();
-	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getName(), mapType);
-        }
-    }
-
-    public DFKlass parameterize(DFType[] paramTypes)
-	throws InvalidSyntax {
-        assert _mapTypes != null;
-        assert paramTypes.length <= _mapTypes.size();
-        if (paramTypes.length < _mapTypes.size()) {
-	    List<DFMapType> mapTypes = _mapTypes.values();
-            DFType[] types = new DFType[mapTypes.size()];
-            for (int i = 0; i < mapTypes.size(); i++) {
-                if (i < paramTypes.length) {
-                    types[i] = paramTypes[i];
-                } else {
-                    types[i] = mapTypes.get(i).toKlass();
-                }
-            }
-            paramTypes = types;
-        }
-        String name = getParamName(paramTypes);
-        DFKlass klass = _paramKlasses.get(name);
-        if (klass == null) {
-            klass = new DFKlass(this, paramTypes);
-            _paramKlasses.put(name, klass);
-        }
-        return klass;
-    }
-
-    public void setJarPath(String jarPath, String entPath) {
-        _jarPath = jarPath;
-        _entPath = entPath;
-    }
-
-    public void setKlassTree(String filePath, ASTNode ast)
-	throws InvalidSyntax {
-        _filePath = filePath;
-        _ast = ast;
-	this.buildTypeFromDecls(ast);
+    protected void buildTypeManually(
+        boolean isInterface, DFKlass baseKlass, DFKlass[] baseIfaces) {
+	// Because this instance is created in such an intermediate state,
+	// not everything might be defined yet.
+        assert _state == LoadState.Unloaded;
+        _interface = isInterface;
+	_baseKlass = baseKlass;
+        _baseIfaces = baseIfaces;
+        this.initBuild();
+        _state = LoadState.Loaded;
     }
 
     @SuppressWarnings("unchecked")
@@ -312,6 +341,10 @@ public class DFKlass extends DFTypeSpace implements DFType {
             throw new InvalidSyntax(ast);
         }
 
+        assert _fields != null;
+        assert _methods != null;
+        assert _id2method != null;
+
         _initMethod = new DFMethod(
             this, DFMethod.CallStyle.Initializer, false,
             "<clinit>", "<clinit>", _klassScope);
@@ -323,7 +356,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	    if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                 String path = this.getFilePath();
-		DFKlass klass = this.buildTypeFromTree(
+		DFKlass klass = this.buildTypeFromAST(
                     path, abstTypeDecl, this, _klassScope);
                 klass.setKlassTree(path, abstTypeDecl);
 
@@ -540,7 +573,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
             AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
             String path = this.getFilePath();
-            DFKlass klass = space.buildTypeFromTree(path, abstTypeDecl, this, outerScope);
+            DFKlass klass = space.buildTypeFromAST(path, abstTypeDecl, this, outerScope);
             klass.setKlassTree(path, abstTypeDecl);
 
         } else {
@@ -843,12 +876,12 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public List<FieldRef> getFields() {
-        assert _state == LoadState.Loaded;
+        assert _fields != null;
 	return _fields;
     }
 
     public List<DFMethod> getMethods() {
-        assert _state == LoadState.Loaded;
+        assert _methods != null;
 	return _methods;
     }
 
@@ -926,16 +959,20 @@ public class DFKlass extends DFTypeSpace implements DFType {
         assert _klassScope != null;
         FieldRef ref = _klassScope.addField(id, isStatic, type);
         //Logger.info("DFKlass.addField:", ref);
+        assert _fields != null;
 	_fields.add(ref);
         return ref;
     }
 
     public DFMethod getMethod(String key) {
+        assert _id2method != null;
         return _id2method.get(key);
     }
 
     protected DFMethod addMethod(DFMethod method, String key) {
         //Logger.info("DFKlass.addMethod:", method);
+        assert _methods != null;
+        assert _id2method != null;
         _methods.add(method);
         if (key != null) {
             _id2method.put(key, method);
@@ -944,6 +981,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
+        assert _id2method != null;
         DFMethod method = new DFMethod(
             this, DFMethod.CallStyle.InstanceMethod, false,
 	    name, name, _klassScope);
@@ -986,6 +1024,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 
     public void load()
         throws InvalidSyntax {
+        // an unspecified parameterized klass cannot be loaded.
         if (_state != LoadState.Unloaded) return;
         _state = LoadState.Loading;
         if (_outerKlass != null) {
@@ -995,21 +1034,23 @@ public class DFKlass extends DFTypeSpace implements DFType {
         assert finder != null;
         assert _ast != null || _jarPath != null;
         if (_mapTypes != null) {
+            // a generic class is only referred to, but not built.
             for (DFMapType mapType : _mapTypes.values()) {
 		mapType.build(finder);
             }
-        }
-        // a generic class is only referred to, but not built.
-        if (_ast != null) {
-	    this.buildMembersFromTree(finder, _ast);
+        } else if (_ast != null) {
+            this.initBuild();
+            this.buildTypeFromDecls(_ast);
+            this.loadMembersFromAST(finder, _ast);
         } else if (_jarPath != null) {
+            this.initBuild();
             try {
                 JarFile jarfile = new JarFile(_jarPath);
                 try {
                     JarEntry je = jarfile.getJarEntry(_entPath);
                     InputStream strm = jarfile.getInputStream(je);
                     JavaClass jklass = new ClassParser(strm, _entPath).parse();
-                    this.buildMembersFromJKlass(finder, jklass);
+                    this.loadMembersFromJKlass(finder, jklass);
                 } finally {
                     jarfile.close();
                 }
@@ -1022,21 +1063,11 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _state = LoadState.Loaded;
     }
 
-    protected void loadManually(
-        boolean isInterface, DFKlass baseKlass, DFKlass[] baseIfaces) {
-	// Because this instance is created in such an intermediate state,
-	// not everything might be defined yet.
-        assert _state == LoadState.Unloaded;
-        _interface = isInterface;
-	_baseKlass = baseKlass;
-        _baseIfaces = baseIfaces;
-        _state = LoadState.Loaded;
-    }
-
-    private void buildMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
+    private void loadMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.buildMembersFromJKlass:", this, finder);
+        //Logger.info("DFKlass.loadMembersFromJKlass:", this, finder);
         _interface = jklass.isInterface();
+
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
 	if (this == DFBuiltinTypes.getObjectKlass()) {
@@ -1048,7 +1079,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
+                    "DFKlass.loadMembersFromJKlass: TypeNotFound (baseKlass)",
                     this, e.name, sig);
 	    }
 	    _baseKlass.load();
@@ -1059,7 +1090,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    iface = parser.resolveType(finder);
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
+                        "DFKlass.loadMembersFromJKlass: TypeNotFound (iface)",
                         this, e.name, sig);
 		}
 		if (iface == null) break;
@@ -1077,7 +1108,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    _baseKlass = finder.lookupType(superClass).toKlass();
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
+                        "DFKlass.loadMembersFromJKlass: TypeNotFound (baseKlass)",
                         this, e.name);
 		}
 	    }
@@ -1091,7 +1122,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 			iface = finder.lookupType(ifaces[i]).toKlass();
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
+                            "DFKlass.loadMembersFromJKlass: TypeNotFound (iface)",
                             this, e.name);
 		    }
 		    _baseIfaces[i] = iface;
@@ -1121,7 +1152,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		}
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromJKlass: TypeNotFound (field)",
+                    "DFKlass.loadMembersFromJKlass: TypeNotFound (field)",
                     this, e.name, sig);
 		type = DFUnknownType.UNKNOWN;
 	    }
@@ -1153,7 +1184,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (method)",
+                        "DFKlass.loadMembersFromJKlass: TypeNotFound (method)",
                         this, e.name, sig);
 		    continue;
 		}
@@ -1179,7 +1210,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 			type = finder.lookupType(excNames[i]);
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.buildMembersFromJKlass: TypeNotFound (exception)",
+                            "DFKlass.loadMembersFromJKlass: TypeNotFound (exception)",
                             this, e.name);
 			type = DFUnknownType.UNKNOWN;
 		    }
@@ -1193,36 +1224,36 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildMembersFromTree(DFTypeFinder finder, ASTNode ast)
+    protected void loadMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.buildMembersFromTree:", this, finder);
+        //Logger.info("DFKlass.loadMembersFromAST:", this, finder);
         if (ast instanceof AbstractTypeDeclaration) {
-            this.buildMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
+            this.loadMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
         } else if (ast instanceof ClassInstanceCreation) {
-            this.buildMembersFromAnonDecl(finder, (ClassInstanceCreation)ast);
+            this.loadMembersFromAnonDecl(finder, (ClassInstanceCreation)ast);
 
         } else {
             throw new InvalidSyntax(ast);
         }
     }
 
-    private void buildMembersFromAbstTypeDecl(
+    private void loadMembersFromAbstTypeDecl(
         DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
         throws InvalidSyntax {
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.buildMembersFromTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
+            this.loadMembersFromTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.buildMembersFromEnumDecl(finder, (EnumDeclaration)abstTypeDecl);
+            this.loadMembersFromEnumDecl(finder, (EnumDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.buildMembersFromAnnotTypeDecl(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+            this.loadMembersFromAnnotTypeDecl(finder, (AnnotationTypeDeclaration)abstTypeDecl);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void buildMembersFromTypeDecl(
+    private void loadMembersFromTypeDecl(
         DFTypeFinder finder, TypeDeclaration typeDecl)
         throws InvalidSyntax {
         _interface = typeDecl.isInterface();
@@ -1234,7 +1265,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		_baseKlass = finder.resolve(superClass).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
+                    "DFKlass.loadMembersFromTypeDecl: TypeNotFound (baseKlass)",
                     this, e.name);
 	    }
 	}
@@ -1248,7 +1279,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (iface)",
+                    "DFKlass.loadMembersFromTypeDecl: TypeNotFound (iface)",
                     this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
@@ -1256,11 +1287,11 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	for (DFKlass iface : _baseIfaces) {
 	    iface.load();
 	}
-	this.buildMembers(finder, typeDecl.bodyDeclarations());
+	this.loadMembers(finder, typeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void buildMembersFromAnonDecl(
+    private void loadMembersFromAnonDecl(
         DFTypeFinder finder, ClassInstanceCreation cstr)
         throws InvalidSyntax {
 	// Get superclass.
@@ -1270,17 +1301,17 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		_baseKlass = finder.resolve(superClass).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
+                    "DFKlass.loadMembersFromAnonDecl: TypeNotFound (baseKlass)",
                     this, e.name);
 	    }
 	}
 	_baseKlass.load();
-	this.buildMembers(
+	this.loadMembers(
 	    finder, cstr.getAnonymousClassDeclaration().bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void buildMembersFromEnumDecl(
+    private void loadMembersFromEnumDecl(
         DFTypeFinder finder, EnumDeclaration enumDecl)
         throws InvalidSyntax {
         // Load base klasses/interfaces.
@@ -1297,7 +1328,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.buildMembersFromEnumDecl: TypeNotFound (iface)",
+                    "DFKlass.loadMembersFromEnumDecl: TypeNotFound (iface)",
                     this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
@@ -1318,18 +1349,18 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, DFArrayType.getType(this, 1)));
 	this.addMethod(method, null);
-	this.buildMembers(finder, enumDecl.bodyDeclarations());
+	this.loadMembers(finder, enumDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void buildMembersFromAnnotTypeDecl(
+    private void loadMembersFromAnnotTypeDecl(
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws InvalidSyntax {
-	this.buildMembers(finder, annotTypeDecl.bodyDeclarations());
+	this.loadMembers(finder, annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
+    private void loadMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         if (_initMethod != null) {
             _initMethod.setFinder(finder);

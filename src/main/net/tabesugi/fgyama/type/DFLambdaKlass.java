@@ -90,7 +90,6 @@ class DFLambdaKlass extends DFKlass {
               DFBuiltinTypes.getObjectKlass());
         _lambdaScope = new LambdaScope(outerScope, name);
         _funcMethod = new FunctionalMethod(FUNC_NAME);
-        this.addMethod(_funcMethod, FUNC_NAME);
     }
 
     @Override
@@ -140,9 +139,10 @@ class DFLambdaKlass extends DFKlass {
     }
 
     @Override
-    protected void buildMembersFromTree(DFTypeFinder finder, ASTNode ast)
+    protected void loadMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
         // _baseKlass is left undefined.
+        this.addMethod(_funcMethod, FUNC_NAME);
         _funcMethod.setFinder(finder);
         _funcMethod.setTree(ast);
     }
