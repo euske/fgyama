@@ -868,6 +868,7 @@ public class Java2DF {
                 }
             }
             for (DFMethod method : klass.getMethods()) {
+                if (method.isGeneric()) continue;
                 try {
                     Logger.info("Stage5:", method.getSignature());
                     DFGraph graph = method.processMethod(counter);

@@ -67,7 +67,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	_outerScope = outerScope;
         // Set temporary baseKlass until this is fully loaded.
         _baseKlass = baseKlass;
-        _klassScope = new KlassScope(_outerScope, _name);
     }
 
     @Override
@@ -173,7 +172,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
         _outerKlass = genericKlass._outerKlass;
         _outerScope = genericKlass._outerScope;
         _baseKlass = genericKlass._baseKlass;
-        _klassScope = new KlassScope(_outerScope, _name);
 
         _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFType>();
@@ -310,6 +308,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
     }
 
     protected void initBuild() {
+        _klassScope = new KlassScope(_outerScope, _name);
         _fields = new ArrayList<FieldRef>();
         _methods = new ArrayList<DFMethod>();
         _id2method = new HashMap<String, DFMethod>();
@@ -349,8 +348,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
             this, DFMethod.CallStyle.Initializer, false,
             "<clinit>", "<clinit>", _klassScope);
         _initMethod.setTree(ast);
-        _initMethod.setFuncType(
-            new DFFunctionType(new DFType[] {}, DFBasicType.VOID));
+        _initMethod.buildFuncType(this);
 
         for (BodyDeclaration body : decls) {
 	    if (body instanceof AbstractTypeDeclaration) {
@@ -388,8 +386,8 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 DFMethod method = new DFMethod(
                     this, callStyle, (stmt == null),
 		    id, name, _klassScope);
-                method.setTree(body);
 		method.setMapTypes(methodDecl.typeParameters());
+                method.setTree(methodDecl);
                 this.addMethod(method, id);
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, method, method.getScope());
@@ -1345,7 +1343,6 @@ public class DFKlass extends DFTypeSpace implements DFType {
 	DFMethod method = new DFMethod(
 	    this, DFMethod.CallStyle.InstanceMethod, false,
             "values", "values", null);
-	method.setFinder(finder);
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, DFArrayType.getType(this, 1)));
 	this.addMethod(method, null);
@@ -1388,34 +1385,7 @@ public class DFKlass extends DFTypeSpace implements DFType {
                 String id = Utils.encodeASTNode(decl);
                 DFMethod method = this.getMethod(id);
                 method.setFinder(finder);
-                DFTypeFinder finder2 = method.getFinder();
-		List<SingleVariableDeclaration> varDecls = decl.parameters();
-                DFType[] argTypes = new DFType[varDecls.size()];
-		for (int i = 0; i < varDecls.size(); i++) {
-		    SingleVariableDeclaration varDecl = varDecls.get(i);
-		    DFType argType = finder2.resolveSafe(varDecl.getType());
-		    if (varDecl.isVarargs()) {
-			argType = DFArrayType.getType(argType, 1);
-		    }
-		    argTypes[i] = argType;
-		}
-                DFType returnType;
-                if (decl.isConstructor()) {
-                    returnType = this;
-                } else {
-		    returnType = finder2.resolveSafe(decl.getReturnType2());
-                }
-                DFFunctionType funcType = new DFFunctionType(argTypes, returnType);
-                List<Type> excs = decl.thrownExceptionTypes();
-                if (0 < excs.size()) {
-                    DFKlass[] exceptions = new DFKlass[excs.size()];
-                    for (int i = 0; i < excs.size(); i++) {
-			exceptions[i] = finder.resolveSafe(excs.get(i)).toKlass();
-                    }
-                    funcType.setExceptions(exceptions);
-                }
-                funcType.setVarArgs(decl.isVarargs());
-                method.setFuncType(funcType);
+                method.buildFuncType(this);
 
             } else if (body instanceof EnumConstantDeclaration) {
 

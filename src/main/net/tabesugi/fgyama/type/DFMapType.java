@@ -55,7 +55,7 @@ public class DFMapType implements DFType {
     public String getName() {
 	return _name;
     }
-    
+
     @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
 	if (this == type) return 0;
