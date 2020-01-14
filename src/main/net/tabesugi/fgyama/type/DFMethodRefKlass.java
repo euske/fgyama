@@ -15,9 +15,9 @@ class DFMethodRefKlass extends DFLambdaKlass {
     private DFMethod _refMethod = null;
 
     public DFMethodRefKlass(
-        String name, DFTypeSpace outerSpace,
-        DFKlass outerKlass, DFVarScope outerScope) {
-	super(name, outerSpace, outerKlass, outerScope);
+        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
+        DFSourceKlass outerKlass) {
+	super(name, outerSpace, outerScope, outerKlass);
     }
 
     @Override
@@ -62,29 +62,31 @@ class DFMethodRefKlass extends DFLambdaKlass {
         assert funcType != null;
         ASTNode ast = this.getTree();
         assert ast instanceof MethodReference;
-        try {
-            DFType[] argTypes = funcType.getRealArgTypes();
-            if (ast instanceof CreationReference) {
-                _refMethod = _refKlass.lookupMethod(
-                    DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            } else if (ast instanceof SuperMethodReference) {
-                SimpleName name = ((SuperMethodReference)ast).getName();
-                _refMethod = _refKlass.lookupMethod(
-                    DFMethod.CallStyle.StaticMethod, name, argTypes);
-            } else if (ast instanceof TypeMethodReference) {
-                SimpleName name = ((TypeMethodReference)ast).getName();
-                _refMethod = _refKlass.lookupMethod(
-                    DFMethod.CallStyle.StaticMethod, name, argTypes);
-            } else if (ast instanceof ExpressionMethodReference) {
-                SimpleName name = ((ExpressionMethodReference)ast).getName();
-                _refMethod = _refKlass.lookupMethod(
-                    DFMethod.CallStyle.InstanceOrStatic, name, argTypes);
-            }
-            //Logger.info("DFMethodRefKlass.fixateMethod:", _refMethod);
-        } catch (MethodNotFound e) {
+	DFType[] argTypes = funcType.getRealArgTypes();
+	DFMethod method = null;
+	if (ast instanceof CreationReference) {
+	    method = _refKlass.findMethod(
+		DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	} else if (ast instanceof SuperMethodReference) {
+	    SimpleName name = ((SuperMethodReference)ast).getName();
+	    method = _refKlass.findMethod(
+		DFMethod.CallStyle.StaticMethod, name, argTypes);
+	} else if (ast instanceof TypeMethodReference) {
+	    SimpleName name = ((TypeMethodReference)ast).getName();
+	    method = _refKlass.findMethod(
+		DFMethod.CallStyle.StaticMethod, name, argTypes);
+	} else if (ast instanceof ExpressionMethodReference) {
+	    SimpleName name = ((ExpressionMethodReference)ast).getName();
+	    method = _refKlass.findMethod(
+		DFMethod.CallStyle.InstanceOrStatic, name, argTypes);
+	}
+	//Logger.info("DFMethodRefKlass.fixateMethod:", method);
+	if (method != null) {
+	    _refMethod = method;
+	} else {
             Logger.error(
                 "DFMethodRefKlass.fixateMethod: MethodNotFound",
-                this, _refKlass, e.name);
+                this, _refKlass, ast);
         }
     }
 

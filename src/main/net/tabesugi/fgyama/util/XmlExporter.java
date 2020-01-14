@@ -42,9 +42,10 @@ public class XmlExporter extends Exporter {
         assert _klass == null;
         _klass = klass;
         try {
+	    _writer.writeStartElement("class");
             klass.writeXML(_writer);
         } catch (XMLStreamException e) {
-            throw new RuntimeException();
+            throw new RuntimeException(e);
         }
     }
 

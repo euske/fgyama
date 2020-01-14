@@ -76,12 +76,6 @@ public abstract class DFVarScope {
         return this.lookupVar(name.getIdentifier());
     }
 
-    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
-        throws MethodNotFound {
-	if (_outer == null) throw new MethodNotFound(name.getIdentifier(), argTypes);
-	return _outer.lookupStaticMethod(name, argTypes);
-    }
-
     public DFRef lookupThis() {
         assert _outer != null;
         return _outer.lookupThis();
@@ -100,6 +94,11 @@ public abstract class DFVarScope {
     public DFRef lookupException(DFType type) {
         assert _outer != null;
         return _outer.lookupException(type);
+    }
+
+    public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
+	if (_outer == null) return null;
+	return _outer.findStaticMethod(name, argTypes);
     }
 
     // dump: for debugging.

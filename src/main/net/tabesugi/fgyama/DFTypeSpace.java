@@ -60,12 +60,6 @@ public class DFTypeSpace {
         return space;
     }
 
-    public DFKlass getKlass(String id) {
-        assert id.indexOf('.') < 0;
-        //assert !_id2klass.containsKey(id);
-        return _id2klass.get(id);
-    }
-
     public DFKlass addKlass(String id, DFKlass klass) {
         assert id.indexOf('.') < 0;
         //assert !_id2klass.containsKey(id);
@@ -74,29 +68,28 @@ public class DFTypeSpace {
         return klass;
     }
 
-    public DFType getType(Name name) {
-        return this.getType(name.getFullyQualifiedName());
+    public DFKlass getKlass(Name name) {
+        return this.getKlass(name.getFullyQualifiedName());
     }
 
-    public DFType getType(String id) {
-        //Logger.info("DFTypeSpace.getType:", this, ":", id);
+    public DFKlass getKlass(String id) {
+        //Logger.info("DFTypeSpace.getKlass:", this, ":", id);
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-            return space.getType(id.substring(i+1));
+            return space.getKlass(id.substring(i+1));
         }
         return _id2klass.get(id);
     }
 
     @SuppressWarnings("unchecked")
-    public DFKlass buildTypeFromAST(
+    public DFSourceKlass buildTypeFromAST(
         String filePath, AbstractTypeDeclaration abstTypeDecl,
-        DFKlass outerKlass, DFVarScope outerScope) {
+        DFVarScope outerScope, DFSourceKlass outerKlass) {
         assert abstTypeDecl != null;
         //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
         String id = abstTypeDecl.getName().getIdentifier();
-        DFKlass klass = new DFKlass(
-            id, this, outerKlass, outerScope, DFBuiltinTypes.getObjectKlass());
+        DFSourceKlass klass = new DFSourceKlass(id, this, outerScope, outerKlass);
         this.addKlass(id, klass);
         if (abstTypeDecl instanceof TypeDeclaration) {
             klass.setMapTypes(

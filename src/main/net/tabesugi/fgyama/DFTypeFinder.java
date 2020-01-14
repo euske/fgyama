@@ -9,6 +9,29 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFTypeFinder
 //
+//  // space(root) = {A, B, C}
+//  class A {                            // space(A) = {P}
+//      A a; B b; C c; P p;              // path(root,A) = {A,B,C,P}
+//      class P {                        // space(P) = {X}
+//          A a; B b; C c; P p; X x;     // path(root,A,P) = {A,B,C,P,X}
+//          class X {                    // space(X) = {}
+//              A a; B b; C c; P p; X x; // path(root,A,P,X) = {A,B,P,X}
+//          }
+//      }
+//  }
+//  class B extends A {               // space(B) = {Q,R} + space(A)
+//      A a; B b; C c; P p; Q q; R r; // path(root,B) = {A,B,C,P,Q,R}
+//      class Q extends P {           // space(Q) = {} + space(P)
+//          A a; B b; C c; P p; Q q; R r; X x; // path(root,B,Q) = {A,B,C,P,Q,R,X}
+//      }
+//      class R<T> extends P implements C<T> { // space(R) = {T} + space(P) + space(C)
+//          A a; B b; C c; P p; Q q; R r; S s; T t; X x; // path(root,B,R) = {A,B,C,P,Q,R,S,T,X}
+//      }
+//  }
+//  interface C<T> {                   // space(C) = {S,T}
+//      interface S { }                // space(S) = {}
+//  }
+//
 public class DFTypeFinder {
 
     private DFTypeSpace _space;
@@ -48,7 +71,7 @@ public class DFTypeFinder {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
         while (finder != null) {
-            DFType type = finder._space.getType(name);
+            DFType type = finder._space.getKlass(name);
             if (type != null) return type;
             finder = finder._next;
         }
@@ -87,7 +110,7 @@ public class DFTypeFinder {
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
-            DFType innerType = klass.getType(qtype.getName());
+            DFType innerType = klass.getKlass(qtype.getName());
             if (innerType == null) {
                 throw new TypeNotFound(qtype.toString(), this);
             }

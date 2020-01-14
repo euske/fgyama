@@ -70,7 +70,7 @@ public class DFFunctionType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
         if (!(type instanceof DFFunctionType)) return -1;
         DFFunctionType mtype = (DFFunctionType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
@@ -83,7 +83,7 @@ public class DFFunctionType implements DFType {
         return dist;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFType> typeMap) {
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap) {
         // Always accept if the signature is unknown.
         if (_argTypes == null || argTypes == null) return 0;
         if (_varargs) {

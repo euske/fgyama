@@ -41,7 +41,7 @@ class DFFileScope extends DFVarScope {
 	DFMethod bestMethod = null;
 	for (DFMethod method1 : _methods) {
             if (!id.equals(method1.getName())) continue;
-	    Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
+	    Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
 	    int dist = method1.canAccept(argTypes, typeMap);
 	    if (dist < 0) continue;
 	    if (bestDist < 0 || dist < bestDist) {
@@ -69,15 +69,14 @@ class DFFileScope extends DFVarScope {
     public void importStatic(DFKlass klass, SimpleName name) {
 	Logger.debug("ImportStatic:", klass+"."+name);
 	String id = name.getIdentifier();
-	try {
-            DFRef ref = klass.lookupField(id);
+	DFRef ref = klass.getField(id);
+	if (ref != null) {
 	    _refs.put(id, ref);
-	} catch (VariableNotFound e) {
-            try {
-                DFMethod method = klass.lookupMethod(
-                    DFMethod.CallStyle.StaticMethod, name, null);
+	} else {
+	    DFMethod method = klass.findMethod(
+		DFMethod.CallStyle.StaticMethod, name, null);
+	    if (method != null) {
                 _methods.add(method);
-            } catch (MethodNotFound ee) {
             }
 	}
     }
@@ -95,10 +94,10 @@ public class Java2DF {
         new DFGlobalScope();
     private Map<String, DFFileScope> _fileScope =
         new HashMap<String, DFFileScope>();
-    private Map<String, List<DFKlass>> _fileKlasses =
-        new HashMap<String, List<DFKlass>>();
+    private Map<String, List<DFSourceKlass>> _fileKlasses =
+        new HashMap<String, List<DFSourceKlass>>();
 
-    private void enumKlasses(DFKlass klass, Set<DFKlass> klasses)
+    private void enumKlasses(DFSourceKlass klass, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         klass.load();
         ASTNode ast = klass.getTree();
@@ -108,14 +107,14 @@ public class Java2DF {
         //Logger.info("enumKlasses:", klass);
         klasses.add(klass);
         DFTypeFinder finder = klass.getFinder();
-        List<DFKlass> toLoad = new ArrayList<DFKlass>();
+        List<DFSourceKlass> toLoad = new ArrayList<DFSourceKlass>();
 	this.enumKlassesDecl(finder, klass, ast, klasses);
     }
 
     @SuppressWarnings("unchecked")
     private void enumKlassesDecl(
-        DFTypeFinder finder, DFKlass klass,
-        ASTNode ast, Set<DFKlass> klasses)
+        DFTypeFinder finder, DFSourceKlass klass,
+        ASTNode ast, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         if (ast instanceof AbstractTypeDeclaration) {
             AbstractTypeDeclaration abstDecl = (AbstractTypeDeclaration)ast;
@@ -145,16 +144,16 @@ public class Java2DF {
         } else if (ast instanceof CreationReference) {
             DFType type = finder.resolveSafe(
                 ((CreationReference)ast).getType());
-            if (type instanceof DFKlass) {
-                enumKlasses(type.toKlass(), klasses);
+            if (type instanceof DFSourceKlass) {
+                enumKlasses((DFSourceKlass)type, klasses);
             }
 
         } else if (ast instanceof SuperMethodReference) {
             try {
                 DFType type = finder.lookupType(
                     ((SuperMethodReference)ast).getQualifier());
-                if (type instanceof DFKlass) {
-                    enumKlasses(type.toKlass(), klasses);
+                if (type instanceof DFSourceKlass) {
+                    enumKlasses((DFSourceKlass)type, klasses);
                 }
             } catch (TypeNotFound e) {
             }
@@ -162,8 +161,8 @@ public class Java2DF {
         } else if (ast instanceof TypeMethodReference) {
             DFType type = finder.resolveSafe(
                 ((TypeMethodReference)ast).getType());
-            if (type instanceof DFKlass) {
-                enumKlasses(type.toKlass(), klasses);
+            if (type instanceof DFSourceKlass) {
+                enumKlasses((DFSourceKlass)type, klasses);
             }
 
         } else if (ast instanceof ExpressionMethodReference) {
@@ -180,8 +179,8 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void enumKlassesDecls(
-        DFTypeFinder finder, DFKlass klass,
-        List<BodyDeclaration> decls, Set<DFKlass> klasses)
+        DFTypeFinder finder, DFSourceKlass klass,
+        List<BodyDeclaration> decls, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
 
         DFMethod initMethod = klass.getInitMethod();
@@ -189,16 +188,16 @@ public class Java2DF {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
-                DFType innerType = klass.getType(decl.getName());
-                if (innerType != null) {
-		    enumKlasses(innerType.toKlass(), klasses);
+                DFKlass innerType = klass.getKlass(decl.getName());
+                if (innerType instanceof DFSourceKlass) {
+		    enumKlasses((DFSourceKlass)innerType, klasses);
 		}
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
 		DFType fldType = finder.resolveSafe(decl.getType());
-		if (fldType instanceof DFKlass) {
-		    enumKlasses((DFKlass)fldType, klasses);
+		if (fldType instanceof DFSourceKlass) {
+		    enumKlasses((DFSourceKlass)fldType, klasses);
 		}
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) decl.fragments()) {
@@ -216,14 +215,14 @@ public class Java2DF {
 		List<SingleVariableDeclaration> varDecls = decl.parameters();
 		for (SingleVariableDeclaration varDecl : varDecls) {
 		    DFType argType = finder2.resolveSafe(varDecl.getType());
-		    if (argType instanceof DFKlass) {
-			enumKlasses((DFKlass)argType, klasses);
+		    if (argType instanceof DFSourceKlass) {
+			enumKlasses((DFSourceKlass)argType, klasses);
 		    }
 		}
 		if (!decl.isConstructor()) {
 		    DFType returnType = finder2.resolveSafe(decl.getReturnType2());
-		    if (returnType instanceof DFKlass) {
-			enumKlasses((DFKlass)returnType, klasses);
+		    if (returnType instanceof DFSourceKlass) {
+			enumKlasses((DFSourceKlass)returnType, klasses);
 		    }
 		}
                 if (decl.getBody() != null) {
@@ -237,8 +236,8 @@ public class Java2DF {
                 AnnotationTypeMemberDeclaration decl =
                     (AnnotationTypeMemberDeclaration)body;
 		DFType type = finder.resolveSafe(decl.getType());
-		if (type instanceof DFKlass) {
-		    enumKlasses((DFKlass)type, klasses);
+		if (type instanceof DFSourceKlass) {
+		    enumKlasses((DFSourceKlass)type, klasses);
 		}
 
             } else if (body instanceof Initializer) {
@@ -255,7 +254,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void enumKlassesStmt(
         DFTypeFinder finder, DFTypeSpace space,
-        Statement ast, Set<DFKlass> klasses)
+        Statement ast, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         assert ast != null;
 
@@ -274,8 +273,8 @@ public class Java2DF {
             VariableDeclarationStatement varStmt =
                 (VariableDeclarationStatement)ast;
 	    DFType varType = finder.resolveSafe(varStmt.getType());
-	    if (varType instanceof DFKlass) {
-		enumKlasses((DFKlass)varType, klasses);
+	    if (varType instanceof DFSourceKlass) {
+		enumKlasses((DFSourceKlass)varType, klasses);
 	    }
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
@@ -360,8 +359,8 @@ public class Java2DF {
             this.enumKlassesExpr(finder, space, eForStmt.getExpression(), klasses);
             SingleVariableDeclaration decl = eForStmt.getParameter();
 	    DFType varType = finder.resolveSafe(decl.getType());
-	    if (varType instanceof DFKlass) {
-		enumKlasses((DFKlass)varType, klasses);
+	    if (varType instanceof DFSourceKlass) {
+		enumKlasses((DFSourceKlass)varType, klasses);
 	    }
             Statement stmt = eForStmt.getBody();
             this.enumKlassesStmt(finder, space, stmt, klasses);
@@ -391,8 +390,8 @@ public class Java2DF {
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
 		DFType varType = finder.resolveSafe(decl.getType());
-		if (varType instanceof DFKlass) {
-		    enumKlasses((DFKlass)varType, klasses);
+		if (varType instanceof DFSourceKlass) {
+		    enumKlasses((DFSourceKlass)varType, klasses);
 		}
                 this.enumKlassesStmt(finder, space, cc.getBody(), klasses);
             }
@@ -425,9 +424,9 @@ public class Java2DF {
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
             AbstractTypeDeclaration abstDecl = decl.getDeclaration();
-            DFType innerType = space.getType(abstDecl.getName());
-            if (innerType != null) {
-                this.enumKlasses(innerType.toKlass(), klasses);
+            DFKlass innerType = space.getKlass(abstDecl.getName());
+            if (innerType instanceof DFSourceKlass) {
+                this.enumKlasses((DFSourceKlass)innerType, klasses);
 	    }
 
         } else {
@@ -439,7 +438,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void enumKlassesExpr(
         DFTypeFinder finder, DFTypeSpace space,
-        Expression ast, Set<DFKlass> klasses)
+        Expression ast, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         assert ast != null;
 
@@ -453,8 +452,10 @@ public class Java2DF {
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
-                    DFKlass innerKlass = finder.lookupType(name).toKlass();
-                    enumKlasses(innerKlass, klasses);
+                    DFType type = finder.lookupType(name);
+		    if (type instanceof DFSourceKlass) {
+			enumKlasses((DFSourceKlass)type, klasses);
+		    }
                 } catch (TypeNotFound e) {
                 }
             }
@@ -472,8 +473,10 @@ public class Java2DF {
         } else if (ast instanceof TypeLiteral) {
 	    Type value = ((TypeLiteral)ast).getType();
             try {
-		DFKlass klass = finder.resolve(value).toKlass();
-		enumKlasses(klass, klasses);
+		DFType type = finder.resolve(value);
+		if (type instanceof DFSourceKlass) {
+		    enumKlasses((DFSourceKlass)type, klasses);
+		}
             } catch (TypeNotFound e) {
             }
 
@@ -521,8 +524,8 @@ public class Java2DF {
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
 	    DFType varType = finder.resolveSafe(decl.getType());
-	    if (varType instanceof DFKlass) {
-		enumKlasses((DFKlass)varType, klasses);
+	    if (varType instanceof DFSourceKlass) {
+		enumKlasses((DFSourceKlass)varType, klasses);
 	    }
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
@@ -537,8 +540,10 @@ public class Java2DF {
             Expression expr = invoke.getExpression();
             if (expr instanceof Name) {
                 try {
-                    DFKlass innerKlass = finder.lookupType((Name)expr).toKlass();
-                    enumKlasses(innerKlass, klasses);
+                    DFType type = finder.lookupType((Name)expr);
+		    if (type instanceof DFSourceKlass) {
+			enumKlasses((DFSourceKlass)type, klasses);
+		    }
                 } catch (TypeNotFound e) {
                 }
             } else if (expr != null) {
@@ -567,8 +572,8 @@ public class Java2DF {
                 this.enumKlassesExpr(finder, space, init, klasses);
             }
 	    DFType type = finder.resolveSafe(ac.getType().getElementType());
-	    if (type instanceof DFKlass) {
-		enumKlasses((DFKlass)type, klasses);
+	    if (type instanceof DFSourceKlass) {
+		enumKlasses((DFSourceKlass)type, klasses);
 	    }
 
         } else if (ast instanceof ArrayInitializer) {
@@ -596,22 +601,22 @@ public class Java2DF {
             CastExpression cast = (CastExpression)ast;
             this.enumKlassesExpr(finder, space, cast.getExpression(), klasses);
 	    DFType type = finder.resolveSafe(cast.getType());
-	    if (type instanceof DFKlass) {
-		enumKlasses((DFKlass)type, klasses);
+	    if (type instanceof DFSourceKlass) {
+		enumKlasses((DFSourceKlass)type, klasses);
 	    }
 
         } else if (ast instanceof ClassInstanceCreation) {
             ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
             try {
-                DFType instType;
+                DFKlass instKlass;
                 if (cstr.getAnonymousClassDeclaration() != null) {
                     String id = Utils.encodeASTNode(cstr);
-                    instType = space.getType(id);
+                    instKlass = space.getKlass(id);
                 } else {
-                    instType = finder.resolve(cstr.getType());
+                    instKlass = finder.resolve(cstr.getType()).toKlass();
                 }
-                if (instType instanceof DFKlass) {
-                    enumKlasses((DFKlass)instType, klasses);
+                if (instKlass instanceof DFSourceKlass) {
+                    enumKlasses((DFSourceKlass)instKlass, klasses);
                 }
             } catch (TypeNotFound e) {
             }
@@ -637,7 +642,7 @@ public class Java2DF {
         } else if (ast instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)ast;
             String id = Utils.encodeASTNode(lambda);
-            DFKlass lambdaKlass = (DFKlass)space.getType(id);
+            DFSourceKlass lambdaKlass = (DFSourceKlass)space.getKlass(id);
 	    // Do not use lambda klasses until defined.
 
         } else if (ast instanceof MethodReference) {
@@ -647,7 +652,7 @@ public class Java2DF {
             //  TypeMethodReference
             MethodReference methodref = (MethodReference)ast;
             String id = Utils.encodeASTNode(methodref);
-            DFKlass methodRefKlass = (DFKlass)space.getType(id);
+            DFSourceKlass methodRefKlass = (DFSourceKlass)space.getKlass(id);
 	    // Do not use methodref klasses until defined.
 
         } else {
@@ -675,7 +680,7 @@ public class Java2DF {
             exporter.writeGraph(graph);
         }
     }
-    private void startKlass(DFKlass klass) {
+    private void startKlass(DFSourceKlass klass) {
         for (Exporter exporter : _exporters) {
             exporter.startKlass(klass);
         }
@@ -693,11 +698,11 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
         _fileScope.put(key, fileScope);
-        List<DFKlass> klasses = new ArrayList<DFKlass>();
+        List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
 	for (AbstractTypeDeclaration abstTypeDecl :
 		 (List<AbstractTypeDeclaration>) cunit.types()) {
-	    DFKlass klass = packageSpace.buildTypeFromAST(
-		key, abstTypeDecl, null, fileScope);
+	    DFSourceKlass klass = packageSpace.buildTypeFromAST(
+		key, abstTypeDecl, fileScope, null);
 	    klass.setKlassTree(key, abstTypeDecl);
 	    Logger.debug("Stage1: Created:", klass);
 	    klasses.add(klass);
@@ -723,11 +728,11 @@ public class Java2DF {
 		finder = new DFTypeFinder(_rootSpace.lookupSpace(name), finder);
 	    } else {
 		assert name.isQualifiedName();
-                DFType type = _rootSpace.getType(name);
-                if (type != null) {
+                DFKlass klass = _rootSpace.getKlass(name);
+                if (klass != null) {
 		    Logger.debug("Import:", name);
                     String id = ((QualifiedName)name).getName().getIdentifier();
-		    importSpace.addKlass(id, type.toKlass());
+		    importSpace.addKlass(id, klass);
 		} else {
 		    if (!importDecl.isStatic()) {
 			Logger.error("Import: Class not found:", name);
@@ -735,8 +740,9 @@ public class Java2DF {
 		}
 	    }
         }
+	// Set a top-level finder.
 	finder = new DFTypeFinder(importSpace, finder);
-        for (DFKlass klass : _fileKlasses.get(key)) {
+        for (DFSourceKlass klass : _fileKlasses.get(key)) {
             klass.setFinder(finder);
 	}
     }
@@ -744,7 +750,7 @@ public class Java2DF {
     // Stage3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
     public void loadKlasses(
-        String key, CompilationUnit cunit, Set<DFKlass> klasses)
+        String key, CompilationUnit cunit, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
         DFFileScope fileScope = _fileScope.get(key);
@@ -753,41 +759,39 @@ public class Java2DF {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
-                DFType type = _rootSpace.getType(name);
-                if (type != null) {
-                    DFKlass klass = type.toKlass();
+                DFKlass klass = _rootSpace.getKlass(name);
+                if (klass instanceof DFSourceKlass) {
                     klass.load();
                     fileScope.importStatic(klass);
                 }
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFType type = _rootSpace.getType(qname.getQualifier());
-                if (type != null) {
-                    DFKlass klass = type.toKlass();
+                DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
+                if (klass instanceof DFSourceKlass) {
                     klass.load();
                     fileScope.importStatic(klass, qname.getName());
                 }
             }
         }
-        for (DFKlass klass : _fileKlasses.get(key)) {
+        for (DFSourceKlass klass : _fileKlasses.get(key)) {
 	    enumKlasses(klass, klasses);
         }
     }
 
     // Stage4: list all methods.
-    public void listMethods(Set<DFKlass> klasses)
+    public void listMethods(Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
         Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
 
 	// List method overrides.
-        for (DFKlass klass : klasses) {
+        for (DFSourceKlass klass : klasses) {
             klass.overrideMethods();
 	}
 
         // Build method scopes (normal classes).
-        for (DFKlass klass : klasses) {
+        for (DFSourceKlass klass : klasses) {
 	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
@@ -799,8 +803,8 @@ public class Java2DF {
         }
 
         // Build call graphs (normal classes).
-	List<DFKlass> defined = new ArrayList<DFKlass>();
-        for (DFKlass klass : klasses) {
+	List<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
+        for (DFSourceKlass klass : klasses) {
 	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
@@ -814,19 +818,19 @@ public class Java2DF {
 
 	while (!defined.isEmpty()) {
 	    klasses.addAll(defined);
-	    List<DFKlass> defined2 = new ArrayList<DFKlass>();
-            for (DFKlass klass : defined) {
+	    List<DFSourceKlass> defined2 = new ArrayList<DFSourceKlass>();
+            for (DFSourceKlass klass : defined) {
                 klass.overrideMethods();
             }
 	    // Build method scopes (lambdas).
-	    for (DFKlass klass : defined) {
+	    for (DFSourceKlass klass : defined) {
 		assert klass.isDefined();
 		for (DFMethod method : klass.getMethods()) {
 		    method.buildScope();
 		}
 	    }
 	    // Build call graphs (lambdas).
-	    for (DFKlass klass : defined) {
+	    for (DFSourceKlass klass : defined) {
 		assert klass.isDefined();
 		for (DFMethod method : klass.getMethods()) {
 		    method.enumRefs(defined2);
@@ -849,7 +853,7 @@ public class Java2DF {
 
     // Stage5: generate graphs for each method.
     @SuppressWarnings("unchecked")
-    public void buildGraphs(Counter counter, DFKlass klass, boolean strict)
+    public void buildGraphs(Counter counter, DFSourceKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
         try {
             this.startKlass(klass);
@@ -989,7 +993,7 @@ public class Java2DF {
             CompilationUnit cunit = srcs.get(path);
             converter.setTypeFinder(path, cunit);
         }
-        ConsistentHashSet<DFKlass> klasses = new ConsistentHashSet<DFKlass>();
+        ConsistentHashSet<DFSourceKlass> klasses = new ConsistentHashSet<DFSourceKlass>();
         for (String path : files) {
             Logger.info("Stage3:", path);
             CompilationUnit cunit = srcs.get(path);
@@ -1010,7 +1014,7 @@ public class Java2DF {
         XmlExporter exporter = new XmlExporter((temp != null)? temp : output);
         converter.addExporter(exporter);
         Counter counter = new Counter(1);
-        for (DFKlass klass : klasses) {
+        for (DFSourceKlass klass : klasses) {
             if (!processed.isEmpty() && !processed.contains(klass.getFilePath())) continue;
             try {
                 converter.buildGraphs(counter, klass, strict);

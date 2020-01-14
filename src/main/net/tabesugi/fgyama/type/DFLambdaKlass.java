@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFLambdaKlass
 //
-class DFLambdaKlass extends DFKlass {
+class DFLambdaKlass extends DFSourceKlass {
 
     private class FunctionalMethod extends DFMethod {
 
@@ -84,10 +84,9 @@ class DFLambdaKlass extends DFKlass {
         new ArrayList<CapturedRef>();
 
     public DFLambdaKlass(
-        String name, DFTypeSpace outerSpace,
-        DFKlass outerKlass, DFVarScope outerScope) {
-	super(name, outerSpace, outerKlass, outerScope,
-              DFBuiltinTypes.getObjectKlass());
+        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
+        DFSourceKlass outerKlass) {
+	super(name, outerSpace, outerScope, outerKlass);
         _lambdaScope = new LambdaScope(outerScope, name);
         _funcMethod = new FunctionalMethod(FUNC_NAME);
     }
@@ -98,8 +97,9 @@ class DFLambdaKlass extends DFKlass {
     }
 
     @Override
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFType> typeMap) {
-        if (klass.isFuncInterface()) return 0;
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+	if (klass instanceof DFSourceKlass &&  
+	    ((DFSourceKlass)klass).isFuncInterface()) return 0;
         return -1;
     }
 

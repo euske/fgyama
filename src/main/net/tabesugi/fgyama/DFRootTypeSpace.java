@@ -70,28 +70,25 @@ public class DFRootTypeSpace extends DFTypeSpace {
 	String klassName = fullName.substring(j+1);
         DFTypeSpace space = this.lookupSpace(spaceName);
         // Create a top-level klass.
-        DFKlass klass = space.getKlass(klassName);
+        DFSourceKlass klass = (DFSourceKlass)space.getKlass(klassName);
         if (klass == null) {
-            klass = new DFKlass(
-                klassName, space, null, null, DFBuiltinTypes.getObjectKlass());
+	    klass = new DFSourceKlass(klassName, space, null, null);
+	    klass.setFinder(_finder);
             space.addKlass(klassName, klass);
         }
-        klass.setFinder(_finder);
         while (0 <= i) {
             // Create inner klasses.
             // Each inner klass is a child of the previous klass in a path.
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-            if (klass.getKlass(name) != null) {
-                klass = klass.getKlass(name);
-            } else {
-                DFKlass child = new DFKlass(
-                    name, klass, klass, klass.getKlassScope(),
-                    DFBuiltinTypes.getObjectKlass());
+	    DFSourceKlass child = (DFSourceKlass)klass.getKlass(name);
+            if (child == null) {
+                child = new DFSourceKlass(
+                    name, klass, klass.getKlassScope(), klass);
                 klass.addKlass(name, child);
-                klass = child;
-            }
+	    }
+	    klass = child;
         }
         klass.setJarPath(jarPath, entPath);
         InputStream strm = jarFile.getInputStream(jarEntry);

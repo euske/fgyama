@@ -223,13 +223,13 @@ public class DFFrame {
                     if (expr != null) {
                         if (enumKlass != null && expr instanceof SimpleName) {
                             // special treatment for enum.
-                            try {
-                                DFRef ref = enumKlass.lookupField((SimpleName)expr);
+			    DFRef ref = enumKlass.getField((SimpleName)expr);
+			    if (ref != null) {
                                 _inputRefs.add(ref);
-                            } catch (VariableNotFound e) {
+			    } else {
                                 Logger.error(
                                     "DFFrame.buildStmt: VariableNotFound (switch)",
-                                    this, e.name, expr);
+                                    this, expr);
                             }
                         } else {
                             caseFrame.buildExpr(expr);
@@ -382,19 +382,19 @@ public class DFFrame {
 		}
                 argTypes[i] = type;
             }
-            try {
-		DFMethod method1 = klass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    DFMethod method1 = klass.findMethod(
+		DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m.isTransparent()) {
                         _inputRefs.addAll(m.getInputRefs());
                         _outputRefs.addAll(m.getOutputRefs());
                     }
                 }
-            } catch (MethodNotFound e) {
+            } else {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (ci)",
-		    this, e.name, ci);
+		    this, ci);
 	    }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -418,17 +418,17 @@ public class DFFrame {
 		}
                 argTypes[i] = type;
             }
-            try {
-		DFMethod method1 = baseKlass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    DFMethod method1 = baseKlass.findMethod(
+		DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    if (method1 != null) {
                 if (method1.isTransparent()) {
                     _inputRefs.addAll(method1.getInputRefs());
                     _outputRefs.addAll(method1.getOutputRefs());
                 }
-            } catch (MethodNotFound e) {
+	    } else {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (sci)",
-		    this, e.name, sci);
+		    this, sci);
 	    }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -454,39 +454,40 @@ public class DFFrame {
             // "a.b"
             Name name = (Name)expr;
             DFRef ref;
-            try {
-                if (name.isSimpleName()) {
+	    if (name.isSimpleName()) {
+		try {
                     ref = _scope.lookupVar((SimpleName)name);
-                } else {
-                    QualifiedName qname = (QualifiedName)name;
-                    // Try assuming it's a variable access.
-                    DFType type = this.buildExpr(qname.getQualifier());
-                    if (type == null) {
-                        // Turned out it's a class variable.
-                        try {
-			    type = _finder.lookupType(qname.getQualifier());
-                        } catch (TypeNotFound e) {
-			    // Do not display an error message as this could be
-			    // recursively called from another buildExpr()
-			    //Logger.error(
-			    //    "DFFrame.buildExpr: VariableNotFound (name)",
-			    //    this, e.name, name);
-                            return null;
-                        }
-                    }
-                    DFKlass klass = type.toKlass();
-                    klass.load();
-                    SimpleName fieldName = qname.getName();
-                    ref = klass.lookupField(fieldName);
-                }
-            } catch (VariableNotFound e) {
-		// Do not display an error message as this could be
-		// recursively called from another buildExpr()
-		//Logger.error(
-		//    "DFFrame.buildExpr: VariableNotFound (name)",
-		//    this, e.name, name);
-                return null;
-            }
+		} catch (VariableNotFound e) {
+		    // Do not display an error message as this could be
+		    // recursively called from another buildExpr()
+		    //Logger.error(
+		    //    "DFFrame.buildExpr: VariableNotFound (name)",
+		    //    this, e.name, name);
+		    return null;
+		}
+	    } else {
+		QualifiedName qname = (QualifiedName)name;
+		// Try assuming it's a variable access.
+		DFType type = this.buildExpr(qname.getQualifier());
+		if (type == null) {
+		    // Turned out it's a class variable.
+		    try {
+			type = _finder.lookupType(qname.getQualifier());
+		    } catch (TypeNotFound e) {
+			// Do not display an error message as this could be
+			// recursively called from another buildExpr()
+			//Logger.error(
+			//    "DFFrame.buildExpr: VariableNotFound (name)",
+			//    this, e.name, name);
+			return null;
+		    }
+		}
+		DFKlass klass = type.toKlass();
+		klass.load();
+		SimpleName fieldName = qname.getName();
+		ref = klass.getField(fieldName);
+		if (ref == null) return null;
+	    }
             _inputRefs.add(ref);
             return ref.getRefType();
 
@@ -659,9 +660,9 @@ public class DFFrame {
 		}
                 argTypes[i] = type;
             }
-            try {
-                DFMethod method1 = klass.lookupMethod(
-                    callStyle, invoke.getName(), argTypes);
+	    DFMethod method1 = klass.findMethod(
+		callStyle, invoke.getName(), argTypes);
+	    if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m.isTransparent()) {
                         _inputRefs.addAll(m.getInputRefs());
@@ -669,10 +670,10 @@ public class DFFrame {
                     }
                 }
                 return method1.getFuncType().getReturnType();
-            } catch (MethodNotFound e) {
+	    } else {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (invoke)",
-		    this, e.name, invoke);
+		    this, invoke);
                 return DFUnknownType.UNKNOWN;
             }
 
@@ -698,18 +699,18 @@ public class DFFrame {
             klass.load();
             DFKlass baseKlass = klass.getBaseKlass();
             baseKlass.load();
-            try {
-                DFMethod method1 = baseKlass.lookupMethod(
-                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+	    DFMethod method1 = baseKlass.findMethod(
+		DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+	    if (method1 != null) {
                 if (method1.isTransparent()) {
                     _inputRefs.addAll(method1.getInputRefs());
                     _outputRefs.addAll(method1.getOutputRefs());
                 }
                 return method1.getFuncType().getReturnType();
-            } catch (MethodNotFound e) {
+	    } else {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (sinvoke)",
-		    this, e.name, sinvoke);
+		    this, sinvoke);
                 return DFUnknownType.UNKNOWN;
             }
 
@@ -770,7 +771,7 @@ public class DFFrame {
                 type = this.buildExpr(expr1);
                 if (type == null) {
 		    Logger.error(
-			"DFFrame.buildExpr: Type unknown (fieldeccess)",
+			"DFFrame.buildExpr: Type unknown (fieldaccess)",
 			this, expr1);
 		    return null;
 		}
@@ -778,14 +779,14 @@ public class DFFrame {
             DFKlass klass = type.toKlass();
             klass.load();
             SimpleName fieldName = fa.getName();
-            try {
-                DFRef ref = klass.lookupField(fieldName);
+	    DFRef ref = klass.getField(fieldName);
+	    if (ref != null) {
                 _inputRefs.add(ref);
                 return ref.getRefType();
-            } catch (VariableNotFound e) {
+	    } else {
                 Logger.error(
                     "DFFrame.buildExpr: VariableNotFound (fieldref)",
-                    this, e.name, expr);
+                    this, expr);
                 return null;
             }
 
@@ -797,14 +798,14 @@ public class DFFrame {
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             klass.load();
-            try {
-                DFRef ref2 = klass.lookupField(fieldName);
+	    DFRef ref2 = klass.getField(fieldName);
+	    if (ref2 != null) {
                 _inputRefs.add(ref2);
                 return ref2.getRefType();
-            } catch (VariableNotFound e) {
+	    } else {
                 Logger.error(
                     "DFFrame.buildExpr: VariableNotFound (superfieldref)",
-                    this, e.name, expr);
+                    this, expr);
                 return null;
             }
 
@@ -866,19 +867,19 @@ public class DFFrame {
 		}
                 argTypes[i] = type;
             }
-            try {
-		DFMethod method1 = instKlass.lookupMethod(
-		    DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    DFMethod method1 = instKlass.findMethod(
+		DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m.isTransparent()) {
                         _inputRefs.addAll(m.getInputRefs());
                         _outputRefs.addAll(m.getOutputRefs());
                     }
                 }
-            } catch (MethodNotFound e) {
+	    } else {
 		Logger.error(
 		    "DFFrame.buildExpr: MethodNotFound (cstr)",
-		    this, e.name, cstr);
+		    this, cstr);
 	    }
 	    return instType;
 
@@ -961,36 +962,42 @@ public class DFFrame {
 	    // "a.b"
             Name name = (Name)expr;
             DFRef ref;
-            try {
-                if (name.isSimpleName()) {
+	    if (name.isSimpleName()) {
+		try {
                     ref = _scope.lookupVar((SimpleName)name);
-                } else {
-                    QualifiedName qname = (QualifiedName)name;
-                    // Try assuming it's a variable access.
-                    DFType type = this.buildExpr(qname.getQualifier());
-                    if (type == null) {
-                        // Turned out it's a class variable.
-                        try {
-                            type = _finder.lookupType(qname.getQualifier());
-                        } catch (TypeNotFound e) {
-			    Logger.error(
-				"DFFrame.buildAssignment: VariableNotFound (name)",
-				this, e.name, name);
-                            return null;
-                        }
-                    }
-                    _inputRefs.add(_scope.lookupThis());
-                    DFKlass klass = type.toKlass();
-                    klass.load();
-                    SimpleName fieldName = qname.getName();
-                    ref = klass.lookupField(fieldName);
-                }
-            } catch (VariableNotFound e) {
-		Logger.error(
-		    "DFFrame.buildAssignment: VariableNotFound (name)",
-		    this, e.name, name);
-                return null;
-            }
+		} catch (VariableNotFound e) {
+		    Logger.error(
+			"DFFrame.buildAssignment: VariableNotFound (name)",
+			this, e.name, name);
+		    return null;
+		}
+	    } else {
+		QualifiedName qname = (QualifiedName)name;
+		// Try assuming it's a variable access.
+		DFType type = this.buildExpr(qname.getQualifier());
+		if (type == null) {
+		    // Turned out it's a class variable.
+		    try {
+			type = _finder.lookupType(qname.getQualifier());
+		    } catch (TypeNotFound e) {
+			Logger.error(
+			    "DFFrame.buildAssignment: VariableNotFound (name)",
+			    this, e.name, name);
+			return null;
+		    }
+		}
+		_inputRefs.add(_scope.lookupThis());
+		DFKlass klass = type.toKlass();
+		klass.load();
+		SimpleName fieldName = qname.getName();
+		ref = klass.getField(fieldName);
+		if (ref == null) {
+		    Logger.error(
+			"DFFrame.buildAssignment: VariableNotFound (name)",
+			this, name);
+		    return null;
+		}
+	    }
             _outputRefs.add(ref);
             return ref;
 
@@ -1024,14 +1031,14 @@ public class DFFrame {
             DFKlass klass = type.toKlass();
             klass.load();
             SimpleName fieldName = fa.getName();
-            try {
-                DFRef ref = klass.lookupField(fieldName);
+	    DFRef ref = klass.getField(fieldName);
+	    if (ref != null) {
                 _outputRefs.add(ref);
                 return ref;
-            } catch (VariableNotFound e) {
+	    } else {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (fieldassign)",
-                    this, e.name, expr);
+                    this, expr);
                 return null;
             }
 
@@ -1043,14 +1050,14 @@ public class DFFrame {
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             klass.load();
-            try {
-                DFRef ref2 = klass.lookupField(fieldName);
+	    DFRef ref2 = klass.getField(fieldName);
+	    if (ref2 != null) {
                 _outputRefs.add(ref2);
                 return ref2;
-            } catch (VariableNotFound e) {
+	    } else {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (superfieldassign)",
-                    this, e.name, expr);
+                    this, expr);
                 return null;
             }
 

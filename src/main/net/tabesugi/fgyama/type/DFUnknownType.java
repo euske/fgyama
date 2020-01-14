@@ -32,7 +32,7 @@ public class DFUnknownType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
         return -1;
     }
 

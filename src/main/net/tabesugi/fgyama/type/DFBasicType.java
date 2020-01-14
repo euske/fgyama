@@ -76,7 +76,7 @@ public class DFBasicType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
 	// Auto-unboxing.
         if (this == type) return 0;
 	if (this.toKlass() == type) return 0;

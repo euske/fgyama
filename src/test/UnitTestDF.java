@@ -48,14 +48,14 @@ public class UnitTestDF extends XMLTestCase {
             CompilationUnit cunit = srcs.get(javaPath);
             _converter.setTypeFinder(javaPath, cunit);
         }
-        Set<DFKlass> klasses = new ConsistentHashSet<DFKlass>();
+        Set<DFSourceKlass> klasses = new ConsistentHashSet<DFSourceKlass>();
         for (String javaPath : javaPaths) {
             CompilationUnit cunit = srcs.get(javaPath);
             _converter.loadKlasses(javaPath, cunit, klasses);
         }
         _converter.listMethods(klasses);
         Counter counter = new Counter(1);
-        for (DFKlass klass : klasses) {
+        for (DFSourceKlass klass : klasses) {
             _converter.buildGraphs(counter, klass, false);
         }
 	exporter.close();

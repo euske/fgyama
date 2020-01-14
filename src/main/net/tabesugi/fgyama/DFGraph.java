@@ -952,8 +952,9 @@ public abstract class DFGraph {
 		argTypes[i] = node.getNodeType();
             }
             DFKlass klass = scope.lookupThis().getRefType().toKlass();
-            DFMethod constructor = klass.lookupMethod(
+            DFMethod constructor = klass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -978,8 +979,9 @@ public abstract class DFGraph {
             DFKlass klass = obj.getNodeType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
-            DFMethod constructor = baseKlass.lookupMethod(
+            DFMethod constructor = baseKlass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
+	    if (constructor == null) throw new MethodNotFound(baseKlass+"<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -1045,7 +1047,8 @@ public abstract class DFGraph {
                         klass = _finder.lookupType(qname.getQualifier()).toKlass();
                     }
                     SimpleName fieldName = qname.getName();
-                    DFRef ref = klass.lookupField(fieldName);
+                    DFRef ref = klass.getField(fieldName);
+		    if (ref == null) throw new VariableNotFound("."+fieldName);
                     DFNode node = new FieldRefNode(this, scope, ref, qname, obj);
                     node.accept(ctx.get(ref));
                     return node;
@@ -1233,24 +1236,20 @@ public abstract class DFGraph {
 		    args[i] = node;
 		    argTypes[i] = node.getNodeType();
                 }
-                DFMethod method;
-                try {
-                    method = klass.lookupMethod(
-                        callStyle, invoke.getName(), argTypes);
-                } catch (MethodNotFound e) {
+                DFMethod method = klass.findMethod(
+		    callStyle, invoke.getName(), argTypes);
+		if (method == null) {
 		    // try static imports.
-                    try {
-                        method = scope.lookupStaticMethod(
-                            invoke.getName(), argTypes);
-                    } catch (MethodNotFound ee) {
+		    method = scope.findStaticMethod(
+			invoke.getName(), argTypes);
+		    if (method == null) {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
-                        DFMethod fallback = klass.addFallbackMethod(id, argTypes);
+                        method = klass.addFallbackMethod(id, argTypes);
                         Logger.error(
                             "DFMethod.processExpression: MethodNotFound",
                             this, klass, expr);
-                        Logger.info("Fallback method:", fallback);
-                        method = fallback;
+                        Logger.info("Fallback method:", method);
                     }
                 }
                 List<DFMethod> overriders = method.getOverriders();
@@ -1280,20 +1279,17 @@ public abstract class DFGraph {
                 DFKlass klass = obj.getNodeType().toKlass();
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
-                DFMethod method;
-                try {
-                    method = baseKlass.lookupMethod(
-                        DFMethod.CallStyle.InstanceMethod,
-                        sinvoke.getName(), argTypes);
-                } catch (MethodNotFound e) {
+                DFMethod method = baseKlass.findMethod(
+		    DFMethod.CallStyle.InstanceMethod,
+		    sinvoke.getName(), argTypes);
+		if (method == null) {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
-                    DFMethod fallback = baseKlass.addFallbackMethod(id, argTypes);
+                    method = baseKlass.addFallbackMethod(id, argTypes);
                     Logger.error(
                         "DFMethod.processExpression: MethodNotFound",
                         this, baseKlass, expr);
-                    Logger.info("Fallback method:", fallback);
-                    method = fallback;
+                    Logger.info("Fallback method:", method);
                 }
                 DFMethod[] methods = new DFMethod[] { method };
                 DFFunctionType funcType = method.getFuncType();
@@ -1372,7 +1368,8 @@ public abstract class DFGraph {
                 }
                 DFKlass klass = instType.toKlass();
                 SimpleName fieldName = fa.getName();
-                DFRef ref = klass.lookupField(fieldName);
+                DFRef ref = klass.getField(fieldName);
+		if (ref == null) throw new VariableNotFound("."+fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, fa, obj);
                 node.accept(ctx.get(ref));
                 return node;
@@ -1383,7 +1380,8 @@ public abstract class DFGraph {
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
                 DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-                DFRef ref = klass.lookupField(fieldName);
+		DFRef ref = klass.getField(fieldName);
+		if (ref == null) throw new VariableNotFound("."+fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
                 return node;
@@ -1423,8 +1421,9 @@ public abstract class DFGraph {
 		    args[i] = node;
 		    argTypes[i] = node.getNodeType();
                 }
-                DFMethod constructor = instKlass.lookupMethod(
+                DFMethod constructor = instKlass.findMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
+		if (constructor == null) throw new MethodNotFound(instKlass+"<init>", argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
@@ -1547,7 +1546,8 @@ public abstract class DFGraph {
                 }
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
-                DFRef ref = klass.lookupField(fieldName);
+		DFRef ref = klass.getField(fieldName);
+		if (ref == null) throw new VariableNotFound("."+fieldName);
                 return new FieldAssignNode(this, scope, ref, expr, obj);
             }
 
@@ -1569,7 +1569,8 @@ public abstract class DFGraph {
             DFNode obj = processExpression(ctx, scope, frame, expr1);
             DFKlass klass = obj.getNodeType().toKlass();
             SimpleName fieldName = fa.getName();
-            DFRef ref = klass.lookupField(fieldName);
+	    DFRef ref = klass.getField(fieldName);
+	    if (ref == null) throw new VariableNotFound("."+fieldName);
             return new FieldAssignNode(this, scope, ref, expr, obj);
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -1578,7 +1579,8 @@ public abstract class DFGraph {
             SimpleName fieldName = sfa.getName();
             DFNode obj = ctx.get(scope.lookupThis());
             DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-            DFRef ref = klass.lookupField(fieldName);
+	    DFRef ref = klass.getField(fieldName);
+	    if (ref == null) throw new VariableNotFound("."+fieldName);
             return new FieldAssignNode(this, scope, ref, expr, obj);
 
 	} else if (expr instanceof ParenthesizedExpression) {
@@ -1900,7 +1902,8 @@ public abstract class DFGraph {
                 if (expr != null) {
                     if (enumKlass != null && expr instanceof SimpleName) {
                         // special treatment for enum.
-                        DFRef ref = enumKlass.lookupField((SimpleName)expr);
+                        DFRef ref = enumKlass.getField((SimpleName)expr);
+			if (ref == null) throw new VariableNotFound("."+expr);
                         DFNode node = new FieldRefNode(this, scope, ref, expr, null);
                         node.accept(ctx.get(ref));
                         caseNode.addMatch(node);
@@ -2295,7 +2298,8 @@ public abstract class DFGraph {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                    DFRef ref = klass.lookupField(frag.getName());
+                    DFRef ref = klass.getField(frag.getName());
+		    if (ref == null) throw new VariableNotFound("."+frag.getName());
                     DFNode value = null;
                     Expression init = frag.getInitializer();
                     if (init != null) {

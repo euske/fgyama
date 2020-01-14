@@ -9,30 +9,28 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMapType
 //
-public class DFMapType implements DFType {
+public class DFMapType extends DFKlass {
 
     private String _name;
-    private DFTypeSpace _outerSpace;
     private DFKlass _boundKlass;
 
     private String _sig = null;
     private List<Type> _types = null;
 
     public DFMapType(String name, DFTypeSpace outerSpace) {
-        _name = name;
-	_outerSpace = outerSpace;
-        _boundKlass = DFBuiltinTypes.getObjectKlass();
+	super(name, outerSpace, null);
+	_name = name;
+	_boundKlass = DFBuiltinTypes.getObjectKlass();
     }
 
     @Override
     public String toString() {
-        String name = _outerSpace.getSpaceName()+_name;
         if (_sig != null) {
-            return ("<DFMapType("+name+":"+_sig+")>");
+            return ("<DFMapType("+this.getTypeName()+" extends "+_sig+")>");
         } else if (_types != null) {
-            return ("<DFMapType("+name+":"+_types+")>");
+            return ("<DFMapType("+this.getTypeName()+" extends "+_types+")>");
         } else {
-            return ("<DFMapType("+name+")>");
+            return ("<DFMapType("+this.getTypeName()+")>");
         }
     }
 
@@ -46,31 +44,25 @@ public class DFMapType implements DFType {
         return _boundKlass;
     }
 
-    @Override
-    public String getTypeName() {
-	//return _outerSpace.getSpaceName()+_name;
-	return _name;
-    }
-
     public String getName() {
 	return _name;
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap) {
-	if (this == type) return 0;
-        assert !(type instanceof DFMapType);
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+	if (this == klass) return 0;
+        assert !(klass instanceof DFMapType);
         if (typeMap == null) {
-            return _boundKlass.canConvertFrom(type, typeMap);
+            return _boundKlass.isSubclassOf(klass, typeMap);
         }
-        DFType self = typeMap.get(this);
+        DFKlass self = typeMap.get(this);
         if (self == null) {
-            int dist = _boundKlass.canConvertFrom(type, typeMap);
+            int dist = _boundKlass.isSubclassOf(klass, typeMap);
             if (dist < 0) return -1;
-            typeMap.put(this, type);
+            typeMap.put(this, klass);
             return dist;
         } else {
-            return self.canConvertFrom(type, typeMap);
+            return self.isSubclassOf(klass, typeMap);
         }
     }
 

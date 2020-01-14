@@ -9,26 +9,30 @@ import java.util.*;
 //
 public class DFBuiltinTypes {
 
+    private static DFTypeFinder _finder;
+    private static DFTypeSpace _langSpace;
+
     public static void initialize(DFRootTypeSpace rootSpace)
         throws IOException, InvalidSyntax {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
-        DFTypeSpace java_lang = rootSpace.lookupSpace("java.lang");
-        _object = createKlass(java_lang, "Object");
-        _class = createKlass(java_lang, "Class");
-        _enum = createKlass(java_lang, "Enum");
-        _string = createKlass(java_lang, "String");
-        _byte = createKlass(java_lang, "Byte");
-        _character = createKlass(java_lang, "Character");
-        _short = createKlass(java_lang, "Short");
-        _integer = createKlass(java_lang, "Integer");
-        _long = createKlass(java_lang, "Long");
-        _float = createKlass(java_lang, "Float");
-        _double = createKlass(java_lang, "Double");
-        _boolean = createKlass(java_lang, "Boolean");
-        _void = createKlass(java_lang, "Void");
-        _exception = createKlass(java_lang, "Exception");
-        _array = new ArrayKlass(java_lang, _object);
+	_finder = new DFTypeFinder(rootSpace);
+        _langSpace = rootSpace.lookupSpace("java.lang");
+        _object = createKlass("Object");
+        _class = createKlass("Class");
+        _enum = createKlass("Enum");
+        _string = createKlass("String");
+        _byte = createKlass("Byte");
+        _character = createKlass("Character");
+        _short = createKlass("Short");
+        _integer = createKlass("Integer");
+        _long = createKlass("Long");
+        _float = createKlass("Float");
+        _double = createKlass("Double");
+        _boolean = createKlass("Boolean");
+        _void = createKlass("Void");
+        _exception = createKlass("Exception");
+        _array = new ArrayKlass();
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
@@ -49,17 +53,23 @@ public class DFBuiltinTypes {
         _exception.load();
     }
 
-    private static DFKlass createKlass(DFTypeSpace typeSpace, String id) {
-        return typeSpace.addKlass(
-            id, new DFKlass(id, typeSpace, null, null, _object));
+    private static DFKlass createKlass(String id) {
+	DFSourceKlass klass = new DFSourceKlass(id, _langSpace, null, null);
+	klass.setFinder(_finder);
+        _langSpace.addKlass(id, klass);
+	return klass;
     }
 
     private static class ArrayKlass extends DFKlass {
-        public ArrayKlass(DFTypeSpace typeSpace, DFKlass baseKlass) {
-            super("_Array", typeSpace, null, null, baseKlass);
-            this.buildTypeManually(false, baseKlass, null);
+        public ArrayKlass() {
+            super("_Array", _langSpace, null);
+	    this.initScope();
             this.addField("length", false, DFBasicType.INT);
         }
+	public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+	    if (this == klass) return 0;
+	    return -1;
+	}
     }
 
     private static DFKlass _object = null;
