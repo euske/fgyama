@@ -67,7 +67,11 @@ public class JNITypeParser {
 		    _pos = i;
 		    DFKlass klass = finder.lookupType(name.replace('/','.')).toKlass();
 		    klass.load();
-                    DFType[] paramTypes = this.resolveTypes(finder, '<', '>');
+                    DFType[] types = this.resolveTypes(finder, '<', '>');
+		    DFKlass[] paramTypes = new DFKlass[types.length];
+		    for (int j = 0; j < types.length; j++) {
+			paramTypes[j] = types[j].toKlass();
+		    }
                     klass = klass.parameterize(paramTypes);
 		    klass.load();
                     char c3 = _text.charAt(_pos);

@@ -100,9 +100,9 @@ public class DFTypeFinder {
             DFType genericType = this.resolve(ptype.getType());
             assert genericType instanceof DFKlass;
             DFKlass genericKlass = (DFKlass)genericType;
-            DFType[] paramTypes = new DFType[args.size()];
+            DFKlass[] paramTypes = new DFKlass[args.size()];
             for (int i = 0; i < args.size(); i++) {
-                paramTypes[i] = this.resolve(args.get(i));
+                paramTypes[i] = this.resolve(args.get(i)).toKlass();
             }
             DFKlass paramKlass = genericKlass.parameterize(paramTypes);
             paramKlass.load();

@@ -34,8 +34,8 @@ class DFFileScope extends DFVarScope {
 	}
     }
 
-    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
-        throws MethodNotFound {
+    @Override
+    public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
 	String id = name.getIdentifier();
 	int bestDist = -1;
 	DFMethod bestMethod = null;
@@ -52,7 +52,6 @@ class DFFileScope extends DFVarScope {
 		}
 	    }
 	}
-        if (bestMethod == null) throw new MethodNotFound(id, argTypes);
 	return bestMethod;
     }
 
@@ -787,12 +786,13 @@ public class Java2DF {
 
 	// List method overrides.
         for (DFSourceKlass klass : klasses) {
+	    assert !(klass.isGeneric());
+	    assert !(klass instanceof DFLambdaKlass);
             klass.overrideMethods();
 	}
 
         // Build method scopes (normal classes).
         for (DFSourceKlass klass : klasses) {
-	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.buildScope();
@@ -805,7 +805,6 @@ public class Java2DF {
         // Build call graphs (normal classes).
 	List<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
         for (DFSourceKlass klass : klasses) {
-	    assert !(klass instanceof DFLambdaKlass);
             DFMethod init = klass.getInitMethod();
             if (init != null) {
                 init.enumRefs(defined);

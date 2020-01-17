@@ -861,9 +861,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
             // "A.class"
 	    Type value = ((TypeLiteral)expr).getType();
             try {
-                DFType typeval = _finder.resolve(value);
+                DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass().parameterize(
-		    new DFType[] { typeval });
+		    new DFKlass[] { typeval });
 		klass.load();
 		return klass;
             } catch (TypeNotFound e) {

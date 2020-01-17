@@ -101,7 +101,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         throws InvalidSyntax {
     }
 
-    public DFKlass parameterize(DFType[] paramTypes)
+    public DFKlass parameterize(DFKlass[] paramTypes)
         throws InvalidSyntax {
 	return this;
     }

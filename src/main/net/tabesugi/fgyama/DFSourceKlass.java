@@ -119,6 +119,7 @@ public class DFSourceKlass extends DFKlass {
     }
 
     // Creates a parameterized klass.
+    @Override
     public DFKlass parameterize(DFKlass[] paramTypes)
 	throws InvalidSyntax {
         //Logger.info("DFKlass.parameterize:", this, Utils.join(paramTypes));
@@ -771,6 +772,29 @@ public class DFSourceKlass extends DFKlass {
         return _initMethod;
     }
 
+    @Override
+    public DFMethod findMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        assert _state == LoadState.Loaded;
+	DFMethod method = super.findMethod(callStyle, id, argTypes);
+	if (method != null) return method;
+	if (_outerKlass != null) {
+	    method = _outerKlass.findMethod(callStyle, id, argTypes);
+	    if (method != null) return method;
+	}
+	if (_baseKlass != null) {
+	    method = _baseKlass.findMethod(callStyle, id, argTypes);
+	    if (method != null) return method;
+	}
+	if (_baseIfaces != null) {
+	    for (DFKlass iface : _baseIfaces) {
+		method = iface.findMethod(callStyle, id, argTypes);
+		if (method != null) return method;
+	    }
+	}
+	return null;
+    }
+    
     public void overrideMethods() {
         // override the methods.
         for (DFMethod method : this.getMethods()) {
@@ -1097,7 +1121,7 @@ public class DFSourceKlass extends DFKlass {
         // Load base klasses/interfaces.
 	// Get superclass.
 	DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
-	_baseKlass = enumKlass.parameterize(new DFType[] { this });
+	_baseKlass = enumKlass.parameterize(new DFKlass[] { this });
 	_baseKlass.load();
 	// Get interfaces.
 	List<Type> ifaces = enumDecl.superInterfaceTypes();
