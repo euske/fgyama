@@ -178,12 +178,8 @@ public class DFSourceKlass extends DFKlass {
         _entPath = genericKlass._entPath;
 	_finder = genericKlass._finder;
 	
-        // Recreate the entire subspace.
-	if (_ast != null) {
-            this.initScope();
-	    this.buildTypeFromDecls(_ast);
-	} else {
-            // In case of a .jar class, refer to the same inner classes.
+	if (_jarPath != null) {
+            // XXX In case of a .jar class, refer to the same inner classes.
 	    for (DFKlass klass : genericKlass.getInnerKlasses()) {
 		this.addKlass(klass.getName(), klass);
 	    }
@@ -191,6 +187,8 @@ public class DFSourceKlass extends DFKlass {
 
         // not loaded yet!
         assert _state == LoadState.Unloaded;
+	
+        // load() will recreate the entire subspace.
     }
 
     @Override
