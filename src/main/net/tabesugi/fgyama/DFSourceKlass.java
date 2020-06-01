@@ -30,38 +30,18 @@ public class DFSourceKlass extends DFKlass {
     private String _jarPath = null;
     private String _entPath = null;
 
-    // These fields are available after setMapTypes(). (Stage1)
-    private ConsistentHashMap<String, DFMapType> _mapTypes = null;
-    private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
-
     // This field is available after setFinder(). (Stage2)
     private DFTypeFinder _finder = null;
 
     // The following fields are available after the klass is loaded. (Stage3)
     private LoadState _state = LoadState.Unloaded;
-    private boolean _interface = false;
-    private DFKlass _baseKlass = null;
-    private DFKlass[] _baseIfaces = null;
     private DFMethod _initMethod = null;
-
-    // These fields are available only for parameterized klasses.
-    private DFSourceKlass _genericKlass = null;
-    private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
     public DFSourceKlass(
         String name, DFTypeSpace outerSpace, DFVarScope outerScope,
         DFSourceKlass outerKlass) {
 	super(name, outerSpace, outerScope);
 	_outerKlass = outerKlass;
-    }
-
-    @Override
-    public String toString() {
-        if (_mapTypes != null) {
-            return ("<DFKlass("+this.getTypeName()+
-		    ":"+Utils.join(_mapTypes.keys())+")>");
-        }
-        return super.toString();
     }
 
     // Set the klass AST from a source code.
@@ -77,198 +57,72 @@ public class DFSourceKlass extends DFKlass {
         _entPath = entPath;
     }
 
-    @Override
-    public boolean isEnum() {
-        assert _state == LoadState.Loaded;
-        return (_baseKlass != null &&
-		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
-    }
-
-    @Override
-    public boolean isGeneric() {
-        return _mapTypes != null;
-    }
-
     // Set the map types from a source code.
     @SuppressWarnings("unchecked")
     public void setMapTypes(List<TypeParameter> tps) {
-        assert _mapTypes == null;
-        assert _paramTypes == null;
-        assert _concreteKlasses == null;
 	DFMapType[] mapTypes = this.getMapTypes(tps);
 	if (mapTypes == null) return;
-	_mapTypes = new ConsistentHashMap<String, DFMapType>();
-	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getName(), mapType);
-        }
-        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+        super.setMapTypes(mapTypes);
     }
 
     // Set the map types from a JAR.
     public void setMapTypes(String sig) {
-        assert _mapTypes == null;
-        assert _paramTypes == null;
-        assert _concreteKlasses == null;
         DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
 	if (mapTypes == null) return;
-	_mapTypes = new ConsistentHashMap<String, DFMapType>();
-	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getName(), mapType);
-        }
-        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
-    }
-
-    // Creates a parameterized klass.
-    @Override
-    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
-	throws InvalidSyntax {
-        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
-        assert _mapTypes != null;
-        assert _paramTypes == null;
-        assert paramTypes.length <= _mapTypes.size();
-        if (paramTypes.length < _mapTypes.size()) {
-	    List<DFMapType> mapTypes = _mapTypes.values();
-            DFKlass[] types = new DFKlass[mapTypes.size()];
-            for (int i = 0; i < mapTypes.size(); i++) {
-                if (i < paramTypes.length) {
-                    types[i] = paramTypes[i];
-                } else {
-                    types[i] = mapTypes.get(i).toKlass();
-                }
-            }
-            paramTypes = types;
-        }
-        String name = DFKlass.getParamName(paramTypes);
-        DFKlass klass = _concreteKlasses.get(name);
-        if (klass == null) {
-            klass = new DFSourceKlass(this, paramTypes);
-            _concreteKlasses.put(name, klass);
-        }
-        return klass;
+        super.setMapTypes(mapTypes);
     }
 
     // Constructor for a parameterized klass.
+    @Override
     @SuppressWarnings("unchecked")
-    private DFSourceKlass(
-        DFSourceKlass genericKlass, DFKlass[] paramTypes)
+    protected DFKlass parameterize(DFKlass[] paramTypes)
 	throws InvalidSyntax {
-	this(genericKlass.getName() + DFKlass.getParamName(paramTypes),
-	     genericKlass.getOuterSpace(), genericKlass.getOuterScope(),
-	     genericKlass._outerKlass);
-        assert genericKlass != null;
         assert paramTypes != null;
+        DFSourceKlass genericKlass = this;
+        DFSourceKlass klass = new DFSourceKlass(
+            genericKlass.getName() + DFKlass.getParamName(paramTypes),
+            genericKlass.getOuterSpace(), genericKlass.getOuterScope(),
+            genericKlass._outerKlass);
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
-        _baseKlass = genericKlass._baseKlass;
-        _genericKlass = genericKlass;
-        _paramTypes = new ConsistentHashMap<String, DFKlass>();
-	List<DFMapType> mapTypes = genericKlass._mapTypes.values();
+        klass._baseKlass = genericKlass._baseKlass;
+        klass._genericKlass = genericKlass;
+        klass._paramTypes = new ConsistentHashMap<String, DFKlass>();
+	List<DFMapType> mapTypes = genericKlass.getMapTypes();
         for (int i = 0; i < paramTypes.length; i++) {
             DFMapType mapType = mapTypes.get(i);
             assert mapType != null;
             DFKlass paramType = paramTypes[i];
             assert paramType != null;
             assert !(paramType instanceof DFMapType);
-            _paramTypes.put(mapType.getName(), paramType);
+            klass._paramTypes.put(mapType.getName(), paramType);
         }
 
-        _ast = genericKlass._ast;
-        _filePath = genericKlass._filePath;
-        _jarPath = genericKlass._jarPath;
-        _entPath = genericKlass._entPath;
-	_finder = genericKlass._finder;
+        klass._ast = genericKlass._ast;
+        klass._filePath = genericKlass._filePath;
+        klass._jarPath = genericKlass._jarPath;
+        klass._entPath = genericKlass._entPath;
+	klass._finder = genericKlass._finder;
 
-	if (_jarPath != null) {
+	if (klass._jarPath != null) {
             // XXX In case of a .jar class, refer to the same inner classes.
-	    for (DFKlass klass : genericKlass.getInnerKlasses()) {
-		this.addKlass(klass.getName(), klass);
+	    for (DFKlass inklass : genericKlass.getInnerKlasses()) {
+		klass.addKlass(inklass.getName(), inklass);
 	    }
         }
 
         // not loaded yet!
-        assert _state == LoadState.Unloaded;
+        assert klass._state == LoadState.Unloaded;
 
         // load() will recreate the entire subspace.
+        return klass;
     }
 
     @Override
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
-	super.writeXML(writer);
         writer.writeAttribute("path", this.getFilePath());
-        writer.writeAttribute("interface", Boolean.toString(_interface));
-        if (_baseKlass != null) {
-            writer.writeAttribute("extends", _baseKlass.getTypeName());
-        }
-        if (_baseIfaces != null && 0 < _baseIfaces.length) {
-            StringBuilder b = new StringBuilder();
-            for (DFKlass iface : _baseIfaces) {
-                if (0 < b.length()) {
-                    b.append(" ");
-                }
-                b.append(iface.getTypeName());
-            }
-            writer.writeAttribute("implements", b.toString());
-        }
-        if (_genericKlass != null) {
-            writer.writeAttribute("generic", _genericKlass.getTypeName());
-            if (_paramTypes != null) {
-		List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
-		List<DFKlass> paramTypes = _paramTypes.values();
-                for (int i = 0; i < paramTypes.size(); i++) {
-		    DFMapType mapType = mapTypes.get(i);
-                    DFKlass paramType = paramTypes.get(i);
-                    writer.writeStartElement("param");
-                    writer.writeAttribute("name", mapType.getName());
-                    writer.writeAttribute("type", paramType.getTypeName());
-                    writer.writeEndElement();
-                }
-            }
-        }
-        if (_concreteKlasses != null) {
-            for (DFKlass pklass : _concreteKlasses.values()) {
-                writer.writeStartElement("parameterized");
-                writer.writeAttribute("type", pklass.getTypeName());
-                writer.writeEndElement();
-            }
-        }
-        for (FieldRef field : this.getFields()) {
-            field.writeXML(writer);
-        }
-    }
-
-    @Override
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-        if (this == klass) return 0;
-        if (_genericKlass != null && _genericKlass == klass.getGenericKlass()) {
-            // A<T> isSubclassOf B<S>?
-            // types0: T
-            List<DFKlass> types0 = _paramTypes.values();
-            assert types0 != null;
-            // types1: S
-            List<DFKlass> types1 = ((DFSourceKlass)klass)._paramTypes.values();
-            assert types1 != null;
-            //assert types0.length == types1.length;
-            // T isSubclassOf S? -> S canConvertFrom T?
-            int dist = 0;
-            for (int i = 0; i < Math.min(types0.size(), types1.size()); i++) {
-                int d = types1.get(i).canConvertFrom(types0.get(i), typeMap);
-                if (d < 0) return -1;
-                dist += d;
-            }
-            return dist;
-        }
-        if (_baseKlass != null) {
-            int dist = _baseKlass.isSubclassOf(klass, typeMap);
-            if (0 <= dist) return dist+1;
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                int dist = iface.isSubclassOf(klass, typeMap);
-                if (0 <= dist) return dist+1;
-            }
-        }
-        return -1;
+        super.writeXML(writer);
     }
 
     @SuppressWarnings("unchecked")
@@ -701,68 +555,13 @@ public class DFSourceKlass extends DFKlass {
         }
     }
 
-    @Override
-    public DFKlass getKlass(String id) {
-        if (_mapTypes != null) {
-            DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType;
-        }
-        if (_paramTypes != null) {
-            DFKlass paramType = _paramTypes.get(id);
-            if (paramType != null) return paramType;
-        }
-        DFKlass klass = super.getKlass(id);
-        if (klass != null) return klass;
-        if (_baseKlass != null) {
-            klass = _baseKlass.getKlass(id);
-            if (klass != null) return klass;
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    klass = iface.getKlass(id);
-                    if (klass != null) return klass;
-                }
-            }
-        }
-        return null;
-    }
-
     // Only used by DFLambdaKlass.
     protected void setBaseKlass(DFKlass klass) {
         _baseKlass = klass;
     }
 
-    public DFKlass getBaseKlass() {
-        assert _state == LoadState.Loaded;
-	if (_baseKlass != null) return _baseKlass;
-        return DFBuiltinTypes.getObjectKlass();
-    }
-
-    public DFKlass[] getBaseIfaces() {
-        assert _state == LoadState.Loaded;
-        return _baseIfaces;
-    }
-
-    public DFKlass getGenericKlass() {
-	return _genericKlass;
-    }
-
     public boolean isDefined() {
         return (_state == LoadState.Loaded);
-    }
-
-    public boolean isFuncInterface() {
-	assert _state == LoadState.Loaded;
-        if (!_interface) return false;
-        // Count the number of abstract methods.
-        int n = 0;
-        for (DFMethod method : this.getMethods()) {
-            if (method.isAbstract()) {
-                n++;
-            }
-        }
-        return (n == 1);
     }
 
     public DFMethod getInitMethod() {
@@ -835,7 +634,7 @@ public class DFSourceKlass extends DFKlass {
         DFTypeFinder finder = this.getFinder();
         assert finder != null;
         assert _ast != null || _jarPath != null;
-        if (_mapTypes != null) {
+        if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else if (_ast != null) {
             this.initScope();
@@ -1203,33 +1002,6 @@ public class DFSourceKlass extends DFKlass {
 
             } else {
                 throw new InvalidSyntax(body);
-            }
-        }
-    }
-
-    protected void dumpContents(PrintStream out, String indent) {
-        super.dumpContents(out, indent);
-        if (_mapTypes != null) {
-            for (Map.Entry<String,DFMapType> e : _mapTypes.entrySet()) {
-                out.println(indent+"map: "+e.getKey()+" "+e.getValue());
-            }
-        }
-        if (_paramTypes != null) {
-            for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
-                out.println(indent+"param: "+e.getKey()+" "+e.getValue());
-            }
-        }
-        if (_genericKlass != null) {
-            _genericKlass.dump(out, indent);
-        }
-        if (_baseKlass != null) {
-            _baseKlass.dump(out, indent);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    iface.dump(out, indent);
-                }
             }
         }
     }

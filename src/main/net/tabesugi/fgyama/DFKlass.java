@@ -25,6 +25,19 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private List<DFMethod> _methods = null;
     private Map<String, DFMethod> _id2method = null;
 
+    // These fields are available after setMapTypes(). (Stage1)
+    private ConsistentHashMap<String, DFMapType> _mapTypes = null;
+    private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
+
+    // The following fields are available after the klass is loaded. (Stage3)
+    protected boolean _interface = false;
+    protected DFKlass _baseKlass = null;
+    protected DFKlass[] _baseIfaces = null;
+
+    // These fields are available only for parameterized klasses.
+    protected DFKlass _genericKlass = null;
+    protected ConsistentHashMap<String, DFKlass> _paramTypes = null;
+
 
     public DFKlass(
         String name, DFTypeSpace outerSpace, DFVarScope outerScope) {
@@ -36,7 +49,12 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFKlass("+this.getTypeName()+")>");
+        if (_mapTypes != null) {
+            return ("<DFKlass("+this.getTypeName()+
+		    ":"+Utils.join(_mapTypes.keys())+")>");
+        } else {
+            return ("<DFKlass("+this.getTypeName()+")>");
+        }
     }
 
     @Override
@@ -63,7 +81,42 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return klass.isSubclassOf(this, typeMap);
     }
 
-    public abstract int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap);
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+        if (this == klass) return 0;
+        if (_genericKlass != null && _genericKlass == klass.getGenericKlass()) {
+            // A<T> isSubclassOf B<S>?
+            // types0: T
+            List<DFKlass> types0 = _paramTypes.values();
+            assert types0 != null;
+            // types1: S
+            List<DFKlass> types1 = klass._paramTypes.values();
+            assert types1 != null;
+            //assert types0.length == types1.length;
+            // T isSubclassOf S? -> S canConvertFrom T?
+            int dist = 0;
+            for (int i = 0; i < Math.min(types0.size(), types1.size()); i++) {
+                int d = types1.get(i).canConvertFrom(types0.get(i), typeMap);
+                if (d < 0) return -1;
+                dist += d;
+            }
+            return dist;
+        }
+        if (_baseKlass != null) {
+            int dist = _baseKlass.isSubclassOf(klass, typeMap);
+            if (0 <= dist) return dist+1;
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                int dist = iface.isSubclassOf(klass, typeMap);
+                if (0 <= dist) return dist+1;
+            }
+        }
+        return -1;
+    }
+
+    public boolean isDefined() {
+        return true;
+    }
 
     public String getName() {
 	return _name;
@@ -82,33 +135,148 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFKlass getBaseKlass() {
-	return DFBuiltinTypes.getObjectKlass();
+        assert this.isDefined();
+	if (_baseKlass != null) return _baseKlass;
+        return DFBuiltinTypes.getObjectKlass();
+    }
+
+    public DFKlass[] getBaseIfaces() {
+        assert this.isDefined();
+        return _baseIfaces;
     }
 
     public DFKlass getGenericKlass() {
-        return null;
+	return _genericKlass;
+    }
+
+    public boolean isFuncInterface() {
+        assert this.isDefined();
+        if (!_interface) return false;
+        // Count the number of abstract methods.
+        int n = 0;
+        for (DFMethod method : this.getMethods()) {
+            if (method.isAbstract()) {
+                n++;
+            }
+        }
+        return (n == 1);
     }
 
     public boolean isGeneric() {
-	return false;
+        return _mapTypes != null;
     }
 
     public boolean isEnum() {
-	return false;
+        assert this.isDefined();
+        return (_baseKlass != null &&
+		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
     }
 
     public void load()
         throws InvalidSyntax {
     }
 
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+	throws InvalidSyntax {
+        return this;
+    }
+
+    // Creates a parameterized klass.
     public DFKlass getConcreteKlass(DFKlass[] paramTypes)
-        throws InvalidSyntax {
-	return this;
+	throws InvalidSyntax {
+        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
+        List<DFMapType> mapTypes = this.getMapTypes();
+        assert _paramTypes == null;
+        assert paramTypes.length <= mapTypes.size();
+        if (paramTypes.length < mapTypes.size()) {
+            DFKlass[] types = new DFKlass[mapTypes.size()];
+            for (int i = 0; i < mapTypes.size(); i++) {
+                if (i < paramTypes.length) {
+                    types[i] = paramTypes[i];
+                } else {
+                    types[i] = mapTypes.get(i).toKlass();
+                }
+            }
+            paramTypes = types;
+        }
+        String name = DFKlass.getParamName(paramTypes);
+        DFKlass klass = _concreteKlasses.get(name);
+        if (klass == null) {
+            klass = this.parameterize(paramTypes);
+            _concreteKlasses.put(name, klass);
+        }
+        return klass;
     }
 
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
         writer.writeAttribute("name", this.getTypeName());
+        writer.writeAttribute("interface", Boolean.toString(_interface));
+        if (_baseKlass != null) {
+            writer.writeAttribute("extends", _baseKlass.getTypeName());
+        }
+        if (_baseIfaces != null && 0 < _baseIfaces.length) {
+            StringBuilder b = new StringBuilder();
+            for (DFKlass iface : _baseIfaces) {
+                if (0 < b.length()) {
+                    b.append(" ");
+                }
+                b.append(iface.getTypeName());
+            }
+            writer.writeAttribute("implements", b.toString());
+        }
+        if (_genericKlass != null) {
+            writer.writeAttribute("generic", _genericKlass.getTypeName());
+            if (_paramTypes != null) {
+		List<DFMapType> mapTypes = _genericKlass.getMapTypes();
+		List<DFKlass> paramTypes = _paramTypes.values();
+                for (int i = 0; i < paramTypes.size(); i++) {
+		    DFMapType mapType = mapTypes.get(i);
+                    DFKlass paramType = paramTypes.get(i);
+                    writer.writeStartElement("param");
+                    writer.writeAttribute("name", mapType.getName());
+                    writer.writeAttribute("type", paramType.getTypeName());
+                    writer.writeEndElement();
+                }
+            }
+        }
+        if (_concreteKlasses != null) {
+            for (DFKlass pklass : _concreteKlasses.values()) {
+                writer.writeStartElement("parameterized");
+                writer.writeAttribute("type", pklass.getTypeName());
+                writer.writeEndElement();
+            }
+        }
+        for (FieldRef field : this.getFields()) {
+            field.writeXML(writer);
+        }
+    }
+
+    @Override
+    public DFKlass getKlass(String id) {
+        if (_mapTypes != null) {
+            DFMapType mapType = _mapTypes.get(id);
+            if (mapType != null) return mapType;
+        }
+        if (_paramTypes != null) {
+            DFKlass paramType = _paramTypes.get(id);
+            if (paramType != null) return paramType;
+        }
+        DFKlass klass = super.getKlass(id);
+        if (klass != null) return klass;
+        if (_baseKlass != null) {
+            klass = _baseKlass.getKlass(id);
+            if (klass != null) return klass;
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                if (iface != null) {
+                    klass = iface.getKlass(id);
+                    if (klass != null) return klass;
+                }
+            }
+        }
+        return null;
     }
 
     // Field/Method-related things.
@@ -118,6 +286,22 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _fields = new ArrayList<FieldRef>();
         _methods = new ArrayList<DFMethod>();
         _id2method = new HashMap<String, DFMethod>();
+    }
+
+    protected void setMapTypes(DFMapType[] mapTypes) {
+        assert _mapTypes == null;
+        assert _paramTypes == null;
+        assert _concreteKlasses == null;
+	_mapTypes = new ConsistentHashMap<String, DFMapType>();
+	for (DFMapType mapType : mapTypes) {
+	    _mapTypes.put(mapType.getName(), mapType);
+        }
+        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+    }
+
+    protected List<DFMapType> getMapTypes() {
+        assert _mapTypes != null;
+        return _mapTypes.values();
     }
 
     public List<FieldRef> getFields() {
@@ -228,6 +412,33 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             b.append(type.getTypeName());
         }
         return "<"+b.toString()+">";
+    }
+
+    protected void dumpContents(PrintStream out, String indent) {
+        super.dumpContents(out, indent);
+        if (_mapTypes != null) {
+            for (Map.Entry<String,DFMapType> e : _mapTypes.entrySet()) {
+                out.println(indent+"map: "+e.getKey()+" "+e.getValue());
+            }
+        }
+        if (_paramTypes != null) {
+            for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
+                out.println(indent+"param: "+e.getKey()+" "+e.getValue());
+            }
+        }
+        if (_genericKlass != null) {
+            _genericKlass.dump(out, indent);
+        }
+        if (_baseKlass != null) {
+            _baseKlass.dump(out, indent);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                if (iface != null) {
+                    iface.dump(out, indent);
+                }
+            }
+        }
     }
 
     // FieldRef
