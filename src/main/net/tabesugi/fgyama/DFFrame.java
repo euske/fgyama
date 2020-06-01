@@ -537,7 +537,7 @@ public class DFFrame {
 	    Type value = ((TypeLiteral)expr).getType();
             try {
                 DFKlass typeval = _finder.resolve(value).toKlass();
-                DFKlass klass = DFBuiltinTypes.getClassKlass().parameterize(
+                DFKlass klass = DFBuiltinTypes.getClassKlass().getConcreteKlass(
 		    new DFKlass[] { typeval });
 		klass.load();
 		return klass;

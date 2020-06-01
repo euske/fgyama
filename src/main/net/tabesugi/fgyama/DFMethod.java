@@ -185,9 +185,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     // Creates a parameterized method.
-    public DFMethod parameterize(Map<DFMapType, DFKlass> typeMap) {
+    public DFMethod getConcreteKlass(Map<DFMapType, DFKlass> typeMap) {
         if (_mapTypes == null) return this;
-        //Logger.info("DFMethod.parameterize:", _mapTypes, typeMap);
+        //Logger.info("DFMethod.getConcreteKlass:", _mapTypes, typeMap);
 	List<DFMapType> mapTypes = _mapTypes.values();
 	DFKlass[] paramTypes = new DFKlass[mapTypes.size()];
 	for (int i = 0; i < mapTypes.size(); i++) {
@@ -862,7 +862,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    Type value = ((TypeLiteral)expr).getType();
             try {
                 DFKlass typeval = _finder.resolve(value).toKlass();
-                DFKlass klass = DFBuiltinTypes.getClassKlass().parameterize(
+                DFKlass klass = DFBuiltinTypes.getClassKlass().getConcreteKlass(
 		    new DFKlass[] { typeval });
 		klass.load();
 		return klass;

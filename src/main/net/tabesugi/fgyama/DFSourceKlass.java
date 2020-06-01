@@ -23,7 +23,7 @@ public class DFSourceKlass extends DFKlass {
 
     // These fields are available upon construction.
     private DFSourceKlass _outerKlass; // can be the same as outerSpace, or null.
-    
+
     // These fields are set immediately after construction.
     private String _filePath = null;
     private ASTNode _ast = null;
@@ -120,9 +120,9 @@ public class DFSourceKlass extends DFKlass {
 
     // Creates a parameterized klass.
     @Override
-    public DFKlass parameterize(DFKlass[] paramTypes)
+    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
 	throws InvalidSyntax {
-        //Logger.info("DFKlass.parameterize:", this, Utils.join(paramTypes));
+        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
         assert _mapTypes != null;
         assert _paramTypes == null;
         assert paramTypes.length <= _mapTypes.size();
@@ -177,7 +177,7 @@ public class DFSourceKlass extends DFKlass {
         _jarPath = genericKlass._jarPath;
         _entPath = genericKlass._entPath;
 	_finder = genericKlass._finder;
-	
+
 	if (_jarPath != null) {
             // XXX In case of a .jar class, refer to the same inner classes.
 	    for (DFKlass klass : genericKlass.getInnerKlasses()) {
@@ -187,7 +187,7 @@ public class DFSourceKlass extends DFKlass {
 
         // not loaded yet!
         assert _state == LoadState.Unloaded;
-	
+
         // load() will recreate the entire subspace.
     }
 
@@ -747,7 +747,7 @@ public class DFSourceKlass extends DFKlass {
     public DFKlass getGenericKlass() {
 	return _genericKlass;
     }
-    
+
     public boolean isDefined() {
         return (_state == LoadState.Loaded);
     }
@@ -792,7 +792,7 @@ public class DFSourceKlass extends DFKlass {
 	}
 	return null;
     }
-    
+
     public void overrideMethods() {
         // override the methods.
         for (DFMethod method : this.getMethods()) {
@@ -1119,7 +1119,7 @@ public class DFSourceKlass extends DFKlass {
         // Load base klasses/interfaces.
 	// Get superclass.
 	DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
-	_baseKlass = enumKlass.parameterize(new DFKlass[] { this });
+	_baseKlass = enumKlass.getConcreteKlass(new DFKlass[] { this });
 	_baseKlass.load();
 	// Get interfaces.
 	List<Type> ifaces = enumDecl.superInterfaceTypes();

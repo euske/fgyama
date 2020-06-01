@@ -45,7 +45,7 @@ class DFFileScope extends DFVarScope {
 	    int dist = method1.canAccept(argTypes, typeMap);
 	    if (dist < 0) continue;
 	    if (bestDist < 0 || dist < bestDist) {
-		DFMethod method = method1.parameterize(typeMap);
+		DFMethod method = method1.getConcreteKlass(typeMap);
 		if (method != null) {
 		    bestDist = dist;
 		    bestMethod = method;

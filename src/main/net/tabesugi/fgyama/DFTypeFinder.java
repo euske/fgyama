@@ -104,7 +104,7 @@ public class DFTypeFinder {
             for (int i = 0; i < args.size(); i++) {
                 paramTypes[i] = this.resolve(args.get(i)).toKlass();
             }
-            DFKlass paramKlass = genericKlass.parameterize(paramTypes);
+            DFKlass paramKlass = genericKlass.getConcreteKlass(paramTypes);
             paramKlass.load();
             return paramKlass;
         } else if (type instanceof QualifiedType) {

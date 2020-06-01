@@ -1111,7 +1111,7 @@ public abstract class DFGraph {
                 DFKlass klass = DFBuiltinTypes.getClassKlass();
                 return new ConstNode(
                     this, scope,
-                    klass.parameterize(new DFKlass[] { typeval }),
+                    klass.getConcreteKlass(new DFKlass[] { typeval }),
                     expr, Utils.getTypeName(value));
 
             } else if (expr instanceof PrefixExpression) {

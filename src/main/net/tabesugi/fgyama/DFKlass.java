@@ -76,7 +76,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFVarScope getOuterScope() {
 	return _outerScope;
     }
-    
+
     public DFVarScope getKlassScope() {
         return _klassScope;
     }
@@ -84,7 +84,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFKlass getBaseKlass() {
 	return DFBuiltinTypes.getObjectKlass();
     }
-    
+
     public DFKlass getGenericKlass() {
         return null;
     }
@@ -92,7 +92,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public boolean isGeneric() {
 	return false;
     }
-    
+
     public boolean isEnum() {
 	return false;
     }
@@ -101,7 +101,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         throws InvalidSyntax {
     }
 
-    public DFKlass parameterize(DFKlass[] paramTypes)
+    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
         throws InvalidSyntax {
 	return this;
     }
@@ -128,7 +128,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFRef getField(SimpleName name) {
 	return this.getField(name.getIdentifier());
     }
-    
+
     public DFRef getField(String id) {
 	assert _klassScope != null;
 	return _klassScope.getField(id);
@@ -166,7 +166,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             int dist = method1.canAccept(argTypes, typeMap);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
-		DFMethod method = method1.parameterize(typeMap);
+		DFMethod method = method1.getConcreteKlass(typeMap);
 		if (method != null) {
 		    bestDist = dist;
 		    bestMethod = method;
