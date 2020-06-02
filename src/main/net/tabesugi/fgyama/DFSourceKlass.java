@@ -24,6 +24,8 @@ public class DFSourceKlass extends DFKlass {
     // These fields are available upon construction.
     private DFSourceKlass _outerKlass; // can be the same as outerSpace, or null.
 
+    private LoadState _state = LoadState.Unloaded;
+    
     // These fields are set immediately after construction.
     private String _filePath = null;
     private ASTNode _ast = null;
@@ -34,14 +36,45 @@ public class DFSourceKlass extends DFKlass {
     private DFTypeFinder _finder = null;
 
     // The following fields are available after the klass is loaded. (Stage3)
-    private LoadState _state = LoadState.Unloaded;
     private DFMethod _initMethod = null;
+    private boolean _interface = false;
+    private DFKlass _baseKlass = null;
+    private DFKlass[] _baseIfaces = null;
+
 
     public DFSourceKlass(
         String name, DFTypeSpace outerSpace, DFVarScope outerScope,
         DFSourceKlass outerKlass) {
 	super(name, outerSpace, outerScope);
 	_outerKlass = outerKlass;
+    }
+
+    protected DFSourceKlass(
+        DFSourceKlass genericKlass, DFKlass[] paramTypes) {
+        super(genericKlass, paramTypes);
+
+        // A parameterized Klass is NOT accessible from
+        // the outer namespace but it creates its own subspace.
+        _outerKlass = genericKlass._outerKlass;
+        //_interface = genericKlass._interface;
+        //_baseKlass = genericKlass._baseKlass;
+        //_baseIfaces = genericKlass._baseIfaces;
+
+        _ast = genericKlass._ast;
+        _filePath = genericKlass._filePath;
+        _jarPath = genericKlass._jarPath;
+        _entPath = genericKlass._entPath;
+	_finder = genericKlass._finder;
+
+	if (_jarPath != null) {
+            // XXX In case of a .jar class, refer to the same inner classes.
+	    for (DFKlass inklass : genericKlass.getInnerKlasses()) {
+		this.addKlass(inklass.getName(), inklass);
+	    }
+        }
+
+        // not loaded yet!
+        assert _state == LoadState.Unloaded;
     }
 
     // Set the klass AST from a source code.
@@ -74,46 +107,10 @@ public class DFSourceKlass extends DFKlass {
 
     // Constructor for a parameterized klass.
     @Override
-    @SuppressWarnings("unchecked")
     protected DFKlass parameterize(DFKlass[] paramTypes)
 	throws InvalidSyntax {
         assert paramTypes != null;
-        DFSourceKlass genericKlass = this;
-        DFSourceKlass klass = new DFSourceKlass(
-            genericKlass.getName() + DFKlass.getParamName(paramTypes),
-            genericKlass.getOuterSpace(), genericKlass.getOuterScope(),
-            genericKlass._outerKlass);
-        // A parameterized Klass is NOT accessible from
-        // the outer namespace but it creates its own subspace.
-        klass._baseKlass = genericKlass._baseKlass;
-        klass._genericKlass = genericKlass;
-        klass._paramTypes = new ConsistentHashMap<String, DFKlass>();
-	List<DFMapType> mapTypes = genericKlass.getMapTypes();
-        for (int i = 0; i < paramTypes.length; i++) {
-            DFMapType mapType = mapTypes.get(i);
-            assert mapType != null;
-            DFKlass paramType = paramTypes[i];
-            assert paramType != null;
-            assert !(paramType instanceof DFMapType);
-            klass._paramTypes.put(mapType.getName(), paramType);
-        }
-
-        klass._ast = genericKlass._ast;
-        klass._filePath = genericKlass._filePath;
-        klass._jarPath = genericKlass._jarPath;
-        klass._entPath = genericKlass._entPath;
-	klass._finder = genericKlass._finder;
-
-	if (klass._jarPath != null) {
-            // XXX In case of a .jar class, refer to the same inner classes.
-	    for (DFKlass inklass : genericKlass.getInnerKlasses()) {
-		klass.addKlass(inklass.getName(), inklass);
-	    }
-        }
-
-        // not loaded yet!
-        assert klass._state == LoadState.Unloaded;
-
+        DFSourceKlass klass = new DFSourceKlass(this, paramTypes);
         // load() will recreate the entire subspace.
         return klass;
     }
@@ -125,6 +122,21 @@ public class DFSourceKlass extends DFKlass {
         super.writeXML(writer);
     }
 
+    @Override
+    protected void dumpContents(PrintStream out, String indent) {
+        super.dumpContents(out, indent);
+        if (_baseKlass != null) {
+            _baseKlass.dump(out, indent);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                if (iface != null) {
+                    iface.dump(out, indent);
+                }
+            }
+        }
+    }        
+        
     @SuppressWarnings("unchecked")
     protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
@@ -562,6 +574,32 @@ public class DFSourceKlass extends DFKlass {
 
     public boolean isDefined() {
         return (_state == LoadState.Loaded);
+    }
+
+    @Override
+    public boolean isInterface() {
+        assert this.isDefined();
+        return _interface;
+    }
+
+    @Override
+    public boolean isEnum() {
+        assert this.isDefined();
+        return (_baseKlass != null &&
+		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
+    }
+
+    @Override
+    public DFKlass getBaseKlass() {
+        assert this.isDefined();
+	if (_baseKlass != null) return _baseKlass;
+        return super.getBaseKlass();
+    }
+
+    @Override
+    public DFKlass[] getBaseIfaces() {
+        assert this.isDefined();
+        return _baseIfaces;
     }
 
     public DFMethod getInitMethod() {

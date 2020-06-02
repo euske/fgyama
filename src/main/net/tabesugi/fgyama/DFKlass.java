@@ -29,15 +29,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
-    // The following fields are available after the klass is loaded. (Stage3)
-    protected boolean _interface = false;
-    protected DFKlass _baseKlass = null;
-    protected DFKlass[] _baseIfaces = null;
-
     // These fields are available only for parameterized klasses.
-    protected DFKlass _genericKlass = null;
-    protected ConsistentHashMap<String, DFKlass> _paramTypes = null;
-
+    private DFKlass _genericKlass = null;
+    private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
     public DFKlass(
         String name, DFTypeSpace outerSpace, DFVarScope outerScope) {
@@ -45,6 +39,23 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _name = name;
         _outerSpace = outerSpace;
 	_outerScope = outerScope;
+    }
+
+    protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
+        this(genericKlass.getName() + DFKlass.getParamName(paramTypes),
+             genericKlass.getOuterSpace(),
+             genericKlass.getOuterScope());
+        _genericKlass = genericKlass;
+        _paramTypes = new ConsistentHashMap<String, DFKlass>();
+	List<DFMapType> mapTypes = genericKlass.getMapTypes();
+        for (int i = 0; i < paramTypes.length; i++) {
+            DFMapType mapType = mapTypes.get(i);
+            assert mapType != null;
+            DFKlass paramType = paramTypes[i];
+            assert paramType != null;
+            assert !(paramType instanceof DFMapType);
+            _paramTypes.put(mapType.getName(), paramType);
+        }
     }
 
     @Override
@@ -101,12 +112,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
             return dist;
         }
-        if (_baseKlass != null) {
-            int dist = _baseKlass.isSubclassOf(klass, typeMap);
+
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            int dist = baseKlass.isSubclassOf(klass, typeMap);
             if (0 <= dist) return dist+1;
         }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
+
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
                 int dist = iface.isSubclassOf(klass, typeMap);
                 if (0 <= dist) return dist+1;
             }
@@ -116,6 +131,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public boolean isDefined() {
         return true;
+    }
+
+    public boolean isInterface() {
+        return false;
     }
 
     public String getName() {
@@ -135,14 +154,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFKlass getBaseKlass() {
-        assert this.isDefined();
-	if (_baseKlass != null) return _baseKlass;
-        return DFBuiltinTypes.getObjectKlass();
+        if (this == DFBuiltinTypes.getObjectKlass()) {
+            return null;
+        } else {
+            return DFBuiltinTypes.getObjectKlass();
+        }
     }
 
     public DFKlass[] getBaseIfaces() {
-        assert this.isDefined();
-        return _baseIfaces;
+        return null;
     }
 
     public DFKlass getGenericKlass() {
@@ -151,7 +171,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public boolean isFuncInterface() {
         assert this.isDefined();
-        if (!_interface) return false;
+        if (!this.isInterface()) return false;
         // Count the number of abstract methods.
         int n = 0;
         for (DFMethod method : this.getMethods()) {
@@ -167,9 +187,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isEnum() {
-        assert this.isDefined();
-        return (_baseKlass != null &&
-		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
+        return false;
     }
 
     public void load()
@@ -210,14 +228,17 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
+        assert this.isDefined();
         writer.writeAttribute("name", this.getTypeName());
-        writer.writeAttribute("interface", Boolean.toString(_interface));
-        if (_baseKlass != null) {
-            writer.writeAttribute("extends", _baseKlass.getTypeName());
+        writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            writer.writeAttribute("extends", baseKlass.getTypeName());
         }
-        if (_baseIfaces != null && 0 < _baseIfaces.length) {
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null && 0 < baseIfaces.length) {
             StringBuilder b = new StringBuilder();
-            for (DFKlass iface : _baseIfaces) {
+            for (DFKlass iface : baseIfaces) {
                 if (0 < b.length()) {
                     b.append(" ");
                 }
@@ -264,15 +285,19 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
         DFKlass klass = super.getKlass(id);
         if (klass != null) return klass;
-        if (_baseKlass != null) {
-            klass = _baseKlass.getKlass(id);
-            if (klass != null) return klass;
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    klass = iface.getKlass(id);
-                    if (klass != null) return klass;
+        if (this.isDefined()) {
+            DFKlass baseKlass = this.getBaseKlass();
+            if (baseKlass != null) {
+                klass = baseKlass.getKlass(id);
+                if (klass != null) return klass;
+            }
+            DFKlass[] baseIfaces = this.getBaseIfaces();
+            if (baseIfaces != null) {
+                for (DFKlass iface : baseIfaces) {
+                    if (iface != null) {
+                        klass = iface.getKlass(id);
+                        if (klass != null) return klass;
+                    }
                 }
             }
         }
@@ -414,6 +439,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return "<"+b.toString()+">";
     }
 
+    @Override
     protected void dumpContents(PrintStream out, String indent) {
         super.dumpContents(out, indent);
         if (_mapTypes != null) {
@@ -428,16 +454,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
         if (_genericKlass != null) {
             _genericKlass.dump(out, indent);
-        }
-        if (_baseKlass != null) {
-            _baseKlass.dump(out, indent);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    iface.dump(out, indent);
-                }
-            }
         }
     }
 
