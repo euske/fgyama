@@ -148,7 +148,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 
 ### Testing
 
-    $ ./run.sh net.tabesugi.fgyama.Java2DF ./tests/Hello.java Class2.java ... > Hello.graph
+    $ ./run.sh net.tabesugi.fgyama.Java2DF ./tests/Hello.java > Hello.graph
     $ python tools/graph2gv.py Hello.graph | dot -Tsvg > Hello.svg
 
 
@@ -167,7 +167,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
 ### TODOs
 
   * Handle consecutive SwitchCases.
-  * Type inference in generic methods. (<T>)
+  * Type inference in generic methods. (`<T>`)
   * Correct local scope handling.
   * Java language spec.: https://docs.oracle.com/javase/specs/
   * Moar unittests.
