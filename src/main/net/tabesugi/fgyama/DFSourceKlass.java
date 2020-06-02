@@ -216,7 +216,8 @@ public class DFSourceKlass extends DFKlass {
                 DFMethod method = new DFMethod(
                     this, callStyle, (stmt == null),
 		    id, name, this.getKlassScope());
-		method.setMapTypes(methodDecl.typeParameters());
+                DFMapType[] mapTypes = method.getMapTypes(methodDecl.typeParameters());
+		method.setMapTypes(mapTypes);
                 method.setTree(methodDecl);
                 this.addMethod(method, id);
                 if (stmt != null) {

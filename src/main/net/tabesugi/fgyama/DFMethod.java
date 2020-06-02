@@ -160,25 +160,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _mapTypes != null;
     }
 
-    public void setMapTypes(List<TypeParameter> tps)
+    public void setMapTypes(DFMapType[] mapTypes)
         throws InvalidSyntax {
-        assert _mapTypes == null;
-	DFMapType[] mapTypes = this.getMapTypes(tps);
         if (mapTypes == null) return;
+        assert _mapTypes == null;
 	_mapTypes = new ConsistentHashMap<String, DFMapType>();
 	for (DFMapType mapType : mapTypes) {
-	    _mapTypes.put(mapType.getName(), mapType);
-        }
-        _concreteMethods = new ConsistentHashMap<String, DFMethod>();
-    }
-
-    public void setMapTypes(String sig)
-        throws InvalidSyntax {
-        assert _mapTypes == null;
-	DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
-        if (mapTypes == null) return;
-        _mapTypes = new ConsistentHashMap<String, DFMapType>();
-        for (DFMapType mapType : mapTypes) {
 	    _mapTypes.put(mapType.getName(), mapType);
         }
         _concreteMethods = new ConsistentHashMap<String, DFMethod>();

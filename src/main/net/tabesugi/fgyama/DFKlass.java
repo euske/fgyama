@@ -407,6 +407,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        //Logger.info("DFKlass.findMethod", this, callStyle, id, Utils.join(argTypes));
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -428,7 +429,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
 	if (bestMethod == null && _outerKlass != null) {
-	    return _outerKlass.findMethod(callStyle, id, argTypes);
+	    bestMethod = _outerKlass.findMethod(callStyle, id, argTypes);
 	}
         return bestMethod;
     }

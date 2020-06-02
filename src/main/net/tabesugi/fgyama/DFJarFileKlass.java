@@ -264,7 +264,8 @@ public class DFJarFileKlass extends DFKlass {
             sig = Utils.getJKlassSignature(meth.getAttributes());
 	    if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
-		method.setMapTypes(sig);
+                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, method);
+		method.setMapTypes(mapTypes);
                 if (method.isGeneric()) continue;
 		JNITypeParser parser = new JNITypeParser(sig);
 		try {
