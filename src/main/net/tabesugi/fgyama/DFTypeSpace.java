@@ -111,6 +111,17 @@ public class DFTypeSpace {
         return mapTypes;
     }
 
+    public static String getParamName(DFType[] paramTypes) {
+        StringBuilder b = new StringBuilder();
+        for (DFType type : paramTypes) {
+            if (0 < b.length()) {
+                b.append(",");
+            }
+            b.append(type.getTypeName());
+        }
+        return "<"+b.toString()+">";
+    }
+
     private DFMapType getMapType(String id) {
 	DFMapType mapType = _id2maptype.get(id);
 	if (mapType == null) {

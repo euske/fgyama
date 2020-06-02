@@ -32,7 +32,7 @@ class DFMethodRefKlass extends DFLambdaKlass {
     }
 
     @Override
-    protected void loadMembersFromAST(DFTypeFinder finder, ASTNode ast)
+    protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
     }
 

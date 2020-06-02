@@ -34,18 +34,8 @@ public class DFSourceKlass extends DFKlass {
         DFSourceKlass genericKlass, DFKlass[] paramTypes) {
         super(genericKlass, paramTypes);
 
-        // A parameterized Klass is NOT accessible from
-        // the outer namespace but it creates its own subspace.
-
-        //_interface = genericKlass._interface;
-        //_baseKlass = genericKlass._baseKlass;
-        //_baseIfaces = genericKlass._baseIfaces;
-
-        _ast = genericKlass._ast;
         _filePath = genericKlass._filePath;
-
-        // not loaded yet!
-        assert !this.isDefined();
+        _ast = genericKlass._ast;
     }
 
     // Set the klass AST from a source code.
@@ -60,7 +50,7 @@ public class DFSourceKlass extends DFKlass {
     public void setMapTypes(List<TypeParameter> tps) {
 	DFMapType[] mapTypes = this.getMapTypes(tps);
 	if (mapTypes == null) return;
-        super.setMapTypes(mapTypes);
+        this.setMapTypes(mapTypes);
     }
 
     // Constructor for a parameterized klass.
@@ -93,6 +83,83 @@ public class DFSourceKlass extends DFKlass {
         }
     }        
         
+    public String getFilePath() {
+        return _filePath;
+    }
+    public ASTNode getTree() {
+        return _ast;
+    }
+
+    @Override
+    public boolean isInterface() {
+        assert this.isDefined();
+        return _interface;
+    }
+
+    @Override
+    public boolean isEnum() {
+        assert this.isDefined();
+        return (_baseKlass != null &&
+		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
+    }
+
+    @Override
+    public DFKlass getBaseKlass() {
+        assert this.isDefined();
+	if (_baseKlass != null) return _baseKlass;
+        return super.getBaseKlass();
+    }
+
+    @Override
+    public DFKlass[] getBaseIfaces() {
+        assert this.isDefined();
+        return _baseIfaces;
+    }
+
+    public DFMethod getInitMethod() {
+        assert this.isDefined();
+        return _initMethod;
+    }
+
+    @Override
+    public DFMethod findMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        assert this.isDefined();
+	DFMethod method = super.findMethod(callStyle, id, argTypes);
+	if (method != null) return method;
+	if (_baseKlass != null) {
+	    method = _baseKlass.findMethod(callStyle, id, argTypes);
+	    if (method != null) return method;
+	}
+	if (_baseIfaces != null) {
+	    for (DFKlass iface : _baseIfaces) {
+		method = iface.findMethod(callStyle, id, argTypes);
+		if (method != null) return method;
+	    }
+	}
+	return null;
+    }
+
+    public void overrideMethods() {
+        // override the methods.
+        for (DFMethod method : this.getMethods()) {
+            if (_baseKlass != null) {
+		this.overrideMethod(_baseKlass, method);
+            }
+            if (_baseIfaces != null) {
+                for (DFKlass iface : _baseIfaces) {
+		    this.overrideMethod(iface, method);
+                }
+            }
+        }
+    }
+
+    private void overrideMethod(DFKlass klass, DFMethod method1) {
+        for (DFMethod method0 : klass.getMethods()) {
+            if (method0.addOverrider(method1)) break;
+        }
+    }
+
     @SuppressWarnings("unchecked")
     protected void buildTypeFromDecls(ASTNode ast)
 	throws InvalidSyntax {
@@ -500,86 +567,24 @@ public class DFSourceKlass extends DFKlass {
         }
     }
 
-    public String getFilePath() {
-        return _filePath;
-    }
-    public ASTNode getTree() {
-        return _ast;
+    public void build()
+        throws InvalidSyntax {
+        super.build();
+        DFTypeFinder finder = this.getFinder();
+        assert finder != null;
+        assert _ast != null;
+        if (this.isGeneric()) {
+            // a generic class is only referred to, but not built.
+        } else {
+            this.initScope();
+            this.buildTypeFromDecls(_ast);
+            this.buildMembersFromAST(finder, _ast);
+        }
     }
 
     // Only used by DFLambdaKlass.
     protected void setBaseKlass(DFKlass klass) {
         _baseKlass = klass;
-    }
-
-    @Override
-    public boolean isInterface() {
-        assert this.isDefined();
-        return _interface;
-    }
-
-    @Override
-    public boolean isEnum() {
-        assert this.isDefined();
-        return (_baseKlass != null &&
-		_baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
-    }
-
-    @Override
-    public DFKlass getBaseKlass() {
-        assert this.isDefined();
-	if (_baseKlass != null) return _baseKlass;
-        return super.getBaseKlass();
-    }
-
-    @Override
-    public DFKlass[] getBaseIfaces() {
-        assert this.isDefined();
-        return _baseIfaces;
-    }
-
-    public DFMethod getInitMethod() {
-        assert this.isDefined();
-        return _initMethod;
-    }
-
-    @Override
-    public DFMethod findMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        assert this.isDefined();
-	DFMethod method = super.findMethod(callStyle, id, argTypes);
-	if (method != null) return method;
-	if (_baseKlass != null) {
-	    method = _baseKlass.findMethod(callStyle, id, argTypes);
-	    if (method != null) return method;
-	}
-	if (_baseIfaces != null) {
-	    for (DFKlass iface : _baseIfaces) {
-		method = iface.findMethod(callStyle, id, argTypes);
-		if (method != null) return method;
-	    }
-	}
-	return null;
-    }
-
-    public void overrideMethods() {
-        // override the methods.
-        for (DFMethod method : this.getMethods()) {
-            if (_baseKlass != null) {
-		this.overrideMethod(_baseKlass, method);
-            }
-            if (_baseIfaces != null) {
-                for (DFKlass iface : _baseIfaces) {
-		    this.overrideMethod(iface, method);
-                }
-            }
-        }
-    }
-
-    private void overrideMethod(DFKlass klass, DFMethod method1) {
-        for (DFMethod method0 : klass.getMethods()) {
-            if (method0.addOverrider(method1)) break;
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -593,52 +598,37 @@ public class DFSourceKlass extends DFKlass {
         return false;
     }
 
-    public void build()
-        throws InvalidSyntax {
-        super.build();
-        DFTypeFinder finder = this.getFinder();
-        assert finder != null;
-        assert _ast != null;
-        if (this.isGeneric()) {
-            // a generic class is only referred to, but not built.
-        } else {
-            this.initScope();
-            this.buildTypeFromDecls(_ast);
-            this.loadMembersFromAST(finder, _ast);
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    protected void loadMembersFromAST(DFTypeFinder finder, ASTNode ast)
+    protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.loadMembersFromAST:", this, finder);
+        //Logger.info("DFKlass.buildMembersFromAST:", this, finder);
         if (ast instanceof AbstractTypeDeclaration) {
-            this.loadMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
+            this.buildMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
         } else if (ast instanceof ClassInstanceCreation) {
-            this.loadMembersFromAnonDecl(finder, (ClassInstanceCreation)ast);
+            this.buildMembersFromAnonDecl(finder, (ClassInstanceCreation)ast);
 
         } else {
             throw new InvalidSyntax(ast);
         }
     }
 
-    private void loadMembersFromAbstTypeDecl(
+    private void buildMembersFromAbstTypeDecl(
         DFTypeFinder finder, AbstractTypeDeclaration abstTypeDecl)
         throws InvalidSyntax {
         if (abstTypeDecl instanceof TypeDeclaration) {
-            this.loadMembersFromTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
+            this.buildMembersFromTypeDecl(finder, (TypeDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof EnumDeclaration) {
-            this.loadMembersFromEnumDecl(finder, (EnumDeclaration)abstTypeDecl);
+            this.buildMembersFromEnumDecl(finder, (EnumDeclaration)abstTypeDecl);
 
         } else if (abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.loadMembersFromAnnotTypeDecl(finder, (AnnotationTypeDeclaration)abstTypeDecl);
+            this.buildMembersFromAnnotTypeDecl(finder, (AnnotationTypeDeclaration)abstTypeDecl);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private void loadMembersFromTypeDecl(
+    private void buildMembersFromTypeDecl(
         DFTypeFinder finder, TypeDeclaration typeDecl)
         throws InvalidSyntax {
         _interface = typeDecl.isInterface();
@@ -653,7 +643,7 @@ public class DFSourceKlass extends DFKlass {
 		_baseKlass.load();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromTypeDecl: TypeNotFound (baseKlass)",
+                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
                     this, e.name);
 	    }
 	}
@@ -666,7 +656,7 @@ public class DFSourceKlass extends DFKlass {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromTypeDecl: TypeNotFound (iface)",
+                    "DFKlass.buildMembersFromTypeDecl: TypeNotFound (iface)",
                     this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
@@ -674,11 +664,11 @@ public class DFSourceKlass extends DFKlass {
 	for (DFKlass iface : _baseIfaces) {
 	    iface.load();
 	}
-	this.loadMembers(finder, typeDecl.bodyDeclarations());
+	this.buildMembers(finder, typeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void loadMembersFromAnonDecl(
+    private void buildMembersFromAnonDecl(
         DFTypeFinder finder, ClassInstanceCreation cstr)
         throws InvalidSyntax {
 	// Get superclass.
@@ -691,16 +681,16 @@ public class DFSourceKlass extends DFKlass {
 		_baseKlass.load();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromAnonDecl: TypeNotFound (baseKlass)",
+                    "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
                     this, e.name);
 	    }
 	}
-	this.loadMembers(
+	this.buildMembers(
 	    finder, cstr.getAnonymousClassDeclaration().bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void loadMembersFromEnumDecl(
+    private void buildMembersFromEnumDecl(
         DFTypeFinder finder, EnumDeclaration enumDecl)
         throws InvalidSyntax {
         // Load base klasses/interfaces.
@@ -717,7 +707,7 @@ public class DFSourceKlass extends DFKlass {
 		iface = finder.resolve(ifaces.get(i)).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromEnumDecl: TypeNotFound (iface)",
+                    "DFKlass.buildMembersFromEnumDecl: TypeNotFound (iface)",
                     this, e.name);
 	    }
 	    _baseIfaces[i] = iface;
@@ -737,18 +727,18 @@ public class DFSourceKlass extends DFKlass {
 	method.setFuncType(
 	    new DFFunctionType(new DFType[] {}, DFArrayType.getType(this, 1)));
 	this.addMethod(method, null);
-	this.loadMembers(finder, enumDecl.bodyDeclarations());
+	this.buildMembers(finder, enumDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void loadMembersFromAnnotTypeDecl(
+    private void buildMembersFromAnnotTypeDecl(
         DFTypeFinder finder, AnnotationTypeDeclaration annotTypeDecl)
         throws InvalidSyntax {
-	this.loadMembers(finder, annotTypeDecl.bodyDeclarations());
+	this.buildMembers(finder, annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
-    private void loadMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
+    private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         if (_initMethod != null) {
             _initMethod.setFinder(finder);

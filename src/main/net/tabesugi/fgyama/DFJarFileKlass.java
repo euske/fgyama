@@ -33,24 +33,12 @@ public class DFJarFileKlass extends DFKlass {
         DFJarFileKlass genericKlass, DFKlass[] paramTypes) {
         super(genericKlass, paramTypes);
 
-        // A parameterized Klass is NOT accessible from
-        // the outer namespace but it creates its own subspace.
-
-        //_interface = genericKlass._interface;
-        //_baseKlass = genericKlass._baseKlass;
-        //_baseIfaces = genericKlass._baseIfaces;
-
         _jarPath = genericKlass._jarPath;
         _entPath = genericKlass._entPath;
-	if (_jarPath != null) {
-            // XXX In case of a .jar class, refer to the same inner classes.
-	    for (DFKlass inklass : genericKlass.getInnerKlasses()) {
-		this.addKlass(inklass.getName(), inklass);
-	    }
+        // XXX In case of a .jar class, refer to the same inner classes.
+        for (DFKlass inklass : genericKlass.getInnerKlasses()) {
+            this.addKlass(inklass.getName(), inklass);
         }
-
-        // not loaded yet!
-        assert !this.isDefined();
     }
 
     // Set the klass code from a JAR.
@@ -63,7 +51,7 @@ public class DFJarFileKlass extends DFKlass {
     public void setMapTypes(String sig) {
         DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
 	if (mapTypes == null) return;
-        super.setMapTypes(mapTypes);
+        this.setMapTypes(mapTypes);
     }
 
     // Constructor for a parameterized klass.
@@ -134,6 +122,7 @@ public class DFJarFileKlass extends DFKlass {
 	return null;
     }
 
+    @Override
     public void build()
         throws InvalidSyntax {
         super.build();
@@ -150,7 +139,7 @@ public class DFJarFileKlass extends DFKlass {
                     JarEntry je = jarfile.getJarEntry(_entPath);
                     InputStream strm = jarfile.getInputStream(je);
                     JavaClass jklass = new ClassParser(strm, _entPath).parse();
-                    this.loadMembersFromJKlass(finder, jklass);
+                    this.buildMembersFromJKlass(finder, jklass);
                 } finally {
                     jarfile.close();
                 }
@@ -162,9 +151,9 @@ public class DFJarFileKlass extends DFKlass {
         }
     }
 
-    private void loadMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
+    private void buildMembersFromJKlass(DFTypeFinder finder, JavaClass jklass)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.loadMembersFromJKlass:", this, finder);
+        //Logger.info("DFKlass.buildMembersFromJKlass:", this, finder);
         _interface = jklass.isInterface();
 
         // Load base klasses/interfaces.
@@ -179,7 +168,7 @@ public class DFJarFileKlass extends DFKlass {
 		_baseKlass = parser.resolveType(finder).toKlass();
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromJKlass: TypeNotFound (baseKlass)",
+                    "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
                     this, e.name, sig);
 	    }
 	    _baseKlass.load();
@@ -190,7 +179,7 @@ public class DFJarFileKlass extends DFKlass {
 		    iface = parser.resolveType(finder);
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.loadMembersFromJKlass: TypeNotFound (iface)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
                         this, e.name, sig);
 		}
 		if (iface == null) break;
@@ -209,7 +198,7 @@ public class DFJarFileKlass extends DFKlass {
 		    _baseKlass = finder.lookupType(superClass).toKlass();
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.loadMembersFromJKlass: TypeNotFound (baseKlass)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
                         this, e.name);
 		}
 	    }
@@ -223,7 +212,7 @@ public class DFJarFileKlass extends DFKlass {
 			iface = finder.lookupType(ifaces[i]).toKlass();
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.loadMembersFromJKlass: TypeNotFound (iface)",
+                            "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
                             this, e.name);
 		    }
 		    _baseIfaces[i] = iface;
@@ -248,7 +237,7 @@ public class DFJarFileKlass extends DFKlass {
 		}
 	    } catch (TypeNotFound e) {
 		Logger.error(
-                    "DFKlass.loadMembersFromJKlass: TypeNotFound (field)",
+                    "DFKlass.buildMembersFromJKlass: TypeNotFound (field)",
                     this, e.name, sig);
 		type = DFUnknownType.UNKNOWN;
 	    }
@@ -282,7 +271,7 @@ public class DFJarFileKlass extends DFKlass {
 		    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
 		} catch (TypeNotFound e) {
 		    Logger.error(
-                        "DFKlass.loadMembersFromJKlass: TypeNotFound (method)",
+                        "DFKlass.buildMembersFromJKlass: TypeNotFound (method)",
                         this, e.name, sig);
 		    continue;
 		}
@@ -308,7 +297,7 @@ public class DFJarFileKlass extends DFKlass {
 			type = finder.lookupType(excNames[i]);
 		    } catch (TypeNotFound e) {
 			Logger.error(
-                            "DFKlass.loadMembersFromJKlass: TypeNotFound (exception)",
+                            "DFKlass.buildMembersFromJKlass: TypeNotFound (exception)",
                             this, e.name);
 			type = DFUnknownType.UNKNOWN;
 		    }

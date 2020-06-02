@@ -55,12 +55,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
-        this(genericKlass.getName() + DFKlass.getParamName(paramTypes),
+        this(genericKlass.getName() + DFTypeSpace.getParamName(paramTypes),
              genericKlass.getOuterSpace(),
              genericKlass.getOuterScope(),
              genericKlass._outerKlass);
-        _genericKlass = genericKlass;
+        // A parameterized Klass is NOT accessible from
+        // the outer namespace but it creates its own subspace.
 	_finder = genericKlass._finder;
+        _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFKlass>();
 	List<DFMapType> mapTypes = genericKlass.getMapTypes();
         for (int i = 0; i < paramTypes.length; i++) {
@@ -168,6 +170,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _klassScope;
     }
 
+    public DFKlass getGenericKlass() {
+	return _genericKlass;
+    }
+
     public DFKlass getBaseKlass() {
         if (this == DFBuiltinTypes.getObjectKlass()) {
             return null;
@@ -178,10 +184,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFKlass[] getBaseIfaces() {
         return null;
-    }
-
-    public DFKlass getGenericKlass() {
-	return _genericKlass;
     }
 
     public boolean isFuncInterface() {
@@ -255,7 +257,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
             paramTypes = types;
         }
-        String name = DFKlass.getParamName(paramTypes);
+        String name = DFTypeSpace.getParamName(paramTypes);
         DFKlass klass = _concreteKlasses.get(name);
         if (klass == null) {
             klass = this.parameterize(paramTypes);
@@ -472,17 +474,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         // Do not adds to _methods because it might be being referenced.
         _id2method.put(name, method);
         return method;
-    }
-
-    public static String getParamName(DFType[] paramTypes) {
-        StringBuilder b = new StringBuilder();
-        for (DFType type : paramTypes) {
-            if (0 < b.length()) {
-                b.append(",");
-            }
-            b.append(type.getTypeName());
-        }
-        return "<"+b.toString()+">";
     }
 
     @Override

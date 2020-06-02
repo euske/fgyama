@@ -139,7 +139,7 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
-    protected void loadMembersFromAST(DFTypeFinder finder, ASTNode ast)
+    protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
         // _baseKlass is left undefined.
         this.addMethod(_funcMethod, FUNC_NAME);

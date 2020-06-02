@@ -195,7 +195,7 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 	    if (!typeMap.containsKey(mapType)) return null;
 	    paramTypes[i] = typeMap.get(mapType);
 	}
-        String name = DFKlass.getParamName(paramTypes);
+        String name = DFTypeSpace.getParamName(paramTypes);
         DFMethod method = _concreteMethods.get(name);
         if (method == null) {
 	    try {
@@ -211,12 +211,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     private DFMethod(
         DFMethod genericMethod, DFKlass[] paramTypes)
 	throws InvalidSyntax {
-	super(genericMethod._methodId + DFKlass.getParamName(paramTypes),
+	super(genericMethod._methodId + DFTypeSpace.getParamName(paramTypes),
 	      genericMethod._klass);
 	_klass = genericMethod._klass;
 	_callStyle = genericMethod._callStyle;
 	_abstract = genericMethod._abstract;
-	_methodId = genericMethod._methodId + DFKlass.getParamName(paramTypes);
+	_methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
 	_methodName = genericMethod._methodName;
 	_outerScope = genericMethod._outerScope;
 
