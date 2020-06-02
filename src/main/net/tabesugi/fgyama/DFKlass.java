@@ -14,10 +14,18 @@ import org.eclipse.jdt.core.dom.*;
 //
 public abstract class DFKlass extends DFTypeSpace implements DFType {
 
+    private enum LoadState {
+	Unloaded,
+	Loading,
+	Loaded,
+    };
+    private LoadState _state = LoadState.Unloaded;
+    
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
     private DFVarScope _outerScope;
+    private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
 
     // These fields are available after initScope().
     private KlassScope _klassScope;
@@ -29,23 +37,30 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
+    // This field is available after setFinder(). (Stage2)
+    private DFTypeFinder _finder = null;
+
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
     public DFKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope) {
+        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
+        DFKlass outerKlass) {
 	super(name, outerSpace);
         _name = name;
         _outerSpace = outerSpace;
 	_outerScope = outerScope;
+	_outerKlass = outerKlass;
     }
 
     protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
         this(genericKlass.getName() + DFKlass.getParamName(paramTypes),
              genericKlass.getOuterSpace(),
-             genericKlass.getOuterScope());
+             genericKlass.getOuterScope(),
+             genericKlass._outerKlass);
         _genericKlass = genericKlass;
+	_finder = genericKlass._finder;
         _paramTypes = new ConsistentHashMap<String, DFKlass>();
 	List<DFMapType> mapTypes = genericKlass.getMapTypes();
         for (int i = 0; i < paramTypes.length; i++) {
@@ -130,7 +145,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isDefined() {
-        return true;
+        return (_state == LoadState.Loaded);
     }
 
     public boolean isInterface() {
@@ -190,15 +205,38 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return false;
     }
 
+    public void setFinder(DFTypeFinder finder) {
+        assert _state == LoadState.Unloaded;
+        //assert _finder == null || _finder == finder;
+	_finder = finder;
+    }
+
+    public DFTypeFinder getFinder() {
+        if (_outerKlass != null) {
+            assert _finder == null;
+            return new DFTypeFinder(this, _outerKlass.getFinder());
+        } else {
+            //assert _finder != null;
+            return new DFTypeFinder(this, _finder);
+        }
+    }
+
     public void load()
         throws InvalidSyntax {
+        // an unspecified parameterized klass cannot be loaded.
+        if (_state != LoadState.Unloaded) return;
+        _state = LoadState.Loading;
+        this.build();
+        _state = LoadState.Loaded;
     }
 
-    protected DFKlass parameterize(DFKlass[] paramTypes)
-	throws InvalidSyntax {
-        return this;
+    public void build()
+        throws InvalidSyntax {
+        if (_outerKlass != null) {
+            _outerKlass.load();
+        }
     }
-
+    
     // Creates a parameterized klass.
     public DFKlass getConcreteKlass(DFKlass[] paramTypes)
 	throws InvalidSyntax {
@@ -306,6 +344,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // Field/Method-related things.
 
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+	throws InvalidSyntax {
+        return this;
+    }
+
     protected void initScope() {
         _klassScope = new KlassScope(_outerScope, _name);
         _fields = new ArrayList<FieldRef>();
@@ -382,6 +425,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 		}
             }
         }
+	if (bestMethod == null && _outerKlass != null) {
+	    return _outerKlass.findMethod(callStyle, id, argTypes);
+	}
         return bestMethod;
     }
 

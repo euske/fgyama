@@ -70,9 +70,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
 	String klassName = fullName.substring(j+1);
         DFTypeSpace space = this.lookupSpace(spaceName);
         // Create a top-level klass.
-        DFSourceKlass klass = (DFSourceKlass)space.getKlass(klassName);
+        DFJarFileKlass klass = (DFJarFileKlass)space.getKlass(klassName);
         if (klass == null) {
-	    klass = new DFSourceKlass(klassName, space, null, null);
+	    klass = new DFJarFileKlass(klassName, space, null, null);
 	    klass.setFinder(_finder);
             space.addKlass(klassName, klass);
         }
@@ -82,9 +82,9 @@ public class DFRootTypeSpace extends DFTypeSpace {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-	    DFSourceKlass child = (DFSourceKlass)klass.getKlass(name);
+	    DFJarFileKlass child = (DFJarFileKlass)klass.getKlass(name);
             if (child == null) {
-                child = new DFSourceKlass(
+                child = new DFJarFileKlass(
                     name, klass, klass.getKlassScope(), klass);
                 klass.addKlass(name, child);
 	    }

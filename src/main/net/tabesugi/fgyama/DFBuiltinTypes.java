@@ -54,7 +54,7 @@ public class DFBuiltinTypes {
     }
 
     private static DFKlass createKlass(String id) {
-	DFSourceKlass klass = new DFSourceKlass(id, _langSpace, null, null);
+	DFJarFileKlass klass = new DFJarFileKlass(id, _langSpace, null, null);
 	klass.setFinder(_finder);
         _langSpace.addKlass(id, klass);
 	return klass;
@@ -62,7 +62,7 @@ public class DFBuiltinTypes {
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass() {
-            super("_Array", _langSpace, null);
+            super("_Array", _langSpace, null, null);
 	    this.initScope();
             this.addField("length", false, DFBasicType.INT);
         }

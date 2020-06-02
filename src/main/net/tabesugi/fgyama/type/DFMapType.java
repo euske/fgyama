@@ -18,7 +18,7 @@ public class DFMapType extends DFKlass {
     private List<Type> _types = null;
 
     public DFMapType(String name, DFTypeSpace outerSpace) {
-	super(name, outerSpace, null);
+	super(name, outerSpace, null, null);
 	_name = name;
 	_boundKlass = DFBuiltinTypes.getObjectKlass();
     }

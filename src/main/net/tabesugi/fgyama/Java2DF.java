@@ -759,17 +759,13 @@ public class Java2DF {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 DFKlass klass = _rootSpace.getKlass(name);
-                if (klass instanceof DFSourceKlass) {
-                    klass.load();
-                    fileScope.importStatic(klass);
-                }
+                klass.load();
+                fileScope.importStatic(klass);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
-                if (klass instanceof DFSourceKlass) {
-                    klass.load();
-                    fileScope.importStatic(klass, qname.getName());
-                }
+                klass.load();
+                fileScope.importStatic(klass, qname.getName());
             }
         }
         for (DFSourceKlass klass : _fileKlasses.get(key)) {
