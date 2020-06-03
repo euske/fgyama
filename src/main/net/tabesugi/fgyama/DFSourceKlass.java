@@ -81,8 +81,8 @@ public class DFSourceKlass extends DFKlass {
                 }
             }
         }
-    }        
-        
+    }
+
     public String getFilePath() {
         return _filePath;
     }
@@ -568,7 +568,7 @@ public class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void build()
+    protected void build()
         throws InvalidSyntax {
         super.build();
         DFTypeFinder finder = this.getFinder();

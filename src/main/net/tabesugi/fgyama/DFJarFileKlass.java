@@ -75,7 +75,7 @@ public class DFJarFileKlass extends DFKlass {
                 }
             }
         }
-    }        
+    }
 
     @Override
     public boolean isInterface() {
@@ -123,7 +123,7 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public void build()
+    protected void build()
         throws InvalidSyntax {
         super.build();
         DFTypeFinder finder = this.getFinder();

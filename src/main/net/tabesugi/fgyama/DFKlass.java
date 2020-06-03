@@ -20,7 +20,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 	Loaded,
     };
     private LoadState _state = LoadState.Unloaded;
-    
+
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
@@ -232,13 +232,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _state = LoadState.Loaded;
     }
 
-    public void build()
+    protected void build()
         throws InvalidSyntax {
         if (_outerKlass != null) {
             _outerKlass.load();
         }
     }
-    
+
     // Creates a parameterized klass.
     public DFKlass getConcreteKlass(DFKlass[] paramTypes)
 	throws InvalidSyntax {
