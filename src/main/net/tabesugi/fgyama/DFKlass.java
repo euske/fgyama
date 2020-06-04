@@ -70,7 +70,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             assert mapType != null;
             DFKlass paramType = paramTypes[i];
             assert paramType != null;
-            assert !(paramType instanceof DFMapType);
             _paramTypes.put(mapType.getName(), paramType);
         }
     }

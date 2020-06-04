@@ -117,6 +117,9 @@ public class DFTypeSpace {
             if (0 < b.length()) {
                 b.append(",");
             }
+            if (type instanceof DFMapType) {
+                type = ((DFMapType)type).getBoundKlass();
+            }
             b.append(type.getTypeName());
         }
         return "<"+b.toString()+">";

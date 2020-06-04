@@ -25,13 +25,7 @@ public class DFMapType extends DFKlass {
 
     @Override
     public String toString() {
-        if (_sig != null) {
-            return ("<DFMapType("+this.getTypeName()+" extends "+_sig+")>");
-        } else if (_types != null) {
-            return ("<DFMapType("+this.getTypeName()+" extends "+_types+")>");
-        } else {
-            return ("<DFMapType("+this.getTypeName()+")>");
-        }
+        return ("<DFMapType("+this.getTypeName()+")>");
     }
 
     @Override
@@ -39,15 +33,14 @@ public class DFMapType extends DFKlass {
         return (this == type);
     }
 
-    @Override
-    public DFKlass toKlass() {
-        return _boundKlass;
-    }
-
     public String getName() {
         return _name;
     }
 
+    public DFKlass getBoundKlass() {
+	return _boundKlass;
+    }
+    
     @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
         if (this == klass) return 0;
