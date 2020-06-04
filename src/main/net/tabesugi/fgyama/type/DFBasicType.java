@@ -54,7 +54,7 @@ public class DFBasicType implements DFType {
 
     @Override
     public DFKlass toKlass() {
-	if (_code == PrimitiveType.BYTE) {
+        if (_code == PrimitiveType.BYTE) {
             return DFBuiltinTypes.getByteKlass();
         } else if (_code == PrimitiveType.CHAR) {
             return DFBuiltinTypes.getCharacterKlass();
@@ -77,9 +77,9 @@ public class DFBasicType implements DFType {
 
     @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
-	// Auto-unboxing.
+        // Auto-unboxing.
         if (this == type) return 0;
-	if (this.toKlass() == type) return 0;
+        if (this.toKlass() == type) return 0;
         if (!(type instanceof DFBasicType)) return -1;
         int rank = ((DFBasicType)type)._rank;
         if (this._rank == 0 || rank == 0) return -1;
@@ -110,24 +110,24 @@ public class DFBasicType implements DFType {
         new DFBasicType(PrimitiveType.VOID, 0);
 
     public static DFBasicType getType(PrimitiveType.Code code) {
-	if (code == PrimitiveType.BYTE) {
-	    return BYTE;
-	} else if (code == PrimitiveType.CHAR) {
-	    return CHAR;
-	} else if (code == PrimitiveType.SHORT) {
-	    return SHORT;
-	} else if (code == PrimitiveType.INT) {
-	    return INT;
-	} else if (code == PrimitiveType.LONG) {
-	    return LONG;
-	} else if (code == PrimitiveType.FLOAT) {
-	    return FLOAT;
-	} else if (code == PrimitiveType.DOUBLE) {
-	    return DOUBLE;
-	} else if (code == PrimitiveType.BOOLEAN) {
-	    return BOOLEAN;
-	} else {
-	    return VOID;
-	}
+        if (code == PrimitiveType.BYTE) {
+            return BYTE;
+        } else if (code == PrimitiveType.CHAR) {
+            return CHAR;
+        } else if (code == PrimitiveType.SHORT) {
+            return SHORT;
+        } else if (code == PrimitiveType.INT) {
+            return INT;
+        } else if (code == PrimitiveType.LONG) {
+            return LONG;
+        } else if (code == PrimitiveType.FLOAT) {
+            return FLOAT;
+        } else if (code == PrimitiveType.DOUBLE) {
+            return DOUBLE;
+        } else if (code == PrimitiveType.BOOLEAN) {
+            return BOOLEAN;
+        } else {
+            return VOID;
+        }
     }
 }

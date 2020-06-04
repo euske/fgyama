@@ -108,9 +108,9 @@ public class DFLocalScope extends DFVarScope {
             DFType varType = finder.resolveSafe(varStmt.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-		int ndims = frag.getExtraDimensions();
+                int ndims = frag.getExtraDimensions();
                 this.addVar(frag.getName(),
-			    (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
+                            (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
                     this.buildExpr(finder, expr);
@@ -197,9 +197,9 @@ public class DFLocalScope extends DFVarScope {
             DFLocalScope innerScope = this.getChildByAST(ast);
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFType varType = finder.resolveSafe(decl.getType());
-	    int ndims = decl.getExtraDimensions();
+            int ndims = decl.getExtraDimensions();
             innerScope.addVar(decl.getName(),
-			      (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
+                              (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
             Statement stmt = eForStmt.getBody();
             innerScope.buildStmt(finder, stmt);
 
@@ -229,12 +229,12 @@ public class DFLocalScope extends DFVarScope {
                      (List<CatchClause>) tryStmt.catchClauses()) {
                 SingleVariableDeclaration decl = cc.getException();
                 DFLocalScope catchScope = this.getChildByAST(cc);
-		DFType varType = finder.resolveSafe(decl.getType());
-		int ndims = decl.getExtraDimensions();
+                DFType varType = finder.resolveSafe(decl.getType());
+                int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
                     varType = DFArrayType.getType(varType, ndims);
                 }
-		catchScope.addVar(decl.getName(), varType);
+                catchScope.addVar(decl.getName(), varType);
                 catchScope.buildStmt(finder, cc.getBody());
             }
             Block finBlock = tryStmt.getFinally();
@@ -339,11 +339,11 @@ public class DFLocalScope extends DFVarScope {
 
         } else if (ast instanceof VariableDeclarationExpression) {
             VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
-	    DFType varType = finder.resolveSafe(decl.getType());
+            DFType varType = finder.resolveSafe(decl.getType());
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 DFType vt = varType;
-		int ndims = frag.getExtraDimensions();
+                int ndims = frag.getExtraDimensions();
                 if (ndims != 0) {
                     vt = DFArrayType.getType(vt, ndims);
                 }
@@ -444,7 +444,7 @@ public class DFLocalScope extends DFVarScope {
             //  TypeMethodReference
             // MethodRef classes are processed separately.
 
-	} else {
+        } else {
             throw new InvalidSyntax(ast);
         }
     }
@@ -474,8 +474,8 @@ public class DFLocalScope extends DFVarScope {
             SimpleName fieldName = sfa.getName();
 
         } else if (ast instanceof ParenthesizedExpression) {
-	    ParenthesizedExpression paren = (ParenthesizedExpression)ast;
-	    this.buildAssignment(finder, paren.getExpression());
+            ParenthesizedExpression paren = (ParenthesizedExpression)ast;
+            this.buildAssignment(finder, paren.getExpression());
 
         } else {
             throw new InvalidSyntax(ast);

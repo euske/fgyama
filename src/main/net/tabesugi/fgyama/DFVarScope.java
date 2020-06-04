@@ -97,8 +97,8 @@ public abstract class DFVarScope {
     }
 
     public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
-	if (_outer == null) return null;
-	return _outer.findStaticMethod(name, argTypes);
+        if (_outer == null) return null;
+        return _outer.findStaticMethod(name, argTypes);
     }
 
     // dump: for debugging.

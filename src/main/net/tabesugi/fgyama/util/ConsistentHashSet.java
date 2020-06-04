@@ -23,7 +23,7 @@ public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
 
     @Override
     public String toString() {
-	return _set.toString();
+        return _set.toString();
     }
 
     @Override

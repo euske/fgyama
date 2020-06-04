@@ -16,7 +16,7 @@ public class DFBuiltinTypes {
         throws IOException, InvalidSyntax {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
-	_finder = new DFTypeFinder(rootSpace);
+        _finder = new DFTypeFinder(rootSpace);
         _langSpace = rootSpace.lookupSpace("java.lang");
         _object = createKlass("Object");
         _class = createKlass("Class");
@@ -49,27 +49,27 @@ public class DFBuiltinTypes {
         _float.load();
         _double.load();
         _boolean.load();
-	_void.load();
+        _void.load();
         _exception.load();
     }
 
     private static DFKlass createKlass(String id) {
-	DFJarFileKlass klass = new DFJarFileKlass(id, _langSpace, null, null);
-	klass.setFinder(_finder);
+        DFJarFileKlass klass = new DFJarFileKlass(id, _langSpace, null, null);
+        klass.setFinder(_finder);
         _langSpace.addKlass(id, klass);
-	return klass;
+        return klass;
     }
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass() {
             super("_Array", _langSpace, null, null);
-	    this.initScope();
+            this.initScope();
             this.addField("length", false, DFBasicType.INT);
         }
-	public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-	    if (this == klass) return 0;
-	    return -1;
-	}
+        public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+            if (this == klass) return 0;
+            return -1;
+        }
     }
 
     private static DFKlass _object = null;

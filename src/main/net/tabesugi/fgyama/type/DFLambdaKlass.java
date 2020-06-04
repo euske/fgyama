@@ -15,7 +15,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
         public FunctionalMethod(String id) {
             super(DFLambdaKlass.this, CallStyle.Lambda, false,
-		  id, id, DFLambdaKlass.this._lambdaScope);
+                  id, id, DFLambdaKlass.this._lambdaScope);
         }
 
         @Override
@@ -86,7 +86,7 @@ class DFLambdaKlass extends DFSourceKlass {
     public DFLambdaKlass(
         String name, DFTypeSpace outerSpace, DFVarScope outerScope,
         DFSourceKlass outerKlass) {
-	super(name, outerSpace, outerScope, outerKlass);
+        super(name, outerSpace, outerScope, outerKlass);
         _lambdaScope = new LambdaScope(outerScope, name);
         _funcMethod = new FunctionalMethod(FUNC_NAME);
     }
@@ -98,8 +98,8 @@ class DFLambdaKlass extends DFSourceKlass {
 
     @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-	if (klass instanceof DFSourceKlass &&  
-	    ((DFSourceKlass)klass).isFuncInterface()) return 0;
+        if (klass instanceof DFSourceKlass &&  
+            ((DFSourceKlass)klass).isFuncInterface()) return 0;
         return -1;
     }
 
@@ -116,17 +116,17 @@ class DFLambdaKlass extends DFSourceKlass {
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
-	assert _funcMethod.getFuncType() == null;
+        assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;
-	_funcMethod.setFuncType(funcMethod.getFuncType());
+        _funcMethod.setFuncType(funcMethod.getFuncType());
     }
 
     @Override
     protected void buildTypeFromDecls(ASTNode ast)
-	throws InvalidSyntax {
+        throws InvalidSyntax {
         LambdaExpression lambda = (LambdaExpression)ast;
         ASTNode body = lambda.getBody();
         if (body instanceof Statement) {

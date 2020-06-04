@@ -18,9 +18,9 @@ public class DFMapType extends DFKlass {
     private List<Type> _types = null;
 
     public DFMapType(String name, DFTypeSpace outerSpace) {
-	super(name, outerSpace, null, null);
-	_name = name;
-	_boundKlass = DFBuiltinTypes.getObjectKlass();
+        super(name, outerSpace, null, null);
+        _name = name;
+        _boundKlass = DFBuiltinTypes.getObjectKlass();
     }
 
     @Override
@@ -45,12 +45,12 @@ public class DFMapType extends DFKlass {
     }
 
     public String getName() {
-	return _name;
+        return _name;
     }
 
     @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-	if (this == klass) return 0;
+        if (this == klass) return 0;
         assert !(klass instanceof DFMapType);
         if (typeMap == null) {
             return _boundKlass.isSubclassOf(klass, typeMap);
@@ -79,26 +79,26 @@ public class DFMapType extends DFKlass {
     public void build(DFTypeFinder finder)
         throws InvalidSyntax {
         assert _sig == null || _types == null;
-	if (_sig != null) {
-	    JNITypeParser parser = new JNITypeParser(_sig);
-	    try {
-		_boundKlass = parser.resolveType(finder).toKlass();
-	    } catch (TypeNotFound e) {
-		Logger.error(
-		    "DFMapType.build: TypeNotFound",
-		    this, e.name, _sig, finder);
-	    }
-	} else if (_types != null) {
-	    try {
-		for (Type type : _types) {
-		    _boundKlass = finder.resolve(type).toKlass();
-		    break;
-		}
-	    } catch (TypeNotFound e) {
-		Logger.error(
-		    "DFMapType.build: TypeNotFound",
-		    this, e.name, _types);
-	    }
-	}
+        if (_sig != null) {
+            JNITypeParser parser = new JNITypeParser(_sig);
+            try {
+                _boundKlass = parser.resolveType(finder).toKlass();
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFMapType.build: TypeNotFound",
+                    this, e.name, _sig, finder);
+            }
+        } else if (_types != null) {
+            try {
+                for (Type type : _types) {
+                    _boundKlass = finder.resolve(type).toKlass();
+                    break;
+                }
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DFMapType.build: TypeNotFound",
+                    this, e.name, _types);
+            }
+        }
     }
 }

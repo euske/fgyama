@@ -13,21 +13,21 @@ public class Logger {
     public static int LogLevel = 1;
 
     public static void debug(Object ... a) {
-	if (2 <= LogLevel) {
+        if (2 <= LogLevel) {
             println(a);
-	}
+        }
     }
 
     public static void info(Object ... a) {
-	if (1 <= LogLevel) {
+        if (1 <= LogLevel) {
             println(a);
-	}
+        }
     }
 
     public static void error(Object ... a) {
-	if (0 <= LogLevel) {
+        if (0 <= LogLevel) {
             println(a);
-	}
+        }
     }
 
     private static void println(Object[] a) {

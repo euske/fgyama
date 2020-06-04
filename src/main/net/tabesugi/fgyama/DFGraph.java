@@ -802,36 +802,36 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	Statement stmt)
+        Statement stmt)
         throws InvalidSyntax, EntityNotFound {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
-	    // "assert x;"
+            // "assert x;"
 
         } else if (stmt instanceof Block) {
-	    // "{ ... }"
+            // "{ ... }"
             processBlock(ctx, scope, frame, (Block)stmt);
 
         } else if (stmt instanceof EmptyStatement) {
 
         } else if (stmt instanceof VariableDeclarationStatement) {
-	    // "int a = 2;"
+            // "int a = 2;"
             processVariableDeclarationStatement(
                 ctx, scope, frame, (VariableDeclarationStatement)stmt);
 
         } else if (stmt instanceof ExpressionStatement) {
-	    // "foo();"
+            // "foo();"
             processExpressionStatement(
                 ctx, scope, frame, (ExpressionStatement)stmt);
 
         } else if (stmt instanceof IfStatement) {
-	    // "if (c) { ... } else { ... }"
+            // "if (c) { ... } else { ... }"
             processIfStatement(
                 ctx, scope, frame, (IfStatement)stmt);
 
         } else if (stmt instanceof SwitchStatement) {
-	    // "switch (x) { case 0: ...; }"
+            // "switch (x) { case 0: ...; }"
             processSwitchStatement(
                 ctx, scope, frame, (SwitchStatement)stmt);
 
@@ -840,27 +840,27 @@ public abstract class DFGraph {
             throw new InvalidSyntax(stmt);
 
         } else if (stmt instanceof WhileStatement) {
-	    // "while (c) { ... }"
+            // "while (c) { ... }"
             processWhileStatement(
                 ctx, scope, frame, (WhileStatement)stmt);
 
         } else if (stmt instanceof DoStatement) {
-	    // "do { ... } while (c);"
+            // "do { ... } while (c);"
             processDoStatement(
                 ctx, scope, frame, (DoStatement)stmt);
 
         } else if (stmt instanceof ForStatement) {
-	    // "for (i = 0; i < 10; i++) { ... }"
+            // "for (i = 0; i < 10; i++) { ... }"
             processForStatement(
                 ctx, scope, frame, (ForStatement)stmt);
 
         } else if (stmt instanceof EnhancedForStatement) {
-	    // "for (x : array) { ... }"
+            // "for (x : array) { ... }"
             processEnhancedForStatement(
                 ctx, scope, frame, (EnhancedForStatement)stmt);
 
         } else if (stmt instanceof ReturnStatement) {
-	    // "return 42;"
+            // "return 42;"
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
             DFFrame dstFrame = frame.find(DFFrame.RETURNABLE);
             assert dstFrame != null;
@@ -876,7 +876,7 @@ public abstract class DFGraph {
             }
 
         } else if (stmt instanceof BreakStatement) {
-	    // "break;"
+            // "break;"
             BreakStatement breakStmt = (BreakStatement)stmt;
             SimpleName labelName = breakStmt.getLabel();
             String dstLabel = (labelName != null)?
@@ -887,7 +887,7 @@ public abstract class DFGraph {
             }
 
         } else if (stmt instanceof ContinueStatement) {
-	    // "continue;"
+            // "continue;"
             ContinueStatement contStmt = (ContinueStatement)stmt;
             SimpleName labelName = contStmt.getLabel();
             String dstLabel = (labelName != null)?
@@ -898,7 +898,7 @@ public abstract class DFGraph {
             }
 
         } else if (stmt instanceof LabeledStatement) {
-	    // "here:"
+            // "here:"
             LabeledStatement labeledStmt = (LabeledStatement)stmt;
             DFFrame labeledFrame = frame.getChildByAST(labeledStmt);
             processStatement(
@@ -906,7 +906,7 @@ public abstract class DFGraph {
             this.endBreaks(ctx, frame, labeledFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
-	    // "synchronized (this) { ... }"
+            // "synchronized (this) { ... }"
             SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             processExpression(
                 ctx, scope, frame, syncStmt.getExpression());
@@ -914,12 +914,12 @@ public abstract class DFGraph {
                 ctx, scope, frame, syncStmt.getBody());
 
         } else if (stmt instanceof TryStatement) {
-	    // "try { ... } catch (e) { ... }"
+            // "try { ... } catch (e) { ... }"
             processTryStatement(
                 ctx, scope, frame, (TryStatement)stmt);
 
         } else if (stmt instanceof ThrowStatement) {
-	    // "throw e;"
+            // "throw e;"
             ThrowStatement throwStmt = (ThrowStatement)stmt;
             DFNode exc = processExpression(
                 ctx, scope, frame, throwStmt.getExpression());
@@ -939,22 +939,22 @@ public abstract class DFGraph {
             }
 
         } else if (stmt instanceof ConstructorInvocation) {
-	    // "this(args)"
+            // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             DFNode obj = ctx.get(scope.lookupThis());
-	    int nargs = ci.arguments().size();
-	    DFNode[] args = new DFNode[nargs];
-	    DFType[] argTypes = new DFType[nargs];
-	    for (int i = 0; i < nargs; i++) {
-		Expression arg = (Expression)ci.arguments().get(i);
+            int nargs = ci.arguments().size();
+            DFNode[] args = new DFNode[nargs];
+            DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+                Expression arg = (Expression)ci.arguments().get(i);
                 DFNode node = processExpression(ctx, scope, frame, arg);
-		args[i] = node;
-		argTypes[i] = node.getNodeType();
+                args[i] = node;
+                argTypes[i] = node.getNodeType();
             }
             DFKlass klass = scope.lookupThis().getRefType().toKlass();
             DFMethod constructor = klass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-	    if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
+            if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -964,24 +964,24 @@ public abstract class DFGraph {
             this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof SuperConstructorInvocation) {
-	    // "super(args)"
+            // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             DFNode obj = ctx.get(scope.lookupThis());
-	    int nargs = sci.arguments().size();
-	    DFNode[] args = new DFNode[nargs];
-	    DFType[] argTypes = new DFType[nargs];
-	    for (int i = 0; i < nargs; i++) {
-		Expression arg = (Expression)sci.arguments().get(i);
+            int nargs = sci.arguments().size();
+            DFNode[] args = new DFNode[nargs];
+            DFType[] argTypes = new DFType[nargs];
+            for (int i = 0; i < nargs; i++) {
+                Expression arg = (Expression)sci.arguments().get(i);
                 DFNode node = processExpression(ctx, scope, frame, arg);
-		args[i] = node;
-		argTypes[i] = node.getNodeType();
+                args[i] = node;
+                argTypes[i] = node.getNodeType();
             }
             DFKlass klass = obj.getNodeType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
             DFMethod constructor = baseKlass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-	    if (constructor == null) throw new MethodNotFound(baseKlass+"<init>", argTypes);
+            if (constructor == null) throw new MethodNotFound(baseKlass+"<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFunctionType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -991,7 +991,7 @@ public abstract class DFGraph {
             this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof TypeDeclarationStatement) {
-	    // "class K { ... }"
+            // "class K { ... }"
             // Inline classes are processed separately.
 
         } else {
@@ -1015,11 +1015,11 @@ public abstract class DFGraph {
 
         try {
             if (expr instanceof Annotation) {
-		// "@Annotation"
+                // "@Annotation"
                 return null;
 
             } else if (expr instanceof Name) {
-		// "a.b"
+                // "a.b"
                 Name name = (Name)expr;
                 if (name.isSimpleName()) {
                     DFRef ref = scope.lookupVar((SimpleName)name);
@@ -1040,7 +1040,7 @@ public abstract class DFGraph {
                     try {
                         // Try assuming it's a variable access.
                         obj = processExpression(
-			    ctx, scope, frame, qname.getQualifier());
+                            ctx, scope, frame, qname.getQualifier());
                         klass = obj.getNodeType().toKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
@@ -1048,14 +1048,14 @@ public abstract class DFGraph {
                     }
                     SimpleName fieldName = qname.getName();
                     DFRef ref = klass.getField(fieldName);
-		    if (ref == null) throw new VariableNotFound("."+fieldName);
+                    if (ref == null) throw new VariableNotFound("."+fieldName);
                     DFNode node = new FieldRefNode(this, scope, ref, qname, obj);
                     node.accept(ctx.get(ref));
                     return node;
                 }
 
             } else if (expr instanceof ThisExpression) {
-		// "this"
+                // "this"
                 ThisExpression thisExpr = (ThisExpression)expr;
                 Name name = thisExpr.getQualifier();
                 DFRef ref;
@@ -1070,34 +1070,34 @@ public abstract class DFGraph {
                 return node;
 
             } else if (expr instanceof BooleanLiteral) {
-		// "true", "false"
+                // "true", "false"
                 boolean value = ((BooleanLiteral)expr).booleanValue();
                 return new ConstNode(
                     this, scope, DFBasicType.BOOLEAN,
                     expr, Boolean.toString(value));
 
             } else if (expr instanceof CharacterLiteral) {
-		// "'c'"
+                // "'c'"
                 char value = ((CharacterLiteral)expr).charValue();
                 return new ConstNode(
                     this, scope, DFBasicType.CHAR,
                     expr, Utils.quote(value));
 
             } else if (expr instanceof NullLiteral) {
-		// "null"
+                // "null"
                 return new ConstNode(
                     this, scope, DFNullType.NULL,
                     expr, "null");
 
             } else if (expr instanceof NumberLiteral) {
-		// "42"
+                // "42"
                 String value = ((NumberLiteral)expr).getToken();
                 return new ConstNode(
                     this, scope, DFBasicType.INT,
                     expr, value);
 
             } else if (expr instanceof StringLiteral) {
-		// ""abc""
+                // ""abc""
                 String value = ((StringLiteral)expr).getLiteralValue();
                 return new ConstNode(
                     this, scope,
@@ -1105,7 +1105,7 @@ public abstract class DFGraph {
                     expr, Utils.quote(value));
 
             } else if (expr instanceof TypeLiteral) {
-		// "A.class"
+                // "A.class"
                 Type value = ((TypeLiteral)expr).getType();
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass();
@@ -1120,7 +1120,7 @@ public abstract class DFGraph {
                 Expression operand = prefix.getOperand();
                 if (op == PrefixExpression.Operator.INCREMENT ||
                     op == PrefixExpression.Operator.DECREMENT) {
-		    // "++x"
+                    // "++x"
                     DFNode assign = processAssignment(ctx, scope, frame, operand);
                     DFRef ref = assign.getRef();
                     DFNode node = new PrefixNode(
@@ -1131,7 +1131,7 @@ public abstract class DFGraph {
                     return node;
 
                 } else {
-		    // "!a", "+a", "-a", "~a"
+                    // "!a", "+a", "-a", "~a"
                     DFNode value = processExpression(ctx, scope, frame, operand);
                     DFType type2 = DFNode.inferPrefixType(value.getNodeType(), op);
                     DFNode node = new PrefixNode(
@@ -1141,7 +1141,7 @@ public abstract class DFGraph {
                 }
 
             } else if (expr instanceof PostfixExpression) {
-		// "y--"
+                // "y--"
                 PostfixExpression postfix = (PostfixExpression)expr;
                 PostfixExpression.Operator op = postfix.getOperator();
                 Expression operand = postfix.getOperand();
@@ -1156,7 +1156,7 @@ public abstract class DFGraph {
                 return node;
 
             } else if (expr instanceof InfixExpression) {
-		// "a+b"
+                // "a+b"
                 InfixExpression infix = (InfixExpression)expr;
                 InfixExpression.Operator op = infix.getOperator();
                 DFNode lvalue = processExpression(
@@ -1169,13 +1169,13 @@ public abstract class DFGraph {
                     this, scope, type2, expr, op, lvalue, rvalue);
 
             } else if (expr instanceof ParenthesizedExpression) {
-		// "(expr)"
+                // "(expr)"
                 ParenthesizedExpression paren = (ParenthesizedExpression)expr;
                 return processExpression(
                     ctx, scope, frame, paren.getExpression());
 
             } else if (expr instanceof Assignment) {
-		// "p = q"
+                // "p = q"
                 Assignment assn = (Assignment)expr;
                 Assignment.Operator op = assn.getOperator();
                 DFNode assign = processAssignment(
@@ -1193,7 +1193,7 @@ public abstract class DFGraph {
                 return assign;
 
             } else if (expr instanceof VariableDeclarationExpression) {
-		// "int a=2"
+                // "int a=2"
                 VariableDeclarationExpression decl =
                     (VariableDeclarationExpression)expr;
                 return processVariableDeclaration(
@@ -1227,22 +1227,22 @@ public abstract class DFGraph {
                     }
                 }
                 DFKlass klass = instType.toKlass();
-		int nargs = invoke.arguments().size();
-		DFNode[] args = new DFNode[nargs];
-		DFType[] argTypes = new DFType[nargs];
-		for (int i = 0; i < nargs; i++) {
-		    Expression arg = (Expression)invoke.arguments().get(i);
+                int nargs = invoke.arguments().size();
+                DFNode[] args = new DFNode[nargs];
+                DFType[] argTypes = new DFType[nargs];
+                for (int i = 0; i < nargs; i++) {
+                    Expression arg = (Expression)invoke.arguments().get(i);
                     DFNode node = processExpression(ctx, scope, frame, arg);
-		    args[i] = node;
-		    argTypes[i] = node.getNodeType();
+                    args[i] = node;
+                    argTypes[i] = node.getNodeType();
                 }
                 DFMethod method = klass.findMethod(
-		    callStyle, invoke.getName(), argTypes);
-		if (method == null) {
-		    // try static imports.
-		    method = scope.findStaticMethod(
-			invoke.getName(), argTypes);
-		    if (method == null) {
+                    callStyle, invoke.getName(), argTypes);
+                if (method == null) {
+                    // try static imports.
+                    method = scope.findStaticMethod(
+                        invoke.getName(), argTypes);
+                    if (method == null) {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         method = klass.addFallbackMethod(id, argTypes);
@@ -1264,25 +1264,25 @@ public abstract class DFGraph {
                 return new ReceiveNode(this, scope, call, invoke);
 
             } else if (expr instanceof SuperMethodInvocation) {
-		// "super.method()"
+                // "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
                 DFNode obj = ctx.get(scope.lookupThis());
-		int nargs = sinvoke.arguments().size();
-		DFNode[] args = new DFNode[nargs];
-		DFType[] argTypes = new DFType[nargs];
-		for (int i = 0; i < nargs; i++) {
-		    Expression arg = (Expression)sinvoke.arguments().get(i);
+                int nargs = sinvoke.arguments().size();
+                DFNode[] args = new DFNode[nargs];
+                DFType[] argTypes = new DFType[nargs];
+                for (int i = 0; i < nargs; i++) {
+                    Expression arg = (Expression)sinvoke.arguments().get(i);
                     DFNode node = processExpression(ctx, scope, frame, arg);
-		    args[i] = node;
-		    argTypes[i] = node.getNodeType();
+                    args[i] = node;
+                    argTypes[i] = node.getNodeType();
                 }
                 DFKlass klass = obj.getNodeType().toKlass();
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
                 DFMethod method = baseKlass.findMethod(
-		    DFMethod.CallStyle.InstanceMethod,
-		    sinvoke.getName(), argTypes);
-		if (method == null) {
+                    DFMethod.CallStyle.InstanceMethod,
+                    sinvoke.getName(), argTypes);
+                if (method == null) {
                     // fallback method.
                     String id = sinvoke.getName().getIdentifier();
                     method = baseKlass.addFallbackMethod(id, argTypes);
@@ -1301,7 +1301,7 @@ public abstract class DFGraph {
                 return new ReceiveNode(this, scope, call, sinvoke);
 
             } else if (expr instanceof ArrayCreation) {
-		// "new int[10]"
+                // "new int[10]"
                 ArrayCreation ac = (ArrayCreation)expr;
                 DFType elemType = _finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
@@ -1338,7 +1338,7 @@ public abstract class DFGraph {
                 return array;
 
             } else if (expr instanceof ArrayAccess) {
-		// "a[0]"
+                // "a[0]"
                 ArrayAccess aa = (ArrayAccess)expr;
                 DFNode array = processExpression(
                     ctx, scope, frame, aa.getArray());
@@ -1351,7 +1351,7 @@ public abstract class DFGraph {
                 return node;
 
             } else if (expr instanceof FieldAccess) {
-		// "(expr).foo"
+                // "(expr).foo"
                 FieldAccess fa = (FieldAccess)expr;
                 Expression expr1 = fa.getExpression();
                 DFNode obj = null;
@@ -1369,25 +1369,25 @@ public abstract class DFGraph {
                 DFKlass klass = instType.toKlass();
                 SimpleName fieldName = fa.getName();
                 DFRef ref = klass.getField(fieldName);
-		if (ref == null) throw new VariableNotFound("."+fieldName);
+                if (ref == null) throw new VariableNotFound("."+fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, fa, obj);
                 node.accept(ctx.get(ref));
                 return node;
 
             } else if (expr instanceof SuperFieldAccess) {
-		// "super.baa"
+                // "super.baa"
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFNode obj = ctx.get(scope.lookupThis());
                 DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-		DFRef ref = klass.getField(fieldName);
-		if (ref == null) throw new VariableNotFound("."+fieldName);
+                DFRef ref = klass.getField(fieldName);
+                if (ref == null) throw new VariableNotFound("."+fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
                 return node;
 
             } else if (expr instanceof CastExpression) {
-		// "(String)"
+                // "(String)"
                 CastExpression cast = (CastExpression)expr;
                 DFType castType = _finder.resolve(cast.getType());
                 DFNode node = new TypeCastNode(this, scope, castType, cast);
@@ -1396,14 +1396,14 @@ public abstract class DFGraph {
                 return node;
 
             } else if (expr instanceof ClassInstanceCreation) {
-		// "new T()"
+                // "new T()"
                 ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
                 DFKlass instKlass;
                 if (cstr.getAnonymousClassDeclaration() != null) {
                     // Anonymous classes are processed separately.
                     String id = Utils.encodeASTNode(cstr);
-		    DFType anonType = _finder.lookupType(id);
-		    instKlass = anonType.toKlass();
+                    DFType anonType = _finder.lookupType(id);
+                    instKlass = anonType.toKlass();
                 } else {
                     instKlass = _finder.resolve(cstr.getType()).toKlass();
                 }
@@ -1412,18 +1412,18 @@ public abstract class DFGraph {
                 if (expr1 != null) {
                     obj = processExpression(ctx, scope, frame, expr1);
                 }
-		int nargs = cstr.arguments().size();
-		DFNode[] args = new DFNode[nargs];
-		DFType[] argTypes = new DFType[nargs];
-		for (int i = 0; i < nargs; i++) {
-		    Expression arg = (Expression)cstr.arguments().get(i);
+                int nargs = cstr.arguments().size();
+                DFNode[] args = new DFNode[nargs];
+                DFType[] argTypes = new DFType[nargs];
+                for (int i = 0; i < nargs; i++) {
+                    Expression arg = (Expression)cstr.arguments().get(i);
                     DFNode node = processExpression(ctx, scope, frame, arg);
-		    args[i] = node;
-		    argTypes[i] = node.getNodeType();
+                    args[i] = node;
+                    argTypes[i] = node.getNodeType();
                 }
                 DFMethod constructor = instKlass.findMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
-		if (constructor == null) throw new MethodNotFound(instKlass+"<init>", argTypes);
+                if (constructor == null) throw new MethodNotFound(instKlass+"<init>", argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFunctionType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
@@ -1434,7 +1434,7 @@ public abstract class DFGraph {
                 return new ReceiveNode(this, scope, call, cstr);
 
             } else if (expr instanceof ConditionalExpression) {
-		// "c? a : b"
+                // "c? a : b"
                 ConditionalExpression cond = (ConditionalExpression)expr;
                 DFNode condValue = processExpression(
                     ctx, scope, frame, cond.getExpression());
@@ -1449,7 +1449,7 @@ public abstract class DFGraph {
                 return join;
 
             } else if (expr instanceof InstanceofExpression) {
-		// "a instanceof A"
+                // "a instanceof A"
                 InstanceofExpression instof = (InstanceofExpression)expr;
                 DFType instType = _finder.resolve(instof.getRightOperand());
                 DFNode node = new TypeCheckNode(this, scope, instof, instType);
@@ -1458,11 +1458,11 @@ public abstract class DFGraph {
                 return node;
 
             } else if (expr instanceof LambdaExpression) {
-		// "x -> { ... }"
+                // "x -> { ... }"
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = Utils.encodeASTNode(lambda);
                 DFType lambdaType = _finder.lookupType(id);
-		assert lambdaType instanceof DFLambdaKlass;
+                assert lambdaType instanceof DFLambdaKlass;
                 // Capture values.
                 CaptureNode node = new CaptureNode(this, scope, lambdaType, lambda);
                 for (DFLambdaKlass.CapturedRef captured :
@@ -1476,7 +1476,7 @@ public abstract class DFGraph {
                 ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
                 String id = Utils.encodeASTNode(methodref);
                 DFType methodRefType = _finder.lookupType(id);
-		assert methodRefType instanceof DFMethodRefKlass;
+                assert methodRefType instanceof DFMethodRefKlass;
                 CaptureNode node = new CaptureNode(this, scope, methodRefType, methodref);
                 try {
                     // Try assuming it's an ExpresionMethodReference.
@@ -1496,7 +1496,7 @@ public abstract class DFGraph {
                 MethodReference methodref = (MethodReference)expr;
                 String id = Utils.encodeASTNode(methodref);
                 DFType methodRefType = _finder.lookupType(id);
-		assert methodRefType instanceof DFMethodRefKlass;
+                assert methodRefType instanceof DFMethodRefKlass;
                 return new CaptureNode(this, scope, methodRefType, methodref);
 
             } else {
@@ -1520,7 +1520,7 @@ public abstract class DFGraph {
         assert expr != null;
 
         if (expr instanceof Name) {
-	    // "a.b"
+            // "a.b"
             Name name = (Name)expr;
             if (name.isSimpleName()) {
                 DFRef ref = scope.lookupVar((SimpleName)name);
@@ -1546,13 +1546,13 @@ public abstract class DFGraph {
                 }
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
-		DFRef ref = klass.getField(fieldName);
-		if (ref == null) throw new VariableNotFound("."+fieldName);
+                DFRef ref = klass.getField(fieldName);
+                if (ref == null) throw new VariableNotFound("."+fieldName);
                 return new FieldAssignNode(this, scope, ref, expr, obj);
             }
 
         } else if (expr instanceof ArrayAccess) {
-	    // "a[0]"
+            // "a[0]"
             ArrayAccess aa = (ArrayAccess)expr;
             DFNode array = processExpression(
                 ctx, scope, frame, aa.getArray());
@@ -1563,30 +1563,30 @@ public abstract class DFGraph {
                 this, scope, ref, expr, array, index);
 
         } else if (expr instanceof FieldAccess) {
-	    // "(expr).foo"
+            // "(expr).foo"
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
             DFNode obj = processExpression(ctx, scope, frame, expr1);
             DFKlass klass = obj.getNodeType().toKlass();
             SimpleName fieldName = fa.getName();
-	    DFRef ref = klass.getField(fieldName);
-	    if (ref == null) throw new VariableNotFound("."+fieldName);
+            DFRef ref = klass.getField(fieldName);
+            if (ref == null) throw new VariableNotFound("."+fieldName);
             return new FieldAssignNode(this, scope, ref, expr, obj);
 
         } else if (expr instanceof SuperFieldAccess) {
-	    // "super.baa"
+            // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFNode obj = ctx.get(scope.lookupThis());
             DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-	    DFRef ref = klass.getField(fieldName);
-	    if (ref == null) throw new VariableNotFound("."+fieldName);
+            DFRef ref = klass.getField(fieldName);
+            if (ref == null) throw new VariableNotFound("."+fieldName);
             return new FieldAssignNode(this, scope, ref, expr, obj);
 
-	} else if (expr instanceof ParenthesizedExpression) {
-	    ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-	    return processAssignment(
-		ctx, scope, frame, paren.getExpression());
+        } else if (expr instanceof ParenthesizedExpression) {
+            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
+            return processAssignment(
+                ctx, scope, frame, paren.getExpression());
 
         } else {
             throw new InvalidSyntax(expr);
@@ -1598,7 +1598,7 @@ public abstract class DFGraph {
      */
     private DFNode processVariableDeclaration(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	List<VariableDeclarationFragment> frags)
+        List<VariableDeclarationFragment> frags)
         throws InvalidSyntax, EntityNotFound {
 
         DFNode value = null;
@@ -1749,7 +1749,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processBlock(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	Block block)
+        Block block)
         throws InvalidSyntax, EntityNotFound {
         DFLocalScope innerScope = scope.getChildByAST(block);
         DFFrame innerFrame = frame.getChildByAST(block);
@@ -1762,7 +1762,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processVariableDeclarationStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	VariableDeclarationStatement varStmt)
+        VariableDeclarationStatement varStmt)
         throws InvalidSyntax, EntityNotFound {
         processVariableDeclaration(
             ctx, scope, frame, varStmt.fragments());
@@ -1770,7 +1770,7 @@ public abstract class DFGraph {
 
     private void processExpressionStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	ExpressionStatement exprStmt)
+        ExpressionStatement exprStmt)
         throws InvalidSyntax, EntityNotFound {
         processExpression(
             ctx, scope, frame, exprStmt.getExpression());
@@ -1778,10 +1778,10 @@ public abstract class DFGraph {
 
     private void processIfStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	IfStatement ifStmt)
+        IfStatement ifStmt)
         throws InvalidSyntax, EntityNotFound {
         DFNode condValue = processExpression(
-	    ctx, scope, frame, ifStmt.getExpression());
+            ctx, scope, frame, ifStmt.getExpression());
         DFFrame ifFrame = frame.getChildByAST(ifStmt);
 
         Statement thenStmt = ifStmt.getThenStatement();
@@ -1866,7 +1866,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processSwitchStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	SwitchStatement switchStmt)
+        SwitchStatement switchStmt)
         throws InvalidSyntax, EntityNotFound {
         DFNode switchValue = processExpression(
             ctx, scope, frame, switchStmt.getExpression());
@@ -1903,7 +1903,7 @@ public abstract class DFGraph {
                     if (enumKlass != null && expr instanceof SimpleName) {
                         // special treatment for enum.
                         DFRef ref = enumKlass.getField((SimpleName)expr);
-			if (ref == null) throw new VariableNotFound("."+expr);
+                        if (ref == null) throw new VariableNotFound("."+expr);
                         DFNode node = new FieldRefNode(this, scope, ref, expr, null);
                         node.accept(ctx.get(ref));
                         caseNode.addMatch(node);
@@ -1960,7 +1960,7 @@ public abstract class DFGraph {
 
     private void processWhileStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	WhileStatement whileStmt)
+        WhileStatement whileStmt)
         throws InvalidSyntax, EntityNotFound {
         DFLocalScope loopScope = scope.getChildByAST(whileStmt);
         DFFrame loopFrame = frame.getChildByAST(whileStmt);
@@ -1976,7 +1976,7 @@ public abstract class DFGraph {
 
     private void processDoStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	DoStatement doStmt)
+        DoStatement doStmt)
         throws InvalidSyntax, EntityNotFound {
         DFLocalScope loopScope = scope.getChildByAST(doStmt);
         DFFrame loopFrame = frame.getChildByAST(doStmt);
@@ -1993,7 +1993,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processForStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	ForStatement forStmt)
+        ForStatement forStmt)
         throws InvalidSyntax, EntityNotFound {
         DFLocalScope loopScope = scope.getChildByAST(forStmt);
         DFContext loopCtx = new DFContext(this, loopScope);
@@ -2022,7 +2022,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processEnhancedForStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	EnhancedForStatement eForStmt)
+        EnhancedForStatement eForStmt)
         throws InvalidSyntax, EntityNotFound {
         Expression expr = eForStmt.getExpression();
         DFLocalScope loopScope = scope.getChildByAST(eForStmt);
@@ -2045,7 +2045,7 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private void processTryStatement(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-	TryStatement tryStmt)
+        TryStatement tryStmt)
         throws InvalidSyntax, EntityNotFound {
         List<CatchClause> catches = (List<CatchClause>)tryStmt.catchClauses();
 
@@ -2299,7 +2299,7 @@ public abstract class DFGraph {
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
                     DFRef ref = klass.getField(frag.getName());
-		    if (ref == null) throw new VariableNotFound("."+frag.getName());
+                    if (ref == null) throw new VariableNotFound("."+frag.getName());
                     DFNode value = null;
                     Expression init = frag.getInitializer();
                     if (init != null) {

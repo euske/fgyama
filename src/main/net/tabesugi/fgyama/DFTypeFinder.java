@@ -57,7 +57,7 @@ public class DFTypeFinder {
     private void toString(List<DFTypeSpace> path) {
         path.add(_space);
         if (_next != null) {
-	    _next.toString(path);
+            _next.toString(path);
         }
     }
 
@@ -92,7 +92,7 @@ public class DFTypeFinder {
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             DFType klassType = this.lookupType(stype.getName());
-	    klassType.toKlass().load();
+            klassType.toKlass().load();
             return klassType;
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
@@ -177,7 +177,7 @@ public class DFTypeFinder {
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
             DFType klassType = this.lookupType(className);
-	    klassType.toKlass().load();
+            klassType.toKlass().load();
             return klassType;
         } else {
             // ???
@@ -187,23 +187,23 @@ public class DFTypeFinder {
 
     public DFType resolveSafe(Type type)
         throws InvalidSyntax {
-	try {
-	    return this.resolve(type);
-	} catch (TypeNotFound e) {
-	    e.setAst(type);
-	    Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
-	    return DFUnknownType.UNKNOWN;
-	}
+        try {
+            return this.resolve(type);
+        } catch (TypeNotFound e) {
+            e.setAst(type);
+            Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
+            return DFUnknownType.UNKNOWN;
+        }
     }
 
     public DFType resolveSafe(org.apache.bcel.generic.Type type)
         throws InvalidSyntax {
-	try {
-	    return this.resolve(type);
-	} catch (TypeNotFound e) {
-	    Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
-	    return DFUnknownType.UNKNOWN;
-	}
+        try {
+            return this.resolve(type);
+        } catch (TypeNotFound e) {
+            Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
+            return DFUnknownType.UNKNOWN;
+        }
     }
 
     // dump: for debugging.

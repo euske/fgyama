@@ -18,10 +18,10 @@ public class UnitTestDF extends XMLTestCase {
 
     public UnitTestDF(String name)
         throws Exception {
-	super(name);
-	XMLUnit.setIgnoreComments(true);
-	XMLUnit.setIgnoreWhitespace(true);
-	XMLUnit.setNormalize(true);
+        super(name);
+        XMLUnit.setIgnoreComments(true);
+        XMLUnit.setIgnoreWhitespace(true);
+        XMLUnit.setNormalize(true);
         if (_rootSpace == null) {
             _rootSpace = new DFRootTypeSpace();
             DFBuiltinTypes.initialize(_rootSpace);
@@ -32,9 +32,9 @@ public class UnitTestDF extends XMLTestCase {
     }
 
     public void compareXml(String[] javaPaths, String xmlPath)
-	throws Exception {
+        throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-	XmlExporter exporter = new XmlExporter(out);
+        XmlExporter exporter = new XmlExporter(out);
         _converter.addExporter(exporter);
         Map<String, CompilationUnit> srcs =
             new HashMap<String, CompilationUnit>();
@@ -58,32 +58,32 @@ public class UnitTestDF extends XMLTestCase {
         for (DFSourceKlass klass : klasses) {
             _converter.buildGraphs(counter, klass, false);
         }
-	exporter.close();
+        exporter.close();
         out.close();
         _converter.removeExporter(exporter);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         Document outdoc = Utils.readXml(in);
         in.close();
         Document refdoc = Utils.readXml(xmlPath);
-	try {
-	    assertXMLEqual(refdoc, outdoc);
-	} catch (junit.framework.AssertionFailedError e) {
-	    OutputStream errout = new FileOutputStream(new File(xmlPath+".err"));
-	    outdoc.setXmlStandalone(true);
-	    Utils.printXml(errout, outdoc);
-	    errout.close();
-	    throw e;
-	}
+        try {
+            assertXMLEqual(refdoc, outdoc);
+        } catch (junit.framework.AssertionFailedError e) {
+            OutputStream errout = new FileOutputStream(new File(xmlPath+".err"));
+            outdoc.setXmlStandalone(true);
+            Utils.printXml(errout, outdoc);
+            errout.close();
+            throw e;
+        }
     }
 
     public void compareXml(String javaPath, String xmlPath)
-	throws Exception {
+        throws Exception {
         compareXml(new String[] { javaPath }, xmlPath);
     }
 
     @Test
     public void test_01_basic_return() throws Exception {
-	compareXml(TESTDATA+"/basic_return.java", TESTDATA+"/basic_return.graph");
+        compareXml(TESTDATA+"/basic_return.java", TESTDATA+"/basic_return.graph");
     }
     @Test
     public void test_02_basic_assign() throws Exception {
@@ -160,7 +160,7 @@ public class UnitTestDF extends XMLTestCase {
 
     @Test
     public void test_20_multi_xref() throws Exception {
-	compareXml(
+        compareXml(
             new String[] {
                 TESTDATA+"/multi/dom/meep/multi_xref1.java",
                 TESTDATA+"/multi/dom/meep/multi_xref2.java",

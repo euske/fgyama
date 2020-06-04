@@ -27,7 +27,7 @@ public class DFTypeSpace {
     }
 
     public DFTypeSpace(String name) {
-	this(name, null);
+        this(name, null);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class DFTypeSpace {
             klass.setMapTypes(
                 ((TypeDeclaration)abstTypeDecl).typeParameters());
         }
-	return klass;
+        return klass;
     }
 
     @SuppressWarnings("unchecked")
@@ -123,12 +123,12 @@ public class DFTypeSpace {
     }
 
     private DFMapType getMapType(String id) {
-	DFMapType mapType = _id2maptype.get(id);
-	if (mapType == null) {
-	    mapType = new DFMapType(id, this);
-	    _id2maptype.put(id, mapType);
-	}
-	return mapType;
+        DFMapType mapType = _id2maptype.get(id);
+        if (mapType == null) {
+            mapType = new DFMapType(id, this);
+            _id2maptype.put(id, mapType);
+        }
+        return mapType;
     }
 
     protected Collection<DFKlass> getInnerKlasses() {

@@ -66,14 +66,14 @@ public class DFRootTypeSpace extends DFTypeSpace {
         int i = s.indexOf('$');
         String fullName = s.substring(0, (0 <= i)? i : s.length());
         int j = fullName.lastIndexOf('/');
-	String spaceName = fullName.substring(0, j).replace('/', '.');
-	String klassName = fullName.substring(j+1);
+        String spaceName = fullName.substring(0, j).replace('/', '.');
+        String klassName = fullName.substring(j+1);
         DFTypeSpace space = this.lookupSpace(spaceName);
         // Create a top-level klass.
         DFJarFileKlass klass = (DFJarFileKlass)space.getKlass(klassName);
         if (klass == null) {
-	    klass = new DFJarFileKlass(klassName, space, null, null);
-	    klass.setFinder(_finder);
+            klass = new DFJarFileKlass(klassName, space, null, null);
+            klass.setFinder(_finder);
             space.addKlass(klassName, klass);
         }
         while (0 <= i) {
@@ -82,13 +82,13 @@ public class DFRootTypeSpace extends DFTypeSpace {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-	    DFJarFileKlass child = (DFJarFileKlass)klass.getKlass(name);
+            DFJarFileKlass child = (DFJarFileKlass)klass.getKlass(name);
             if (child == null) {
                 child = new DFJarFileKlass(
                     name, klass, klass.getKlassScope(), klass);
                 klass.addKlass(name, child);
-	    }
-	    klass = child;
+            }
+            klass = child;
         }
         klass.setJarPath(jarPath, entPath);
         InputStream strm = jarFile.getInputStream(jarEntry);

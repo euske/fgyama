@@ -74,11 +74,11 @@ public class DFFunctionType implements DFType {
         if (!(type instanceof DFFunctionType)) return -1;
         DFFunctionType mtype = (DFFunctionType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
-	if (dist < 0) return -1;
+        if (dist < 0) return -1;
         if (_returnType != null && mtype._returnType != null) {
             int d = _returnType.canConvertFrom(mtype._returnType, typeMap);
             if (d < 0) return -1;
-	    dist += d;
+            dist += d;
         }
         return dist;
     }

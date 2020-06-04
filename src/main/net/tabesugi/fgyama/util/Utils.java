@@ -25,15 +25,15 @@ public class Utils {
     }
     public static <T> String join(String delim, T[] a) {
         StringBuilder b = new StringBuilder();
-	b.append("[");
-	for (T v : a) {
+        b.append("[");
+        for (T v : a) {
             if (1 < b.length()) {
                 b.append(delim);
             }
             b.append((v == null)? "null" : v.toString());
         }
-	b.append("]");
-	return b.toString();
+        b.append("]");
+        return b.toString();
     }
 
     public static <T> String join(List<T> a) {
@@ -41,44 +41,44 @@ public class Utils {
     }
     public static <T> String join(String delim, List<T> a) {
         StringBuilder b = new StringBuilder();
-	b.append("[");
+        b.append("[");
         for (T v : a) {
             if (1 < b.length()) {
                 b.append(delim);
             }
             b.append((v == null)? "null" : v.toString());
         }
-	b.append("]");
-	return b.toString();
+        b.append("]");
+        return b.toString();
     }
 
     public static String quote(char c) {
-	switch (c) {
-	case '\0':
-	    return "\\0";
-	case '\t':
-	    return "\\t";
-	case '\b':
-	    return "\\b";
-	case '\n':
-	    return "\\n";
-	case '\r':
-	    return "\\r";
-	case '\f':
-	    return "\\f";
-	case '\'':
-	    return "\\'";
-	case '\"':
-	    return "\\\"";
-	case '\\':
-	    return "\\\\";
-	default:
+        switch (c) {
+        case '\0':
+            return "\\0";
+        case '\t':
+            return "\\t";
+        case '\b':
+            return "\\b";
+        case '\n':
+            return "\\n";
+        case '\r':
+            return "\\r";
+        case '\f':
+            return "\\f";
+        case '\'':
+            return "\\'";
+        case '\"':
+            return "\\\"";
+        case '\\':
+            return "\\\\";
+        default:
             if (Character.isISOControl(c)) {
                 return String.format("\\u%04x", (int)c);
             } else {
                 return Character.toString(c);
             }
-	}
+        }
     }
 
     public static String quote(String s) {
@@ -86,7 +86,7 @@ public class Utils {
         for (int i = 0; i < s.length(); i++) {
             b.append(quote(s.charAt(i)));
         }
-	return b.toString();
+        return b.toString();
     }
 
     public static String hashString(String s) {
