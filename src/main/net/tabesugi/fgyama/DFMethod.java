@@ -179,8 +179,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         DFKlass[] paramTypes = new DFKlass[mapTypes.size()];
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
-            if (!typeMap.containsKey(mapType)) return null;
-            paramTypes[i] = typeMap.get(mapType);
+            if (typeMap != null && typeMap.containsKey(mapType)) {
+                paramTypes[i] = typeMap.get(mapType);
+            } else {
+                paramTypes[i] = mapType.toKlass();
+            }
         }
         String name = DFTypeSpace.getParamName(paramTypes);
         DFMethod method = _concreteMethods.get(name);

@@ -245,21 +245,18 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         List<DFMapType> mapTypes = this.getMapTypes();
         assert _paramTypes == null;
         assert paramTypes.length <= mapTypes.size();
-        if (paramTypes.length < mapTypes.size()) {
-            DFKlass[] types = new DFKlass[mapTypes.size()];
-            for (int i = 0; i < mapTypes.size(); i++) {
-                if (i < paramTypes.length) {
-                    types[i] = paramTypes[i];
-                } else {
-                    types[i] = mapTypes.get(i).toKlass();
-                }
+        DFKlass[] types = new DFKlass[mapTypes.size()];
+        for (int i = 0; i < mapTypes.size(); i++) {
+            if (paramTypes != null && i < paramTypes.length) {
+                types[i] = paramTypes[i];
+            } else {
+                types[i] = mapTypes.get(i).toKlass();
             }
-            paramTypes = types;
         }
-        String name = DFTypeSpace.getParamName(paramTypes);
+        String name = DFTypeSpace.getParamName(types);
         DFKlass klass = _concreteKlasses.get(name);
         if (klass == null) {
-            klass = this.parameterize(paramTypes);
+            klass = this.parameterize(types);
             _concreteKlasses.put(name, klass);
         }
         return klass;
