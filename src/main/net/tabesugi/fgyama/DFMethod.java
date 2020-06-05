@@ -137,6 +137,41 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         _outerScope = outerScope;
     }
 
+    // Constructor for a parameterized method.
+    private DFMethod(
+        DFMethod genericMethod, DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        super(genericMethod._methodId + DFTypeSpace.getParamName(paramTypes),
+              genericMethod._klass);
+        _klass = genericMethod._klass;
+        _callStyle = genericMethod._callStyle;
+        _abstract = genericMethod._abstract;
+        _methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
+        _methodName = genericMethod._methodName;
+        _outerScope = genericMethod._outerScope;
+
+        _genericMethod = genericMethod;
+        _paramTypes = new ConsistentHashMap<String, DFKlass>();
+        List<DFMapType> mapTypes = genericMethod._mapTypes.values();
+        for (int i = 0; i < paramTypes.length; i++) {
+            DFMapType mapType = mapTypes.get(i);
+            DFKlass paramType = paramTypes[i];
+            assert mapType != null;
+            assert paramType != null;
+            _paramTypes.put(mapType.getName(), paramType);
+        }
+
+        _ast = genericMethod._ast;
+        _finder = genericMethod._finder;
+        _methodScope = new MethodScope(_outerScope, _methodId);
+        this.buildFuncType(_klass);
+        Statement stmt = ((MethodDeclaration)_ast).getBody();
+        if (stmt != null) {
+            ((DFSourceKlass)_klass).buildTypeFromStmt(stmt, this, _methodScope);
+        }
+        this.buildScope();
+    }
+
     @Override
     public String toString() {
         if (_mapTypes != null) {
@@ -172,9 +207,9 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     // Creates a parameterized method.
-    public DFMethod getConcreteKlass(Map<DFMapType, DFKlass> typeMap) {
+    public DFMethod getConcreteMethod(Map<DFMapType, DFKlass> typeMap) {
         if (_mapTypes == null) return this;
-        //Logger.info("DFMethod.getConcreteKlass:", _mapTypes, typeMap);
+        Logger.info("DFMethod.getConcreteMethod1:", this, typeMap);
         List<DFMapType> mapTypes = _mapTypes.values();
         DFKlass[] paramTypes = new DFKlass[mapTypes.size()];
         for (int i = 0; i < mapTypes.size(); i++) {
@@ -185,51 +220,18 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
                 paramTypes[i] = mapType.toKlass();
             }
         }
+        Logger.info("DFMethod.getConcreteMethod2:", Utils.join(paramTypes));
         String name = DFTypeSpace.getParamName(paramTypes);
         DFMethod method = _concreteMethods.get(name);
         if (method == null) {
             try {
-                method = new DFMethod(this, paramTypes);
+                method = this.parameterize(paramTypes);
                 _concreteMethods.put(name, method);
             } catch (InvalidSyntax e) {
             }
         }
+        Logger.info("DFMethod.getConcreteMethod3:", method);
         return method;
-    }
-
-    // Constructor for a parameterized method.
-    private DFMethod(
-        DFMethod genericMethod, DFKlass[] paramTypes)
-        throws InvalidSyntax {
-        super(genericMethod._methodId + DFTypeSpace.getParamName(paramTypes),
-              genericMethod._klass);
-        _klass = genericMethod._klass;
-        _callStyle = genericMethod._callStyle;
-        _abstract = genericMethod._abstract;
-        _methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
-        _methodName = genericMethod._methodName;
-        _outerScope = genericMethod._outerScope;
-
-        _genericMethod = genericMethod;
-        _paramTypes = new ConsistentHashMap<String, DFKlass>();
-        List<DFMapType> mapTypes = genericMethod._mapTypes.values();
-        for (int i = 0; i < paramTypes.length; i++) {
-            DFMapType mapType = mapTypes.get(i);
-            DFKlass paramType = paramTypes[i];
-            assert mapType != null;
-            assert paramType != null;
-            _paramTypes.put(mapType.getName(), paramType);
-        }
-
-        _ast = genericMethod._ast;
-        _finder = genericMethod._finder;
-        _methodScope = new MethodScope(_outerScope, _methodId);
-        this.buildFuncType(_klass);
-        Statement stmt = ((MethodDeclaration)_ast).getBody();
-        if (stmt != null) {
-            ((DFSourceKlass)_klass).buildTypeFromStmt(stmt, this, _methodScope);
-        }
-        this.buildScope();
     }
 
     public String getName() {
@@ -1543,6 +1545,12 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         // Do not remove input/output nodes.
         graph.cleanup(preserved);
         return graph;
+    }
+
+    protected DFMethod parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert paramTypes != null;
+        return new DFMethod(this, paramTypes);
     }
 
     @SuppressWarnings("unchecked")

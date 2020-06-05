@@ -129,6 +129,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             return dist;
         }
 
+        if (klass instanceof DFMapType) {
+            DFMapType mapType = (DFMapType)klass;
+            int dist = this.isSubclassOf(mapType.getBoundKlass(), typeMap);
+            if (dist < 0) return -1;
+            typeMap.put(mapType, this);
+            return dist;
+        }
+
         DFKlass baseKlass = this.getBaseKlass();
         if (baseKlass != null) {
             int dist = baseKlass.isSubclassOf(klass, typeMap);
@@ -417,7 +425,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             int dist = method1.canAccept(argTypes, typeMap);
             if (dist < 0) continue;
             if (bestDist < 0 || dist < bestDist) {
-                DFMethod method = method1.getConcreteKlass(typeMap);
+                DFMethod method = method1.getConcreteMethod(typeMap);
                 if (method != null) {
                     bestDist = dist;
                     bestMethod = method;

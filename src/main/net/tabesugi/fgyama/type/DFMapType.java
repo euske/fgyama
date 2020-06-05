@@ -38,9 +38,9 @@ public class DFMapType extends DFKlass {
     }
 
     public DFKlass getBoundKlass() {
-	return _boundKlass;
+        return _boundKlass;
     }
-    
+
     @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
         if (this == klass) return 0;

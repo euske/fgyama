@@ -98,7 +98,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
     @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-        if (klass instanceof DFSourceKlass &&  
+        if (klass instanceof DFSourceKlass &&
             ((DFSourceKlass)klass).isFuncInterface()) return 0;
         return -1;
     }
