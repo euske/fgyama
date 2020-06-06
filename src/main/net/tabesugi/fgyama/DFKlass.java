@@ -235,11 +235,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         // an unspecified parameterized klass cannot be loaded.
         if (_state != LoadState.Unloaded) return;
         _state = LoadState.Loading;
-        this.build();
+        this.build(this.getFinder());
         _state = LoadState.Loaded;
     }
 
-    protected void build()
+    protected void build(DFTypeFinder finder)
         throws InvalidSyntax {
         if (_outerKlass != null) {
             _outerKlass.load();

@@ -568,11 +568,9 @@ public class DFSourceKlass extends DFKlass {
         }
     }
 
-    protected void build()
+    protected void build(DFTypeFinder finder)
         throws InvalidSyntax {
-        super.build();
-        DFTypeFinder finder = this.getFinder();
-        assert finder != null;
+        super.build(finder);
         assert _ast != null;
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
