@@ -740,7 +740,7 @@ public class DFSourceKlass extends DFKlass {
     private void buildMembers(DFTypeFinder finder, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         if (_initMethod != null) {
-            _initMethod.setFinder(finder);
+            _initMethod.setBaseFinder(finder);
         }
 
         for (BodyDeclaration body : decls) {
@@ -764,7 +764,7 @@ public class DFSourceKlass extends DFKlass {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
                 DFMethod method = this.getMethod(id);
-                method.setFinder(finder);
+                method.setBaseFinder(finder);
                 method.buildFuncType(this);
 
             } else if (body instanceof EnumConstantDeclaration) {

@@ -143,7 +143,7 @@ class DFLambdaKlass extends DFSourceKlass {
         throws InvalidSyntax {
         // _baseKlass is left undefined.
         this.addMethod(_funcMethod, FUNC_NAME);
-        _funcMethod.setFinder(finder);
+        _funcMethod.setBaseFinder(finder);
         _funcMethod.setTree(ast);
     }
 

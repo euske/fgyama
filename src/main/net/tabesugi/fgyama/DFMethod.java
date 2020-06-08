@@ -328,8 +328,8 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return _funcType;
     }
 
-    public void setFinder(DFTypeFinder finder) {
-        _finder = new DFTypeFinder(this, finder);
+    public void setBaseFinder(DFTypeFinder baseFinder) {
+        _finder = new DFTypeFinder(this, baseFinder);
     }
 
     public boolean addOverrider(DFMethod method) {

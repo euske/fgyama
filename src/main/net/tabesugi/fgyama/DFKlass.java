@@ -37,8 +37,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
-    // This field is available after setFinder(). (Stage2)
-    private DFTypeFinder _finder = null;
+    // This field is available after setBaseFinder(). (Stage2)
+    private DFTypeFinder _baseFinder = null;
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -61,7 +61,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
              genericKlass._outerKlass);
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
-        _finder = genericKlass._finder;
+        _baseFinder = genericKlass._baseFinder;
         _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFKlass>();
         List<DFMapType> mapTypes = genericKlass.getMapTypes();
@@ -214,19 +214,19 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return false;
     }
 
-    public void setFinder(DFTypeFinder finder) {
+    public void setBaseFinder(DFTypeFinder baseFinder) {
         assert _state == LoadState.Unloaded;
-        //assert _finder == null || _finder == finder;
-        _finder = finder;
+        //assert _baseFinder == null || _baseFinder == baseFinder;
+        _baseFinder = baseFinder;
     }
 
     public DFTypeFinder getFinder() {
         if (_outerKlass != null) {
-            assert _finder == null;
+            assert _baseFinder == null;
             return new DFTypeFinder(this, _outerKlass.getFinder());
         } else {
-            //assert _finder != null;
-            return new DFTypeFinder(this, _finder);
+            //assert _baseFinder != null;
+            return new DFTypeFinder(this, _baseFinder);
         }
     }
 

@@ -257,7 +257,7 @@ public class DFJarFileKlass extends DFKlass {
             DFMethod method = new DFMethod(
                 this, callStyle, meth.isAbstract(),
                 id, name, null);
-            method.setFinder(finder);
+            method.setBaseFinder(finder);
             DFFunctionType funcType;
             sig = Utils.getJKlassSignature(meth.getAttributes());
             if (sig != null) {

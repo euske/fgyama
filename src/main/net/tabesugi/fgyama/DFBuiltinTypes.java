@@ -55,7 +55,7 @@ public class DFBuiltinTypes {
 
     private static DFKlass createKlass(String id) {
         DFJarFileKlass klass = new DFJarFileKlass(id, _langSpace, null, null);
-        klass.setFinder(_finder);
+        klass.setBaseFinder(_finder);
         _langSpace.addKlass(id, klass);
         return klass;
     }

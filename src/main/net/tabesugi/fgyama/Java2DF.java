@@ -742,7 +742,7 @@ public class Java2DF {
         // Set a top-level finder.
         finder = new DFTypeFinder(importSpace, finder);
         for (DFSourceKlass klass : _fileKlasses.get(key)) {
-            klass.setFinder(finder);
+            klass.setBaseFinder(finder);
         }
     }
 
