@@ -70,6 +70,9 @@ public class DFBuiltinTypes {
             if (this == klass) return 0;
             return -1;
         }
+        @Override
+        public void load() throws InvalidSyntax {
+        }
     }
 
     private static DFKlass _object = null;

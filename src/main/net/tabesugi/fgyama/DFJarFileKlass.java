@@ -49,7 +49,7 @@ public class DFJarFileKlass extends DFKlass {
 
     // Set the map types from a JAR.
     public void setMapTypes(String sig) {
-        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this);
+        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this, this);
         if (mapTypes == null) return;
         this.setMapTypes(mapTypes);
     }
@@ -262,9 +262,8 @@ public class DFJarFileKlass extends DFKlass {
             sig = Utils.getJKlassSignature(meth.getAttributes());
             if (sig != null) {
                 //Logger.info("meth:", meth.getName(), sig);
-                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, method);
+                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, method, this);
                 method.setMapTypes(mapTypes);
-                if (method.isGeneric()) continue;
                 JNITypeParser parser = new JNITypeParser(sig);
                 try {
                     funcType = (DFFunctionType)parser.resolveType(method.getFinder());

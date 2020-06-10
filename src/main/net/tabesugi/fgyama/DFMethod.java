@@ -319,7 +319,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
     }
 
     public void setFuncType(DFFunctionType funcType) {
-        assert _mapTypes == null;
         assert _funcType == null;
         _funcType = funcType;
     }
@@ -402,12 +401,6 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         throws InvalidSyntax {
         if (_ast == null) return;
         assert _finder != null;
-        if (_mapTypes != null) {
-            for (DFMapType mapType : _mapTypes.values()) {
-                mapType.build(_finder);
-            }
-            return;
-        }
         assert _methodScope != null;
         if (_ast instanceof MethodDeclaration) {
             _methodScope.buildMethodDecl(

@@ -48,7 +48,7 @@ public class DFSourceKlass extends DFKlass {
     // Set the map types from a source code.
     @SuppressWarnings("unchecked")
     public void setMapTypes(List<TypeParameter> tps) {
-        DFMapType[] mapTypes = this.getMapTypes(tps);
+        DFMapType[] mapTypes = this.getMapTypes(this, tps);
         if (mapTypes == null) return;
         this.setMapTypes(mapTypes);
     }
@@ -216,7 +216,7 @@ public class DFSourceKlass extends DFKlass {
                 DFMethod method = new DFMethod(
                     this, callStyle, (stmt == null),
                     id, name, this.getKlassScope());
-                DFMapType[] mapTypes = method.getMapTypes(methodDecl.typeParameters());
+                DFMapType[] mapTypes = method.getMapTypes(this, methodDecl.typeParameters());
                 method.setMapTypes(mapTypes);
                 method.setTree(methodDecl);
                 this.addMethod(method, id);

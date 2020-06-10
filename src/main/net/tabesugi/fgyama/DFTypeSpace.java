@@ -99,14 +99,18 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public DFMapType[] getMapTypes(List<TypeParameter> tps) {
+    public DFMapType[] getMapTypes(DFKlass klass, List<TypeParameter> tps) {
         if (tps.size() == 0) return null;
         DFMapType[] mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
-            mapTypes[i] = this.getMapType(id);
-            mapTypes[i].setTypeBounds(tp.typeBounds());
+            DFMapType mapType = _id2maptype.get(id);
+            if (mapType == null) {
+                mapType = new DFMapType(id, this, klass, tp.typeBounds());
+                _id2maptype.put(id, mapType);
+            }
+            mapTypes[i] = mapType;
         }
         return mapTypes;
     }
@@ -123,15 +127,6 @@ public class DFTypeSpace {
             b.append(type.getTypeName());
         }
         return "<"+b.toString()+">";
-    }
-
-    private DFMapType getMapType(String id) {
-        DFMapType mapType = _id2maptype.get(id);
-        if (mapType == null) {
-            mapType = new DFMapType(id, this);
-            _id2maptype.put(id, mapType);
-        }
-        return mapType;
     }
 
     protected Collection<DFKlass> getInnerKlasses() {

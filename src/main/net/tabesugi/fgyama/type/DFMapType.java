@@ -17,10 +17,24 @@ public class DFMapType extends DFKlass {
     private String _sig = null;
     private List<Type> _types = null;
 
-    public DFMapType(String name, DFTypeSpace outerSpace) {
-        super(name, outerSpace, null, null);
+    private DFMapType(String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
+        super(name, outerSpace, null, outerKlass);
         _name = name;
         _boundKlass = DFBuiltinTypes.getObjectKlass();
+    }
+
+    public DFMapType(
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        List<Type> types) {
+        this(name, outerSpace, outerKlass);
+        _types = types;
+    }
+
+    public DFMapType(
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        String sig) {
+        this(name, outerSpace, outerKlass);
+        _sig = sig;
     }
 
     @Override
@@ -42,6 +56,15 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
+    public DFKlass getKlass(String id) {
+        if (_name.equals(id)) {
+            return this;
+        } else {
+            return super.getKlass(id);
+        }
+    }
+
+    @Override
     public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
         if (this == klass) return 0;
         assert !(klass instanceof DFMapType);
@@ -59,16 +82,7 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    public void setTypeBounds(String sig) {
-        assert _sig == null && _types == null;
-        _sig = sig;
-    }
-
-    public void setTypeBounds(List<Type> types) {
-        assert _sig == null && _types == null;
-        _types = types;
-    }
-
+    @Override
     public void build(DFTypeFinder finder)
         throws InvalidSyntax {
         assert _sig == null || _types == null;
