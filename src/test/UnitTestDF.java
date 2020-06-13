@@ -23,7 +23,11 @@ public class UnitTestDF extends XMLTestCase {
         XMLUnit.setIgnoreWhitespace(true);
         XMLUnit.setNormalize(true);
         if (_rootSpace == null) {
+            File homeDir = new File(System.getProperty("java.home"));
+            File libDir = new File(homeDir, "lib");
+            File rtFile = new File(libDir, "rt.jar");
             _rootSpace = new DFRootTypeSpace();
+            _rootSpace.loadJarFile(rtFile.getAbsolutePath());
             DFBuiltinTypes.initialize(_rootSpace);
         }
         if (_converter == null) {

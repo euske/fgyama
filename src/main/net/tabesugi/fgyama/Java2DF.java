@@ -768,6 +768,7 @@ public class Java2DF {
                 fileScope.importStatic(klass, qname.getName());
             }
         }
+        // Enumerate all the klasses used.
         for (DFSourceKlass klass : _fileKlasses.get(key)) {
             enumKlasses(klass, klasses);
         }
@@ -960,7 +961,11 @@ public class Java2DF {
         }
 
         // Initialize base classes.
+        File homeDir = new File(System.getProperty("java.home"));
+        File libDir = new File(homeDir, "lib");
+        File rtFile = new File(libDir, "rt.jar");
         DFRootTypeSpace rootSpace = new DFRootTypeSpace();
+        rootSpace.loadJarFile(rtFile.getAbsolutePath());
         DFBuiltinTypes.initialize(rootSpace);
         for (String path : jarfiles) {
             rootSpace.loadJarFile(path);

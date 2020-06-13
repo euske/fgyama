@@ -9,34 +9,26 @@ import java.util.*;
 //
 public class DFBuiltinTypes {
 
-    private static DFTypeFinder _finder;
-    private static DFTypeSpace _langSpace;
-
     public static void initialize(DFRootTypeSpace rootSpace)
         throws IOException, InvalidSyntax {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
-        _finder = new DFTypeFinder(rootSpace);
-        _langSpace = rootSpace.lookupSpace("java.lang");
-        _object = createKlass("Object");
-        _class = createKlass("Class");
-        _enum = createKlass("Enum");
-        _string = createKlass("String");
-        _byte = createKlass("Byte");
-        _character = createKlass("Character");
-        _short = createKlass("Short");
-        _integer = createKlass("Integer");
-        _long = createKlass("Long");
-        _float = createKlass("Float");
-        _double = createKlass("Double");
-        _boolean = createKlass("Boolean");
-        _void = createKlass("Void");
-        _exception = createKlass("Exception");
-        _array = new ArrayKlass();
-        File homeDir = new File(System.getProperty("java.home"));
-        File libDir = new File(homeDir, "lib");
-        File rtFile = new File(libDir, "rt.jar");
-        rootSpace.loadJarFile(rtFile.getAbsolutePath());
+        DFTypeSpace langSpace = rootSpace.lookupSpace("java.lang");
+        _object = (DFJarFileKlass)langSpace.getKlass("Object");
+        _class = (DFJarFileKlass)langSpace.getKlass("Class");
+        _enum = (DFJarFileKlass)langSpace.getKlass("Enum");
+        _string = (DFJarFileKlass)langSpace.getKlass("String");
+        _byte = (DFJarFileKlass)langSpace.getKlass("Byte");
+        _character = (DFJarFileKlass)langSpace.getKlass("Character");
+        _short = (DFJarFileKlass)langSpace.getKlass("Short");
+        _integer = (DFJarFileKlass)langSpace.getKlass("Integer");
+        _long = (DFJarFileKlass)langSpace.getKlass("Long");
+        _float = (DFJarFileKlass)langSpace.getKlass("Float");
+        _double = (DFJarFileKlass)langSpace.getKlass("Double");
+        _boolean = (DFJarFileKlass)langSpace.getKlass("Boolean");
+        _void = (DFJarFileKlass)langSpace.getKlass("Void");
+        _exception = (DFJarFileKlass)langSpace.getKlass("Exception");
+        _array = new ArrayKlass(langSpace);
         _object.load();
         _class.load();
         _enum.load();
@@ -53,16 +45,9 @@ public class DFBuiltinTypes {
         _exception.load();
     }
 
-    private static DFKlass createKlass(String id) {
-        DFJarFileKlass klass = new DFJarFileKlass(id, _langSpace, null, null);
-        klass.setBaseFinder(_finder);
-        _langSpace.addKlass(id, klass);
-        return klass;
-    }
-
     private static class ArrayKlass extends DFKlass {
-        public ArrayKlass() {
-            super("_Array", _langSpace, null, null);
+        public ArrayKlass(DFTypeSpace langSpace) {
+            super("_Array", langSpace, null, null);
             this.initScope();
             this.addField("length", false, DFBasicType.INT);
         }

@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
-    private DFKlass _boundKlass;
+    private DFKlass _boundKlass = null;
 
     private String _sig = null;
     private List<Type> _types = null;
@@ -20,7 +20,6 @@ public class DFMapType extends DFKlass {
     private DFMapType(String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
         super(name, outerSpace, null, outerKlass);
         _name = name;
-        _boundKlass = DFBuiltinTypes.getObjectKlass();
     }
 
     public DFMapType(
@@ -52,6 +51,7 @@ public class DFMapType extends DFKlass {
     }
 
     public DFKlass getBoundKlass() {
+        assert _boundKlass != null;
         return _boundKlass;
     }
 
@@ -86,6 +86,7 @@ public class DFMapType extends DFKlass {
     public void build(DFTypeFinder finder)
         throws InvalidSyntax {
         assert _sig == null || _types == null;
+        _boundKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);
             try {
