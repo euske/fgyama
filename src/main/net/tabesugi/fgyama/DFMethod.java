@@ -232,6 +232,11 @@ public class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
         return method;
     }
 
+    public List<DFMethod> getConcreteMethods() {
+        assert _concreteMethods != null;
+        return _concreteMethods.values();
+    }
+
     public String getName() {
         return _methodName;
     }
