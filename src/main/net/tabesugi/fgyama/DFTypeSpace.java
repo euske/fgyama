@@ -83,22 +83,6 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public DFSourceKlass buildTypeFromAST(
-        String filePath, AbstractTypeDeclaration abstTypeDecl,
-        DFVarScope outerScope, DFSourceKlass outerKlass) {
-        assert abstTypeDecl != null;
-        //Logger.info("DFTypeSpace.build:", this, ":", abstTypeDecl.getName());
-        String id = abstTypeDecl.getName().getIdentifier();
-        DFSourceKlass klass = new DFSourceKlass(id, this, outerScope, outerKlass);
-        this.addKlass(id, klass);
-        if (abstTypeDecl instanceof TypeDeclaration) {
-            klass.setMapTypes(
-                ((TypeDeclaration)abstTypeDecl).typeParameters());
-        }
-        return klass;
-    }
-
-    @SuppressWarnings("unchecked")
     public DFMapType[] getMapTypes(DFKlass klass, List<TypeParameter> tps) {
         if (tps.size() == 0) return null;
         DFMapType[] mapTypes = new DFMapType[tps.size()];

@@ -24,33 +24,56 @@ public class DFSourceKlass extends DFKlass {
     private DFKlass[] _baseIfaces = null;
 
 
+    @SuppressWarnings("unchecked")
     public DFSourceKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
-        DFSourceKlass outerKlass) {
-        super(name, outerSpace, outerScope, outerKlass);
+        String filePath, AbstractTypeDeclaration abstTypeDecl,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        this(filePath, abstTypeDecl, abstTypeDecl.getName().getIdentifier(),
+             outerSpace, outerScope, outerKlass);
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
+            DFMapType[] mapTypes = this.getMapTypes(this, typeDecl.typeParameters());
+            if (mapTypes != null) {
+                this.setMapTypes(mapTypes);
+            }
+        }
     }
 
     protected DFSourceKlass(
+        String filePath, ClassInstanceCreation cstr,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        this(filePath, cstr, Utils.encodeASTNode(cstr),
+             outerSpace, outerScope, outerKlass);
+    }
+
+    protected DFSourceKlass(
+        String filePath, LambdaExpression lambda,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        this(filePath, lambda, Utils.encodeASTNode(lambda),
+             outerSpace, outerScope, outerKlass);
+    }
+
+    protected DFSourceKlass(
+        String filePath, MethodReference methodref,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        this(filePath, methodref, Utils.encodeASTNode(methodref),
+             outerSpace, outerScope, outerKlass);
+    }
+
+    private DFSourceKlass(
         DFSourceKlass genericKlass, DFKlass[] paramTypes) {
         super(genericKlass, paramTypes);
-
         _filePath = genericKlass._filePath;
         _ast = genericKlass._ast;
     }
 
-    // Set the klass AST from a source code.
-    public void setKlassTree(String filePath, ASTNode ast)
-        throws InvalidSyntax {
+    private DFSourceKlass(
+        String filePath, ASTNode ast, String id,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        super(id, outerSpace, outerScope, outerKlass);
+        //Logger.info("DFSourceKlass:", outerSpace, ":", id);
         _filePath = filePath;
         _ast = ast;
-    }
-
-    // Set the map types from a source code.
-    @SuppressWarnings("unchecked")
-    public void setMapTypes(List<TypeParameter> tps) {
-        DFMapType[] mapTypes = this.getMapTypes(this, tps);
-        if (mapTypes == null) return;
-        this.setMapTypes(mapTypes);
     }
 
     // Constructor for a parameterized klass.
@@ -183,10 +206,11 @@ public class DFSourceKlass extends DFKlass {
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
+                String id = abstTypeDecl.getName().getIdentifier();
                 String path = this.getFilePath();
-                DFSourceKlass klass = this.buildTypeFromAST(
-                    path, abstTypeDecl, this.getKlassScope(), this);
-                klass.setKlassTree(path, abstTypeDecl);
+                DFSourceKlass klass = new DFSourceKlass(
+                    path, abstTypeDecl, this, this.getKlassScope(), this);
+                this.addKlass(id, klass);
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
@@ -401,10 +425,11 @@ public class DFSourceKlass extends DFKlass {
         } else if (ast instanceof TypeDeclarationStatement) {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
             AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
+            String id = abstTypeDecl.getName().getIdentifier();
             String path = this.getFilePath();
-            DFSourceKlass klass = space.buildTypeFromAST(
-                path, abstTypeDecl, outerScope, this);
-            klass.setKlassTree(path, abstTypeDecl);
+            DFSourceKlass klass = new DFSourceKlass(
+                path, abstTypeDecl, space, outerScope, this);
+            this.addKlass(id, klass);
 
         } else {
             throw new InvalidSyntax(ast);
@@ -529,9 +554,8 @@ public class DFSourceKlass extends DFKlass {
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
                 DFSourceKlass anonKlass = new DFSourceKlass(
-                    id, space, outerScope, this);
+                    this.getFilePath(), cstr, space, outerScope, this);
                 space.addKlass(id, anonKlass);
-                anonKlass.setKlassTree(this.getFilePath(), cstr);
             }
 
         } else if (expr instanceof ConditionalExpression) {
@@ -546,9 +570,8 @@ public class DFSourceKlass extends DFKlass {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = new DFLambdaKlass(
-                id, space, outerScope, this);
+                this.getFilePath(), lambda, space, outerScope, this);
             space.addKlass(id, lambdaKlass);
-            lambdaKlass.setKlassTree(this.getFilePath(), lambda);
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -558,9 +581,8 @@ public class DFSourceKlass extends DFKlass {
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = new DFMethodRefKlass(
-                id, space, outerScope, this);
+                this.getFilePath(), methodref, space, outerScope, this);
             space.addKlass(id, methodRefKlass);
-            methodRefKlass.setKlassTree(this.getFilePath(), methodref);
 
         } else {
             // ???

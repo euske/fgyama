@@ -9,15 +9,28 @@ import org.eclipse.jdt.core.dom.*;
 
 //  DFMethodRefKlass
 //
-class DFMethodRefKlass extends DFLambdaKlass {
+class DFMethodRefKlass extends DFSourceKlass {
+
+    private class FunctionalMethod extends DFMethod {
+
+        public FunctionalMethod(String id, DFVarScope scope) {
+            super(DFMethodRefKlass.this, CallStyle.Lambda, false,
+                  id, id, scope);
+        }
+    }
 
     private DFKlass _refKlass = null;
     private DFMethod _refMethod = null;
 
+    private final String FUNC_NAME = "#f";
+
+    private FunctionalMethod _funcMethod;
+
     public DFMethodRefKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
-        DFSourceKlass outerKlass) {
-        super(name, outerSpace, outerScope, outerKlass);
+        String filePath, MethodReference methodref,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        super(filePath, methodref, outerSpace, outerScope, outerKlass);
+        _funcMethod = new FunctionalMethod(FUNC_NAME, outerScope);
     }
 
     @Override
@@ -37,13 +50,31 @@ class DFMethodRefKlass extends DFLambdaKlass {
     }
 
     @Override
+    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+        if (klass instanceof DFSourceKlass &&
+            ((DFSourceKlass)klass).isFuncInterface()) return 0;
+        return -1;
+    }
+
+    @Override
     public boolean isDefined() {
-        return (super.isDefined() && _refMethod != null);
+        return (_funcMethod.getFuncType() != null && _refMethod != null);
+    }
+
+    @Override
+    public DFMethod getFuncMethod() {
+        return _funcMethod;
     }
 
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
+        assert _funcMethod.getFuncType() == null;
+        DFMethod funcMethod = klass.getFuncMethod();
+        // BaseKlass does not have a function method.
+        // This happens when baseKlass type is undefined.
+        if (funcMethod == null) return;
+        _funcMethod.setFuncType(funcMethod.getFuncType());
         if (_refKlass != null) {
             this.fixateMethod();
         }
@@ -51,7 +82,7 @@ class DFMethodRefKlass extends DFLambdaKlass {
 
     public void setRefKlass(DFKlass refKlass) {
         _refKlass = refKlass;
-        if (super.isDefined()) {
+        if (_funcMethod.getFuncType() != null) {
             this.fixateMethod();
         }
     }

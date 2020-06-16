@@ -84,10 +84,10 @@ class DFLambdaKlass extends DFSourceKlass {
         new ArrayList<CapturedRef>();
 
     public DFLambdaKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
-        DFSourceKlass outerKlass) {
-        super(name, outerSpace, outerScope, outerKlass);
-        _lambdaScope = new LambdaScope(outerScope, name);
+        String filePath, LambdaExpression lambda,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        super(filePath, lambda, outerSpace, outerScope, outerKlass);
+        _lambdaScope = new LambdaScope(outerScope, Utils.encodeASTNode(lambda));
         _funcMethod = new FunctionalMethod(FUNC_NAME);
     }
 
