@@ -597,7 +597,6 @@ public class DFSourceKlass extends DFKlass {
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else {
-            this.initScope();
             this.buildTypeFromDecls(_ast);
             this.buildMembersFromAST(finder, _ast);
         }

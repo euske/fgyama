@@ -48,7 +48,6 @@ public class DFBuiltinTypes {
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace langSpace) {
             super("_Array", langSpace, null, null);
-            this.initScope();
             this.addField("length", false, DFBasicType.INT);
         }
         public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {

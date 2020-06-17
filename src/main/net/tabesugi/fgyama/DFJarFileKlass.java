@@ -134,7 +134,6 @@ public class DFJarFileKlass extends DFKlass {
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else {
-            this.initScope();
             try {
                 JarFile jarfile = new JarFile(_jarPath);
                 try {

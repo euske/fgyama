@@ -27,11 +27,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private DFVarScope _outerScope;
     private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
 
-    // These fields are available after initScope().
     private KlassScope _klassScope;
-    private List<FieldRef> _fields = null;
-    private List<DFMethod> _methods = null;
-    private Map<String, DFMethod> _id2method = null;
+    private List<FieldRef> _fields;
+    private List<DFMethod> _methods;
+    private Map<String, DFMethod> _id2method;
 
     // These fields are available after setMapTypes(). (Stage1)
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
@@ -52,6 +51,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _outerSpace = outerSpace;
         _outerScope = outerScope;
         _outerKlass = outerKlass;
+
+        _klassScope = new KlassScope(outerScope, name);
+        _fields = new ArrayList<FieldRef>();
+        _methods = new ArrayList<DFMethod>();
+        _id2method = new HashMap<String, DFMethod>();
     }
 
     protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
@@ -354,13 +358,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     protected DFKlass parameterize(DFKlass[] paramTypes)
         throws InvalidSyntax {
         return this;
-    }
-
-    protected void initScope() {
-        _klassScope = new KlassScope(_outerScope, _name);
-        _fields = new ArrayList<FieldRef>();
-        _methods = new ArrayList<DFMethod>();
-        _id2method = new HashMap<String, DFMethod>();
     }
 
     protected void setMapTypes(DFMapType[] mapTypes) {
