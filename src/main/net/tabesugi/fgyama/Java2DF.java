@@ -700,7 +700,7 @@ public class Java2DF {
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) cunit.types()) {
-            DFSourceKlass klass = new DFSourceKlass(
+            DFSourceKlass klass = new DFAbstTypeDeclKlass(
                 key, abstTypeDecl, packageSpace, fileScope, null);
             packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
             Logger.debug("Stage1: Created:", klass);

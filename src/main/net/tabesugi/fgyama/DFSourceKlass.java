@@ -9,6 +9,63 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+class DFAbstTypeDeclKlass extends DFSourceKlass {
+
+    @SuppressWarnings("unchecked")
+    public DFAbstTypeDeclKlass(
+        String filePath, AbstractTypeDeclaration abstTypeDecl,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        throws InvalidSyntax {
+        super(filePath, abstTypeDecl, abstTypeDecl.getName().getIdentifier(),
+              outerSpace, outerScope, outerKlass);
+        if (abstTypeDecl instanceof TypeDeclaration) {
+            TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
+            DFMapType[] mapTypes = this.getMapTypes(this, typeDecl.typeParameters());
+            if (mapTypes != null) {
+                this.setMapTypes(mapTypes);
+            }
+        }
+        this.buildTypeFromDecls(
+            abstTypeDecl, abstTypeDecl.bodyDeclarations());
+    }
+
+    @SuppressWarnings("unchecked")
+    private DFAbstTypeDeclKlass(
+        DFSourceKlass genericKlass, DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        super(genericKlass, paramTypes);
+        ASTNode ast = this.getTree();
+        assert ast instanceof AbstractTypeDeclaration;
+        AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)ast;
+        this.buildTypeFromDecls(
+            abstTypeDecl, abstTypeDecl.bodyDeclarations());
+    }
+
+    // Constructor for a parameterized klass.
+    @Override
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert paramTypes != null;
+        return new DFAbstTypeDeclKlass(this, paramTypes);
+    }
+
+}
+
+class DFAnonymousKlass extends DFSourceKlass {
+
+    @SuppressWarnings("unchecked")
+    protected DFAnonymousKlass(
+        String filePath, ClassInstanceCreation cstr,
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        throws InvalidSyntax {
+        super(filePath, cstr, Utils.encodeASTNode(cstr),
+              outerSpace, outerScope, outerKlass);
+        this.buildTypeFromDecls(
+            cstr, cstr.getAnonymousClassDeclaration().bodyDeclarations());
+    }
+
+}
+
 //  DFSourceKlass
 //
 public class DFSourceKlass extends DFKlass {
@@ -24,64 +81,21 @@ public class DFSourceKlass extends DFKlass {
     private DFKlass[] _baseIfaces = null;
 
 
-    @SuppressWarnings("unchecked")
-    public DFSourceKlass(
-        String filePath, AbstractTypeDeclaration abstTypeDecl,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        this(filePath, abstTypeDecl, abstTypeDecl.getName().getIdentifier(),
-             outerSpace, outerScope, outerKlass);
-        if (abstTypeDecl instanceof TypeDeclaration) {
-            TypeDeclaration typeDecl = (TypeDeclaration)abstTypeDecl;
-            DFMapType[] mapTypes = this.getMapTypes(this, typeDecl.typeParameters());
-            if (mapTypes != null) {
-                this.setMapTypes(mapTypes);
-            }
-        }
-    }
-
     protected DFSourceKlass(
-        String filePath, ClassInstanceCreation cstr,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        this(filePath, cstr, Utils.encodeASTNode(cstr),
-             outerSpace, outerScope, outerKlass);
-    }
-
-    protected DFSourceKlass(
-        String filePath, LambdaExpression lambda,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        this(filePath, lambda, Utils.encodeASTNode(lambda),
-             outerSpace, outerScope, outerKlass);
-    }
-
-    protected DFSourceKlass(
-        String filePath, MethodReference methodref,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        this(filePath, methodref, Utils.encodeASTNode(methodref),
-             outerSpace, outerScope, outerKlass);
-    }
-
-    private DFSourceKlass(
-        DFSourceKlass genericKlass, DFKlass[] paramTypes) {
-        super(genericKlass, paramTypes);
-        _filePath = genericKlass._filePath;
-        _ast = genericKlass._ast;
-    }
-
-    private DFSourceKlass(
         String filePath, ASTNode ast, String id,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        throws InvalidSyntax {
         super(id, outerSpace, outerScope, outerKlass);
-        //Logger.info("DFSourceKlass:", outerSpace, ":", id);
         _filePath = filePath;
         _ast = ast;
     }
 
-    // Constructor for a parameterized klass.
-    @Override
-    protected DFKlass parameterize(DFKlass[] paramTypes)
+    protected DFSourceKlass(
+        DFSourceKlass genericKlass, DFKlass[] paramTypes)
         throws InvalidSyntax {
-        assert paramTypes != null;
-        return new DFSourceKlass(this, paramTypes);
+        super(genericKlass, paramTypes);
+        _filePath = genericKlass._filePath;
+        _ast = genericKlass._ast;
     }
 
     @Override
@@ -184,31 +198,20 @@ public class DFSourceKlass extends DFKlass {
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildTypeFromDecls(ASTNode ast)
+    protected void buildTypeFromDecls(ASTNode ast, List<BodyDeclaration> decls)
         throws InvalidSyntax {
-
-        List<BodyDeclaration> decls;
-        if (ast instanceof AbstractTypeDeclaration) {
-            decls = ((AbstractTypeDeclaration)ast).bodyDeclarations();
-        } else if (ast instanceof ClassInstanceCreation) {
-            ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
-            decls = cstr.getAnonymousClassDeclaration().bodyDeclarations();
-        } else {
-            throw new InvalidSyntax(ast);
-        }
 
         _initMethod = new DFMethod(
             this, DFMethod.CallStyle.Initializer, false,
             "<clinit>", "<clinit>", this.getKlassScope());
         _initMethod.setTree(ast);
-        _initMethod.buildFuncType(this);
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                 String id = abstTypeDecl.getName().getIdentifier();
                 String path = this.getFilePath();
-                DFSourceKlass klass = new DFSourceKlass(
+                DFSourceKlass klass = new DFAbstTypeDeclKlass(
                     path, abstTypeDecl, this, this.getKlassScope(), this);
                 this.addKlass(id, klass);
 
@@ -427,7 +430,7 @@ public class DFSourceKlass extends DFKlass {
             AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
             String id = abstTypeDecl.getName().getIdentifier();
             String path = this.getFilePath();
-            DFSourceKlass klass = new DFSourceKlass(
+            DFSourceKlass klass = new DFAbstTypeDeclKlass(
                 path, abstTypeDecl, space, outerScope, this);
             this.addKlass(id, klass);
 
@@ -553,7 +556,7 @@ public class DFSourceKlass extends DFKlass {
             }
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
-                DFSourceKlass anonKlass = new DFSourceKlass(
+                DFSourceKlass anonKlass = new DFAnonymousKlass(
                     this.getFilePath(), cstr, space, outerScope, this);
                 space.addKlass(id, anonKlass);
             }
@@ -597,7 +600,6 @@ public class DFSourceKlass extends DFKlass {
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else {
-            this.buildTypeFromDecls(_ast);
             this.buildMembersFromAST(finder, _ast);
         }
     }
@@ -622,6 +624,7 @@ public class DFSourceKlass extends DFKlass {
     protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
         //Logger.info("DFKlass.buildMembersFromAST:", this, finder);
+
         if (ast instanceof AbstractTypeDeclaration) {
             this.buildMembersFromAbstTypeDecl(finder, (AbstractTypeDeclaration)ast);
 
@@ -762,6 +765,7 @@ public class DFSourceKlass extends DFKlass {
         throws InvalidSyntax {
         if (_initMethod != null) {
             _initMethod.setBaseFinder(finder);
+            _initMethod.buildFuncType(this);
         }
 
         for (BodyDeclaration body : decls) {

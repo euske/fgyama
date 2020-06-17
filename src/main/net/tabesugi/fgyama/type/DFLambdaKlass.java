@@ -80,15 +80,27 @@ class DFLambdaKlass extends DFSourceKlass {
 
     private LambdaScope _lambdaScope;
     private FunctionalMethod _funcMethod;
+
     private List<CapturedRef> _captured =
         new ArrayList<CapturedRef>();
 
     public DFLambdaKlass(
         String filePath, LambdaExpression lambda,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        super(filePath, lambda, outerSpace, outerScope, outerKlass);
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        throws InvalidSyntax {
+        super(filePath, lambda, Utils.encodeASTNode(lambda),
+              outerSpace, outerScope, outerKlass);
         _lambdaScope = new LambdaScope(outerScope, Utils.encodeASTNode(lambda));
         _funcMethod = new FunctionalMethod(FUNC_NAME);
+        ASTNode body = lambda.getBody();
+        if (body instanceof Statement) {
+            this.buildTypeFromStmt((Statement)body, _funcMethod, _funcMethod.getScope());
+        } else if (body instanceof Expression) {
+            this.buildTypeFromExpr((Expression)body, _funcMethod, _funcMethod.getScope());
+        } else {
+            throw new InvalidSyntax(body);
+        }
+        assert _funcMethod != null;
     }
 
     @Override
@@ -105,7 +117,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
     @Override
     public boolean isDefined() {
-        return (_funcMethod.getFuncType() != null);
+        return (_funcMethod != null && _funcMethod.getFuncType() != null);
     }
 
     @Override
@@ -116,6 +128,7 @@ class DFLambdaKlass extends DFSourceKlass {
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
+        assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
@@ -125,23 +138,10 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
-    protected void buildTypeFromDecls(ASTNode ast)
-        throws InvalidSyntax {
-        LambdaExpression lambda = (LambdaExpression)ast;
-        ASTNode body = lambda.getBody();
-        if (body instanceof Statement) {
-            this.buildTypeFromStmt((Statement)body, _funcMethod, _funcMethod.getScope());
-        } else if (body instanceof Expression) {
-            this.buildTypeFromExpr((Expression)body, _funcMethod, _funcMethod.getScope());
-        } else {
-            throw new InvalidSyntax(body);
-        }
-    }
-
-    @Override
     protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
         throws InvalidSyntax {
         // _baseKlass is left undefined.
+        assert _funcMethod != null;
         this.addMethod(_funcMethod, FUNC_NAME);
         _funcMethod.setBaseFinder(finder);
         _funcMethod.setTree(ast);

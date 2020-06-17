@@ -28,20 +28,16 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     public DFMethodRefKlass(
         String filePath, MethodReference methodref,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass) {
-        super(filePath, methodref, outerSpace, outerScope, outerKlass);
+        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        throws InvalidSyntax {
+        super(filePath, methodref, Utils.encodeASTNode(methodref),
+              outerSpace, outerScope, outerKlass);
         _funcMethod = new FunctionalMethod(FUNC_NAME, outerScope);
     }
 
     @Override
     public String toString() {
         return ("<DFMethodRefKlass("+this.getTypeName()+")>");
-    }
-
-    @Override
-    protected void buildTypeFromDecls(ASTNode ast)
-        throws InvalidSyntax {
-        MethodReference methodref = (MethodReference)ast;
     }
 
     @Override
