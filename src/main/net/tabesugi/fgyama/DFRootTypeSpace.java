@@ -71,10 +71,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
         DFTypeSpace space = this.lookupSpace(spaceName);
         // Create a top-level klass.
         DFJarFileKlass klass = (DFJarFileKlass)space.getKlass(klassName);
+        DFTypeFinder finder = _finder;
         if (klass == null) {
-            klass = new DFJarFileKlass(klassName, space, null, null);
+            klass = new DFJarFileKlass(klassName, space, null, null, finder);
             klass.setBaseFinder(_finder);
             space.addKlass(klassName, klass);
+            finder = new DFTypeFinder(klass, finder);
         }
         while (0 <= i) {
             // Create inner klasses.
@@ -85,9 +87,10 @@ public class DFRootTypeSpace extends DFTypeSpace {
             DFJarFileKlass child = (DFJarFileKlass)klass.getKlass(name);
             if (child == null) {
                 child = new DFJarFileKlass(
-                    name, klass, klass.getKlassScope(), klass);
+                    name, klass, klass.getKlassScope(), klass, finder);
                 klass.addKlass(name, child);
             }
+            finder = new DFTypeFinder(child, finder);
             klass = child;
         }
         klass.setJarPath(jarPath, entPath);
