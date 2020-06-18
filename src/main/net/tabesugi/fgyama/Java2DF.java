@@ -86,11 +86,22 @@ class DFFileScope extends DFVarScope {
 //
 public class Java2DF {
 
+    private class Entry {
+        String key;
+        CompilationUnit cunit;
+        public Entry(String key, CompilationUnit cunit) {
+            this.key = key;
+            this.cunit = cunit;
+        }
+    }
+
     private DFRootTypeSpace _rootSpace;
     private List<Exporter> _exporters =
         new ArrayList<Exporter>();
     private DFGlobalScope _globalScope =
         new DFGlobalScope();
+    private List<Entry> _sourceFiles =
+        new ArrayList<Entry>();
     private Map<String, DFFileScope> _fileScope =
         new HashMap<String, DFFileScope>();
     private Map<String, List<DFSourceKlass>> _fileKlasses =
@@ -127,9 +138,45 @@ public class Java2DF {
         }
     }
 
-    // Stage1: populate TypeSpaces.
+    public void clearSourceFiles() {
+        _sourceFiles.clear();
+    }
+
+    public void addSourceFile(String key, CompilationUnit cunit) {
+        _sourceFiles.add(new Entry(key, cunit));
+    }
+
+    public Collection<DFSourceKlass> processAll()
+        throws InvalidSyntax {
+        // Stage1: populate TypeSpaces.
+        for (Entry e : _sourceFiles) {
+            Logger.info("Stage1:", e.key);
+            this.buildTypeSpace(e.key, e.cunit);
+        }
+
+        // Stage2: set references to external Klasses.
+        for (Entry e : _sourceFiles) {
+            Logger.info("Stage2:", e.key);
+            this.setTypeFinder(e.key, e.cunit);
+        }
+
+        // Stage3: load class definitions and define parameterized Klasses.
+        ConsistentHashSet<DFSourceKlass> klasses =
+            new ConsistentHashSet<DFSourceKlass>();
+        for (Entry e : _sourceFiles) {
+            Logger.info("Stage3:", e.key);
+            this.loadKlasses(e.key, e.cunit, klasses);
+        }
+
+        // Stage4: list all methods.
+        Logger.info("Stage4:");
+        this.listMethods(klasses);
+
+        return klasses;
+    }
+
     @SuppressWarnings("unchecked")
-    public void buildTypeSpace(String key, CompilationUnit cunit)
+    private void buildTypeSpace(String key, CompilationUnit cunit)
         throws InvalidSyntax {
         DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, key);
@@ -146,9 +193,8 @@ public class Java2DF {
         _fileKlasses.put(key, klasses);
     }
 
-    // Stage2: set references to external Klasses.
     @SuppressWarnings("unchecked")
-    public void setTypeFinder(String key, CompilationUnit cunit) {
+    private void setTypeFinder(String key, CompilationUnit cunit) {
         // Search path for types: ROOT -> java.lang -> package -> imports.
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = new DFTypeFinder(_rootSpace.lookupSpace("java.lang"), finder);
@@ -183,9 +229,8 @@ public class Java2DF {
         }
     }
 
-    // Stage3: load class definitions and define parameterized Klasses.
     @SuppressWarnings("unchecked")
-    public void loadKlasses(
+    private void loadKlasses(
         String key, CompilationUnit cunit, Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
@@ -211,8 +256,7 @@ public class Java2DF {
         }
     }
 
-    // Stage4: list all methods.
-    public void listMethods(Set<DFSourceKlass> klasses)
+    private void listMethods(Set<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
@@ -418,38 +462,18 @@ public class Java2DF {
 
         // Process files.
         Java2DF converter = new Java2DF(rootSpace);
-        Map<String, CompilationUnit> srcs =
-            new HashMap<String, CompilationUnit>();
         for (String path : files) {
-            Logger.info("Stage1:", path);
+            Logger.info("Parsing:", path);
             try {
                 CompilationUnit cunit = Utils.parseFile(path);
-                srcs.put(path, cunit);
-                converter.buildTypeSpace(path, cunit);
+                converter.addSourceFile(path, cunit);
             } catch (IOException e) {
-                Logger.error("Stage1: IOException at "+path);
-                throw e;
-            } catch (InvalidSyntax e) {
+                Logger.error("Parsing: IOException at "+path);
                 throw e;
             }
         }
-        for (String path : files) {
-            Logger.info("Stage2:", path);
-            CompilationUnit cunit = srcs.get(path);
-            converter.setTypeFinder(path, cunit);
-        }
-        ConsistentHashSet<DFSourceKlass> klasses = new ConsistentHashSet<DFSourceKlass>();
-        for (String path : files) {
-            Logger.info("Stage3:", path);
-            CompilationUnit cunit = srcs.get(path);
-            converter.loadKlasses(path, cunit, klasses);
-        }
-        Logger.info("Stage4.");
-        try {
-            converter.listMethods(klasses);
-        } catch (InvalidSyntax e) {
-            throw e;
-        }
+
+        Collection<DFSourceKlass> klasses = converter.processAll();
 
         ByteArrayOutputStream temp = null;
         if (reformat) {

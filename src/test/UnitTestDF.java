@@ -40,24 +40,13 @@ public class UnitTestDF extends XMLTestCase {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XmlExporter exporter = new XmlExporter(out);
         _converter.addExporter(exporter);
-        Map<String, CompilationUnit> srcs =
-            new HashMap<String, CompilationUnit>();
+        _converter.clearSourceFiles();
         for (String javaPath : javaPaths) {
             System.err.println("compareXml: "+javaPath+", "+xmlPath);
             CompilationUnit cunit = Utils.parseFile(javaPath);
-            srcs.put(javaPath, cunit);
-            _converter.buildTypeSpace(javaPath, cunit);
+            _converter.addSourceFile(javaPath, cunit);
         }
-        for (String javaPath : javaPaths) {
-            CompilationUnit cunit = srcs.get(javaPath);
-            _converter.setTypeFinder(javaPath, cunit);
-        }
-        Set<DFSourceKlass> klasses = new ConsistentHashSet<DFSourceKlass>();
-        for (String javaPath : javaPaths) {
-            CompilationUnit cunit = srcs.get(javaPath);
-            _converter.loadKlasses(javaPath, cunit, klasses);
-        }
-        _converter.listMethods(klasses);
+        Collection<DFSourceKlass> klasses = _converter.processAll();
         Counter counter = new Counter(1);
         for (DFSourceKlass klass : klasses) {
             _converter.buildGraphs(counter, klass, false);
