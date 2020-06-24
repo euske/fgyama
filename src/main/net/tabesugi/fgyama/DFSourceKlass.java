@@ -36,6 +36,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         this.buildTypeFromDecls(_abstTypeDecl.bodyDeclarations());
     }
 
+    @SuppressWarnings("unchecked")
     protected void build() throws InvalidSyntax {
         if (this.getGenericKlass() == null &&
             _abstTypeDecl instanceof TypeDeclaration) {

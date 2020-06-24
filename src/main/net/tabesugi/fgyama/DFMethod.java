@@ -7,9 +7,20 @@ import javax.xml.stream.*;
 
 
 //  DFMethod
+//  Abstract Method type that belongs to a DFKlass.
+//
+//  Usage:
+//    1. new DFMethod()
+//    2. load()
+//    3.
+//
+//  Implement:
+//    parameterize(paramTypes)
+//    getFuncType()
 //
 public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMethod> {
 
+    // CallStyle:
     public enum CallStyle {
         Constructor,
         InstanceMethod,
@@ -38,20 +49,21 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     // These fields are available upon construction.
-    private DFKlass _klass;
-    private CallStyle _callStyle;
-    private boolean _abstract;
-    private String _methodId;
-    private String _methodName;
+    private String _methodId;     // Unique identifier for a method.
+    private DFKlass _klass;       // Klass it belongs.
+    private CallStyle _callStyle; // Calling style.
+    private boolean _abstract;    // true if the method is abstract.
+    private String _methodName;   // Method name (not unique).
 
-    // These fields are available after setMapTypes(). (Stage3)
+    // These fields are available only for generic methods.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFMethod> _concreteMethods = null;
 
-    // These fields are available only for parameterized methods;
+    // These fields are available only for parameterized methods.
     private DFMethod _genericMethod = null;
     private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
+    // List of callers for this method.
     private ConsistentHashSet<DFMethod> _callers =
         new ConsistentHashSet<DFMethod>();
 
@@ -60,27 +72,32 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     // List of superclass' methods being overriden by this method.
     private List<DFMethod> _overriding = new ArrayList<DFMethod>();
 
+    // Normal constructor.
     public DFMethod(
         DFKlass klass, CallStyle callStyle, boolean isAbstract,
         String methodId, String methodName) {
         super(methodId, klass);
+
+        _methodId = methodId;
         _klass = klass;
         _callStyle = callStyle;
         _abstract = isAbstract;
-        _methodId = methodId;
         _methodName = methodName;
     }
 
-    // Constructor for a parameterized method.
+    // Protected constructor for a parameterized method.
     protected DFMethod(
         DFMethod genericMethod, DFKlass[] paramTypes)
         throws InvalidSyntax {
+        // A parameterized method has its own separate typespace
+        // that is NOT accessible from the outside.
         super(genericMethod._methodId + DFTypeSpace.getParamName(paramTypes),
               genericMethod._klass);
+
+        _methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
         _klass = genericMethod._klass;
         _callStyle = genericMethod._callStyle;
         _abstract = genericMethod._abstract;
-        _methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
         _methodName = genericMethod._methodName;
 
         _genericMethod = genericMethod;
@@ -95,9 +112,6 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         }
     }
 
-    protected abstract DFMethod parameterize(DFKlass[] paramTypes)
-        throws InvalidSyntax;
-
     @Override
     public String toString() {
         if (_mapTypes != null) {
@@ -106,30 +120,28 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return ("<DFMethod("+this.getSignature()+")>");
     }
 
-    @Override
-    public int compareTo(DFMethod method) {
-        if (this == method) return 0;
-        return _methodName.compareTo(method._methodName);
-    }
-
     public boolean equals(DFMethod method) {
         if (!_methodName.equals(method._methodName)) return false;
         return this.getFuncType().equals(method.getFuncType());
     }
 
-    public boolean isGeneric() {
-        return _mapTypes != null && 0 < _mapTypes.size();
+    @Override
+    public int compareTo(DFMethod method) {
+        if (this == method) return 0;
+        return _methodId.compareTo(method._methodId);
     }
 
-    public void setMapTypes(DFMapType[] mapTypes)
-        throws InvalidSyntax {
-        if (mapTypes == null) return;
-        assert _mapTypes == null;
-        _mapTypes = new ConsistentHashMap<String, DFMapType>();
-        for (DFMapType mapType : mapTypes) {
-            _mapTypes.put(mapType.getName(), mapType);
+    @Override
+    public DFKlass getKlass(String id) {
+        if (_mapTypes != null) {
+            DFMapType mapType = _mapTypes.get(id);
+            if (mapType != null) return mapType;
         }
-        _concreteMethods = new ConsistentHashMap<String, DFMethod>();
+        if (_paramTypes != null) {
+            DFKlass paramType = _paramTypes.get(id);
+            if (paramType != null) return paramType;
+        }
+        return super.getKlass(id);
     }
 
     // Creates a parameterized method.
@@ -158,25 +170,28 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return method;
     }
 
-    public DFMethod getGenericMethod() {
-        return _genericMethod;
+    public boolean isAbstract() {
+        return _abstract;
     }
 
-    public List<DFMethod> getConcreteMethods() {
-        assert _concreteMethods != null;
-        return _concreteMethods.values();
+    public boolean isGeneric() {
+        return _mapTypes != null && 0 < _mapTypes.size();
+    }
+
+    public String getMethodId() {
+        return _methodId;
     }
 
     public DFKlass getKlass() {
         return _klass;
     }
 
-    public String getName() {
-        return _methodName;
+    public CallStyle getCallStyle() {
+        return _callStyle;
     }
 
-    public String getMethodId() {
-        return _methodId;
+    public String getName() {
+        return _methodName;
     }
 
     public String getSignature() {
@@ -192,15 +207,22 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return name;
     }
 
-    public CallStyle getCallStyle() {
-        return _callStyle;
+    public DFMethod getGenericMethod() {
+        return _genericMethod;
     }
 
-    public boolean isAbstract() {
-        return _abstract;
+    public List<DFMethod> getConcreteMethods() {
+        assert _concreteMethods != null;
+        return _concreteMethods.values();
     }
 
-    public abstract DFFunctionType getFuncType();
+    public void addCaller(DFMethod method) {
+        _callers.add(method);
+    }
+
+    public ConsistentHashSet<DFMethod> getCallers() {
+        return _callers;
+    }
 
     public boolean addOverrider(DFMethod method) {
         if (method._callStyle != CallStyle.Lambda &&
@@ -210,13 +232,6 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         _overriders.add(method);
         method._overriding.add(this);
         return true;
-    }
-
-    private void listOverriders(List<Overrider> overriders, int prio) {
-        overriders.add(new Overrider(this, prio));
-        for (DFMethod method : _overriders) {
-            method.listOverriders(overriders, prio+1);
-        }
     }
 
     private List<DFMethod> _allOverriders = null;
@@ -234,33 +249,35 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _allOverriders;
     }
 
+    private void listOverriders(List<Overrider> overriders, int prio) {
+        overriders.add(new Overrider(this, prio));
+        for (DFMethod method : _overriders) {
+            method.listOverriders(overriders, prio+1);
+        }
+    }
+
     public List<DFMethod> getOverridings() {
         return _overriding;
     }
 
-    public void addCaller(DFMethod method) {
-        _callers.add(method);
-    }
-
-    public ConsistentHashSet<DFMethod> getCallers() {
-        return _callers;
-    }
-
-    @Override
-    public DFKlass getKlass(String id) {
-        if (_mapTypes != null) {
-            DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType;
-        }
-        if (_paramTypes != null) {
-            DFKlass paramType = _paramTypes.get(id);
-            if (paramType != null) return paramType;
-        }
-        return super.getKlass(id);
-    }
-
     public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap) {
         return this.getFuncType().canAccept(argTypes, typeMap);
+    }
+
+    public abstract DFFunctionType getFuncType();
+
+    protected abstract DFMethod parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax;
+
+    protected void setMapTypes(DFMapType[] mapTypes)
+        throws InvalidSyntax {
+        if (mapTypes == null) return;
+        assert _mapTypes == null;
+        _mapTypes = new ConsistentHashMap<String, DFMapType>();
+        for (DFMapType mapType : mapTypes) {
+            _mapTypes.put(mapType.getName(), mapType);
+        }
+        _concreteMethods = new ConsistentHashMap<String, DFMethod>();
     }
 
     // Overrider

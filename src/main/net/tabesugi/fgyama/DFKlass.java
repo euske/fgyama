@@ -8,6 +8,9 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+//  FallbackMethod
+//  A dummy entry used for an unknown method.
+//
 class FallbackMethod extends DFMethod {
 
     DFFunctionType _funcType;
@@ -32,10 +35,19 @@ class FallbackMethod extends DFMethod {
 
 //  DFKlass
 //  Abstract Klass type.
-//  Implement: isSubclassOf(klass, typeMap)
+//
+//  Usage:
+//    1. new DFKlass()
+//    2. load()
+//    3. getXXX(), ...
+//
+//  Implement:
+//    parameterize(paramTypes)
+//    build()
 //
 public abstract class DFKlass extends DFTypeSpace implements DFType {
 
+    // LoadState for tracking the current klass status.
     private enum LoadState {
         Unloaded,
         Loading,
@@ -47,16 +59,18 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private String _name;
     private DFTypeSpace _outerSpace;
 
+    // List of fields.
     private List<FieldRef> _fields =
         new ArrayList<FieldRef>();
-    private List<DFMethod> _methods =
-        new ArrayList<DFMethod>();
     private Map<String, FieldRef> _id2field =
         new HashMap<String, FieldRef>();
+    // List of methods.
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
     private Map<String, DFMethod> _id2method =
         new HashMap<String, DFMethod>();
 
-    // These fields are available after setMapTypes(). (Stage1)
+    // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
@@ -64,18 +78,22 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _genericKlass = null;
     private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
+    // Normal constructor.
     public DFKlass(
         String name, DFTypeSpace outerSpace) {
         super(name, outerSpace);
+
         _name = name;
         _outerSpace = outerSpace;
     }
 
+    // Protected constructor for a parameterized klass.
     protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
+        // A parameterized Klass has its own separate typespace
+        // that is NOT accessible from the outside.
         this(genericKlass.getName() + DFTypeSpace.getParamName(paramTypes),
              genericKlass.getOuterSpace());
-        // A parameterized Klass is NOT accessible from
-        // the outer namespace but it creates its own subspace.
+
         _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFKlass>();
         List<DFMapType> mapTypes = genericKlass.getMapTypes();
@@ -87,9 +105,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             _paramTypes.put(mapType.getName(), paramType);
         }
     }
-
-    protected abstract DFKlass parameterize(DFKlass[] paramTypes)
-        throws InvalidSyntax;
 
     @Override
     public String toString() {
@@ -114,6 +129,37 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     @Override
     public DFKlass toKlass() {
         return this;
+    }
+
+    @Override
+    public DFKlass getKlass(String id) {
+        if (_mapTypes != null) {
+            DFMapType mapType = _mapTypes.get(id);
+            if (mapType != null) return mapType;
+        }
+        if (_paramTypes != null) {
+            DFKlass paramType = _paramTypes.get(id);
+            if (paramType != null) return paramType;
+        }
+        DFKlass klass = super.getKlass(id);
+        if (klass != null) return klass;
+        if (this.isDefined()) {
+            DFKlass baseKlass = this.getBaseKlass();
+            if (baseKlass != null) {
+                klass = baseKlass.getKlass(id);
+                if (klass != null) return klass;
+            }
+            DFKlass[] baseIfaces = this.getBaseIfaces();
+            if (baseIfaces != null) {
+                for (DFKlass iface : baseIfaces) {
+                    if (iface != null) {
+                        klass = iface.getKlass(id);
+                        if (klass != null) return klass;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     @Override
@@ -170,12 +216,44 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return -1;
     }
 
+    // Creates a parameterized klass.
+    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
+        List<DFMapType> mapTypes = this.getMapTypes();
+        assert _paramTypes == null;
+        assert paramTypes.length <= mapTypes.size();
+        DFKlass[] types = new DFKlass[mapTypes.size()];
+        for (int i = 0; i < mapTypes.size(); i++) {
+            if (paramTypes != null && i < paramTypes.length) {
+                types[i] = paramTypes[i];
+            } else {
+                types[i] = mapTypes.get(i).toKlass();
+            }
+        }
+        String name = DFTypeSpace.getParamName(types);
+        DFKlass klass = _concreteKlasses.get(name);
+        if (klass == null) {
+            klass = this.parameterize(types);
+            _concreteKlasses.put(name, klass);
+        }
+        return klass;
+    }
+
     public boolean isDefined() {
         return (_state == LoadState.Loaded);
     }
 
     public boolean isInterface() {
         return false;
+    }
+
+    public boolean isEnum() {
+        return false;
+    }
+
+    public boolean isGeneric() {
+        return _mapTypes != null && 0 < _mapTypes.size();
     }
 
     public String getName() {
@@ -215,14 +293,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
-    public boolean isGeneric() {
-        return _mapTypes != null && 0 < _mapTypes.size();
-    }
-
-    public boolean isEnum() {
-        return false;
-    }
-
     public void load()
         throws InvalidSyntax {
         // an unspecified parameterized klass cannot be loaded.
@@ -230,30 +300,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _state = LoadState.Loading;
         this.build();
         _state = LoadState.Loaded;
-    }
-
-    // Creates a parameterized klass.
-    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
-        throws InvalidSyntax {
-        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
-        List<DFMapType> mapTypes = this.getMapTypes();
-        assert _paramTypes == null;
-        assert paramTypes.length <= mapTypes.size();
-        DFKlass[] types = new DFKlass[mapTypes.size()];
-        for (int i = 0; i < mapTypes.size(); i++) {
-            if (paramTypes != null && i < paramTypes.length) {
-                types[i] = paramTypes[i];
-            } else {
-                types[i] = mapTypes.get(i).toKlass();
-            }
-        }
-        String name = DFTypeSpace.getParamName(types);
-        DFKlass klass = _concreteKlasses.get(name);
-        if (klass == null) {
-            klass = this.parameterize(types);
-            _concreteKlasses.put(name, klass);
-        }
-        return klass;
     }
 
     public void writeXML(XMLStreamWriter writer)
@@ -301,59 +347,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         for (FieldRef field : this.getFields()) {
             field.writeXML(writer);
         }
-    }
-
-    @Override
-    public DFKlass getKlass(String id) {
-        if (_mapTypes != null) {
-            DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType;
-        }
-        if (_paramTypes != null) {
-            DFKlass paramType = _paramTypes.get(id);
-            if (paramType != null) return paramType;
-        }
-        DFKlass klass = super.getKlass(id);
-        if (klass != null) return klass;
-        if (this.isDefined()) {
-            DFKlass baseKlass = this.getBaseKlass();
-            if (baseKlass != null) {
-                klass = baseKlass.getKlass(id);
-                if (klass != null) return klass;
-            }
-            DFKlass[] baseIfaces = this.getBaseIfaces();
-            if (baseIfaces != null) {
-                for (DFKlass iface : baseIfaces) {
-                    if (iface != null) {
-                        klass = iface.getKlass(id);
-                        if (klass != null) return klass;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    // Field/Method-related things.
-
-    protected void setMapTypes(DFMapType[] mapTypes) {
-        assert _mapTypes == null;
-        assert _paramTypes == null;
-        assert _concreteKlasses == null;
-        if (mapTypes == null) {
-            _mapTypes = null;
-        } else {
-            _mapTypes = new ConsistentHashMap<String, DFMapType>();
-            for (DFMapType mapType : mapTypes) {
-                _mapTypes.put(mapType.getName(), mapType);
-            }
-            _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
-        }
-    }
-
-    protected List<DFMapType> getMapTypes() {
-        assert _mapTypes != null;
-        return _mapTypes.values();
     }
 
     public List<FieldRef> getFields() {
@@ -416,6 +409,41 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.findMethod(callStyle, id, argTypes);
     }
 
+    public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
+        assert _id2method != null;
+        DFMethod method = new FallbackMethod(this, name, argTypes);
+        // Do not adds to _methods because it shouldn't be analyzed.
+        _id2method.put(name, method);
+        return method;
+    }
+
+    /// For constructions.
+
+    protected abstract DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax;
+
+    protected abstract void build() throws InvalidSyntax;
+
+    protected void setMapTypes(DFMapType[] mapTypes) {
+        assert _mapTypes == null;
+        assert _paramTypes == null;
+        assert _concreteKlasses == null;
+        if (mapTypes == null || mapTypes.length == 0) {
+            _mapTypes = null;
+        } else {
+            _mapTypes = new ConsistentHashMap<String, DFMapType>();
+            for (DFMapType mapType : mapTypes) {
+                _mapTypes.put(mapType.getName(), mapType);
+            }
+            _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+        }
+    }
+
+    protected List<DFMapType> getMapTypes() {
+        assert _mapTypes != null;
+        return _mapTypes.values();
+    }
+
     protected DFRef addField(
         DFType type, SimpleName name, boolean isStatic) {
         return this.addField(type, name.getIdentifier(), isStatic);
@@ -442,14 +470,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return method;
     }
 
-    public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
-        assert _id2method != null;
-        DFMethod method = new FallbackMethod(this, name, argTypes);
-        // Do not adds to _methods because it might be being referenced.
-        _id2method.put(name, method);
-        return method;
-    }
-
     @Override
     protected void dumpContents(PrintStream out, String indent) {
         super.dumpContents(out, indent);
@@ -467,8 +487,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             _genericKlass.dump(out, indent);
         }
     }
-
-    protected abstract void build() throws InvalidSyntax;
 
     // FieldRef
     public class FieldRef extends DFRef {

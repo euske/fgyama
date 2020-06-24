@@ -10,12 +10,19 @@ import org.apache.bcel.classfile.*;
 
 
 //  DFJarFileKlass
+//  A DFKlass defined in .jar file.
+//
+//  Usage:
+//    1. new DFJarFileKlass(finder)
+//    2. setJarPath()
+//    3. load()
 //
 public class DFJarFileKlass extends DFKlass {
 
+    // These fields are available upon construction.
     private DFTypeFinder _finder;
 
-    // These fields are set immediately after construction.
+    // These fields must be set immediately after construction.
     private String _jarPath = null;
     private String _entPath = null;
 
@@ -24,7 +31,7 @@ public class DFJarFileKlass extends DFKlass {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
 
-
+    // Normal constructor.
     public DFJarFileKlass(
         String name, DFTypeSpace outerSpace,
         DFTypeFinder finder) {
@@ -32,6 +39,7 @@ public class DFJarFileKlass extends DFKlass {
         _finder = new DFTypeFinder(this, finder);
     }
 
+    // Protected constructor for a parameterized klass.
     protected DFJarFileKlass(
         DFJarFileKlass genericKlass, DFKlass[] paramTypes) {
         super(genericKlass, paramTypes);
@@ -49,29 +57,6 @@ public class DFJarFileKlass extends DFKlass {
     public void setJarPath(String jarPath, String entPath) {
         _jarPath = jarPath;
         _entPath = entPath;
-    }
-
-    // Constructor for a parameterized klass.
-    @Override
-    protected DFKlass parameterize(DFKlass[] paramTypes)
-        throws InvalidSyntax {
-        assert paramTypes != null;
-        return new DFJarFileKlass(this, paramTypes);
-    }
-
-    @Override
-    protected void dumpContents(PrintStream out, String indent) {
-        super.dumpContents(out, indent);
-        if (_baseKlass != null) {
-            _baseKlass.dump(out, indent);
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                if (iface != null) {
-                    iface.dump(out, indent);
-                }
-            }
-        }
     }
 
     @Override
@@ -119,6 +104,14 @@ public class DFJarFileKlass extends DFKlass {
         return null;
     }
 
+    // Constructor for a parameterized klass.
+    @Override
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert paramTypes != null;
+        return new DFJarFileKlass(this, paramTypes);
+    }
+
     @Override
     protected void build() throws InvalidSyntax {
         assert _jarPath != null;
@@ -126,7 +119,6 @@ public class DFJarFileKlass extends DFKlass {
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else {
-            Logger.info("build", this);
             try {
                 JarFile jarfile = new JarFile(_jarPath);
                 try {
@@ -263,6 +255,21 @@ public class DFJarFileKlass extends DFKlass {
                 this, callStyle, meth.isAbstract(),
                 id, name, meth, _finder);
             this.addMethod(method, null);
+        }
+    }
+
+    @Override
+    protected void dumpContents(PrintStream out, String indent) {
+        super.dumpContents(out, indent);
+        if (_baseKlass != null) {
+            _baseKlass.dump(out, indent);
+        }
+        if (_baseIfaces != null) {
+            for (DFKlass iface : _baseIfaces) {
+                if (iface != null) {
+                    iface.dump(out, indent);
+                }
+            }
         }
     }
 }
