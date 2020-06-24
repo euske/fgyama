@@ -3,6 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
@@ -83,6 +84,11 @@ class DFMethodRefKlass extends DFSourceKlass {
         public DFGraph generateGraph(Counter counter)
             throws InvalidSyntax, EntityNotFound {
             return null;
+        }
+
+        public void writeXML(XMLStreamWriter writer)
+            throws XMLStreamException {
+            Utils.writeXML(writer, _methodRef);
         }
 
         protected void fixateMethod(DFKlass refKlass) {

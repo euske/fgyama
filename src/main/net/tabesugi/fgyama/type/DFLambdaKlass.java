@@ -3,6 +3,7 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import javax.xml.stream.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
@@ -98,6 +99,11 @@ class DFLambdaKlass extends DFSourceKlass {
             }
             ASTNode body = _lambda.getBody();
             return this.generateMethodBody(graph, ctx, body);
+        }
+
+        public void writeXML(XMLStreamWriter writer)
+            throws XMLStreamException {
+            Utils.writeXML(writer, _lambda);
         }
     }
 

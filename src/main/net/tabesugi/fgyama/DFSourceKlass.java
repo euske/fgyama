@@ -188,6 +188,17 @@ class InitMethod extends DFSourceMethod {
         throws InvalidSyntax, EntityNotFound {
         return this.generateBodyDecls(counter, _decls);
     }
+
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        for (BodyDeclaration body : _decls) {
+            if (body instanceof Initializer) {
+                Initializer initializer = (Initializer)body;
+                Utils.writeXML(writer, initializer);
+                break;
+            }
+        }
+    }
 }
 
 
@@ -350,6 +361,11 @@ class DefinedMethod extends DFSourceMethod {
             i++;
         }
         return this.generateMethodBody(graph, ctx, body);
+    }
+
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        Utils.writeXML(writer, _methodDecl);
     }
 }
 

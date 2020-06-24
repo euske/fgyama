@@ -1765,6 +1765,9 @@ public abstract class DFSourceMethod extends DFMethod {
     public abstract DFGraph generateGraph(Counter counter)
         throws InvalidSyntax, EntityNotFound;
 
+    public abstract void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException;
+
     @SuppressWarnings("unchecked")
     public DFGraph generateBodyDecls(
         Counter counter, List<BodyDeclaration> decls)
@@ -1932,6 +1935,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 writer.writeAttribute("name", overriding.getSignature());
                 writer.writeEndElement();
             }
+            method.writeXML(writer);
             DFNode[] nodes = new DFNode[_nodes.size()];
             _nodes.toArray(nodes);
             method.getScope().writeXML(writer, nodes);
