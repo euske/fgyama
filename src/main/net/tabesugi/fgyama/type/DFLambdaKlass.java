@@ -30,6 +30,12 @@ class DFLambdaKlass extends DFSourceKlass {
             }
         }
 
+        protected DFMethod parameterize(DFKlass[] paramTypes)
+            throws InvalidSyntax {
+            assert false;
+            return null;
+        }
+
         public void setFuncType(DFFunctionType funcType) {
             _funcType = funcType;
         }
@@ -188,6 +194,12 @@ class DFLambdaKlass extends DFSourceKlass {
     @Override
     public DFMethod getFuncMethod() {
         return _funcMethod;
+    }
+
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert false;
+        return null;
     }
 
     @Override

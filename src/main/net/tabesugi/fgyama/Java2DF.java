@@ -169,7 +169,7 @@ public class Java2DF {
         }
 
         // Stage4: list all methods.
-        Logger.info("Stage4:");
+        Logger.info("Stage4: listing methods for "+klasses.size()+" klasses...");
         this.listMethods(klasses);
 
         return klasses;
@@ -272,12 +272,8 @@ public class Java2DF {
         // Build call graphs (normal classes).
         List<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
         for (DFSourceKlass klass : klasses) {
-            DFMethod init = klass.getInitMethod();
-            if (init != null) {
-                ((DFSourceMethod)init).enumRefs(defined);
-            }
+            klass.enumRefs(defined);
             for (DFMethod method : klass.getMethods()) {
-                ((DFSourceMethod)method).enumRefs(defined);
                 queue.add(method);
             }
         }
@@ -316,21 +312,9 @@ public class Java2DF {
         throws InvalidSyntax, EntityNotFound {
         try {
             this.startKlass(klass);
-            if (!(klass instanceof DFLambdaKlass)) {
-                try {
-                    DFMethod init = klass.getInitMethod();
-                    if (init != null) {
-                        Logger.info("Stage5:", init.getSignature());
-                        DFGraph graph = ((DFSourceMethod)init).generateGraph(counter);
-                        if (graph != null) {
-                            this.exportGraph(graph);
-                        }
-                    }
-                } catch (EntityNotFound e) {
-                    if (strict) throw e;
-                }
-            }
             List<DFMethod> methods = new ArrayList<DFMethod>();
+            DFMethod init = klass.getInitMethod();
+            methods.add(init);
             for (DFMethod method : klass.getMethods()) {
                 if (method.isGeneric()) {
                     methods.addAll(method.getConcreteMethods());
@@ -340,14 +324,16 @@ public class Java2DF {
             }
             for (DFMethod method : methods) {
                 assert !method.isGeneric();
-                try {
-                    Logger.info("Stage5:", method.getSignature());
-                    DFGraph graph = ((DFSourceMethod)method).generateGraph(counter);
-                    if (graph != null) {
-                        this.exportGraph(graph);
+                if (method instanceof DFSourceMethod) {
+                    try {
+                        Logger.info("Stage5:", method.getSignature());
+                        DFGraph graph = ((DFSourceMethod)method).generateGraph(counter);
+                        if (graph != null) {
+                            this.exportGraph(graph);
+                        }
+                    } catch (EntityNotFound e) {
+                        if (strict) throw e;
                     }
-                } catch (EntityNotFound e) {
-                    if (strict) throw e;
                 }
             }
         } finally {

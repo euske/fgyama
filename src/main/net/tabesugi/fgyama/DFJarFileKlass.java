@@ -10,7 +10,7 @@ import org.apache.bcel.classfile.*;
 
 
 //  DFJarFileKlass
-//  A DFKlass defined in .jar file.
+//  DFKlass defined in .jar file.
 //
 //  Usage:
 //    1. new DFJarFileKlass(finder)
@@ -104,7 +104,7 @@ public class DFJarFileKlass extends DFKlass {
         return null;
     }
 
-    // Constructor for a parameterized klass.
+    // Parameterize the klass.
     @Override
     protected DFKlass parameterize(DFKlass[] paramTypes)
         throws InvalidSyntax {

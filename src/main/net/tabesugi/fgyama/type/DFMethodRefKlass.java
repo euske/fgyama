@@ -34,6 +34,12 @@ class DFMethodRefKlass extends DFSourceKlass {
             return _refMethod;
         }
 
+        protected DFMethod parameterize(DFKlass[] paramTypes)
+            throws InvalidSyntax {
+            assert false;
+            return null;
+        }
+
         @Override
         public void loadKlasses(Set<DFSourceKlass> klasses)
             throws InvalidSyntax {
@@ -147,6 +153,12 @@ class DFMethodRefKlass extends DFSourceKlass {
     @Override
     public DFMethod getFuncMethod() {
         return _funcMethod;
+    }
+
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert false;
+        return null;
     }
 
     @Override

@@ -11,8 +11,7 @@ import javax.xml.stream.*;
 //
 //  Usage:
 //    1. new DFMethod()
-//    2. load()
-//    3.
+//    2. getXXX(), ...
 //
 //  Implement:
 //    parameterize(paramTypes)
@@ -264,8 +263,10 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return this.getFuncType().canAccept(argTypes, typeMap);
     }
 
+    // Get the method signature.
     public abstract DFFunctionType getFuncType();
 
+    // Parameterize the klass.
     protected abstract DFMethod parameterize(DFKlass[] paramTypes)
         throws InvalidSyntax;
 

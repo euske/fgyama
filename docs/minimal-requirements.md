@@ -1,10 +1,10 @@
-# Minimal Requirements for processing Java 8 source code.
+# Minimal Requirements for Processing Java 8 Source Code...
 
-Here are a list of classes that you have to load
-to just get started (to define Object, Class and String)
-in Java 8...
+Here are a list of classes in Java 8 that you have to load
+to just get started (to define basic stuff like `Object`, `Class` and `String`)
+...
 
-These classes are stored in rt.jar.
+These classes are stored in `rt.jar`.
 
 ```
 Ljava/lang/Object;

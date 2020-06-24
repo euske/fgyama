@@ -9,6 +9,11 @@ import org.apache.bcel.classfile.*;
 
 
 //  DFJarFileMethod
+//  DFMethod defined in .jar file.
+//
+//  Usage:
+//    1. new DFJarFileMethod(meth, finder)
+//    2. getXXX(), ...
 //
 public class DFJarFileMethod extends DFMethod {
 
@@ -16,6 +21,7 @@ public class DFJarFileMethod extends DFMethod {
     Method _meth;
     DFFunctionType _funcType;
 
+    // Normal constructor.
     public DFJarFileMethod(
         DFKlass klass, CallStyle callStyle, boolean isAbstract,
         String methodId, String methodName,
@@ -28,7 +34,7 @@ public class DFJarFileMethod extends DFMethod {
         this.build();
     }
 
-    // Constructor for a parameterized method.
+    // Protected constructor for a parameterized method.
     private DFJarFileMethod(
         DFJarFileMethod genericMethod, DFKlass[] paramTypes)
         throws InvalidSyntax {
@@ -39,16 +45,19 @@ public class DFJarFileMethod extends DFMethod {
         this.build();
     }
 
+    public DFFunctionType getFuncType() {
+        return _funcType;
+    }
+
+    // Parameterize the klass.
+    @Override
     protected DFMethod parameterize(DFKlass[] paramTypes)
         throws InvalidSyntax {
         assert paramTypes != null;
         return new DFJarFileMethod(this, paramTypes);
     }
 
-    public DFFunctionType getFuncType() {
-        return _funcType;
-    }
-
+    // Builds the internal structure.
     @SuppressWarnings("unchecked")
     private void build()
         throws InvalidSyntax {
