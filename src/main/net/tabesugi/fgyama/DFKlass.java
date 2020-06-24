@@ -269,11 +269,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFKlass getBaseKlass() {
-        if (this == DFBuiltinTypes.getObjectKlass()) {
-            return null;
-        } else {
-            return DFBuiltinTypes.getObjectKlass();
-        }
+        return null;
     }
 
     public DFKlass[] getBaseIfaces() {

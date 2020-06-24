@@ -568,11 +568,13 @@ public abstract class DFSourceKlass extends DFKlass {
     }
 
     protected DFTypeFinder getFinder() {
+        assert _finder != null;
         return _finder;
     }
 
     // Only used by DFLambdaKlass.
     protected void setBaseKlass(DFKlass klass) {
+        assert klass != null;
         _baseKlass = klass;
     }
 
@@ -610,10 +612,9 @@ public abstract class DFSourceKlass extends DFKlass {
         ClassInstanceCreation cstr)
         throws InvalidSyntax {
         // Get superclass.
+        _baseKlass = DFBuiltinTypes.getObjectKlass();
         Type superClass = cstr.getType();
-        if (superClass == null) {
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
-        } else {
+        if (superClass != null) {
             try {
                 _baseKlass = _finder.resolve(superClass).toKlass();
                 _baseKlass.load();
@@ -633,10 +634,9 @@ public abstract class DFSourceKlass extends DFKlass {
         _interface = typeDecl.isInterface();
         // Load base klasses/interfaces.
         // Get superclass.
+        _baseKlass = DFBuiltinTypes.getObjectKlass();
         Type superClass = typeDecl.getSuperclassType();
-        if (superClass == null) {
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
-        } else {
+        if (superClass != null) {
             try {
                 _baseKlass = _finder.resolve(superClass).toKlass();
                 _baseKlass.load();

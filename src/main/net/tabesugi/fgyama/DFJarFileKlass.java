@@ -75,8 +75,7 @@ public class DFJarFileKlass extends DFKlass {
     @Override
     public DFKlass getBaseKlass() {
         assert this.isDefined();
-        if (_baseKlass != null) return _baseKlass;
-        return super.getBaseKlass();
+        return _baseKlass;
     }
 
     @Override
