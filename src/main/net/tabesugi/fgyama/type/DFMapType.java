@@ -16,24 +16,31 @@ public class DFMapType extends DFKlass {
 
     private String _sig = null;
     private List<Type> _types = null;
+    private DFTypeFinder _finder = null;
 
-    private DFMapType(String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
-        super(name, outerSpace, null, outerKlass);
+    private DFMapType(String name, DFTypeSpace outerSpace) {
+        super(name, outerSpace);
         _name = name;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        String name, DFTypeSpace outerSpace,
         List<Type> types) {
-        this(name, outerSpace, outerKlass);
+        this(name, outerSpace);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        String name, DFTypeSpace outerSpace,
         String sig) {
-        this(name, outerSpace, outerKlass);
+        this(name, outerSpace);
         _sig = sig;
+    }
+
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert false;
+        return null;
     }
 
     @Override
@@ -82,24 +89,27 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    @Override
-    public void build(DFTypeFinder finder)
-        throws InvalidSyntax {
+    public void setBaseFinder(DFTypeFinder baseFinder) {
+        assert _finder == null;
+        _finder = baseFinder;
+    }
+
+    protected void build() throws InvalidSyntax {
         assert _sig == null || _types == null;
         _boundKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);
             try {
-                _boundKlass = parser.resolveType(finder).toKlass();
+                _boundKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFMapType.build: TypeNotFound",
-                    this, e.name, _sig, finder);
+                    this, e.name, _sig, _finder);
             }
         } else if (_types != null) {
             try {
                 for (Type type : _types) {
-                    _boundKlass = finder.resolve(type).toKlass();
+                    _boundKlass = _finder.resolve(type).toKlass();
                     break;
                 }
             } catch (TypeNotFound e) {

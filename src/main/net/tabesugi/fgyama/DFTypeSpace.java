@@ -83,15 +83,14 @@ public class DFTypeSpace {
     }
 
     @SuppressWarnings("unchecked")
-    public DFMapType[] getMapTypes(DFKlass klass, List<TypeParameter> tps) {
-        if (tps.size() == 0) return null;
+    public DFMapType[] createMapTypes(List<TypeParameter> tps) {
         DFMapType[] mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);
             String id = tp.getName().getIdentifier();
             DFMapType mapType = _id2maptype.get(id);
             if (mapType == null) {
-                mapType = new DFMapType(id, this, klass, tp.typeBounds());
+                mapType = new DFMapType(id, this, tp.typeBounds());
                 _id2maptype.put(id, mapType);
             }
             mapTypes[i] = mapType;

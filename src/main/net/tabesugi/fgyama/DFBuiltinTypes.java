@@ -43,19 +43,23 @@ public class DFBuiltinTypes {
         _boolean.load();
         _void.load();
         _exception.load();
+        _array.load();
     }
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace langSpace) {
-            super("_Array", langSpace, null, null);
-            this.addField("length", false, DFBasicType.INT);
+            super("_Array", langSpace);
+        }
+        protected void build() throws InvalidSyntax {
+            this.addField(DFBasicType.INT, "length", false);
         }
         public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
             if (this == klass) return 0;
             return -1;
         }
-        @Override
-        public void load() throws InvalidSyntax {
+        protected DFKlass parameterize(DFKlass[] paramTypes) throws InvalidSyntax {
+            assert false;
+            return null;
         }
     }
 

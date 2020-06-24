@@ -161,8 +161,8 @@ public class JNITypeParser {
         _pos++;
     }
 
-    public static DFMapType[] getMapTypes(
-        String text, DFTypeSpace outerSpace, DFKlass outerKlass) {
+    public static DFMapType[] createMapTypes(
+        String text, DFTypeSpace outerSpace) {
         int pos = 0;
         if (text.charAt(pos) != '<') return null;
         pos++;
@@ -177,7 +177,7 @@ public class JNITypeParser {
             i = skipType(text, pos);
             String sig = text.substring(pos, i);
             pos = i;
-            DFMapType pt = new DFMapType(id, outerSpace, outerKlass, sig);
+            DFMapType pt = new DFMapType(id, outerSpace, sig);
             params.add(pt);
         }
         pos++;

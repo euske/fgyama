@@ -386,9 +386,12 @@ public class DFFrame {
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
-                    if (m.isTransparent()) {
-                        _inputRefs.addAll(m.getInputRefs());
-                        _outputRefs.addAll(m.getOutputRefs());
+                    if (m instanceof DFSourceMethod) {
+                        DFSourceMethod srcm = (DFSourceMethod)m;
+                        if (srcm.isTransparent()) {
+                            _inputRefs.addAll(srcm.getInputRefs());
+                            _outputRefs.addAll(srcm.getOutputRefs());
+                        }
                     }
                 }
             } else {
@@ -421,9 +424,12 @@ public class DFFrame {
             DFMethod method1 = baseKlass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
-                if (method1.isTransparent()) {
-                    _inputRefs.addAll(method1.getInputRefs());
-                    _outputRefs.addAll(method1.getOutputRefs());
+                if (method1 instanceof DFSourceMethod) {
+                    DFSourceMethod srcmethod = (DFSourceMethod)method1;
+                    if (srcmethod.isTransparent()) {
+                        _inputRefs.addAll(srcmethod.getInputRefs());
+                        _outputRefs.addAll(srcmethod.getOutputRefs());
+                    }
                 }
             } else {
                 Logger.error(
@@ -498,8 +504,9 @@ public class DFFrame {
             DFRef ref;
             if (name != null) {
                 try {
-                    DFType type = _finder.lookupType(name);
-                    ref = type.toKlass().getKlassScope().lookupThis();
+                    DFKlass klass = _finder.lookupType(name).toKlass();
+                    assert klass instanceof DFSourceKlass;
+                    ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (this)",
@@ -664,9 +671,12 @@ public class DFFrame {
                 callStyle, invoke.getName(), argTypes);
             if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
-                    if (m.isTransparent()) {
-                        _inputRefs.addAll(m.getInputRefs());
-                        _outputRefs.addAll(m.getOutputRefs());
+                    if (m instanceof DFSourceMethod) {
+                        DFSourceMethod srcm = (DFSourceMethod)m;
+                        if (srcm.isTransparent()) {
+                            _inputRefs.addAll(srcm.getInputRefs());
+                            _outputRefs.addAll(srcm.getOutputRefs());
+                        }
                     }
                 }
                 return method1.getFuncType().getReturnType();
@@ -702,9 +712,12 @@ public class DFFrame {
             DFMethod method1 = baseKlass.findMethod(
                 DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
             if (method1 != null) {
-                if (method1.isTransparent()) {
-                    _inputRefs.addAll(method1.getInputRefs());
-                    _outputRefs.addAll(method1.getOutputRefs());
+                if (method1 instanceof DFSourceMethod) {
+                    DFSourceMethod srcmethod = (DFSourceMethod)method1;
+                    if (srcmethod.isTransparent()) {
+                        _inputRefs.addAll(srcmethod.getInputRefs());
+                        _outputRefs.addAll(srcmethod.getOutputRefs());
+                    }
                 }
                 return method1.getFuncType().getReturnType();
             } else {
@@ -871,9 +884,12 @@ public class DFFrame {
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
                 for (DFMethod m : method1.getOverriders()) {
-                    if (m.isTransparent()) {
-                        _inputRefs.addAll(m.getInputRefs());
-                        _outputRefs.addAll(m.getOutputRefs());
+                    if (m instanceof DFSourceMethod) {
+                        DFSourceMethod srcm = (DFSourceMethod)m;
+                        if (srcm.isTransparent()) {
+                            _inputRefs.addAll(srcm.getInputRefs());
+                            _outputRefs.addAll(srcm.getOutputRefs());
+                        }
                     }
                 }
             } else {

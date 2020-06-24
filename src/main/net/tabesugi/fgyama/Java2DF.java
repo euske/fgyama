@@ -184,8 +184,8 @@ public class Java2DF {
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) cunit.types()) {
-            DFSourceKlass klass = new DFAbstTypeDeclKlass(
-                key, abstTypeDecl, packageSpace, fileScope, null);
+            DFSourceKlass klass = new AbstTypeDeclKlass(
+                abstTypeDecl, packageSpace, null, key, fileScope);
             packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
             Logger.debug("Stage1: Created:", klass);
             klasses.add(klass);
@@ -269,26 +269,15 @@ public class Java2DF {
             klass.overrideMethods();
         }
 
-        // Build method scopes (normal classes).
-        for (DFSourceKlass klass : klasses) {
-            DFMethod init = klass.getInitMethod();
-            if (init != null) {
-                init.buildScope();
-            }
-            for (DFMethod method : klass.getMethods()) {
-                method.buildScope();
-            }
-        }
-
         // Build call graphs (normal classes).
         List<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
         for (DFSourceKlass klass : klasses) {
             DFMethod init = klass.getInitMethod();
             if (init != null) {
-                init.enumRefs(defined);
+                ((DFSourceMethod)init).enumRefs(defined);
             }
             for (DFMethod method : klass.getMethods()) {
-                method.enumRefs(defined);
+                ((DFSourceMethod)method).enumRefs(defined);
                 queue.add(method);
             }
         }
@@ -299,18 +288,11 @@ public class Java2DF {
             for (DFSourceKlass klass : defined) {
                 klass.overrideMethods();
             }
-            // Build method scopes (lambdas).
-            for (DFSourceKlass klass : defined) {
-                assert klass.isDefined();
-                for (DFMethod method : klass.getMethods()) {
-                    method.buildScope();
-                }
-            }
             // Build call graphs (lambdas).
             for (DFSourceKlass klass : defined) {
                 assert klass.isDefined();
                 for (DFMethod method : klass.getMethods()) {
-                    method.enumRefs(defined2);
+                    ((DFSourceMethod)method).enumRefs(defined2);
                     queue.add(method);
                 }
             }
@@ -321,7 +303,7 @@ public class Java2DF {
         while (!queue.isEmpty()) {
             DFMethod method = queue.remove();
             for (DFMethod caller : method.getCallers()) {
-                if (caller.expandRefs(method)) {
+                if (((DFSourceMethod)caller).expandRefs((DFSourceMethod)method)) {
                     queue.add(caller);
                 }
             }
@@ -339,7 +321,7 @@ public class Java2DF {
                     DFMethod init = klass.getInitMethod();
                     if (init != null) {
                         Logger.info("Stage5:", init.getSignature());
-                        DFGraph graph = init.processKlassBody(counter);
+                        DFGraph graph = ((DFSourceMethod)init).generateGraph(counter);
                         if (graph != null) {
                             this.exportGraph(graph);
                         }
@@ -360,7 +342,7 @@ public class Java2DF {
                 assert !method.isGeneric();
                 try {
                     Logger.info("Stage5:", method.getSignature());
-                    DFGraph graph = method.processMethod(counter);
+                    DFGraph graph = ((DFSourceMethod)method).generateGraph(counter);
                     if (graph != null) {
                         this.exportGraph(graph);
                     }
@@ -436,7 +418,7 @@ public class Java2DF {
             } else if (arg.equals("-s")) {
                 reformat = false;
             } else if (arg.equals("-a")) {
-                DFMethod.setDefaultTransparent(true);
+                DFSourceMethod.setDefaultTransparent(true);
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(

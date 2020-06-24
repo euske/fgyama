@@ -26,9 +26,9 @@ public class DFJarFileKlass extends DFKlass {
 
 
     public DFJarFileKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
-        DFJarFileKlass outerKlass, DFTypeFinder finder) {
-        super(name, outerSpace, outerScope, outerKlass);
+        String name, DFTypeSpace outerSpace,
+        DFTypeFinder finder) {
+        super(name, outerSpace);
         _finder = new DFTypeFinder(this, finder);
     }
 
@@ -49,13 +49,6 @@ public class DFJarFileKlass extends DFKlass {
     public void setJarPath(String jarPath, String entPath) {
         _jarPath = jarPath;
         _entPath = entPath;
-    }
-
-    // Set the map types from a JAR.
-    public void setMapTypes(String sig) {
-        DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, this, this);
-        if (mapTypes == null) return;
-        this.setMapTypes(mapTypes);
     }
 
     // Constructor for a parameterized klass.
@@ -127,49 +120,57 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    protected void build(DFTypeFinder finder)
-        throws InvalidSyntax {
-        super.build(finder);
+    protected void build() throws InvalidSyntax {
         assert _jarPath != null;
+        assert _entPath != null;
         if (this.isGeneric()) {
             // a generic class is only referred to, but not built.
         } else {
+            Logger.info("build", this);
             try {
                 JarFile jarfile = new JarFile(_jarPath);
                 try {
                     JarEntry je = jarfile.getJarEntry(_entPath);
                     InputStream strm = jarfile.getInputStream(je);
                     JavaClass jklass = new ClassParser(strm, _entPath).parse();
-                    this.buildMembersFromJKlass(jklass);
+                    this.build(jklass);
                 } finally {
                     jarfile.close();
                 }
             } catch (IOException e) {
                 Logger.error(
-                    "DFKlass.load: IOException",
+                    "DFJarFileKlass.load: IOException",
                     this, _jarPath+"/"+_entPath);
             }
         }
     }
 
-    private void buildMembersFromJKlass(JavaClass jklass)
+    private void build(JavaClass jklass)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.buildMembersFromJKlass:", this);
+        //Logger.info("DFJarFileKlass.build:", this);
         _interface = jklass.isInterface();
+        if (this == DFBuiltinTypes.getObjectKlass()) return;
 
+        _baseKlass = DFBuiltinTypes.getObjectKlass();
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
-        if (this == DFBuiltinTypes.getObjectKlass()) {
-            ;
-        } else if (sig != null) {
+        if (sig != null) {
             //Logger.info("jklass:", this, sig);
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
+            if (this.getGenericKlass() == null) {
+                DFMapType[] mapTypes = JNITypeParser.createMapTypes(sig, this);
+                if (mapTypes != null) {
+                    for (DFMapType mapType : mapTypes) {
+                        mapType.setBaseFinder(_finder);
+                    }
+                    this.setMapTypes(mapTypes);
+                }
+            }
             JNITypeParser parser = new JNITypeParser(sig);
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
                 Logger.error(
-                    "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
+                    "DFJarFileKlass.build: TypeNotFound (baseKlass)",
                     this, e.name, sig);
             }
             _baseKlass.load();
@@ -180,7 +181,7 @@ public class DFJarFileKlass extends DFKlass {
                     iface = parser.resolveType(_finder);
                 } catch (TypeNotFound e) {
                     Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
+                        "DFJarFileKlass.build: TypeNotFound (iface)",
                         this, e.name, sig);
                 }
                 if (iface == null) break;
@@ -192,14 +193,13 @@ public class DFJarFileKlass extends DFKlass {
                 iface.load();
             }
         } else {
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
             String superClass = jklass.getSuperclassName();
             if (superClass != null && !superClass.equals(jklass.getClassName())) {
                 try {
                     _baseKlass = _finder.lookupType(superClass).toKlass();
                 } catch (TypeNotFound e) {
                     Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (baseKlass)",
+                        "DFJarFileKlass.build: TypeNotFound (baseKlass)",
                         this, e.name);
                 }
             }
@@ -213,7 +213,7 @@ public class DFJarFileKlass extends DFKlass {
                         iface = _finder.lookupType(ifaces[i]).toKlass();
                     } catch (TypeNotFound e) {
                         Logger.error(
-                            "DFKlass.buildMembersFromJKlass: TypeNotFound (iface)",
+                            "DFJarFileKlass.build: TypeNotFound (iface)",
                             this, e.name);
                     }
                     _baseIfaces[i] = iface;
@@ -223,6 +223,7 @@ public class DFJarFileKlass extends DFKlass {
                 }
             }
         }
+
         // Define fields.
         for (Field fld : jklass.getFields()) {
             if (fld.isPrivate()) continue;
@@ -238,12 +239,13 @@ public class DFJarFileKlass extends DFKlass {
                 }
             } catch (TypeNotFound e) {
                 Logger.error(
-                    "DFKlass.buildMembersFromJKlass: TypeNotFound (field)",
+                    "DFJarFileKlass.build: TypeNotFound (field)",
                     this, e.name, sig);
                 type = DFUnknownType.UNKNOWN;
             }
-            this.addField(fld.getName(), fld.isStatic(), type);
+            this.addField(type, fld.getName(), fld.isStatic());
         }
+
         // Define methods.
         for (Method meth : jklass.getMethods()) {
             if (meth.isPrivate()) continue;
@@ -257,56 +259,9 @@ public class DFJarFileKlass extends DFKlass {
                 callStyle = DFMethod.CallStyle.InstanceMethod;
             }
             String id = name+":"+meth.getNameIndex();
-            DFMethod method = new DFMethod(
+            DFMethod method = new DFJarFileMethod(
                 this, callStyle, meth.isAbstract(),
-                id, name, null);
-            method.setBaseFinder(_finder);
-            DFFunctionType funcType;
-            sig = Utils.getJKlassSignature(meth.getAttributes());
-            if (sig != null) {
-                //Logger.info("meth:", meth.getName(), sig);
-                DFMapType[] mapTypes = JNITypeParser.getMapTypes(sig, method, this);
-                method.setMapTypes(mapTypes);
-                JNITypeParser parser = new JNITypeParser(sig);
-                try {
-                    funcType = (DFFunctionType)parser.resolveType(method.getFinder());
-                } catch (TypeNotFound e) {
-                    Logger.error(
-                        "DFKlass.buildMembersFromJKlass: TypeNotFound (method)",
-                        this, e.name, sig);
-                    continue;
-                }
-            } else {
-                org.apache.bcel.generic.Type[] args = meth.getArgumentTypes();
-                DFType[] argTypes = new DFType[args.length];
-                for (int i = 0; i < args.length; i++) {
-                    argTypes[i] = _finder.resolveSafe(args[i]);
-                }
-                DFType returnType = _finder.resolveSafe(meth.getReturnType());
-                funcType = new DFFunctionType(argTypes, returnType);
-            }
-            // For varargs methods, the last argument is declared as an array
-            // so no special treatment is required here.
-            funcType.setVarArgs(meth.isVarArgs());
-            ExceptionTable excTable = meth.getExceptionTable();
-            if (excTable != null) {
-                String[] excNames = excTable.getExceptionNames();
-                DFKlass[] exceptions = new DFKlass[excNames.length];
-                for (int i = 0; i < excNames.length; i++) {
-                    DFType type;
-                    try {
-                        type = _finder.lookupType(excNames[i]);
-                    } catch (TypeNotFound e) {
-                        Logger.error(
-                            "DFKlass.buildMembersFromJKlass: TypeNotFound (exception)",
-                            this, e.name);
-                        type = DFUnknownType.UNKNOWN;
-                    }
-                    exceptions[i] = type.toKlass();
-                }
-                funcType.setExceptions(exceptions);
-            }
-            method.setFuncType(funcType);
+                id, name, meth, _finder);
             this.addMethod(method, null);
         }
     }

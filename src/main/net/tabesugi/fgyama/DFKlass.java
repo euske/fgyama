@@ -8,6 +8,28 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
+class FallbackMethod extends DFMethod {
+
+    DFFunctionType _funcType;
+
+    public FallbackMethod(
+        DFKlass klass, String methodName, DFType[] argTypes) {
+        super(klass, CallStyle.InstanceMethod, false, methodName, methodName);
+        _funcType = new DFFunctionType(argTypes, DFUnknownType.UNKNOWN);
+    }
+
+    protected DFMethod parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert false;
+        return null;
+    }
+
+    public DFFunctionType getFuncType() {
+        return _funcType;
+    }
+}
+
+
 //  DFKlass
 //  Abstract Klass type.
 //  Implement: isSubclassOf(klass, typeMap)
@@ -24,48 +46,36 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
-    private DFVarScope _outerScope;
-    private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
 
-    private KlassScope _klassScope;
-    private List<FieldRef> _fields;
-    private List<DFMethod> _methods;
-    private Map<String, DFMethod> _id2method;
+    private List<FieldRef> _fields =
+        new ArrayList<FieldRef>();
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
+    private Map<String, FieldRef> _id2field =
+        new HashMap<String, FieldRef>();
+    private Map<String, DFMethod> _id2method =
+        new HashMap<String, DFMethod>();
 
     // These fields are available after setMapTypes(). (Stage1)
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
-
-    // This field is available after setBaseFinder(). (Stage2)
-    private DFTypeFinder _baseFinder = null;
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private ConsistentHashMap<String, DFKlass> _paramTypes = null;
 
     public DFKlass(
-        String name, DFTypeSpace outerSpace, DFVarScope outerScope,
-        DFKlass outerKlass) {
+        String name, DFTypeSpace outerSpace) {
         super(name, outerSpace);
         _name = name;
         _outerSpace = outerSpace;
-        _outerScope = outerScope;
-        _outerKlass = outerKlass;
-
-        _klassScope = new KlassScope(outerScope, name);
-        _fields = new ArrayList<FieldRef>();
-        _methods = new ArrayList<DFMethod>();
-        _id2method = new HashMap<String, DFMethod>();
     }
 
     protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
         this(genericKlass.getName() + DFTypeSpace.getParamName(paramTypes),
-             genericKlass.getOuterSpace(),
-             genericKlass.getOuterScope(),
-             genericKlass._outerKlass);
+             genericKlass.getOuterSpace());
         // A parameterized Klass is NOT accessible from
         // the outer namespace but it creates its own subspace.
-        _baseFinder = genericKlass._baseFinder;
         _genericKlass = genericKlass;
         _paramTypes = new ConsistentHashMap<String, DFKlass>();
         List<DFMapType> mapTypes = genericKlass.getMapTypes();
@@ -77,6 +87,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             _paramTypes.put(mapType.getName(), paramType);
         }
     }
+
+    protected abstract DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax;
 
     @Override
     public String toString() {
@@ -173,14 +186,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _outerSpace;
     }
 
-    public DFVarScope getOuterScope() {
-        return _outerScope;
-    }
-
-    public DFVarScope getKlassScope() {
-        return _klassScope;
-    }
-
     public DFKlass getGenericKlass() {
         return _genericKlass;
     }
@@ -211,44 +216,20 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isGeneric() {
-        return _mapTypes != null;
+        return _mapTypes != null && 0 < _mapTypes.size();
     }
 
     public boolean isEnum() {
         return false;
     }
 
-    public void setBaseFinder(DFTypeFinder baseFinder) {
-        assert _state == LoadState.Unloaded;
-        //assert _baseFinder == null || _baseFinder == baseFinder;
-        _baseFinder = baseFinder;
-    }
-
-    public DFTypeFinder getFinder() {
-        if (_outerKlass != null) {
-            assert _baseFinder == null;
-            return new DFTypeFinder(this, _outerKlass.getFinder());
-        } else {
-            //assert _baseFinder != null;
-            return new DFTypeFinder(this, _baseFinder);
-        }
-    }
-
     public void load()
         throws InvalidSyntax {
         // an unspecified parameterized klass cannot be loaded.
         if (_state != LoadState.Unloaded) return;
-        assert _outerKlass != null || _baseFinder != null;
         _state = LoadState.Loading;
-        this.build(this.getFinder());
+        this.build();
         _state = LoadState.Loaded;
-    }
-
-    protected void build(DFTypeFinder finder)
-        throws InvalidSyntax {
-        if (_outerKlass != null) {
-            _outerKlass.load();
-        }
     }
 
     // Creates a parameterized klass.
@@ -355,20 +336,19 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // Field/Method-related things.
 
-    protected DFKlass parameterize(DFKlass[] paramTypes)
-        throws InvalidSyntax {
-        return this;
-    }
-
     protected void setMapTypes(DFMapType[] mapTypes) {
         assert _mapTypes == null;
         assert _paramTypes == null;
         assert _concreteKlasses == null;
-        _mapTypes = new ConsistentHashMap<String, DFMapType>();
-        for (DFMapType mapType : mapTypes) {
-            _mapTypes.put(mapType.getName(), mapType);
+        if (mapTypes == null) {
+            _mapTypes = null;
+        } else {
+            _mapTypes = new ConsistentHashMap<String, DFMapType>();
+            for (DFMapType mapType : mapTypes) {
+                _mapTypes.put(mapType.getName(), mapType);
+            }
+            _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
         }
-        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
     }
 
     protected List<DFMapType> getMapTypes() {
@@ -386,17 +366,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFRef getField(String id) {
-        assert _klassScope != null;
-        return _klassScope.getField(id);
+        return _id2field.get(id);
     }
 
     public List<DFMethod> getMethods() {
-        assert _methods != null;
         return _methods;
     }
 
     public DFMethod getMethod(String key) {
-        assert _id2method != null;
         return _id2method.get(key);
     }
 
@@ -430,9 +407,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-        if (bestMethod == null && _outerKlass != null) {
-            bestMethod = _outerKlass.findMethod(callStyle, id, argTypes);
-        }
         return bestMethod;
     }
 
@@ -443,24 +417,24 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     protected DFRef addField(
-        SimpleName name, boolean isStatic, DFType type) {
-        return this.addField(name.getIdentifier(), isStatic, type);
+        DFType type, SimpleName name, boolean isStatic) {
+        return this.addField(type, name.getIdentifier(), isStatic);
     }
 
     protected DFRef addField(
-        String id, boolean isStatic, DFType type) {
-        assert _klassScope != null;
-        FieldRef ref = _klassScope.addField(id, isStatic, type);
+        DFType type, String id, boolean isStatic) {
+        return this.addField(new FieldRef(type, id, isStatic));
+    }
+
+    protected DFRef addField(FieldRef ref) {
         //Logger.info("DFKlass.addField:", ref);
-        assert _fields != null;
         _fields.add(ref);
+        _id2field.put(ref.getName(), ref);
         return ref;
     }
 
     protected DFMethod addMethod(DFMethod method, String key) {
         //Logger.info("DFKlass.addMethod:", method);
-        assert _methods != null;
-        assert _id2method != null;
         _methods.add(method);
         if (key != null) {
             _id2method.put(key, method);
@@ -470,10 +444,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
         assert _id2method != null;
-        DFMethod method = new DFMethod(
-            this, DFMethod.CallStyle.InstanceMethod, false,
-            name, name, this.getKlassScope());
-        method.setFuncType(new DFFunctionType(argTypes, DFUnknownType.UNKNOWN));
+        DFMethod method = new FallbackMethod(this, name, argTypes);
         // Do not adds to _methods because it might be being referenced.
         _id2method.put(name, method);
         return method;
@@ -496,6 +467,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             _genericKlass.dump(out, indent);
         }
     }
+
+    protected abstract void build() throws InvalidSyntax;
 
     // FieldRef
     public class FieldRef extends DFRef {
@@ -537,73 +510,4 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
-    // ThisRef
-    private class ThisRef extends DFRef {
-        public ThisRef(DFType type) {
-            super(type);
-        }
-
-        @Override
-        public boolean isLocal() {
-            return false;
-        }
-
-        @Override
-        public String getFullName() {
-            return "#this";
-        }
-    }
-
-    // KlassScope
-    private class KlassScope extends DFVarScope {
-
-        private DFRef _this;
-        private Map<String, DFRef> _id2field =
-            new HashMap<String, DFRef>();
-
-        public KlassScope(DFVarScope outer, String id) {
-            super(outer, id);
-            _this = new ThisRef(DFKlass.this);
-        }
-
-        @Override
-        public String getScopeName() {
-            return DFKlass.this.getTypeName();
-        }
-
-        @Override
-        public DFRef lookupThis() {
-            return _this;
-        }
-
-        @Override
-        public DFRef lookupVar(String id)
-            throws VariableNotFound {
-            DFRef ref = DFKlass.this.getField(id);
-            if (ref != null) return ref;
-            return super.lookupVar(id);
-        }
-
-        public DFRef getField(String id) {
-            return _id2field.get(id);
-        }
-
-        protected FieldRef addField(
-            String id, boolean isStatic, DFType type) {
-            FieldRef ref = new FieldRef(type, id, isStatic);
-            _id2field.put(id, ref);
-            return ref;
-        }
-
-        // dumpContents (for debugging)
-        protected void dumpContents(PrintStream out, String indent) {
-            super.dumpContents(out, indent);
-            for (DFRef ref : DFKlass.this.getFields()) {
-                out.println(indent+"defined: "+ref);
-            }
-            for (DFMethod method : DFKlass.this.getMethods()) {
-                out.println(indent+"defined: "+method);
-            }
-        }
-    }
 }

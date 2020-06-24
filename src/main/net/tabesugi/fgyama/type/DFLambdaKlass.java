@@ -11,16 +11,87 @@ import org.eclipse.jdt.core.dom.*;
 //
 class DFLambdaKlass extends DFSourceKlass {
 
-    private class FunctionalMethod extends DFMethod {
+    private class FunctionalMethod extends DFSourceMethod {
 
-        public FunctionalMethod(String id) {
-            super(DFLambdaKlass.this, CallStyle.Lambda, false,
-                  id, id, DFLambdaKlass.this._lambdaScope);
+        private DFFunctionType _funcType = null;
+
+        public FunctionalMethod(String id, DFTypeFinder finder)
+            throws InvalidSyntax {
+            super(DFLambdaKlass.this, CallStyle.Lambda,
+                  false, id, id,
+                  DFLambdaKlass.this._lambdaScope, finder);
+            ASTNode body = _lambda.getBody();
+            if (body instanceof Statement) {
+                this.buildTypeFromStmt((Statement)body, this.getScope());
+            } else if (body instanceof Expression) {
+                this.buildTypeFromExpr((Expression)body, this.getScope());
+            } else {
+                throw new InvalidSyntax(body);
+            }
+        }
+
+        public void setFuncType(DFFunctionType funcType) {
+            _funcType = funcType;
+        }
+
+        @Override
+        public DFFunctionType getFuncType() {
+            return _funcType;
         }
 
         @Override
         public boolean isTransparent() {
             return true;
+        }
+
+        @Override
+        public void loadKlasses(Set<DFSourceKlass> klasses)
+            throws InvalidSyntax {
+            ASTNode body = _lambda.getBody();
+            if (body instanceof Statement) {
+                this.loadKlassesStmt(klasses, (Statement)body);
+            } else if (body instanceof Expression) {
+                this.loadKlassesExpr(klasses, (Expression)body);
+            } else {
+                throw new InvalidSyntax(body);
+            }
+        }
+
+        @Override
+        public void enumRefs(List<DFSourceKlass> defined)
+            throws InvalidSyntax {
+            DFLocalScope methodScope = this.getScope();
+            ASTNode body = _lambda.getBody();
+            if (body instanceof Statement) {
+                this.enumRefsStmt(defined, methodScope, (Statement)body);
+            } else if (body instanceof Expression) {
+                this.enumRefsExpr(defined, methodScope, (Expression)body);
+            } else {
+                throw new InvalidSyntax(body);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        public DFGraph generateGraph(Counter counter)
+            throws InvalidSyntax, EntityNotFound {
+            MethodScope methodScope = (MethodScope)this.getScope();
+            MethodGraph graph = new MethodGraph(
+                "M"+counter.getNewId()+"_"+this.getName());
+            DFContext ctx = new DFContext(graph, methodScope);
+            int i = 0;
+            for (VariableDeclaration decl :
+                     (List<VariableDeclaration>)_lambda.parameters()) {
+                DFRef ref = methodScope.lookupArgument(i);
+                DFNode input = new InputNode(graph, methodScope, ref, decl);
+                ctx.set(input);
+                DFNode assign = new AssignNode(
+                    graph, methodScope, methodScope.lookupVar(decl.getName()), decl);
+                assign.accept(input);
+                ctx.set(assign);
+                i++;
+            }
+            ASTNode body = _lambda.getBody();
+            return this.generateMethodBody(graph, ctx, body);
         }
     }
 
@@ -78,6 +149,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
     private final String FUNC_NAME = "#f";
 
+    private LambdaExpression _lambda;
     private LambdaScope _lambdaScope;
     private FunctionalMethod _funcMethod;
 
@@ -85,22 +157,15 @@ class DFLambdaKlass extends DFSourceKlass {
         new ArrayList<CapturedRef>();
 
     public DFLambdaKlass(
-        String filePath, LambdaExpression lambda,
-        DFTypeSpace outerSpace, DFVarScope outerScope, DFSourceKlass outerKlass)
+        LambdaExpression lambda,
+        DFTypeSpace outerSpace, DFSourceKlass outerKlass,
+        DFVarScope outerScope)
         throws InvalidSyntax {
-        super(filePath, lambda, Utils.encodeASTNode(lambda),
-              outerSpace, outerScope, outerKlass);
+        super(Utils.encodeASTNode(lambda),
+              outerSpace, outerKlass, outerKlass.getFilePath(),
+              outerScope);
+        _lambda = lambda;
         _lambdaScope = new LambdaScope(outerScope, Utils.encodeASTNode(lambda));
-        _funcMethod = new FunctionalMethod(FUNC_NAME);
-        ASTNode body = lambda.getBody();
-        if (body instanceof Statement) {
-            this.buildTypeFromStmt((Statement)body, _funcMethod, _funcMethod.getScope());
-        } else if (body instanceof Expression) {
-            this.buildTypeFromExpr((Expression)body, _funcMethod, _funcMethod.getScope());
-        } else {
-            throw new InvalidSyntax(body);
-        }
-        assert _funcMethod != null;
     }
 
     @Override
@@ -126,6 +191,13 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
+    protected void build() throws InvalidSyntax {
+        DFTypeFinder finder = this.getFinder();
+        _funcMethod = new FunctionalMethod(FUNC_NAME, finder);
+        this.addMethod(_funcMethod, FUNC_NAME);
+    }
+
+    @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
         assert _funcMethod != null;
@@ -135,16 +207,6 @@ class DFLambdaKlass extends DFSourceKlass {
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;
         _funcMethod.setFuncType(funcMethod.getFuncType());
-    }
-
-    @Override
-    protected void buildMembersFromAST(DFTypeFinder finder, ASTNode ast)
-        throws InvalidSyntax {
-        // _baseKlass is left undefined.
-        assert _funcMethod != null;
-        this.addMethod(_funcMethod, FUNC_NAME);
-        _funcMethod.setBaseFinder(finder);
-        _funcMethod.setTree(ast);
     }
 
     private void addCapturedRef(CapturedRef ref) {

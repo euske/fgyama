@@ -1061,7 +1061,8 @@ public abstract class DFGraph {
                 DFRef ref;
                 if (name != null) {
                     DFKlass klass = _finder.lookupType(name).toKlass();
-                    ref = klass.getKlassScope().lookupThis();
+                    assert klass instanceof DFSourceKlass;
+                    ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } else {
                     ref = scope.lookupThis();
                 }
@@ -2145,8 +2146,11 @@ public abstract class DFGraph {
         DFContext ctx, DFLocalScope scope, CallNode call, DFMethod[] methods) {
         ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
-            if (method1.isTransparent()) {
-                refs.addAll(method1.getInputRefs());
+            if (method1 instanceof DFSourceMethod) {
+                DFSourceMethod srcmethod = (DFSourceMethod)method1;
+                if (srcmethod.isTransparent()) {
+                    refs.addAll(srcmethod.getInputRefs());
+                }
             }
         }
         for (DFRef ref : refs) {
@@ -2154,8 +2158,11 @@ public abstract class DFGraph {
         }
         refs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
-            if (method1.isTransparent()) {
-                refs.addAll(method1.getOutputRefs());
+            if (method1 instanceof DFSourceMethod) {
+                DFSourceMethod srcmethod = (DFSourceMethod)method1;
+                if (srcmethod.isTransparent()) {
+                    refs.addAll(srcmethod.getOutputRefs());
+                }
             }
         }
         for (DFRef ref : refs) {
