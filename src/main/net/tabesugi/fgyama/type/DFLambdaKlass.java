@@ -19,8 +19,7 @@ class DFLambdaKlass extends DFSourceKlass {
         public FunctionalMethod(String id, DFTypeFinder finder)
             throws InvalidSyntax {
             super(DFLambdaKlass.this, CallStyle.Lambda,
-                  false, id, id,
-                  DFLambdaKlass.this._lambdaScope, finder);
+                  false, id, id, _lambdaScope, finder);
 
             this.build();
         }
@@ -45,6 +44,10 @@ class DFLambdaKlass extends DFSourceKlass {
 
         protected void setFuncType(DFFunctionType funcType) {
             _funcType = funcType;
+        }
+
+        public ASTNode getAST() {
+            return _lambda;
         }
 
         @Override
@@ -106,11 +109,6 @@ class DFLambdaKlass extends DFSourceKlass {
             }
             ASTNode body = _lambda.getBody();
             return this.generateMethodBody(graph, ctx, body);
-        }
-
-        public void writeXML(XMLStreamWriter writer)
-            throws XMLStreamException {
-            Utils.writeXML(writer, _lambda);
         }
     }
 

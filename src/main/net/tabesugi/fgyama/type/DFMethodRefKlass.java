@@ -28,8 +28,17 @@ class DFMethodRefKlass extends DFSourceKlass {
             return null;
         }
 
+        protected boolean isDefined() {
+            return _funcType != null && _refMethod != null;
+        }
+
         protected void setFuncType(DFFunctionType funcType) {
+            assert _funcType == null;
             _funcType = funcType;
+        }
+
+        public ASTNode getAST() {
+            return _methodRef;
         }
 
         @Override
@@ -44,15 +53,17 @@ class DFMethodRefKlass extends DFSourceKlass {
             if (_methodRef instanceof CreationReference) {
                 DFType type = finder.resolveSafe(
                     ((CreationReference)_methodRef).getType());
-                assert type instanceof DFSourceKlass;
-                ((DFSourceKlass)type).loadKlasses(klasses);
+                if (type instanceof DFSourceKlass) {
+                    ((DFSourceKlass)type).loadKlasses(klasses);
+                }
 
             } else if (_methodRef instanceof SuperMethodReference) {
                 try {
                     DFType type = finder.lookupType(
                         ((SuperMethodReference)_methodRef).getQualifier());
-                    assert type instanceof DFSourceKlass;
-                    ((DFSourceKlass)type).loadKlasses(klasses);
+                    if (type instanceof DFSourceKlass) {
+                        ((DFSourceKlass)type).loadKlasses(klasses);
+                    }
                 } catch (TypeNotFound e) {
                 }
 
@@ -76,6 +87,65 @@ class DFMethodRefKlass extends DFSourceKlass {
         @Override
         public void enumRefs(List<DFSourceKlass> defined)
             throws InvalidSyntax {
+            DFTypeFinder finder = this.getFinder();
+            assert _funcType != null;
+            DFType[] argTypes = _funcType.getRealArgTypes();
+            if (_methodRef instanceof ExpressionMethodReference) {
+                ExpressionMethodReference exprmref = (ExpressionMethodReference)_methodRef;
+                Expression expr1 = exprmref.getExpression();
+                DFType type = null;
+                if (expr1 instanceof Name) {
+                    try {
+                        type = finder.lookupType((Name)expr1);
+                    } catch (TypeNotFound e) {
+                    }
+                }
+                if (type == null) {
+                    type = this.enumRefsExpr(defined, this.getScope(), expr1);
+                }
+                if (type != null) {
+                    DFKlass klass = type.toKlass();
+                    _refMethod = klass.findMethod(
+                        CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                }
+
+            } else if (_methodRef instanceof CreationReference) {
+                CreationReference creatmref = (CreationReference)_methodRef;
+                try {
+                    DFKlass klass = finder.resolve(creatmref.getType()).toKlass();
+                    _refMethod = klass.findMethod(
+                        CallStyle.Constructor, (String)null, argTypes);
+                } catch (TypeNotFound e) {
+                }
+
+            } else if (_methodRef instanceof SuperMethodReference) {
+                SuperMethodReference supermref = (SuperMethodReference)_methodRef;
+                try {
+                    DFKlass klass = finder.lookupType(supermref.getQualifier()).toKlass();
+                    klass = klass.getBaseKlass();
+                    _refMethod = klass.findMethod(
+                        CallStyle.StaticMethod, supermref.getName(), argTypes);
+                } catch (TypeNotFound e) {
+                }
+
+            } else if (_methodRef instanceof TypeMethodReference) {
+                TypeMethodReference typemref = (TypeMethodReference)_methodRef;
+                try {
+                    DFKlass klass = finder.resolve(typemref.getType()).toKlass();
+                    _refMethod = klass.findMethod(
+                        CallStyle.StaticMethod, typemref.getName(), argTypes);
+                } catch (TypeNotFound e) {
+                }
+
+            } else {
+                throw new InvalidSyntax(_methodRef);
+            }
+
+            if (_refMethod == null) {
+                Logger.error(
+                    "DFMethodRefKlass.setRefMethod: MethodNotFound",
+                    this, _methodRef);
+            }
         }
 
         @Override
@@ -84,47 +154,9 @@ class DFMethodRefKlass extends DFSourceKlass {
             throws InvalidSyntax, EntityNotFound {
             return null;
         }
-
-        public void writeXML(XMLStreamWriter writer)
-            throws XMLStreamException {
-            Utils.writeXML(writer, _methodRef);
-        }
-
-        protected DFMethod getRefMethod() {
-            return _refMethod;
-        }
-
-        protected void setRefMethod(DFKlass refKlass) {
-            assert _funcType != null;
-            ASTNode ast = _methodRef;
-            DFType[] argTypes = _funcType.getRealArgTypes();
-            if (ast instanceof CreationReference) {
-                _refMethod = refKlass.findMethod(
-                    DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            } else if (ast instanceof SuperMethodReference) {
-                SimpleName name = ((SuperMethodReference)ast).getName();
-                _refMethod = refKlass.findMethod(
-                    DFMethod.CallStyle.StaticMethod, name, argTypes);
-            } else if (ast instanceof TypeMethodReference) {
-                SimpleName name = ((TypeMethodReference)ast).getName();
-                _refMethod = refKlass.findMethod(
-                    DFMethod.CallStyle.StaticMethod, name, argTypes);
-            } else if (ast instanceof ExpressionMethodReference) {
-                SimpleName name = ((ExpressionMethodReference)ast).getName();
-                _refMethod = refKlass.findMethod(
-                    DFMethod.CallStyle.InstanceOrStatic, name, argTypes);
-            }
-            //Logger.info("DFMethodRefKlass.setRefMethod:", method);
-            if (_refMethod == null) {
-                Logger.error(
-                    "DFMethodRefKlass.setRefMethod: MethodNotFound",
-                    this, refKlass, ast);
-            }
-        }
     }
 
     private MethodReference _methodRef;
-    private DFKlass _refKlass = null;
 
     private final String FUNC_NAME = "#f";
 
@@ -138,7 +170,14 @@ class DFMethodRefKlass extends DFSourceKlass {
         super(Utils.encodeASTNode(methodRef),
               outerSpace, outerKlass, outerKlass.getFilePath(),
               outerScope);
+
         _methodRef = methodRef;
+    }
+
+    protected DFKlass parameterize(DFKlass[] paramTypes)
+        throws InvalidSyntax {
+        assert false;
+        return null;
     }
 
     @Override
@@ -155,19 +194,12 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     @Override
     public boolean isDefined() {
-        return (_funcMethod.getFuncType() != null &&
-                _funcMethod.getRefMethod() != null);
+        return _funcMethod.isDefined();
     }
 
     @Override
     public DFMethod getFuncMethod() {
         return _funcMethod;
-    }
-
-    protected DFKlass parameterize(DFKlass[] paramTypes)
-        throws InvalidSyntax {
-        assert false;
-        return null;
     }
 
     @Override
@@ -180,21 +212,10 @@ class DFMethodRefKlass extends DFSourceKlass {
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
-        assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;
         _funcMethod.setFuncType(funcMethod.getFuncType());
-        if (_refKlass != null) {
-            _funcMethod.setRefMethod(_refKlass);
-        }
-    }
-
-    public void setRefKlass(DFKlass refKlass) {
-        _refKlass = refKlass;
-        if (_funcMethod.getFuncType() != null) {
-            _funcMethod.setRefMethod(_refKlass);
-        }
     }
 }

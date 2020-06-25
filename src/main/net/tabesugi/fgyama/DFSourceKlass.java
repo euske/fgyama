@@ -132,6 +132,7 @@ class InitMethod extends DFSourceMethod {
         }
     }
 
+    // loadKlasses: enumerate all referenced Klasses.
     @Override
     @SuppressWarnings("unchecked")
     public void loadKlasses(Set<DFSourceKlass> klasses)
@@ -189,15 +190,13 @@ class InitMethod extends DFSourceMethod {
         return this.generateBodyDecls(counter, _decls);
     }
 
-    public void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException {
+    public ASTNode getAST() {
         for (BodyDeclaration body : _decls) {
             if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                Utils.writeXML(writer, initializer);
-                break;
+                return body;
             }
         }
+        return null;
     }
 }
 
@@ -231,6 +230,10 @@ class DefinedMethod extends DFSourceMethod {
 
         _methodDecl = genericMethod._methodDecl;
         this.build();
+    }
+
+    public ASTNode getAST() {
+        return _methodDecl;
     }
 
     public DFFunctionType getFuncType() {

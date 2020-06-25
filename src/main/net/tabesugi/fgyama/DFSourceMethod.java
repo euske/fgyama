@@ -103,7 +103,6 @@ class AnonymousKlass extends DFSourceKlass {
 //    3. enumRefs()
 //    4. expandRefs()
 //    5. generateGraph()
-//    6. writeXML()
 //
 public abstract class DFSourceMethod extends DFMethod {
 
@@ -1517,75 +1516,11 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             return lambdaKlass;
 
-        } else if (expr instanceof ExpressionMethodReference) {
-            ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
+        } else if (expr instanceof MethodReference) {
+            MethodReference methodref = (ExpressionMethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
             methodRefKlass.load();
-            Expression expr1 = methodref.getExpression();
-            DFType type = null;
-            if (expr1 instanceof Name) {
-                try {
-                    type = _finder.lookupType((Name)expr1);
-                } catch (TypeNotFound e) {
-                }
-            }
-            if (type == null) {
-                type = this.enumRefsExpr(defined, scope, expr1);
-            }
-            if (type != null) {
-                DFKlass klass = type.toKlass();
-                methodRefKlass.setRefKlass(klass);
-                if (methodRefKlass.isDefined()) {
-                    defined.add(methodRefKlass);
-                }
-            }
-            return methodRefKlass;
-
-        } else if (expr instanceof CreationReference) {
-            CreationReference methodref = (CreationReference)expr;
-            String id = Utils.encodeASTNode(methodref);
-            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
-            methodRefKlass.load();
-            try {
-                DFKlass klass = _finder.resolve(methodref.getType()).toKlass();
-                methodRefKlass.setRefKlass(klass);
-                if (methodRefKlass.isDefined()) {
-                    defined.add(methodRefKlass);
-                }
-            } catch (TypeNotFound e) {
-            }
-            return methodRefKlass;
-
-        } else if (expr instanceof SuperMethodReference) {
-            SuperMethodReference methodref = (SuperMethodReference)expr;
-            String id = Utils.encodeASTNode(methodref);
-            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
-            methodRefKlass.load();
-            try {
-                DFKlass klass = _finder.lookupType(methodref.getQualifier()).toKlass();
-                klass = klass.getBaseKlass();
-                methodRefKlass.setRefKlass(klass);
-                if (methodRefKlass.isDefined()) {
-                    defined.add(methodRefKlass);
-                }
-            } catch (TypeNotFound e) {
-            }
-            return methodRefKlass;
-
-        } else if (expr instanceof TypeMethodReference) {
-            TypeMethodReference methodref = (TypeMethodReference)expr;
-            String id = Utils.encodeASTNode(methodref);
-            DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
-            methodRefKlass.load();
-            try {
-                DFKlass klass = _finder.resolve(methodref.getType()).toKlass();
-                methodRefKlass.setRefKlass(klass);
-                if (methodRefKlass.isDefined()) {
-                    defined.add(methodRefKlass);
-                }
-            } catch (TypeNotFound e) {
-            }
             return methodRefKlass;
 
         } else {
@@ -1759,17 +1694,20 @@ public abstract class DFSourceMethod extends DFMethod {
     /**
      * Performs dataflow analysis for a given method.
      */
+
+    // loadKlasses: enumerate all the referenced Klasses.
     public abstract void loadKlasses(Set<DFSourceKlass> klasses)
         throws InvalidSyntax;
 
+    // enumRefs: list all the internal DFRefs AND fix the lambdas.
     public abstract void enumRefs(List<DFSourceKlass> defined)
         throws InvalidSyntax;
 
+    // generateGraph: generate graphs.
     public abstract DFGraph generateGraph(Counter counter)
         throws InvalidSyntax, EntityNotFound;
 
-    public abstract void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException;
+    public abstract ASTNode getAST();
 
     @SuppressWarnings("unchecked")
     public DFGraph generateBodyDecls(
@@ -1879,7 +1817,7 @@ public abstract class DFSourceMethod extends DFMethod {
             new ArrayList<DFNode>();
 
         public MethodGraph(String graphId) {
-            super(DFSourceMethod.this._finder);
+            super(_finder);
             _graphId = graphId;
         }
 
@@ -1938,7 +1876,10 @@ public abstract class DFSourceMethod extends DFMethod {
                 writer.writeAttribute("name", overriding.getSignature());
                 writer.writeEndElement();
             }
-            method.writeXML(writer);
+            ASTNode ast = method.getAST();
+            if (ast != null) {
+                Utils.writeXML(writer, ast);
+            }
             DFNode[] nodes = new DFNode[_nodes.size()];
             _nodes.toArray(nodes);
             method.getScope().writeXML(writer, nodes);
