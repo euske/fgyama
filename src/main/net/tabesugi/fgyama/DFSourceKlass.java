@@ -171,7 +171,7 @@ class InitMethod extends DFSourceMethod {
                         Expression init = frag.getInitializer();
                         if (init != null) {
                             this.enumRefsExpr(defined, scope, init);
-                            this.fixateLambda(defined, ref.getRefType(), init);
+                            this.setLambdaType(defined, ref.getRefType(), init);
                         }
                     } catch (VariableNotFound e) {
                     }

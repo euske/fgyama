@@ -21,6 +21,12 @@ class DFLambdaKlass extends DFSourceKlass {
             super(DFLambdaKlass.this, CallStyle.Lambda,
                   false, id, id,
                   DFLambdaKlass.this._lambdaScope, finder);
+
+            this.build();
+        }
+
+        private void build()
+            throws InvalidSyntax {
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
                 this.buildTypeFromStmt((Statement)body, this.getScope());
@@ -37,18 +43,18 @@ class DFLambdaKlass extends DFSourceKlass {
             return null;
         }
 
-        public void setFuncType(DFFunctionType funcType) {
+        protected void setFuncType(DFFunctionType funcType) {
             _funcType = funcType;
-        }
-
-        @Override
-        public DFFunctionType getFuncType() {
-            return _funcType;
         }
 
         @Override
         public boolean isTransparent() {
             return true;
+        }
+
+        @Override
+        public DFFunctionType getFuncType() {
+            return _funcType;
         }
 
         @Override
@@ -78,6 +84,7 @@ class DFLambdaKlass extends DFSourceKlass {
             }
         }
 
+        @Override
         @SuppressWarnings("unchecked")
         public DFGraph generateGraph(Counter counter)
             throws InvalidSyntax, EntityNotFound {

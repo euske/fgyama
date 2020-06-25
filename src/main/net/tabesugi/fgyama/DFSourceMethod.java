@@ -99,7 +99,11 @@ class AnonymousKlass extends DFSourceKlass {
 //
 //  Usage:
 //    1. new DFSourceMethod(finder)
-//    2. getXXX(), ...
+//    2. loadKlasses()
+//    3. enumRefs()
+//    4. expandRefs()
+//    5. generateGraph()
+//    6. writeXML()
 //
 public abstract class DFSourceMethod extends DFMethod {
 
@@ -164,27 +168,29 @@ public abstract class DFSourceMethod extends DFMethod {
         return _outputRefs;
     }
 
+    /// TypeSpace construction.
+
     @SuppressWarnings("unchecked")
     protected void buildTypeFromStmt(
-        Statement ast, DFLocalScope outerScope)
+        Statement stmt, DFLocalScope outerScope)
         throws InvalidSyntax {
-        assert ast != null;
+        assert stmt != null;
 
-        if (ast instanceof AssertStatement) {
+        if (stmt instanceof AssertStatement) {
 
-        } else if (ast instanceof Block) {
-            Block block = (Block)ast;
-            DFLocalScope innerScope = outerScope.addChild(ast);
-            for (Statement stmt :
+        } else if (stmt instanceof Block) {
+            Block block = (Block)stmt;
+            DFLocalScope innerScope = outerScope.addChild(stmt);
+            for (Statement stmt1 :
                      (List<Statement>) block.statements()) {
-                this.buildTypeFromStmt(stmt, innerScope);
+                this.buildTypeFromStmt(stmt1, innerScope);
             }
 
-        } else if (ast instanceof EmptyStatement) {
+        } else if (stmt instanceof EmptyStatement) {
 
-        } else if (ast instanceof VariableDeclarationStatement) {
+        } else if (stmt instanceof VariableDeclarationStatement) {
             VariableDeclarationStatement varStmt =
-                (VariableDeclarationStatement)ast;
+                (VariableDeclarationStatement)stmt;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 Expression expr = frag.getInitializer();
@@ -193,19 +199,19 @@ public abstract class DFSourceMethod extends DFMethod {
                 }
             }
 
-        } else if (ast instanceof ExpressionStatement) {
-            ExpressionStatement exprStmt = (ExpressionStatement)ast;
+        } else if (stmt instanceof ExpressionStatement) {
+            ExpressionStatement exprStmt = (ExpressionStatement)stmt;
             this.buildTypeFromExpr(exprStmt.getExpression(), outerScope);
 
-        } else if (ast instanceof ReturnStatement) {
-            ReturnStatement returnStmt = (ReturnStatement)ast;
+        } else if (stmt instanceof ReturnStatement) {
+            ReturnStatement returnStmt = (ReturnStatement)stmt;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
-        } else if (ast instanceof IfStatement) {
-            IfStatement ifStmt = (IfStatement)ast;
+        } else if (stmt instanceof IfStatement) {
+            IfStatement ifStmt = (IfStatement)stmt;
             this.buildTypeFromExpr(ifStmt.getExpression(), outerScope);
             Statement thenStmt = ifStmt.getThenStatement();
             this.buildTypeFromStmt(thenStmt, outerScope);
@@ -214,39 +220,37 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.buildTypeFromStmt(elseStmt, outerScope);
             }
 
-        } else if (ast instanceof SwitchStatement) {
-            SwitchStatement switchStmt = (SwitchStatement)ast;
-            DFLocalScope innerScope = outerScope.addChild(ast);
+        } else if (stmt instanceof SwitchStatement) {
+            SwitchStatement switchStmt = (SwitchStatement)stmt;
+            DFLocalScope innerScope = outerScope.addChild(stmt);
             this.buildTypeFromExpr(switchStmt.getExpression(), innerScope);
-            for (Statement stmt :
+            for (Statement stmt1 :
                      (List<Statement>) switchStmt.statements()) {
-                this.buildTypeFromStmt(stmt, innerScope);
+                this.buildTypeFromStmt(stmt1, innerScope);
             }
 
-        } else if (ast instanceof SwitchCase) {
-            SwitchCase switchCase = (SwitchCase)ast;
+        } else if (stmt instanceof SwitchCase) {
+            SwitchCase switchCase = (SwitchCase)stmt;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
-        } else if (ast instanceof WhileStatement) {
-            WhileStatement whileStmt = (WhileStatement)ast;
+        } else if (stmt instanceof WhileStatement) {
+            WhileStatement whileStmt = (WhileStatement)stmt;
             this.buildTypeFromExpr(whileStmt.getExpression(), outerScope);
-            DFLocalScope innerScope = outerScope.addChild(ast);
-            Statement stmt = whileStmt.getBody();
-            this.buildTypeFromStmt(stmt, innerScope);
+            DFLocalScope innerScope = outerScope.addChild(stmt);
+            this.buildTypeFromStmt(whileStmt.getBody(), innerScope);
 
-        } else if (ast instanceof DoStatement) {
-            DoStatement doStmt = (DoStatement)ast;
-            DFLocalScope innerScope = outerScope.addChild(ast);
-            Statement stmt = doStmt.getBody();
-            this.buildTypeFromStmt(stmt, innerScope);
+        } else if (stmt instanceof DoStatement) {
+            DoStatement doStmt = (DoStatement)stmt;
+            DFLocalScope innerScope = outerScope.addChild(stmt);
+            this.buildTypeFromStmt(doStmt.getBody(), innerScope);
             this.buildTypeFromExpr(doStmt.getExpression(), innerScope);
 
-        } else if (ast instanceof ForStatement) {
-            ForStatement forStmt = (ForStatement)ast;
-            DFLocalScope innerScope = outerScope.addChild(ast);
+        } else if (stmt instanceof ForStatement) {
+            ForStatement forStmt = (ForStatement)stmt;
+            DFLocalScope innerScope = outerScope.addChild(stmt);
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 this.buildTypeFromExpr(init, innerScope);
@@ -255,36 +259,34 @@ public abstract class DFSourceMethod extends DFMethod {
             if (expr != null) {
                 this.buildTypeFromExpr(expr, innerScope);
             }
-            Statement stmt = forStmt.getBody();
-            this.buildTypeFromStmt(stmt, innerScope);
+            this.buildTypeFromStmt(forStmt.getBody(), innerScope);
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
                 this.buildTypeFromExpr(update, innerScope);
             }
 
-        } else if (ast instanceof EnhancedForStatement) {
-            EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+        } else if (stmt instanceof EnhancedForStatement) {
+            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.buildTypeFromExpr(eForStmt.getExpression(), outerScope);
-            DFLocalScope innerScope = outerScope.addChild(ast);
+            DFLocalScope innerScope = outerScope.addChild(stmt);
             this.buildTypeFromStmt(eForStmt.getBody(), innerScope);
 
-        } else if (ast instanceof BreakStatement) {
+        } else if (stmt instanceof BreakStatement) {
 
-        } else if (ast instanceof ContinueStatement) {
+        } else if (stmt instanceof ContinueStatement) {
 
-        } else if (ast instanceof LabeledStatement) {
-            LabeledStatement labeledStmt = (LabeledStatement)ast;
-            Statement stmt = labeledStmt.getBody();
-            this.buildTypeFromStmt(stmt, outerScope);
+        } else if (stmt instanceof LabeledStatement) {
+            LabeledStatement labeledStmt = (LabeledStatement)stmt;
+            this.buildTypeFromStmt(labeledStmt.getBody(), outerScope);
 
-        } else if (ast instanceof SynchronizedStatement) {
-            SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+        } else if (stmt instanceof SynchronizedStatement) {
+            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             this.buildTypeFromExpr(syncStmt.getExpression(), outerScope);
             this.buildTypeFromStmt(syncStmt.getBody(), outerScope);
 
-        } else if (ast instanceof TryStatement) {
-            TryStatement tryStmt = (TryStatement)ast;
-            DFLocalScope innerScope = outerScope.addChild(ast);
+        } else if (stmt instanceof TryStatement) {
+            TryStatement tryStmt = (TryStatement)stmt;
+            DFLocalScope innerScope = outerScope.addChild(stmt);
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 this.buildTypeFromExpr(decl, innerScope);
@@ -300,29 +302,29 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.buildTypeFromStmt(finBlock, outerScope);
             }
 
-        } else if (ast instanceof ThrowStatement) {
-            ThrowStatement throwStmt = (ThrowStatement)ast;
+        } else if (stmt instanceof ThrowStatement) {
+            ThrowStatement throwStmt = (ThrowStatement)stmt;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
-        } else if (ast instanceof ConstructorInvocation) {
-            ConstructorInvocation ci = (ConstructorInvocation)ast;
+        } else if (stmt instanceof ConstructorInvocation) {
+            ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
-        } else if (ast instanceof SuperConstructorInvocation) {
-            SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
+        } else if (stmt instanceof SuperConstructorInvocation) {
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
-        } else if (ast instanceof TypeDeclarationStatement) {
-            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)ast;
+        } else if (stmt instanceof TypeDeclarationStatement) {
+            TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
             AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
             String id = abstTypeDecl.getName().getIdentifier();
             DFSourceKlass klass = new AbstTypeDeclKlass(
@@ -332,7 +334,7 @@ public abstract class DFSourceMethod extends DFMethod {
             this.addKlass(id, klass);
 
         } else {
-            throw new InvalidSyntax(ast);
+            throw new InvalidSyntax(stmt);
 
         }
     }
@@ -490,26 +492,28 @@ public abstract class DFSourceMethod extends DFMethod {
         }
     }
 
+    /// Load klasses.
+
     @SuppressWarnings("unchecked")
     protected void loadKlassesStmt(
-        Set<DFSourceKlass> klasses, Statement ast)
+        Set<DFSourceKlass> klasses, Statement stmt)
         throws InvalidSyntax {
-        assert ast != null;
+        assert stmt != null;
 
-        if (ast instanceof AssertStatement) {
+        if (stmt instanceof AssertStatement) {
 
-        } else if (ast instanceof Block) {
-            Block block = (Block)ast;
-            for (Statement stmt :
+        } else if (stmt instanceof Block) {
+            Block block = (Block)stmt;
+            for (Statement stmt1 :
                      (List<Statement>) block.statements()) {
-                this.loadKlassesStmt(klasses, stmt);
+                this.loadKlassesStmt(klasses, stmt1);
             }
 
-        } else if (ast instanceof EmptyStatement) {
+        } else if (stmt instanceof EmptyStatement) {
 
-        } else if (ast instanceof VariableDeclarationStatement) {
+        } else if (stmt instanceof VariableDeclarationStatement) {
             VariableDeclarationStatement varStmt =
-                (VariableDeclarationStatement)ast;
+                (VariableDeclarationStatement)stmt;
             DFType varType = _finder.resolveSafe(varStmt.getType());
             if (varType instanceof DFSourceKlass) {
                 ((DFSourceKlass)varType).loadKlasses(klasses);
@@ -522,20 +526,20 @@ public abstract class DFSourceMethod extends DFMethod {
                 }
             }
 
-        } else if (ast instanceof ExpressionStatement) {
-            ExpressionStatement exprStmt = (ExpressionStatement)ast;
+        } else if (stmt instanceof ExpressionStatement) {
+            ExpressionStatement exprStmt = (ExpressionStatement)stmt;
             Expression expr = exprStmt.getExpression();
             this.loadKlassesExpr(klasses, expr);
 
-        } else if (ast instanceof ReturnStatement) {
-            ReturnStatement returnStmt = (ReturnStatement)ast;
+        } else if (stmt instanceof ReturnStatement) {
+            ReturnStatement returnStmt = (ReturnStatement)stmt;
             Expression expr = returnStmt.getExpression();
             if (expr != null) {
                 this.loadKlassesExpr(klasses, expr);
             }
 
-        } else if (ast instanceof IfStatement) {
-            IfStatement ifStmt = (IfStatement)ast;
+        } else if (stmt instanceof IfStatement) {
+            IfStatement ifStmt = (IfStatement)stmt;
             Expression expr = ifStmt.getExpression();
             this.loadKlassesExpr(klasses, expr);
             Statement thenStmt = ifStmt.getThenStatement();
@@ -545,38 +549,34 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.loadKlassesStmt(klasses, elseStmt);
             }
 
-        } else if (ast instanceof SwitchStatement) {
-            SwitchStatement switchStmt = (SwitchStatement)ast;
+        } else if (stmt instanceof SwitchStatement) {
+            SwitchStatement switchStmt = (SwitchStatement)stmt;
             Expression expr = switchStmt.getExpression();
             this.loadKlassesExpr(klasses, expr);
-            for (Statement stmt :
+            for (Statement stmt1 :
                      (List<Statement>) switchStmt.statements()) {
-                this.loadKlassesStmt(klasses, stmt);
+                this.loadKlassesStmt(klasses, stmt1);
             }
 
-        } else if (ast instanceof SwitchCase) {
-            SwitchCase switchCase = (SwitchCase)ast;
+        } else if (stmt instanceof SwitchCase) {
+            SwitchCase switchCase = (SwitchCase)stmt;
             Expression expr = switchCase.getExpression();
             if (expr != null) {
                 this.loadKlassesExpr(klasses, expr);
             }
 
-        } else if (ast instanceof WhileStatement) {
-            WhileStatement whileStmt = (WhileStatement)ast;
-            Expression expr = whileStmt.getExpression();
-            this.loadKlassesExpr(klasses, expr);
-            Statement stmt = whileStmt.getBody();
-            this.loadKlassesStmt(klasses, stmt);
+        } else if (stmt instanceof WhileStatement) {
+            WhileStatement whileStmt = (WhileStatement)stmt;
+            this.loadKlassesExpr(klasses, whileStmt.getExpression());
+            this.loadKlassesStmt(klasses, whileStmt.getBody());
 
-        } else if (ast instanceof DoStatement) {
-            DoStatement doStmt = (DoStatement)ast;
-            Statement stmt = doStmt.getBody();
-            this.loadKlassesStmt(klasses, stmt);
-            Expression expr = doStmt.getExpression();
-            this.loadKlassesExpr(klasses, expr);
+        } else if (stmt instanceof DoStatement) {
+            DoStatement doStmt = (DoStatement)stmt;
+            this.loadKlassesStmt(klasses, doStmt.getBody());
+            this.loadKlassesExpr(klasses, doStmt.getExpression());
 
-        } else if (ast instanceof ForStatement) {
-            ForStatement forStmt = (ForStatement)ast;
+        } else if (stmt instanceof ForStatement) {
+            ForStatement forStmt = (ForStatement)stmt;
             for (Expression init :
                      (List<Expression>) forStmt.initializers()) {
                 this.loadKlassesExpr(klasses, init);
@@ -585,40 +585,37 @@ public abstract class DFSourceMethod extends DFMethod {
             if (expr != null) {
                 this.loadKlassesExpr(klasses, expr);
             }
-            Statement stmt = forStmt.getBody();
-            this.loadKlassesStmt(klasses, stmt);
+            this.loadKlassesStmt(klasses, forStmt.getBody());
             for (Expression update :
                      (List<Expression>) forStmt.updaters()) {
                 this.loadKlassesExpr(klasses, update);
             }
 
-        } else if (ast instanceof EnhancedForStatement) {
-            EnhancedForStatement eForStmt = (EnhancedForStatement)ast;
+        } else if (stmt instanceof EnhancedForStatement) {
+            EnhancedForStatement eForStmt = (EnhancedForStatement)stmt;
             this.loadKlassesExpr(klasses, eForStmt.getExpression());
             SingleVariableDeclaration decl = eForStmt.getParameter();
             DFType varType = _finder.resolveSafe(decl.getType());
             if (varType instanceof DFSourceKlass) {
                 ((DFSourceKlass)varType).loadKlasses(klasses);
             }
-            Statement stmt = eForStmt.getBody();
-            this.loadKlassesStmt(klasses, stmt);
+            this.loadKlassesStmt(klasses, eForStmt.getBody());
 
-        } else if (ast instanceof BreakStatement) {
+        } else if (stmt instanceof BreakStatement) {
 
-        } else if (ast instanceof ContinueStatement) {
+        } else if (stmt instanceof ContinueStatement) {
 
-        } else if (ast instanceof LabeledStatement) {
-            LabeledStatement labeledStmt = (LabeledStatement)ast;
-            Statement stmt = labeledStmt.getBody();
-            this.loadKlassesStmt(klasses, stmt);
+        } else if (stmt instanceof LabeledStatement) {
+            LabeledStatement labeledStmt = (LabeledStatement)stmt;
+            this.loadKlassesStmt(klasses, labeledStmt.getBody());
 
-        } else if (ast instanceof SynchronizedStatement) {
-            SynchronizedStatement syncStmt = (SynchronizedStatement)ast;
+        } else if (stmt instanceof SynchronizedStatement) {
+            SynchronizedStatement syncStmt = (SynchronizedStatement)stmt;
             this.loadKlassesExpr(klasses, syncStmt.getExpression());
             this.loadKlassesStmt(klasses, syncStmt.getBody());
 
-        } else if (ast instanceof TryStatement) {
-            TryStatement tryStmt = (TryStatement)ast;
+        } else if (stmt instanceof TryStatement) {
+            TryStatement tryStmt = (TryStatement)stmt;
             for (VariableDeclarationExpression decl :
                      (List<VariableDeclarationExpression>) tryStmt.resources()) {
                 this.loadKlassesExpr(klasses, decl);
@@ -638,29 +635,29 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.loadKlassesStmt(klasses, finBlock);
             }
 
-        } else if (ast instanceof ThrowStatement) {
-            ThrowStatement throwStmt = (ThrowStatement)ast;
+        } else if (stmt instanceof ThrowStatement) {
+            ThrowStatement throwStmt = (ThrowStatement)stmt;
             Expression expr = throwStmt.getExpression();
             if (expr != null) {
                 this.loadKlassesExpr(klasses, expr);
             }
 
-        } else if (ast instanceof ConstructorInvocation) {
-            ConstructorInvocation ci = (ConstructorInvocation)ast;
+        } else if (stmt instanceof ConstructorInvocation) {
+            ConstructorInvocation ci = (ConstructorInvocation)stmt;
             for (Expression expr :
                      (List<Expression>) ci.arguments()) {
                 this.loadKlassesExpr(klasses, expr);
             }
 
-        } else if (ast instanceof SuperConstructorInvocation) {
-            SuperConstructorInvocation sci = (SuperConstructorInvocation)ast;
+        } else if (stmt instanceof SuperConstructorInvocation) {
+            SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             for (Expression expr :
                      (List<Expression>) sci.arguments()) {
                 this.loadKlassesExpr(klasses, expr);
             }
 
-        } else if (ast instanceof TypeDeclarationStatement) {
-            TypeDeclarationStatement decl = (TypeDeclarationStatement)ast;
+        } else if (stmt instanceof TypeDeclarationStatement) {
+            TypeDeclarationStatement decl = (TypeDeclarationStatement)stmt;
             AbstractTypeDeclaration abstDecl = decl.getDeclaration();
             DFKlass innerType = this.getKlass(abstDecl.getName());
             if (innerType instanceof DFSourceKlass) {
@@ -668,24 +665,24 @@ public abstract class DFSourceMethod extends DFMethod {
             }
 
         } else {
-            throw new InvalidSyntax(ast);
+            throw new InvalidSyntax(stmt);
 
         }
     }
 
     @SuppressWarnings("unchecked")
     protected void loadKlassesExpr(
-        Set<DFSourceKlass> klasses, Expression ast)
+        Set<DFSourceKlass> klasses, Expression expr)
         throws InvalidSyntax {
-        assert ast != null;
+        assert expr != null;
 
-        if (ast instanceof Annotation) {
+        if (expr instanceof Annotation) {
 
-        } else if (ast instanceof Name) {
+        } else if (expr instanceof Name) {
 
-        } else if (ast instanceof ThisExpression) {
+        } else if (expr instanceof ThisExpression) {
             // "this"
-            ThisExpression thisExpr = (ThisExpression)ast;
+            ThisExpression thisExpr = (ThisExpression)expr;
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
@@ -697,18 +694,18 @@ public abstract class DFSourceMethod extends DFMethod {
                 }
             }
 
-        } else if (ast instanceof BooleanLiteral) {
+        } else if (expr instanceof BooleanLiteral) {
 
-        } else if (ast instanceof CharacterLiteral) {
+        } else if (expr instanceof CharacterLiteral) {
 
-        } else if (ast instanceof NullLiteral) {
+        } else if (expr instanceof NullLiteral) {
 
-        } else if (ast instanceof NumberLiteral) {
+        } else if (expr instanceof NumberLiteral) {
 
-        } else if (ast instanceof StringLiteral) {
+        } else if (expr instanceof StringLiteral) {
 
-        } else if (ast instanceof TypeLiteral) {
-            Type value = ((TypeLiteral)ast).getType();
+        } else if (expr instanceof TypeLiteral) {
+            Type value = ((TypeLiteral)expr).getType();
             try {
                 DFType type = _finder.resolve(value);
                 if (type instanceof DFSourceKlass) {
@@ -717,32 +714,32 @@ public abstract class DFSourceMethod extends DFMethod {
             } catch (TypeNotFound e) {
             }
 
-        } else if (ast instanceof PrefixExpression) {
-            PrefixExpression prefix = (PrefixExpression)ast;
+        } else if (expr instanceof PrefixExpression) {
+            PrefixExpression prefix = (PrefixExpression)expr;
             PrefixExpression.Operator op = prefix.getOperator();
             Expression operand = prefix.getOperand();
             this.loadKlassesExpr(klasses, operand);
 
-        } else if (ast instanceof PostfixExpression) {
-            PostfixExpression postfix = (PostfixExpression)ast;
+        } else if (expr instanceof PostfixExpression) {
+            PostfixExpression postfix = (PostfixExpression)expr;
             PostfixExpression.Operator op = postfix.getOperator();
             Expression operand = postfix.getOperand();
             this.loadKlassesExpr(klasses, operand);
 
-        } else if (ast instanceof InfixExpression) {
-            InfixExpression infix = (InfixExpression)ast;
+        } else if (expr instanceof InfixExpression) {
+            InfixExpression infix = (InfixExpression)expr;
             InfixExpression.Operator op = infix.getOperator();
             Expression loperand = infix.getLeftOperand();
             this.loadKlassesExpr(klasses, loperand);
             Expression roperand = infix.getRightOperand();
             this.loadKlassesExpr(klasses, roperand);
 
-        } else if (ast instanceof ParenthesizedExpression) {
-            ParenthesizedExpression paren = (ParenthesizedExpression)ast;
+        } else if (expr instanceof ParenthesizedExpression) {
+            ParenthesizedExpression paren = (ParenthesizedExpression)expr;
             this.loadKlassesExpr(klasses, paren.getExpression());
 
-        } else if (ast instanceof Assignment) {
-            Assignment assn = (Assignment)ast;
+        } else if (expr instanceof Assignment) {
+            Assignment assn = (Assignment)expr;
             Assignment.Operator op = assn.getOperator();
             this.loadKlassesExpr(klasses, assn.getLeftHandSide());
             if (op != Assignment.Operator.ASSIGN) {
@@ -750,48 +747,48 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             this.loadKlassesExpr(klasses, assn.getRightHandSide());
 
-        } else if (ast instanceof VariableDeclarationExpression) {
-            VariableDeclarationExpression decl = (VariableDeclarationExpression)ast;
+        } else if (expr instanceof VariableDeclarationExpression) {
+            VariableDeclarationExpression decl = (VariableDeclarationExpression)expr;
             DFType varType = _finder.resolveSafe(decl.getType());
             if (varType instanceof DFSourceKlass) {
                 ((DFSourceKlass)varType).loadKlasses(klasses);
             }
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) decl.fragments()) {
-                Expression expr = frag.getInitializer();
-                if (expr != null) {
-                    this.loadKlassesExpr(klasses, expr);
+                Expression init = frag.getInitializer();
+                if (init != null) {
+                    this.loadKlassesExpr(klasses, init);
                 }
             }
 
-        } else if (ast instanceof MethodInvocation) {
-            MethodInvocation invoke = (MethodInvocation)ast;
-            Expression expr = invoke.getExpression();
-            if (expr instanceof Name) {
+        } else if (expr instanceof MethodInvocation) {
+            MethodInvocation invoke = (MethodInvocation)expr;
+            Expression expr1 = invoke.getExpression();
+            if (expr1 instanceof Name) {
                 try {
-                    DFType type = _finder.lookupType((Name)expr);
+                    DFType type = _finder.lookupType((Name)expr1);
                     if (type instanceof DFSourceKlass) {
                         ((DFSourceKlass)type).loadKlasses(klasses);
                     }
                 } catch (TypeNotFound e) {
                 }
-            } else if (expr != null) {
-                this.loadKlassesExpr(klasses, expr);
+            } else if (expr1 != null) {
+                this.loadKlassesExpr(klasses, expr1);
             }
             for (Expression arg :
                      (List<Expression>) invoke.arguments()) {
                 this.loadKlassesExpr(klasses, arg);
             }
 
-        } else if (ast instanceof SuperMethodInvocation) {
-            SuperMethodInvocation si = (SuperMethodInvocation)ast;
+        } else if (expr instanceof SuperMethodInvocation) {
+            SuperMethodInvocation si = (SuperMethodInvocation)expr;
             for (Expression arg :
                      (List<Expression>) si.arguments()) {
                 this.loadKlassesExpr(klasses, arg);
             }
 
-        } else if (ast instanceof ArrayCreation) {
-            ArrayCreation ac = (ArrayCreation)ast;
+        } else if (expr instanceof ArrayCreation) {
+            ArrayCreation ac = (ArrayCreation)expr;
             for (Expression dim :
                      (List<Expression>) ac.dimensions()) {
                 this.loadKlassesExpr(klasses, dim);
@@ -805,37 +802,37 @@ public abstract class DFSourceMethod extends DFMethod {
                 ((DFSourceKlass)type).loadKlasses(klasses);
             }
 
-        } else if (ast instanceof ArrayInitializer) {
-            ArrayInitializer init = (ArrayInitializer)ast;
-            for (Expression expr :
+        } else if (expr instanceof ArrayInitializer) {
+            ArrayInitializer init = (ArrayInitializer)expr;
+            for (Expression expr1 :
                      (List<Expression>) init.expressions()) {
-                this.loadKlassesExpr(klasses, expr);
+                this.loadKlassesExpr(klasses, expr1);
             }
 
-        } else if (ast instanceof ArrayAccess) {
-            ArrayAccess aa = (ArrayAccess)ast;
+        } else if (expr instanceof ArrayAccess) {
+            ArrayAccess aa = (ArrayAccess)expr;
             this.loadKlassesExpr(klasses, aa.getArray());
             this.loadKlassesExpr(klasses, aa.getIndex());
 
-        } else if (ast instanceof FieldAccess) {
-            FieldAccess fa = (FieldAccess)ast;
+        } else if (expr instanceof FieldAccess) {
+            FieldAccess fa = (FieldAccess)expr;
             SimpleName fieldName = fa.getName();
             this.loadKlassesExpr(klasses, fa.getExpression());
 
-        } else if (ast instanceof SuperFieldAccess) {
-            SuperFieldAccess sfa = (SuperFieldAccess)ast;
+        } else if (expr instanceof SuperFieldAccess) {
+            SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
 
-        } else if (ast instanceof CastExpression) {
-            CastExpression cast = (CastExpression)ast;
+        } else if (expr instanceof CastExpression) {
+            CastExpression cast = (CastExpression)expr;
             this.loadKlassesExpr(klasses, cast.getExpression());
             DFType type = _finder.resolveSafe(cast.getType());
             if (type instanceof DFSourceKlass) {
                 ((DFSourceKlass)type).loadKlasses(klasses);
             }
 
-        } else if (ast instanceof ClassInstanceCreation) {
-            ClassInstanceCreation cstr = (ClassInstanceCreation)ast;
+        } else if (expr instanceof ClassInstanceCreation) {
+            ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
             try {
                 DFKlass instKlass;
                 if (cstr.getAnonymousClassDeclaration() != null) {
@@ -849,45 +846,47 @@ public abstract class DFSourceMethod extends DFMethod {
                 }
             } catch (TypeNotFound e) {
             }
-            Expression expr = cstr.getExpression();
-            if (expr != null) {
-                this.loadKlassesExpr(klasses, expr);
+            Expression expr1 = cstr.getExpression();
+            if (expr1 != null) {
+                this.loadKlassesExpr(klasses, expr1);
             }
             for (Expression arg :
                      (List<Expression>) cstr.arguments()) {
                 this.loadKlassesExpr(klasses, arg);
             }
 
-        } else if (ast instanceof ConditionalExpression) {
-            ConditionalExpression cond = (ConditionalExpression)ast;
+        } else if (expr instanceof ConditionalExpression) {
+            ConditionalExpression cond = (ConditionalExpression)expr;
             this.loadKlassesExpr(klasses, cond.getExpression());
             this.loadKlassesExpr(klasses, cond.getThenExpression());
             this.loadKlassesExpr(klasses, cond.getElseExpression());
 
-        } else if (ast instanceof InstanceofExpression) {
-            InstanceofExpression instof = (InstanceofExpression)ast;
+        } else if (expr instanceof InstanceofExpression) {
+            InstanceofExpression instof = (InstanceofExpression)expr;
             this.loadKlassesExpr(klasses, instof.getLeftOperand());
 
-        } else if (ast instanceof LambdaExpression) {
-            LambdaExpression lambda = (LambdaExpression)ast;
+        } else if (expr instanceof LambdaExpression) {
+            LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use lambda klasses until defined.
 
-        } else if (ast instanceof MethodReference) {
+        } else if (expr instanceof MethodReference) {
             //  CreationReference
             //  ExpressionMethodReference
             //  SuperMethodReference
             //  TypeMethodReference
-            MethodReference methodref = (MethodReference)ast;
+            MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use methodref klasses until defined.
 
         } else {
-            throw new InvalidSyntax(ast);
+            throw new InvalidSyntax(expr);
         }
     }
+
+    /// Enum References.
 
     @SuppressWarnings("unchecked")
     protected void enumRefsStmt(
@@ -922,7 +921,7 @@ public abstract class DFSourceMethod extends DFMethod {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.enumRefsExpr(defined, scope, init);
-                        this.fixateLambda(defined, ref.getRefType(), init);
+                        this.setLambdaType(defined, ref.getRefType(), init);
                     }
                 } catch (VariableNotFound e) {
                 }
@@ -962,16 +961,16 @@ public abstract class DFSourceMethod extends DFMethod {
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
                     SwitchCase switchCase = (SwitchCase)cstmt;
-                    Expression expr = switchCase.getExpression();
-                    if (expr != null) {
-                        if (enumKlass != null && expr instanceof SimpleName) {
+                    Expression expr1 = switchCase.getExpression();
+                    if (expr1 != null) {
+                        if (enumKlass != null && expr1 instanceof SimpleName) {
                             // special treatment for enum.
-                            DFRef ref = enumKlass.getField((SimpleName)expr);
+                            DFRef ref = enumKlass.getField((SimpleName)expr1);
                             if (ref != null) {
                                 _inputRefs.add(ref);
                             }
                         } else {
-                            this.enumRefsExpr(defined, innerScope, expr);
+                            this.enumRefsExpr(defined, innerScope, expr1);
                         }
                     }
                 } else {
@@ -1004,9 +1003,9 @@ public abstract class DFSourceMethod extends DFMethod {
             for (Expression init : (List<Expression>) forStmt.initializers()) {
                 this.enumRefsExpr(defined, innerScope, init);
             }
-            Expression expr = forStmt.getExpression();
-            if (expr != null) {
-                this.enumRefsExpr(defined, innerScope, expr);
+            Expression expr1 = forStmt.getExpression();
+            if (expr1 != null) {
+                this.enumRefsExpr(defined, innerScope, expr1);
             }
             this.enumRefsStmt(defined, innerScope, forStmt.getBody());
             for (Expression update : (List<Expression>) forStmt.updaters()) {
@@ -1023,9 +1022,9 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (stmt instanceof ReturnStatement) {
             // "return 42;"
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
-            Expression expr = rtrnStmt.getExpression();
-            if (expr != null) {
-                this.enumRefsExpr(defined, scope, expr);
+            Expression expr1 = rtrnStmt.getExpression();
+            if (expr1 != null) {
+                this.enumRefsExpr(defined, scope, expr1);
             }
             // Return is handled as an Exit, not an output.
 
@@ -1089,7 +1088,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1 = klass.findMethod(
                 CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
-                this.fixateLambda(
+                this.setLambdaType(
                     defined, method1.getFuncType(), ci.arguments());
             }
 
@@ -1113,7 +1112,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
                 method1.addCaller(this);
-                this.fixateLambda(
+                this.setLambdaType(
                     defined, method1.getFuncType(), sci.arguments());
             }
 
@@ -1273,7 +1272,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = this.enumRefsAssignment(
                 defined, scope, assn.getLeftHandSide());
             if (ref != null) {
-                this.fixateLambda(
+                this.setLambdaType(
                     defined, ref.getRefType(), assn.getRightHandSide());
             }
             return this.enumRefsExpr(defined, scope, assn.getRightHandSide());
@@ -1290,7 +1289,7 @@ public abstract class DFSourceMethod extends DFMethod {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.enumRefsExpr(defined, scope, init);
-                        this.fixateLambda(defined, ref.getRefType(), init);
+                        this.setLambdaType(defined, ref.getRefType(), init);
                     }
                 } catch (VariableNotFound e) {
                 }
@@ -1340,7 +1339,7 @@ public abstract class DFSourceMethod extends DFMethod {
             for (DFMethod m : method1.getOverriders()) {
                 m.addCaller(this);
             }
-            this.fixateLambda(
+            this.setLambdaType(
                 defined, method1.getFuncType(), invoke.arguments());
             return method1.getFuncType().getReturnType();
 
@@ -1365,7 +1364,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
             if (method1 == null) return DFUnknownType.UNKNOWN;
             method1.addCaller(this);
-            this.fixateLambda(
+            this.setLambdaType(
                 defined, method1.getFuncType(), sinvoke.arguments());
             return method1.getFuncType().getReturnType();
 
@@ -1490,7 +1489,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
                 method1.addCaller(this);
-                this.fixateLambda(
+                this.setLambdaType(
                     defined, method1.getFuncType(), cstr.arguments());
             }
             return instKlass;
@@ -1694,24 +1693,26 @@ public abstract class DFSourceMethod extends DFMethod {
         }
     }
 
-    protected void fixateLambda(
+    /// Set Lambda types.
+
+    protected void setLambdaType(
         List<DFSourceKlass> defined,
         DFFunctionType funcType, List<Expression> exprs)
         throws InvalidSyntax {
         // types or exprs might be shorter than the other. (due to varargs calls)
         for (int i = 0; i < exprs.size(); i++) {
             DFType type = funcType.getArgType(i);
-            this.fixateLambda(defined, type, exprs.get(i));
+            this.setLambdaType(defined, type, exprs.get(i));
         }
     }
 
-    protected void fixateLambda(
+    protected void setLambdaType(
         List<DFSourceKlass> defined,
         DFType type, Expression expr)
         throws InvalidSyntax {
         if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            fixateLambda(defined, type, paren.getExpression());
+            setLambdaType(defined, type, paren.getExpression());
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
@@ -1735,6 +1736,8 @@ public abstract class DFSourceMethod extends DFMethod {
 
         }
     }
+
+    /// Expand References.
 
     public boolean expandRefs(DFSourceMethod callee) {
         boolean added = false;

@@ -22,23 +22,19 @@ class DFMethodRefKlass extends DFSourceKlass {
                   false, id, id, scope, finder);
         }
 
-        public void setFuncType(DFFunctionType funcType) {
+        protected DFMethod parameterize(DFKlass[] paramTypes)
+            throws InvalidSyntax {
+            assert false;
+            return null;
+        }
+
+        protected void setFuncType(DFFunctionType funcType) {
             _funcType = funcType;
         }
 
         @Override
         public DFFunctionType getFuncType() {
             return _funcType;
-        }
-
-        public DFMethod getRefMethod() {
-            return _refMethod;
-        }
-
-        protected DFMethod parameterize(DFKlass[] paramTypes)
-            throws InvalidSyntax {
-            assert false;
-            return null;
         }
 
         @Override
@@ -76,10 +72,13 @@ class DFMethodRefKlass extends DFSourceKlass {
                 throw new InvalidSyntax(_methodRef);
             }
         }
+
         @Override
         public void enumRefs(List<DFSourceKlass> defined)
             throws InvalidSyntax {
         }
+
+        @Override
         @SuppressWarnings("unchecked")
         public DFGraph generateGraph(Counter counter)
             throws InvalidSyntax, EntityNotFound {
@@ -91,7 +90,11 @@ class DFMethodRefKlass extends DFSourceKlass {
             Utils.writeXML(writer, _methodRef);
         }
 
-        protected void fixateMethod(DFKlass refKlass) {
+        protected DFMethod getRefMethod() {
+            return _refMethod;
+        }
+
+        protected void setRefMethod(DFKlass refKlass) {
             assert _funcType != null;
             ASTNode ast = _methodRef;
             DFType[] argTypes = _funcType.getRealArgTypes();
@@ -111,10 +114,10 @@ class DFMethodRefKlass extends DFSourceKlass {
                 _refMethod = refKlass.findMethod(
                     DFMethod.CallStyle.InstanceOrStatic, name, argTypes);
             }
-            //Logger.info("DFMethodRefKlass.fixateMethod:", method);
+            //Logger.info("DFMethodRefKlass.setRefMethod:", method);
             if (_refMethod == null) {
                 Logger.error(
-                    "DFMethodRefKlass.fixateMethod: MethodNotFound",
+                    "DFMethodRefKlass.setRefMethod: MethodNotFound",
                     this, refKlass, ast);
             }
         }
@@ -184,20 +187,14 @@ class DFMethodRefKlass extends DFSourceKlass {
         if (funcMethod == null) return;
         _funcMethod.setFuncType(funcMethod.getFuncType());
         if (_refKlass != null) {
-            _funcMethod.fixateMethod(_refKlass);
+            _funcMethod.setRefMethod(_refKlass);
         }
     }
 
     public void setRefKlass(DFKlass refKlass) {
         _refKlass = refKlass;
         if (_funcMethod.getFuncType() != null) {
-            _funcMethod.fixateMethod(_refKlass);
+            _funcMethod.setRefMethod(_refKlass);
         }
-    }
-
-    public void loadKlasses(Set<DFSourceKlass> klasses)
-        throws InvalidSyntax {
-        super.loadKlasses(klasses);
-
     }
 }
