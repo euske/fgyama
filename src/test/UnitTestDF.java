@@ -13,7 +13,6 @@ public class UnitTestDF extends XMLTestCase {
 
     public static final String TESTDATA = "tests";
 
-    private static DFRootTypeSpace _rootSpace = null;
     private static Java2DF _converter = null;
 
     public UnitTestDF(String name)
@@ -22,16 +21,9 @@ public class UnitTestDF extends XMLTestCase {
         XMLUnit.setIgnoreComments(true);
         XMLUnit.setIgnoreWhitespace(true);
         XMLUnit.setNormalize(true);
-        if (_rootSpace == null) {
-            File homeDir = new File(System.getProperty("java.home"));
-            File libDir = new File(homeDir, "lib");
-            File rtFile = new File(libDir, "rt.jar");
-            _rootSpace = new DFRootTypeSpace();
-            _rootSpace.loadJarFile(rtFile.getAbsolutePath());
-            DFBuiltinTypes.initialize(_rootSpace);
-        }
         if (_converter == null) {
-            _converter = new Java2DF(_rootSpace);
+            _converter = new Java2DF();
+            _converter.loadDefaults();
         }
     }
 
@@ -42,10 +34,9 @@ public class UnitTestDF extends XMLTestCase {
         _converter.clearSourceFiles();
         for (String javaPath : javaPaths) {
             System.err.println("compareXml: "+javaPath+", "+xmlPath);
-            CompilationUnit cunit = Utils.parseFile(javaPath);
-            _converter.addSourceFile(javaPath, cunit);
+            _converter.addSourceFile(javaPath);
         }
-        Collection<DFSourceKlass> klasses = _converter.getKlasses();
+        Collection<DFSourceKlass> klasses = _converter.getSourceKlasses();
         for (DFSourceKlass klass : klasses) {
             _converter.analyzeKlass(exporter, klass, false);
         }

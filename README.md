@@ -152,6 +152,20 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
     $ python tools/graph2gv.py Hello.graph | dot -Tsvg > Hello.svg
 
 
+## How to Use
+
+    XmlExporter exporter = new XmlExporter(System.out);
+    Java2DF converter = new Java2DF();
+    converter.loadDefaults();       // Load the standard classes.
+    converter.loadJarFile("path/to/my.jar");  // Add a jar.
+    converter.addSourceFile("Hello.java");    // Add a source code.
+    for (DFSourceKlass klass : converter.getSourceKlasses()) {
+        // Perform analysis for every class.
+        converter.analyzeKlass(exporter, klass, false);
+    }
+    exporter.close();
+
+
 ## Development
 
 ### Coding style

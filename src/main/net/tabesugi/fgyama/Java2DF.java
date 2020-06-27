@@ -107,9 +107,22 @@ public class Java2DF {
 
     /// Top-level functions.
 
-    public Java2DF(
-        DFRootTypeSpace rootSpace) {
-        _rootSpace = rootSpace;
+    public Java2DF() {
+        _rootSpace = new DFRootTypeSpace();
+    }
+
+    public void loadDefaults()
+        throws IOException, InvalidSyntax {
+        // Initialize base classes.
+        File homeDir = new File(System.getProperty("java.home"));
+        File libDir = new File(homeDir, "lib");
+        File rtFile = new File(libDir, "rt.jar");
+        _rootSpace.loadJarFile(rtFile.getAbsolutePath());
+        DFBuiltinTypes.initialize(_rootSpace);
+    }
+
+    public void loadJarFile(String path) throws IOException {
+        _rootSpace.loadJarFile(path);
     }
 
     public void clearSourceFiles() {
@@ -120,8 +133,15 @@ public class Java2DF {
         _sourceFiles.add(new Entry(key, cunit));
     }
 
-    public Collection<DFSourceKlass> getKlasses()
+    public void addSourceFile(String path)
+        throws IOException {
+        CompilationUnit cunit = Utils.parseFile(path);
+        this.addSourceFile(path, cunit);
+    }
+
+    public Collection<DFSourceKlass> getSourceKlasses()
         throws InvalidSyntax {
+
         // Stage1: populate TypeSpaces.
         for (Entry e : _sourceFiles) {
             Logger.info("Stage1:", e.key);
@@ -323,7 +343,7 @@ public class Java2DF {
         // Parse the options.
         List<String> files = new ArrayList<String>();
         List<String> jarfiles = new ArrayList<String>();
-        Set<String> processed = new HashSet<String>();
+        Set<String> toprocess = new HashSet<String>();
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
@@ -369,7 +389,7 @@ public class Java2DF {
                     jarfiles.add(path);
                 }
             } else if (arg.equals("-p")) {
-                processed.add(args[++i]);
+                toprocess.add(args[++i]);
             } else if (arg.equals("-S")) {
                 strict = true;
             } else if (arg.equals("-s")) {
@@ -388,31 +408,23 @@ public class Java2DF {
             }
         }
 
-        // Initialize base classes.
-        File homeDir = new File(System.getProperty("java.home"));
-        File libDir = new File(homeDir, "lib");
-        File rtFile = new File(libDir, "rt.jar");
-        DFRootTypeSpace rootSpace = new DFRootTypeSpace();
-        rootSpace.loadJarFile(rtFile.getAbsolutePath());
-        DFBuiltinTypes.initialize(rootSpace);
-        for (String path : jarfiles) {
-            rootSpace.loadJarFile(path);
-        }
-
         // Process files.
-        Java2DF converter = new Java2DF(rootSpace);
+        Java2DF converter = new Java2DF();
+        converter.loadDefaults();
+        for (String path : jarfiles) {
+            converter.loadJarFile(path);
+        }
         for (String path : files) {
             Logger.info("Parsing:", path);
             try {
-                CompilationUnit cunit = Utils.parseFile(path);
-                converter.addSourceFile(path, cunit);
+                converter.addSourceFile(path);
             } catch (IOException e) {
                 Logger.error("Parsing: IOException at "+path);
                 throw e;
             }
         }
 
-        Collection<DFSourceKlass> klasses = converter.getKlasses();
+        Collection<DFSourceKlass> klasses = converter.getSourceKlasses();
 
         ByteArrayOutputStream temp = null;
         if (reformat) {
@@ -421,7 +433,7 @@ public class Java2DF {
 
         XmlExporter exporter = new XmlExporter((temp != null)? temp : output);
         for (DFSourceKlass klass : klasses) {
-            if (!processed.isEmpty() && !processed.contains(klass.getFilePath())) continue;
+            if (!toprocess.isEmpty() && !toprocess.contains(klass.getFilePath())) continue;
             try {
                 converter.analyzeKlass(exporter, klass, strict);
             } catch (EntityNotFound e) {
