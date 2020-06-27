@@ -225,7 +225,7 @@ public class Java2DF {
 
     @SuppressWarnings("unchecked")
     private void loadKlasses(
-        String key, CompilationUnit cunit, Set<DFSourceKlass> klasses)
+        String key, CompilationUnit cunit, Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
         DFFileScope fileScope = _fileScope.get(key);
@@ -250,7 +250,7 @@ public class Java2DF {
         }
     }
 
-    private void listMethods(Set<DFSourceKlass> klasses)
+    private void listMethods(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
@@ -264,7 +264,7 @@ public class Java2DF {
         }
 
         // Build call graphs (normal classes).
-        List<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
+        Collection<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
         for (DFSourceKlass klass : klasses) {
             klass.enumRefs(defined);
             for (DFMethod method : klass.getMethods()) {
@@ -274,7 +274,7 @@ public class Java2DF {
 
         while (!defined.isEmpty()) {
             klasses.addAll(defined);
-            List<DFSourceKlass> defined2 = new ArrayList<DFSourceKlass>();
+            Collection<DFSourceKlass> defined2 = new ArrayList<DFSourceKlass>();
             for (DFSourceKlass klass : defined) {
                 klass.overrideMethods();
             }
@@ -343,7 +343,7 @@ public class Java2DF {
         // Parse the options.
         List<String> files = new ArrayList<String>();
         List<String> jarfiles = new ArrayList<String>();
-        Set<String> toprocess = new HashSet<String>();
+        Collection<String> toprocess = new HashSet<String>();
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;

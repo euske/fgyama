@@ -47,7 +47,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
-        public void loadKlasses(Set<DFSourceKlass> klasses)
+        public void loadKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             DFTypeFinder finder = this.getFinder();
             if (_methodRef instanceof CreationReference) {
@@ -85,7 +85,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
-        public void enumRefs(List<DFSourceKlass> defined)
+        public void enumRefs(Collection<DFSourceKlass> defined)
             throws InvalidSyntax {
             DFTypeFinder finder = this.getFinder();
             assert _funcType != null;

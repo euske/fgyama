@@ -64,7 +64,7 @@ class InitMethod extends DFSourceMethod {
     // loadKlasses: enumerate all referenced Klasses.
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Set<DFSourceKlass> klasses)
+    public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         for (BodyDeclaration body : _decls) {
             if (body instanceof FieldDeclaration) {
@@ -88,7 +88,7 @@ class InitMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void enumRefs(List<DFSourceKlass> defined)
+    public void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         DFLocalScope scope = this.getScope();
         for (BodyDeclaration body : _decls) {
@@ -235,7 +235,7 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Set<DFSourceKlass> klasses)
+    public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         if (this.isGeneric()) return;
 
@@ -259,7 +259,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     @Override
-    public void enumRefs(List<DFSourceKlass> defined)
+    public void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         if (this.isGeneric()) return;
         if (_methodDecl.getBody() == null) return;
@@ -707,7 +707,7 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void loadKlasses(Set<DFSourceKlass> klasses)
+    public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         if (this.isGeneric()) return;
         if (klasses.contains(this)) return;
@@ -716,7 +716,7 @@ public abstract class DFSourceKlass extends DFKlass {
         this.load();
     }
 
-    public void enumRefs(List<DFSourceKlass> defined)
+    public void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         assert _initMethod != null;
         _initMethod.enumRefs(defined);
@@ -729,7 +729,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     @SuppressWarnings("unchecked")
     protected void loadKlassesDecls(
-        Set<DFSourceKlass> klasses, List<BodyDeclaration> decls)
+        Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         assert _initMethod != null;
 

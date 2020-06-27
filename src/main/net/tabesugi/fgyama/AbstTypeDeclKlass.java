@@ -70,7 +70,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Set<DFSourceKlass> klasses)
+    public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         super.loadKlasses(klasses);
         this.loadKlassesDecls(klasses, _abstTypeDecl.bodyDeclarations());

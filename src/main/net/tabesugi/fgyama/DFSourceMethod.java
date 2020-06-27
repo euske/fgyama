@@ -39,7 +39,7 @@ class AnonymousKlass extends DFSourceKlass {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Set<DFSourceKlass> klasses)
+    public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         super.loadKlasses(klasses);
         this.loadKlassesDecls(
@@ -449,7 +449,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     @SuppressWarnings("unchecked")
     protected void loadKlassesStmt(
-        Set<DFSourceKlass> klasses, Statement stmt)
+        Collection<DFSourceKlass> klasses, Statement stmt)
         throws InvalidSyntax {
         assert stmt != null;
 
@@ -625,7 +625,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     @SuppressWarnings("unchecked")
     protected void loadKlassesExpr(
-        Set<DFSourceKlass> klasses, Expression expr)
+        Collection<DFSourceKlass> klasses, Expression expr)
         throws InvalidSyntax {
         assert expr != null;
 
@@ -843,7 +843,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     @SuppressWarnings("unchecked")
     protected void enumRefsStmt(
-        List<DFSourceKlass> defined,
+        Collection<DFSourceKlass> defined,
         DFLocalScope scope, Statement stmt)
         throws InvalidSyntax {
         assert stmt != null;
@@ -1081,7 +1081,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     @SuppressWarnings("unchecked")
     protected DFType enumRefsExpr(
-        List<DFSourceKlass> defined,
+        Collection<DFSourceKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
         assert expr != null;
@@ -1484,7 +1484,7 @@ public abstract class DFSourceMethod extends DFMethod {
     }
 
     private DFRef enumRefsAssignment(
-        List<DFSourceKlass> defined,
+        Collection<DFSourceKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
         assert expr != null;
@@ -1585,7 +1585,7 @@ public abstract class DFSourceMethod extends DFMethod {
     /// Set Lambda types.
 
     protected void setLambdaType(
-        List<DFSourceKlass> defined,
+        Collection<DFSourceKlass> defined,
         DFFunctionType funcType, List<Expression> exprs)
         throws InvalidSyntax {
         // types or exprs might be shorter than the other. (due to varargs calls)
@@ -1596,7 +1596,7 @@ public abstract class DFSourceMethod extends DFMethod {
     }
 
     protected void setLambdaType(
-        List<DFSourceKlass> defined,
+        Collection<DFSourceKlass> defined,
         DFType type, Expression expr)
         throws InvalidSyntax {
         if (expr instanceof ParenthesizedExpression) {
@@ -1650,11 +1650,11 @@ public abstract class DFSourceMethod extends DFMethod {
      */
 
     // loadKlasses: enumerate all the referenced Klasses.
-    public abstract void loadKlasses(Set<DFSourceKlass> klasses)
+    public abstract void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax;
 
     // enumRefs: list all the internal DFRefs AND fix the lambdas.
-    public abstract void enumRefs(List<DFSourceKlass> defined)
+    public abstract void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax;
 
     // writeGraph: generate graphs.

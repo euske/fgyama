@@ -61,7 +61,7 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
-        public void loadKlasses(Set<DFSourceKlass> klasses)
+        public void loadKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
@@ -74,7 +74,7 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
-        public void enumRefs(List<DFSourceKlass> defined)
+        public void enumRefs(Collection<DFSourceKlass> defined)
             throws InvalidSyntax {
             DFLocalScope methodScope = this.getScope();
             ASTNode body = _lambda.getBody();
