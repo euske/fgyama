@@ -187,13 +187,9 @@ class DefinedMethod extends DFSourceMethod {
         MethodScope methodScope = (MethodScope)this.getScope();
 
         if (this.getGenericMethod() == null) {
-            DFMapType[] mapTypes = this.createMapTypes(_methodDecl.typeParameters());
-            if (mapTypes != null) {
-                for (DFMapType mapType : mapTypes) {
-                    mapType.setBaseFinder(finder);
-                }
-                this.setMapTypes(mapTypes);
-            }
+            DFMapType[] mapTypes = this.createMapTypes(
+                finder, _methodDecl.typeParameters());
+            this.setMapTypes(mapTypes);
         }
 
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
@@ -501,6 +497,11 @@ public abstract class DFSourceKlass extends DFKlass {
     public void setBaseFinder(DFTypeFinder baseFinder) {
         assert _finder == null;
         _finder = new DFTypeFinder(this, baseFinder);
+        for (DFKlass klass : this.getInnerKlasses()) {
+            if (klass instanceof DFSourceKlass) {
+                ((DFSourceKlass)klass).setBaseFinder(_finder);
+            }
+        }
     }
 
     protected DFTypeFinder getFinder() {

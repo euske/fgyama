@@ -12,28 +12,30 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
+    private DFTypeFinder _finder;
     private DFKlass _boundKlass = null;
 
     private String _sig = null;
     private List<Type> _types = null;
-    private DFTypeFinder _finder = null;
 
-    private DFMapType(String name, DFTypeSpace outerSpace) {
+    private DFMapType(
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder) {
         super(name, outerSpace);
         _name = name;
+        _finder = finder;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace,
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder,
         List<Type> types) {
-        this(name, outerSpace);
+        this(name, outerSpace, finder);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace,
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder,
         String sig) {
-        this(name, outerSpace);
+        this(name, outerSpace, finder);
         _sig = sig;
     }
 
@@ -87,11 +89,6 @@ public class DFMapType extends DFKlass {
         } else {
             return self.isSubclassOf(klass, typeMap);
         }
-    }
-
-    public void setBaseFinder(DFTypeFinder baseFinder) {
-        assert _finder == null;
-        _finder = baseFinder;
     }
 
     protected void build() throws InvalidSyntax {
