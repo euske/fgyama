@@ -62,7 +62,6 @@ class InitMethod extends DFSourceMethod {
     }
 
     // loadKlasses: enumerate all referenced Klasses.
-    @Override
     @SuppressWarnings("unchecked")
     public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
@@ -233,7 +232,6 @@ class DefinedMethod extends DFSourceMethod {
         }
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {

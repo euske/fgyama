@@ -41,6 +41,7 @@ class AnonymousKlass extends DFSourceKlass {
     @SuppressWarnings("unchecked")
     public void loadKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
+        if (klasses.contains(this)) return;
         super.loadKlasses(klasses);
         this.loadKlassesDecls(
             klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());

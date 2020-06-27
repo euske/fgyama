@@ -60,7 +60,6 @@ class DFLambdaKlass extends DFSourceKlass {
             return _funcType;
         }
 
-        @Override
         public void loadKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             ASTNode body = _lambda.getBody();

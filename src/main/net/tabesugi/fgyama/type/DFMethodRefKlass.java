@@ -46,7 +46,6 @@ class DFMethodRefKlass extends DFSourceKlass {
             return _funcType;
         }
 
-        @Override
         public void loadKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             DFTypeFinder finder = this.getFinder();
