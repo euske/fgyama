@@ -89,11 +89,11 @@ class DFLambdaKlass extends DFSourceKlass {
 
         @Override
         @SuppressWarnings("unchecked")
-        public DFGraph generateGraph(Counter counter)
+        public void writeGraph(Exporter exporter)
             throws InvalidSyntax, EntityNotFound {
             MethodScope methodScope = (MethodScope)this.getScope();
             MethodGraph graph = new MethodGraph(
-                "M"+counter.getNewId()+"_"+this.getName());
+                "M"+exporter.getNewId()+"_"+this.getName());
             DFContext ctx = new DFContext(graph, methodScope);
             int i = 0;
             for (VariableDeclaration decl :
@@ -108,7 +108,8 @@ class DFLambdaKlass extends DFSourceKlass {
                 i++;
             }
             ASTNode body = _lambda.getBody();
-            return this.generateMethodBody(graph, ctx, body);
+            this.processMethodBody(graph, ctx, body);
+            exporter.writeGraph(graph);
         }
     }
 

@@ -783,17 +783,74 @@ class CatchJoin extends DFNode {
 public abstract class DFGraph {
 
     public abstract String getGraphId();
-    public abstract int addNode(DFNode node);
-
-    public abstract void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException;
 
     /// General graph operations.
 
+    private DFSourceMethod _method;
     private DFTypeFinder _finder;
+    private List<DFNode> _nodes =
+        new ArrayList<DFNode>();
 
-    public DFGraph(DFTypeFinder finder) {
-        _finder = finder;
+    public DFGraph(DFSourceMethod method) {
+        _method = method;
+        _finder = method.getFinder();
+    }
+
+    public int addNode(DFNode node) {
+        _nodes.add(node);
+        return _nodes.size();
+    }
+
+    public void cleanup(Set<DFNode> preserved) {
+        Set<DFNode> toremove = new HashSet<DFNode>();
+        while (true) {
+            boolean changed = false;
+            for (DFNode node : _nodes) {
+                if (preserved != null && preserved.contains(node)) continue;
+                if (toremove.contains(node)) continue;
+                if (node.purge()) {
+                    toremove.add(node);
+                    changed = true;
+                }
+            }
+            if (!changed) break;
+        }
+        for (DFNode node : toremove) {
+            _nodes.remove(node);
+        }
+        Collections.sort(_nodes);
+    }
+
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        writer.writeStartElement("method");
+        writer.writeAttribute("name", _method.getSignature());
+        writer.writeAttribute("style", _method.getCallStyle().toString());
+        writer.writeAttribute("abstract", Boolean.toString(_method.isAbstract()));
+        for (DFMethod caller : _method.getCallers()) {
+            writer.writeStartElement("caller");
+            writer.writeAttribute("name", caller.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overrider : _method.getOverriders()) {
+            if (overrider == _method) continue;
+            writer.writeStartElement("overrider");
+            writer.writeAttribute("name", overrider.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overriding : _method.getOverridings()) {
+            writer.writeStartElement("overriding");
+            writer.writeAttribute("name", overriding.getSignature());
+            writer.writeEndElement();
+        }
+        ASTNode ast = _method.getAST();
+        if (ast != null) {
+            Utils.writeXML(writer, ast);
+        }
+        DFNode[] nodes = new DFNode[_nodes.size()];
+        _nodes.toArray(nodes);
+        _method.getScope().writeXML(writer, nodes);
+        writer.writeEndElement();
     }
 
     /**

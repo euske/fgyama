@@ -16,6 +16,7 @@ public class XmlExporter extends Exporter {
     private DFKlass _klass = null;
 
     public XmlExporter(OutputStream stream) {
+        super(1);
         try {
             XMLOutputFactory factory = XMLOutputFactory.newFactory();
             _writer = factory.createXMLStreamWriter(stream, "utf-8");
@@ -28,6 +29,7 @@ public class XmlExporter extends Exporter {
 
     @Override
     public void close() {
+        super.close();
         try {
             _writer.writeEndElement();
             _writer.writeEndDocument();

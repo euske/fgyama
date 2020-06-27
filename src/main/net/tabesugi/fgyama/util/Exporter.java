@@ -9,8 +9,20 @@ import java.util.*;
 //
 abstract class Exporter {
 
-    abstract public void close();
-    abstract public void startKlass(DFKlass klass);
-    abstract public void endKlass();
-    abstract public void writeGraph(DFGraph graph);
+    int _baseId;
+
+    public Exporter(int baseId) {
+        _baseId = baseId;
+    }
+
+    public int getNewId() {
+        return _baseId++;
+    }
+
+    public void close() {
+    }
+
+    public abstract void startKlass(DFKlass klass);
+    public abstract void endKlass();
+    public abstract void writeGraph(DFGraph graph);
 }

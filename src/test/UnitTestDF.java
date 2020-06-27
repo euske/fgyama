@@ -39,21 +39,18 @@ public class UnitTestDF extends XMLTestCase {
         throws Exception {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         XmlExporter exporter = new XmlExporter(out);
-        _converter.addExporter(exporter);
         _converter.clearSourceFiles();
         for (String javaPath : javaPaths) {
             System.err.println("compareXml: "+javaPath+", "+xmlPath);
             CompilationUnit cunit = Utils.parseFile(javaPath);
             _converter.addSourceFile(javaPath, cunit);
         }
-        Collection<DFSourceKlass> klasses = _converter.processAll();
-        Counter counter = new Counter(1);
+        Collection<DFSourceKlass> klasses = _converter.getKlasses();
         for (DFSourceKlass klass : klasses) {
-            _converter.buildGraphs(counter, klass, false);
+            _converter.analyzeKlass(exporter, klass, false);
         }
         exporter.close();
         out.close();
-        _converter.removeExporter(exporter);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
         Document outdoc = Utils.readXml(in);
         in.close();

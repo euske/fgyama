@@ -185,9 +185,14 @@ class InitMethod extends DFSourceMethod {
     }
 
     @Override
-    public DFGraph generateGraph(Counter counter)
+    public void writeGraph(Exporter exporter)
         throws InvalidSyntax, EntityNotFound {
-        return this.generateBodyDecls(counter, _decls);
+        MethodScope methodScope = (MethodScope)this.getScope();
+        MethodGraph graph = new MethodGraph("K"+exporter.getNewId()+"_"+this.getName());
+        DFContext ctx = new DFContext(graph, methodScope);
+
+        this.processBodyDecls(graph, ctx, _decls);
+        exporter.writeGraph(graph);
     }
 
     public ASTNode getAST() {
@@ -343,13 +348,13 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public DFGraph generateGraph(Counter counter)
+    public void writeGraph(Exporter exporter)
         throws InvalidSyntax, EntityNotFound {
         ASTNode body = _methodDecl.getBody();
-        if (body == null) return null;
+        if (body == null) return;
 
         MethodScope methodScope = (MethodScope)this.getScope();
-        MethodGraph graph = new MethodGraph("M"+counter.getNewId()+"_"+this.getName());
+        MethodGraph graph = new MethodGraph("M"+exporter.getNewId()+"_"+this.getName());
         DFContext ctx = new DFContext(graph, methodScope);
         int i = 0;
         for (VariableDeclaration decl :
@@ -363,7 +368,8 @@ class DefinedMethod extends DFSourceMethod {
             ctx.set(assign);
             i++;
         }
-        return this.generateMethodBody(graph, ctx, body);
+        this.processMethodBody(graph, ctx, body);
+        exporter.writeGraph(graph);
     }
 
     public void writeXML(XMLStreamWriter writer)

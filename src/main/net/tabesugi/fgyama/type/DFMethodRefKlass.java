@@ -149,10 +149,8 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        public DFGraph generateGraph(Counter counter)
+        public void writeGraph(Exporter exporter)
             throws InvalidSyntax, EntityNotFound {
-            return null;
         }
     }
 

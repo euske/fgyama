@@ -96,8 +96,6 @@ public class Java2DF {
     }
 
     private DFRootTypeSpace _rootSpace;
-    private List<Exporter> _exporters =
-        new ArrayList<Exporter>();
     private DFGlobalScope _globalScope =
         new DFGlobalScope();
     private List<Entry> _sourceFiles =
@@ -114,30 +112,6 @@ public class Java2DF {
         _rootSpace = rootSpace;
     }
 
-    public void addExporter(Exporter exporter) {
-        _exporters.add(exporter);
-    }
-
-    public void removeExporter(Exporter exporter) {
-        _exporters.remove(exporter);
-    }
-
-    private void exportGraph(DFGraph graph) {
-        for (Exporter exporter : _exporters) {
-            exporter.writeGraph(graph);
-        }
-    }
-    private void startKlass(DFSourceKlass klass) {
-        for (Exporter exporter : _exporters) {
-            exporter.startKlass(klass);
-        }
-    }
-    private void endKlass() {
-        for (Exporter exporter : _exporters) {
-            exporter.endKlass();
-        }
-    }
-
     public void clearSourceFiles() {
         _sourceFiles.clear();
     }
@@ -146,7 +120,7 @@ public class Java2DF {
         _sourceFiles.add(new Entry(key, cunit));
     }
 
-    public Collection<DFSourceKlass> processAll()
+    public Collection<DFSourceKlass> getKlasses()
         throws InvalidSyntax {
         // Stage1: populate TypeSpaces.
         for (Entry e : _sourceFiles) {
@@ -306,12 +280,12 @@ public class Java2DF {
         }
     }
 
-    // Stage5: generate graphs for each method.
+    // Stage5: perform the analysis for each method.
     @SuppressWarnings("unchecked")
-    public void buildGraphs(Counter counter, DFSourceKlass klass, boolean strict)
+    public void analyzeKlass(Exporter exporter, DFSourceKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
         try {
-            this.startKlass(klass);
+            exporter.startKlass(klass);
             List<DFMethod> methods = new ArrayList<DFMethod>();
             DFMethod init = klass.getInitMethod();
             methods.add(init);
@@ -327,17 +301,14 @@ public class Java2DF {
                 if (method instanceof DFSourceMethod) {
                     try {
                         Logger.info("Stage5:", method.getSignature());
-                        DFGraph graph = ((DFSourceMethod)method).generateGraph(counter);
-                        if (graph != null) {
-                            this.exportGraph(graph);
-                        }
+                        ((DFSourceMethod)method).writeGraph(exporter);
                     } catch (EntityNotFound e) {
                         if (strict) throw e;
                     }
                 }
             }
         } finally {
-            this.endKlass();
+            exporter.endKlass();
         }
     }
 
@@ -441,7 +412,7 @@ public class Java2DF {
             }
         }
 
-        Collection<DFSourceKlass> klasses = converter.processAll();
+        Collection<DFSourceKlass> klasses = converter.getKlasses();
 
         ByteArrayOutputStream temp = null;
         if (reformat) {
@@ -449,12 +420,10 @@ public class Java2DF {
         }
 
         XmlExporter exporter = new XmlExporter((temp != null)? temp : output);
-        converter.addExporter(exporter);
-        Counter counter = new Counter(1);
         for (DFSourceKlass klass : klasses) {
             if (!processed.isEmpty() && !processed.contains(klass.getFilePath())) continue;
             try {
-                converter.buildGraphs(counter, klass, strict);
+                converter.analyzeKlass(exporter, klass, strict);
             } catch (EntityNotFound e) {
                 Logger.error("Stage5: EntityNotFound at", klass,
                              "("+e.name+", method="+e.method+
@@ -462,7 +431,6 @@ public class Java2DF {
                 throw e;
             }
         }
-        converter.removeExporter(exporter);
         exporter.close();
 
         if (temp != null) {
