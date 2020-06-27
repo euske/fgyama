@@ -8,52 +8,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-// InputNode: represnets a function argument.
-class InputNode extends DFNode {
-
-    public InputNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "input";
-    }
-}
-
-// OutputNode: represents a return value.
-class OutputNode extends DFNode {
-
-    public OutputNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "output";
-    }
-}
-
-// AssignNode:
-class AssignNode extends DFNode {
-
-    public AssignNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "assign_var";
-    }
-}
-
-
 //  AnonymousKlass
 //
 class AnonymousKlass extends DFSourceKlass {
@@ -1819,6 +1773,7 @@ public abstract class DFSourceMethod extends DFMethod {
         }
     }
 
+    // MethodScope
     protected class MethodScope extends DFLocalScope {
 
         private InternalRef _return = null;
@@ -1944,6 +1899,51 @@ public abstract class DFSourceMethod extends DFMethod {
             public String getFullName() {
                 return "#"+_name;
             }
+        }
+    }
+
+    // InputNode: represnets a function argument.
+    protected class InputNode extends DFNode {
+
+        public InputNode(
+            DFGraph graph, DFVarScope scope, DFRef ref,
+            ASTNode ast) {
+            super(graph, scope, ref.getRefType(), ref, ast);
+        }
+
+        @Override
+        public String getKind() {
+            return "input";
+        }
+    }
+
+    // OutputNode: represents a return value.
+    protected class OutputNode extends DFNode {
+
+        public OutputNode(
+            DFGraph graph, DFVarScope scope, DFRef ref,
+            ASTNode ast) {
+            super(graph, scope, ref.getRefType(), ref, ast);
+        }
+
+        @Override
+        public String getKind() {
+            return "output";
+        }
+    }
+
+    // AssignNode:
+    protected class AssignNode extends DFNode {
+
+        public AssignNode(
+            DFGraph graph, DFVarScope scope, DFRef ref,
+            ASTNode ast) {
+            super(graph, scope, ref.getRefType(), ref, ast);
+        }
+
+        @Override
+        public String getKind() {
+            return "assign_var";
         }
     }
 }
