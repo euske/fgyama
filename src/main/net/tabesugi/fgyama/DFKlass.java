@@ -168,6 +168,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_genericKlass != null && _genericKlass == klass.getGenericKlass()) {
             // A<T> isSubclassOf B<S>?
             // types0: T
+            assert _paramTypes != null;
+            assert klass._paramTypes != null;
             assert _paramTypes.size() == klass._paramTypes.size();
             int dist = 0;
             for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {

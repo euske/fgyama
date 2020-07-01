@@ -427,6 +427,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = new DFLambdaKlass(
                 lambda, this, _srcklass, outerScope);
+            lambdaKlass.setBaseFinder(_finder);
             this.addKlass(id, lambdaKlass);
 
         } else if (expr instanceof MethodReference) {
@@ -438,6 +439,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = new DFMethodRefKlass(
                 methodref, this, _srcklass, outerScope);
+            methodRefKlass.setBaseFinder(_finder);
             this.addKlass(id, methodRefKlass);
 
         } else {
@@ -1836,47 +1838,6 @@ public abstract class DFSourceMethod extends DFMethod {
                 _arguments[i] = new InternalRef(argType, name);
                 this.addVar(decl.getName(), argType);
                 i++;
-            }
-        }
-
-        /**
-         * Lists all the variables defined inside a method.
-         */
-        @SuppressWarnings("unchecked")
-        public void buildMethodDecl(
-            DFTypeFinder finder, MethodDeclaration methodDecl)
-            throws InvalidSyntax {
-            //Logger.info("MethodScope.buildMethodDecl:", this);
-            Statement stmt = methodDecl.getBody();
-            if (stmt == null) return;
-            this.buildInternalRefs(methodDecl.parameters());
-            this.buildStmt(finder, stmt);
-        }
-
-        @SuppressWarnings("unchecked")
-        public void buildLambda(
-            DFTypeFinder finder, LambdaExpression lambda)
-            throws InvalidSyntax {
-            //Logger.info("MethodScope.buildLambda:", this);
-            ASTNode body = lambda.getBody();
-            this.buildInternalRefs(lambda.parameters());
-            if (body instanceof Statement) {
-                this.buildStmt(finder, (Statement)body);
-            } else if (body instanceof Expression) {
-                this.buildExpr(finder, (Expression)body);
-            } else {
-                throw new InvalidSyntax(body);
-            }
-        }
-
-        public void buildBodyDecls(
-            DFTypeFinder finder, List<BodyDeclaration> decls)
-            throws InvalidSyntax {
-            for (BodyDeclaration body : decls) {
-                if (body instanceof Initializer) {
-                    Initializer initializer = (Initializer)body;
-                    this.buildStmt(finder, initializer.getBody());
-                }
             }
         }
 

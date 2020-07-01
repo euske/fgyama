@@ -40,6 +40,7 @@ class InitMethod extends DFSourceMethod {
     @SuppressWarnings("unchecked")
     private void build()
         throws InvalidSyntax {
+        DFTypeFinder finder = this.getFinder();
         DFLocalScope scope = this.getScope();
         for (BodyDeclaration body : _decls) {
             if (body instanceof FieldDeclaration) {
@@ -49,6 +50,7 @@ class InitMethod extends DFSourceMethod {
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.buildTypeFromExpr(init, scope);
+                        scope.buildExpr(finder, init);
                     }
                 }
             } else if (body instanceof Initializer) {
@@ -56,6 +58,7 @@ class InitMethod extends DFSourceMethod {
                 Statement stmt = initializer.getBody();
                 if (stmt != null) {
                     this.buildTypeFromStmt(stmt, scope);
+                    scope.buildStmt(finder, stmt);
                 }
             }
         }
@@ -364,7 +367,6 @@ public abstract class DFSourceKlass extends DFKlass {
         throws InvalidSyntax {
         super(name, outerSpace);
 
-        assert outerKlass == null || outerKlass == outerSpace;
         _outerKlass = outerKlass;
         _filePath = filePath;
         _outerScope = outerScope;
@@ -439,7 +441,6 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public DFMethod getInitMethod() {
         assert this.isDefined();
-        assert _initMethod != null;
         return _initMethod;
     }
 
@@ -731,6 +732,7 @@ public abstract class DFSourceKlass extends DFKlass {
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         assert _initMethod != null;
+        _initMethod.loadKlasses(klasses);
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {

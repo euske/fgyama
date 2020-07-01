@@ -42,8 +42,21 @@ class DFLambdaKlass extends DFSourceKlass {
             return null;
         }
 
-        protected void setFuncType(DFFunctionType funcType) {
+        @SuppressWarnings("unchecked")
+        protected void setFuncType(DFFunctionType funcType)
+            throws InvalidSyntax {
             _funcType = funcType;
+            DFTypeFinder finder = this.getFinder();
+            MethodScope methodScope = (MethodScope)this.getScope();
+            methodScope.buildInternalRefs(_lambda.parameters());
+            ASTNode body = _lambda.getBody();
+            if (body instanceof Statement) {
+                methodScope.buildStmt(finder, (Statement)body);
+            } else if (body instanceof Expression) {
+                methodScope.buildExpr(finder, (Expression)body);
+            } else {
+                throw new InvalidSyntax(body);
+            }
         }
 
         public ASTNode getAST() {
@@ -75,12 +88,12 @@ class DFLambdaKlass extends DFSourceKlass {
         @Override
         public void enumRefs(Collection<DFSourceKlass> defined)
             throws InvalidSyntax {
-            DFLocalScope methodScope = this.getScope();
+            DFLocalScope scope = this.getScope();
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
-                this.enumRefsStmt(defined, methodScope, (Statement)body);
+                this.enumRefsStmt(defined, scope, (Statement)body);
             } else if (body instanceof Expression) {
-                this.enumRefsExpr(defined, methodScope, (Expression)body);
+                this.enumRefsExpr(defined, scope, (Expression)body);
             } else {
                 throw new InvalidSyntax(body);
             }
@@ -229,7 +242,10 @@ class DFLambdaKlass extends DFSourceKlass {
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;
-        _funcMethod.setFuncType(funcMethod.getFuncType());
+        try {
+            _funcMethod.setFuncType(funcMethod.getFuncType());
+        } catch (InvalidSyntax e) {
+        }
     }
 
     private void addCapturedRef(CapturedRef ref) {

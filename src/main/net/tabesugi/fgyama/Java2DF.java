@@ -308,7 +308,9 @@ public class Java2DF {
             exporter.startKlass(klass);
             List<DFMethod> methods = new ArrayList<DFMethod>();
             DFMethod init = klass.getInitMethod();
-            methods.add(init);
+            if (init != null) {
+                methods.add(init);
+            }
             for (DFMethod method : klass.getMethods()) {
                 if (method.isGeneric()) {
                     methods.addAll(method.getConcreteMethods());
