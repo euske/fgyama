@@ -177,6 +177,10 @@ class DFMethodRefKlass extends DFSourceKlass {
         return null;
     }
 
+    public ASTNode getAST() {
+        return _methodRef;
+    }
+
     @Override
     public String toString() {
         return ("<DFMethodRefKlass("+this.getTypeName()+")>");

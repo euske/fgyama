@@ -43,6 +43,10 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         }
     }
 
+    public ASTNode getAST() {
+        return _abstTypeDecl;
+    }
+
     @SuppressWarnings("unchecked")
     protected void build() throws InvalidSyntax {
         if (_abstTypeDecl instanceof TypeDeclaration) {

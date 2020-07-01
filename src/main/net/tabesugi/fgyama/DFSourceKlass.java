@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 class InitMethod extends DFSourceMethod {
 
+    private ASTNode _ast;
     private List<BodyDeclaration> _decls;
 
     public InitMethod(
@@ -23,6 +24,7 @@ class InitMethod extends DFSourceMethod {
               false, "<clinit>", "<clinit>",
               klass.getKlassScope(), finder);
 
+        _ast = klass.getAST();
         _decls = decls;
         this.build();
     }
@@ -127,12 +129,7 @@ class InitMethod extends DFSourceMethod {
     }
 
     public ASTNode getAST() {
-        for (BodyDeclaration body : _decls) {
-            if (body instanceof Initializer) {
-                return body;
-            }
-        }
-        return null;
+        return _ast;
     }
 }
 
@@ -454,6 +451,8 @@ public abstract class DFSourceKlass extends DFKlass {
         return _klassScope;
     }
 
+    public abstract ASTNode getAST();
+
     @Override
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
@@ -552,6 +551,7 @@ public abstract class DFSourceKlass extends DFKlass {
         ClassInstanceCreation cstr)
         throws InvalidSyntax {
         // Get superclass.
+        assert _finder != null;
         _baseKlass = DFBuiltinTypes.getObjectKlass();
         Type superClass = cstr.getType();
         if (superClass != null) {

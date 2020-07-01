@@ -33,6 +33,10 @@ class AnonymousKlass extends DFSourceKlass {
         return null;
     }
 
+    public ASTNode getAST() {
+        return _cstr;
+    }
+
     protected void build() throws InvalidSyntax {
         this.buildMembersFromAnonDecl(_cstr);
     }
@@ -411,6 +415,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 DFSourceKlass anonKlass = new AnonymousKlass(
                     cstr,
                     this, _srcklass, _srcklass.getFilePath(), outerScope);
+                anonKlass.setBaseFinder(_finder);
                 this.addKlass(id, anonKlass);
             }
 

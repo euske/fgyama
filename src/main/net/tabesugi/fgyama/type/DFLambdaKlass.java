@@ -198,6 +198,10 @@ class DFLambdaKlass extends DFSourceKlass {
         _lambdaScope = new LambdaScope(outerScope, Utils.encodeASTNode(lambda));
     }
 
+    public ASTNode getAST() {
+        return _lambda;
+    }
+
     @Override
     public String toString() {
         return ("<DFLambdaKlass("+this.getTypeName()+")>");
