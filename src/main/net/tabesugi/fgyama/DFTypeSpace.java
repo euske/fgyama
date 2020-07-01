@@ -99,12 +99,16 @@ public class DFTypeSpace {
         return mapTypes;
     }
 
-    public static String getParamName(DFType[] paramTypes) {
+    public static String getParamName(Map<String, DFKlass> paramTypes) {
+        String[] keys = new String[paramTypes.size()];
+        paramTypes.keySet().toArray(keys);
+        Arrays.sort(keys);
         StringBuilder b = new StringBuilder();
-        for (DFType type : paramTypes) {
+        for (String k : keys) {
             if (0 < b.length()) {
                 b.append(",");
             }
+            DFKlass type = paramTypes.get(k);
             if (type instanceof DFMapType) {
                 type = ((DFMapType)type).getBoundKlass();
             }

@@ -57,7 +57,8 @@ public class DFBuiltinTypes {
             if (this == klass) return 0;
             return -1;
         }
-        protected DFKlass parameterize(DFKlass[] paramTypes) throws InvalidSyntax {
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
+            throws InvalidSyntax {
             assert false;
             return null;
         }

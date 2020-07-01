@@ -41,7 +41,7 @@ public class DFJarFileKlass extends DFKlass {
 
     // Protected constructor for a parameterized klass.
     protected DFJarFileKlass(
-        DFJarFileKlass genericKlass, DFKlass[] paramTypes) {
+        DFJarFileKlass genericKlass, Map<String, DFKlass> paramTypes) {
         super(genericKlass, paramTypes);
 
         _finder = new DFTypeFinder(this, genericKlass._finder);
@@ -105,7 +105,7 @@ public class DFJarFileKlass extends DFKlass {
 
     // Parameterize the klass.
     @Override
-    protected DFKlass parameterize(DFKlass[] paramTypes)
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert paramTypes != null;
         return new DFJarFileKlass(this, paramTypes);

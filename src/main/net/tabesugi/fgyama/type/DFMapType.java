@@ -39,7 +39,7 @@ public class DFMapType extends DFKlass {
         _sig = sig;
     }
 
-    protected DFKlass parameterize(DFKlass[] paramTypes)
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert false;
         return null;

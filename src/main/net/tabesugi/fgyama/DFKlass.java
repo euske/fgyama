@@ -21,7 +21,7 @@ class FallbackMethod extends DFMethod {
         _funcType = new DFFunctionType(argTypes, DFUnknownType.UNKNOWN);
     }
 
-    protected DFMethod parameterize(DFKlass[] paramTypes)
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert false;
         return null;
@@ -76,7 +76,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
-    private ConsistentHashMap<String, DFKlass> _paramTypes = null;
+    private Map<String, DFKlass> _paramTypes = null;
 
     // Normal constructor.
     public DFKlass(
@@ -88,22 +88,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Protected constructor for a parameterized klass.
-    protected DFKlass(DFKlass genericKlass, DFKlass[] paramTypes) {
+    protected DFKlass(DFKlass genericKlass, Map<String, DFKlass> paramTypes) {
         // A parameterized Klass has its own separate typespace
         // that is NOT accessible from the outside.
         this(genericKlass.getName() + DFTypeSpace.getParamName(paramTypes),
              genericKlass.getOuterSpace());
 
         _genericKlass = genericKlass;
-        _paramTypes = new ConsistentHashMap<String, DFKlass>();
-        List<DFMapType> mapTypes = genericKlass.getMapTypes();
-        for (int i = 0; i < paramTypes.length; i++) {
-            DFMapType mapType = mapTypes.get(i);
-            assert mapType != null;
-            DFKlass paramType = paramTypes[i];
-            assert paramType != null;
-            _paramTypes.put(mapType.getName(), paramType);
-        }
+        _paramTypes = paramTypes;
     }
 
     @Override
@@ -176,16 +168,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_genericKlass != null && _genericKlass == klass.getGenericKlass()) {
             // A<T> isSubclassOf B<S>?
             // types0: T
-            List<DFKlass> types0 = _paramTypes.values();
-            assert types0 != null;
-            // types1: S
-            List<DFKlass> types1 = klass._paramTypes.values();
-            assert types1 != null;
-            //assert types0.length == types1.length;
-            // T isSubclassOf S? -> S canConvertFrom T?
+            assert _paramTypes.size() == klass._paramTypes.size();
             int dist = 0;
-            for (int i = 0; i < Math.min(types0.size(), types1.size()); i++) {
-                int d = types1.get(i).canConvertFrom(types0.get(i), typeMap);
+            for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
+                String k = e.getKey();
+                DFKlass type0 = e.getValue();
+                DFKlass type1 = klass._paramTypes.get(k);
+                assert type1 != null;
+                // T isSubclassOf S? -> S canConvertFrom T?
+                int d = type1.canConvertFrom(type0, typeMap);
                 if (d < 0) return -1;
                 dist += d;
             }
@@ -217,24 +208,27 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Creates a parameterized klass.
-    public DFKlass getConcreteKlass(DFKlass[] paramTypes)
+    public DFKlass getConcreteKlass(DFKlass[] argTypes)
         throws InvalidSyntax {
-        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(paramTypes));
-        List<DFMapType> mapTypes = this.getMapTypes();
+        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
         assert _paramTypes == null;
-        assert paramTypes.length <= mapTypes.size();
-        DFKlass[] types = new DFKlass[mapTypes.size()];
+        List<DFMapType> mapTypes = this.getMapTypes();
+        assert argTypes.length <= mapTypes.size();
+        HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
         for (int i = 0; i < mapTypes.size(); i++) {
-            if (paramTypes != null && i < paramTypes.length) {
-                types[i] = paramTypes[i];
+            DFMapType mapType = mapTypes.get(i);
+            DFKlass type;
+            if (argTypes != null && i < argTypes.length) {
+                type = argTypes[i];
             } else {
-                types[i] = mapTypes.get(i).toKlass();
+                type = mapType.toKlass();
             }
+            paramTypes.put(mapType.getName(), type);
         }
-        String name = DFTypeSpace.getParamName(types);
+        String name = DFTypeSpace.getParamName(paramTypes);
         DFKlass klass = _concreteKlasses.get(name);
         if (klass == null) {
-            klass = this.parameterize(types);
+            klass = this.parameterize(paramTypes);
             _concreteKlasses.put(name, klass);
         }
         return klass;
@@ -322,12 +316,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             writer.writeAttribute("generic", _genericKlass.getTypeName());
             if (_paramTypes != null) {
                 List<DFMapType> mapTypes = _genericKlass.getMapTypes();
-                List<DFKlass> paramTypes = _paramTypes.values();
-                for (int i = 0; i < paramTypes.size(); i++) {
-                    DFMapType mapType = mapTypes.get(i);
-                    DFKlass paramType = paramTypes.get(i);
+                for (int i = 0; i < mapTypes.size(); i++) {
+                    String name = mapTypes.get(i).getName();
+                    DFKlass paramType = _paramTypes.get(name);
                     writer.writeStartElement("param");
-                    writer.writeAttribute("name", mapType.getName());
+                    writer.writeAttribute("name", name);
                     writer.writeAttribute("type", paramType.getTypeName());
                     writer.writeEndElement();
                 }
@@ -415,7 +408,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     /// For constructions.
 
-    protected abstract DFKlass parameterize(DFKlass[] paramTypes)
+    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax;
 
     protected abstract void build() throws InvalidSyntax;

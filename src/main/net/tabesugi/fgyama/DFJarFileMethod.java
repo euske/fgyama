@@ -36,7 +36,7 @@ public class DFJarFileMethod extends DFMethod {
 
     // Protected constructor for a parameterized method.
     private DFJarFileMethod(
-        DFJarFileMethod genericMethod, DFKlass[] paramTypes)
+        DFJarFileMethod genericMethod, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         super(genericMethod, paramTypes);
 
@@ -51,7 +51,7 @@ public class DFJarFileMethod extends DFMethod {
 
     // Parameterize the klass.
     @Override
-    protected DFMethod parameterize(DFKlass[] paramTypes)
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert paramTypes != null;
         return new DFJarFileMethod(this, paramTypes);

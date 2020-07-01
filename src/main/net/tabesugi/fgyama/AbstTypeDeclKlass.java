@@ -27,7 +27,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
     @SuppressWarnings("unchecked")
     private AbstTypeDeclKlass(
-        AbstTypeDeclKlass genericKlass, DFKlass[] paramTypes)
+        AbstTypeDeclKlass genericKlass, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         super(genericKlass, paramTypes);
         _abstTypeDecl = genericKlass._abstTypeDecl;
@@ -58,7 +58,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     }
 
     // Constructor for a parameterized klass.
-    protected DFKlass parameterize(DFKlass[] paramTypes)
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert paramTypes != null;
         return new AbstTypeDeclKlass(this, paramTypes);

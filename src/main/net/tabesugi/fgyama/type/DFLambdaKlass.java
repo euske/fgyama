@@ -36,7 +36,7 @@ class DFLambdaKlass extends DFSourceKlass {
             }
         }
 
-        protected DFMethod parameterize(DFKlass[] paramTypes)
+        protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
             throws InvalidSyntax {
             assert false;
             return null;
@@ -207,7 +207,7 @@ class DFLambdaKlass extends DFSourceKlass {
         return _funcMethod;
     }
 
-    protected DFKlass parameterize(DFKlass[] paramTypes)
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert false;
         return null;

@@ -31,7 +31,7 @@ class InitMethod extends DFSourceMethod {
         return new DFFunctionType(new DFType[] {}, DFBasicType.VOID);
     }
 
-    protected DFMethod parameterize(DFKlass[] paramTypes)
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert false;
         return null;
@@ -157,7 +157,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     protected DefinedMethod(
-        DefinedMethod genericMethod, DFKlass[] paramTypes)
+        DefinedMethod genericMethod, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         super(genericMethod, paramTypes);
 
@@ -174,7 +174,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     @Override
-    protected DFMethod parameterize(DFKlass[] paramTypes)
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert paramTypes != null;
         return new DefinedMethod(this, paramTypes);
@@ -315,7 +315,7 @@ class EnumValuesMethod extends DFMethod {
             new DFType[] {}, DFArrayType.getType(klass, 1));
     }
 
-    protected DFMethod parameterize(DFKlass[] paramTypes)
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         assert false;
         return null;
@@ -373,7 +373,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     // Constructor for a parameterized klass.
     protected DFSourceKlass(
-        DFSourceKlass genericKlass, DFKlass[] paramTypes)
+        DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         super(genericKlass, paramTypes);
 
