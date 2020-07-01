@@ -21,6 +21,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         throws InvalidSyntax {
         super(abstTypeDecl.getName().getIdentifier(),
               outerSpace, outerKlass, filePath, outerScope);
+
         _abstTypeDecl = abstTypeDecl;
         this.buildTypeFromDecls(abstTypeDecl.bodyDeclarations());
     }
@@ -30,8 +31,16 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         AbstTypeDeclKlass genericKlass, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax {
         super(genericKlass, paramTypes);
+
         _abstTypeDecl = genericKlass._abstTypeDecl;
         this.buildTypeFromDecls(_abstTypeDecl.bodyDeclarations());
+
+        DFTypeFinder finder = this.getFinder();
+        for (DFKlass klass : this.getInnerKlasses()) {
+            if (klass instanceof DFSourceKlass) {
+                ((DFSourceKlass)klass).setBaseFinder(finder);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
