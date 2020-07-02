@@ -254,7 +254,7 @@ public class Java2DF {
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
-        Queue<DFMethod> queue = new ArrayDeque<DFMethod>();
+        Queue<DFSourceMethod> queue = new ArrayDeque<DFSourceMethod>();
 
         // List method overrides.
         for (DFSourceKlass klass : klasses) {
@@ -267,33 +267,41 @@ public class Java2DF {
         for (DFSourceKlass klass : klasses) {
             klass.enumRefs(defined);
             for (DFMethod method : klass.getMethods()) {
-                queue.add(method);
+                if (method instanceof DFSourceMethod) {
+                    queue.add((DFSourceMethod)method);
+                }
             }
         }
 
+        // Repeat until there is no newly defined klass.
         while (!defined.isEmpty()) {
             klasses.addAll(defined);
-            Collection<DFSourceKlass> defined2 = new ArrayList<DFSourceKlass>();
+            Collection<DFSourceKlass> tmp = new ArrayList<DFSourceKlass>();
             for (DFSourceKlass klass : defined) {
                 klass.overrideMethods();
             }
-            // Build call graphs (lambdas).
+            // Build call graphs (lambda and methodref).
             for (DFSourceKlass klass : defined) {
                 assert klass.isDefined();
-                klass.enumRefs(defined2);
+                klass.enumRefs(tmp);
                 for (DFMethod method : klass.getMethods()) {
-                    queue.add(method);
+                    if (method instanceof DFSourceMethod) {
+                        queue.add((DFSourceMethod)method);
+                    }
                 }
             }
-            defined = defined2;
+            defined = tmp;
         }
 
-        // Expand callee refs recursively.
+        // Expand input/output refs of each method
+        // based on the methods it calls.
         while (!queue.isEmpty()) {
-            DFMethod method = queue.remove();
-            for (DFMethod caller : method.getCallers()) {
-                if (((DFSourceMethod)caller).expandRefs((DFSourceMethod)method)) {
-                    queue.add(caller);
+            DFSourceMethod callee = queue.remove();
+            for (DFMethod caller : callee.getCallers()) {
+                if (caller instanceof DFSourceMethod) {
+                    if (((DFSourceMethod)caller).expandRefs(callee)) {
+                        queue.add((DFSourceMethod)caller);
+                    }
                 }
             }
         }
