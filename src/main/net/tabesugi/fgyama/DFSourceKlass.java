@@ -189,7 +189,9 @@ class DefinedMethod extends DFSourceMethod {
         if (this.getGenericMethod() == null) {
             DFMapType[] mapTypes = this.createMapTypes(
                 finder, _methodDecl.typeParameters());
-            this.setMapTypes(mapTypes);
+            if (mapTypes != null) {
+                this.setMapTypes(mapTypes);
+            }
         }
 
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();

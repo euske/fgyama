@@ -55,7 +55,9 @@ class AbstTypeDeclKlass extends DFSourceKlass {
                 TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
                 DFMapType[] mapTypes = this.createMapTypes(
                     finder, typeDecl.typeParameters());
-                this.setMapTypes(mapTypes);
+                if (mapTypes != null) {
+                    this.setMapTypes(mapTypes);
+                }
             }
             this.buildMembersFromTypeDecl(
                 (TypeDeclaration)_abstTypeDecl);

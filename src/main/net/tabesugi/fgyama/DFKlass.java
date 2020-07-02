@@ -213,12 +213,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFKlass getConcreteKlass(DFKlass[] argTypes)
         throws InvalidSyntax {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
+        assert _mapTypes != null;
         assert _paramTypes == null;
-        List<DFMapType> mapTypes = this.getMapTypes();
-        assert argTypes.length <= mapTypes.size();
+        assert argTypes.length <= _mapTypes.size();
+        List<DFMapType> mapTypes = _mapTypes.values();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
+            assert mapType != null;
             DFKlass type;
             if (argTypes != null && i < argTypes.length) {
                 type = argTypes[i];
@@ -249,7 +251,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isGeneric() {
-        return _mapTypes != null && 0 < _mapTypes.size();
+        return _mapTypes != null;
     }
 
     public String getName() {
@@ -317,7 +319,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_genericKlass != null) {
             writer.writeAttribute("generic", _genericKlass.getTypeName());
             if (_paramTypes != null) {
-                List<DFMapType> mapTypes = _genericKlass.getMapTypes();
+                List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
                 for (int i = 0; i < mapTypes.size(); i++) {
                     String name = mapTypes.get(i).getName();
                     DFKlass paramType = _paramTypes.get(name);
@@ -416,23 +418,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     protected abstract void build() throws InvalidSyntax;
 
     protected void setMapTypes(DFMapType[] mapTypes) {
+        assert mapTypes != null;
         assert _mapTypes == null;
         assert _paramTypes == null;
         assert _concreteKlasses == null;
-        if (mapTypes == null || mapTypes.length == 0) {
-            _mapTypes = null;
-        } else {
-            _mapTypes = new ConsistentHashMap<String, DFMapType>();
-            for (DFMapType mapType : mapTypes) {
-                _mapTypes.put(mapType.getName(), mapType);
-            }
-            _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+        _mapTypes = new ConsistentHashMap<String, DFMapType>();
+        for (DFMapType mapType : mapTypes) {
+            _mapTypes.put(mapType.getName(), mapType);
         }
-    }
-
-    protected List<DFMapType> getMapTypes() {
-        assert _mapTypes != null;
-        return _mapTypes.values();
+        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
     }
 
     protected DFRef addField(

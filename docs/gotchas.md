@@ -20,6 +20,10 @@ Nuff' said.
           // Visible: A, B, C, P, X, Y.
         }
       }
+      void method() {
+        // Visible: A, B, C, E, P.
+        class E { };
+      }
     }
 
     class B extends A {

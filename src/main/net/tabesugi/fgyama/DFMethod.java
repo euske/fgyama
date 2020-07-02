@@ -169,7 +169,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     public boolean isGeneric() {
-        return _mapTypes != null && 0 < _mapTypes.size();
+        return _mapTypes != null;
     }
 
     public String getMethodId() {
@@ -267,8 +267,10 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     protected void setMapTypes(DFMapType[] mapTypes)
         throws InvalidSyntax {
-        if (mapTypes == null) return;
+        assert mapTypes != null;
         assert _mapTypes == null;
+        assert _paramTypes == null;
+        assert _concreteMethods == null;
         _mapTypes = new ConsistentHashMap<String, DFMapType>();
         for (DFMapType mapType : mapTypes) {
             _mapTypes.put(mapType.getName(), mapType);

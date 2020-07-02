@@ -85,6 +85,7 @@ public class DFTypeSpace {
     @SuppressWarnings("unchecked")
     public DFMapType[] createMapTypes(
         DFTypeFinder finder, List<TypeParameter> tps) {
+        if (tps.isEmpty()) return null;
         DFMapType[] mapTypes = new DFMapType[tps.size()];
         for (int i = 0; i < tps.size(); i++) {
             TypeParameter tp = tps.get(i);

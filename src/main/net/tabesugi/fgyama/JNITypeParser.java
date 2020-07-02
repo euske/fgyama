@@ -180,8 +180,8 @@ public class JNITypeParser {
             DFMapType pt = new DFMapType(id, outerSpace, finder, sig);
             params.add(pt);
         }
+        if (params.isEmpty()) return null;
         pos++;
-        if (params.size() == 0) return null;
         DFMapType[] mapTypes = new DFMapType[params.size()];
         params.toArray(mapTypes);
         return mapTypes;
