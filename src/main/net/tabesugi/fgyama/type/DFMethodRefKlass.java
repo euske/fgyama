@@ -29,7 +29,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         protected boolean isDefined() {
-            return _funcType != null && _refMethod != null;
+            return _funcType != null;
         }
 
         protected void setFuncType(DFFunctionType funcType) {

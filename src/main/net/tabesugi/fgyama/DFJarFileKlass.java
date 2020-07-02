@@ -140,12 +140,14 @@ public class DFJarFileKlass extends DFKlass {
         throws InvalidSyntax {
         //Logger.info("DFJarFileKlass.build:", this);
         _interface = jklass.isInterface();
-        if (this == DFBuiltinTypes.getObjectKlass()) return;
 
-        _baseKlass = DFBuiltinTypes.getObjectKlass();
         // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(jklass.getAttributes());
-        if (sig != null) {
+        if (this == DFBuiltinTypes.getObjectKlass()) {
+            _baseKlass = null;
+
+        } else if (sig != null) {
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
             //Logger.info("jklass:", this, sig);
             if (this.getGenericKlass() == null) {
                 DFMapType[] mapTypes = JNITypeParser.createMapTypes(
@@ -181,7 +183,9 @@ public class DFJarFileKlass extends DFKlass {
             for (DFKlass iface : _baseIfaces) {
                 iface.load();
             }
+
         } else {
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
             String superClass = jklass.getSuperclassName();
             if (superClass != null && !superClass.equals(jklass.getClassName())) {
                 try {

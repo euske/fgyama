@@ -722,8 +722,9 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
-        assert _initMethod != null;
-        _initMethod.enumRefs(defined);
+        if (_initMethod != null) {
+            _initMethod.enumRefs(defined);
+        }
         for (DFMethod method : this.getMethods()) {
             if (method instanceof DFSourceMethod) {
                 ((DFSourceMethod)method).enumRefs(defined);
@@ -735,9 +736,9 @@ public abstract class DFSourceKlass extends DFKlass {
     protected void loadKlassesDecls(
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
-        assert _initMethod != null;
-        _initMethod.loadKlasses(klasses);
-
+        if (_initMethod != null) {
+            _initMethod.loadKlasses(klasses);
+        }
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;

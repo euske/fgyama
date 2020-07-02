@@ -258,7 +258,6 @@ public class Java2DF {
 
         // List method overrides.
         for (DFSourceKlass klass : klasses) {
-            assert !(klass.isGeneric());
             assert !(klass instanceof DFLambdaKlass);
             klass.overrideMethods();
         }
@@ -281,8 +280,8 @@ public class Java2DF {
             // Build call graphs (lambdas).
             for (DFSourceKlass klass : defined) {
                 assert klass.isDefined();
+                klass.enumRefs(defined2);
                 for (DFMethod method : klass.getMethods()) {
-                    ((DFSourceMethod)method).enumRefs(defined2);
                     queue.add(method);
                 }
             }

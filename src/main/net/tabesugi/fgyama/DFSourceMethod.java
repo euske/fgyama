@@ -1609,7 +1609,7 @@ public abstract class DFSourceMethod extends DFMethod {
         throws InvalidSyntax {
         if (expr instanceof ParenthesizedExpression) {
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            setLambdaType(defined, type, paren.getExpression());
+            this.setLambdaType(defined, type, paren.getExpression());
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
