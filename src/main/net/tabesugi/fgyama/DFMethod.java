@@ -90,10 +90,10 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         throws InvalidSyntax {
         // A parameterized method has its own separate typespace
         // that is NOT accessible from the outside.
-        super(genericMethod._methodId + DFTypeSpace.getParamName(paramTypes),
+        super(genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes),
               genericMethod._klass);
 
-        _methodId = genericMethod._methodId + DFTypeSpace.getParamName(paramTypes);
+        _methodId = genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes);
         _klass = genericMethod._klass;
         _callStyle = genericMethod._callStyle;
         _abstract = genericMethod._abstract;
@@ -106,7 +106,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     @Override
     public String toString() {
         if (_mapTypes != null) {
-            return ("<DFMethod("+this.getSignature()+":"+Utils.join(_mapTypes.keys())+")>");
+            return ("<DFMethod("+this.getSignature()+" "+Utils.join(_mapTypes.keys())+")>");
         }
         return ("<DFMethod("+this.getSignature()+")>");
     }
@@ -137,8 +137,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     // Creates a parameterized method.
     public DFMethod getConcreteMethod(Map<DFMapType, DFKlass> typeMap) {
-        assert _paramTypes == null;
-        if (_mapTypes == null) return this;
+        if (!this.isGeneric()) return this;
         //Logger.info("DFMethod.getConcreteMethod:", this, typeMap);
         List<DFMapType> mapTypes = _mapTypes.values();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
@@ -152,7 +151,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             }
             paramTypes.put(mapType.getName(), type);
         }
-        String name = DFTypeSpace.getParamName(paramTypes);
+        String name = DFTypeSpace.getConcreteName(paramTypes);
         DFMethod method = _concreteMethods.get(name);
         if (method == null) {
             try {

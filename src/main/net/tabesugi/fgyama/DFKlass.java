@@ -91,7 +91,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     protected DFKlass(DFKlass genericKlass, Map<String, DFKlass> paramTypes) {
         // A parameterized Klass has its own separate typespace
         // that is NOT accessible from the outside.
-        this(genericKlass.getName() + DFTypeSpace.getParamName(paramTypes),
+        this(genericKlass.getName() + DFTypeSpace.getConcreteName(paramTypes),
              genericKlass.getOuterSpace());
 
         _genericKlass = genericKlass;
@@ -101,8 +101,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     @Override
     public String toString() {
         if (_mapTypes != null) {
-            return ("<DFKlass("+this.getTypeName()+
-                    ":"+Utils.join(_mapTypes.keys())+")>");
+            return ("<DFKlass("+this.getTypeName()+" "+
+                    Utils.join(_mapTypes.keys())+")>");
         } else {
             return ("<DFKlass("+this.getTypeName()+")>");
         }
@@ -229,7 +229,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
             paramTypes.put(mapType.getName(), type);
         }
-        String name = DFTypeSpace.getParamName(paramTypes);
+        String name = DFTypeSpace.getConcreteName(paramTypes);
         DFKlass klass = _concreteKlasses.get(name);
         if (klass == null) {
             klass = this.parameterize(paramTypes);
