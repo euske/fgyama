@@ -416,32 +416,32 @@ public abstract class DFSourceKlass extends DFKlass {
 
     @Override
     public boolean isInterface() {
-        assert this.isDefined();
+        assert this.isLoaded();
         return _interface;
     }
 
     @Override
     public boolean isEnum() {
-        assert this.isDefined();
+        assert this.isLoaded();
         return (_baseKlass != null &&
                 _baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
     }
 
     @Override
     public DFKlass getBaseKlass() {
-        assert this.isDefined();
+        assert this.isLoaded();
         if (_baseKlass != null) return _baseKlass;
         return super.getBaseKlass();
     }
 
     @Override
     public DFKlass[] getBaseIfaces() {
-        assert this.isDefined();
+        assert this.isLoaded();
         return _baseIfaces;
     }
 
     public DFMethod getInitMethod() {
-        assert this.isDefined();
+        assert this.isLoaded();
         return _initMethod;
     }
 
@@ -458,7 +458,7 @@ public abstract class DFSourceKlass extends DFKlass {
     @Override
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        assert this.isDefined();
+        assert this.isLoaded();
         DFMethod method = super.findMethod(callStyle, id, argTypes);
         if (method != null) return method;
         if (_outerKlass != null) {

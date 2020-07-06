@@ -1617,7 +1617,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getKlass(id);
             lambdaKlass.load();
             lambdaKlass.setBaseKlass(type.toKlass());
-            if (lambdaKlass.isDefined()) {
+            if (lambdaKlass.isLoaded()) {
                 defined.add(lambdaKlass);
             }
 
@@ -1627,7 +1627,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
             methodRefKlass.load();
             methodRefKlass.setBaseKlass(type.toKlass());
-            if (methodRefKlass.isDefined()) {
+            if (methodRefKlass.isLoaded()) {
                 defined.add(methodRefKlass);
             }
 
@@ -1791,10 +1791,6 @@ public abstract class DFSourceMethod extends DFMethod {
 
         protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
-        }
-
-        public boolean isDefined() {
-            return _return != null && _arguments != null;
         }
 
         public DFRef lookupArgument(int index) {

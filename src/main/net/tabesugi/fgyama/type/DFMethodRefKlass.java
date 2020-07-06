@@ -194,7 +194,7 @@ class DFMethodRefKlass extends DFSourceKlass {
     }
 
     @Override
-    public boolean isDefined() {
+    public boolean isLoaded() {
         return _funcMethod.isDefined();
     }
 

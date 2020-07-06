@@ -135,7 +135,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
         DFKlass klass = super.getKlass(id);
         if (klass != null) return klass;
-        if (this.isDefined()) {
+        if (this.isLoaded()) {
             DFKlass baseKlass = this.getBaseKlass();
             if (baseKlass != null) {
                 klass = baseKlass.getKlass(id);
@@ -238,7 +238,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return klass;
     }
 
-    public boolean isDefined() {
+    public boolean isLoaded() {
         return (_state == LoadState.Loaded);
     }
 
@@ -275,7 +275,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isFuncInterface() {
-        assert this.isDefined();
+        assert this.isLoaded();
         if (!this.isInterface()) return false;
         // Count the number of abstract methods.
         int n = 0;
@@ -298,7 +298,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
-        assert this.isDefined();
+        assert this.isLoaded();
         writer.writeAttribute("name", this.getTypeName());
         writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
         DFKlass baseKlass = this.getBaseKlass();

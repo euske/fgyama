@@ -215,7 +215,7 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
-    public boolean isDefined() {
+    public boolean isLoaded() {
         return (_funcMethod != null && _funcMethod.getFuncType() != null);
     }
 
