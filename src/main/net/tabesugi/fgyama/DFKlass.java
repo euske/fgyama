@@ -13,12 +13,12 @@ import org.eclipse.jdt.core.dom.*;
 //
 class FallbackMethod extends DFMethod {
 
-    DFFunctionType _funcType;
+    DFFuncType _funcType;
 
     public FallbackMethod(
         DFKlass klass, String methodName, DFType[] argTypes) {
         super(klass, CallStyle.InstanceMethod, false, methodName, methodName);
-        _funcType = new DFFunctionType(argTypes, DFUnknownType.UNKNOWN);
+        _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
     }
 
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
@@ -27,7 +27,7 @@ class FallbackMethod extends DFMethod {
         return null;
     }
 
-    public DFFunctionType getFuncType() {
+    public DFFuncType getFuncType() {
         return _funcType;
     }
 }

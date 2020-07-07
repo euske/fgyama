@@ -258,7 +258,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     // Get the method signature.
-    public abstract DFFunctionType getFuncType();
+    public abstract DFFuncType getFuncType();
 
     // Parameterize the klass.
     protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes)

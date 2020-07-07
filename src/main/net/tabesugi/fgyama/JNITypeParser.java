@@ -124,7 +124,7 @@ public class JNITypeParser {
         case '(':
             DFType[] argTypes = this.resolveTypes(finder, '(', ')');
             DFType returnType = this.resolveType(finder);
-            return new DFFunctionType(argTypes, returnType);
+            return new DFFuncType(argTypes, returnType);
         default:
             break;
         }

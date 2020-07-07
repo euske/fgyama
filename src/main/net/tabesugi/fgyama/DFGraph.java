@@ -591,12 +591,12 @@ class IterNode extends DFNode {
 // CallNode
 abstract class CallNode extends DFNode {
 
-    public DFFunctionType funcType;
+    public DFFuncType funcType;
     public DFNode[] args;
 
     public CallNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast, DFFunctionType funcType) {
+        ASTNode ast, DFFuncType funcType) {
         super(graph, scope, type, ref, ast);
         this.funcType = funcType;
         this.args = null;
@@ -624,7 +624,7 @@ class MethodCallNode extends CallNode {
 
     public MethodCallNode(
         DFGraph graph, DFVarScope scope,
-        ASTNode ast, DFFunctionType funcType,
+        ASTNode ast, DFFuncType funcType,
         DFNode obj, DFMethod[] methods) {
         super(graph, scope, funcType.getReturnType(), null,
               ast, funcType);
@@ -1013,7 +1013,7 @@ public abstract class DFGraph {
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
-            DFFunctionType funcType = constructor.getFuncType();
+            DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
                 this, scope, ci, funcType, obj, methods);
             call.setArgs(args);
@@ -1040,7 +1040,7 @@ public abstract class DFGraph {
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (constructor == null) throw new MethodNotFound(baseKlass+"<init>", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
-            DFFunctionType funcType = constructor.getFuncType();
+            DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
                 this, scope, sci, funcType, obj, methods);
             call.setArgs(args);
@@ -1313,7 +1313,7 @@ public abstract class DFGraph {
                 List<DFMethod> overriders = method.getOverriders();
                 DFMethod[] methods = new DFMethod[overriders.size()];
                 overriders.toArray(methods);
-                DFFunctionType funcType = method.getFuncType();
+                DFFuncType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
                     this, scope, invoke, funcType, obj, methods);
                 call.setArgs(args);
@@ -1350,7 +1350,7 @@ public abstract class DFGraph {
                     Logger.info("Fallback method:", method);
                 }
                 DFMethod[] methods = new DFMethod[] { method };
-                DFFunctionType funcType = method.getFuncType();
+                DFFuncType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
                     this, scope, sinvoke, funcType, obj, methods);
                 call.setArgs(args);
@@ -1483,7 +1483,7 @@ public abstract class DFGraph {
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 if (constructor == null) throw new MethodNotFound(instKlass+"<init>", argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
-                DFFunctionType funcType = constructor.getFuncType();
+                DFFuncType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
                     this, scope, instKlass, constructor, cstr, obj);
                 call.setArgs(args);

@@ -14,7 +14,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
     private class FunctionalMethod extends DFSourceMethod {
 
-        private DFFunctionType _funcType = null;
+        private DFFuncType _funcType = null;
 
         public FunctionalMethod(String id, DFTypeFinder finder)
             throws InvalidSyntax {
@@ -43,7 +43,7 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @SuppressWarnings("unchecked")
-        protected void setFuncType(DFFunctionType funcType)
+        protected void setFuncType(DFFuncType funcType)
             throws InvalidSyntax {
             _funcType = funcType;
             DFTypeFinder finder = this.getFinder();
@@ -69,7 +69,7 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
-        public DFFunctionType getFuncType() {
+        public DFFuncType getFuncType() {
             return _funcType;
         }
 

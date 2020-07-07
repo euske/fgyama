@@ -7,16 +7,16 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFFunctionType
+//  DFFuncType
 //
-public class DFFunctionType implements DFType {
+public class DFFuncType implements DFType {
 
     private DFType[] _argTypes;
     private DFType _returnType;
     private boolean _varargs;
     private DFKlass[] _exceptions = new DFKlass[] {};
 
-    public DFFunctionType(DFType[] argTypes, DFType returnType) {
+    public DFFuncType(DFType[] argTypes, DFType returnType) {
         assert returnType != null;
         _argTypes = argTypes;
         _returnType = returnType;
@@ -24,7 +24,7 @@ public class DFFunctionType implements DFType {
 
     @Override
     public String toString() {
-        return ("<DFFunctionType("+this.getTypeName()+")>");
+        return ("<DFFuncType("+this.getTypeName()+")>");
     }
 
     @Override
@@ -49,8 +49,8 @@ public class DFFunctionType implements DFType {
 
     @Override
     public boolean equals(DFType type) {
-        if (!(type instanceof DFFunctionType)) return false;
-        DFFunctionType mtype = (DFFunctionType)type;
+        if (!(type instanceof DFFuncType)) return false;
+        DFFuncType mtype = (DFFuncType)type;
         if (_returnType != null && !_returnType.equals(mtype._returnType)) return false;
         // Should we check if it's varargs??
         if (_argTypes.length != mtype._argTypes.length) return false;
@@ -71,8 +71,8 @@ public class DFFunctionType implements DFType {
 
     @Override
     public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
-        if (!(type instanceof DFFunctionType)) return -1;
-        DFFunctionType mtype = (DFFunctionType)type;
+        if (!(type instanceof DFFuncType)) return -1;
+        DFFuncType mtype = (DFFuncType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
         if (dist < 0) return -1;
         if (_returnType != null && mtype._returnType != null) {

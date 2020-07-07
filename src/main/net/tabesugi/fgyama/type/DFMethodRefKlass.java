@@ -14,7 +14,7 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     private class FunctionalMethod extends DFSourceMethod {
 
-        private DFFunctionType _funcType = null;
+        private DFFuncType _funcType = null;
         private DFMethod _refMethod = null;
 
         public FunctionalMethod(String id, DFVarScope scope, DFTypeFinder finder) {
@@ -32,7 +32,7 @@ class DFMethodRefKlass extends DFSourceKlass {
             return _funcType != null;
         }
 
-        protected void setFuncType(DFFunctionType funcType) {
+        protected void setFuncType(DFFuncType funcType) {
             assert _funcType == null;
             _funcType = funcType;
         }
@@ -42,7 +42,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
-        public DFFunctionType getFuncType() {
+        public DFFuncType getFuncType() {
             return _funcType;
         }
 

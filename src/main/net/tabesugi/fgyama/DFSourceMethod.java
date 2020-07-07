@@ -1594,7 +1594,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     protected void setLambdaType(
         Collection<DFSourceKlass> defined,
-        DFFunctionType funcType, List<Expression> exprs)
+        DFFuncType funcType, List<Expression> exprs)
         throws InvalidSyntax {
         // types or exprs might be shorter than the other. (due to varargs calls)
         for (int i = 0; i < exprs.size(); i++) {
@@ -1819,7 +1819,7 @@ public abstract class DFSourceMethod extends DFMethod {
         }
 
         protected void buildInternalRefs(List<VariableDeclaration> parameters) {
-            DFFunctionType funcType = DFSourceMethod.this.getFuncType();
+            DFFuncType funcType = DFSourceMethod.this.getFuncType();
             _return = new InternalRef(funcType.getReturnType(), "return");
             _arguments = new InternalRef[parameters.size()];
             DFType[] argTypes = funcType.getRealArgTypes();

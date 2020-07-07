@@ -29,8 +29,8 @@ class InitMethod extends DFSourceMethod {
         this.build();
     }
 
-    public DFFunctionType getFuncType() {
-        return new DFFunctionType(new DFType[] {}, DFBasicType.VOID);
+    public DFFuncType getFuncType() {
+        return new DFFuncType(new DFType[] {}, DFBasicType.VOID);
     }
 
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
@@ -140,7 +140,7 @@ class DefinedMethod extends DFSourceMethod {
 
     private MethodDeclaration _methodDecl;
 
-    private DFFunctionType _funcType;
+    private DFFuncType _funcType;
 
     @SuppressWarnings("unchecked")
     public DefinedMethod(
@@ -169,7 +169,7 @@ class DefinedMethod extends DFSourceMethod {
         return _methodDecl;
     }
 
-    public DFFunctionType getFuncType() {
+    public DFFuncType getFuncType() {
         return _funcType;
     }
 
@@ -211,7 +211,7 @@ class DefinedMethod extends DFSourceMethod {
             returnType = finder.resolveSafe(_methodDecl.getReturnType2());
         }
 
-        _funcType = new DFFunctionType(argTypes, returnType);
+        _funcType = new DFFuncType(argTypes, returnType);
         List<Type> excs = _methodDecl.thrownExceptionTypes();
         if (0 < excs.size()) {
             DFKlass[] exceptions = new DFKlass[excs.size()];
@@ -310,12 +310,12 @@ class DefinedMethod extends DFSourceMethod {
 //
 class EnumValuesMethod extends DFMethod {
 
-    private DFFunctionType _funcType;
+    private DFFuncType _funcType;
 
     public EnumValuesMethod(DFSourceKlass klass) {
         super(klass, CallStyle.InstanceMethod,
               false, "values", "values");
-        _funcType = new DFFunctionType(
+        _funcType = new DFFuncType(
             new DFType[] {}, DFArrayType.getType(klass, 1));
     }
 
@@ -325,7 +325,7 @@ class EnumValuesMethod extends DFMethod {
         return null;
     }
 
-    public DFFunctionType getFuncType() {
+    public DFFuncType getFuncType() {
         return _funcType;
     }
 }

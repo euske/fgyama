@@ -19,7 +19,7 @@ public class DFJarFileMethod extends DFMethod {
 
     DFTypeFinder _finder;
     Method _meth;
-    DFFunctionType _funcType;
+    DFFuncType _funcType;
 
     // Normal constructor.
     public DFJarFileMethod(
@@ -45,7 +45,7 @@ public class DFJarFileMethod extends DFMethod {
         this.build();
     }
 
-    public DFFunctionType getFuncType() {
+    public DFFuncType getFuncType() {
         return _funcType;
     }
 
@@ -76,7 +76,7 @@ public class DFJarFileMethod extends DFMethod {
             }
             JNITypeParser parser = new JNITypeParser(sig);
             try {
-                _funcType = (DFFunctionType)parser.resolveType(_finder);
+                _funcType = (DFFuncType)parser.resolveType(_finder);
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFJarFileMethod.build: TypeNotFound (method)",
@@ -90,7 +90,7 @@ public class DFJarFileMethod extends DFMethod {
                 argTypes[i] = _finder.resolveSafe(args[i]);
             }
             DFType returnType = _finder.resolveSafe(_meth.getReturnType());
-            _funcType = new DFFunctionType(argTypes, returnType);
+            _funcType = new DFFuncType(argTypes, returnType);
         }
         // For varargs methods, the last argument is declared as an array
         // so no special treatment is required here.
