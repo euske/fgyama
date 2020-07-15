@@ -48,8 +48,7 @@ public class DFTypeFinder {
         while (finder != null) {
             DFKlass klass = finder._space.getKlass(name);
             if (klass != null) {
-                klass.load();
-                return klass;
+                return klass.load();
             }
             finder = finder._next;
         }

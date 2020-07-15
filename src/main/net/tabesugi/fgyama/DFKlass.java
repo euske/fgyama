@@ -210,6 +210,12 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Creates a parameterized klass.
+    public DFKlass getConcreteKlass()
+        throws InvalidSyntax {
+        if (_mapTypes == null) return this;
+        return this.getConcreteKlass(new DFKlass[] {});
+    }
+
     public DFKlass getConcreteKlass(DFKlass[] argTypes)
         throws InvalidSyntax {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
@@ -287,13 +293,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
-    public void load()
+    public DFKlass load()
         throws InvalidSyntax {
         // an unspecified parameterized klass cannot be loaded.
-        if (_state != LoadState.Unloaded) return;
-        _state = LoadState.Loading;
-        this.build();
-        _state = LoadState.Loaded;
+        if (_state == LoadState.Unloaded) {
+            _state = LoadState.Loading;
+            this.build();
+            _state = LoadState.Loaded;
+        }
+        return this;
     }
 
     public void writeXML(XMLStreamWriter writer)
