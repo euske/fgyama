@@ -1284,7 +1284,9 @@ public abstract class DFGraph {
                         instType = obj.getNodeType();
                     }
                 }
+                assert instType != null;
                 DFKlass klass = instType.toKlass();
+                klass = _finder.getParameterized(klass, invoke.typeArguments());
                 int nargs = invoke.arguments().size();
                 DFNode[] args = new DFNode[nargs];
                 DFType[] argTypes = new DFType[nargs];

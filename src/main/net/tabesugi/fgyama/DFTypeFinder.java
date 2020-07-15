@@ -28,28 +28,31 @@ public class DFTypeFinder {
     @Override
     public String toString() {
         List<DFTypeSpace> path = new ArrayList<DFTypeSpace>();
-        this.toString(path);
-        return ("<DFTypeFinder: "+Utils.join(path)+">");
-    }
-    private void toString(List<DFTypeSpace> path) {
-        path.add(_space);
-        if (_next != null) {
-            _next.toString(path);
+        DFTypeFinder finder = this;
+        while (finder != null) {
+            path.add(finder._space);
+            finder = finder._next;
         }
+        return ("<DFTypeFinder: "+Utils.join(path)+">");
     }
 
     public DFType lookupType(Name name)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         return this.lookupType(name.getFullyQualifiedName());
     }
 
     public DFType lookupType(String name)
-        throws TypeNotFound {
+        throws InvalidSyntax, TypeNotFound {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
         while (finder != null) {
             DFType type = finder._space.getKlass(name);
-            if (type != null) return type;
+            if (type != null) {
+                if (type instanceof DFKlass) {
+                    ((DFKlass)type).load();
+                }
+                return type;
+            }
             finder = finder._next;
         }
         throw new TypeNotFound(name, this);
@@ -73,17 +76,9 @@ public class DFTypeFinder {
             return klassType;
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
-            List<Type> args = (List<Type>) ptype.typeArguments();
             DFType genericType = this.resolve(ptype.getType());
             assert genericType instanceof DFKlass;
-            DFKlass genericKlass = (DFKlass)genericType;
-            DFKlass[] paramTypes = new DFKlass[args.size()];
-            for (int i = 0; i < args.size(); i++) {
-                paramTypes[i] = this.resolve(args.get(i)).toKlass();
-            }
-            DFKlass paramKlass = genericKlass.getConcreteKlass(paramTypes);
-            paramKlass.load();
-            return paramKlass;
+            return this.getParameterized((DFKlass)genericType, ptype.typeArguments());
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
@@ -181,6 +176,18 @@ public class DFTypeFinder {
             Logger.error("DFTypeFinder.resolveSafe: TypeNotFound", e.name);
             return DFUnknownType.UNKNOWN;
         }
+    }
+
+    public DFKlass getParameterized(DFKlass klass, List<Type> typeArgs)
+        throws InvalidSyntax, TypeNotFound {
+        if (typeArgs == null || typeArgs.isEmpty()) return klass;
+        DFKlass[] paramTypes = new DFKlass[typeArgs.size()];
+        for (int i = 0; i < typeArgs.size(); i++) {
+            paramTypes[i] = this.resolve(typeArgs.get(i)).toKlass();
+        }
+        DFKlass paramKlass = klass.getConcreteKlass(paramTypes);
+        paramKlass.load();
+        return paramKlass;
     }
 
     // dump: for debugging.
