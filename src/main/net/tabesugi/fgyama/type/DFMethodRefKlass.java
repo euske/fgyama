@@ -46,6 +46,7 @@ class DFMethodRefKlass extends DFSourceKlass {
             return _funcType;
         }
 
+        @SuppressWarnings("unchecked")
         public void loadKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             DFTypeFinder finder = this.getFinder();
@@ -63,10 +64,10 @@ class DFMethodRefKlass extends DFSourceKlass {
                 ((DFSourceKlass)type).loadKlasses(klasses);
 
             } else if (_methodRef instanceof SuperMethodReference) {
-                // XXX ignored supermref.typeArguments().
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
                     DFKlass klass = finder.lookupKlass(supermref.getQualifier());
+                    klass = finder.getParameterized(klass, supermref.typeArguments());
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).loadKlasses(klasses);
                     }
@@ -85,6 +86,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void enumRefs(Collection<DFSourceKlass> defined)
             throws InvalidSyntax {
             DFTypeFinder finder = this.getFinder();
@@ -109,18 +111,17 @@ class DFMethodRefKlass extends DFSourceKlass {
                 }
 
             } else if (_methodRef instanceof SuperMethodReference) {
-                // XXX ignored supermref.typeArguments().
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
                     DFKlass klass = finder.lookupKlass(supermref.getQualifier());
                     klass = klass.getBaseKlass();
+                    klass = finder.getParameterized(klass, supermref.typeArguments());
                     _refMethod = klass.findMethod(
                         CallStyle.StaticMethod, supermref.getName(), argTypes);
                 } catch (TypeNotFound e) {
                 }
 
             } else if (_methodRef instanceof ExpressionMethodReference) {
-                // XXX ignored exprmref.typeArguments().
                 ExpressionMethodReference exprmref = (ExpressionMethodReference)_methodRef;
                 Expression expr1 = exprmref.getExpression();
                 DFKlass klass = null;
@@ -134,8 +135,12 @@ class DFMethodRefKlass extends DFSourceKlass {
                     klass = (DFKlass)this.enumRefsExpr(defined, this.getScope(), expr1);
                 }
                 if (klass != null) {
-                    _refMethod = klass.findMethod(
-                        CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                    try {
+                        klass = finder.getParameterized(klass, exprmref.typeArguments());
+                        _refMethod = klass.findMethod(
+                            CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                    } catch (TypeNotFound e) {
+                    }
                 }
 
             } else {
