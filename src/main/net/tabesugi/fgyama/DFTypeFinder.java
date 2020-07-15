@@ -36,22 +36,20 @@ public class DFTypeFinder {
         return ("<DFTypeFinder: "+Utils.join(path)+">");
     }
 
-    public DFType lookupType(Name name)
+    public DFKlass lookupKlass(Name name)
         throws InvalidSyntax, TypeNotFound {
-        return this.lookupType(name.getFullyQualifiedName());
+        return this.lookupKlass(name.getFullyQualifiedName());
     }
 
-    public DFType lookupType(String name)
+    public DFKlass lookupKlass(String name)
         throws InvalidSyntax, TypeNotFound {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
         while (finder != null) {
-            DFType type = finder._space.getKlass(name);
-            if (type != null) {
-                if (type instanceof DFKlass) {
-                    ((DFKlass)type).load();
-                }
-                return type;
+            DFKlass klass = finder._space.getKlass(name);
+            if (klass != null) {
+                klass.load();
+                return klass;
             }
             finder = finder._next;
         }
@@ -71,9 +69,7 @@ public class DFTypeFinder {
             return DFArrayType.getType(elemType, ndims);
         } else if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            DFType klassType = this.lookupType(stype.getName());
-            klassType.toKlass().load();
-            return klassType;
+            return this.lookupKlass(stype.getName());
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
             DFType genericType = this.resolve(ptype.getType());
@@ -148,9 +144,7 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            DFType klassType = this.lookupType(className);
-            klassType.toKlass().load();
-            return klassType;
+            return this.lookupKlass(className);
         } else {
             // ???
             throw new TypeNotFound(type.toString());

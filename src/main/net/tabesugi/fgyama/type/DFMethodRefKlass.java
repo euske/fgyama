@@ -66,9 +66,9 @@ class DFMethodRefKlass extends DFSourceKlass {
                 // XXX ignored supermref.typeArguments().
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
-                    DFType type = finder.lookupType(supermref.getQualifier());
-                    if (type instanceof DFSourceKlass) {
-                        ((DFSourceKlass)type).loadKlasses(klasses);
+                    DFKlass klass = finder.lookupKlass(supermref.getQualifier());
+                    if (klass instanceof DFSourceKlass) {
+                        ((DFSourceKlass)klass).loadKlasses(klasses);
                     }
                 } catch (TypeNotFound e) {
                 }
@@ -112,7 +112,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                 // XXX ignored supermref.typeArguments().
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
-                    DFKlass klass = finder.lookupType(supermref.getQualifier()).toKlass();
+                    DFKlass klass = finder.lookupKlass(supermref.getQualifier());
                     klass = klass.getBaseKlass();
                     _refMethod = klass.findMethod(
                         CallStyle.StaticMethod, supermref.getName(), argTypes);
@@ -123,18 +123,17 @@ class DFMethodRefKlass extends DFSourceKlass {
                 // XXX ignored exprmref.typeArguments().
                 ExpressionMethodReference exprmref = (ExpressionMethodReference)_methodRef;
                 Expression expr1 = exprmref.getExpression();
-                DFType type = null;
+                DFKlass klass = null;
                 if (expr1 instanceof Name) {
                     try {
-                        type = finder.lookupType((Name)expr1);
+                        klass = finder.lookupKlass((Name)expr1);
                     } catch (TypeNotFound e) {
                     }
                 }
-                if (type == null) {
-                    type = this.enumRefsExpr(defined, this.getScope(), expr1);
+                if (klass == null) {
+                    klass = (DFKlass)this.enumRefsExpr(defined, this.getScope(), expr1);
                 }
-                if (type != null) {
-                    DFKlass klass = type.toKlass();
+                if (klass != null) {
                     _refMethod = klass.findMethod(
                         CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
                 }

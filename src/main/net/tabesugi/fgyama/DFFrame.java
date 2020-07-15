@@ -478,7 +478,7 @@ public class DFFrame {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupType(qname.getQualifier());
+                        type = _finder.lookupKlass(qname.getQualifier());
                     } catch (TypeNotFound e) {
                         // Do not display an error message as this could be
                         // recursively called from another buildExpr()
@@ -504,7 +504,7 @@ public class DFFrame {
             DFRef ref;
             if (name != null) {
                 try {
-                    DFKlass klass = _finder.lookupType(name).toKlass();
+                    DFKlass klass = _finder.lookupKlass(name);
                     assert klass instanceof DFSourceKlass;
                     ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
@@ -636,7 +636,7 @@ public class DFFrame {
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
-                        klass = _finder.lookupType((Name)expr1).toKlass();
+                        klass = _finder.lookupKlass((Name)expr1);
                         callStyle = DFMethod.CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
@@ -776,7 +776,7 @@ public class DFFrame {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupType((Name)expr1);
+                    type = _finder.lookupKlass((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }
@@ -840,11 +840,11 @@ public class DFFrame {
         } else if (expr instanceof ClassInstanceCreation) {
             // "new T()"
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            DFType instType;
+            DFKlass instKlass;
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
                 try {
-                    instType = _finder.lookupType(id);
+                    instKlass = _finder.lookupKlass(id);
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (anondecl)",
@@ -853,7 +853,7 @@ public class DFFrame {
                 }
             } else {
                 try {
-                    instType = _finder.resolve(cstr.getType());
+                    instKlass = _finder.resolve(cstr.getType()).toKlass();
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (new)",
@@ -861,8 +861,6 @@ public class DFFrame {
                     return null;
                 }
             }
-            DFKlass instKlass = instType.toKlass();
-            instKlass.load();
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.buildExpr(expr1);
@@ -897,7 +895,7 @@ public class DFFrame {
                     "DFFrame.buildExpr: MethodNotFound (cstr)",
                     this, cstr);
             }
-            return instType;
+            return instKlass;
 
         } else if (expr instanceof ConditionalExpression) {
             // "c? a : b"
@@ -915,14 +913,13 @@ public class DFFrame {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             try {
-                DFType lambdaType = _finder.lookupType(id);
-                assert lambdaType instanceof DFLambdaKlass;
-                ((DFLambdaKlass)lambdaType).load();
+                DFKlass lambdaKlass = _finder.lookupKlass(id);
+                assert lambdaKlass instanceof DFLambdaKlass;
                 for (DFLambdaKlass.CapturedRef captured :
-                         ((DFLambdaKlass)lambdaType).getCapturedRefs()) {
+                         ((DFLambdaKlass)lambdaKlass).getCapturedRefs()) {
                     _inputRefs.add(captured.getOriginal());
                 }
-                return lambdaType;
+                return lambdaKlass;
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (lambda)",
@@ -935,10 +932,9 @@ public class DFFrame {
             this.buildExpr(methodref.getExpression());
             String id = Utils.encodeASTNode(methodref);
             try {
-                DFType methodRefType = _finder.lookupType(id);
-                assert methodRefType instanceof DFMethodRefKlass;
-                ((DFMethodRefKlass)methodRefType).load();
-                return methodRefType;
+                DFKlass methodRefKlass = _finder.lookupKlass(id);
+                assert methodRefKlass instanceof DFMethodRefKlass;
+                return methodRefKlass;
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (methodref)",
@@ -953,10 +949,9 @@ public class DFFrame {
             //  TypeMethodReference
             String id = Utils.encodeASTNode(methodref);
             try {
-                DFType methodRefType = _finder.lookupType(id);
-                assert methodRefType instanceof DFMethodRefKlass;
-                ((DFMethodRefKlass)methodRefType).load();
-                return methodRefType;
+                DFKlass methodRefKlass = _finder.lookupKlass(id);
+                assert methodRefKlass instanceof DFMethodRefKlass;
+                return methodRefKlass;
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (methodref)",
@@ -994,7 +989,7 @@ public class DFFrame {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupType(qname.getQualifier());
+                        type = _finder.lookupKlass(qname.getQualifier());
                     } catch (TypeNotFound e) {
                         Logger.error(
                             "DFFrame.buildAssignment: VariableNotFound (name)",
@@ -1036,7 +1031,7 @@ public class DFFrame {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupType((Name)expr1);
+                    type = _finder.lookupKlass((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }

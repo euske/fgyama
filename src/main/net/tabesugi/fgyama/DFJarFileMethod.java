@@ -100,16 +100,16 @@ public class DFJarFileMethod extends DFMethod {
             String[] excNames = excTable.getExceptionNames();
             DFKlass[] exceptions = new DFKlass[excNames.length];
             for (int i = 0; i < excNames.length; i++) {
-                DFType type;
+                DFKlass klass;
                 try {
-                    type = _finder.lookupType(excNames[i]);
+                    klass = _finder.lookupKlass(excNames[i]);
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileMethod.build: TypeNotFound (exception)",
                         this, e.name);
-                    type = DFUnknownType.UNKNOWN;
+                    klass = DFUnknownType.UNKNOWN.toKlass();
                 }
-                exceptions[i] = type.toKlass();
+                exceptions[i] = klass;
             }
             _funcType.setExceptions(exceptions);
         }
