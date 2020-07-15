@@ -343,27 +343,32 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public List<FieldRef> getFields() {
-        assert _fields != null;
+        assert this.isLoaded();
         return _fields;
     }
 
     public DFRef getField(SimpleName name) {
+        assert this.isLoaded();
         return this.getField(name.getIdentifier());
     }
 
     public DFRef getField(String id) {
+        assert this.isLoaded();
         return _id2field.get(id);
     }
 
     public List<DFMethod> getMethods() {
+        assert this.isLoaded();
         return _methods;
     }
 
     public DFMethod getMethod(String key) {
+        assert this.isLoaded();
         return _id2method.get(key);
     }
 
     public DFMethod getFuncMethod() {
+        assert this.isLoaded();
         for (DFMethod method : this.getMethods()) {
             if (method.isAbstract()) return method;
         }
@@ -373,6 +378,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
         //Logger.info("DFKlass.findMethod", this, callStyle, id, Utils.join(argTypes));
+        assert this.isLoaded();
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -398,12 +404,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
+        assert this.isLoaded();
         String id = (name == null)? null : name.getIdentifier();
         return this.findMethod(callStyle, id, argTypes);
     }
 
     public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
-        assert _id2method != null;
+        assert this.isLoaded();
         DFMethod method = new FallbackMethod(this, name, argTypes);
         // Do not adds to _methods because it shouldn't be analyzed.
         _id2method.put(name, method);
