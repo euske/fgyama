@@ -17,13 +17,13 @@ public class JNITypeParser {
     public JNITypeParser(String text) {
         _text = text;
         _pos = 0;
-        skipMapTypes();
     }
 
     public DFType resolveType(DFTypeFinder finder)
         throws InvalidSyntax, TypeNotFound {
         if (_text.length() <= _pos) return null;
         //Logger.info("  resolveType:", _text.substring(_pos), "finder="+finder);
+        assert _text.charAt(_pos) != '<';
         switch (_text.charAt(_pos)) {
         case 'B':
             _pos++;
@@ -59,7 +59,8 @@ public class JNITypeParser {
                 if (c2 == ';') {
                     String name = _text.substring(_pos, i);
                     _pos = i+1;
-                    return finder.lookupKlass(name.replace('/','.'));
+                    DFKlass klass = finder.lookupKlass(name.replace('/','.'));
+                    return klass.getDefaultKlass();
                 } else if (c2 == '<') {
                     String name = _text.substring(_pos, i);
                     _pos = i;
@@ -91,7 +92,8 @@ public class JNITypeParser {
                 if (_text.charAt(i) == ';') {
                     String name = _text.substring(_pos, i);
                     _pos = i+1;
-                    return finder.lookupKlass(name);
+                    DFKlass klass = finder.lookupKlass(name);
+                    return klass.getDefaultKlass();
                 }
             }
             break;
@@ -156,27 +158,26 @@ public class JNITypeParser {
         _pos++;
     }
 
-    public static DFMapType[] createMapTypes(
-        DFTypeSpace outerSpace, DFTypeFinder finder, String text) {
-        int pos = 0;
-        if (text.charAt(pos) != '<') return null;
-        pos++;
+    public DFMapType[] createMapTypes(
+        DFTypeSpace outerSpace, DFTypeFinder finder) {
+        if (_text.charAt(_pos) != '<') return null;
+        _pos++;
         List<DFMapType> params = new ArrayList<DFMapType>();
-        while (text.charAt(pos) != '>') {
-            int i = text.indexOf(':', pos);
-            String id = text.substring(pos, i);
-            pos = i+1;
-            if (text.charAt(pos) == ':') {
-                pos++;   // ???
+        while (_text.charAt(_pos) != '>') {
+            int i = _text.indexOf(':', _pos);
+            String id = _text.substring(_pos, i);
+            _pos = i+1;
+            if (_text.charAt(_pos) == ':') {
+                _pos++;   // ???
             }
-            i = skipType(text, pos);
-            String sig = text.substring(pos, i);
-            pos = i;
+            i = skipType(_text, _pos);
+            String sig = _text.substring(_pos, i);
+            _pos = i;
             DFMapType pt = new DFMapType(id, outerSpace, finder, sig);
             params.add(pt);
         }
         if (params.isEmpty()) return null;
-        pos++;
+        _pos++;
         DFMapType[] mapTypes = new DFMapType[params.size()];
         params.toArray(mapTypes);
         return mapTypes;

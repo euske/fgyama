@@ -96,6 +96,7 @@ public class DFMapType extends DFKlass {
         _boundKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);
+            parser.skipMapTypes();
             try {
                 _boundKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {

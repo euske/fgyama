@@ -115,24 +115,20 @@ public class DFJarFileKlass extends DFKlass {
     protected void build() throws InvalidSyntax {
         assert _jarPath != null;
         assert _entPath != null;
-        if (this.isGeneric()) {
-            // a generic class is only referred to, but not built.
-        } else {
+        try {
+            JarFile jarfile = new JarFile(_jarPath);
             try {
-                JarFile jarfile = new JarFile(_jarPath);
-                try {
-                    JarEntry je = jarfile.getJarEntry(_entPath);
-                    InputStream strm = jarfile.getInputStream(je);
-                    JavaClass jklass = new ClassParser(strm, _entPath).parse();
-                    this.build(jklass);
-                } finally {
-                    jarfile.close();
-                }
-            } catch (IOException e) {
-                Logger.error(
-                    "DFJarFileKlass.load: IOException",
-                    this, _jarPath+"/"+_entPath);
+                JarEntry je = jarfile.getJarEntry(_entPath);
+                InputStream strm = jarfile.getInputStream(je);
+                JavaClass jklass = new ClassParser(strm, _entPath).parse();
+                this.build(jklass);
+            } finally {
+                jarfile.close();
             }
+        } catch (IOException e) {
+            Logger.error(
+                "DFJarFileKlass.load: IOException",
+                this, _jarPath+"/"+_entPath);
         }
     }
 
@@ -149,14 +145,15 @@ public class DFJarFileKlass extends DFKlass {
         } else if (sig != null) {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             //Logger.info("jklass:", this, sig);
-            if (this.getGenericKlass() == null) {
-                DFMapType[] mapTypes = JNITypeParser.createMapTypes(
-                    this, _finder, sig);
+            JNITypeParser parser = new JNITypeParser(sig);
+            if (this.getGenericMethod() == null) {
+                DFMapType[] mapTypes = parser.createMapTypes(this, _finder);
                 if (mapTypes != null) {
                     this.setMapTypes(mapTypes);
                 }
+            } else {
+                parser.skipMapTypes();
             }
-            JNITypeParser parser = new JNITypeParser(sig);
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
@@ -226,6 +223,7 @@ public class DFJarFileKlass extends DFKlass {
                 if (sig != null) {
                     //Logger.info("fld:", fld.getName(), sig);
                     JNITypeParser parser = new JNITypeParser(sig);
+                    parser.skipMapTypes();
                     type = parser.resolveType(_finder);
                 } else {
                     type = _finder.resolve(fld.getType());
