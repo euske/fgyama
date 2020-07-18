@@ -25,6 +25,7 @@ public class DFJarFileKlass extends DFKlass {
     // These fields must be set immediately after construction.
     private String _jarPath = null;
     private String _entPath = null;
+    private JavaClass _jklass = null;
 
     // The following fields are available after the klass is loaded. (Stage3)
     private boolean _interface = false;
@@ -45,8 +46,7 @@ public class DFJarFileKlass extends DFKlass {
         super(genericKlass, paramTypes);
 
         _finder = new DFTypeFinder(this, genericKlass._finder);
-        _jarPath = genericKlass._jarPath;
-        _entPath = genericKlass._entPath;
+        _jklass = genericKlass._jklass;
         // XXX In case of a .jar class, refer to the same inner classes.
         for (DFKlass inklass : genericKlass.getInnerKlasses()) {
             this.addKlass(inklass.getName(), inklass);
@@ -112,7 +112,16 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    protected void build() throws InvalidSyntax {
+    public DFKlass getConcreteKlass(DFKlass[] argTypes)
+        throws InvalidSyntax {
+        this.preload();
+        return super.getConcreteKlass(argTypes);
+    }
+
+    private void preload() throws InvalidSyntax {
+        if (_jklass != null) return;
+
+        assert this.getGenericKlass() == null;
         assert _jarPath != null;
         assert _entPath != null;
         try {
@@ -120,25 +129,36 @@ public class DFJarFileKlass extends DFKlass {
             try {
                 JarEntry je = jarfile.getJarEntry(_entPath);
                 InputStream strm = jarfile.getInputStream(je);
-                JavaClass jklass = new ClassParser(strm, _entPath).parse();
-                this.build(jklass);
+                _jklass = new ClassParser(strm, _entPath).parse();
             } finally {
                 jarfile.close();
             }
         } catch (IOException e) {
             Logger.error(
-                "DFJarFileKlass.load: IOException",
+                "DFJarFileKlass.preload: IOException",
                 this, _jarPath+"/"+_entPath);
+            return;
+        }
+
+        String sig = Utils.getJKlassSignature(_jklass.getAttributes());
+        if (sig != null) {
+            JNITypeParser parser = new JNITypeParser(sig);
+            DFMapType[] mapTypes = parser.createMapTypes(this, _finder);
+            if (mapTypes != null) {
+                this.setMapTypes(mapTypes);
+            }
         }
     }
 
-    private void build(JavaClass jklass)
-        throws InvalidSyntax {
+    @Override
+    protected void build() throws InvalidSyntax {
+        this.preload();
+        assert _jklass != null;
         //Logger.info("DFJarFileKlass.build:", this);
-        _interface = jklass.isInterface();
+        _interface = _jklass.isInterface();
 
         // Load base klasses/interfaces.
-        String sig = Utils.getJKlassSignature(jklass.getAttributes());
+        String sig = Utils.getJKlassSignature(_jklass.getAttributes());
         if (this == DFBuiltinTypes.getObjectKlass()) {
             _baseKlass = null;
 
@@ -146,14 +166,7 @@ public class DFJarFileKlass extends DFKlass {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             //Logger.info("jklass:", this, sig);
             JNITypeParser parser = new JNITypeParser(sig);
-            if (this.getGenericMethod() == null) {
-                DFMapType[] mapTypes = parser.createMapTypes(this, _finder);
-                if (mapTypes != null) {
-                    this.setMapTypes(mapTypes);
-                }
-            } else {
-                parser.skipMapTypes();
-            }
+            parser.skipMapTypes();
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
@@ -183,8 +196,8 @@ public class DFJarFileKlass extends DFKlass {
 
         } else {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
-            String superClass = jklass.getSuperclassName();
-            if (superClass != null && !superClass.equals(jklass.getClassName())) {
+            String superClass = _jklass.getSuperclassName();
+            if (superClass != null && !superClass.equals(_jklass.getClassName())) {
                 try {
                     _baseKlass = _finder.lookupKlass(superClass);
                 } catch (TypeNotFound e) {
@@ -194,7 +207,7 @@ public class DFJarFileKlass extends DFKlass {
                 }
             }
             _baseKlass.load();
-            String[] ifaces = jklass.getInterfaceNames();
+            String[] ifaces = _jklass.getInterfaceNames();
             if (ifaces != null) {
                 _baseIfaces = new DFKlass[ifaces.length];
                 for (int i = 0; i < ifaces.length; i++) {
@@ -215,7 +228,7 @@ public class DFJarFileKlass extends DFKlass {
         }
 
         // Define fields.
-        for (Field fld : jklass.getFields()) {
+        for (Field fld : _jklass.getFields()) {
             if (fld.isPrivate()) continue;
             sig = Utils.getJKlassSignature(fld.getAttributes());
             DFType type;
@@ -238,7 +251,7 @@ public class DFJarFileKlass extends DFKlass {
         }
 
         // Define methods.
-        for (Method meth : jklass.getMethods()) {
+        for (Method meth : _jklass.getMethods()) {
             if (meth.isPrivate()) continue;
             String name = meth.getName();
             DFMethod.CallStyle callStyle;
