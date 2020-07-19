@@ -15,7 +15,6 @@ import org.apache.bcel.classfile.*;
 //  Usage:
 //    1. new DFJarFileKlass(finder)
 //    2. setJarPath()
-//    3. load()
 //
 public class DFJarFileKlass extends DFKlass {
 
@@ -155,7 +154,6 @@ public class DFJarFileKlass extends DFKlass {
         //Logger.info("DFJarFileKlass.build:", this);
         _interface = _jklass.isInterface();
 
-        // Load base klasses/interfaces.
         String sig = Utils.getJKlassSignature(_jklass.getAttributes());
         if (this == DFBuiltinTypes.getObjectKlass()) {
             _baseKlass = null;

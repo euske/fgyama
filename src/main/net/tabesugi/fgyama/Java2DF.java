@@ -154,12 +154,12 @@ public class Java2DF {
             this.setTypeFinder(e.key, e.cunit);
         }
 
-        // Stage3: load class definitions and define parameterized Klasses.
+        // Stage3: list class definitions and define parameterized Klasses.
         ConsistentHashSet<DFSourceKlass> klasses =
             new ConsistentHashSet<DFSourceKlass>();
         for (Entry e : _sourceFiles) {
             Logger.info("Stage3:", e.key);
-            this.loadKlasses(e.key, e.cunit, klasses);
+            this.enumKlasses(e.key, e.cunit, klasses);
         }
 
         // Stage4: list all methods.
@@ -224,7 +224,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void loadKlasses(
+    private void enumKlasses(
         String key, CompilationUnit cunit, Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
@@ -244,7 +244,7 @@ public class Java2DF {
         }
         // Enumerate all the klasses used.
         for (DFSourceKlass klass : _fileKlasses.get(key)) {
-            klass.loadKlasses(klasses);
+            klass.enumKlasses(klasses);
         }
     }
 

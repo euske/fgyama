@@ -46,20 +46,20 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @SuppressWarnings("unchecked")
-        public void loadKlasses(Collection<DFSourceKlass> klasses) {
+        public void enumKlasses(Collection<DFSourceKlass> klasses) {
             DFTypeFinder finder = this.getFinder();
             if (_methodRef instanceof CreationReference) {
                 CreationReference creatmref = (CreationReference)_methodRef;
                 DFType type = finder.resolveSafe(creatmref.getType());
                 if (type instanceof DFSourceKlass) {
-                    ((DFSourceKlass)type).loadKlasses(klasses);
+                    ((DFSourceKlass)type).enumKlasses(klasses);
                 }
 
             } else if (_methodRef instanceof TypeMethodReference) {
                 TypeMethodReference typemref = (TypeMethodReference)_methodRef;
                 DFType type = finder.resolveSafe(typemref.getType());
                 assert type instanceof DFSourceKlass;
-                ((DFSourceKlass)type).loadKlasses(klasses);
+                ((DFSourceKlass)type).enumKlasses(klasses);
 
             } else if (_methodRef instanceof SuperMethodReference) {
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
@@ -67,7 +67,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                     DFKlass klass = finder.lookupKlass(supermref.getQualifier());
                     klass = finder.getParameterized(klass, supermref.typeArguments());
                     if (klass instanceof DFSourceKlass) {
-                        ((DFSourceKlass)klass).loadKlasses(klasses);
+                        ((DFSourceKlass)klass).enumKlasses(klasses);
                     }
                 } catch (TypeNotFound e) {
                 }
@@ -76,10 +76,10 @@ class DFMethodRefKlass extends DFSourceKlass {
                 // XXX ignored exprmref.typeArguments().
                 ExpressionMethodReference exprmref = (ExpressionMethodReference)_methodRef;
                 try {
-                    this.loadKlassesExpr(
+                    this.enumKlassesExpr(
                         klasses, exprmref.getExpression());
                 } catch (InvalidSyntax e) {
-                    Logger.error("DFMethodRefKlass.loadKlasses:", e);
+                    Logger.error("DFMethodRefKlass.enumKlasses:", e);
                 }
             }
         }
@@ -198,8 +198,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         return -1;
     }
 
-    @Override
-    public boolean isLoaded() {
+    public boolean isDefined() {
         return _funcMethod.isDefined();
     }
 

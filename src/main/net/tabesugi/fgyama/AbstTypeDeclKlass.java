@@ -89,13 +89,13 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Collection<DFSourceKlass> klasses) {
+    public void enumKlasses(Collection<DFSourceKlass> klasses) {
         if (klasses.contains(this)) return;
-        super.loadKlasses(klasses);
+        super.enumKlasses(klasses);
         try {
-            this.loadKlassesDecls(klasses, _abstTypeDecl.bodyDeclarations());
+            this.enumKlassesDecls(klasses, _abstTypeDecl.bodyDeclarations());
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.loadKlasses:", e);
+            Logger.error("AbstTypeDeclKlass.enumKlasses:", e);
         }
     }
 }

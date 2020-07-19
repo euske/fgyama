@@ -72,13 +72,13 @@ class DFLambdaKlass extends DFSourceKlass {
             return _funcType;
         }
 
-        public void loadKlasses(Collection<DFSourceKlass> klasses)
+        public void enumKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
-                this.loadKlassesStmt(klasses, (Statement)body);
+                this.enumKlassesStmt(klasses, (Statement)body);
             } else if (body instanceof Expression) {
-                this.loadKlassesExpr(klasses, (Expression)body);
+                this.enumKlassesExpr(klasses, (Expression)body);
             } else {
                 throw new InvalidSyntax(body);
             }
@@ -213,8 +213,7 @@ class DFLambdaKlass extends DFSourceKlass {
         return -1;
     }
 
-    @Override
-    public boolean isLoaded() {
+    public boolean isDefined() {
         return (_funcMethod != null && _funcMethod.getFuncType() != null);
     }
 
