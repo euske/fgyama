@@ -29,36 +29,20 @@ public class DFBuiltinTypes {
         _void = (DFJarFileKlass)langSpace.getKlass("Void");
         _exception = (DFJarFileKlass)langSpace.getKlass("Exception");
         _array = new ArrayKlass(langSpace);
-        _object.load();
-        _class.load();
-        _enum.load();
-        _string.load();
-        _byte.load();
-        _character.load();
-        _short.load();
-        _integer.load();
-        _long.load();
-        _float.load();
-        _double.load();
-        _boolean.load();
-        _void.load();
-        _exception.load();
-        _array.load();
     }
 
     private static class ArrayKlass extends DFKlass {
         public ArrayKlass(DFTypeSpace langSpace) {
             super("_Array", langSpace);
         }
-        protected void build() throws InvalidSyntax {
+        protected void build() {
             this.addField(DFBasicType.INT, "length", false);
         }
         public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
             if (this == klass) return 0;
             return -1;
         }
-        protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-            throws InvalidSyntax {
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
             return null;
         }

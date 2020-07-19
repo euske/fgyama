@@ -207,7 +207,6 @@ public class DFFrame {
             if (type instanceof DFKlass &&
                 ((DFKlass)type).isEnum()) {
                 enumKlass = type.toKlass();
-                enumKlass.load();
             }
             DFLocalScope switchScope = _scope.getChildByAST(stmt);
             DFFrame switchFrame = this.addChild(DFFrame.BREAKABLE, stmt, switchScope);
@@ -368,7 +367,6 @@ public class DFFrame {
             DFRef ref = _scope.lookupThis();
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
-            klass.load();
             int nargs = ci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -407,7 +405,6 @@ public class DFFrame {
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
-            baseKlass.load();
             int nargs = sci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -489,7 +486,6 @@ public class DFFrame {
                     }
                 }
                 DFKlass klass = type.toKlass();
-                klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
@@ -546,7 +542,6 @@ public class DFFrame {
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass().getConcreteKlass(
                     new DFKlass[] { typeval });
-                klass.load();
                 return klass;
             } catch (TypeNotFound e) {
                 Logger.error(
@@ -653,7 +648,6 @@ public class DFFrame {
                     klass = type.toKlass();
                 }
             }
-            klass.load();
             int nargs = invoke.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -706,9 +700,7 @@ public class DFFrame {
             DFRef ref = _scope.lookupThis();
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
-            klass.load();
             DFKlass baseKlass = klass.getBaseKlass();
-            baseKlass.load();
             DFMethod method1 = baseKlass.findMethod(
                 DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
             if (method1 != null) {
@@ -738,9 +730,7 @@ public class DFFrame {
                 this.buildExpr(init);
             }
             try {
-                DFType type = _finder.resolve(ac.getType().getElementType());
-                type.toKlass().load();
-                return type;
+                return _finder.resolve(ac.getType().getElementType());
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (array)",
@@ -790,7 +780,6 @@ public class DFFrame {
                 }
             }
             DFKlass klass = type.toKlass();
-            klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref != null) {
@@ -810,7 +799,6 @@ public class DFFrame {
             DFRef ref = _scope.lookupThis();
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            klass.load();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 != null) {
                 _inputRefs.add(ref2);
@@ -827,9 +815,7 @@ public class DFFrame {
             CastExpression cast = (CastExpression)expr;
             this.buildExpr(cast.getExpression());
             try {
-                DFType type = _finder.resolve(cast.getType());
-                type.toKlass().load();
-                return type;
+                return _finder.resolve(cast.getType());
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (cast)",
@@ -999,7 +985,6 @@ public class DFFrame {
                 }
                 _inputRefs.add(_scope.lookupThis());
                 DFKlass klass = type.toKlass();
-                klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) {
@@ -1040,7 +1025,6 @@ public class DFFrame {
                 if (type == null) return null;
             }
             DFKlass klass = type.toKlass();
-            klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref != null) {
@@ -1060,7 +1044,6 @@ public class DFFrame {
             DFRef ref = _scope.lookupThis();
             _inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            klass.load();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 != null) {
                 _outputRefs.add(ref2);

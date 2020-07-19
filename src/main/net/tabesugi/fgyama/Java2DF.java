@@ -235,12 +235,10 @@ public class Java2DF {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 DFKlass klass = _rootSpace.getKlass(name);
-                klass.load();
                 fileScope.importStatic(klass);
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
-                klass.load();
                 fileScope.importStatic(klass, qname.getName());
             }
         }

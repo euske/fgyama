@@ -36,8 +36,7 @@ class DFLambdaKlass extends DFSourceKlass {
             }
         }
 
-        protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-            throws InvalidSyntax {
+        protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
             return null;
         }
@@ -224,17 +223,20 @@ class DFLambdaKlass extends DFSourceKlass {
         return _funcMethod;
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
 
     @Override
-    protected void build() throws InvalidSyntax {
+    protected void build() {
         DFTypeFinder finder = this.getFinder();
-        _funcMethod = new FunctionalMethod(FUNC_NAME, finder);
-        this.addMethod(_funcMethod, FUNC_NAME);
+        try {
+            _funcMethod = new FunctionalMethod(FUNC_NAME, finder);
+            this.addMethod(_funcMethod, FUNC_NAME);
+        } catch (InvalidSyntax e) {
+            Logger.error("DFLambdaKlass.build:", e);
+        }
     }
 
     @Override

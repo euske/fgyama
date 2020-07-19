@@ -39,8 +39,7 @@ public class DFMapType extends DFKlass {
         _sig = sig;
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -60,6 +59,7 @@ public class DFMapType extends DFKlass {
     }
 
     public DFKlass getBoundKlass() {
+        this.load();
         assert _boundKlass != null;
         return _boundKlass;
     }
@@ -91,7 +91,7 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    protected void build() throws InvalidSyntax {
+    protected void build() {
         assert _sig == null || _types == null;
         _boundKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {

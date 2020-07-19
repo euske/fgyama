@@ -18,8 +18,7 @@ class InitMethod extends DFSourceMethod {
 
     public InitMethod(
         DFSourceKlass klass,
-        List<BodyDeclaration> decls, DFTypeFinder finder)
-        throws InvalidSyntax {
+        List<BodyDeclaration> decls, DFTypeFinder finder) {
         super(klass, CallStyle.Initializer,
               false, "<clinit>", "<clinit>",
               klass.getKlassScope(), finder);
@@ -33,98 +32,110 @@ class InitMethod extends DFSourceMethod {
         return new DFFuncType(new DFType[] {}, DFBasicType.VOID);
     }
 
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
 
     @SuppressWarnings("unchecked")
-    private void build()
-        throws InvalidSyntax {
+    private void build() {
         DFTypeFinder finder = this.getFinder();
         DFLocalScope scope = this.getScope();
-        for (BodyDeclaration body : _decls) {
-            if (body instanceof FieldDeclaration) {
-                FieldDeclaration decl = (FieldDeclaration)body;
-                for (VariableDeclarationFragment frag :
-                         (List<VariableDeclarationFragment>) decl.fragments()) {
-                    Expression init = frag.getInitializer();
-                    if (init != null) {
-                        this.buildTypeFromExpr(init, scope);
-                        scope.buildExpr(finder, init);
+        try {
+            for (BodyDeclaration body : _decls) {
+                if (body instanceof FieldDeclaration) {
+                    FieldDeclaration decl = (FieldDeclaration)body;
+                    for (VariableDeclarationFragment frag :
+                             (List<VariableDeclarationFragment>) decl.fragments()) {
+                        Expression init = frag.getInitializer();
+                        if (init != null) {
+                            this.buildTypeFromExpr(init, scope);
+                            scope.buildExpr(finder, init);
+                        }
+                    }
+                } else if (body instanceof Initializer) {
+                    Initializer initializer = (Initializer)body;
+                    Statement stmt = initializer.getBody();
+                    if (stmt != null) {
+                        this.buildTypeFromStmt(stmt, scope);
+                        scope.buildStmt(finder, stmt);
                     }
                 }
-            } else if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                Statement stmt = initializer.getBody();
-                if (stmt != null) {
-                    this.buildTypeFromStmt(stmt, scope);
-                    scope.buildStmt(finder, stmt);
-                }
             }
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.build: ", e);
         }
     }
 
     // loadKlasses: enumerate all referenced Klasses.
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Collection<DFSourceKlass> klasses)
-        throws InvalidSyntax {
-        for (BodyDeclaration body : _decls) {
-            if (body instanceof FieldDeclaration) {
-                FieldDeclaration decl = (FieldDeclaration)body;
-                for (VariableDeclarationFragment frag :
-                         (List<VariableDeclarationFragment>) decl.fragments()) {
-                    Expression expr = frag.getInitializer();
-                    if (expr != null) {
-                        this.loadKlassesExpr(klasses, expr);
+    public void loadKlasses(Collection<DFSourceKlass> klasses) {
+        try {
+            for (BodyDeclaration body : _decls) {
+                if (body instanceof FieldDeclaration) {
+                    FieldDeclaration decl = (FieldDeclaration)body;
+                    for (VariableDeclarationFragment frag :
+                             (List<VariableDeclarationFragment>) decl.fragments()) {
+                        Expression expr = frag.getInitializer();
+                        if (expr != null) {
+                            this.loadKlassesExpr(klasses, expr);
+                        }
+                    }
+                } else if (body instanceof Initializer) {
+                    Initializer initializer = (Initializer)body;
+                    Statement stmt = initializer.getBody();
+                    if (stmt != null) {
+                        this.loadKlassesStmt(klasses, stmt);
                     }
                 }
-            } else if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                Statement stmt = initializer.getBody();
-                if (stmt != null) {
-                    this.loadKlassesStmt(klasses, stmt);
-                }
             }
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.loadKlasses: ", e);
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void enumRefs(Collection<DFSourceKlass> defined)
-        throws InvalidSyntax {
+    public void enumRefs(Collection<DFSourceKlass> defined) {
         DFLocalScope scope = this.getScope();
-        for (BodyDeclaration body : _decls) {
-            if (body instanceof FieldDeclaration) {
-                FieldDeclaration fieldDecl = (FieldDeclaration)body;
-                for (VariableDeclarationFragment frag :
-                         (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                    try {
-                        DFRef ref = scope.lookupVar(frag.getName());
-                        Expression init = frag.getInitializer();
-                        if (init != null) {
-                            this.enumRefsExpr(defined, scope, init);
-                            this.setLambdaType(defined, ref.getRefType(), init);
+        try {
+            for (BodyDeclaration body : _decls) {
+                if (body instanceof FieldDeclaration) {
+                    FieldDeclaration fieldDecl = (FieldDeclaration)body;
+                    for (VariableDeclarationFragment frag :
+                             (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
+                        try {
+                            DFRef ref = scope.lookupVar(frag.getName());
+                            Expression init = frag.getInitializer();
+                            if (init != null) {
+                                this.enumRefsExpr(defined, scope, init);
+                                this.setLambdaType(defined, ref.getRefType(), init);
+                            }
+                        } catch (VariableNotFound e) {
                         }
-                    } catch (VariableNotFound e) {
                     }
+                } else if (body instanceof Initializer) {
+                    Initializer initializer = (Initializer)body;
+                    this.enumRefsStmt(defined, scope, initializer.getBody());
                 }
-            } else if (body instanceof Initializer) {
-                Initializer initializer = (Initializer)body;
-                this.enumRefsStmt(defined, scope, initializer.getBody());
             }
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.enumRefs: ", e);
         }
     }
 
     @Override
     public void writeGraph(Exporter exporter)
-        throws InvalidSyntax, EntityNotFound {
+        throws EntityNotFound {
         DFLocalScope scope = this.getScope();
         MethodGraph graph = new MethodGraph("K"+exporter.getNewId()+"_"+this.getName());
         DFContext ctx = new DFContext(graph, scope);
 
-        this.processBodyDecls(graph, ctx, _decls);
+        try {
+            this.processBodyDecls(graph, ctx, _decls);
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.writeGraph: ", e);
+        }
         exporter.writeGraph(graph);
     }
 
@@ -146,8 +157,7 @@ class DefinedMethod extends DFSourceMethod {
     public DefinedMethod(
         DFSourceKlass srcklass, CallStyle callStyle,
         boolean isAbstract, String methodId, String methodName,
-        MethodDeclaration methodDecl, DFTypeFinder finder)
-        throws InvalidSyntax {
+        MethodDeclaration methodDecl, DFTypeFinder finder) {
         super(srcklass, callStyle,
               isAbstract, methodId, methodName,
               srcklass.getKlassScope(), finder);
@@ -157,8 +167,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     protected DefinedMethod(
-        DefinedMethod genericMethod, Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+        DefinedMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _methodDecl = genericMethod._methodDecl;
@@ -174,15 +183,13 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     @Override
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         return new DefinedMethod(this, paramTypes);
     }
 
     @SuppressWarnings("unchecked")
-    private void build()
-        throws InvalidSyntax {
+    private void build() {
         DFTypeFinder finder = this.getFinder();
         MethodScope methodScope = (MethodScope)this.getScope();
 
@@ -224,17 +231,19 @@ class DefinedMethod extends DFSourceMethod {
 
         Statement stmt = _methodDecl.getBody();
         if (stmt != null) {
-            this.buildTypeFromStmt(stmt, methodScope);
-            methodScope.buildInternalRefs(_methodDecl.parameters());
-            methodScope.buildStmt(finder, stmt);
+            try {
+                this.buildTypeFromStmt(stmt, methodScope);
+                methodScope.buildInternalRefs(_methodDecl.parameters());
+                methodScope.buildStmt(finder, stmt);
+            } catch (InvalidSyntax e) {
+                Logger.error("DFSourceKlass.build:", e);
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Collection<DFSourceKlass> klasses)
-        throws InvalidSyntax {
+    public void loadKlasses(Collection<DFSourceKlass> klasses) {
         if (this.isGeneric()) return;
-
         DFTypeFinder finder = this.getFinder();
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         for (SingleVariableDeclaration varDecl : varDecls) {
@@ -250,13 +259,16 @@ class DefinedMethod extends DFSourceMethod {
             }
         }
         if (_methodDecl.getBody() != null) {
-            this.loadKlassesStmt(klasses, _methodDecl.getBody());
+            try {
+                this.loadKlassesStmt(klasses, _methodDecl.getBody());
+            } catch (InvalidSyntax e) {
+                Logger.error("DFSourceKlass.loadKlasses:", e);
+            }
         }
     }
 
     @Override
-    public void enumRefs(Collection<DFSourceKlass> defined)
-        throws InvalidSyntax {
+    public void enumRefs(Collection<DFSourceKlass> defined) {
         if (this.isGeneric()) return;
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
@@ -270,13 +282,17 @@ class DefinedMethod extends DFSourceMethod {
             }
         }
         DFLocalScope scope = this.getScope();
-        this.enumRefsStmt(defined, scope, _methodDecl.getBody());
+        try {
+            this.enumRefsStmt(defined, scope, _methodDecl.getBody());
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.enumRefs:", e);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void writeGraph(Exporter exporter)
-        throws InvalidSyntax, EntityNotFound {
+        throws EntityNotFound {
         ASTNode body = _methodDecl.getBody();
         if (body == null) return;
 
@@ -295,7 +311,11 @@ class DefinedMethod extends DFSourceMethod {
             ctx.set(assign);
             i++;
         }
-        this.processMethodBody(graph, ctx, body);
+        try {
+            this.processMethodBody(graph, ctx, body);
+        } catch (InvalidSyntax e) {
+            Logger.error("DFSourceKlass.writeGraph:", e);
+        }
         exporter.writeGraph(graph);
     }
 
@@ -319,8 +339,7 @@ class EnumValuesMethod extends DFMethod {
             new DFType[] {}, DFArrayType.getType(klass, 1));
     }
 
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -337,8 +356,7 @@ class EnumValuesMethod extends DFMethod {
 //  Usage:
 //    1. new DFSourceKlass()
 //    2. setBaseFinder(finder)
-//    3. load()
-//    4. getXXX(), ...
+//    3. getXXX(), ...
 //
 //  Implement:
 //    parameterize(paramTypes)
@@ -364,8 +382,7 @@ public abstract class DFSourceKlass extends DFKlass {
     // Normal constructor.
     protected DFSourceKlass(
         String name, DFTypeSpace outerSpace, DFSourceKlass outerKlass,
-        String filePath, DFVarScope outerScope)
-        throws InvalidSyntax {
+        String filePath, DFVarScope outerScope) {
         super(name, outerSpace);
 
         _outerKlass = outerKlass;
@@ -376,8 +393,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     // Constructor for a parameterized klass.
     protected DFSourceKlass(
-        DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+        DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes) {
         super(genericKlass, paramTypes);
 
         _outerKlass = genericKlass._outerKlass;
@@ -559,7 +575,6 @@ public abstract class DFSourceKlass extends DFKlass {
         if (superClass != null) {
             try {
                 _baseKlass = _finder.resolve(superClass).toKlass();
-                _baseKlass.load();
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
@@ -581,7 +596,6 @@ public abstract class DFSourceKlass extends DFKlass {
         if (superClass != null) {
             try {
                 _baseKlass = _finder.resolve(superClass).toKlass();
-                _baseKlass.load();
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
@@ -602,9 +616,6 @@ public abstract class DFSourceKlass extends DFKlass {
             }
             _baseIfaces[i] = iface;
         }
-        for (DFKlass iface : _baseIfaces) {
-            iface.load();
-        }
         this.buildMembers(typeDecl.bodyDeclarations());
     }
 
@@ -616,7 +627,6 @@ public abstract class DFSourceKlass extends DFKlass {
         // Get superclass.
         DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
         _baseKlass = enumKlass.getConcreteKlass(new DFKlass[] { this });
-        _baseKlass.load();
         // Get interfaces.
         List<Type> ifaces = enumDecl.superInterfaceTypes();
         _baseIfaces = new DFKlass[ifaces.size()];
@@ -630,9 +640,6 @@ public abstract class DFSourceKlass extends DFKlass {
                     this, e.name);
             }
             _baseIfaces[i] = iface;
-        }
-        for (DFKlass iface : _baseIfaces) {
-            iface.load();
         }
         // Get constants.
         for (EnumConstantDeclaration econst :
@@ -711,13 +718,11 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void loadKlasses(Collection<DFSourceKlass> klasses)
-        throws InvalidSyntax {
+    public void loadKlasses(Collection<DFSourceKlass> klasses) {
         if (this.isGeneric()) return;
         if (klasses.contains(this)) return;
         klasses.add(this);
         //Logger.info("loadKlasses:", this);
-        this.load();
     }
 
     public void enumRefs(Collection<DFSourceKlass> defined)

@@ -86,8 +86,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     // Protected constructor for a parameterized method.
     protected DFMethod(
-        DFMethod genericMethod, Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+        DFMethod genericMethod, Map<String, DFKlass> paramTypes) {
         // A parameterized method has its own separate typespace
         // that is NOT accessible from the outside.
         super(genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes),
@@ -154,11 +153,8 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         String name = DFTypeSpace.getConcreteName(paramTypes);
         DFMethod method = _concreteMethods.get(name);
         if (method == null) {
-            try {
-                method = this.parameterize(paramTypes);
-                _concreteMethods.put(name, method);
-            } catch (InvalidSyntax e) {
-            }
+            method = this.parameterize(paramTypes);
+            _concreteMethods.put(name, method);
         }
         return method;
     }
@@ -261,11 +257,9 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     public abstract DFFuncType getFuncType();
 
     // Parameterize the klass.
-    protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax;
+    protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes);
 
-    protected void setMapTypes(DFMapType[] mapTypes)
-        throws InvalidSyntax {
+    protected void setMapTypes(DFMapType[] mapTypes) {
         assert mapTypes != null;
         assert _mapTypes == null;
         assert _paramTypes == null;

@@ -20,7 +20,7 @@ public class JNITypeParser {
     }
 
     public DFType resolveType(DFTypeFinder finder)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         if (_text.length() <= _pos) return null;
         //Logger.info("  resolveType:", _text.substring(_pos), "finder="+finder);
         assert _text.charAt(_pos) != '<';
@@ -71,7 +71,6 @@ public class JNITypeParser {
                         paramTypes[j] = types[j].toKlass();
                     }
                     klass = klass.getConcreteKlass(paramTypes);
-                    klass.load();
                     char c3 = _text.charAt(_pos);
                     if (c3 == ';') {
                         _pos++;
@@ -129,7 +128,7 @@ public class JNITypeParser {
     }
 
     private DFType[] resolveTypes(DFTypeFinder finder, char start, char end)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         assert _text.charAt(_pos) == start;
         _pos++;
         List<DFType> types = new ArrayList<DFType>();

@@ -27,8 +27,7 @@ class AnonymousKlass extends DFSourceKlass {
             cstr.getAnonymousClassDeclaration().bodyDeclarations());
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -37,18 +36,25 @@ class AnonymousKlass extends DFSourceKlass {
         return _cstr;
     }
 
-    protected void build() throws InvalidSyntax {
-        this.buildMembersFromAnonDecl(_cstr);
+    protected void build() {
+        try {
+            this.buildMembersFromAnonDecl(_cstr);
+        } catch (InvalidSyntax e) {
+            Logger.error("AnonymousKlass.build:", e);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Collection<DFSourceKlass> klasses)
-        throws InvalidSyntax {
+    public void loadKlasses(Collection<DFSourceKlass> klasses) {
         if (klasses.contains(this)) return;
         super.loadKlasses(klasses);
-        this.loadKlassesDecls(
-            klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
+        try {
+            this.loadKlassesDecls(
+                klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
+        } catch (InvalidSyntax e) {
+            Logger.error("AnonymousKlass.loadKlasses:", e);
+        }
     }
 }
 
@@ -94,8 +100,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     // Constructor for a parameterized method.
     protected DFSourceMethod(
-        DFSourceMethod genericMethod, Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+        DFSourceMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _srcklass = genericMethod._srcklass;
@@ -916,7 +921,6 @@ public abstract class DFSourceMethod extends DFMethod {
             if (type instanceof DFKlass &&
                 ((DFKlass)type).isEnum()) {
                 enumKlass = type.toKlass();
-                enumKlass.load();
             }
             DFLocalScope innerScope = scope.getChildByAST(stmt);
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
@@ -1037,7 +1041,6 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = scope.lookupThis();
             //_inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
-            klass.load();
             int nargs = ci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -1060,7 +1063,6 @@ public abstract class DFSourceMethod extends DFMethod {
             //_inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
-            baseKlass.load();
             int nargs = sci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -1122,7 +1124,6 @@ public abstract class DFSourceMethod extends DFMethod {
                     }
                 }
                 DFKlass klass = type.toKlass();
-                klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
@@ -1178,7 +1179,6 @@ public abstract class DFSourceMethod extends DFMethod {
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass().getConcreteKlass(
                     new DFKlass[] { typeval });
-                klass.load();
                 return klass;
             } catch (TypeNotFound e) {
                 return null;
@@ -1285,7 +1285,6 @@ public abstract class DFSourceMethod extends DFMethod {
                     klass = type.toKlass();
                 }
             }
-            klass.load();
             int nargs = invoke.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -1318,9 +1317,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = scope.lookupThis();
             //_inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass();
-            klass.load();
             DFKlass baseKlass = klass.getBaseKlass();
-            baseKlass.load();
             DFMethod method1 = baseKlass.findMethod(
                 CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
             if (method1 == null) return DFUnknownType.UNKNOWN;
@@ -1340,9 +1337,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.enumRefsExpr(defined, scope, init);
             }
             try {
-                DFType type = _finder.resolve(ac.getType().getElementType());
-                type.toKlass().load();
-                return type;
+                return _finder.resolve(ac.getType().getElementType());
             } catch (TypeNotFound e) {
                 return null;
             }
@@ -1384,7 +1379,6 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return null;
             }
             DFKlass klass = type.toKlass();
-            klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref == null) return null;
@@ -1398,7 +1392,6 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = scope.lookupThis();
             //_inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            klass.load();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 == null) return null;
             _inputRefs.add(ref2);
@@ -1409,9 +1402,7 @@ public abstract class DFSourceMethod extends DFMethod {
             CastExpression cast = (CastExpression)expr;
             this.enumRefsExpr(defined, scope, cast.getExpression());
             try {
-                DFType type = _finder.resolve(cast.getType());
-                type.toKlass().load();
-                return type;
+                return _finder.resolve(cast.getType());
             } catch (TypeNotFound e) {
                 return null;
             }
@@ -1433,7 +1424,6 @@ public abstract class DFSourceMethod extends DFMethod {
                     return null;
                 }
             }
-            instKlass.load();
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.enumRefsExpr(defined, scope, expr1);
@@ -1471,7 +1461,6 @@ public abstract class DFSourceMethod extends DFMethod {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getKlass(id);
-            lambdaKlass.load();
             for (DFLambdaKlass.CapturedRef captured :
                      lambdaKlass.getCapturedRefs()) {
                 _inputRefs.add(captured.getOriginal());
@@ -1482,7 +1471,6 @@ public abstract class DFSourceMethod extends DFMethod {
             MethodReference methodref = (ExpressionMethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
-            methodRefKlass.load();
             return methodRefKlass;
 
         } else {
@@ -1522,7 +1510,6 @@ public abstract class DFSourceMethod extends DFMethod {
                 }
                 //_inputRefs.add(scope.lookupThis());
                 DFKlass klass = type.toKlass();
-                klass.load();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
@@ -1560,7 +1547,6 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return null;
             }
             DFKlass klass = type.toKlass();
-            klass.load();
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref == null) return null;
@@ -1574,7 +1560,6 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = scope.lookupThis();
             //_inputRefs.add(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            klass.load();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 == null) return null;
             _outputRefs.add(ref2);
@@ -1615,7 +1600,6 @@ public abstract class DFSourceMethod extends DFMethod {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getKlass(id);
-            lambdaKlass.load();
             lambdaKlass.setBaseKlass(type.toKlass());
             if (lambdaKlass.isLoaded()) {
                 defined.add(lambdaKlass);
@@ -1625,7 +1609,6 @@ public abstract class DFSourceMethod extends DFMethod {
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
-            methodRefKlass.load();
             methodRefKlass.setBaseKlass(type.toKlass());
             if (methodRefKlass.isLoaded()) {
                 defined.add(methodRefKlass);

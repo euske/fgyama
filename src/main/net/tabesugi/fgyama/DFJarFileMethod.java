@@ -25,8 +25,7 @@ public class DFJarFileMethod extends DFMethod {
     public DFJarFileMethod(
         DFKlass klass, CallStyle callStyle, boolean isAbstract,
         String methodId, String methodName,
-        Method meth, DFTypeFinder finder)
-        throws InvalidSyntax {
+        Method meth, DFTypeFinder finder) {
         super(klass, callStyle, isAbstract, methodId, methodName);
 
         _finder = new DFTypeFinder(this, finder);
@@ -36,8 +35,7 @@ public class DFJarFileMethod extends DFMethod {
 
     // Protected constructor for a parameterized method.
     private DFJarFileMethod(
-        DFJarFileMethod genericMethod, Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+        DFJarFileMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _finder = new DFTypeFinder(this, genericMethod._finder);
@@ -51,16 +49,14 @@ public class DFJarFileMethod extends DFMethod {
 
     // Parameterize the klass.
     @Override
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         return new DFJarFileMethod(this, paramTypes);
     }
 
     // Builds the internal structure.
     @SuppressWarnings("unchecked")
-    private void build()
-        throws InvalidSyntax {
+    private void build() {
         assert _finder != null;
         assert _meth != null;
 

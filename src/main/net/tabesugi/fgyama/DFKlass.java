@@ -21,8 +21,7 @@ class FallbackMethod extends DFMethod {
         _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
     }
 
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -210,14 +209,12 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Creates a parameterized klass.
-    public DFKlass getConcreteKlass()
-        throws InvalidSyntax {
+    public DFKlass getDefaultKlass() {
         if (_mapTypes == null) return this;
         return this.getConcreteKlass(new DFKlass[] {});
     }
 
-    public DFKlass getConcreteKlass(DFKlass[] argTypes)
-        throws InvalidSyntax {
+    public DFKlass getConcreteKlass(DFKlass[] argTypes) {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
         assert _mapTypes != null;
         assert _paramTypes == null;
@@ -281,7 +278,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isFuncInterface() {
-        assert this.isLoaded();
+        this.load();
         if (!this.isInterface()) return false;
         // Count the number of abstract methods.
         int n = 0;
@@ -293,9 +290,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
-    public DFKlass load()
-        throws InvalidSyntax {
+    public DFKlass load() {
         // an unspecified parameterized klass cannot be loaded.
+        assert _mapTypes == null;
         if (_state == LoadState.Unloaded) {
             _state = LoadState.Loading;
             this.build();
@@ -306,7 +303,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
-        assert this.isLoaded();
+        this.load();
         writer.writeAttribute("name", this.getTypeName());
         writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
         DFKlass baseKlass = this.getBaseKlass();
@@ -351,32 +348,32 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public List<FieldRef> getFields() {
-        assert this.isLoaded();
+        this.load();
         return _fields;
     }
 
     public DFRef getField(SimpleName name) {
-        assert this.isLoaded();
+        this.load();
         return this.getField(name.getIdentifier());
     }
 
     public DFRef getField(String id) {
-        assert this.isLoaded();
+        this.load();
         return _id2field.get(id);
     }
 
     public List<DFMethod> getMethods() {
-        assert this.isLoaded();
+        this.load();
         return _methods;
     }
 
     public DFMethod getMethod(String key) {
-        assert this.isLoaded();
+        this.load();
         return _id2method.get(key);
     }
 
     public DFMethod getFuncMethod() {
-        assert this.isLoaded();
+        this.load();
         for (DFMethod method : this.getMethods()) {
             if (method.isAbstract()) return method;
         }
@@ -386,7 +383,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
         //Logger.info("DFKlass.findMethod", this, callStyle, id, Utils.join(argTypes));
-        assert this.isLoaded();
+        this.load();
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -412,13 +409,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
-        assert this.isLoaded();
+        this.load();
         String id = (name == null)? null : name.getIdentifier();
         return this.findMethod(callStyle, id, argTypes);
     }
 
     public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
-        assert this.isLoaded();
+        this.load();
         DFMethod method = new FallbackMethod(this, name, argTypes);
         // Do not adds to _methods because it shouldn't be analyzed.
         _id2method.put(name, method);
@@ -427,10 +424,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     /// For constructions.
 
-    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax;
+    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
 
-    protected abstract void build() throws InvalidSyntax;
+    protected abstract void build();
 
     protected void setMapTypes(DFMapType[] mapTypes) {
         assert mapTypes != null;

@@ -37,19 +37,17 @@ public class DFTypeFinder {
     }
 
     public DFKlass lookupKlass(Name name)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         return this.lookupKlass(name.getFullyQualifiedName());
     }
 
     public DFKlass lookupKlass(String name)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
         while (finder != null) {
             DFKlass klass = finder._space.getKlass(name);
-            if (klass != null) {
-                return klass.load();
-            }
+            if (klass != null) return klass;
             finder = finder._next;
         }
         throw new TypeNotFound(name, this);
@@ -57,8 +55,20 @@ public class DFTypeFinder {
 
     @SuppressWarnings("unchecked")
     public DFType resolve(Type type)
-        throws InvalidSyntax, TypeNotFound {
-        if (type instanceof PrimitiveType) {
+        throws TypeNotFound {
+        if (type instanceof SimpleType) {
+            return ((DFKlass)this.resolve1(type)).getDefaultKlass();
+        } else {
+            return this.resolve1(type);
+        }
+    }
+    @SuppressWarnings("unchecked")
+    private DFType resolve1(Type type)
+        throws TypeNotFound {
+        if (type instanceof SimpleType) {
+            SimpleType stype = (SimpleType)type;
+            return this.lookupKlass(stype.getName());
+        } else if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return DFBasicType.getType(ptype.getPrimitiveTypeCode());
         } else if (type instanceof ArrayType) {
@@ -66,23 +76,18 @@ public class DFTypeFinder {
             DFType elemType = this.resolve(atype.getElementType());
             int ndims = atype.getDimensions();
             return DFArrayType.getType(elemType, ndims);
-        } else if (type instanceof SimpleType) {
-            SimpleType stype = (SimpleType)type;
-            return this.lookupKlass(stype.getName());
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
-            DFType genericType = this.resolve(ptype.getType());
+            DFType genericType = this.resolve1(ptype.getType());
             assert genericType instanceof DFKlass;
             return this.getParameterized((DFKlass)genericType, ptype.typeArguments());
         } else if (type instanceof QualifiedType) {
             QualifiedType qtype = (QualifiedType)type;
             DFKlass klass = (DFKlass)this.resolve(qtype.getQualifier());
-            DFType innerType = klass.getKlass(qtype.getName());
-            if (innerType == null) {
+            DFKlass innerKlass = klass.getKlass(qtype.getName());
+            if (innerKlass == null) {
                 throw new TypeNotFound(qtype.toString(), this);
             }
-            DFKlass innerKlass = innerType.toKlass();
-            innerKlass.load();
             return innerKlass;
         } else if (type instanceof UnionType) {
             // XXX only consider the first type.
@@ -114,7 +119,7 @@ public class DFTypeFinder {
     }
 
     public DFType resolve(org.apache.bcel.generic.Type type)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         if (type.equals(org.apache.bcel.generic.BasicType.BOOLEAN)) {
             return DFBasicType.BOOLEAN;
         } else if (type.equals(org.apache.bcel.generic.BasicType.BYTE)) {
@@ -143,15 +148,14 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            return this.lookupKlass(className);
+            return this.lookupKlass(className).getDefaultKlass();
         } else {
             // ???
             throw new TypeNotFound(type.toString());
         }
     }
 
-    public DFType resolveSafe(Type type)
-        throws InvalidSyntax {
+    public DFType resolveSafe(Type type) {
         try {
             return this.resolve(type);
         } catch (TypeNotFound e) {
@@ -161,8 +165,7 @@ public class DFTypeFinder {
         }
     }
 
-    public DFType resolveSafe(org.apache.bcel.generic.Type type)
-        throws InvalidSyntax {
+    public DFType resolveSafe(org.apache.bcel.generic.Type type) {
         try {
             return this.resolve(type);
         } catch (TypeNotFound e) {
@@ -172,15 +175,13 @@ public class DFTypeFinder {
     }
 
     public DFKlass getParameterized(DFKlass klass, List<Type> typeArgs)
-        throws InvalidSyntax, TypeNotFound {
+        throws TypeNotFound {
         if (typeArgs == null || typeArgs.isEmpty()) return klass;
         DFKlass[] paramTypes = new DFKlass[typeArgs.size()];
         for (int i = 0; i < typeArgs.size(); i++) {
             paramTypes[i] = this.resolve(typeArgs.get(i)).toKlass();
         }
-        DFKlass paramKlass = klass.getConcreteKlass(paramTypes);
-        paramKlass.load();
-        return paramKlass;
+        return klass.getConcreteKlass(paramTypes);
     }
 
     // dump: for debugging.

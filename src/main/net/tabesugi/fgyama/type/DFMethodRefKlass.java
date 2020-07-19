@@ -22,8 +22,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                   false, id, id, scope, finder);
         }
 
-        protected DFMethod parameterize(Map<String, DFKlass> paramTypes)
-            throws InvalidSyntax {
+        protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
             return null;
         }
@@ -47,8 +46,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @SuppressWarnings("unchecked")
-        public void loadKlasses(Collection<DFSourceKlass> klasses)
-            throws InvalidSyntax {
+        public void loadKlasses(Collection<DFSourceKlass> klasses) {
             DFTypeFinder finder = this.getFinder();
             if (_methodRef instanceof CreationReference) {
                 CreationReference creatmref = (CreationReference)_methodRef;
@@ -77,11 +75,12 @@ class DFMethodRefKlass extends DFSourceKlass {
             } else if (_methodRef instanceof ExpressionMethodReference) {
                 // XXX ignored exprmref.typeArguments().
                 ExpressionMethodReference exprmref = (ExpressionMethodReference)_methodRef;
-                this.loadKlassesExpr(
-                    klasses, exprmref.getExpression());
-
-            } else {
-                throw new InvalidSyntax(_methodRef);
+                try {
+                    this.loadKlassesExpr(
+                        klasses, exprmref.getExpression());
+                } catch (InvalidSyntax e) {
+                    Logger.error("DFMethodRefKlass.loadKlasses:", e);
+                }
             }
         }
 
@@ -178,8 +177,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         _methodRef = methodRef;
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -211,7 +209,7 @@ class DFMethodRefKlass extends DFSourceKlass {
     }
 
     @Override
-    protected void build() throws InvalidSyntax {
+    protected void build() {
         DFTypeFinder finder = this.getFinder();
         _funcMethod = new FunctionalMethod(FUNC_NAME, this.getKlassScope(), finder);
         this.addMethod(_funcMethod, FUNC_NAME);

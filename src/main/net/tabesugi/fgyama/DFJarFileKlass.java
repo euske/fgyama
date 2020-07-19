@@ -105,20 +105,18 @@ public class DFJarFileKlass extends DFKlass {
 
     // Parameterize the klass.
     @Override
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         return new DFJarFileKlass(this, paramTypes);
     }
 
     @Override
-    public DFKlass getConcreteKlass(DFKlass[] argTypes)
-        throws InvalidSyntax {
+    public DFKlass getConcreteKlass(DFKlass[] argTypes) {
         this.preload();
         return super.getConcreteKlass(argTypes);
     }
 
-    private void preload() throws InvalidSyntax {
+    private void preload() {
         if (_jklass != null) return;
 
         assert this.getGenericKlass() == null;
@@ -151,7 +149,7 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    protected void build() throws InvalidSyntax {
+    protected void build() {
         this.preload();
         assert _jklass != null;
         //Logger.info("DFJarFileKlass.build:", this);
@@ -174,7 +172,6 @@ public class DFJarFileKlass extends DFKlass {
                     "DFJarFileKlass.build: TypeNotFound (baseKlass)",
                     this, e.name, sig);
             }
-            _baseKlass.load();
             List<DFKlass> ifaces = new ArrayList<DFKlass>();
             for (;;) {
                 DFType iface = DFBuiltinTypes.getObjectKlass();
@@ -190,9 +187,6 @@ public class DFJarFileKlass extends DFKlass {
             }
             _baseIfaces = new DFKlass[ifaces.size()];
             ifaces.toArray(_baseIfaces);
-            for (DFKlass iface : _baseIfaces) {
-                iface.load();
-            }
 
         } else {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -206,7 +200,6 @@ public class DFJarFileKlass extends DFKlass {
                         this, e.name);
                 }
             }
-            _baseKlass.load();
             String[] ifaces = _jklass.getInterfaceNames();
             if (ifaces != null) {
                 _baseIfaces = new DFKlass[ifaces.length];
@@ -220,9 +213,6 @@ public class DFJarFileKlass extends DFKlass {
                             this, e.name);
                     }
                     _baseIfaces[i] = iface;
-                }
-                for (DFKlass iface : _baseIfaces) {
-                    iface.load();
                 }
             }
         }

@@ -48,43 +48,54 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     }
 
     @SuppressWarnings("unchecked")
-    protected void build() throws InvalidSyntax {
-        if (_abstTypeDecl instanceof TypeDeclaration) {
-            if (this.getGenericKlass() == null) {
-                DFTypeFinder finder = this.getFinder();
-                TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
-                DFMapType[] mapTypes = this.createMapTypes(
-                    finder, typeDecl.typeParameters());
-                if (mapTypes != null) {
-                    this.setMapTypes(mapTypes);
+    protected void build() {
+        try {
+            if (_abstTypeDecl instanceof TypeDeclaration) {
+                if (this.getGenericKlass() == null) {
+                    DFTypeFinder finder = this.getFinder();
+                    TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
+                    DFMapType[] mapTypes = this.createMapTypes(
+                        finder, typeDecl.typeParameters());
+                    if (mapTypes != null) {
+                        this.setMapTypes(mapTypes);
+                    }
                 }
+                this.buildMembersFromTypeDecl(
+                    (TypeDeclaration)_abstTypeDecl);
+
+            } else if (_abstTypeDecl instanceof EnumDeclaration) {
+                this.buildMembersFromEnumDecl(
+                    (EnumDeclaration)_abstTypeDecl);
+
+            } else if (_abstTypeDecl instanceof AnnotationTypeDeclaration) {
+                this.buildMembersFromAnnotTypeDecl(
+                    (AnnotationTypeDeclaration)_abstTypeDecl);
             }
-            this.buildMembersFromTypeDecl(
-                (TypeDeclaration)_abstTypeDecl);
-
-        } else if (_abstTypeDecl instanceof EnumDeclaration) {
-            this.buildMembersFromEnumDecl(
-                (EnumDeclaration)_abstTypeDecl);
-
-        } else if (_abstTypeDecl instanceof AnnotationTypeDeclaration) {
-            this.buildMembersFromAnnotTypeDecl(
-                (AnnotationTypeDeclaration)_abstTypeDecl);
+        } catch (InvalidSyntax e) {
+            Logger.error("AbstTypeDeclKlass.build:", e);
         }
     }
 
     // Constructor for a parameterized klass.
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes)
-        throws InvalidSyntax {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
-        return new AbstTypeDeclKlass(this, paramTypes);
+        try {
+            return new AbstTypeDeclKlass(this, paramTypes);
+        } catch (InvalidSyntax e) {
+            Logger.error("AbstTypeDeclKlass.parameterize:", e);
+            return this;
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void loadKlasses(Collection<DFSourceKlass> klasses)
-        throws InvalidSyntax {
+    public void loadKlasses(Collection<DFSourceKlass> klasses) {
         if (klasses.contains(this)) return;
         super.loadKlasses(klasses);
-        this.loadKlassesDecls(klasses, _abstTypeDecl.bodyDeclarations());
+        try {
+            this.loadKlassesDecls(klasses, _abstTypeDecl.bodyDeclarations());
+        } catch (InvalidSyntax e) {
+            Logger.error("AbstTypeDeclKlass.loadKlasses:", e);
+        }
     }
 }
