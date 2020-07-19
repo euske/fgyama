@@ -31,6 +31,9 @@ public class DFJarFileKlass extends DFKlass {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
 
+    private Map<String, DFJarFileKlass> _id2jarklass =
+        new ConsistentHashMap<String, DFJarFileKlass>();
+
     // Normal constructor.
     public DFJarFileKlass(
         String name, DFTypeSpace outerSpace,
@@ -60,33 +63,33 @@ public class DFJarFileKlass extends DFKlass {
 
     @Override
     public boolean isInterface() {
-        assert this.isLoaded();
+        this.load();
         return _interface;
     }
 
     @Override
     public boolean isEnum() {
-        assert this.isLoaded();
+        this.load();
         return (_baseKlass != null &&
                 _baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
     }
 
     @Override
     public DFKlass getBaseKlass() {
-        assert this.isLoaded();
+        this.load();
         return _baseKlass;
     }
 
     @Override
     public DFKlass[] getBaseIfaces() {
-        assert this.isLoaded();
+        this.load();
         return _baseIfaces;
     }
 
     @Override
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        assert this.isLoaded();
+        this.load();
         DFMethod method = super.findMethod(callStyle, id, argTypes);
         if (method != null) return method;
         if (_baseKlass != null) {
@@ -113,6 +116,20 @@ public class DFJarFileKlass extends DFKlass {
     public DFKlass getConcreteKlass(DFKlass[] argTypes) {
         this.preload();
         return super.getConcreteKlass(argTypes);
+    }
+
+    // for loading nested klasses.
+
+    protected DFJarFileKlass addInnerKlass(String id, DFJarFileKlass klass) {
+        super.addKlass(id, klass);
+        assert id.indexOf('.') < 0;
+        _id2jarklass.put(id, klass);
+        return klass;
+    }
+
+    protected DFJarFileKlass getInnerKlass(String id) {
+        assert id.indexOf('.') < 0;
+        return _id2jarklass.get(id);
     }
 
     private void preload() {

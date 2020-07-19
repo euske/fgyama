@@ -111,7 +111,7 @@ public class DFTypeSpace {
             }
             DFKlass type = paramTypes.get(k);
             if (type instanceof DFMapType) {
-                type = ((DFMapType)type).getBoundKlass();
+                type = type.getBaseKlass();
             }
             b.append(type.getTypeName());
         }

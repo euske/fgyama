@@ -44,6 +44,18 @@ public class DFBuiltinTypes {
         }
         protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
+            return this;
+        }
+        public boolean isInterface() {
+            return false;
+        }
+        public boolean isEnum() {
+            return false;
+        }
+        public DFKlass getBaseKlass() {
+            return _object;
+        }
+        public DFKlass[] getBaseIfaces() {
             return null;
         }
     }

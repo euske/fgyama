@@ -13,7 +13,7 @@ public class DFMapType extends DFKlass {
 
     private String _name;
     private DFTypeFinder _finder;
-    private DFKlass _boundKlass = null;
+    private DFKlass _baseKlass = null;
 
     private String _sig = null;
     private List<Type> _types = null;
@@ -58,11 +58,25 @@ public class DFMapType extends DFKlass {
         return _name;
     }
 
-    public DFKlass getBoundKlass() {
+    public boolean isInterface() {
         this.load();
-        assert _boundKlass != null;
-        return _boundKlass;
+        return _baseKlass.isInterface();
     }
+
+    public boolean isEnum() {
+        this.load();
+        return _baseKlass.isEnum();
+    }
+
+    public DFKlass getBaseKlass() {
+        this.load();
+        return _baseKlass;
+    }
+
+    public DFKlass[] getBaseIfaces() {
+        return null;
+    }
+
 
     @Override
     public DFKlass getKlass(String id) {
@@ -78,11 +92,11 @@ public class DFMapType extends DFKlass {
         if (this == klass) return 0;
         assert !(klass instanceof DFMapType);
         if (typeMap == null) {
-            return _boundKlass.isSubclassOf(klass, typeMap);
+            return _baseKlass.isSubclassOf(klass, typeMap);
         }
         DFKlass self = typeMap.get(this);
         if (self == null) {
-            int dist = _boundKlass.isSubclassOf(klass, typeMap);
+            int dist = _baseKlass.isSubclassOf(klass, typeMap);
             if (dist < 0) return -1;
             typeMap.put(this, klass);
             return dist;
@@ -93,12 +107,12 @@ public class DFMapType extends DFKlass {
 
     protected void build() {
         assert _sig == null || _types == null;
-        _boundKlass = DFBuiltinTypes.getObjectKlass();
+        _baseKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);
             parser.skipMapTypes();
             try {
-                _boundKlass = parser.resolveType(_finder).toKlass();
+                _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFMapType.build: TypeNotFound",
@@ -107,7 +121,7 @@ public class DFMapType extends DFKlass {
         } else if (_types != null) {
             try {
                 for (Type type : _types) {
-                    _boundKlass = _finder.resolve(type).toKlass();
+                    _baseKlass = _finder.resolve(type).toKlass();
                     break;
                 }
             } catch (TypeNotFound e) {

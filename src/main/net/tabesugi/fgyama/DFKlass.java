@@ -37,8 +37,7 @@ class FallbackMethod extends DFMethod {
 //
 //  Usage:
 //    1. new DFKlass()
-//    2. load()
-//    3. getXXX(), ...
+//    2. getXXX(), ...
 //
 //  Implement:
 //    parameterize(paramTypes)
@@ -132,24 +131,25 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             DFKlass paramType = _paramTypes.get(id);
             if (paramType != null) return paramType;
         }
+
         DFKlass klass = super.getKlass(id);
         if (klass != null) return klass;
-        if (this.isLoaded()) {
-            DFKlass baseKlass = this.getBaseKlass();
-            if (baseKlass != null) {
-                klass = baseKlass.getKlass(id);
-                if (klass != null) return klass;
-            }
-            DFKlass[] baseIfaces = this.getBaseIfaces();
-            if (baseIfaces != null) {
-                for (DFKlass iface : baseIfaces) {
-                    if (iface != null) {
-                        klass = iface.getKlass(id);
-                        if (klass != null) return klass;
-                    }
+
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            klass = baseKlass.getKlass(id);
+            if (klass != null) return klass;
+        }
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
+                if (iface != null) {
+                    klass = iface.getKlass(id);
+                    if (klass != null) return klass;
                 }
             }
         }
+
         return null;
     }
 
@@ -186,7 +186,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         if (klass instanceof DFMapType) {
             DFMapType mapType = (DFMapType)klass;
-            int dist = this.isSubclassOf(mapType.getBoundKlass(), typeMap);
+            int dist = this.isSubclassOf(mapType.getBaseKlass(), typeMap);
             if (dist < 0) return -1;
             typeMap.put(mapType, this);
             return dist;
@@ -241,18 +241,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return klass;
     }
 
-    public boolean isLoaded() {
-        return (_state == LoadState.Loaded);
-    }
-
-    public boolean isInterface() {
-        return false;
-    }
-
-    public boolean isEnum() {
-        return false;
-    }
-
     public boolean isGeneric() {
         return _mapTypes != null;
     }
@@ -269,14 +257,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _genericKlass;
     }
 
-    public DFKlass getBaseKlass() {
-        return null;
-    }
-
-    public DFKlass[] getBaseIfaces() {
-        return null;
-    }
-
     public boolean isFuncInterface() {
         this.load();
         if (!this.isInterface()) return false;
@@ -288,17 +268,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
         return (n == 1);
-    }
-
-    public DFKlass load() {
-        // an unspecified parameterized klass cannot be loaded.
-        assert _mapTypes == null;
-        if (_state == LoadState.Unloaded) {
-            _state = LoadState.Loading;
-            this.build();
-            _state = LoadState.Loaded;
-        }
-        return this;
     }
 
     public void writeXML(XMLStreamWriter writer)
@@ -422,11 +391,28 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return method;
     }
 
+    public abstract boolean isInterface();
+    public abstract boolean isEnum();
+    public abstract DFKlass getBaseKlass();
+    public abstract DFKlass[] getBaseIfaces();
+
     /// For constructions.
 
-    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
+    protected DFKlass load() {
+        // an unspecified parameterized klass cannot be loaded.
+        assert _mapTypes == null;
+        if (_state == LoadState.Unloaded) {
+            _state = LoadState.Loading;
+            //Logger.info("build:", this);
+            this.build();
+            _state = LoadState.Loaded;
+        }
+        return this;
+    }
 
     protected abstract void build();
+
+    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
 
     protected void setMapTypes(DFMapType[] mapTypes) {
         assert mapTypes != null;

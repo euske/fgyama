@@ -430,37 +430,6 @@ public abstract class DFSourceKlass extends DFKlass {
         return _filePath;
     }
 
-    @Override
-    public boolean isInterface() {
-        assert this.isLoaded();
-        return _interface;
-    }
-
-    @Override
-    public boolean isEnum() {
-        assert this.isLoaded();
-        return (_baseKlass != null &&
-                _baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
-    }
-
-    @Override
-    public DFKlass getBaseKlass() {
-        assert this.isLoaded();
-        if (_baseKlass != null) return _baseKlass;
-        return super.getBaseKlass();
-    }
-
-    @Override
-    public DFKlass[] getBaseIfaces() {
-        assert this.isLoaded();
-        return _baseIfaces;
-    }
-
-    public DFMethod getInitMethod() {
-        assert this.isLoaded();
-        return _initMethod;
-    }
-
     public DFVarScope getOuterScope() {
         return _outerScope;
     }
@@ -472,9 +441,34 @@ public abstract class DFSourceKlass extends DFKlass {
     public abstract ASTNode getAST();
 
     @Override
+    public boolean isInterface() {
+        this.load();
+        return _interface;
+    }
+
+    @Override
+    public boolean isEnum() {
+        this.load();
+        return (_baseKlass != null &&
+                _baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
+    }
+
+    @Override
+    public DFKlass getBaseKlass() {
+        this.load();
+        return _baseKlass;
+    }
+
+    @Override
+    public DFKlass[] getBaseIfaces() {
+        this.load();
+        return _baseIfaces;
+    }
+
+    @Override
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        assert this.isLoaded();
+        this.load();
         DFMethod method = super.findMethod(callStyle, id, argTypes);
         if (method != null) return method;
         if (_outerKlass != null) {
@@ -492,6 +486,11 @@ public abstract class DFSourceKlass extends DFKlass {
             }
         }
         return null;
+    }
+
+    public DFMethod getInitMethod() {
+        this.load();
+        return _initMethod;
     }
 
     public void overrideMethods() {

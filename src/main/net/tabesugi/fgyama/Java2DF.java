@@ -280,7 +280,6 @@ public class Java2DF {
             }
             // Build call graphs (lambda and methodref).
             for (DFSourceKlass klass : defined) {
-                assert klass.isLoaded();
                 klass.enumRefs(tmp);
                 for (DFMethod method : klass.getMethods()) {
                     if (method instanceof DFSourceMethod) {
