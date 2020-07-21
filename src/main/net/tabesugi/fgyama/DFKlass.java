@@ -113,7 +113,21 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public String getTypeName() {
-        return "L"+_outerSpace.getSpaceName()+_name+";";
+        if (_mapTypes != null) {
+            String[] keys = new String[_mapTypes.size()];
+            _mapTypes.keySet().toArray(keys);
+            Arrays.sort(keys);
+            StringBuilder b = new StringBuilder();
+            for (String k : keys) {
+                if (0 < b.length()) {
+                    b.append(",");
+                }
+                b.append(k);
+            }
+            return "L"+_outerSpace.getSpaceName()+_name+"<"+b.toString()+">;";
+        } else {
+            return "L"+_outerSpace.getSpaceName()+_name+";";
+        }
     }
 
     @Override
