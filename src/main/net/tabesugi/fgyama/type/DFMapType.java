@@ -12,30 +12,27 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
-    private DFTypeFinder _finder;
-    private DFKlass _baseKlass = null;
-
     private String _sig = null;
     private List<Type> _types = null;
 
+    private DFTypeFinder _finder = null;
+    private DFKlass _baseKlass = null;
+
     private DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder) {
+        String name, DFTypeSpace outerSpace) {
         super(name, outerSpace);
         _name = name;
-        _finder = finder;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder,
-        List<Type> types) {
-        this(name, outerSpace, finder);
+        String name, DFTypeSpace outerSpace, List<Type> types) {
+        this(name, outerSpace);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder,
-        String sig) {
-        this(name, outerSpace, finder);
+        String name, DFTypeSpace outerSpace, String sig) {
+        this(name, outerSpace);
         _sig = sig;
     }
 
@@ -105,8 +102,13 @@ public class DFMapType extends DFKlass {
         }
     }
 
+    public void setFinder(DFTypeFinder finder) {
+        _finder = finder;
+    }
+
     protected void build() {
         assert _sig == null || _types == null;
+        assert _finder != null;
         _baseKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);

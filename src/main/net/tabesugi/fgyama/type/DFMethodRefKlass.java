@@ -217,6 +217,7 @@ class DFMethodRefKlass extends DFSourceKlass {
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
+        this.load();
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.

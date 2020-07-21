@@ -23,6 +23,13 @@ class AbstTypeDeclKlass extends DFSourceKlass {
               outerSpace, outerKlass, filePath, outerScope);
 
         _abstTypeDecl = abstTypeDecl;
+        if (_abstTypeDecl instanceof TypeDeclaration) {
+            TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
+            DFMapType[] mapTypes = this.createMapTypes(typeDecl.typeParameters());
+            if (mapTypes != null) {
+                this.setMapTypes(mapTypes);
+            }
+        }
         this.buildTypeFromDecls(abstTypeDecl.bodyDeclarations());
     }
 
@@ -51,15 +58,6 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     protected void build() {
         try {
             if (_abstTypeDecl instanceof TypeDeclaration) {
-                if (this.getGenericKlass() == null) {
-                    DFTypeFinder finder = this.getFinder();
-                    TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
-                    DFMapType[] mapTypes = this.createMapTypes(
-                        finder, typeDecl.typeParameters());
-                    if (mapTypes != null) {
-                        this.setMapTypes(mapTypes);
-                    }
-                }
                 this.buildMembersFromTypeDecl(
                     (TypeDeclaration)_abstTypeDecl);
 

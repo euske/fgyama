@@ -124,9 +124,12 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     @Override
     public DFKlass getKlass(String id) {
         if (_mapTypes != null) {
+            // If this is a generic klass,
             DFMapType mapType = _mapTypes.get(id);
             if (mapType != null) return mapType;
+            return super.getKlass(id);
         }
+
         if (_paramTypes != null) {
             DFKlass paramType = _paramTypes.get(id);
             if (paramType != null) return paramType;
@@ -398,7 +401,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     /// For constructions.
 
-    protected DFKlass load() {
+    protected void load() {
         // an unspecified parameterized klass cannot be loaded.
         assert _mapTypes == null;
         if (_state == LoadState.Unloaded) {
@@ -407,7 +410,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             this.build();
             _state = LoadState.Loaded;
         }
-        return this;
     }
 
     protected abstract void build();
@@ -424,6 +426,14 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             _mapTypes.put(mapType.getName(), mapType);
         }
         _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+    }
+
+    protected void setMapTypeFinder(DFTypeFinder finder) {
+        if (_mapTypes != null) {
+            for (DFMapType mapType : _mapTypes.values()) {
+                mapType.setFinder(finder);
+            }
+        }
     }
 
     protected DFRef addField(

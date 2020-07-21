@@ -241,6 +241,7 @@ class DFLambdaKlass extends DFSourceKlass {
     @Override
     public void setBaseKlass(DFKlass klass) {
         super.setBaseKlass(klass);
+        this.load();
         assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();
