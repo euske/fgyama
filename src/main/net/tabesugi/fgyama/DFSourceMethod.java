@@ -464,6 +464,7 @@ public abstract class DFSourceMethod extends DFMethod {
     protected void enumKlassesStmt(
         Collection<DFSourceKlass> klasses, Statement stmt)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -640,6 +641,7 @@ public abstract class DFSourceMethod extends DFMethod {
     protected void enumKlassesExpr(
         Collection<DFSourceKlass> klasses, Expression expr)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         assert expr != null;
 
         if (expr instanceof Annotation) {
@@ -859,6 +861,7 @@ public abstract class DFSourceMethod extends DFMethod {
         Collection<DFSourceKlass> defined,
         DFLocalScope scope, Statement stmt)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -1094,6 +1097,7 @@ public abstract class DFSourceMethod extends DFMethod {
         Collection<DFSourceKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         assert expr != null;
 
         if (expr instanceof Annotation) {

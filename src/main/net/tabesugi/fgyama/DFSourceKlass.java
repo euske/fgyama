@@ -242,7 +242,7 @@ class DefinedMethod extends DFSourceMethod {
 
     @SuppressWarnings("unchecked")
     public void enumKlasses(Collection<DFSourceKlass> klasses) {
-        if (this.isGeneric()) return;
+        assert !this.isGeneric();
         DFTypeFinder finder = this.getFinder();
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         for (SingleVariableDeclaration varDecl : varDecls) {
@@ -268,7 +268,7 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     public void enumRefs(Collection<DFSourceKlass> defined) {
-        if (this.isGeneric()) return;
+        assert !this.isGeneric();
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
         if (this.getCallStyle() == CallStyle.Constructor) {
@@ -716,7 +716,7 @@ public abstract class DFSourceKlass extends DFKlass {
     }
 
     public void enumKlasses(Collection<DFSourceKlass> klasses) {
-        if (this.isGeneric()) return;
+        assert !this.isGeneric();
         if (klasses.contains(this)) return;
         klasses.add(this);
         //Logger.info("enumKlasses:", this);
@@ -724,6 +724,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public void enumRefs(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         if (_initMethod != null) {
             _initMethod.enumRefs(defined);
         }
@@ -738,6 +739,7 @@ public abstract class DFSourceKlass extends DFKlass {
     protected void enumKlassesDecls(
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
+        assert !this.isGeneric();
         if (_initMethod != null) {
             _initMethod.enumKlasses(klasses);
         }
