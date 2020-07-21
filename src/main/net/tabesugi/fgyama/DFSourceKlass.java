@@ -67,9 +67,9 @@ class InitMethod extends DFSourceMethod {
         }
     }
 
-    // enumKlasses: enumerate all referenced Klasses.
+    // listUsedKlasses: enumerate all referenced Klasses.
     @SuppressWarnings("unchecked")
-    public void enumKlasses(Collection<DFSourceKlass> klasses) {
+    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
         try {
             for (BodyDeclaration body : _decls) {
                 if (body instanceof FieldDeclaration) {
@@ -78,25 +78,26 @@ class InitMethod extends DFSourceMethod {
                              (List<VariableDeclarationFragment>) decl.fragments()) {
                         Expression expr = frag.getInitializer();
                         if (expr != null) {
-                            this.enumKlassesExpr(klasses, expr);
+                            this.listUsedExpr(klasses, expr);
                         }
                     }
                 } else if (body instanceof Initializer) {
                     Initializer initializer = (Initializer)body;
                     Statement stmt = initializer.getBody();
                     if (stmt != null) {
-                        this.enumKlassesStmt(klasses, stmt);
+                        this.listUsedStmt(klasses, stmt);
                     }
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.enumKlasses: ", e);
+            Logger.error("DFSourceKlass.listUsedKlasses: ", e);
         }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void enumRefs(Collection<DFSourceKlass> defined) {
+    public void listDefinedKlasses(Collection<DFSourceKlass> defined) {
+        if (this.isGeneric()) return;
         DFLocalScope scope = this.getScope();
         try {
             for (BodyDeclaration body : _decls) {
@@ -108,7 +109,7 @@ class InitMethod extends DFSourceMethod {
                             DFRef ref = scope.lookupVar(frag.getName());
                             Expression init = frag.getInitializer();
                             if (init != null) {
-                                this.enumRefsExpr(defined, scope, init);
+                                this.listDefinedExpr(defined, scope, init);
                                 this.setLambdaType(defined, ref.getRefType(), init);
                             }
                         } catch (VariableNotFound e) {
@@ -116,11 +117,11 @@ class InitMethod extends DFSourceMethod {
                     }
                 } else if (body instanceof Initializer) {
                     Initializer initializer = (Initializer)body;
-                    this.enumRefsStmt(defined, scope, initializer.getBody());
+                    this.listDefinedStmt(defined, scope, initializer.getBody());
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.enumRefs: ", e);
+            Logger.error("DFSourceKlass.listDefinedKlasses: ", e);
         }
     }
 
@@ -241,34 +242,34 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     @SuppressWarnings("unchecked")
-    public void enumKlasses(Collection<DFSourceKlass> klasses) {
-        assert !this.isGeneric();
+    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
+        if (this.isGeneric()) return;
         DFTypeFinder finder = this.getFinder();
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         for (SingleVariableDeclaration varDecl : varDecls) {
             DFType argType = finder.resolveSafe(varDecl.getType());
             if (argType instanceof DFSourceKlass) {
-                ((DFSourceKlass)argType).enumKlasses(klasses);
+                ((DFSourceKlass)argType).listUsedKlasses(klasses);
             }
         }
         if (!_methodDecl.isConstructor()) {
             DFType returnType = finder.resolveSafe(_methodDecl.getReturnType2());
             if (returnType instanceof DFSourceKlass) {
-                ((DFSourceKlass)returnType).enumKlasses(klasses);
+                ((DFSourceKlass)returnType).listUsedKlasses(klasses);
             }
         }
         if (_methodDecl.getBody() != null) {
             try {
-                this.enumKlassesStmt(klasses, _methodDecl.getBody());
+                this.listUsedStmt(klasses, _methodDecl.getBody());
             } catch (InvalidSyntax e) {
-                Logger.error("DFSourceKlass.enumKlasses:", e);
+                Logger.error("DFSourceKlass.listUsedKlasses:", e);
             }
         }
     }
 
     @Override
-    public void enumRefs(Collection<DFSourceKlass> defined) {
-        assert !this.isGeneric();
+    public void listDefinedKlasses(Collection<DFSourceKlass> defined) {
+        if (this.isGeneric()) return;
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
         if (this.getCallStyle() == CallStyle.Constructor) {
@@ -282,9 +283,9 @@ class DefinedMethod extends DFSourceMethod {
         }
         DFLocalScope scope = this.getScope();
         try {
-            this.enumRefsStmt(defined, scope, _methodDecl.getBody());
+            this.listDefinedStmt(defined, scope, _methodDecl.getBody());
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.enumRefs:", e);
+            Logger.error("DFSourceKlass.listDefinedKlasses:", e);
         }
     }
 
@@ -715,46 +716,46 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void enumKlasses(Collection<DFSourceKlass> klasses) {
+    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
         assert !this.isGeneric();
         if (klasses.contains(this)) return;
         klasses.add(this);
-        //Logger.info("enumKlasses:", this);
+        //Logger.info("listUsedKlasses:", this);
     }
 
-    public void enumRefs(Collection<DFSourceKlass> defined)
+    public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         assert !this.isGeneric();
         if (_initMethod != null) {
-            _initMethod.enumRefs(defined);
+            _initMethod.listDefinedKlasses(defined);
         }
         for (DFMethod method : this.getMethods()) {
             if (method instanceof DFSourceMethod) {
-                ((DFSourceMethod)method).enumRefs(defined);
+                ((DFSourceMethod)method).listDefinedKlasses(defined);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected void enumKlassesDecls(
+    protected void listUsedDecls(
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         assert !this.isGeneric();
         if (_initMethod != null) {
-            _initMethod.enumKlasses(klasses);
+            _initMethod.listUsedKlasses(klasses);
         }
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration decl = (AbstractTypeDeclaration)body;
                 DFKlass innerType = this.getKlass(decl.getName());
                 assert innerType instanceof DFSourceKlass;
-                ((DFSourceKlass)innerType).enumKlasses(klasses);
+                ((DFSourceKlass)innerType).listUsedKlasses(klasses);
 
             } else if (body instanceof FieldDeclaration) {
                 FieldDeclaration decl = (FieldDeclaration)body;
                 DFType fldType = _finder.resolveSafe(decl.getType());
                 if (fldType instanceof DFSourceKlass) {
-                    ((DFSourceKlass)fldType).enumKlasses(klasses);
+                    ((DFSourceKlass)fldType).listUsedKlasses(klasses);
                 }
 
             } else if (body instanceof MethodDeclaration) {
@@ -762,7 +763,7 @@ public abstract class DFSourceKlass extends DFKlass {
                 String id = Utils.encodeASTNode(decl);
                 DFMethod method = this.getMethod(id);
                 assert method instanceof DFSourceMethod;
-                ((DFSourceMethod)method).enumKlasses(klasses);
+                ((DFSourceMethod)method).listUsedKlasses(klasses);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -771,7 +772,7 @@ public abstract class DFSourceKlass extends DFKlass {
                     (AnnotationTypeMemberDeclaration)body;
                 DFType type = _finder.resolveSafe(decl.getType());
                 if (type instanceof DFSourceKlass) {
-                    ((DFSourceKlass)type).enumKlasses(klasses);
+                    ((DFSourceKlass)type).listUsedKlasses(klasses);
                 }
 
             } else if (body instanceof Initializer) {

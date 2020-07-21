@@ -159,12 +159,12 @@ public class Java2DF {
             new ConsistentHashSet<DFSourceKlass>();
         for (Entry e : _sourceFiles) {
             Logger.info("Stage3:", e.key);
-            this.enumKlasses(e.key, e.cunit, klasses);
+            this.listUsedKlasses(e.key, e.cunit, klasses);
         }
 
-        // Stage4: list all methods.
-        Logger.info("Stage4: listing methods for "+klasses.size()+" klasses...");
-        this.listMethods(klasses);
+        // Stage4: expand classes.
+        Logger.info("Stage4: expanding "+klasses.size()+" klasses...");
+        this.expandKlasses(klasses);
 
         return klasses;
     }
@@ -224,7 +224,7 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void enumKlasses(
+    private void listUsedKlasses(
         String key, CompilationUnit cunit, Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
@@ -242,13 +242,13 @@ public class Java2DF {
                 fileScope.importStatic(klass, qname.getName());
             }
         }
-        // Enumerate all the klasses used.
+        // List all the klasses used.
         for (DFSourceKlass klass : _fileKlasses.get(key)) {
-            klass.enumKlasses(klasses);
+            klass.listUsedKlasses(klasses);
         }
     }
 
-    private void listMethods(Collection<DFSourceKlass> klasses)
+    private void expandKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
@@ -263,7 +263,7 @@ public class Java2DF {
         // Build call graphs (normal classes).
         Collection<DFSourceKlass> defined = new ArrayList<DFSourceKlass>();
         for (DFSourceKlass klass : klasses) {
-            klass.enumRefs(defined);
+            klass.listDefinedKlasses(defined);
             for (DFMethod method : klass.getMethods()) {
                 if (method instanceof DFSourceMethod) {
                     queue.add((DFSourceMethod)method);
@@ -280,7 +280,7 @@ public class Java2DF {
             }
             // Build call graphs (lambda and methodref).
             for (DFSourceKlass klass : defined) {
-                klass.enumRefs(tmp);
+                klass.listDefinedKlasses(tmp);
                 for (DFMethod method : klass.getMethods()) {
                     if (method instanceof DFSourceMethod) {
                         queue.add((DFSourceMethod)method);

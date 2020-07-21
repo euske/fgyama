@@ -72,27 +72,27 @@ class DFLambdaKlass extends DFSourceKlass {
             return _funcType;
         }
 
-        public void enumKlasses(Collection<DFSourceKlass> klasses)
+        public void listUsedKlasses(Collection<DFSourceKlass> klasses)
             throws InvalidSyntax {
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
-                this.enumKlassesStmt(klasses, (Statement)body);
+                this.listUsedStmt(klasses, (Statement)body);
             } else if (body instanceof Expression) {
-                this.enumKlassesExpr(klasses, (Expression)body);
+                this.listUsedExpr(klasses, (Expression)body);
             } else {
                 throw new InvalidSyntax(body);
             }
         }
 
         @Override
-        public void enumRefs(Collection<DFSourceKlass> defined)
+        public void listDefinedKlasses(Collection<DFSourceKlass> defined)
             throws InvalidSyntax {
             DFLocalScope scope = this.getScope();
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
-                this.enumRefsStmt(defined, scope, (Statement)body);
+                this.listDefinedStmt(defined, scope, (Statement)body);
             } else if (body instanceof Expression) {
-                this.enumRefsExpr(defined, scope, (Expression)body);
+                this.listDefinedExpr(defined, scope, (Expression)body);
             } else {
                 throw new InvalidSyntax(body);
             }
