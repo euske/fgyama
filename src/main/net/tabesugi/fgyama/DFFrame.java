@@ -110,7 +110,7 @@ public class DFFrame {
         DFFrame frame = this;
         while (frame != null) {
             if (frame._catchKlass != null &&
-                0 <= catchKlass.isSubclassOf(frame._catchKlass, null)) break;
+                0 <= frame._catchKlass.canConvertFrom(catchKlass, null)) break;
             frame = frame._outer;
         }
         return frame;

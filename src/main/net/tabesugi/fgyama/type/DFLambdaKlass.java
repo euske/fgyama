@@ -206,13 +206,6 @@ class DFLambdaKlass extends DFSourceKlass {
         return ("<DFLambdaKlass("+this.getTypeName()+")>");
     }
 
-    @Override
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-        if (klass instanceof DFSourceKlass &&
-            ((DFSourceKlass)klass).isFuncInterface()) return 0;
-        return -1;
-    }
-
     public boolean isDefined() {
         return (_funcMethod != null && _funcMethod.getFuncType() != null);
     }
@@ -239,9 +232,9 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
-    public void setBaseKlass(DFKlass klass) {
-        super.setBaseKlass(klass);
+    protected void setBaseKlass(DFKlass klass) {
         this.load();
+        super.setBaseKlass(klass);
         assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
         DFMethod funcMethod = klass.getFuncMethod();

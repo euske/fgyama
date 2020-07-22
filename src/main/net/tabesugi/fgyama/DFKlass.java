@@ -175,17 +175,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
         if (klass == null) return -1;
-        // type is-a this.
-        return klass.isSubclassOf(this, typeMap);
+        return this.canConvertFrom(klass, typeMap);
     }
 
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
         if (this == klass) return 0;
-        if (_genericKlass != null && _genericKlass == klass.getGenericKlass()) {
-            // A<T> isSubclassOf B<S>?
-            // types0: T
-            assert _paramTypes != null;
-            assert klass._paramTypes != null;
+        if (_genericKlass != null && _genericKlass == klass._genericKlass) {
+            // A<S1,S2,...> canConvertFrom A<T1,T2,...>?
+            // == Si canConvertFrom T1
+            assert _paramTypes != null && klass._paramTypes != null;
             assert _paramTypes.size() == klass._paramTypes.size();
             int dist = 0;
             for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
@@ -193,32 +191,28 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 DFKlass type0 = e.getValue();
                 DFKlass type1 = klass._paramTypes.get(k);
                 assert type1 != null;
-                // T isSubclassOf S? -> S canConvertFrom T?
-                int d = type1.canConvertFrom(type0, typeMap);
+                int d = type0.canConvertFrom(type1, typeMap);
                 if (d < 0) return -1;
                 dist += d;
             }
             return dist;
         }
 
-        if (klass instanceof DFMapType) {
-            DFMapType mapType = (DFMapType)klass;
-            int dist = this.isSubclassOf(mapType.getBaseKlass(), typeMap);
-            if (dist < 0) return -1;
-            typeMap.put(mapType, this);
-            return dist;
+        if (klass instanceof DFLambdaKlass ||
+            klass instanceof DFMethodRefKlass) {
+            return (this.isFuncInterface())? 0 : -1;
         }
 
-        DFKlass baseKlass = this.getBaseKlass();
+        DFKlass baseKlass = klass.getBaseKlass();
         if (baseKlass != null) {
-            int dist = baseKlass.isSubclassOf(klass, typeMap);
+            int dist = this.canConvertFrom(baseKlass, typeMap);
             if (0 <= dist) return dist+1;
         }
 
-        DFKlass[] baseIfaces = this.getBaseIfaces();
+        DFKlass[] baseIfaces = klass.getBaseIfaces();
         if (baseIfaces != null) {
             for (DFKlass iface : baseIfaces) {
-                int dist = iface.isSubclassOf(klass, typeMap);
+                int dist = this.canConvertFrom(iface, typeMap);
                 if (0 <= dist) return dist+1;
             }
         }

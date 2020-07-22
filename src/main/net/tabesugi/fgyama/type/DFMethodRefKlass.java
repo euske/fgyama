@@ -191,13 +191,6 @@ class DFMethodRefKlass extends DFSourceKlass {
         return ("<DFMethodRefKlass("+this.getTypeName()+")>");
     }
 
-    @Override
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
-        if (klass instanceof DFSourceKlass &&
-            ((DFSourceKlass)klass).isFuncInterface()) return 0;
-        return -1;
-    }
-
     public boolean isDefined() {
         return _funcMethod.isDefined();
     }
@@ -216,8 +209,8 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     @Override
     public void setBaseKlass(DFKlass klass) {
-        super.setBaseKlass(klass);
         this.load();
+        super.setBaseKlass(klass);
         DFMethod funcMethod = klass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.

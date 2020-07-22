@@ -85,20 +85,19 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
-    public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
         if (this == klass) return 0;
-        assert !(klass instanceof DFMapType);
         if (typeMap == null) {
-            return _baseKlass.isSubclassOf(klass, typeMap);
+            return _baseKlass.canConvertFrom(klass, typeMap);
         }
         DFKlass self = typeMap.get(this);
         if (self == null) {
-            int dist = _baseKlass.isSubclassOf(klass, typeMap);
+            int dist = _baseKlass.canConvertFrom(klass, typeMap);
             if (dist < 0) return -1;
             typeMap.put(this, klass);
             return dist;
         } else {
-            return self.isSubclassOf(klass, typeMap);
+            return self.canConvertFrom(klass, typeMap);
         }
     }
 
