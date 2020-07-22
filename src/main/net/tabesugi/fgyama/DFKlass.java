@@ -171,14 +171,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
-        if (klass == null) return -1;
+        if (klass == null) throw new TypeIncompatible(this, type);
         return this.canConvertFrom(klass, typeMap);
     }
 
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         if (this == klass) return 0;
         if (_genericKlass != null && _genericKlass == klass._genericKlass) {
             // A<S1,S2,...> canConvertFrom A<T1,T2,...>?
@@ -191,32 +193,39 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 DFKlass type0 = e.getValue();
                 DFKlass type1 = klass._paramTypes.get(k);
                 assert type1 != null;
-                int d = type0.canConvertFrom(type1, typeMap);
-                if (d < 0) return -1;
-                dist += d;
+                dist += type0.canConvertFrom(type1, typeMap);
             }
             return dist;
         }
 
         if (klass instanceof DFLambdaKlass ||
             klass instanceof DFMethodRefKlass) {
-            return (this.isFuncInterface())? 0 : -1;
+            if (this.isFuncInterface()) {
+                return 0;
+            } else {
+                throw new TypeIncompatible(this, klass);
+            }
         }
 
         DFKlass baseKlass = klass.getBaseKlass();
         if (baseKlass != null) {
-            int dist = this.canConvertFrom(baseKlass, typeMap);
-            if (0 <= dist) return dist+1;
+            try {
+                return this.canConvertFrom(baseKlass, typeMap)+1;
+            } catch (TypeIncompatible e) {
+            }
         }
 
         DFKlass[] baseIfaces = klass.getBaseIfaces();
         if (baseIfaces != null) {
             for (DFKlass iface : baseIfaces) {
-                int dist = this.canConvertFrom(iface, typeMap);
-                if (0 <= dist) return dist+1;
+                try {
+                    return this.canConvertFrom(iface, typeMap)+1;
+                } catch (TypeIncompatible e) {
+                }
             }
         }
-        return -1;
+
+        throw new TypeIncompatible(this, klass);
     }
 
     // Creates a parameterized klass.
@@ -374,14 +383,17 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                     callStyle1 == DFMethod.CallStyle.StaticMethod)))) continue;
             if (id != null && !id.equals(method1.getName())) continue;
             Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
-            int dist = method1.canAccept(argTypes, typeMap);
-            if (dist < 0) continue;
-            if (bestDist < 0 || dist < bestDist) {
-                DFMethod method = method1.getConcreteMethod(typeMap);
-                if (method != null) {
-                    bestDist = dist;
-                    bestMethod = method;
+            try {
+                int dist = method1.canAccept(argTypes, typeMap);
+                if (bestDist < 0 || dist < bestDist) {
+                    DFMethod method = method1.getConcreteMethod(typeMap);
+                    if (method != null) {
+                        bestDist = dist;
+                        bestMethod = method;
+                    }
                 }
+            } catch (TypeIncompatible e) {
+                continue;
             }
         }
         return bestMethod;

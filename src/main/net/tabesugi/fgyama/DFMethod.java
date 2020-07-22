@@ -249,7 +249,8 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _overriding;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap) {
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         return this.getFuncType().canAccept(argTypes, typeMap);
     }
 

@@ -85,7 +85,8 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         if (this == klass) return 0;
         if (typeMap == null) {
             return _baseKlass.canConvertFrom(klass, typeMap);
@@ -93,7 +94,6 @@ public class DFMapType extends DFKlass {
         DFKlass self = typeMap.get(this);
         if (self == null) {
             int dist = _baseKlass.canConvertFrom(klass, typeMap);
-            if (dist < 0) return -1;
             typeMap.put(this, klass);
             return dist;
         } else {

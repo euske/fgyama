@@ -38,9 +38,10 @@ public class DFBuiltinTypes {
         protected void build() {
             this.addField(DFBasicType.INT, "length", false);
         }
-        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
+        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+            throws TypeIncompatible {
             if (this == klass) return 0;
-            return -1;
+            throw new TypeIncompatible(this, klass);
         }
         protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
             assert false;

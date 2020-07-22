@@ -32,8 +32,9 @@ public class DFUnknownType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
-        return -1;
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
+        throw new TypeIncompatible(this, type);
     }
 
     public static final DFType UNKNOWN =

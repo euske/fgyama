@@ -109,8 +109,13 @@ public class DFFrame {
     public DFFrame find(DFKlass catchKlass) {
         DFFrame frame = this;
         while (frame != null) {
-            if (frame._catchKlass != null &&
-                0 <= frame._catchKlass.canConvertFrom(catchKlass, null)) break;
+            if (frame._catchKlass != null) {
+                try {
+                    frame._catchKlass.canConvertFrom(catchKlass, null);
+                    break;
+                } catch (TypeIncompatible e) {
+                }
+            }
             frame = frame._outer;
         }
         return frame;

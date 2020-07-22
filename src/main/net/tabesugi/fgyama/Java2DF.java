@@ -42,14 +42,17 @@ class DFFileScope extends DFVarScope {
         for (DFMethod method1 : _methods) {
             if (!id.equals(method1.getName())) continue;
             Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
-            int dist = method1.canAccept(argTypes, typeMap);
-            if (dist < 0) continue;
-            if (bestDist < 0 || dist < bestDist) {
-                DFMethod method = method1.getConcreteMethod(typeMap);
-                if (method != null) {
-                    bestDist = dist;
-                    bestMethod = method;
+            try {
+                int dist = method1.canAccept(argTypes, typeMap);
+                if (bestDist < 0 || dist < bestDist) {
+                    DFMethod method = method1.getConcreteMethod(typeMap);
+                    if (method != null) {
+                        bestDist = dist;
+                        bestMethod = method;
+                    }
                 }
+            } catch (TypeIncompatible e) {
+                continue;
             }
         }
         return bestMethod;

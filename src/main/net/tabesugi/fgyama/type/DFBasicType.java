@@ -76,13 +76,14 @@ public class DFBasicType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         // Auto-unboxing.
         if (this == type) return 0;
         if (this.toKlass() == type) return 0;
-        if (!(type instanceof DFBasicType)) return -1;
+        if (!(type instanceof DFBasicType)) throw new TypeIncompatible(this, type);
         int rank = ((DFBasicType)type)._rank;
-        if (this._rank == 0 || rank == 0) return -1;
+        if (this._rank == 0 || rank == 0) throw new TypeIncompatible(this, type);
         return (this._rank - rank);
     }
 

@@ -61,11 +61,12 @@ public class DFArrayType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
-        if (!(type instanceof DFArrayType)) return -1;
+        if (!(type instanceof DFArrayType)) throw new TypeIncompatible(this, type);
         DFArrayType atype = (DFArrayType)type;
-        if (_ndims != atype._ndims) return -1;
+        if (_ndims != atype._ndims) throw new TypeIncompatible(this, type);
         return _elemType.canConvertFrom(atype._elemType, typeMap);
     }
 

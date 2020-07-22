@@ -176,10 +176,13 @@ public class DFNode implements Comparable<DFNode> {
         } else if (left instanceof DFUnknownType ||
                    right instanceof DFUnknownType) {
             return (left instanceof DFUnknownType)? right : left;
-        } else if (0 <= left.canConvertFrom(right, null)) {
-            return left;
         } else {
-            return right;
+            try {
+                left.canConvertFrom(right, null);
+                return left;
+            } catch (TypeIncompatible e) {
+                return right;
+            }
         }
     }
 

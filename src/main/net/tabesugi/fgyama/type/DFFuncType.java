@@ -70,37 +70,34 @@ public class DFFuncType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap) {
-        if (!(type instanceof DFFuncType)) return -1;
+    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
+        if (!(type instanceof DFFuncType)) throw new TypeIncompatible(this, type);
         DFFuncType mtype = (DFFuncType)type;
         int dist = this.canAccept(mtype._argTypes, typeMap);
-        if (dist < 0) return -1;
         if (_returnType != null && mtype._returnType != null) {
-            int d = _returnType.canConvertFrom(mtype._returnType, typeMap);
-            if (d < 0) return -1;
-            dist += d;
+            dist += _returnType.canConvertFrom(mtype._returnType, typeMap);
         }
         return dist;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap) {
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap)
+        throws TypeIncompatible {
         // Always accept if the signature is unknown.
         if (_argTypes == null || argTypes == null) return 0;
         if (_varargs) {
             // For varargs methods, the minimum number of arguments is required.
-            if (argTypes.length < _argTypes.length-1) return -1;
+            if (argTypes.length < _argTypes.length-1) throw new TypeIncompatible(this, null);
         } else {
             // For fixed-args methods, the exact number of arguments is required.
-            if (argTypes.length != _argTypes.length) return -1;
+            if (argTypes.length != _argTypes.length) throw new TypeIncompatible(this, null);
         }
         int dist = 0;
         for (int i = 0; i < argTypes.length; i++) {
             DFType typePassed = argTypes[i];
             DFType typeRecv = this.getArgType(i);
             if (typeRecv == null || typePassed == null) continue;
-            int d = typeRecv.canConvertFrom(typePassed, typeMap);
-            if (d < 0) return -1;
-            dist += d;
+            dist += typeRecv.canConvertFrom(typePassed, typeMap);
         }
         return dist;
     }
