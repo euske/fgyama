@@ -40,6 +40,7 @@ public class DFBuiltinTypes {
         }
         public int isSubclassOf(DFKlass klass, Map<DFMapType, DFKlass> typeMap) {
             if (this == klass) return 0;
+            if (_object == klass) return 1;
             return -1;
         }
         protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
