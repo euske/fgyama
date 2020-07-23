@@ -1306,7 +1306,7 @@ public abstract class DFGraph {
                         String id = invoke.getName().getIdentifier();
                         method = instKlass.addFallbackMethod(id, argTypes);
                         Logger.error(
-                            "DFMethod.processExpression: MethodNotFound",
+                            "DFGraph.processExpression: MethodNotFound",
                             this, instKlass, expr);
                         Logger.info("Fallback method:", method);
                     }
@@ -1346,7 +1346,7 @@ public abstract class DFGraph {
                     String id = sinvoke.getName().getIdentifier();
                     method = baseKlass.addFallbackMethod(id, argTypes);
                     Logger.error(
-                        "DFMethod.processExpression: MethodNotFound",
+                        "DFGraph.processExpression: MethodNotFound",
                         this, baseKlass, expr);
                     Logger.info("Fallback method:", method);
                 }
@@ -1362,15 +1362,11 @@ public abstract class DFGraph {
             } else if (expr instanceof ArrayCreation) {
                 // "new int[10]"
                 ArrayCreation ac = (ArrayCreation)expr;
-                DFType elemType = _finder.resolve(ac.getType());
+                DFType arrayType = _finder.resolve(ac.getType());
                 for (Expression dim : (List<Expression>) ac.dimensions()) {
                     // XXX value is not used (for now).
                     processExpression(ctx, scope, frame, dim);
                 }
-                int ndims = ac.dimensions().size();
-                // zero dimensions [] are treated as 1.
-                ndims = Math.max(1, ndims);
-                DFType arrayType = DFArrayType.getType(elemType, ndims);
                 ArrayInitializer init = ac.getInitializer();
                 if (init != null) {
                     return processExpression(ctx, scope, frame, init, arrayType);
@@ -2152,7 +2148,7 @@ public abstract class DFGraph {
                             src.merge(dst);
                             dst = src;
                         } else {
-                            Logger.error("DFMethod.catch: Conflict:", dst, "<-", src);
+                            Logger.error("DFGraph.catch: Conflict:", dst, "<-", src);
                             continue;
                         }
                         ctx.set(dst);
@@ -2283,7 +2279,7 @@ public abstract class DFGraph {
                     src.merge(dst);
                     ctx.set(src);
                 } else {
-                    Logger.error("DFMethod.endBreaks: cannot merge:", ref, dst, src);
+                    Logger.error("DFGraph.endBreaks: cannot merge:", ref, dst, src);
                     //assert false;
                 }
             }
@@ -2337,7 +2333,7 @@ public abstract class DFGraph {
                         src.merge(dst);
                         ctx.set(src);
                     } else {
-                        Logger.error("DFMethod.closeFrame: cannot merge:", ref, dst, src);
+                        Logger.error("DFGraph.closeFrame: cannot merge:", ref, dst, src);
                         //assert false;
                     }
                 }

@@ -735,7 +735,7 @@ public class DFFrame {
                 this.buildExpr(init);
             }
             try {
-                return _finder.resolve(ac.getType().getElementType());
+                return _finder.resolve(ac.getType());
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (array)",
