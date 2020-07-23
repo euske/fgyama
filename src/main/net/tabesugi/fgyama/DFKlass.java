@@ -348,14 +348,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFRef getField(String id) {
         this.load();
-        if (_id2field.containsKey(id)) {
-            return _id2field.get(id);
-        }
-        DFKlass baseKlass = this.getBaseKlass();
-        if (baseKlass != null) {
-            return baseKlass.getField(id);
-        }
-        return null;
+        return _id2field.get(id);
     }
 
     public List<DFMethod> getMethods() {

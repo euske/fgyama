@@ -488,6 +488,17 @@ public abstract class DFSourceKlass extends DFKlass {
         return null;
     }
 
+    public DFRef getField(String id) {
+        this.load();
+        DFRef ref = super.getField(id);
+        if (ref != null) return ref;
+        if (_baseKlass != null) {
+            ref = _baseKlass.getField(id);
+            if (ref != null) return ref;
+        }
+        return null;
+    }
+
     public DFMethod getInitMethod() {
         this.load();
         return _initMethod;

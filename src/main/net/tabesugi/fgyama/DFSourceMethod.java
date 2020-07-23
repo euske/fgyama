@@ -1715,13 +1715,13 @@ public abstract class DFSourceMethod extends DFMethod {
         } catch (MethodNotFound e) {
             e.setMethod(this);
             Logger.error(
-                "DFMethod.processMethod: MethodNotFound",
+                "DFSourceMethod.processMethod: MethodNotFound",
                 this, e.name+"("+Utils.join(e.argTypes)+")");
             throw e;
         } catch (EntityNotFound e) {
             e.setMethod(this);
             Logger.error(
-                "DFMethod.processMethod: EntityNotFound",
+                "DFSourceMethod.processMethod: EntityNotFound",
                 this, e.name);
             throw e;
         }
