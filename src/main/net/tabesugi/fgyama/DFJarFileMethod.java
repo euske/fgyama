@@ -35,7 +35,7 @@ public class DFJarFileMethod extends DFMethod {
 
     // Protected constructor for a parameterized method.
     private DFJarFileMethod(
-        DFJarFileMethod genericMethod, Map<String, DFType> paramTypes) {
+        DFJarFileMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _finder = new DFTypeFinder(this, genericMethod._finder);
@@ -49,7 +49,7 @@ public class DFJarFileMethod extends DFMethod {
 
     // Parameterize the klass.
     @Override
-    protected DFMethod parameterize(Map<String, DFType> paramTypes) {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         return new DFJarFileMethod(this, paramTypes);
     }

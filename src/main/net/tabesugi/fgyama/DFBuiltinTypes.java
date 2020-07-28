@@ -38,12 +38,12 @@ public class DFBuiltinTypes {
         protected void build() {
             this.addField(DFBasicType.INT, "length", false);
         }
-        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFType> typeMap)
+        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
             throws TypeIncompatible {
             if (this == klass) return 0;
             throw new TypeIncompatible(this, klass);
         }
-        protected DFKlass parameterize(Map<String, DFType> paramTypes) {
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
             return this;
         }

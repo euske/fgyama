@@ -32,7 +32,7 @@ class InitMethod extends DFSourceMethod {
         return new DFFuncType(new DFType[] {}, DFBasicType.VOID);
     }
 
-    protected DFMethod parameterize(Map<String, DFType> paramTypes) {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -168,7 +168,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     protected DefinedMethod(
-        DefinedMethod genericMethod, Map<String, DFType> paramTypes) {
+        DefinedMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _methodDecl = genericMethod._methodDecl;
@@ -184,7 +184,7 @@ class DefinedMethod extends DFSourceMethod {
     }
 
     @Override
-    protected DFMethod parameterize(Map<String, DFType> paramTypes) {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         return new DefinedMethod(this, paramTypes);
     }
@@ -339,7 +339,7 @@ class EnumValuesMethod extends DFMethod {
             new DFType[] {}, DFArrayType.getType(klass, 1));
     }
 
-    protected DFMethod parameterize(Map<String, DFType> paramTypes) {
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -393,7 +393,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     // Constructor for a parameterized klass.
     protected DFSourceKlass(
-        DFSourceKlass genericKlass, Map<String, DFType> paramTypes) {
+        DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes) {
         super(genericKlass, paramTypes);
 
         _outerKlass = genericKlass._outerKlass;

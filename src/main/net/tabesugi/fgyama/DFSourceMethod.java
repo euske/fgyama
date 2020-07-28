@@ -27,7 +27,7 @@ class AnonymousKlass extends DFSourceKlass {
             cstr.getAnonymousClassDeclaration().bodyDeclarations());
     }
 
-    protected DFKlass parameterize(Map<String, DFType> paramTypes) {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -101,7 +101,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
     // Constructor for a parameterized method.
     protected DFSourceMethod(
-        DFSourceMethod genericMethod, Map<String, DFType> paramTypes) {
+        DFSourceMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _srcklass = genericMethod._srcklass;

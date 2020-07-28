@@ -11,7 +11,7 @@ interface DFType {
 
     String getTypeName();
     boolean equals(DFType type);
-    int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
+    int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
         throws TypeIncompatible;
 
     DFKlass toKlass();

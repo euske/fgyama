@@ -99,7 +99,7 @@ public class DFTypeSpace {
         return mapTypes;
     }
 
-    public static String getConcreteName(Map<String, DFType> paramTypes) {
+    public static String getConcreteName(Map<String, DFKlass> paramTypes) {
         String[] keys = new String[paramTypes.size()];
         paramTypes.keySet().toArray(keys);
         Arrays.sort(keys);
@@ -108,9 +108,9 @@ public class DFTypeSpace {
             if (0 < b.length()) {
                 b.append(",");
             }
-            DFType type = paramTypes.get(k);
+            DFKlass type = paramTypes.get(k);
             if (type instanceof DFMapType) {
-                type = ((DFMapType)type).getBaseKlass();
+                type = type.getBaseKlass();
             }
             b.append(type.getTypeName());
         }

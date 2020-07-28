@@ -36,7 +36,7 @@ public class DFMapType extends DFKlass {
         _sig = sig;
     }
 
-    protected DFKlass parameterize(Map<String, DFType> paramTypes) {
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
     }
@@ -85,13 +85,13 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFType> typeMap)
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
         if (typeMap == null) {
             return _baseKlass.canConvertFrom(klass, typeMap);
         }
-        DFType self = typeMap.get(this);
+        DFKlass self = typeMap.get(this);
         if (self == null) {
             int dist = _baseKlass.canConvertFrom(klass, typeMap);
             typeMap.put(this, klass);
