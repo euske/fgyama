@@ -21,7 +21,7 @@ class FallbackMethod extends DFMethod {
         _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
     }
 
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
+    protected DFMethod parameterize(Map<String, DFType> paramTypes) {
         assert false;
         return null;
     }
@@ -74,7 +74,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
-    private Map<String, DFKlass> _paramTypes = null;
+    private Map<String, DFType> _paramTypes = null;
 
     // Normal constructor.
     public DFKlass(
@@ -86,7 +86,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Protected constructor for a parameterized klass.
-    protected DFKlass(DFKlass genericKlass, Map<String, DFKlass> paramTypes) {
+    protected DFKlass(DFKlass genericKlass, Map<String, DFType> paramTypes) {
         // A parameterized Klass has its own separate typespace
         // that is NOT accessible from the outside.
         this(genericKlass.getName() + DFTypeSpace.getConcreteName(paramTypes),
@@ -145,8 +145,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
 
         if (_paramTypes != null) {
-            DFKlass paramType = _paramTypes.get(id);
-            if (paramType != null) return paramType;
+            DFType paramType = _paramTypes.get(id);
+            if (paramType != null) return paramType.toKlass();
         }
 
         DFKlass klass = super.getKlass(id);
@@ -171,7 +171,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
@@ -179,7 +179,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.canConvertFrom(klass, typeMap);
     }
 
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
         if (_genericKlass != null && _genericKlass == klass._genericKlass) {
@@ -188,10 +188,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             assert _paramTypes != null && klass._paramTypes != null;
             assert _paramTypes.size() == klass._paramTypes.size();
             int dist = 0;
-            for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
+            for (Map.Entry<String, DFType> e : _paramTypes.entrySet()) {
                 String k = e.getKey();
-                DFKlass type0 = e.getValue();
-                DFKlass type1 = klass._paramTypes.get(k);
+                DFType type0 = e.getValue();
+                DFType type1 = klass._paramTypes.get(k);
                 assert type1 != null;
                 dist += type0.canConvertFrom(type1, typeMap);
             }
@@ -234,21 +234,21 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.getConcreteKlass(new DFKlass[] {});
     }
 
-    public DFKlass getConcreteKlass(DFKlass[] argTypes) {
+    public DFKlass getConcreteKlass(DFType[] argTypes) {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
         assert _mapTypes != null;
         assert _paramTypes == null;
         assert argTypes.length <= _mapTypes.size();
         List<DFMapType> mapTypes = _mapTypes.values();
-        HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
+        HashMap<String, DFType> paramTypes = new HashMap<String, DFType>();
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
             assert mapType != null;
-            DFKlass type;
+            DFType type;
             if (argTypes != null && i < argTypes.length) {
                 type = argTypes[i];
             } else {
-                type = mapType.toKlass();
+                type = mapType;
             }
             paramTypes.put(mapType.getName(), type);
         }
@@ -316,7 +316,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
                 for (int i = 0; i < mapTypes.size(); i++) {
                     String name = mapTypes.get(i).getName();
-                    DFKlass paramType = _paramTypes.get(name);
+                    DFType paramType = _paramTypes.get(name);
                     writer.writeStartElement("param");
                     writer.writeAttribute("name", name);
                     writer.writeAttribute("type", paramType.getTypeName());
@@ -382,7 +382,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                    (callStyle1 == DFMethod.CallStyle.InstanceMethod ||
                     callStyle1 == DFMethod.CallStyle.StaticMethod)))) continue;
             if (id != null && !id.equals(method1.getName())) continue;
-            Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
+            Map<DFMapType, DFType> typeMap = new HashMap<DFMapType, DFType>();
             try {
                 int dist = method1.canAccept(argTypes, typeMap);
                 if (bestDist < 0 || dist < bestDist) {
@@ -434,7 +434,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     protected abstract void build();
 
-    protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
+    protected abstract DFKlass parameterize(Map<String, DFType> paramTypes);
 
     protected void setMapTypes(DFMapType[] mapTypes) {
         assert mapTypes != null;
@@ -491,7 +491,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
         if (_paramTypes != null) {
-            for (Map.Entry<String,DFKlass> e : _paramTypes.entrySet()) {
+            for (Map.Entry<String,DFType> e : _paramTypes.entrySet()) {
                 out.println(indent+"param: "+e.getKey()+" "+e.getValue());
             }
         }

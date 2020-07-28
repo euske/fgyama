@@ -70,7 +70,7 @@ public class DFFuncType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         if (!(type instanceof DFFuncType)) throw new TypeIncompatible(this, type);
         DFFuncType mtype = (DFFuncType)type;
@@ -81,7 +81,7 @@ public class DFFuncType implements DFType {
         return dist;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap)
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         // Always accept if the signature is unknown.
         if (_argTypes == null || argTypes == null) return 0;

@@ -22,7 +22,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                   false, id, id, scope, finder);
         }
 
-        protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
+        protected DFMethod parameterize(Map<String, DFType> paramTypes) {
             assert false;
             return null;
         }
@@ -177,7 +177,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         _methodRef = methodRef;
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+    protected DFKlass parameterize(Map<String, DFType> paramTypes) {
         assert false;
         return null;
     }

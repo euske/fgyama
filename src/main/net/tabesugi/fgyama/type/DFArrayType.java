@@ -15,6 +15,7 @@ public class DFArrayType implements DFType {
         new HashMap<String, DFArrayType>();
 
     public static DFArrayType getType(DFType elemType, int ndims) {
+        Logger.info("DFArrayType:", elemType, ndims);
         String key = elemType.getTypeName()+":"+ndims;
         DFArrayType type = _types.get(key);
         if (type == null) {
@@ -61,7 +62,7 @@ public class DFArrayType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) throw new TypeIncompatible(this, type);

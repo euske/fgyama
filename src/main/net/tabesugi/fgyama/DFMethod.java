@@ -60,7 +60,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     // These fields are available only for parameterized methods.
     private DFMethod _genericMethod = null;
-    private Map<String, DFKlass> _paramTypes = null;
+    private Map<String, DFType> _paramTypes = null;
 
     // List of callers for this method.
     private ConsistentHashSet<DFMethod> _callers =
@@ -86,7 +86,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     // Protected constructor for a parameterized method.
     protected DFMethod(
-        DFMethod genericMethod, Map<String, DFKlass> paramTypes) {
+        DFMethod genericMethod, Map<String, DFType> paramTypes) {
         // A parameterized method has its own separate typespace
         // that is NOT accessible from the outside.
         super(genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes),
@@ -128,25 +128,25 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             if (mapType != null) return mapType;
         }
         if (_paramTypes != null) {
-            DFKlass paramType = _paramTypes.get(id);
-            if (paramType != null) return paramType;
+            DFType paramType = _paramTypes.get(id);
+            if (paramType != null) return paramType.toKlass();
         }
         return super.getKlass(id);
     }
 
     // Creates a parameterized method.
-    public DFMethod getConcreteMethod(Map<DFMapType, DFKlass> typeMap) {
+    public DFMethod getConcreteMethod(Map<DFMapType, DFType> typeMap) {
         if (_mapTypes == null) return this;
         //Logger.info("DFMethod.getConcreteMethod:", this, typeMap);
         List<DFMapType> mapTypes = _mapTypes.values();
-        HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
+        HashMap<String, DFType> paramTypes = new HashMap<String, DFType>();
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
-            DFKlass type;
+            DFType type;
             if (typeMap != null && typeMap.containsKey(mapType)) {
                 type = typeMap.get(mapType);
             } else {
-                type = mapType.toKlass();
+                type = mapType;
             }
             paramTypes.put(mapType.getName(), type);
         }
@@ -249,7 +249,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _overriding;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap)
+    public int canAccept(DFType[] argTypes, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         return this.getFuncType().canAccept(argTypes, typeMap);
     }
@@ -258,7 +258,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     public abstract DFFuncType getFuncType();
 
     // Parameterize the klass.
-    protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes);
+    protected abstract DFMethod parameterize(Map<String, DFType> paramTypes);
 
     protected void setMapTypes(DFMapType[] mapTypes, DFTypeFinder finder) {
         assert mapTypes != null;

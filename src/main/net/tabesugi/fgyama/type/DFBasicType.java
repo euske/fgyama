@@ -76,7 +76,7 @@ public class DFBasicType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         // Auto-unboxing.
         if (this == type) return 0;

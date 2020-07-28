@@ -32,7 +32,7 @@ public class DFNullType implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapType, DFType> typeMap)
         throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         throw new TypeIncompatible(this, type);
