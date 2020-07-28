@@ -1379,7 +1379,7 @@ public abstract class DFGraph {
                 assert type instanceof DFArrayType;
                 DFNode array = new ValueSetNode(this, scope, type, expr);
                 DFType elemType = ((DFArrayType)type).getElemType();
-                DFRef ref = scope.lookupArray(elemType);
+                DFRef ref = scope.lookupArray(array.getNodeType());
                 List<Expression> exprs = (List<Expression>) init.expressions();
                 int i = 0;
                 for (Expression expr1 : exprs) {

@@ -75,7 +75,7 @@
           <node data="10" id="M2_foo_N17" kind="value" type="I">
             <ast end="130" start="128" type="34"/>
           </node>
-          <node id="M2_foo_N18" kind="valueset" type="[[I">
+          <node id="M2_foo_N18" kind="valueset" type="[I">
             <ast end="146" start="132" type="4"/>
           </node>
           <node data="44" id="M2_foo_N19" kind="value" type="I">
