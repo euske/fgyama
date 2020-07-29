@@ -1816,7 +1816,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
-                    argType = DFArrayType.getType(argType, ndims);
+                    argType = DFArrayType.getArray(argType, ndims);
                 }
                 String name;
                 if (funcType.isVarArg(i)) {

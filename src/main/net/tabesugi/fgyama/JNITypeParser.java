@@ -102,7 +102,7 @@ public class JNITypeParser {
                     int ndims = i-_pos;
                     _pos = i;
                     DFType elemType = this.resolveType(finder);
-                    return DFArrayType.getType(elemType, ndims);
+                    return DFArrayType.getArray(elemType, ndims);
                 }
             }
             break;

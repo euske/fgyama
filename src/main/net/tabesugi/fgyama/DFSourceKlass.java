@@ -207,7 +207,7 @@ class DefinedMethod extends DFSourceMethod {
             SingleVariableDeclaration varDecl = varDecls.get(i);
             DFType argType = finder.resolveSafe(varDecl.getType());
             if (varDecl.isVarargs()) {
-                argType = DFArrayType.getType(argType, 1);
+                argType = DFArrayType.getArray(argType, 1);
             }
             argTypes[i] = argType;
         }
@@ -336,7 +336,7 @@ class EnumValuesMethod extends DFMethod {
         super(klass, CallStyle.InstanceMethod,
               false, "values", "values");
         _funcType = new DFFuncType(
-            new DFType[] {}, DFArrayType.getType(klass, 1));
+            new DFType[] {}, DFArrayType.getArray(klass, 1));
     }
 
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
@@ -687,7 +687,7 @@ public abstract class DFSourceKlass extends DFKlass {
                     DFType ft = fldType;
                     int ndims = frag.getExtraDimensions();
                     if (ndims != 0) {
-                        ft = DFArrayType.getType(ft, ndims);
+                        ft = DFArrayType.getArray(ft, ndims);
                     }
                     this.addField(ft, frag.getName(), isStatic(decl));
                 }

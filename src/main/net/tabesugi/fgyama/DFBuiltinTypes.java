@@ -28,37 +28,6 @@ public class DFBuiltinTypes {
         _boolean = (DFJarFileKlass)langSpace.getKlass("Boolean");
         _void = (DFJarFileKlass)langSpace.getKlass("Void");
         _exception = (DFJarFileKlass)langSpace.getKlass("Exception");
-        _array = new ArrayKlass(langSpace);
-    }
-
-    private static class ArrayKlass extends DFKlass {
-        public ArrayKlass(DFTypeSpace langSpace) {
-            super("_Array", langSpace);
-        }
-        protected void build() {
-            this.addField(DFBasicType.INT, "length", false);
-        }
-        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
-            throws TypeIncompatible {
-            if (this == klass) return 0;
-            throw new TypeIncompatible(this, klass);
-        }
-        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-            assert false;
-            return this;
-        }
-        public boolean isInterface() {
-            return false;
-        }
-        public boolean isEnum() {
-            return false;
-        }
-        public DFKlass getBaseKlass() {
-            return _object;
-        }
-        public DFKlass[] getBaseIfaces() {
-            return null;
-        }
     }
 
     private static DFKlass _object = null;
@@ -143,12 +112,6 @@ public class DFBuiltinTypes {
     public static DFKlass getExceptionKlass() {
         assert _exception != null;
         return _exception;
-    }
-
-    private static DFKlass _array = null;
-    public static DFKlass getArrayKlass() {
-        assert _array != null;
-        return _array;
     }
 
 }

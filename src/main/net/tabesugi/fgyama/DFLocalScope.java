@@ -110,7 +110,7 @@ public class DFLocalScope extends DFVarScope {
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 int ndims = frag.getExtraDimensions();
                 this.addVar(frag.getName(),
-                            (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
+                            (ndims != 0)? DFArrayType.getArray(varType, ndims) : varType);
                 Expression expr = frag.getInitializer();
                 if (expr != null) {
                     this.buildExpr(finder, expr);
@@ -199,7 +199,7 @@ public class DFLocalScope extends DFVarScope {
             DFType varType = finder.resolveSafe(decl.getType());
             int ndims = decl.getExtraDimensions();
             innerScope.addVar(decl.getName(),
-                              (ndims != 0)? DFArrayType.getType(varType, ndims) : varType);
+                              (ndims != 0)? DFArrayType.getArray(varType, ndims) : varType);
             Statement stmt = eForStmt.getBody();
             innerScope.buildStmt(finder, stmt);
 
@@ -232,7 +232,7 @@ public class DFLocalScope extends DFVarScope {
                 DFType varType = finder.resolveSafe(decl.getType());
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
-                    varType = DFArrayType.getType(varType, ndims);
+                    varType = DFArrayType.getArray(varType, ndims);
                 }
                 catchScope.addVar(decl.getName(), varType);
                 catchScope.buildStmt(finder, cc.getBody());
@@ -345,7 +345,7 @@ public class DFLocalScope extends DFVarScope {
                 DFType vt = varType;
                 int ndims = frag.getExtraDimensions();
                 if (ndims != 0) {
-                    vt = DFArrayType.getType(vt, ndims);
+                    vt = DFArrayType.getArray(vt, ndims);
                 }
                 this.addVar(frag.getName(), vt);
                 Expression expr = frag.getInitializer();
