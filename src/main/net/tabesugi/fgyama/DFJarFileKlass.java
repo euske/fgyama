@@ -118,6 +118,12 @@ public class DFJarFileKlass extends DFKlass {
         return super.getConcreteKlass(argTypes);
     }
 
+    @Override
+    public DFKlass getKlass(String id) {
+        this.preload();
+        return super.getKlass(id);
+    }
+
     // for loading nested klasses.
 
     protected DFJarFileKlass addInnerKlass(String id, DFJarFileKlass klass) {
