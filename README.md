@@ -165,6 +165,17 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
     }
     exporter.close();
 
+### Options
+
+ * `-v`: increases verbosity.
+ * `-s`: serializable format. (no pretty printing)
+ * `-S`: strict mode. (stops at a first error)
+ * `-a`: treat all variables interprocedural.
+ * `-C jarfile`: add a jar file to the classpath.
+ * `-i filelist`: takes a filename list.
+ * `-o output`: specifies the output file.
+ * `-p name`: limit analysis to a specific file only.
+
 
 ## Development
 
