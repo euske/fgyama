@@ -101,6 +101,7 @@ public class DFMapType extends DFKlass {
     public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
+        this.load();
         if (typeMap == null) {
             return _baseKlass.canConvertFrom(klass, typeMap);
         }

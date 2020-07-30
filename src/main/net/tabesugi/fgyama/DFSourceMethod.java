@@ -655,7 +655,7 @@ public abstract class DFSourceMethod extends DFMethod {
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
-                    DFKlass klass = _finder.lookupKlass(name);
+                    DFKlass klass = _finder.lookupKlass(name).getDefaultKlass();
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).listUsedKlasses(klasses);
                     }
@@ -735,7 +735,7 @@ public abstract class DFSourceMethod extends DFMethod {
             Expression expr1 = invoke.getExpression();
             if (expr1 instanceof Name) {
                 try {
-                    DFKlass klass = _finder.lookupKlass((Name)expr1);
+                    DFKlass klass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).listUsedKlasses(klasses);
                     }
@@ -1123,7 +1123,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupKlass(qname.getQualifier());
+                        type = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
                     } catch (TypeNotFound e) {
                         return null;
                     }
@@ -1145,7 +1145,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref;
             if (name != null) {
                 try {
-                    DFKlass klass = _finder.lookupKlass(name);
+                    DFKlass klass = _finder.lookupKlass(name).getDefaultKlass();
                     assert klass instanceof DFSourceKlass;
                     ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
@@ -1278,7 +1278,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
-                        klass = _finder.lookupKlass((Name)expr1);
+                        klass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
                         callStyle = CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
@@ -1375,7 +1375,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupKlass((Name)expr1);
+                    type = _finder.lookupKlass((Name)expr1).getDefaultKlass();
                 } catch (TypeNotFound e) {
                 }
             }
@@ -1508,7 +1508,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupKlass(qname.getQualifier());
+                        type = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
                     } catch (TypeNotFound e) {
                         return null;
                     }
@@ -1543,7 +1543,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupKlass((Name)expr1);
+                    type = _finder.lookupKlass((Name)expr1).getDefaultKlass();
                 } catch (TypeNotFound e) {
                 }
             }
