@@ -378,7 +378,12 @@ public abstract class DFSourceKlass extends DFKlass {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private InitMethod _initMethod = null;
-    private Map<String, DFMethod> _id2method = null;
+
+    // List of methods.
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
+    private Map<String, DFMethod> _id2method =
+        new HashMap<String, DFMethod>();
 
     // Normal constructor.
     protected DFSourceKlass(
@@ -464,6 +469,13 @@ public abstract class DFSourceKlass extends DFKlass {
     public DFKlass[] getBaseIfaces() {
         this.load();
         return _baseIfaces;
+    }
+
+    @Override
+    public DFMethod[] getMethods() {
+        DFMethod[] methods = new DFMethod[_methods.size()];
+        _methods.toArray(methods);
+        return methods;
     }
 
     @Override
@@ -657,8 +669,7 @@ public abstract class DFSourceKlass extends DFKlass {
             this.addField(this, econst.getName(), true);
         }
         // Enum has a special method "values()".
-        DFMethod method = new EnumValuesMethod(this);
-        this.addMethod(method);
+        _methods.add(new EnumValuesMethod(this));
         this.buildMembers(enumDecl.bodyDeclarations());
     }
 
@@ -675,7 +686,6 @@ public abstract class DFSourceKlass extends DFKlass {
 
         assert _initMethod == null;
         _initMethod = new InitMethod(this, decls, _finder);
-        _id2method = new HashMap<String, DFMethod>();
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -711,7 +721,7 @@ public abstract class DFSourceKlass extends DFKlass {
                 Statement stmt = decl.getBody();
                 DFMethod method = new DefinedMethod(
                     this, callStyle, (stmt == null), id, name, decl, _finder);
-                this.addMethod(method);
+                _methods.add(method);
                 _id2method.put(id, method);
 
             } else if (body instanceof EnumConstantDeclaration) {

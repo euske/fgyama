@@ -62,6 +62,11 @@ public class DFArrayType extends DFKlass {
     }
 
     @Override
+    public DFMethod[] getMethods() {
+        return new DFMethod[] {};
+    }
+
+    @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;

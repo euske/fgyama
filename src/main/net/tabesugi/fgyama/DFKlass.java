@@ -62,9 +62,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         new ArrayList<FieldRef>();
     private Map<String, FieldRef> _id2field =
         new HashMap<String, FieldRef>();
-    // List of methods.
-    private List<DFMethod> _methods =
-        new ArrayList<DFMethod>();
 
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
@@ -349,11 +346,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _id2field.get(id);
     }
 
-    public List<DFMethod> getMethods() {
-        this.load();
-        return _methods;
-    }
-
     public DFMethod getFuncMethod() {
         this.load();
         for (DFMethod method : this.getMethods()) {
@@ -399,17 +391,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.findMethod(callStyle, id, argTypes);
     }
 
-    public DFMethod addFallbackMethod(String name, DFType[] argTypes) {
+    public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
         this.load();
-        DFMethod method = new FallbackMethod(this, name, argTypes);
-        // Do not adds to _methods because it shouldn't be analyzed.
-        return method;
+        return new FallbackMethod(this, name, argTypes);
     }
 
     public abstract boolean isInterface();
     public abstract boolean isEnum();
     public abstract DFKlass getBaseKlass();
     public abstract DFKlass[] getBaseIfaces();
+    public abstract DFMethod[] getMethods();
 
     /// For constructions.
 
@@ -463,12 +454,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _fields.add(ref);
         _id2field.put(ref.getName(), ref);
         return ref;
-    }
-
-    protected DFMethod addMethod(DFMethod method) {
-        //Logger.info("DFKlass.addMethod:", method);
-        _methods.add(method);
-        return method;
     }
 
     @Override

@@ -33,6 +33,8 @@ public class DFJarFileKlass extends DFKlass {
 
     private Map<String, DFJarFileKlass> _id2jarklass =
         new ConsistentHashMap<String, DFJarFileKlass>();
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
 
     // Normal constructor.
     public DFJarFileKlass(
@@ -84,6 +86,13 @@ public class DFJarFileKlass extends DFKlass {
     public DFKlass[] getBaseIfaces() {
         this.load();
         return _baseIfaces;
+    }
+
+    @Override
+    public DFMethod[] getMethods() {
+        DFMethod[] methods = new DFMethod[_methods.size()];
+        _methods.toArray(methods);
+        return methods;
     }
 
     @Override
@@ -280,7 +289,7 @@ public class DFJarFileKlass extends DFKlass {
             DFMethod method = new DFJarFileMethod(
                 this, callStyle, meth.isAbstract(),
                 id, name, meth, _finder);
-            this.addMethod(method);
+            _methods.add(method);
         }
     }
 

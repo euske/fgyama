@@ -74,6 +74,10 @@ public class DFMapType extends DFKlass {
         return null;
     }
 
+    public DFMethod[] getMethods() {
+        return new DFMethod[] {};
+    }
+
 
     @Override
     public DFKlass getKlass(String id) {
