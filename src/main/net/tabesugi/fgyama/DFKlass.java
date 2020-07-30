@@ -339,6 +339,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             FieldRef ref = baseKlass.getField(id);
             if (ref != null) return ref;
         }
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
+                FieldRef ref = iface.getField(id);
+                if (ref != null) return ref;
+            }
+        }
         return null;
     }
 
