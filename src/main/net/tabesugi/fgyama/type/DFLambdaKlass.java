@@ -178,6 +178,8 @@ class DFLambdaKlass extends DFSourceKlass {
 
     private LambdaExpression _lambda;
     private LambdaScope _lambdaScope;
+
+    private DFKlass _baseKlass = null;
     private FunctionalMethod _funcMethod = null;
 
     private List<CapturedRef> _captured =
@@ -209,6 +211,11 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
+    public DFKlass getBaseKlass() {
+        return _baseKlass;
+    }
+
+    @Override
     public DFMethod[] getMethods() {
         return new DFMethod[] { _funcMethod };
     }
@@ -233,13 +240,13 @@ class DFLambdaKlass extends DFSourceKlass {
         }
     }
 
-    @Override
-    protected void setBaseKlass(DFKlass klass) {
+    public void setBaseKlass(DFKlass baseKlass) {
         this.load();
-        super.setBaseKlass(klass);
+        assert _baseKlass == null;
+        _baseKlass = baseKlass;
         assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
-        DFMethod funcMethod = klass.getFuncMethod();
+        DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;

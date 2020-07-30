@@ -161,6 +161,7 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     private MethodReference _methodRef;
 
+    private DFKlass _baseKlass = null;
     private FunctionalMethod _funcMethod = null;
 
     public DFMethodRefKlass(
@@ -194,6 +195,11 @@ class DFMethodRefKlass extends DFSourceKlass {
     }
 
     @Override
+    public DFKlass getBaseKlass() {
+        return _baseKlass;
+    }
+
+    @Override
     public DFMethod[] getMethods() {
         return new DFMethod[] { _funcMethod };
     }
@@ -209,11 +215,11 @@ class DFMethodRefKlass extends DFSourceKlass {
         _funcMethod = new FunctionalMethod("#f", this.getKlassScope(), finder);
     }
 
-    @Override
-    public void setBaseKlass(DFKlass klass) {
+    public void setBaseKlass(DFKlass baseKlass) {
         this.load();
-        super.setBaseKlass(klass);
-        DFMethod funcMethod = klass.getFuncMethod();
+        assert _baseKlass == null;
+        _baseKlass = baseKlass;
+        DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
         if (funcMethod == null) return;

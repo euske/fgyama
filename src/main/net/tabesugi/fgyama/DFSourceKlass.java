@@ -420,11 +420,13 @@ public abstract class DFSourceKlass extends DFKlass {
     @Override
     protected void dumpContents(PrintStream out, String indent) {
         super.dumpContents(out, indent);
-        if (_baseKlass != null) {
-            _baseKlass.dump(out, indent);
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            baseKlass.dump(out, indent);
         }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
                 if (iface != null) {
                     iface.dump(out, indent);
                 }
@@ -455,8 +457,9 @@ public abstract class DFSourceKlass extends DFKlass {
     @Override
     public boolean isEnum() {
         this.load();
-        return (_baseKlass != null &&
-                _baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
+        DFKlass baseKlass = this.getBaseKlass();
+        return (baseKlass != null &&
+                baseKlass.getGenericKlass() == DFBuiltinTypes.getEnumKlass());
     }
 
     @Override
@@ -488,12 +491,14 @@ public abstract class DFSourceKlass extends DFKlass {
             method = _outerKlass.findMethod(callStyle, id, argTypes);
             if (method != null) return method;
         }
-        if (_baseKlass != null) {
-            method = _baseKlass.findMethod(callStyle, id, argTypes);
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            method = baseKlass.findMethod(callStyle, id, argTypes);
             if (method != null) return method;
         }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
                 method = iface.findMethod(callStyle, id, argTypes);
                 if (method != null) return method;
             }
@@ -505,8 +510,10 @@ public abstract class DFSourceKlass extends DFKlass {
         this.load();
         DFRef ref = super.getField(id);
         if (ref != null) return ref;
-        if (_baseKlass != null) {
-            ref = _baseKlass.getField(id);
+
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            ref = baseKlass.getField(id);
             if (ref != null) return ref;
         }
         return null;
@@ -519,12 +526,16 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public void overrideMethods() {
         // override the methods.
-        for (DFMethod method : this.getMethods()) {
-            if (_baseKlass != null) {
-                this.overrideMethod(_baseKlass, method);
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            for (DFMethod method : this.getMethods()) {
+                this.overrideMethod(baseKlass, method);
             }
-            if (_baseIfaces != null) {
-                for (DFKlass iface : _baseIfaces) {
+        }
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFMethod method : this.getMethods()) {
+                for (DFKlass iface : baseIfaces) {
                     this.overrideMethod(iface, method);
                 }
             }
@@ -551,12 +562,6 @@ public abstract class DFSourceKlass extends DFKlass {
     protected DFTypeFinder getFinder() {
         assert _finder != null;
         return _finder;
-    }
-
-    // Only used by DFLambdaKlass.
-    protected void setBaseKlass(DFKlass klass) {
-        assert klass != null;
-        _baseKlass = klass;
     }
 
     @SuppressWarnings("unchecked")
