@@ -33,8 +33,15 @@ public class DFJarFileKlass extends DFKlass {
 
     private Map<String, DFJarFileKlass> _id2jarklass =
         new ConsistentHashMap<String, DFJarFileKlass>();
+
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
+
+    // List of fields.
+    private List<FieldRef> _fields =
+        new ArrayList<FieldRef>();
+    private Map<String, FieldRef> _id2field =
+        new HashMap<String, FieldRef>();
 
     // Normal constructor.
     public DFJarFileKlass(
@@ -112,6 +119,33 @@ public class DFJarFileKlass extends DFKlass {
             }
         }
         return null;
+    }
+
+    private FieldRef addField(
+        DFType type, String id, boolean isStatic) {
+        return this.addField(new FieldRef(type, id, isStatic));
+    }
+
+    private FieldRef addField(FieldRef ref) {
+        _fields.add(ref);
+        _id2field.put(ref.getName(), ref);
+        return ref;
+    }
+
+    @Override
+    public FieldRef[] getFields() {
+        this.load();
+        FieldRef[] fields = new FieldRef[_fields.size()];
+        _fields.toArray(fields);
+        return fields;
+    }
+
+    @Override
+    public FieldRef getField(String id) {
+        this.load();
+        FieldRef ref = _id2field.get(id);
+        if (ref != null) return ref;
+        return super.getField(id);
     }
 
     // Parameterize the klass.

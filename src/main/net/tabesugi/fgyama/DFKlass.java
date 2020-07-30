@@ -57,12 +57,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private String _name;
     private DFTypeSpace _outerSpace;
 
-    // List of fields.
-    private List<FieldRef> _fields =
-        new ArrayList<FieldRef>();
-    private Map<String, FieldRef> _id2field =
-        new HashMap<String, FieldRef>();
-
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
@@ -285,67 +279,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return (n == 1);
     }
 
-    public void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException {
-        this.load();
-        writer.writeAttribute("name", this.getTypeName());
-        writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
-        DFKlass baseKlass = this.getBaseKlass();
-        if (baseKlass != null) {
-            writer.writeAttribute("extends", baseKlass.getTypeName());
-        }
-        DFKlass[] baseIfaces = this.getBaseIfaces();
-        if (baseIfaces != null && 0 < baseIfaces.length) {
-            StringBuilder b = new StringBuilder();
-            for (DFKlass iface : baseIfaces) {
-                if (0 < b.length()) {
-                    b.append(" ");
-                }
-                b.append(iface.getTypeName());
-            }
-            writer.writeAttribute("implements", b.toString());
-        }
-        if (_genericKlass != null) {
-            writer.writeAttribute("generic", _genericKlass.getTypeName());
-            if (_paramTypes != null) {
-                List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
-                for (int i = 0; i < mapTypes.size(); i++) {
-                    String name = mapTypes.get(i).getName();
-                    DFKlass paramType = _paramTypes.get(name);
-                    writer.writeStartElement("param");
-                    writer.writeAttribute("name", name);
-                    writer.writeAttribute("type", paramType.getTypeName());
-                    writer.writeEndElement();
-                }
-            }
-        }
-        if (_concreteKlasses != null) {
-            for (DFKlass pklass : _concreteKlasses.values()) {
-                writer.writeStartElement("parameterized");
-                writer.writeAttribute("type", pklass.getTypeName());
-                writer.writeEndElement();
-            }
-        }
-        for (FieldRef field : this.getFields()) {
-            field.writeXML(writer);
-        }
-    }
-
-    public List<FieldRef> getFields() {
-        this.load();
-        return _fields;
-    }
-
-    public DFRef getField(SimpleName name) {
-        this.load();
-        return this.getField(name.getIdentifier());
-    }
-
-    public DFRef getField(String id) {
-        this.load();
-        return _id2field.get(id);
-    }
-
     public DFMethod getFuncMethod() {
         this.load();
         for (DFMethod method : this.getMethods()) {
@@ -396,11 +329,71 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return new FallbackMethod(this, name, argTypes);
     }
 
+    public FieldRef getField(SimpleName name) {
+        return this.getField(name.getIdentifier());
+    }
+
+    public FieldRef getField(String id) {
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            FieldRef ref = baseKlass.getField(id);
+            if (ref != null) return ref;
+        }
+        return null;
+    }
+
     public abstract boolean isInterface();
     public abstract boolean isEnum();
     public abstract DFKlass getBaseKlass();
     public abstract DFKlass[] getBaseIfaces();
     public abstract DFMethod[] getMethods();
+    public abstract FieldRef[] getFields();
+
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
+        this.load();
+        writer.writeAttribute("name", this.getTypeName());
+        writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            writer.writeAttribute("extends", baseKlass.getTypeName());
+        }
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null && 0 < baseIfaces.length) {
+            StringBuilder b = new StringBuilder();
+            for (DFKlass iface : baseIfaces) {
+                if (0 < b.length()) {
+                    b.append(" ");
+                }
+                b.append(iface.getTypeName());
+            }
+            writer.writeAttribute("implements", b.toString());
+        }
+        if (_genericKlass != null) {
+            writer.writeAttribute("generic", _genericKlass.getTypeName());
+            if (_paramTypes != null) {
+                List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
+                for (int i = 0; i < mapTypes.size(); i++) {
+                    String name = mapTypes.get(i).getName();
+                    DFKlass paramType = _paramTypes.get(name);
+                    writer.writeStartElement("param");
+                    writer.writeAttribute("name", name);
+                    writer.writeAttribute("type", paramType.getTypeName());
+                    writer.writeEndElement();
+                }
+            }
+        }
+        if (_concreteKlasses != null) {
+            for (DFKlass pklass : _concreteKlasses.values()) {
+                writer.writeStartElement("parameterized");
+                writer.writeAttribute("type", pklass.getTypeName());
+                writer.writeEndElement();
+            }
+        }
+        for (FieldRef field : this.getFields()) {
+            field.writeXML(writer);
+        }
+    }
 
     /// For constructions.
 
@@ -437,23 +430,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 mapType.setFinder(finder);
             }
         }
-    }
-
-    protected DFRef addField(
-        DFType type, SimpleName name, boolean isStatic) {
-        return this.addField(type, name.getIdentifier(), isStatic);
-    }
-
-    protected DFRef addField(
-        DFType type, String id, boolean isStatic) {
-        return this.addField(new FieldRef(type, id, isStatic));
-    }
-
-    protected DFRef addField(FieldRef ref) {
-        //Logger.info("DFKlass.addField:", ref);
-        _fields.add(ref);
-        _id2field.put(ref.getName(), ref);
-        return ref;
     }
 
     @Override

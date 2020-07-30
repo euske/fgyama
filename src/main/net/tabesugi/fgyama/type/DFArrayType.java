@@ -29,11 +29,13 @@ public class DFArrayType extends DFKlass {
     }
 
     private DFType _elemType;
+    private FieldRef _lengthFld;
 
     // DFArrayType
     private DFArrayType(DFType elemType) {
         super(elemType.getTypeName(), null);
         _elemType = elemType;
+        _lengthFld = new FieldRef(DFBasicType.INT, "length", false);
     }
 
     @Override
@@ -67,6 +69,20 @@ public class DFArrayType extends DFKlass {
     }
 
     @Override
+    public FieldRef[] getFields() {
+        return new FieldRef[] { _lengthFld };
+    }
+
+    @Override
+    public FieldRef getField(String id) {
+        if (id.equals("length")) {
+            return _lengthFld;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
@@ -86,6 +102,5 @@ public class DFArrayType extends DFKlass {
     }
 
     protected void build() {
-        this.addField(DFBasicType.INT, "length", false);
     }
 }

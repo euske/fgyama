@@ -55,29 +55,38 @@ public class DFMapType extends DFKlass {
         return _name;
     }
 
+    @Override
     public boolean isInterface() {
         this.load();
         return _baseKlass.isInterface();
     }
 
+    @Override
     public boolean isEnum() {
         this.load();
         return _baseKlass.isEnum();
     }
 
+    @Override
     public DFKlass getBaseKlass() {
         this.load();
         return _baseKlass;
     }
 
+    @Override
     public DFKlass[] getBaseIfaces() {
         return null;
     }
 
+    @Override
     public DFMethod[] getMethods() {
         return new DFMethod[] {};
     }
 
+    @Override
+    public FieldRef[] getFields() {
+        return new FieldRef[] {};
+    }
 
     @Override
     public DFKlass getKlass(String id) {

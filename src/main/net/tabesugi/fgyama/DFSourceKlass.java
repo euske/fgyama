@@ -385,6 +385,12 @@ public abstract class DFSourceKlass extends DFKlass {
     private Map<String, DFMethod> _id2method =
         new HashMap<String, DFMethod>();
 
+    // List of fields.
+    private List<FieldRef> _fields =
+        new ArrayList<FieldRef>();
+    private Map<String, FieldRef> _id2field =
+        new HashMap<String, FieldRef>();
+
     // Normal constructor.
     protected DFSourceKlass(
         String name, DFTypeSpace outerSpace, DFSourceKlass outerKlass,
@@ -506,22 +512,41 @@ public abstract class DFSourceKlass extends DFKlass {
         return null;
     }
 
-    public DFRef getField(String id) {
-        this.load();
-        DFRef ref = super.getField(id);
-        if (ref != null) return ref;
-
-        DFKlass baseKlass = this.getBaseKlass();
-        if (baseKlass != null) {
-            ref = baseKlass.getField(id);
-            if (ref != null) return ref;
-        }
-        return null;
-    }
-
     public DFMethod getInitMethod() {
         this.load();
         return _initMethod;
+    }
+
+    private FieldRef addField(
+        DFType type, SimpleName name, boolean isStatic) {
+        return this.addField(type, name.getIdentifier(), isStatic);
+    }
+
+    private FieldRef addField(
+        DFType type, String id, boolean isStatic) {
+        return this.addField(new FieldRef(type, id, isStatic));
+    }
+
+    private FieldRef addField(FieldRef ref) {
+        _fields.add(ref);
+        _id2field.put(ref.getName(), ref);
+        return ref;
+    }
+
+    @Override
+    public FieldRef[] getFields() {
+        this.load();
+        FieldRef[] fields = new FieldRef[_fields.size()];
+        _fields.toArray(fields);
+        return fields;
+    }
+
+    @Override
+    public FieldRef getField(String id) {
+        this.load();
+        FieldRef ref = _id2field.get(id);
+        if (ref != null) return ref;
+        return super.getField(id);
     }
 
     public void overrideMethods() {

@@ -27,10 +27,6 @@ class DFMethodRefKlass extends DFSourceKlass {
             return null;
         }
 
-        protected boolean isDefined() {
-            return _funcType != null;
-        }
-
         protected void setFuncType(DFFuncType funcType) {
             assert _funcType == null;
             _funcType = funcType;
@@ -191,7 +187,7 @@ class DFMethodRefKlass extends DFSourceKlass {
     }
 
     public boolean isDefined() {
-        return _funcMethod.isDefined();
+        return (_funcMethod != null && _funcMethod.getFuncType() != null);
     }
 
     @Override
