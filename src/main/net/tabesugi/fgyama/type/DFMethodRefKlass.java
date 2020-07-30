@@ -161,8 +161,6 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     private MethodReference _methodRef;
 
-    private final String FUNC_NAME = "#f";
-
     private FunctionalMethod _funcMethod;
 
     public DFMethodRefKlass(
@@ -203,8 +201,8 @@ class DFMethodRefKlass extends DFSourceKlass {
     @Override
     protected void build() {
         DFTypeFinder finder = this.getFinder();
-        _funcMethod = new FunctionalMethod(FUNC_NAME, this.getKlassScope(), finder);
-        this.addMethod(_funcMethod, FUNC_NAME);
+        _funcMethod = new FunctionalMethod("#f", this.getKlassScope(), finder);
+        this.addMethod(_funcMethod);
     }
 
     @Override

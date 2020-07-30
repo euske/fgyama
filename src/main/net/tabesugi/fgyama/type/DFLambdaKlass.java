@@ -176,8 +176,6 @@ class DFLambdaKlass extends DFSourceKlass {
         }
     }
 
-    private final String FUNC_NAME = "#f";
-
     private LambdaExpression _lambda;
     private LambdaScope _lambdaScope;
     private FunctionalMethod _funcMethod;
@@ -224,8 +222,8 @@ class DFLambdaKlass extends DFSourceKlass {
     protected void build() {
         DFTypeFinder finder = this.getFinder();
         try {
-            _funcMethod = new FunctionalMethod(FUNC_NAME, finder);
-            this.addMethod(_funcMethod, FUNC_NAME);
+            _funcMethod = new FunctionalMethod("#f", finder);
+            this.addMethod(_funcMethod);
         } catch (InvalidSyntax e) {
             Logger.error("DFLambdaKlass.build:", e);
         }

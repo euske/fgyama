@@ -65,8 +65,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // List of methods.
     private List<DFMethod> _methods =
         new ArrayList<DFMethod>();
-    private Map<String, DFMethod> _id2method =
-        new HashMap<String, DFMethod>();
 
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
@@ -356,11 +354,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _methods;
     }
 
-    public DFMethod getMethod(String key) {
-        this.load();
-        return _id2method.get(key);
-    }
-
     public DFMethod getFuncMethod() {
         this.load();
         for (DFMethod method : this.getMethods()) {
@@ -410,7 +403,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         this.load();
         DFMethod method = new FallbackMethod(this, name, argTypes);
         // Do not adds to _methods because it shouldn't be analyzed.
-        _id2method.put(name, method);
         return method;
     }
 
@@ -473,12 +465,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return ref;
     }
 
-    protected DFMethod addMethod(DFMethod method, String key) {
+    protected DFMethod addMethod(DFMethod method) {
         //Logger.info("DFKlass.addMethod:", method);
         _methods.add(method);
-        if (key != null) {
-            _id2method.put(key, method);
-        }
         return method;
     }
 

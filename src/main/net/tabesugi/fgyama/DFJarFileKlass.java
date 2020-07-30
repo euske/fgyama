@@ -280,7 +280,7 @@ public class DFJarFileKlass extends DFKlass {
             DFMethod method = new DFJarFileMethod(
                 this, callStyle, meth.isAbstract(),
                 id, name, meth, _finder);
-            this.addMethod(method, null);
+            this.addMethod(method);
         }
     }
 

@@ -378,6 +378,7 @@ public abstract class DFSourceKlass extends DFKlass {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
     private InitMethod _initMethod = null;
+    private Map<String, DFMethod> _id2method = null;
 
     // Normal constructor.
     protected DFSourceKlass(
@@ -657,7 +658,7 @@ public abstract class DFSourceKlass extends DFKlass {
         }
         // Enum has a special method "values()".
         DFMethod method = new EnumValuesMethod(this);
-        this.addMethod(method, null);
+        this.addMethod(method);
         this.buildMembers(enumDecl.bodyDeclarations());
     }
 
@@ -674,6 +675,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
         assert _initMethod == null;
         _initMethod = new InitMethod(this, decls, _finder);
+        _id2method = new HashMap<String, DFMethod>();
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -709,7 +711,8 @@ public abstract class DFSourceKlass extends DFKlass {
                 Statement stmt = decl.getBody();
                 DFMethod method = new DefinedMethod(
                     this, callStyle, (stmt == null), id, name, decl, _finder);
-                this.addMethod(method, id);
+                this.addMethod(method);
+                _id2method.put(id, method);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -752,6 +755,7 @@ public abstract class DFSourceKlass extends DFKlass {
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
         assert !this.isGeneric();
+        this.load();
         if (_initMethod != null) {
             _initMethod.listUsedKlasses(klasses);
         }
@@ -772,7 +776,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } else if (body instanceof MethodDeclaration) {
                 MethodDeclaration decl = (MethodDeclaration)body;
                 String id = Utils.encodeASTNode(decl);
-                DFMethod method = this.getMethod(id);
+                DFMethod method = _id2method.get(id);
                 assert method instanceof DFSourceMethod;
                 ((DFSourceMethod)method).listUsedKlasses(klasses);
 
