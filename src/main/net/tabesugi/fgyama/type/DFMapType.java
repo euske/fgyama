@@ -75,17 +75,20 @@ public class DFMapType extends DFKlass {
 
     @Override
     public DFKlass[] getBaseIfaces() {
-        return null;
+        this.load();
+        return _baseKlass.getBaseIfaces();
     }
 
     @Override
     public DFMethod[] getMethods() {
-        return new DFMethod[] {};
+        this.load();
+        return _baseKlass.getMethods();
     }
 
     @Override
     public FieldRef[] getFields() {
-        return new FieldRef[] {};
+        this.load();
+        return _baseKlass.getFields();
     }
 
     @Override
