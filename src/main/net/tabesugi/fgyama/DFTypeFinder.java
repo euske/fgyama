@@ -176,7 +176,7 @@ public class DFTypeFinder {
 
     public DFKlass getParameterized(DFKlass klass, List<Type> typeArgs)
         throws TypeNotFound {
-        if (typeArgs == null || typeArgs.isEmpty()) return klass;
+        if (typeArgs == null) return klass;
         DFKlass[] paramTypes = new DFKlass[typeArgs.size()];
         for (int i = 0; i < typeArgs.size(); i++) {
             paramTypes[i] = this.resolve(typeArgs.get(i)).toKlass();

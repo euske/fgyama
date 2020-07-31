@@ -110,13 +110,13 @@ public class DFMapType extends DFKlass {
         }
         DFKlass self = typeMap.get(this);
         if (self == null) {
+            typeMap.put(this, klass);
             int dist;
             try {
                 dist = _baseKlass.canConvertFrom(klass, typeMap);
             } catch (TypeIncompatible e) {
                 dist = 9999;    // XXX unchecked conversion.
             }
-            typeMap.put(this, klass);
             return dist;
         } else {
             return self.canConvertFrom(klass, typeMap);

@@ -1429,6 +1429,7 @@ public abstract class DFSourceMethod extends DFMethod {
                     return null;
                 }
             }
+            assert !instKlass.isGeneric();
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.listDefinedExpr(defined, scope, expr1);
