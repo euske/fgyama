@@ -157,11 +157,11 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
     XmlExporter exporter = new XmlExporter(System.out);
     Java2DF converter = new Java2DF();
     converter.loadDefaults();       // Load the standard classes.
-    converter.loadJarFile("path/to/my.jar");  // Add a jar.
-    converter.addSourceFile("Hello.java");    // Add a source code.
+    converter.loadJarFile("path/to/my.jar");        // Add a jar.
+    converter.addSourceFile("path/to/Hello.java");  // Add a source code.
+    // Perform analysis for every user-defined class.
     for (DFSourceKlass klass : converter.getSourceKlasses()) {
-        // Perform analysis for every class.
-        converter.analyzeKlass(exporter, klass, false);
+        converter.analyzeKlass(exporter, klass);
     }
     exporter.close();
 
@@ -170,7 +170,7 @@ FGyama, or Flow Graph yama is a dataflow graph extractor for Java source code.
  * `-v`: increases verbosity.
  * `-s`: serializable format. (no pretty printing)
  * `-S`: strict mode. (stops at a first error)
- * `-a`: treat all variables interprocedural.
+ * `-a`: treat all object members interprocedural.
  * `-C jarfile`: add a jar file to the classpath.
  * `-i filelist`: takes a filename list.
  * `-o output`: specifies the output file.

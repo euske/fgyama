@@ -341,6 +341,11 @@ public class Java2DF {
         }
     }
 
+    public void analyzeKlass(Exporter exporter, DFSourceKlass klass)
+        throws InvalidSyntax, EntityNotFound {
+        this.analyzeKlass(exporter, klass, false);
+    }
+
     /**
      * Provides a command line interface.
      *
