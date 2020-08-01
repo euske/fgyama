@@ -61,7 +61,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
                     DFKlass klass = finder.lookupKlass(supermref.getQualifier());
-                    klass = finder.getParameterized(klass, supermref.typeArguments());
+                    // XXX ignored: supermref.typeArguments()
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).listUsedKlasses(klasses);
                     }
@@ -110,7 +110,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                 try {
                     DFKlass klass = finder.lookupKlass(supermref.getQualifier());
                     klass = klass.getBaseKlass();
-                    klass = finder.getParameterized(klass, supermref.typeArguments());
+                    // XXX ignored: supermref.typeArguments()
                     _refMethod = klass.findMethod(
                         CallStyle.StaticMethod, supermref.getName(), argTypes);
                 } catch (TypeNotFound e) {
@@ -130,12 +130,9 @@ class DFMethodRefKlass extends DFSourceKlass {
                     klass = (DFKlass)this.listDefinedExpr(defined, this.getScope(), expr1);
                 }
                 if (klass != null) {
-                    try {
-                        klass = finder.getParameterized(klass, exprmref.typeArguments());
-                        _refMethod = klass.findMethod(
-                            CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
-                    } catch (TypeNotFound e) {
-                    }
+                    // XXX ignored: exprmref.typeArguments()
+                    _refMethod = klass.findMethod(
+                        CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
                 }
 
             } else {

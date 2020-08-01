@@ -1285,7 +1285,6 @@ public abstract class DFGraph {
                     }
                 }
                 assert instKlass != null;
-                instKlass = _finder.getParameterized(instKlass, invoke.typeArguments());
                 int nargs = invoke.arguments().size();
                 DFNode[] args = new DFNode[nargs];
                 DFType[] argTypes = new DFType[nargs];
@@ -1295,6 +1294,7 @@ public abstract class DFGraph {
                     args[i] = node;
                     argTypes[i] = node.getNodeType();
                 }
+                // XXX ignored: invoke.typeArguments().
                 DFMethod method = instKlass.findMethod(
                     callStyle, invoke.getName(), argTypes);
                 if (method == null) {
