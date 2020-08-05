@@ -408,6 +408,7 @@ public abstract class DFSourceKlass extends DFKlass {
         DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes) {
         super(genericKlass, paramTypes);
 
+        assert genericKlass.isGeneric();
         _outerKlass = genericKlass._outerKlass;
         _filePath = genericKlass._filePath;
         _outerScope = genericKlass._outerScope;
