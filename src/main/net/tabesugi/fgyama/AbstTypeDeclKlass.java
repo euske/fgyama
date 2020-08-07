@@ -88,7 +88,6 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     @Override
     @SuppressWarnings("unchecked")
     public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (this.isGeneric()) return;
         if (klasses.contains(this)) return;
         super.listUsedKlasses(klasses);
         try {

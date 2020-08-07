@@ -47,7 +47,6 @@ class AnonymousKlass extends DFSourceKlass {
     @Override
     @SuppressWarnings("unchecked")
     public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (this.isGeneric()) return;
         if (klasses.contains(this)) return;
         super.listUsedKlasses(klasses);
         try {
@@ -465,7 +464,6 @@ public abstract class DFSourceMethod extends DFMethod {
     protected void listUsedStmt(
         Collection<DFSourceKlass> klasses, Statement stmt)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -642,7 +640,6 @@ public abstract class DFSourceMethod extends DFMethod {
     protected void listUsedExpr(
         Collection<DFSourceKlass> klasses, Expression expr)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         assert expr != null;
 
         if (expr instanceof Annotation) {
@@ -655,7 +652,7 @@ public abstract class DFSourceMethod extends DFMethod {
             Name name = thisExpr.getQualifier();
             if (name != null) {
                 try {
-                    DFKlass klass = _finder.lookupKlass(name).getDefaultKlass();
+                    DFKlass klass = _finder.lookupKlass(name);
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).listUsedKlasses(klasses);
                     }
@@ -735,7 +732,7 @@ public abstract class DFSourceMethod extends DFMethod {
             Expression expr1 = invoke.getExpression();
             if (expr1 instanceof Name) {
                 try {
-                    DFKlass klass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                    DFKlass klass = _finder.lookupKlass((Name)expr1);
                     if (klass instanceof DFSourceKlass) {
                         ((DFSourceKlass)klass).listUsedKlasses(klasses);
                     }
@@ -862,7 +859,6 @@ public abstract class DFSourceMethod extends DFMethod {
         Collection<DFSourceKlass> defined,
         DFLocalScope scope, Statement stmt)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -1098,7 +1094,6 @@ public abstract class DFSourceMethod extends DFMethod {
         Collection<DFSourceKlass> defined,
         DFLocalScope scope, Expression expr)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         assert expr != null;
 
         if (expr instanceof Annotation) {
@@ -1123,7 +1118,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
+                        type = _finder.lookupKlass(qname.getQualifier());
                     } catch (TypeNotFound e) {
                         return null;
                     }
@@ -1145,7 +1140,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref;
             if (name != null) {
                 try {
-                    DFKlass klass = _finder.lookupKlass(name).getDefaultKlass();
+                    DFKlass klass = _finder.lookupKlass(name);
                     assert klass instanceof DFSourceKlass;
                     ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
@@ -1278,7 +1273,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
-                        klass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                        klass = _finder.lookupKlass((Name)expr1);
                         callStyle = CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
@@ -1375,7 +1370,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                    type = _finder.lookupKlass((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }
@@ -1429,7 +1424,6 @@ public abstract class DFSourceMethod extends DFMethod {
                     return null;
                 }
             }
-            assert !instKlass.isGeneric();
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.listDefinedExpr(defined, scope, expr1);
@@ -1509,7 +1503,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
+                        type = _finder.lookupKlass(qname.getQualifier());
                     } catch (TypeNotFound e) {
                         return null;
                     }
@@ -1544,7 +1538,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFType type = null;
             if (expr1 instanceof Name) {
                 try {
-                    type = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                    type = _finder.lookupKlass((Name)expr1);
                 } catch (TypeNotFound e) {
                 }
             }

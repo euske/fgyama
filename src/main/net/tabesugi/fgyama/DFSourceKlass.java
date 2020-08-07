@@ -97,7 +97,6 @@ class InitMethod extends DFSourceMethod {
     @Override
     @SuppressWarnings("unchecked")
     public void listDefinedKlasses(Collection<DFSourceKlass> defined) {
-        if (this.isGeneric()) return;
         DFLocalScope scope = this.getScope();
         try {
             for (BodyDeclaration body : _decls) {
@@ -243,7 +242,6 @@ class DefinedMethod extends DFSourceMethod {
 
     @SuppressWarnings("unchecked")
     public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (this.isGeneric()) return;
         DFTypeFinder finder = this.getFinder();
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         for (SingleVariableDeclaration varDecl : varDecls) {
@@ -269,7 +267,6 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     public void listDefinedKlasses(Collection<DFSourceKlass> defined) {
-        if (this.isGeneric()) return;
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
         if (this.getCallStyle() == CallStyle.Constructor) {
@@ -772,7 +769,6 @@ public abstract class DFSourceKlass extends DFKlass {
     }
 
     public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        assert !this.isGeneric();
         if (klasses.contains(this)) return;
         klasses.add(this);
         //Logger.info("listUsedKlasses:", this);
@@ -780,7 +776,6 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         if (_initMethod != null) {
             _initMethod.listDefinedKlasses(defined);
         }
@@ -795,7 +790,6 @@ public abstract class DFSourceKlass extends DFKlass {
     protected void listUsedDecls(
         Collection<DFSourceKlass> klasses, List<BodyDeclaration> decls)
         throws InvalidSyntax {
-        assert !this.isGeneric();
         this.load();
         if (_initMethod != null) {
             _initMethod.listUsedKlasses(klasses);

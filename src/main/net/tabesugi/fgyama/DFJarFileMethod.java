@@ -99,7 +99,7 @@ public class DFJarFileMethod extends DFMethod {
             for (int i = 0; i < excNames.length; i++) {
                 DFKlass klass;
                 try {
-                    klass = _finder.lookupKlass(excNames[i]).getDefaultKlass();
+                    klass = _finder.lookupKlass(excNames[i]);
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileMethod.build: TypeNotFound (exception)",

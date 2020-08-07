@@ -57,15 +57,6 @@ public class DFTypeFinder {
     public DFType resolve(Type type)
         throws TypeNotFound {
         if (type instanceof SimpleType) {
-            return ((DFKlass)this.resolve1(type)).getDefaultKlass();
-        } else {
-            return this.resolve1(type);
-        }
-    }
-    @SuppressWarnings("unchecked")
-    private DFType resolve1(Type type)
-        throws TypeNotFound {
-        if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             return this.lookupKlass(stype.getName());
         } else if (type instanceof PrimitiveType) {
@@ -78,7 +69,7 @@ public class DFTypeFinder {
             return DFArrayType.getArray(elemType, ndims);
         } else if (type instanceof ParameterizedType) {
             ParameterizedType ptype = (ParameterizedType)type;
-            DFType genericType = this.resolve1(ptype.getType());
+            DFType genericType = this.resolve(ptype.getType());
             assert genericType instanceof DFKlass;
             return this.getParameterized((DFKlass)genericType, ptype.typeArguments());
         } else if (type instanceof QualifiedType) {
@@ -148,7 +139,7 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            return this.lookupKlass(className).getDefaultKlass();
+            return this.lookupKlass(className);
         } else {
             // ???
             throw new TypeNotFound(type.toString());

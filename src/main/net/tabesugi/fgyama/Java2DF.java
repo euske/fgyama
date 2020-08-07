@@ -319,14 +319,12 @@ public class Java2DF {
                 methods.add(init);
             }
             for (DFMethod method : klass.getMethods()) {
+                methods.add(method);
                 if (method.isGeneric()) {
                     methods.addAll(method.getConcreteMethods());
-                } else {
-                    methods.add(method);
                 }
             }
             for (DFMethod method : methods) {
-                assert !method.isGeneric();
                 if (method instanceof DFSourceMethod) {
                     try {
                         Logger.info("Stage5:", method.getSignature());

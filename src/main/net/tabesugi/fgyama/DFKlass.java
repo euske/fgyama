@@ -218,11 +218,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Creates a parameterized klass.
-    public DFKlass getDefaultKlass() {
-        if (_mapTypes == null) return this;
-        return this.getConcreteKlass(new DFKlass[] {});
-    }
-
     public DFKlass getConcreteKlass(DFKlass[] argTypes) {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
         assert _mapTypes != null;
@@ -406,7 +401,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     protected void load() {
         // an unspecified parameterized klass cannot be loaded.
-        assert _mapTypes == null;
+        assert (_mapTypes == null || _paramTypes == null);
         if (_state == LoadState.Unloaded) {
             _state = LoadState.Loading;
             //Logger.info("build:", this);

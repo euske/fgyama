@@ -77,12 +77,6 @@ public class DFTypeSpace {
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.lookupSpace(id.substring(0, i));
-            if (space instanceof DFKlass) {
-                DFKlass klass = (DFKlass)space;
-                if (klass.isGeneric()) {
-                    space = klass.getDefaultKlass();
-                }
-            }
             return space.getKlass(id.substring(i+1));
         }
         return _id2klass.get(id);

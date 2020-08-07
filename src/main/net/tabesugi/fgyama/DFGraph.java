@@ -1101,7 +1101,7 @@ public abstract class DFGraph {
                         klass = obj.getNodeType().toKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
-                        klass = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
+                        klass = _finder.lookupKlass(qname.getQualifier());
                     }
                     SimpleName fieldName = qname.getName();
                     DFRef ref = klass.getField(fieldName);
@@ -1117,7 +1117,7 @@ public abstract class DFGraph {
                 Name name = thisExpr.getQualifier();
                 DFRef ref;
                 if (name != null) {
-                    DFKlass klass = _finder.lookupKlass(name).getDefaultKlass();
+                    DFKlass klass = _finder.lookupKlass(name);
                     assert klass instanceof DFSourceKlass;
                     ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
                 } else {
@@ -1273,7 +1273,7 @@ public abstract class DFGraph {
                     if (expr1 instanceof Name) {
                         // "ClassName.method()"
                         try {
-                            instKlass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                            instKlass = _finder.lookupKlass((Name)expr1);
                             callStyle = DFMethod.CallStyle.StaticMethod;
                         } catch (TypeNotFound e) {
                         }
@@ -1413,7 +1413,7 @@ public abstract class DFGraph {
                 DFKlass instKlass = null;
                 if (expr1 instanceof Name) {
                     try {
-                        instKlass = _finder.lookupKlass((Name)expr1).getDefaultKlass();
+                        instKlass = _finder.lookupKlass((Name)expr1);
                     } catch (TypeNotFound e) {
                     }
                 }
@@ -1595,7 +1595,7 @@ public abstract class DFGraph {
                     type = obj.getNodeType();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    type = _finder.lookupKlass(qname.getQualifier()).getDefaultKlass();
+                    type = _finder.lookupKlass(qname.getQualifier());
                 }
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
