@@ -1759,6 +1759,11 @@ public abstract class DFSourceMethod extends DFMethod {
         }
 
         @Override
+        public String toString() {
+            return "<MethodGraph ("+_graphId+") "+DFSourceMethod.this+">";
+        }
+
+        @Override
         public String getGraphId() {
             return _graphId;
         }

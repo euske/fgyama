@@ -796,6 +796,11 @@ public abstract class DFGraph {
         _finder = method.getFinder();
     }
 
+    @Override
+    public String toString() {
+        return "<DFGraph ("+_method+")>";
+    }
+
     public int addNode(DFNode node) {
         _nodes.add(node);
         return _nodes.size();
