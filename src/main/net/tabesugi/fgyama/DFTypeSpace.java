@@ -109,9 +109,6 @@ public class DFTypeSpace {
                 b.append(",");
             }
             DFKlass type = paramTypes.get(k);
-            if (type instanceof DFMapType) {
-                type = type.getBaseKlass();
-            }
             b.append(type.getTypeName());
         }
         return "<"+b.toString()+">";

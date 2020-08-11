@@ -260,17 +260,24 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     // Parameterize the klass.
     protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes);
 
-    protected void setMapTypes(DFMapType[] mapTypes, DFTypeFinder finder) {
+    protected void setMapTypes(DFMapType[] mapTypes) {
         assert mapTypes != null;
         assert _mapTypes == null;
         assert _paramTypes == null;
         assert _concreteMethods == null;
         _mapTypes = new ConsistentHashMap<String, DFMapType>();
         for (DFMapType mapType : mapTypes) {
-            mapType.setFinder(finder);
             _mapTypes.put(mapType.getName(), mapType);
         }
         _concreteMethods = new ConsistentHashMap<String, DFMethod>();
+    }
+
+    protected void setMapTypeFinder(DFTypeFinder finder) {
+        if (_mapTypes != null) {
+            for (DFMapType mapType : _mapTypes.values()) {
+                mapType.setFinder(finder);
+            }
+        }
     }
 
     // Overrider

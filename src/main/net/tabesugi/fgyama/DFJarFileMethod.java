@@ -67,7 +67,8 @@ public class DFJarFileMethod extends DFMethod {
             if (this.getGenericMethod() == null) {
                 DFMapType[] mapTypes = parser.createMapTypes(this);
                 if (mapTypes != null) {
-                    this.setMapTypes(mapTypes, _finder);
+                    this.setMapTypes(mapTypes);
+                    this.setMapTypeFinder(_finder);
                 }
             } else {
                 parser.skipMapTypes();

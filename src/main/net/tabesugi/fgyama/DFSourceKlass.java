@@ -157,12 +157,18 @@ class DefinedMethod extends DFSourceMethod {
     public DefinedMethod(
         DFSourceKlass srcklass, CallStyle callStyle,
         boolean isAbstract, String methodId, String methodName,
-        MethodDeclaration methodDecl, DFTypeFinder finder) {
+        MethodDeclaration methodDecl, DFTypeFinder finder,
+        DFTypeSpace outerSpace) {
         super(srcklass, callStyle,
               isAbstract, methodId, methodName,
               srcklass.getKlassScope(), finder);
 
         _methodDecl = methodDecl;
+        outerSpace = outerSpace.lookupSpace(methodId);
+        DFMapType[] mapTypes = outerSpace.createMapTypes(_methodDecl.typeParameters());
+        if (mapTypes != null) {
+            this.setMapTypes(mapTypes);
+        }
         this.build();
     }
 
@@ -193,12 +199,7 @@ class DefinedMethod extends DFSourceMethod {
         DFTypeFinder finder = this.getFinder();
         MethodScope methodScope = (MethodScope)this.getScope();
 
-        if (this.getGenericMethod() == null) {
-            DFMapType[] mapTypes = this.createMapTypes(_methodDecl.typeParameters());
-            if (mapTypes != null) {
-                this.setMapTypes(mapTypes, finder);
-            }
-        }
+        this.setMapTypeFinder(finder);
 
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         DFType[] argTypes = new DFType[varDecls.size()];
@@ -747,8 +748,12 @@ public abstract class DFSourceKlass extends DFKlass {
                         DFMethod.CallStyle.InstanceMethod;
                 }
                 Statement stmt = decl.getBody();
+                DFTypeSpace space = this.getGenericKlass();
+                if (space == null) {
+                    space = this;
+                }
                 DFMethod method = new DefinedMethod(
-                    this, callStyle, (stmt == null), id, name, decl, _finder);
+                    this, callStyle, (stmt == null), id, name, decl, _finder, space);
                 _methods.add(method);
                 _id2method.put(id, method);
 
