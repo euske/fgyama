@@ -208,7 +208,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             if (argTypes != null && i < argTypes.length) {
                 type = argTypes[i];
             } else {
-                type = mapType.toKlass();
+                type = mapType.getBaseKlass();
             }
             paramTypes.put(mapType.getName(), type);
         }

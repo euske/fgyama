@@ -146,7 +146,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             if (typeMap != null && typeMap.containsKey(mapType)) {
                 type = typeMap.get(mapType);
             } else {
-                type = mapType.toKlass();
+                type = mapType.getBaseKlass();
             }
             paramTypes.put(mapType.getName(), type);
         }
