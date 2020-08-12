@@ -355,6 +355,8 @@ class EnumValuesMethod extends DFMethod {
 //    1. new DFSourceKlass()
 //    2. setBaseFinder(finder)
 //    3. getXXX(), ...
+//    4. listUsedKlass(used)
+//    5. listDefinedKlass(defined)
 //
 //  Implement:
 //    parameterize(paramTypes)
@@ -773,12 +775,15 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (klasses.contains(this)) return;
+    // listUsedKlass: enumerate all the klasses used within this klass.
+    public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
+        if (klasses.contains(this)) return false;
         klasses.add(this);
         //Logger.info("listUsedKlasses:", this);
+        return true;
     }
 
+    // listDefinedKlass: enumerate newly defined klasses (Lambdas).
     public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         if (_initMethod != null) {

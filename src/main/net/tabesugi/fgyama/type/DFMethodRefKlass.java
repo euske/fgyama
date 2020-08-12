@@ -54,8 +54,9 @@ class DFMethodRefKlass extends DFSourceKlass {
             } else if (_methodRef instanceof TypeMethodReference) {
                 TypeMethodReference typemref = (TypeMethodReference)_methodRef;
                 DFType type = finder.resolveSafe(typemref.getType());
-                assert type instanceof DFSourceKlass;
-                ((DFSourceKlass)type).listUsedKlasses(klasses);
+                if (type instanceof DFSourceKlass) {
+                    ((DFSourceKlass)type).listUsedKlasses(klasses);
+                }
 
             } else if (_methodRef instanceof SuperMethodReference) {
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;

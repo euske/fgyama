@@ -46,15 +46,15 @@ class AnonymousKlass extends DFSourceKlass {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (klasses.contains(this)) return;
-        super.listUsedKlasses(klasses);
+    public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
+        if (!super.listUsedKlasses(klasses)) return false;
         try {
             this.listUsedDecls(
                 klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } catch (InvalidSyntax e) {
             Logger.error("AnonymousKlass.listUsedKlasses:", e);
         }
+        return true;
     }
 }
 
@@ -836,6 +836,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use lambda klasses until defined.
+            lambdaKlass.listUsedKlasses(klasses);
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -846,6 +847,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use methodref klasses until defined.
+            methodRefKlass.listUsedKlasses(klasses);
 
         } else {
             throw new InvalidSyntax(expr);

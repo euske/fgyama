@@ -259,7 +259,6 @@ public class Java2DF {
 
         // List method overrides.
         for (DFSourceKlass klass : klasses) {
-            assert !(klass instanceof DFLambdaKlass);
             klass.overrideMethods();
         }
 

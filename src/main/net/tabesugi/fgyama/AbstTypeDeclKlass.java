@@ -87,13 +87,13 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (klasses.contains(this)) return;
-        super.listUsedKlasses(klasses);
+    public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
+        if (!super.listUsedKlasses(klasses)) return false;
         try {
             this.listUsedDecls(klasses, _abstTypeDecl.bodyDeclarations());
         } catch (InvalidSyntax e) {
             Logger.error("AbstTypeDeclKlass.listUsedKlasses:", e);
         }
+        return true;
     }
 }
