@@ -373,6 +373,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+    protected boolean isRecursive(DFKlass genericKlass) {
+        assert genericKlass != null;
+        if (_paramTypes == null) return false;
+        for (DFKlass klass : _paramTypes.values()) {
+            if (klass._genericKlass == genericKlass) return true;
+            if (klass.isRecursive(genericKlass)) return true;
+        }
+        return false;
+    }
+
     /// For constructions.
 
     protected void load() {

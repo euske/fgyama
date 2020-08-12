@@ -439,6 +439,8 @@ public abstract class DFSourceKlass extends DFKlass {
     // listUsedKlass: enumerate all the klasses used within this klass.
     public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
         if (klasses.contains(this)) return false;
+        if (this.getGenericKlass() != null &&
+            this.isRecursive(this.getGenericKlass())) return false;
         klasses.add(this);
         //Logger.info("listUsedKlasses:", this);
         return true;
