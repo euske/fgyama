@@ -7,17 +7,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  RelayNode
-//
-class RelayNode extends DFNode {
-
-    public RelayNode(
-        DFGraph graph, DFVarScope scope, DFRef ref) {
-        super(graph, scope, ref.getRefType(), ref, null);
-    }
-}
-
-
 //  DFContext
 //
 public class DFContext {
@@ -80,5 +69,16 @@ public class DFContext {
         for (Map.Entry<DFRef, DFNode> ent : _last.entrySet()) {
             out.println("    "+ent.getKey()+" = "+ent.getValue());
         }
+    }
+}
+
+
+//  RelayNode
+//
+class RelayNode extends DFNode {
+
+    public RelayNode(
+        DFGraph graph, DFVarScope scope, DFRef ref) {
+        super(graph, scope, ref.getRefType(), ref, null);
     }
 }

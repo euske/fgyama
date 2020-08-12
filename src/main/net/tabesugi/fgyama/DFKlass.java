@@ -8,30 +8,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  FallbackMethod
-//  A dummy entry used for an unknown method.
-//
-class FallbackMethod extends DFMethod {
-
-    DFFuncType _funcType;
-
-    public FallbackMethod(
-        DFKlass klass, String methodName, DFType[] argTypes) {
-        super(klass, CallStyle.InstanceMethod, false, methodName, methodName);
-        _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
-    }
-
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
-        assert false;
-        return null;
-    }
-
-    public DFFuncType getFuncType() {
-        return _funcType;
-    }
-}
-
-
 //  DFKlass
 //  Abstract Klass type.
 //
@@ -492,4 +468,28 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+}
+
+
+//  FallbackMethod
+//  A dummy entry used for an unknown method.
+//
+class FallbackMethod extends DFMethod {
+
+    DFFuncType _funcType;
+
+    public FallbackMethod(
+        DFKlass klass, String methodName, DFType[] argTypes) {
+        super(klass, CallStyle.InstanceMethod, false, methodName, methodName);
+        _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
+    }
+
+    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
+        assert false;
+        return null;
+    }
+
+    public DFFuncType getFuncType() {
+        return _funcType;
+    }
 }

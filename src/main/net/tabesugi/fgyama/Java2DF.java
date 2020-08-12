@@ -10,81 +10,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFFileScope
-//  File-wide scope for methods and variables.
-class DFFileScope extends DFVarScope {
-
-    private Map<String, DFRef> _refs =
-        new HashMap<String, DFRef>();
-    private List<DFMethod> _methods =
-        new ArrayList<DFMethod>();
-
-    public DFFileScope(DFVarScope outer, String path) {
-        super(outer, "["+path+"]");
-    }
-
-    @Override
-    public DFRef lookupVar(String id)
-        throws VariableNotFound {
-        DFRef ref = _refs.get(id);
-        if (ref != null) {
-            return ref;
-        } else {
-            return super.lookupVar(id);
-        }
-    }
-
-    @Override
-    public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
-        String id = name.getIdentifier();
-        int bestDist = -1;
-        DFMethod bestMethod = null;
-        for (DFMethod method1 : _methods) {
-            if (!id.equals(method1.getName())) continue;
-            Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
-            try {
-                int dist = method1.canAccept(argTypes, typeMap);
-                if (bestDist < 0 || dist < bestDist) {
-                    DFMethod method = method1.getConcreteMethod(typeMap);
-                    if (method != null) {
-                        bestDist = dist;
-                        bestMethod = method;
-                    }
-                }
-            } catch (TypeIncompatible e) {
-                continue;
-            }
-        }
-        return bestMethod;
-    }
-
-    public void importStatic(DFKlass klass) {
-        Logger.debug("ImportStatic:", klass+".*");
-        for (DFKlass.FieldRef ref : klass.getFields()) {
-            _refs.put(ref.getName(), ref);
-        }
-        for (DFMethod method : klass.getMethods()) {
-            _methods.add(method);
-        }
-    }
-
-    public void importStatic(DFKlass klass, SimpleName name) {
-        Logger.debug("ImportStatic:", klass+"."+name);
-        String id = name.getIdentifier();
-        DFRef ref = klass.getField(id);
-        if (ref != null) {
-            _refs.put(id, ref);
-        } else {
-            DFMethod method = klass.findMethod(
-                DFMethod.CallStyle.StaticMethod, name, null);
-            if (method != null) {
-                _methods.add(method);
-            }
-        }
-    }
-}
-
-
 //  Java2DF
 //
 public class Java2DF {
@@ -469,5 +394,80 @@ public class Java2DF {
         }
 
         output.close();
+    }
+}
+
+
+//  DFFileScope
+//  File-wide scope for methods and variables.
+class DFFileScope extends DFVarScope {
+
+    private Map<String, DFRef> _refs =
+        new HashMap<String, DFRef>();
+    private List<DFMethod> _methods =
+        new ArrayList<DFMethod>();
+
+    public DFFileScope(DFVarScope outer, String path) {
+        super(outer, "["+path+"]");
+    }
+
+    @Override
+    public DFRef lookupVar(String id)
+        throws VariableNotFound {
+        DFRef ref = _refs.get(id);
+        if (ref != null) {
+            return ref;
+        } else {
+            return super.lookupVar(id);
+        }
+    }
+
+    @Override
+    public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
+        String id = name.getIdentifier();
+        int bestDist = -1;
+        DFMethod bestMethod = null;
+        for (DFMethod method1 : _methods) {
+            if (!id.equals(method1.getName())) continue;
+            Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
+            try {
+                int dist = method1.canAccept(argTypes, typeMap);
+                if (bestDist < 0 || dist < bestDist) {
+                    DFMethod method = method1.getConcreteMethod(typeMap);
+                    if (method != null) {
+                        bestDist = dist;
+                        bestMethod = method;
+                    }
+                }
+            } catch (TypeIncompatible e) {
+                continue;
+            }
+        }
+        return bestMethod;
+    }
+
+    public void importStatic(DFKlass klass) {
+        Logger.debug("ImportStatic:", klass+".*");
+        for (DFKlass.FieldRef ref : klass.getFields()) {
+            _refs.put(ref.getName(), ref);
+        }
+        for (DFMethod method : klass.getMethods()) {
+            _methods.add(method);
+        }
+    }
+
+    public void importStatic(DFKlass klass, SimpleName name) {
+        Logger.debug("ImportStatic:", klass+"."+name);
+        String id = name.getIdentifier();
+        DFRef ref = klass.getField(id);
+        if (ref != null) {
+            _refs.put(id, ref);
+        } else {
+            DFMethod method = klass.findMethod(
+                DFMethod.CallStyle.StaticMethod, name, null);
+            if (method != null) {
+                _methods.add(method);
+            }
+        }
     }
 }

@@ -8,776 +8,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-// BreakExit
-class BreakExit extends DFExit {
-
-    public BreakExit(DFFrame frame, DFNode node) {
-        super(frame, node);
-        // frame.getLabel() can be either @BREAKABLE or a label.
-    }
-
-    @Override
-    public int compareTo(DFExit exit) {
-        boolean m0 = this.getNode().canMerge();
-        boolean m1 = exit.getNode().canMerge();
-        if (m0 && !m1) {
-            return +1;
-        } else if (!m0 && m1) {
-            return -1;
-        } else {
-            return super.compareTo(exit);
-        }
-    }
-}
-
-// ContinueExit
-class ContinueExit extends DFExit {
-
-    public ContinueExit(DFFrame frame, DFNode node) {
-        super(frame, node);
-        // frame.getLabel() can be either @BREAKABLE or a label.
-    }
-}
-
-// ReturnExit
-class ReturnExit extends DFExit {
-
-    public ReturnExit(DFFrame frame, DFNode node) {
-        super(frame, node);
-        assert frame.getLabel() == DFFrame.RETURNABLE;
-    }
-
-    @Override
-    public int compareTo(DFExit exit) {
-        boolean m0 = this.getNode().canMerge();
-        boolean m1 = exit.getNode().canMerge();
-        if (m0 && !m1) {
-            return +1;
-        } else if (!m0 && m1) {
-            return -1;
-        } else {
-            return super.compareTo(exit);
-        }
-    }
-}
-
-// ThrowExit
-class ThrowExit extends DFExit {
-
-    private DFKlass _excKlass;
-
-    public ThrowExit(DFFrame frame, DFNode node, DFKlass excKlass) {
-        super(frame, node);
-        _excKlass = excKlass;
-    }
-
-    public DFKlass getExcKlass() {
-        return _excKlass;
-    }
-}
-
-// SingleAssignNode:
-class SingleAssignNode extends DFNode {
-
-    public SingleAssignNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-}
-
-// VarAssignNode:
-class VarAssignNode extends SingleAssignNode {
-
-    public VarAssignNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "assign_var";
-    }
-}
-
-// ArrayAssignNode:
-class ArrayAssignNode extends DFNode {
-
-    public ArrayAssignNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode array, DFNode index) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        this.accept(array, "array");
-        this.accept(index, "index");
-    }
-
-    @Override
-    public String getKind() {
-        return "assign_array";
-    }
-}
-
-// FieldAssignNode:
-class FieldAssignNode extends DFNode {
-
-    public FieldAssignNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode obj) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        if (obj != null) {
-            this.accept(obj, "obj");
-        }
-    }
-
-    @Override
-    public String getKind() {
-        return "assign_field";
-    }
-}
-
-// VarRefNode: represnets a variable reference.
-class VarRefNode extends DFNode {
-
-    public VarRefNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "ref_var";
-    }
-}
-
-// ArrayRefNode
-class ArrayRefNode extends DFNode {
-
-    public ArrayRefNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode array, DFNode index) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        this.accept(array, "array");
-        this.accept(index, "index");
-    }
-
-    @Override
-    public String getKind() {
-        return "ref_array";
-    }
-}
-
-// FieldRefNode
-class FieldRefNode extends DFNode {
-
-    public FieldRefNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, DFNode obj) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        if (obj != null) {
-            this.accept(obj, "obj");
-        }
-    }
-
-    @Override
-    public String getKind() {
-        return "ref_field";
-    }
-}
-
-// PrefixNode
-class PrefixNode extends DFNode {
-
-    public PrefixExpression.Operator op;
-
-    public PrefixNode(
-        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast, PrefixExpression.Operator op) {
-        super(graph, scope, type, ref, ast);
-        this.op = op;
-    }
-
-    @Override
-    public String getKind() {
-        return "op_prefix";
-    }
-
-    @Override
-    public String getData() {
-        return this.op.toString();
-    }
-}
-
-// PostfixNode
-class PostfixNode extends DFNode {
-
-    public PostfixExpression.Operator op;
-
-    public PostfixNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, PostfixExpression.Operator op) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        this.op = op;
-    }
-
-    @Override
-    public String getKind() {
-        return "op_postfix";
-    }
-
-    @Override
-    public String getData() {
-        return this.op.toString();
-    }
-}
-
-// InfixNode
-class InfixNode extends DFNode {
-
-    public InfixExpression.Operator op;
-
-    public InfixNode(
-        DFGraph graph, DFVarScope scope, DFType type,
-        ASTNode ast, InfixExpression.Operator op,
-        DFNode lvalue, DFNode rvalue) {
-        super(graph, scope, type, null, ast);
-        this.op = op;
-        this.accept(lvalue, "L");
-        this.accept(rvalue, "R");
-    }
-
-    @Override
-    public String getKind() {
-        return "op_infix";
-    }
-
-    @Override
-    public String getData() {
-        return this.op.toString();
-    }
-}
-
-// TypeCastNode
-class TypeCastNode extends DFNode {
-
-    public TypeCastNode(
-        DFGraph graph, DFVarScope scope, DFType type,
-        ASTNode ast) {
-        super(graph, scope, type, null, ast);
-        assert type != null;
-    }
-
-    @Override
-    public String getKind() {
-        return "op_typecast";
-    }
-
-    @Override
-    public String getData() {
-        return this.getNodeType().getTypeName();
-    }
-}
-
-// TypeCheckNode
-class TypeCheckNode extends DFNode {
-
-    public DFType type;
-
-    public TypeCheckNode(
-        DFGraph graph, DFVarScope scope,
-        ASTNode ast, DFType type) {
-        super(graph, scope, DFBasicType.BOOLEAN, null, ast);
-        assert type != null;
-        this.type = type;
-    }
-
-    @Override
-    public String getKind() {
-        return "op_typecheck";
-    }
-
-    @Override
-    public String getData() {
-        return this.getNodeType().getTypeName();
-    }
-}
-
-// CaseNode
-class CaseNode extends DFNode {
-
-    public List<DFNode> matches = new ArrayList<DFNode>();
-
-    public CaseNode(
-        DFGraph graph, DFVarScope scope,
-        ASTNode ast) {
-        super(graph, scope, DFUnknownType.UNKNOWN, null, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "case";
-    }
-
-    @Override
-    public String getData() {
-        if (this.matches.isEmpty()) {
-            return "default";
-        } else {
-            return "case("+this.matches.size()+")";
-        }
-    }
-
-    public void addMatch(DFNode node) {
-        String label = "match"+this.matches.size();
-        this.accept(node, label);
-        this.matches.add(node);
-    }
-}
-
-// AssignOpNode
-class AssignOpNode extends SingleAssignNode {
-
-    public Assignment.Operator op;
-
-    public AssignOpNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, Assignment.Operator op,
-        DFNode lvalue, DFNode rvalue) {
-        super(graph, scope, ref, ast);
-        this.op = op;
-        if (lvalue != null) {
-            this.accept(lvalue, "L");
-        }
-        this.accept(rvalue, "R");
-    }
-
-    @Override
-    public String getKind() {
-        return "op_assign";
-    }
-
-    @Override
-    public String getData() {
-        return this.op.toString();
-    }
-}
-
-// ConstNode: represents a constant value.
-class ConstNode extends DFNode {
-
-    public String data;
-
-    public ConstNode(
-        DFGraph graph, DFVarScope scope, DFType type,
-        ASTNode ast, String data) {
-        super(graph, scope, type, null, ast);
-        this.data = data;
-    }
-
-    @Override
-    public String getKind() {
-        return "value";
-    }
-
-    @Override
-    public String getData() {
-        return this.data;
-    }
-}
-
-// ValueSetNode: represents an array.
-class ValueSetNode extends DFNode {
-
-    public ValueSetNode(
-        DFGraph graph, DFVarScope scope, DFType type,
-        ASTNode ast) {
-        super(graph, scope, type, null, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "valueset";
-    }
-}
-
-// CaptureNode: represents variable captures (for lambdas).
-class CaptureNode extends DFNode {
-
-    public CaptureNode(
-        DFGraph graph, DFVarScope scope, DFType type,
-        ASTNode ast) {
-        super(graph, scope, type, null, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "capture";
-    }
-}
-
-// JoinNode
-class JoinNode extends DFNode {
-
-    private DFNode.Link _linkCond;
-    private DFNode.Link _linkTrue = null;
-    private DFNode.Link _linkFalse = null;
-
-    public JoinNode(
-        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast, DFNode cond) {
-        super(graph, scope, type, ref, ast);
-        _linkCond = this.accept(cond, "cond");
-    }
-
-    @Override
-    public String getKind() {
-        return "join";
-    }
-
-    public void recv(boolean cond, DFNode node) {
-        if (cond) {
-            assert _linkTrue == null;
-            _linkTrue = this.accept(node, "true");
-        } else {
-            assert _linkFalse == null;
-            _linkFalse = this.accept(node, "false");
-        }
-    }
-
-    @Override
-    public boolean canMerge() {
-        return (_linkTrue == null || _linkFalse == null);
-    }
-
-    @Override
-    public void merge(DFNode node) {
-        if (_linkTrue == null) {
-            assert _linkFalse != null;
-            _linkTrue = this.accept(node, "true");
-        } else if (_linkFalse == null) {
-            assert _linkTrue != null;
-            _linkFalse = this.accept(node, "false");
-        } else {
-            Logger.error("JoinNode: cannot merge:", this, node);
-            assert false;
-        }
-    }
-
-    @Override
-    public boolean purge() {
-        if (_linkTrue == null) {
-            assert _linkFalse != null;
-            unlink(_linkFalse.getSrc());
-            return true;
-        } else if (_linkFalse == null) {
-            assert _linkTrue != null;
-            unlink(_linkTrue.getSrc());
-            return true;
-        } else {
-            DFNode srcTrue = _linkTrue.getSrc();
-            if (srcTrue instanceof JoinNode &&
-                ((JoinNode)srcTrue)._linkCond.getSrc() == _linkCond.getSrc() &&
-                ((JoinNode)srcTrue)._linkFalse != null &&
-                ((JoinNode)srcTrue)._linkFalse.getSrc() == _linkFalse.getSrc()) {
-                unlink(srcTrue);
-                return true;
-            }
-            DFNode srcFalse = _linkFalse.getSrc();
-            if (srcFalse instanceof JoinNode &&
-                ((JoinNode)srcFalse)._linkCond.getSrc() == _linkCond.getSrc() &&
-                ((JoinNode)srcFalse)._linkTrue != null &&
-                ((JoinNode)srcFalse)._linkTrue.getSrc() == _linkTrue.getSrc()) {
-                unlink(srcFalse);
-                return true;
-            }
-            return false;
-        }
-    }
-}
-
-// LoopNode
-class LoopNode extends DFNode {
-
-    public String loopId;
-
-    public LoopNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, String loopId) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        this.loopId = loopId;
-    }
-
-    @Override
-    public String getData() {
-        return this.loopId;
-    }
-}
-
-// LoopBeginNode
-class LoopBeginNode extends LoopNode {
-
-    public LoopBeginNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, String loopId, DFNode init) {
-        super(graph, scope, ref, ast, loopId);
-        this.accept(init, "init");
-    }
-
-    @Override
-    public String getKind() {
-        return "begin";
-    }
-
-    public void setCont(DFNode cont) {
-        this.accept(cont, "cont");
-    }
-}
-
-// LoopEndNode
-class LoopEndNode extends LoopNode {
-
-    public LoopEndNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, String loopId, DFNode cond) {
-        super(graph, scope, ref, ast, loopId);
-        this.accept(cond, "cond");
-    }
-
-    @Override
-    public String getKind() {
-        return "end";
-    }
-
-    public void setRepeat(LoopRepeatNode repeat) {
-        this.accept(repeat, "_repeat");
-    }
-}
-
-// LoopRepeatNode
-class LoopRepeatNode extends LoopNode {
-
-    public LoopRepeatNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast, String loopId) {
-        super(graph, scope, ref, ast, loopId);
-    }
-
-    @Override
-    public String getKind() {
-        return "repeat";
-    }
-
-    public void setEnd(DFNode end) {
-        this.accept(end, "_end");
-    }
-}
-
-// IterNode
-class IterNode extends DFNode {
-
-    public IterNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "op_iter";
-    }
-}
-
-// CallNode
-abstract class CallNode extends DFNode {
-
-    public DFFuncType funcType;
-    public DFNode[] args;
-
-    public CallNode(
-        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
-        ASTNode ast, DFFuncType funcType) {
-        super(graph, scope, type, ref, ast);
-        this.funcType = funcType;
-        this.args = null;
-    }
-
-    @Override
-    public String getKind() {
-        return "call";
-    }
-
-    public void setArgs(DFNode[] args) {
-        assert this.args == null;
-        for (int i = 0; i < args.length; i++) {
-            String label = "#arg"+i;
-            this.accept(args[i], label);
-        }
-        this.args = args;
-    }
-}
-
-// MethodCallNode
-class MethodCallNode extends CallNode {
-
-    public DFMethod[] methods;
-
-    public MethodCallNode(
-        DFGraph graph, DFVarScope scope,
-        ASTNode ast, DFFuncType funcType,
-        DFNode obj, DFMethod[] methods) {
-        super(graph, scope, funcType.getReturnType(), null,
-              ast, funcType);
-        if (obj != null) {
-            this.accept(obj, "#this");
-        }
-        this.methods = methods;
-    }
-
-    @Override
-    public String getData() {
-        StringBuilder b = new StringBuilder();
-        for (DFMethod method : this.methods) {
-            if (0 < b.length()) {
-                b.append(" ");
-            }
-            b.append(method.getSignature());
-        }
-        return b.toString();
-    }
-}
-
-// ReceiveNode:
-class ReceiveNode extends DFNode {
-
-    public ReceiveNode(
-        DFGraph graph, DFVarScope scope, CallNode call,
-        ASTNode ast) {
-        super(graph, scope, call.getNodeType(), null, ast);
-        this.accept(call);
-    }
-
-    public ReceiveNode(
-        DFGraph graph, DFVarScope scope, CallNode call,
-        ASTNode ast, DFRef ref) {
-        super(graph, scope, ref.getRefType(), ref, ast);
-        this.accept(call, ref.getFullName());
-    }
-
-    @Override
-    public String getKind() {
-        return "receive";
-    }
-}
-
-// CreateObjectNode
-class CreateObjectNode extends CallNode {
-
-    public DFMethod constructor;
-
-    public CreateObjectNode(
-        DFGraph graph, DFVarScope scope, DFType type, DFMethod constructor,
-        ASTNode ast, DFNode obj) {
-        super(graph, scope, type, null,
-              ast, constructor.getFuncType());
-        if (obj != null) {
-            this.accept(obj, "#this");
-        }
-        this.constructor = constructor;
-    }
-
-    @Override
-    public String getKind() {
-        return "new";
-    }
-
-    @Override
-    public String getData() {
-        return this.constructor.getSignature();
-    }
-}
-
-// ReturnNode:
-class ReturnNode extends SingleAssignNode {
-
-    public ReturnNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "return";
-    }
-}
-
-// ThrowNode
-class ThrowNode extends SingleAssignNode {
-
-    public ThrowNode(
-        DFGraph graph, DFVarScope scope, DFRef ref, ASTNode ast) {
-        super(graph, scope, ref, ast);
-    }
-
-    @Override
-    public String getKind() {
-        return "throw";
-    }
-}
-
-// CatchNode
-class CatchNode extends SingleAssignNode {
-
-    private int _nexcs = 0;
-
-    public CatchNode(
-        DFGraph graph, DFVarScope scope, DFRef ref,
-        ASTNode ast) {
-        super(graph, scope, ref, ast);
-    }
-
-    @Override
-    public Link accept(DFNode node) {
-        String label = "exc"+(_nexcs++);
-        return this.accept(node, label);
-    }
-
-    @Override
-    public String getKind() {
-        return "catch";
-    }
-}
-
-// CatchJoin
-class CatchJoin extends DFNode {
-
-    public CatchJoin(
-        DFGraph graph, DFVarScope scope, ASTNode ast,
-        DFNode node, DFKlass catchKlass) {
-        super(graph, scope, node.getNodeType(), node.getRef(), ast);
-        this.accept(node, catchKlass.getTypeName());
-    }
-
-    @Override
-    public String getKind() {
-        return "catchjoin";
-    }
-
-    @Override
-    public boolean canMerge() {
-        return !this.hasValue();
-    }
-
-    @Override
-    public void merge(DFNode node) {
-        assert !this.hasValue();
-        this.accept(node);
-    }
-
-}
-
-
 //  DFGraph
 //
 public abstract class DFGraph {
@@ -2422,4 +1652,774 @@ public abstract class DFGraph {
 
         this.closeFrame(ctx, scope, frame);
     }
+}
+
+
+// BreakExit
+class BreakExit extends DFExit {
+
+    public BreakExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        // frame.getLabel() can be either @BREAKABLE or a label.
+    }
+
+    @Override
+    public int compareTo(DFExit exit) {
+        boolean m0 = this.getNode().canMerge();
+        boolean m1 = exit.getNode().canMerge();
+        if (m0 && !m1) {
+            return +1;
+        } else if (!m0 && m1) {
+            return -1;
+        } else {
+            return super.compareTo(exit);
+        }
+    }
+}
+
+// ContinueExit
+class ContinueExit extends DFExit {
+
+    public ContinueExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        // frame.getLabel() can be either @BREAKABLE or a label.
+    }
+}
+
+// ReturnExit
+class ReturnExit extends DFExit {
+
+    public ReturnExit(DFFrame frame, DFNode node) {
+        super(frame, node);
+        assert frame.getLabel() == DFFrame.RETURNABLE;
+    }
+
+    @Override
+    public int compareTo(DFExit exit) {
+        boolean m0 = this.getNode().canMerge();
+        boolean m1 = exit.getNode().canMerge();
+        if (m0 && !m1) {
+            return +1;
+        } else if (!m0 && m1) {
+            return -1;
+        } else {
+            return super.compareTo(exit);
+        }
+    }
+}
+
+// ThrowExit
+class ThrowExit extends DFExit {
+
+    private DFKlass _excKlass;
+
+    public ThrowExit(DFFrame frame, DFNode node, DFKlass excKlass) {
+        super(frame, node);
+        _excKlass = excKlass;
+    }
+
+    public DFKlass getExcKlass() {
+        return _excKlass;
+    }
+}
+
+// SingleAssignNode:
+class SingleAssignNode extends DFNode {
+
+    public SingleAssignNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+    }
+}
+
+// VarAssignNode:
+class VarAssignNode extends SingleAssignNode {
+
+    public VarAssignNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "assign_var";
+    }
+}
+
+// ArrayAssignNode:
+class ArrayAssignNode extends DFNode {
+
+    public ArrayAssignNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, DFNode array, DFNode index) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.accept(array, "array");
+        this.accept(index, "index");
+    }
+
+    @Override
+    public String getKind() {
+        return "assign_array";
+    }
+}
+
+// FieldAssignNode:
+class FieldAssignNode extends DFNode {
+
+    public FieldAssignNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, DFNode obj) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        if (obj != null) {
+            this.accept(obj, "obj");
+        }
+    }
+
+    @Override
+    public String getKind() {
+        return "assign_field";
+    }
+}
+
+// VarRefNode: represnets a variable reference.
+class VarRefNode extends DFNode {
+
+    public VarRefNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "ref_var";
+    }
+}
+
+// ArrayRefNode
+class ArrayRefNode extends DFNode {
+
+    public ArrayRefNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, DFNode array, DFNode index) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.accept(array, "array");
+        this.accept(index, "index");
+    }
+
+    @Override
+    public String getKind() {
+        return "ref_array";
+    }
+}
+
+// FieldRefNode
+class FieldRefNode extends DFNode {
+
+    public FieldRefNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, DFNode obj) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        if (obj != null) {
+            this.accept(obj, "obj");
+        }
+    }
+
+    @Override
+    public String getKind() {
+        return "ref_field";
+    }
+}
+
+// PrefixNode
+class PrefixNode extends DFNode {
+
+    public PrefixExpression.Operator op;
+
+    public PrefixNode(
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
+        ASTNode ast, PrefixExpression.Operator op) {
+        super(graph, scope, type, ref, ast);
+        this.op = op;
+    }
+
+    @Override
+    public String getKind() {
+        return "op_prefix";
+    }
+
+    @Override
+    public String getData() {
+        return this.op.toString();
+    }
+}
+
+// PostfixNode
+class PostfixNode extends DFNode {
+
+    public PostfixExpression.Operator op;
+
+    public PostfixNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, PostfixExpression.Operator op) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.op = op;
+    }
+
+    @Override
+    public String getKind() {
+        return "op_postfix";
+    }
+
+    @Override
+    public String getData() {
+        return this.op.toString();
+    }
+}
+
+// InfixNode
+class InfixNode extends DFNode {
+
+    public InfixExpression.Operator op;
+
+    public InfixNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast, InfixExpression.Operator op,
+        DFNode lvalue, DFNode rvalue) {
+        super(graph, scope, type, null, ast);
+        this.op = op;
+        this.accept(lvalue, "L");
+        this.accept(rvalue, "R");
+    }
+
+    @Override
+    public String getKind() {
+        return "op_infix";
+    }
+
+    @Override
+    public String getData() {
+        return this.op.toString();
+    }
+}
+
+// TypeCastNode
+class TypeCastNode extends DFNode {
+
+    public TypeCastNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast) {
+        super(graph, scope, type, null, ast);
+        assert type != null;
+    }
+
+    @Override
+    public String getKind() {
+        return "op_typecast";
+    }
+
+    @Override
+    public String getData() {
+        return this.getNodeType().getTypeName();
+    }
+}
+
+// TypeCheckNode
+class TypeCheckNode extends DFNode {
+
+    public DFType type;
+
+    public TypeCheckNode(
+        DFGraph graph, DFVarScope scope,
+        ASTNode ast, DFType type) {
+        super(graph, scope, DFBasicType.BOOLEAN, null, ast);
+        assert type != null;
+        this.type = type;
+    }
+
+    @Override
+    public String getKind() {
+        return "op_typecheck";
+    }
+
+    @Override
+    public String getData() {
+        return this.getNodeType().getTypeName();
+    }
+}
+
+// CaseNode
+class CaseNode extends DFNode {
+
+    public List<DFNode> matches = new ArrayList<DFNode>();
+
+    public CaseNode(
+        DFGraph graph, DFVarScope scope,
+        ASTNode ast) {
+        super(graph, scope, DFUnknownType.UNKNOWN, null, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "case";
+    }
+
+    @Override
+    public String getData() {
+        if (this.matches.isEmpty()) {
+            return "default";
+        } else {
+            return "case("+this.matches.size()+")";
+        }
+    }
+
+    public void addMatch(DFNode node) {
+        String label = "match"+this.matches.size();
+        this.accept(node, label);
+        this.matches.add(node);
+    }
+}
+
+// AssignOpNode
+class AssignOpNode extends SingleAssignNode {
+
+    public Assignment.Operator op;
+
+    public AssignOpNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, Assignment.Operator op,
+        DFNode lvalue, DFNode rvalue) {
+        super(graph, scope, ref, ast);
+        this.op = op;
+        if (lvalue != null) {
+            this.accept(lvalue, "L");
+        }
+        this.accept(rvalue, "R");
+    }
+
+    @Override
+    public String getKind() {
+        return "op_assign";
+    }
+
+    @Override
+    public String getData() {
+        return this.op.toString();
+    }
+}
+
+// ConstNode: represents a constant value.
+class ConstNode extends DFNode {
+
+    public String data;
+
+    public ConstNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast, String data) {
+        super(graph, scope, type, null, ast);
+        this.data = data;
+    }
+
+    @Override
+    public String getKind() {
+        return "value";
+    }
+
+    @Override
+    public String getData() {
+        return this.data;
+    }
+}
+
+// ValueSetNode: represents an array.
+class ValueSetNode extends DFNode {
+
+    public ValueSetNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast) {
+        super(graph, scope, type, null, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "valueset";
+    }
+}
+
+// CaptureNode: represents variable captures (for lambdas).
+class CaptureNode extends DFNode {
+
+    public CaptureNode(
+        DFGraph graph, DFVarScope scope, DFType type,
+        ASTNode ast) {
+        super(graph, scope, type, null, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "capture";
+    }
+}
+
+// JoinNode
+class JoinNode extends DFNode {
+
+    private DFNode.Link _linkCond;
+    private DFNode.Link _linkTrue = null;
+    private DFNode.Link _linkFalse = null;
+
+    public JoinNode(
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
+        ASTNode ast, DFNode cond) {
+        super(graph, scope, type, ref, ast);
+        _linkCond = this.accept(cond, "cond");
+    }
+
+    @Override
+    public String getKind() {
+        return "join";
+    }
+
+    public void recv(boolean cond, DFNode node) {
+        if (cond) {
+            assert _linkTrue == null;
+            _linkTrue = this.accept(node, "true");
+        } else {
+            assert _linkFalse == null;
+            _linkFalse = this.accept(node, "false");
+        }
+    }
+
+    @Override
+    public boolean canMerge() {
+        return (_linkTrue == null || _linkFalse == null);
+    }
+
+    @Override
+    public void merge(DFNode node) {
+        if (_linkTrue == null) {
+            assert _linkFalse != null;
+            _linkTrue = this.accept(node, "true");
+        } else if (_linkFalse == null) {
+            assert _linkTrue != null;
+            _linkFalse = this.accept(node, "false");
+        } else {
+            Logger.error("JoinNode: cannot merge:", this, node);
+            assert false;
+        }
+    }
+
+    @Override
+    public boolean purge() {
+        if (_linkTrue == null) {
+            assert _linkFalse != null;
+            unlink(_linkFalse.getSrc());
+            return true;
+        } else if (_linkFalse == null) {
+            assert _linkTrue != null;
+            unlink(_linkTrue.getSrc());
+            return true;
+        } else {
+            DFNode srcTrue = _linkTrue.getSrc();
+            if (srcTrue instanceof JoinNode &&
+                ((JoinNode)srcTrue)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcTrue)._linkFalse != null &&
+                ((JoinNode)srcTrue)._linkFalse.getSrc() == _linkFalse.getSrc()) {
+                unlink(srcTrue);
+                return true;
+            }
+            DFNode srcFalse = _linkFalse.getSrc();
+            if (srcFalse instanceof JoinNode &&
+                ((JoinNode)srcFalse)._linkCond.getSrc() == _linkCond.getSrc() &&
+                ((JoinNode)srcFalse)._linkTrue != null &&
+                ((JoinNode)srcFalse)._linkTrue.getSrc() == _linkTrue.getSrc()) {
+                unlink(srcFalse);
+                return true;
+            }
+            return false;
+        }
+    }
+}
+
+// LoopNode
+class LoopNode extends DFNode {
+
+    public String loopId;
+
+    public LoopNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, String loopId) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.loopId = loopId;
+    }
+
+    @Override
+    public String getData() {
+        return this.loopId;
+    }
+}
+
+// LoopBeginNode
+class LoopBeginNode extends LoopNode {
+
+    public LoopBeginNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, String loopId, DFNode init) {
+        super(graph, scope, ref, ast, loopId);
+        this.accept(init, "init");
+    }
+
+    @Override
+    public String getKind() {
+        return "begin";
+    }
+
+    public void setCont(DFNode cont) {
+        this.accept(cont, "cont");
+    }
+}
+
+// LoopEndNode
+class LoopEndNode extends LoopNode {
+
+    public LoopEndNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, String loopId, DFNode cond) {
+        super(graph, scope, ref, ast, loopId);
+        this.accept(cond, "cond");
+    }
+
+    @Override
+    public String getKind() {
+        return "end";
+    }
+
+    public void setRepeat(LoopRepeatNode repeat) {
+        this.accept(repeat, "_repeat");
+    }
+}
+
+// LoopRepeatNode
+class LoopRepeatNode extends LoopNode {
+
+    public LoopRepeatNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast, String loopId) {
+        super(graph, scope, ref, ast, loopId);
+    }
+
+    @Override
+    public String getKind() {
+        return "repeat";
+    }
+
+    public void setEnd(DFNode end) {
+        this.accept(end, "_end");
+    }
+}
+
+// IterNode
+class IterNode extends DFNode {
+
+    public IterNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "op_iter";
+    }
+}
+
+// CallNode
+abstract class CallNode extends DFNode {
+
+    public DFFuncType funcType;
+    public DFNode[] args;
+
+    public CallNode(
+        DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
+        ASTNode ast, DFFuncType funcType) {
+        super(graph, scope, type, ref, ast);
+        this.funcType = funcType;
+        this.args = null;
+    }
+
+    @Override
+    public String getKind() {
+        return "call";
+    }
+
+    public void setArgs(DFNode[] args) {
+        assert this.args == null;
+        for (int i = 0; i < args.length; i++) {
+            String label = "#arg"+i;
+            this.accept(args[i], label);
+        }
+        this.args = args;
+    }
+}
+
+// MethodCallNode
+class MethodCallNode extends CallNode {
+
+    public DFMethod[] methods;
+
+    public MethodCallNode(
+        DFGraph graph, DFVarScope scope,
+        ASTNode ast, DFFuncType funcType,
+        DFNode obj, DFMethod[] methods) {
+        super(graph, scope, funcType.getReturnType(), null,
+              ast, funcType);
+        if (obj != null) {
+            this.accept(obj, "#this");
+        }
+        this.methods = methods;
+    }
+
+    @Override
+    public String getData() {
+        StringBuilder b = new StringBuilder();
+        for (DFMethod method : this.methods) {
+            if (0 < b.length()) {
+                b.append(" ");
+            }
+            b.append(method.getSignature());
+        }
+        return b.toString();
+    }
+}
+
+// ReceiveNode:
+class ReceiveNode extends DFNode {
+
+    public ReceiveNode(
+        DFGraph graph, DFVarScope scope, CallNode call,
+        ASTNode ast) {
+        super(graph, scope, call.getNodeType(), null, ast);
+        this.accept(call);
+    }
+
+    public ReceiveNode(
+        DFGraph graph, DFVarScope scope, CallNode call,
+        ASTNode ast, DFRef ref) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+        this.accept(call, ref.getFullName());
+    }
+
+    @Override
+    public String getKind() {
+        return "receive";
+    }
+}
+
+// CreateObjectNode
+class CreateObjectNode extends CallNode {
+
+    public DFMethod constructor;
+
+    public CreateObjectNode(
+        DFGraph graph, DFVarScope scope, DFType type, DFMethod constructor,
+        ASTNode ast, DFNode obj) {
+        super(graph, scope, type, null,
+              ast, constructor.getFuncType());
+        if (obj != null) {
+            this.accept(obj, "#this");
+        }
+        this.constructor = constructor;
+    }
+
+    @Override
+    public String getKind() {
+        return "new";
+    }
+
+    @Override
+    public String getData() {
+        return this.constructor.getSignature();
+    }
+}
+
+// ReturnNode:
+class ReturnNode extends SingleAssignNode {
+
+    public ReturnNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "return";
+    }
+}
+
+// ThrowNode
+class ThrowNode extends SingleAssignNode {
+
+    public ThrowNode(
+        DFGraph graph, DFVarScope scope, DFRef ref, ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "throw";
+    }
+}
+
+// CatchNode
+class CatchNode extends SingleAssignNode {
+
+    private int _nexcs = 0;
+
+    public CatchNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref, ast);
+    }
+
+    @Override
+    public Link accept(DFNode node) {
+        String label = "exc"+(_nexcs++);
+        return this.accept(node, label);
+    }
+
+    @Override
+    public String getKind() {
+        return "catch";
+    }
+}
+
+// CatchJoin
+class CatchJoin extends DFNode {
+
+    public CatchJoin(
+        DFGraph graph, DFVarScope scope, ASTNode ast,
+        DFNode node, DFKlass catchKlass) {
+        super(graph, scope, node.getNodeType(), node.getRef(), ast);
+        this.accept(node, catchKlass.getTypeName());
+    }
+
+    @Override
+    public String getKind() {
+        return "catchjoin";
+    }
+
+    @Override
+    public boolean canMerge() {
+        return !this.hasValue();
+    }
+
+    @Override
+    public void merge(DFNode node) {
+        assert !this.hasValue();
+        this.accept(node);
+    }
+
 }

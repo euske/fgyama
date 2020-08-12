@@ -8,57 +8,6 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  AnonymousKlass
-//
-class AnonymousKlass extends DFSourceKlass {
-
-    private ClassInstanceCreation _cstr;
-
-    @SuppressWarnings("unchecked")
-    protected AnonymousKlass(
-        ClassInstanceCreation cstr,
-        DFTypeSpace outerSpace, DFSourceKlass outerKlass,
-        String filePath, DFVarScope outerScope)
-        throws InvalidSyntax {
-        super(Utils.encodeASTNode(cstr),
-              outerSpace, outerKlass, filePath, outerScope);
-        _cstr = cstr;
-        this.buildTypeFromDecls(
-            cstr.getAnonymousClassDeclaration().bodyDeclarations());
-    }
-
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-        assert false;
-        return null;
-    }
-
-    public ASTNode getAST() {
-        return _cstr;
-    }
-
-    protected void build() {
-        try {
-            this.buildMembersFromAnonDecl(_cstr);
-        } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.build:", e);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
-        if (!super.listUsedKlasses(klasses)) return false;
-        try {
-            this.listUsedDecls(
-                klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
-        } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.listUsedKlasses:", e);
-        }
-        return true;
-    }
-}
-
-
 //  DFSourceMethod
 //  DFMethod defined in source code.
 //
@@ -1898,5 +1847,56 @@ public abstract class DFSourceMethod extends DFMethod {
         public String getKind() {
             return "assign_var";
         }
+    }
+}
+
+
+//  AnonymousKlass
+//
+class AnonymousKlass extends DFSourceKlass {
+
+    private ClassInstanceCreation _cstr;
+
+    @SuppressWarnings("unchecked")
+    protected AnonymousKlass(
+        ClassInstanceCreation cstr,
+        DFTypeSpace outerSpace, DFSourceKlass outerKlass,
+        String filePath, DFVarScope outerScope)
+        throws InvalidSyntax {
+        super(Utils.encodeASTNode(cstr),
+              outerSpace, outerKlass, filePath, outerScope);
+        _cstr = cstr;
+        this.buildTypeFromDecls(
+            cstr.getAnonymousClassDeclaration().bodyDeclarations());
+    }
+
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+        assert false;
+        return null;
+    }
+
+    public ASTNode getAST() {
+        return _cstr;
+    }
+
+    protected void build() {
+        try {
+            this.buildMembersFromAnonDecl(_cstr);
+        } catch (InvalidSyntax e) {
+            Logger.error("AnonymousKlass.build:", e);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
+        if (!super.listUsedKlasses(klasses)) return false;
+        try {
+            this.listUsedDecls(
+                klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
+        } catch (InvalidSyntax e) {
+            Logger.error("AnonymousKlass.listUsedKlasses:", e);
+        }
+        return true;
     }
 }
