@@ -65,7 +65,7 @@ public class DFJarFileMethod extends DFMethod {
             //Logger.info("meth:", _meth.getName(), sig);
             JNITypeParser parser = new JNITypeParser(sig);
             if (this.getGenericMethod() == null) {
-                DFMapType[] mapTypes = parser.createMapTypes(this);
+                DFMapType[] mapTypes = parser.createMapTypes(this, false);
                 if (mapTypes != null) {
                     this.setMapTypes(mapTypes);
                     this.setMapTypeFinder(_finder);

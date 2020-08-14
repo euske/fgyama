@@ -142,11 +142,13 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
-            DFKlass type;
+            DFKlass type = mapType;
             if (typeMap != null && typeMap.containsKey(mapType)) {
                 type = typeMap.get(mapType);
-            } else {
-                type = mapType.getBaseKlass();
+            }
+            if (type instanceof DFMapType && ((DFMapType)type).isFixed()) {
+                type = ((DFMapType)type).getBaseKlass();
+                assert !(type instanceof DFMapType);
             }
             paramTypes.put(mapType.getName(), type);
         }

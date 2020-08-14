@@ -212,7 +212,7 @@ public class DFJarFileKlass extends DFKlass {
         String sig = Utils.getJKlassSignature(_jklass.getAttributes());
         if (sig != null) {
             JNITypeParser parser = new JNITypeParser(sig);
-            DFMapType[] mapTypes = parser.createMapTypes(this);
+            DFMapType[] mapTypes = parser.createMapTypes(this, true);
             if (mapTypes != null) {
                 for (DFMapType mapType : mapTypes) {
                     mapType.setFinder(_finder);

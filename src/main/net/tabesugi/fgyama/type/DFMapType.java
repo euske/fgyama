@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
+    private boolean _fixed;
     private String _sig = null;
     private List<Type> _types = null;
 
@@ -19,20 +20,21 @@ public class DFMapType extends DFKlass {
     private DFKlass _baseKlass = null;
 
     private DFMapType(
-        String name, DFTypeSpace outerSpace) {
+        String name, DFTypeSpace outerSpace, boolean fixed) {
         super(name, outerSpace);
         _name = name;
+        _fixed = fixed;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, List<Type> types) {
-        this(name, outerSpace);
+        String name, DFTypeSpace outerSpace, boolean fixed, List<Type> types) {
+        this(name, outerSpace, fixed);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, String sig) {
-        this(name, outerSpace);
+        String name, DFTypeSpace outerSpace, boolean fixed, String sig) {
+        this(name, outerSpace, fixed);
         _sig = sig;
     }
 
@@ -53,6 +55,10 @@ public class DFMapType extends DFKlass {
 
     public String getName() {
         return _name;
+    }
+
+    public boolean isFixed() {
+        return _fixed;
     }
 
     @Override

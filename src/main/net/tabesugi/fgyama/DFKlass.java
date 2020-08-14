@@ -204,11 +204,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         for (int i = 0; i < mapTypes.size(); i++) {
             DFMapType mapType = mapTypes.get(i);
             assert mapType != null;
-            DFKlass type;
+            DFKlass type = mapType;
             if (argTypes != null && i < argTypes.length) {
                 type = argTypes[i];
-            } else {
-                type = mapType.getBaseKlass();
+            }
+            if (type instanceof DFMapType && ((DFMapType)type).isFixed()) {
+                type = ((DFMapType)type).getBaseKlass();
+                assert !(type instanceof DFMapType);
             }
             paramTypes.put(mapType.getName(), type);
         }

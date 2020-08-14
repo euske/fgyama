@@ -25,8 +25,15 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         _abstTypeDecl = abstTypeDecl;
         if (_abstTypeDecl instanceof TypeDeclaration) {
             TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
-            DFMapType[] mapTypes = this.createMapTypes(typeDecl.typeParameters());
-            if (mapTypes != null) {
+            List<TypeParameter> tps = typeDecl.typeParameters();
+            if (!tps.isEmpty()) {
+                DFMapType[] mapTypes = new DFMapType[tps.size()];
+                for (int i = 0; i < tps.size(); i++) {
+                    TypeParameter tp = tps.get(i);
+                    String id = tp.getName().getIdentifier();
+                    DFMapType mapType = new DFMapType(id, this, true, tp.typeBounds());
+                    mapTypes[i] = mapType;
+                }
                 this.setMapTypes(mapTypes);
             }
         }

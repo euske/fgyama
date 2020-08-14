@@ -18,8 +18,6 @@ public class DFTypeSpace {
         new HashMap<String, DFTypeSpace>();
     private Map<String, DFKlass> _id2klass =
         new ConsistentHashMap<String, DFKlass>();
-    private Map<String, DFMapType> _id2maptype =
-        new ConsistentHashMap<String, DFMapType>();
 
     public DFTypeSpace(String name, DFTypeSpace outerSpace) {
         _name = name;
@@ -80,23 +78,6 @@ public class DFTypeSpace {
             return space.getKlass(id.substring(i+1));
         }
         return _id2klass.get(id);
-    }
-
-    @SuppressWarnings("unchecked")
-    public DFMapType[] createMapTypes(List<TypeParameter> tps) {
-        if (tps.isEmpty()) return null;
-        DFMapType[] mapTypes = new DFMapType[tps.size()];
-        for (int i = 0; i < tps.size(); i++) {
-            TypeParameter tp = tps.get(i);
-            String id = tp.getName().getIdentifier();
-            DFMapType mapType = _id2maptype.get(id);
-            if (mapType == null) {
-                mapType = new DFMapType(id, this, tp.typeBounds());
-                _id2maptype.put(id, mapType);
-            }
-            mapTypes[i] = mapType;
-        }
-        return mapTypes;
     }
 
     public static String getConcreteName(Map<String, DFKlass> paramTypes) {
