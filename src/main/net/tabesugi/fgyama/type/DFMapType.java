@@ -16,6 +16,7 @@ public class DFMapType extends DFKlass {
     private String _sig = null;
     private List<Type> _types = null;
 
+    private boolean _loaded = false;
     private DFTypeFinder _finder = null;
     private DFKlass _baseKlass = null;
 
@@ -131,6 +132,13 @@ public class DFMapType extends DFKlass {
 
     public void setFinder(DFTypeFinder finder) {
         _finder = finder;
+    }
+
+    protected void load() {
+        if (!_loaded) {
+            _loaded = true;
+            this.build();
+        }
     }
 
     protected void build() {

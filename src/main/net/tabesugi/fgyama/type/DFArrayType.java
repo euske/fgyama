@@ -100,7 +100,4 @@ public class DFArrayType extends DFKlass {
     public DFType getElemType() {
         return _elemType;
     }
-
-    protected void build() {
-    }
 }

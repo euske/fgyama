@@ -32,6 +32,7 @@ public abstract class DFSourceKlass extends DFKlass {
     private KlassScope _klassScope;
 
     // This field is available after setBaseFinder(). (Stage2)
+    private boolean _loaded = false;
     private DFTypeFinder _finder = null;
 
     // The following fields are available after the klass is loaded. (Stage3)
@@ -251,6 +252,16 @@ public abstract class DFSourceKlass extends DFKlass {
         return _finder;
     }
 
+    protected void load() {
+        if (!_loaded) {
+            _loaded = true;
+            //Logger.info("build:", this);
+            this.build();
+        }
+    }
+
+    protected abstract void build();
+
     @SuppressWarnings("unchecked")
     protected void buildTypeFromDecls(List<BodyDeclaration> decls)
         throws InvalidSyntax {
@@ -449,6 +460,7 @@ public abstract class DFSourceKlass extends DFKlass {
     // listDefinedKlass: enumerate newly defined klasses (Lambdas).
     public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
+        this.load();
         if (_initMethod != null) {
             _initMethod.listDefinedKlasses(defined);
         }

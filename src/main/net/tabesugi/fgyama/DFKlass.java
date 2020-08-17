@@ -21,14 +21,6 @@ import org.eclipse.jdt.core.dom.*;
 //
 public abstract class DFKlass extends DFTypeSpace implements DFType {
 
-    // LoadState for tracking the current klass status.
-    private enum LoadState {
-        Unloaded,
-        Loading,
-        Loaded,
-    };
-    private LoadState _state = LoadState.Unloaded;
-
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
@@ -240,7 +232,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isFuncInterface() {
-        this.load();
         if (!this.isInterface()) return false;
         // Count the number of abstract methods.
         int n = 0;
@@ -253,7 +244,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFMethod getFuncMethod() {
-        this.load();
         for (DFMethod method : this.getMethods()) {
             if (method.isAbstract()) return method;
         }
@@ -263,7 +253,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
         //Logger.info("DFKlass.findMethod", this, callStyle, id, Utils.join(argTypes));
-        this.load();
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -292,13 +281,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
-        this.load();
         String id = (name == null)? null : name.getIdentifier();
         return this.findMethod(callStyle, id, argTypes);
     }
 
     public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
-        this.load();
         return new FallbackMethod(this, name, argTypes);
     }
 
@@ -331,7 +318,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
-        this.load();
         writer.writeAttribute("name", this.getTypeName());
         writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
         DFKlass baseKlass = this.getBaseKlass();
@@ -386,19 +372,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     /// For constructions.
-
-    protected void load() {
-        // an unspecified parameterized klass cannot be loaded.
-        assert (_mapTypes == null || _paramTypes == null);
-        if (_state == LoadState.Unloaded) {
-            _state = LoadState.Loading;
-            //Logger.info("build:", this);
-            this.build();
-            _state = LoadState.Loaded;
-        }
-    }
-
-    protected abstract void build();
 
     protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
 

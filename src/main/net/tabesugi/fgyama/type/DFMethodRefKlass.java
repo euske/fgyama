@@ -190,17 +190,26 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     @Override
     public DFKlass getBaseKlass() {
+        assert _baseKlass != null;
         return _baseKlass;
     }
 
     @Override
     public DFMethod[] getMethods() {
+        this.load();
         return new DFMethod[] { _funcMethod };
     }
 
     @Override
     public DFMethod getFuncMethod() {
+        this.load();
         return _funcMethod;
+    }
+
+    @Override
+    public void overrideMethods() {
+        if (!this.isDefined()) return;
+        super.overrideMethods();
     }
 
     @Override

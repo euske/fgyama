@@ -20,6 +20,7 @@ public class DFJarFileKlass extends DFKlass {
 
     // These fields are available upon construction.
     private DFTypeFinder _finder;
+    private boolean _loaded = false;
 
     // These fields must be set immediately after construction.
     private String _jarPath = null;
@@ -97,6 +98,7 @@ public class DFJarFileKlass extends DFKlass {
 
     @Override
     public DFMethod[] getMethods() {
+        this.load();
         DFMethod[] methods = new DFMethod[_methods.size()];
         _methods.toArray(methods);
         return methods;
@@ -222,7 +224,14 @@ public class DFJarFileKlass extends DFKlass {
         }
     }
 
-    @Override
+    protected void load() {
+        if (!_loaded) {
+            _loaded = true;
+            //Logger.info("build:", this);
+            this.build();
+        }
+    }
+
     protected void build() {
         this.preload();
         assert _jklass != null;
