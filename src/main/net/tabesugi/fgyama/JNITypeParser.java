@@ -139,26 +139,19 @@ public class JNITypeParser {
         return a;
     }
 
-    public void skipMapTypes() {
-        if (_text.charAt(_pos) != '<') return;
-        _pos++;
-        int n = 0;
-        while (_text.charAt(_pos) != '>') {
-            int i = _text.indexOf(':', _pos);
-            String id = _text.substring(_pos, i);
-            _pos = i+1;
-            if (_text.charAt(_pos) == ':') {
-                _pos++;  // ???
-            }
-            _pos = skipType(_text, _pos);
+    public class TypeSlot {
+        public String id;
+        public String sig;
+        public TypeSlot(String id, String sig) {
+            this.id = id;
+            this.sig = sig;
         }
-        _pos++;
     }
 
-    public DFMapType[] createMapTypes(DFTypeSpace outerSpace, boolean fixed) {
+    public TypeSlot[] getTypeSlots() {
         if (_text.charAt(_pos) != '<') return null;
         _pos++;
-        List<DFMapType> params = new ArrayList<DFMapType>();
+        List<TypeSlot> list = new ArrayList<TypeSlot>();
         while (_text.charAt(_pos) != '>') {
             int i = _text.indexOf(':', _pos);
             String id = _text.substring(_pos, i);
@@ -168,15 +161,14 @@ public class JNITypeParser {
             }
             i = skipType(_text, _pos);
             String sig = _text.substring(_pos, i);
+            list.add(new TypeSlot(id, sig));
             _pos = i;
-            DFMapType pt = new DFMapType(id, outerSpace, fixed, sig);
-            params.add(pt);
         }
-        if (params.isEmpty()) return null;
+        if (list.isEmpty()) return null;
         _pos++;
-        DFMapType[] mapTypes = new DFMapType[params.size()];
-        params.toArray(mapTypes);
-        return mapTypes;
+        TypeSlot[] slots = new TypeSlot[list.size()];
+        list.toArray(slots);
+        return slots;
     }
 
     private static int skipType(String text, int pos) {

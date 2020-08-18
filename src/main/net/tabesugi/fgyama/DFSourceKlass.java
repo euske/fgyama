@@ -244,7 +244,6 @@ public abstract class DFSourceKlass extends DFKlass {
                 ((DFSourceKlass)klass).setBaseFinder(_finder);
             }
         }
-        this.setMapTypeFinder(_finder);
     }
 
     protected DFTypeFinder getFinder() {
@@ -756,7 +755,8 @@ class DefinedMethod extends DFSourceMethod {
                     assert klass instanceof DFMapType;
                     mapType = (DFMapType)klass;
                 } else {
-                    mapType = new DFMapType(id, outerSpace, false, tp.typeBounds());
+                    mapType = new DFMapType(
+                        id, outerSpace, finder, tp.typeBounds());
                     outerSpace.addKlass(id, mapType);
                 }
                 mapTypes[i] = mapType;
@@ -792,8 +792,6 @@ class DefinedMethod extends DFSourceMethod {
     private void build() {
         DFTypeFinder finder = this.getFinder();
         MethodScope methodScope = (MethodScope)this.getScope();
-
-        this.setMapTypeFinder(finder);
 
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         DFType[] argTypes = new DFType[varDecls.size()];

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 class AbstTypeDeclKlass extends DFSourceKlass {
 
     private AbstractTypeDeclaration _abstTypeDecl;
+    private DefaultKlass[] _defaultKlasses = null;
 
     @SuppressWarnings("unchecked")
     public AbstTypeDeclKlass(
@@ -27,14 +28,17 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             TypeDeclaration typeDecl = (TypeDeclaration)_abstTypeDecl;
             List<TypeParameter> tps = typeDecl.typeParameters();
             if (!tps.isEmpty()) {
-                DFMapType[] mapTypes = new DFMapType[tps.size()];
+                ConsistentHashMap<String, DFKlass> typeSlots =
+                    new ConsistentHashMap<String, DFKlass>();
+                _defaultKlasses = new DefaultKlass[tps.size()];
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DFMapType mapType = new DFMapType(id, this, true, tp.typeBounds());
-                    mapTypes[i] = mapType;
+                    DefaultKlass klass = new DefaultKlass(id, tp.typeBounds());
+                    typeSlots.put(id, klass);
+                    _defaultKlasses[i] = klass;
                 }
-                this.setMapTypes(mapTypes);
+                this.setTypeSlots(typeSlots);
             }
         }
         this.buildTypeFromDecls(abstTypeDecl.bodyDeclarations());
@@ -59,6 +63,15 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
     public ASTNode getAST() {
         return _abstTypeDecl;
+    }
+
+    public void setBaseFinder(DFTypeFinder baseFinder) {
+        super.setBaseFinder(baseFinder);
+        if (_defaultKlasses != null) {
+            for (DefaultKlass klass : _defaultKlasses) {
+                klass.setFinder(baseFinder);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -102,5 +115,79 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             Logger.error("AbstTypeDeclKlass.listUsedKlasses:", e);
         }
         return true;
+    }
+
+    // DefaultKlass
+    class DefaultKlass extends DFKlass {
+
+        private List<Type> _types;
+        private DFTypeFinder _finder = null;
+        private DFKlass _baseKlass = null;
+
+        public DefaultKlass(String name, List<Type> types) {
+            super(name, AbstTypeDeclKlass.this);
+            _types = types;
+        }
+
+        @Override
+        public String getTypeName() {
+            if (_finder == null) return super.getTypeName();
+            this.load();
+            return _baseKlass.getTypeName();
+        }
+
+        public boolean isInterface() {
+            this.load();
+            return _baseKlass.isInterface();
+        }
+
+        public boolean isEnum() {
+            this.load();
+            return _baseKlass.isEnum();
+        }
+
+        public DFKlass getBaseKlass() {
+            this.load();
+            return _baseKlass;
+        }
+
+        public DFKlass[] getBaseIfaces() {
+            return null;
+        }
+
+        public DFMethod[] getMethods() {
+            this.load();
+            return _baseKlass.getMethods();
+        }
+
+        public FieldRef[] getFields() {
+            this.load();
+            return _baseKlass.getFields();
+        }
+
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+            assert false;
+            return null;
+        }
+
+        protected void setFinder(DFTypeFinder finder) {
+            _finder = finder;
+        }
+
+        private void load() {
+            assert _finder != null;
+            if (_baseKlass != null) return;
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
+            try {
+                for (Type type : _types) {
+                    _baseKlass = _finder.resolve(type).toKlass();
+                    break;
+                }
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DefaultKlass.load: TypeNotFound",
+                    this, e.name, _types);
+            }
+        }
     }
 }

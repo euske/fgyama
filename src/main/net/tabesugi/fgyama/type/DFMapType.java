@@ -12,30 +12,29 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
-    private boolean _fixed;
+    private DFTypeFinder _finder;
+
     private String _sig = null;
     private List<Type> _types = null;
 
-    private boolean _loaded = false;
-    private DFTypeFinder _finder = null;
     private DFKlass _baseKlass = null;
 
     private DFMapType(
-        String name, DFTypeSpace outerSpace, boolean fixed) {
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder) {
         super(name, outerSpace);
         _name = name;
-        _fixed = fixed;
+        _finder = finder;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, boolean fixed, List<Type> types) {
-        this(name, outerSpace, fixed);
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder, List<Type> types) {
+        this(name, outerSpace, finder);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, boolean fixed, String sig) {
-        this(name, outerSpace, fixed);
+        String name, DFTypeSpace outerSpace, DFTypeFinder finder, String sig) {
+        this(name, outerSpace, finder);
         _sig = sig;
     }
 
@@ -56,10 +55,6 @@ public class DFMapType extends DFKlass {
 
     public String getName() {
         return _name;
-    }
-
-    public boolean isFixed() {
-        return _fixed;
     }
 
     @Override
@@ -130,24 +125,13 @@ public class DFMapType extends DFKlass {
         }
     }
 
-    public void setFinder(DFTypeFinder finder) {
-        _finder = finder;
-    }
-
     protected void load() {
-        if (!_loaded) {
-            _loaded = true;
-            this.build();
-        }
-    }
-
-    protected void build() {
         assert _sig == null || _types == null;
-        assert _finder != null;
+        if (_baseKlass != null) return;
         _baseKlass = DFBuiltinTypes.getObjectKlass();
         if (_sig != null) {
             JNITypeParser parser = new JNITypeParser(_sig);
-            parser.skipMapTypes();
+            parser.getTypeSlots();
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {

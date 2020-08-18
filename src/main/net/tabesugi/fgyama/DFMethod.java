@@ -146,10 +146,6 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             if (typeMap != null && typeMap.containsKey(mapType)) {
                 type = typeMap.get(mapType);
             }
-            if (type instanceof DFMapType && ((DFMapType)type).isFixed()) {
-                type = ((DFMapType)type).getBaseKlass();
-                assert !(type instanceof DFMapType);
-            }
             paramTypes.put(mapType.getName(), type);
         }
         String name = DFTypeSpace.getConcreteName(paramTypes);
@@ -272,14 +268,6 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             _mapTypes.put(mapType.getName(), mapType);
         }
         _concreteMethods = new ConsistentHashMap<String, DFMethod>();
-    }
-
-    protected void setMapTypeFinder(DFTypeFinder finder) {
-        if (_mapTypes != null) {
-            for (DFMapType mapType : _mapTypes.values()) {
-                mapType.setFinder(finder);
-            }
-        }
     }
 
     // Overrider

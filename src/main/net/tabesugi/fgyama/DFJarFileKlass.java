@@ -214,12 +214,15 @@ public class DFJarFileKlass extends DFKlass {
         String sig = Utils.getJKlassSignature(_jklass.getAttributes());
         if (sig != null) {
             JNITypeParser parser = new JNITypeParser(sig);
-            DFMapType[] mapTypes = parser.createMapTypes(this, true);
-            if (mapTypes != null) {
-                for (DFMapType mapType : mapTypes) {
-                    mapType.setFinder(_finder);
+            JNITypeParser.TypeSlot[] slots = parser.getTypeSlots();
+            if (slots != null) {
+                ConsistentHashMap<String, DFKlass> typeSlots =
+                    new ConsistentHashMap<String, DFKlass>();
+                for (JNITypeParser.TypeSlot slot : slots) {
+                    DefaultKlass klass = new DefaultKlass(slot.id, slot.sig, _finder);
+                    typeSlots.put(slot.id, klass);
                 }
-                this.setMapTypes(mapTypes);
+                this.setTypeSlots(typeSlots);
             }
         }
     }
@@ -246,7 +249,7 @@ public class DFJarFileKlass extends DFKlass {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
             //Logger.info("jklass:", this, sig);
             JNITypeParser parser = new JNITypeParser(sig);
-            parser.skipMapTypes();
+            parser.getTypeSlots();
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
@@ -308,7 +311,7 @@ public class DFJarFileKlass extends DFKlass {
                 if (sig != null) {
                     //Logger.info("fld:", fld.getName(), sig);
                     JNITypeParser parser = new JNITypeParser(sig);
-                    parser.skipMapTypes();
+                    parser.getTypeSlots();
                     type = parser.resolveType(_finder);
                 } else {
                     type = _finder.resolve(fld.getType());
@@ -353,6 +356,75 @@ public class DFJarFileKlass extends DFKlass {
                 if (iface != null) {
                     iface.dump(out, indent);
                 }
+            }
+        }
+    }
+
+    // DefaultKlass
+    class DefaultKlass extends DFKlass {
+
+        private String _sig;
+        private DFTypeFinder _finder;
+        private DFKlass _baseKlass = null;
+
+        public DefaultKlass(
+            String name, String sig, DFTypeFinder finder) {
+            super(name, DFJarFileKlass.this);
+            _sig = sig;
+            _finder = finder;
+        }
+
+        @Override
+        public String getTypeName() {
+            this.load();
+            return _baseKlass.getTypeName();
+        }
+
+        public boolean isInterface() {
+            this.load();
+            return _baseKlass.isInterface();
+        }
+
+        public boolean isEnum() {
+            this.load();
+            return _baseKlass.isEnum();
+        }
+
+        public DFKlass getBaseKlass() {
+            this.load();
+            return _baseKlass;
+        }
+
+        public DFKlass[] getBaseIfaces() {
+            return null;
+        }
+
+        public DFMethod[] getMethods() {
+            this.load();
+            return _baseKlass.getMethods();
+        }
+
+        public FieldRef[] getFields() {
+            this.load();
+            return _baseKlass.getFields();
+        }
+
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+            assert false;
+            return null;
+        }
+
+        private void load() {
+            if (_baseKlass != null) return;
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
+            JNITypeParser parser = new JNITypeParser(_sig);
+            parser.getTypeSlots();
+            try {
+                _baseKlass = parser.resolveType(_finder).toKlass();
+            } catch (TypeNotFound e) {
+                Logger.error(
+                    "DefaultKlass.load: TypeNotFound",
+                    this, e.name, _sig, _finder);
             }
         }
     }

@@ -26,7 +26,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private DFTypeSpace _outerSpace;
 
     // These fields are available only for generic klasses.
-    private ConsistentHashMap<String, DFMapType> _mapTypes = null;
+    private ConsistentHashMap<String, DFKlass> _typeSlots = null;
     private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
 
     // These fields are available only for parameterized klasses.
@@ -55,9 +55,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public String toString() {
-        if (_mapTypes != null) {
+        if (_typeSlots != null) {
             return ("<DFKlass("+this.getTypeName()+" "+
-                    Utils.join(_mapTypes.keys())+")>");
+                    Utils.join(_typeSlots.keys())+")>");
         } else {
             return ("<DFKlass("+this.getTypeName()+")>");
         }
@@ -70,16 +70,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public String getTypeName() {
-        if (_mapTypes != null) {
-            String[] keys = new String[_mapTypes.size()];
-            _mapTypes.keySet().toArray(keys);
-            Arrays.sort(keys);
+        if (_typeSlots != null) {
             StringBuilder b = new StringBuilder();
-            for (String k : keys) {
+            for (String k : _typeSlots.keys()) {
                 if (0 < b.length()) {
                     b.append(",");
                 }
-                b.append(_mapTypes.get(k).getTypeName());
+                b.append(_typeSlots.get(k).getTypeName());
             }
             return "L"+_outerSpace.getSpaceName()+_name+"<"+b.toString()+">;";
         } else {
@@ -94,10 +91,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     @Override
     public DFKlass getKlass(String id) {
-        if (_mapTypes != null) {
+        if (_typeSlots != null) {
             // If this is a generic klass,
-            DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType;
+            DFKlass defaultKlass = _typeSlots.get(id);
+            if (defaultKlass != null) return defaultKlass;
             return super.getKlass(id);
         }
 
@@ -188,23 +185,18 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // Creates a parameterized klass.
     public DFKlass getConcreteKlass(DFKlass[] argTypes) {
         //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
-        assert _mapTypes != null;
+        assert _typeSlots != null;
         assert _paramTypes == null;
-        assert argTypes.length <= _mapTypes.size();
-        List<DFMapType> mapTypes = _mapTypes.values();
+        assert argTypes.length <= _typeSlots.size();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
-        for (int i = 0; i < mapTypes.size(); i++) {
-            DFMapType mapType = mapTypes.get(i);
-            assert mapType != null;
-            DFKlass type = mapType;
+        int i = 0;
+        for (String key : _typeSlots.keys()) {
+            DFKlass type = _typeSlots.get(key);
             if (argTypes != null && i < argTypes.length) {
                 type = argTypes[i];
             }
-            if (type instanceof DFMapType && ((DFMapType)type).isFixed()) {
-                type = ((DFMapType)type).getBaseKlass();
-                assert !(type instanceof DFMapType);
-            }
-            paramTypes.put(mapType.getName(), type);
+            paramTypes.put(key, type);
+            i++;
         }
         String name = DFTypeSpace.getConcreteName(paramTypes);
         DFKlass klass = _concreteKlasses.get(name);
@@ -216,7 +208,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public boolean isGeneric() {
-        return _mapTypes != null;
+        return _typeSlots != null;
     }
 
     public String getName() {
@@ -338,12 +330,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_genericKlass != null) {
             writer.writeAttribute("generic", _genericKlass.getTypeName());
             if (_paramTypes != null) {
-                List<DFMapType> mapTypes = _genericKlass._mapTypes.values();
-                for (int i = 0; i < mapTypes.size(); i++) {
-                    String name = mapTypes.get(i).getName();
-                    DFKlass paramType = _paramTypes.get(name);
+                ConsistentHashMap<String, DFKlass> typeSlots = _genericKlass._typeSlots;
+                for (String key : typeSlots.keys()) {
+                    DFKlass paramType = _paramTypes.get(key);
                     writer.writeStartElement("param");
-                    writer.writeAttribute("name", name);
+                    writer.writeAttribute("name", key);
                     writer.writeAttribute("type", paramType.getTypeName());
                     writer.writeEndElement();
                 }
@@ -375,31 +366,20 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     protected abstract DFKlass parameterize(Map<String, DFKlass> paramTypes);
 
-    protected void setMapTypes(DFMapType[] mapTypes) {
-        assert mapTypes != null;
-        assert _mapTypes == null;
+    protected void setTypeSlots(ConsistentHashMap<String, DFKlass> typeSlots) {
+        assert typeSlots != null;
+        assert _typeSlots == null;
         assert _paramTypes == null;
         assert _concreteKlasses == null;
-        _mapTypes = new ConsistentHashMap<String, DFMapType>();
-        for (DFMapType mapType : mapTypes) {
-            _mapTypes.put(mapType.getName(), mapType);
-        }
+        _typeSlots = typeSlots;
         _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
-    }
-
-    protected void setMapTypeFinder(DFTypeFinder finder) {
-        if (_mapTypes != null) {
-            for (DFMapType mapType : _mapTypes.values()) {
-                mapType.setFinder(finder);
-            }
-        }
     }
 
     @Override
     protected void dumpContents(PrintStream out, String indent) {
         super.dumpContents(out, indent);
-        if (_mapTypes != null) {
-            for (Map.Entry<String,DFMapType> e : _mapTypes.entrySet()) {
+        if (_typeSlots != null) {
+            for (Map.Entry<String,DFKlass> e : _typeSlots.entrySet()) {
                 out.println(indent+"map: "+e.getKey()+" "+e.getValue());
             }
         }
