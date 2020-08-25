@@ -130,7 +130,7 @@ public class Java2DF {
             if (importDecl.isOnDemand()) {
                 Logger.debug("Import:", name+".*");
                 finder = new DFTypeFinder(_rootSpace.lookupSpace(name), finder);
-            } else {
+            } else if (!importDecl.isStatic()) {
                 assert name.isQualifiedName();
                 DFKlass klass = _rootSpace.getKlass(name);
                 if (klass != null) {
@@ -138,9 +138,7 @@ public class Java2DF {
                     String id = ((QualifiedName)name).getName().getIdentifier();
                     importSpace.addKlass(id, klass);
                 } else {
-                    if (!importDecl.isStatic()) {
-                        Logger.error("Import: Class not found:", name);
-                    }
+                    Logger.error("Import: Class not found:", name);
                 }
             }
         }

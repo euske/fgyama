@@ -941,6 +941,8 @@ public abstract class DFSourceMethod extends DFMethod {
             Expression expr1 = rtrnStmt.getExpression();
             if (expr1 != null) {
                 this.listDefinedExpr(defined, scope, expr1);
+                this.setLambdaType(
+                    defined, this.getFuncType().getReturnType(), expr1);
             }
             // Return is handled as an Exit, not an output.
 
@@ -964,11 +966,26 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (stmt instanceof TryStatement) {
             // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
+            DFLocalScope tryScope = scope.getChildByAST(tryStmt);
+            for (VariableDeclarationExpression decl :
+                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
+                for (VariableDeclarationFragment frag :
+                         (List<VariableDeclarationFragment>) decl.fragments()) {
+                    try {
+                        DFRef ref = tryScope.lookupVar(frag.getName());
+                        Expression init = frag.getInitializer();
+                        if (init != null) {
+                            this.listDefinedExpr(defined, tryScope, init);
+                            this.setLambdaType(defined, ref.getRefType(), init);
+                        }
+                    } catch (VariableNotFound e) {
+                    }
+                }
+            }
             for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
                 DFLocalScope catchScope = scope.getChildByAST(cc);
                 this.listDefinedStmt(defined, catchScope, cc.getBody());
             }
-            DFLocalScope tryScope = scope.getChildByAST(tryStmt);
             this.listDefinedStmt(defined, tryScope, tryStmt.getBody());
             Block finBlock = tryStmt.getFinally();
             if (finBlock != null) {
@@ -1353,7 +1370,9 @@ public abstract class DFSourceMethod extends DFMethod {
             CastExpression cast = (CastExpression)expr;
             this.listDefinedExpr(defined, scope, cast.getExpression());
             try {
-                return _finder.resolve(cast.getType());
+                DFType type = _finder.resolve(cast.getType());
+                this.setLambdaType(defined, type, cast.getExpression());
+                return type;
             } catch (TypeNotFound e) {
                 return null;
             }
