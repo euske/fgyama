@@ -228,4 +228,11 @@ class DFMethodRefKlass extends DFSourceKlass {
         if (funcMethod == null) return;
         _funcMethod.setFuncType(funcMethod.getFuncType());
     }
+
+    @Override
+    public void listDefinedKlasses(Collection<DFSourceKlass> defined)
+        throws InvalidSyntax {
+        assert this.isDefined();
+        super.listDefinedKlasses(defined);
+    }
 }

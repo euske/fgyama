@@ -785,7 +785,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use lambda klasses until defined.
-            lambdaKlass.listUsedKlasses(klasses);
+            //lambdaKlass.listUsedKlasses(klasses);
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -796,7 +796,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = (DFSourceKlass)this.getKlass(id);
             // Do not use methodref klasses until defined.
-            methodRefKlass.listUsedKlasses(klasses);
+            //methodRefKlass.listUsedKlasses(klasses);
 
         } else {
             throw new InvalidSyntax(expr);
@@ -1438,7 +1438,7 @@ public abstract class DFSourceMethod extends DFMethod {
             return lambdaKlass;
 
         } else if (expr instanceof MethodReference) {
-            MethodReference methodref = (ExpressionMethodReference)expr;
+            MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
             return methodRefKlass;

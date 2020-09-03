@@ -272,4 +272,11 @@ class DFLambdaKlass extends DFSourceKlass {
     public List<CapturedRef> getCapturedRefs() {
         return _captured;
     }
+
+    @Override
+    public void listDefinedKlasses(Collection<DFSourceKlass> defined)
+        throws InvalidSyntax {
+        assert this.isDefined();
+        super.listDefinedKlasses(defined);
+    }
 }
