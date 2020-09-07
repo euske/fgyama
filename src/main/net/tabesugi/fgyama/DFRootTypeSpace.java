@@ -73,7 +73,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         DFTypeFinder finder = _finder;
         DFJarFileKlass klass = (DFJarFileKlass)space.getKlass(klassName);
         if (klass == null) {
-            klass = new DFJarFileKlass(klassName, space, finder);
+            klass = new DFJarFileKlass(klassName, space, null, finder);
             space.addKlass(klassName, klass);
             finder = new DFTypeFinder(klass, finder);
         }
@@ -85,7 +85,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
             String name = s.substring(i0, (0 <= i)? i : s.length());
             DFJarFileKlass child = klass.getInnerKlass(name);
             if (child == null) {
-                child = new DFJarFileKlass(name, klass, finder);
+                child = new DFJarFileKlass(name, klass, klass, finder);
                 klass.addInnerKlass(name, child);
             }
             klass = child;

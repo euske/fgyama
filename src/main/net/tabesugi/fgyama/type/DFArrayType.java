@@ -33,7 +33,7 @@ public class DFArrayType extends DFKlass {
 
     // DFArrayType
     private DFArrayType(DFType elemType) {
-        super(elemType.getTypeName(), null);
+        super(elemType.getTypeName(), null, null, null);
         _elemType = elemType;
         _lengthFld = new FieldRef(DFBasicType.INT, "length", false);
     }

@@ -17,11 +17,11 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     @SuppressWarnings("unchecked")
     public AbstTypeDeclKlass(
         AbstractTypeDeclaration abstTypeDecl,
-        DFTypeSpace outerSpace, DFSourceKlass outerKlass,
-        String filePath, DFVarScope outerScope)
+        DFTypeSpace outerSpace, DFSourceKlass outerKlass, DFVarScope outerScope,
+        String filePath)
         throws InvalidSyntax {
         super(abstTypeDecl.getName().getIdentifier(),
-              outerSpace, outerKlass, filePath, outerScope);
+              outerSpace, outerKlass, outerScope, filePath);
 
         _abstTypeDecl = abstTypeDecl;
         if (_abstTypeDecl instanceof TypeDeclaration) {
@@ -125,7 +125,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         private DFKlass _baseKlass = null;
 
         public DefaultKlass(String name, List<Type> types) {
-            super(name, AbstTypeDeclKlass.this);
+            super(name, AbstTypeDeclKlass.this, null, null);
             _types = types;
         }
 

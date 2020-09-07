@@ -26,10 +26,7 @@ import org.eclipse.jdt.core.dom.*;
 public abstract class DFSourceKlass extends DFKlass {
 
     // These fields are set at the constructor.
-    private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
     private String _filePath;
-    private DFVarScope _outerScope;
-    private KlassScope _klassScope;
 
     // This field is available after setBaseFinder(). (Stage2)
     private boolean _loaded = false;
@@ -55,14 +52,12 @@ public abstract class DFSourceKlass extends DFKlass {
 
     // Normal constructor.
     protected DFSourceKlass(
-        String name, DFTypeSpace outerSpace, DFSourceKlass outerKlass,
-        String filePath, DFVarScope outerScope) {
-        super(name, outerSpace);
+        String name,
+        DFTypeSpace outerSpace, DFSourceKlass outerKlass, DFVarScope outerScope,
+        String filePath) {
+        super(name, outerSpace, outerKlass, outerScope);
 
-        _outerKlass = outerKlass;
         _filePath = filePath;
-        _outerScope = outerScope;
-        _klassScope = new KlassScope(outerScope, name);
     }
 
     // Constructor for a parameterized klass.
@@ -71,11 +66,7 @@ public abstract class DFSourceKlass extends DFKlass {
         super(genericKlass, paramTypes);
 
         assert genericKlass.isGeneric();
-        _outerKlass = genericKlass._outerKlass;
         _filePath = genericKlass._filePath;
-        _outerScope = genericKlass._outerScope;
-        _klassScope = new KlassScope(genericKlass._outerScope, this.getName());
-
         _finder = new DFTypeFinder(this, genericKlass._finder);
     }
 
@@ -105,14 +96,6 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public String getFilePath() {
         return _filePath;
-    }
-
-    public DFVarScope getOuterScope() {
-        return _outerScope;
-    }
-
-    public DFVarScope getKlassScope() {
-        return _klassScope;
     }
 
     public abstract ASTNode getAST();
@@ -154,25 +137,7 @@ public abstract class DFSourceKlass extends DFKlass {
     public DFMethod findMethod(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
         this.load();
-        DFMethod method = super.findMethod(callStyle, id, argTypes);
-        if (method != null) return method;
-        if (_outerKlass != null) {
-            method = _outerKlass.findMethod(callStyle, id, argTypes);
-            if (method != null) return method;
-        }
-        DFKlass baseKlass = this.getBaseKlass();
-        if (baseKlass != null) {
-            method = baseKlass.findMethod(callStyle, id, argTypes);
-            if (method != null) return method;
-        }
-        DFKlass[] baseIfaces = this.getBaseIfaces();
-        if (baseIfaces != null) {
-            for (DFKlass iface : baseIfaces) {
-                method = iface.findMethod(callStyle, id, argTypes);
-                if (method != null) return method;
-            }
-        }
-        return null;
+        return super.findMethod(callStyle, id, argTypes);
     }
 
     public DFMethod getInitMethod() {
@@ -270,8 +235,8 @@ public abstract class DFSourceKlass extends DFKlass {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                 String id = abstTypeDecl.getName().getIdentifier();
                 DFSourceKlass klass = new AbstTypeDeclKlass(
-                    abstTypeDecl, this, this,
-                    this.getFilePath(), this.getKlassScope());
+                    abstTypeDecl, this, this, this.getKlassScope(),
+                    this.getFilePath());
                 this.addKlass(id, klass);
 
             } else if (body instanceof FieldDeclaration) {
@@ -526,63 +491,6 @@ public abstract class DFSourceKlass extends DFKlass {
             }
         }
         return false;
-    }
-
-    // ThisRef
-    private class ThisRef extends DFRef {
-        public ThisRef(DFType type) {
-            super(type);
-        }
-
-        @Override
-        public boolean isLocal() {
-            return false;
-        }
-
-        @Override
-        public String getFullName() {
-            return "#this";
-        }
-    }
-
-    // KlassScope
-    private class KlassScope extends DFVarScope {
-
-        private DFRef _this;
-
-        public KlassScope(DFVarScope outer, String id) {
-            super(outer, id);
-            _this = new ThisRef(DFSourceKlass.this);
-        }
-
-        @Override
-        public String getScopeName() {
-            return DFSourceKlass.this.getTypeName();
-        }
-
-        @Override
-        public DFRef lookupThis() {
-            return _this;
-        }
-
-        @Override
-        public DFRef lookupVar(String id)
-            throws VariableNotFound {
-            DFRef ref = DFSourceKlass.this.getField(id);
-            if (ref != null) return ref;
-            return super.lookupVar(id);
-        }
-
-        // dumpContents (for debugging)
-        protected void dumpContents(PrintStream out, String indent) {
-            super.dumpContents(out, indent);
-            for (DFRef ref : DFSourceKlass.this.getFields()) {
-                out.println(indent+"defined: "+ref);
-            }
-            for (DFMethod method : DFSourceKlass.this.getMethods()) {
-                out.println(indent+"defined: "+method);
-            }
-        }
     }
 }
 

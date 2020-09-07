@@ -24,6 +24,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
+    private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
+    private DFVarScope _outerScope;
+    private KlassScope _klassScope;
 
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFKlass> _typeSlots = null;
@@ -35,11 +38,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // Normal constructor.
     public DFKlass(
-        String name, DFTypeSpace outerSpace) {
+        String name,
+        DFTypeSpace outerSpace, DFKlass outerKlass, DFVarScope outerScope) {
         super(name, outerSpace);
 
         _name = name;
         _outerSpace = outerSpace;
+        _outerKlass = outerKlass;
+        _outerScope = outerScope;
+        _klassScope = new KlassScope(outerScope, name);
     }
 
     // Protected constructor for a parameterized klass.
@@ -47,7 +54,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         // A parameterized Klass has its own separate typespace
         // that is NOT accessible from the outside.
         this(genericKlass.getName() + DFTypeSpace.getConcreteName(paramTypes),
-             genericKlass.getOuterSpace());
+             genericKlass._outerSpace, genericKlass._outerKlass, genericKlass._outerScope);
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
@@ -215,12 +222,24 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _name;
     }
 
+    public DFKlass getGenericKlass() {
+        return _genericKlass;
+    }
+
     public DFTypeSpace getOuterSpace() {
         return _outerSpace;
     }
 
-    public DFKlass getGenericKlass() {
-        return _genericKlass;
+    public DFKlass getOuterKlass() {
+        return _outerKlass;
+    }
+
+    public DFVarScope getOuterScope() {
+        return _outerScope;
+    }
+
+    public DFVarScope getKlassScope() {
+        return _klassScope;
     }
 
     public boolean isFuncInterface() {
@@ -242,9 +261,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return null;
     }
 
-    public DFMethod findMethod(
+    protected DFMethod findMethod1(
         DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        //Logger.info("DFKlass.findMethod", this, callStyle, id, Utils.join(argTypes));
+        //Logger.info("DFKlass.findMethod1", this, callStyle, id, Utils.join(argTypes));
         int bestDist = -1;
         DFMethod bestMethod = null;
         for (DFMethod method1 : this.getMethods()) {
@@ -269,6 +288,30 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
         return bestMethod;
+    }
+
+    public DFMethod findMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        DFMethod method = this.findMethod1(callStyle, id, argTypes);
+        if (method != null) return method;
+        DFKlass outerKlass = this.getOuterKlass();
+        if (outerKlass != null) {
+            method = outerKlass.findMethod(callStyle, id, argTypes);
+            if (method != null) return method;
+        }
+        DFKlass baseKlass = this.getBaseKlass();
+        if (baseKlass != null) {
+            method = baseKlass.findMethod(callStyle, id, argTypes);
+            if (method != null) return method;
+        }
+        DFKlass[] baseIfaces = this.getBaseIfaces();
+        if (baseIfaces != null) {
+            for (DFKlass iface : baseIfaces) {
+                method = iface.findMethod(callStyle, id, argTypes);
+                if (method != null) return method;
+            }
+        }
+        return null;
     }
 
     public DFMethod findMethod(
@@ -433,6 +476,63 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+
+    // ThisRef
+    private class ThisRef extends DFRef {
+        public ThisRef(DFType type) {
+            super(type);
+        }
+
+        @Override
+        public boolean isLocal() {
+            return false;
+        }
+
+        @Override
+        public String getFullName() {
+            return "#this";
+        }
+    }
+
+    // KlassScope
+    private class KlassScope extends DFVarScope {
+
+        private DFRef _this;
+
+        public KlassScope(DFVarScope outer, String id) {
+            super(outer, id);
+            _this = new ThisRef(DFKlass.this);
+        }
+
+        @Override
+        public String getScopeName() {
+            return DFKlass.this.getTypeName();
+        }
+
+        @Override
+        public DFRef lookupThis() {
+            return _this;
+        }
+
+        @Override
+        public DFRef lookupVar(String id)
+            throws VariableNotFound {
+            DFRef ref = DFKlass.this.getField(id);
+            if (ref != null) return ref;
+            return super.lookupVar(id);
+        }
+
+        // dumpContents (for debugging)
+        protected void dumpContents(PrintStream out, String indent) {
+            super.dumpContents(out, indent);
+            for (DFRef ref : DFKlass.this.getFields()) {
+                out.println(indent+"defined: "+ref);
+            }
+            for (DFMethod method : DFKlass.this.getMethods()) {
+                out.println(indent+"defined: "+method);
+            }
+        }
+    }
 }
 
 

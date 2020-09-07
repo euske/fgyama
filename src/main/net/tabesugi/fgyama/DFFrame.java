@@ -506,8 +506,7 @@ public class DFFrame {
             if (name != null) {
                 try {
                     DFKlass klass = _finder.lookupKlass(name);
-                    assert klass instanceof DFSourceKlass;
-                    ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
+                    ref = klass.getKlassScope().lookupThis();
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (this)",

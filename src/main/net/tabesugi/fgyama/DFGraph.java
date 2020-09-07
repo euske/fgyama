@@ -353,8 +353,7 @@ public abstract class DFGraph {
                 DFRef ref;
                 if (name != null) {
                     DFKlass klass = _finder.lookupKlass(name);
-                    assert klass instanceof DFSourceKlass;
-                    ref = ((DFSourceKlass)klass).getKlassScope().lookupThis();
+                    ref = klass.getKlassScope().lookupThis();
                 } else {
                     ref = scope.lookupThis();
                 }

@@ -46,9 +46,9 @@ public class DFJarFileKlass extends DFKlass {
 
     // Normal constructor.
     public DFJarFileKlass(
-        String name, DFTypeSpace outerSpace,
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
         DFTypeFinder finder) {
-        super(name, outerSpace);
+        super(name, outerSpace, outerKlass, null);
         _finder = new DFTypeFinder(this, finder);
     }
 
@@ -369,7 +369,7 @@ public class DFJarFileKlass extends DFKlass {
 
         public DefaultKlass(
             String name, String sig, DFTypeFinder finder) {
-            super(name, DFJarFileKlass.this);
+            super(name, DFJarFileKlass.this, null, null);
             _sig = sig;
             _finder = finder;
         }

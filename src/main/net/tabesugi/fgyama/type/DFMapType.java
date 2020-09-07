@@ -21,7 +21,7 @@ public class DFMapType extends DFKlass {
 
     private DFMapType(
         String name, DFTypeSpace outerSpace, DFTypeFinder finder) {
-        super(name, outerSpace);
+        super(name, outerSpace, null, null);
         _name = name;
         _finder = finder;
     }
