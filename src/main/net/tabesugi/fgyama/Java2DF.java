@@ -234,6 +234,7 @@ public class Java2DF {
     public void analyzeKlass(Exporter exporter, DFSourceKlass klass, boolean strict)
         throws InvalidSyntax, EntityNotFound {
         try {
+            assert klass.isResolved();
             exporter.startKlass(klass);
             List<DFMethod> methods = new ArrayList<DFMethod>();
             DFMethod init = klass.getInitMethod();

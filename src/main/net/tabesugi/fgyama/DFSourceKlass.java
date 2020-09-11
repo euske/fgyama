@@ -65,7 +65,6 @@ public abstract class DFSourceKlass extends DFKlass {
         DFSourceKlass genericKlass, Map<String, DFKlass> paramTypes) {
         super(genericKlass, paramTypes);
 
-        assert genericKlass.isGeneric();
         _filePath = genericKlass._filePath;
         _finder = new DFTypeFinder(this, genericKlass._finder);
     }
@@ -416,6 +415,7 @@ public abstract class DFSourceKlass extends DFKlass {
         if (klasses.contains(this)) return false;
         if (this.getGenericKlass() != null &&
             this.isRecursive(this.getGenericKlass())) return false;
+        if (!this.isResolved()) return false;
         klasses.add(this);
         //Logger.info("listUsedKlasses:", this);
         return true;
@@ -425,6 +425,7 @@ public abstract class DFSourceKlass extends DFKlass {
     public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         this.load();
+        assert this.isResolved();
         if (_initMethod != null) {
             _initMethod.listDefinedKlasses(defined);
         }

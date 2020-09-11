@@ -170,9 +170,9 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public boolean isGeneric() {
+    public boolean isResolved() {
         this.preload();
-        return super.isGeneric();
+        return super.isResolved();
     }
 
     // for loading nested klasses.

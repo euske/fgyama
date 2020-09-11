@@ -214,8 +214,13 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return klass;
     }
 
-    public boolean isGeneric() {
-        return _typeSlots != null;
+    public boolean isResolved() {
+        if (_paramTypes != null) {
+            for (DFKlass klass : _paramTypes.values()) {
+                if (!klass.isResolved()) return false;
+            }
+        }
+        return true;
     }
 
     public String getName() {

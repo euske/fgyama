@@ -64,6 +64,11 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
+    public boolean isResolved() {
+        return false;
+    }
+
+    @Override
     public boolean isEnum() {
         this.load();
         return _baseKlass.isEnum();
