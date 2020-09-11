@@ -652,6 +652,7 @@ class DefinedMethod extends DFSourceMethod {
 
         _methodDecl = methodDecl;
         outerSpace = outerSpace.lookupSpace(methodId);
+        finder = this.getFinder();
         List<TypeParameter> tps = _methodDecl.typeParameters();
         if (!tps.isEmpty()) {
             DFMapType[] mapTypes = new DFMapType[tps.size()];

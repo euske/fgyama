@@ -153,7 +153,7 @@ public class DFMapType extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFMapType.build: TypeNotFound",
-                    this, e.name, _types);
+                    this, e.name, _types, _finder);
             }
         }
     }
