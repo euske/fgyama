@@ -249,9 +249,13 @@ public class Java2DF {
             }
             for (DFMethod method : methods) {
                 if (method instanceof DFSourceMethod) {
+                    DFSourceMethod srcMethod = (DFSourceMethod)method;
                     try {
                         Logger.info("Stage5:", method.getSignature());
-                        ((DFSourceMethod)method).writeGraph(exporter);
+                        DFGraph graph = srcMethod.getGraph(exporter);
+                        if (graph != null) {
+                            exporter.writeMethod(srcMethod, graph);
+                        }
                     } catch (EntityNotFound e) {
                         if (strict) throw e;
                     }

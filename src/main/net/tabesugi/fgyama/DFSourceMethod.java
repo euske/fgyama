@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.*;
 //    2. listUsedKlasses()
 //    3. listDefinedKlasses()
 //    4. expandRefs()
-//    5. writeGraph()
+//    5. getGraph()
 //
 public abstract class DFSourceMethod extends DFMethod {
 
@@ -1617,11 +1617,42 @@ public abstract class DFSourceMethod extends DFMethod {
     public abstract void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax;
 
-    // writeGraph: generate graphs.
-    public abstract void writeGraph(Exporter exporter)
+    // getGraph: generate graphs.
+    public abstract DFGraph getGraph(Exporter exporter)
         throws InvalidSyntax, EntityNotFound;
 
     public abstract ASTNode getAST();
+
+    public void writeXML(XMLStreamWriter writer, DFGraph graph)
+        throws XMLStreamException {
+        writer.writeStartElement("method");
+        writer.writeAttribute("name", this.getSignature());
+        writer.writeAttribute("style", this.getCallStyle().toString());
+        writer.writeAttribute("abstract", Boolean.toString(this.isAbstract()));
+        for (DFMethod caller : this.getCallers()) {
+            writer.writeStartElement("caller");
+            writer.writeAttribute("name", caller.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overrider : this.getOverriders()) {
+            if (overrider == this) continue;
+            writer.writeStartElement("overrider");
+            writer.writeAttribute("name", overrider.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overriding : this.getOverridings()) {
+            writer.writeStartElement("overriding");
+            writer.writeAttribute("name", overriding.getSignature());
+            writer.writeEndElement();
+        }
+        ASTNode ast = this.getAST();
+        if (ast != null) {
+            Utils.writeXML(writer, ast);
+        }
+        DFNode[] nodes = graph.getNodes();
+        this.getScope().writeXML(writer, nodes);
+        writer.writeEndElement();
+    }
 
     @SuppressWarnings("unchecked")
     public void processBodyDecls(

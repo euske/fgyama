@@ -56,36 +56,10 @@ public abstract class DFGraph {
         Collections.sort(_nodes);
     }
 
-    public void writeXML(XMLStreamWriter writer)
-        throws XMLStreamException {
-        writer.writeStartElement("method");
-        writer.writeAttribute("name", _method.getSignature());
-        writer.writeAttribute("style", _method.getCallStyle().toString());
-        writer.writeAttribute("abstract", Boolean.toString(_method.isAbstract()));
-        for (DFMethod caller : _method.getCallers()) {
-            writer.writeStartElement("caller");
-            writer.writeAttribute("name", caller.getSignature());
-            writer.writeEndElement();
-        }
-        for (DFMethod overrider : _method.getOverriders()) {
-            if (overrider == _method) continue;
-            writer.writeStartElement("overrider");
-            writer.writeAttribute("name", overrider.getSignature());
-            writer.writeEndElement();
-        }
-        for (DFMethod overriding : _method.getOverridings()) {
-            writer.writeStartElement("overriding");
-            writer.writeAttribute("name", overriding.getSignature());
-            writer.writeEndElement();
-        }
-        ASTNode ast = _method.getAST();
-        if (ast != null) {
-            Utils.writeXML(writer, ast);
-        }
+    public DFNode[] getNodes() {
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
-        _method.getScope().writeXML(writer, nodes);
-        writer.writeEndElement();
+        return nodes;
     }
 
     /**

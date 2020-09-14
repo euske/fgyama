@@ -40,7 +40,7 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void startKlass(DFKlass klass) {
+    public void startKlass(DFSourceKlass klass) {
         assert _klass == null;
         _klass = klass;
         try {
@@ -63,10 +63,10 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void writeGraph(DFGraph graph) {
+    public void writeMethod(DFSourceMethod method, DFGraph graph) {
         assert _klass != null;
         try {
-            graph.writeXML(_writer);
+            method.writeXML(_writer, graph);
         } catch (XMLStreamException e) {
             throw new RuntimeException();
         }
