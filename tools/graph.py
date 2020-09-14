@@ -94,7 +94,7 @@ class DFMethod:
 
     def toxml(self):
         emethod = Element('method')
-        emethod.set('name', self.name)
+        emethod.set('id', self.name)
         if self.ast is not None:
             east = Element('ast')
             (astype,astart,aend) = self.ast
@@ -318,7 +318,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
         elif name == 'method':
             assert self.method is None
             self.gid += 1
-            gname = attrs.get('name')
+            gname = attrs.get('id')
             style = attrs.get('style')
             self.method = DFMethod(
                 self.klass, gname, style, gid=self.gid)
@@ -345,13 +345,13 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
                 int(attrs.get('end')))
             return
         elif name == 'caller':
-            self.method.callers.append(attrs.get('name'))
+            self.method.callers.append(attrs.get('id'))
             return
         elif name == 'overrider':
-            self.method.overrider.append(attrs.get('name'))
+            self.method.overrider.append(attrs.get('id'))
             return
         elif name == 'overriding':
-            self.method.overriding.append(attrs.get('name'))
+            self.method.overriding.append(attrs.get('id'))
             return
         elif name == 'scope':
             assert self.scope is None
