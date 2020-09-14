@@ -1626,23 +1626,26 @@ public abstract class DFSourceMethod extends DFMethod {
     public void writeXML(XMLStreamWriter writer, DFGraph graph)
         throws XMLStreamException {
         writer.writeStartElement("method");
-        writer.writeAttribute("name", this.getSignature());
+        writer.writeAttribute("id", this.getSignature());
+        writer.writeAttribute("name", this.getName());
         writer.writeAttribute("style", this.getCallStyle().toString());
-        writer.writeAttribute("abstract", Boolean.toString(this.isAbstract()));
+        if (this.isAbstract()) {
+            writer.writeAttribute("abstract", Boolean.toString(true));
+        }
         for (DFMethod caller : this.getCallers()) {
             writer.writeStartElement("caller");
-            writer.writeAttribute("name", caller.getSignature());
+            writer.writeAttribute("id", caller.getSignature());
             writer.writeEndElement();
         }
         for (DFMethod overrider : this.getOverriders()) {
             if (overrider == this) continue;
             writer.writeStartElement("overrider");
-            writer.writeAttribute("name", overrider.getSignature());
+            writer.writeAttribute("id", overrider.getSignature());
             writer.writeEndElement();
         }
         for (DFMethod overriding : this.getOverridings()) {
             writer.writeStartElement("overriding");
-            writer.writeAttribute("name", overriding.getSignature());
+            writer.writeAttribute("id", overriding.getSignature());
             writer.writeEndElement();
         }
         ASTNode ast = this.getAST();

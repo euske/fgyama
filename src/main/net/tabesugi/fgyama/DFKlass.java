@@ -359,7 +359,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public void writeXML(XMLStreamWriter writer)
         throws XMLStreamException {
         writer.writeAttribute("name", this.getTypeName());
-        writer.writeAttribute("interface", Boolean.toString(this.isInterface()));
+        if (this.isInterface()) {
+            writer.writeAttribute("interface", Boolean.toString(true));
+        }
         DFKlass baseKlass = this.getBaseKlass();
         if (baseKlass != null) {
             writer.writeAttribute("extends", baseKlass.getTypeName());
