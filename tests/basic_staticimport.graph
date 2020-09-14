@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
-    <method abstract="false" name="Lbasic_staticimport;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
+    <method id="Lbasic_staticimport;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="163" start="69" type="55"/>
       <scope name="Lbasic_staticimport;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_staticimport;.foo()V" style="static">
+    <method id="Lbasic_staticimport;.foo()V" name="foo" style="static">
       <ast end="161" start="107" type="31"/>
       <scope name="Lbasic_staticimport;.:foo:107:161">
         <node id="M2_foo_N1" kind="input" ref="#this" type="Lbasic_staticimport;"/>

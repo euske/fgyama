@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_funcs;" path="tests/basic_funcs.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_funcs;" path="tests/basic_funcs.java">
     <field name="@Lbasic_funcs;/.y" static="false" type="I"/>
     <field name="@Lbasic_funcs;/.z" static="false" type="I"/>
-    <method abstract="false" name="Lbasic_funcs;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Lbasic_funcs;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="479" start="0" type="55"/>
       <scope name="Lbasic_funcs;.&lt;clinit&gt;">
         <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -21,7 +21,7 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_funcs;.main([Ljava/lang/String;)V" style="static">
+    <method id="Lbasic_funcs;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="243" start="77" type="31"/>
       <scope name="Lbasic_funcs;.:main:77:243">
         <node id="M2_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
@@ -111,9 +111,9 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_funcs;.moo(I)I" style="static">
-      <caller name="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
-      <caller name="Lbasic_funcs;.moo(I)I"/>
+    <method id="Lbasic_funcs;.moo(I)I" name="moo" style="static">
+      <caller id="Lbasic_funcs;.main([Ljava/lang/String;)V"/>
+      <caller id="Lbasic_funcs;.moo(I)I"/>
       <ast end="407" start="249" type="31"/>
       <scope name="Lbasic_funcs;.:moo:249:407">
         <node id="M3_moo_N1" kind="input" ref="#arg0" type="I">
@@ -211,8 +211,8 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_funcs;.foo()I" style="static">
-      <caller name="Lbasic_funcs;.moo(I)I"/>
+    <method id="Lbasic_funcs;.foo()I" name="foo" style="static">
+      <caller id="Lbasic_funcs;.moo(I)I"/>
       <ast end="477" start="413" type="31"/>
       <scope name="Lbasic_funcs;.:foo:413:477">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_funcs;"/>

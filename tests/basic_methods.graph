@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods;" path="tests/basic_methods.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
     <field name="@Lbasic_methods;/.x" static="false" type="I"/>
-    <method abstract="false" name="Lbasic_methods;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Lbasic_methods;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;.&lt;clinit&gt;">
         <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -13,7 +13,7 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_methods;.fa()V" style="instance">
+    <method id="Lbasic_methods;.fa()V" name="fa" style="instance">
       <ast end="385" start="139" type="31"/>
       <scope name="Lbasic_methods;.:fa:139:385">
         <node id="M2_fa_N1" kind="input" ref="#this" type="Lbasic_methods;"/>
@@ -84,8 +84,8 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_methods;.fb()I" style="static">
-      <caller name="Lbasic_methods;.fa()V"/>
+    <method id="Lbasic_methods;.fb()I" name="fb" style="static">
+      <caller id="Lbasic_methods;.fa()V"/>
       <ast end="450" start="390" type="31"/>
       <scope name="Lbasic_methods;.:fb:390:450">
         <node id="M3_fb_N1" kind="input" ref="#this" type="Lbasic_methods;"/>
@@ -112,15 +112,15 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/A;" path="tests/basic_methods.java">
-    <method abstract="false" name="Lbasic_methods/A;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/A;" path="tests/basic_methods.java">
+    <method id="Lbasic_methods/A;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="118" start="34" type="55"/>
       <scope name="Lbasic_methods/A;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_methods/A;.toString()Ljava/lang/String;" style="instance">
-      <caller name="Lbasic_methods;.fa()V"/>
-      <overrider name="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;"/>
-      <overriding name="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
+    <method id="Lbasic_methods/A;.toString()Ljava/lang/String;" name="toString" style="instance">
+      <caller id="Lbasic_methods;.fa()V"/>
+      <overrider id="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;"/>
+      <overriding id="Ljava/lang/Object;.toString()Ljava/lang/String;"/>
       <ast end="112" start="52" type="31"/>
       <scope name="Lbasic_methods/A;.:toString:52:112">
         <node id="M5_toString_N1" kind="input" ref="#this" type="Lbasic_methods/A;"/>
@@ -139,14 +139,14 @@
       </scope>
     </method>
   </class>
-  <class extends="Lbasic_methods/A;" interface="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;" path="tests/basic_methods.java">
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Lbasic_methods/A;" name="Lbasic_methods/:fa:139:385/:AST14:165:225;" path="tests/basic_methods.java">
+    <method id="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="225" start="165" type="14"/>
       <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;" style="instance">
-      <caller name="Lbasic_methods;.fa()V"/>
-      <overriding name="Lbasic_methods/A;.toString()Ljava/lang/String;"/>
+    <method id="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;" name="toString" style="instance">
+      <caller id="Lbasic_methods;.fa()V"/>
+      <overriding id="Lbasic_methods/A;.toString()Ljava/lang/String;"/>
       <ast end="222" start="180" type="31"/>
       <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:toString:180:222">
         <node id="M7_toString_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/:AST14:165:225;"/>
@@ -165,13 +165,13 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_methods/:fa:139:385/moo;" path="tests/basic_methods.java">
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/moo;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_methods/:fa:139:385/moo;" path="tests/basic_methods.java">
+    <method id="Lbasic_methods/:fa:139:385/moo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="296" start="228" type="55"/>
       <scope name="Lbasic_methods/:fa:139:385/moo;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_methods/:fa:139:385/moo;.fc()I" style="instance">
-      <caller name="Lbasic_methods;.fa()V"/>
+    <method id="Lbasic_methods/:fa:139:385/moo;.fc()I" name="fc" style="instance">
+      <caller id="Lbasic_methods;.fa()V"/>
       <ast end="293" start="245" type="31"/>
       <scope name="Lbasic_methods/:fa:139:385/moo;.:fc:245:293">
         <node id="M9_fc_N1" kind="input" ref="#this" type="Lbasic_methods/:fa:139:385/moo;"/>

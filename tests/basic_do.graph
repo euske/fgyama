@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_do;" path="tests/basic_do.java">
-    <method abstract="false" name="Lbasic_do;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_do;" path="tests/basic_do.java">
+    <method id="Lbasic_do;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="137" start="0" type="55"/>
       <scope name="Lbasic_do;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_do;.foo(I)I" style="static">
+    <method id="Lbasic_do;.foo(I)I" name="foo" style="static">
       <ast end="135" start="29" type="31"/>
       <scope name="Lbasic_do;.:foo:29:135">
         <node id="M2_foo_N1" kind="input" ref="#arg0" type="I">

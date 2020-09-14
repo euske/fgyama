@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_switch;" path="tests/basic_switch.java">
-    <method abstract="false" name="Lbasic_switch;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_switch;" path="tests/basic_switch.java">
+    <method id="Lbasic_switch;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="191" start="0" type="55"/>
       <scope name="Lbasic_switch;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_switch;.foo(I)I" style="static">
+    <method id="Lbasic_switch;.foo(I)I" name="foo" style="static">
       <ast end="189" start="33" type="31"/>
       <scope name="Lbasic_switch;.:foo:33:189">
         <node id="M2_foo_N1" kind="input" ref="#arg0" type="I">

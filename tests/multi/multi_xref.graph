@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
     <field name="@Ldom/meep/multi_xref1;/.xref2" static="false" type="Ldom/meep/multi_xref2;"/>
-    <method abstract="false" name="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="256" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref1;.&lt;clinit&gt;">
         <node data="uninitialized" id="K1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -11,8 +11,8 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/multi_xref1;.moo()V" style="instance">
-      <caller name="Ldom/meep/multi_xref2;.foo()V"/>
+    <method id="Ldom/meep/multi_xref1;.moo()V" name="moo" style="instance">
+      <caller id="Ldom/meep/multi_xref2;.foo()V"/>
       <ast end="254" start="115" type="31"/>
       <scope name="Ldom/meep/multi_xref1;.:moo:115:254">
         <node id="M2_moo_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref1;"/>
@@ -72,9 +72,9 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
     <field name="@Ldom/meep/multi_xref2;/.xref1" static="false" type="Ldom/meep/multi_xref1;"/>
-    <method abstract="false" name="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="297" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref2;.&lt;clinit&gt;">
         <node data="uninitialized" id="K3_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -84,8 +84,8 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/multi_xref2;.foo()V" style="instance">
-      <caller name="Ldom/meep/multi_xref1;.moo()V"/>
+    <method id="Ldom/meep/multi_xref2;.foo()V" name="foo" style="instance">
+      <caller id="Ldom/meep/multi_xref1;.moo()V"/>
       <ast end="239" start="75" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:foo:75:239">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
@@ -154,8 +154,8 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/multi_xref2;.bam()I" style="static">
-      <caller name="Ldom/meep/multi_xref1;.moo()V"/>
+    <method id="Ldom/meep/multi_xref2;.bam()I" name="bam" style="static">
+      <caller id="Ldom/meep/multi_xref1;.moo()V"/>
       <ast end="295" start="245" type="31"/>
       <scope name="Ldom/meep/multi_xref2;.:bam:245:295">
         <node id="M5_bam_N1" kind="input" ref="#this" type="Ldom/meep/multi_xref2;"/>
@@ -174,9 +174,9 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
     <field name="@Ldom/meep/multi_xref1/baa;/.baz" static="false" type="I"/>
-    <method abstract="false" name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="109" start="75" type="55"/>
       <scope name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;">
         <node data="uninitialized" id="K6_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -187,9 +187,9 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
     <field name="@Ldom/dood/multi_xref3;/.boo" static="true" type="I"/>
-    <method abstract="false" name="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="195" start="48" type="55"/>
       <scope name="Ldom/dood/multi_xref3;.&lt;clinit&gt;">
         <node data="100" id="K7_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -201,7 +201,7 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/dood/multi_xref3;.baa()V" style="instance">
+    <method id="Ldom/dood/multi_xref3;.baa()V" name="baa" style="instance">
       <ast end="193" start="114" type="31"/>
       <scope name="Ldom/dood/multi_xref3;.:baa:114:193">
         <node id="M8_baa_N1" kind="input" ref="#this" type="Ldom/dood/multi_xref3;"/>

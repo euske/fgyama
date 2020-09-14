@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_exception;" path="tests/basic_exception.java">
-    <method abstract="false" name="Lbasic_exception;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_exception;" path="tests/basic_exception.java">
+    <method id="Lbasic_exception;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="477" start="0" type="55"/>
       <scope name="Lbasic_exception;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_exception;.foo()V" style="instance">
+    <method id="Lbasic_exception;.foo()V" name="foo" style="instance">
       <ast end="380" start="103" type="31"/>
       <scope name="Lbasic_exception;.:foo:103:380">
         <node id="M2_foo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
@@ -120,8 +120,8 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_exception;.moo()Ljava/lang/String;" style="instance">
-      <caller name="Lbasic_exception;.foo()V"/>
+    <method id="Lbasic_exception;.moo()Ljava/lang/String;" name="moo" style="instance">
+      <caller id="Lbasic_exception;.foo()V"/>
       <ast end="475" start="386" type="31"/>
       <scope name="Lbasic_exception;.:moo:386:475">
         <node id="M3_moo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
@@ -157,9 +157,9 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Exception;" interface="false" name="Lbasic_exception/A;" path="tests/basic_exception.java">
+  <class extends="Ljava/lang/Exception;" name="Lbasic_exception/A;" path="tests/basic_exception.java">
     <field name="@Lbasic_exception/A;/.text" static="false" type="Ljava/lang/String;"/>
-    <method abstract="false" name="Lbasic_exception/A;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Lbasic_exception/A;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="97" start="36" type="55"/>
       <scope name="Lbasic_exception/A;.&lt;clinit&gt;">
         <node data="uninitialized" id="K4_&lt;clinit&gt;_N1" kind="value" type="@null"/>

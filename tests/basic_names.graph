@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
     <field name="@Ldom/meep/basic_names;/.y" static="false" type="I"/>
-    <method abstract="false" name="Ldom/meep/basic_names;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/meep/basic_names;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="470" start="19" type="55"/>
       <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
         <node data="123" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -13,8 +13,8 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.doit()V" style="instance">
-      <caller name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
+    <method id="Ldom/meep/basic_names;.doit()V" name="doit" style="instance">
+      <caller id="Ldom/meep/basic_names;.main([Ljava/lang/String;)V"/>
       <ast end="289" start="79" type="31"/>
       <scope name="Ldom/meep/basic_names;.:doit:79:289">
         <node id="M2_doit_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
@@ -85,7 +85,7 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.meh()V" style="instance">
+    <method id="Ldom/meep/basic_names;.meh()V" name="meh" style="instance">
       <ast end="351" start="295" type="31"/>
       <scope name="Ldom/meep/basic_names;.:meh:295:351">
         <node id="M3_meh_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
@@ -101,7 +101,7 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" style="static">
+    <method id="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="468" start="357" type="31"/>
       <scope name="Ldom/meep/basic_names;.:main:357:468">
         <node id="M4_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
@@ -140,15 +140,15 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
-    <method abstract="false" name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
+    <method id="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="56" start="44" type="55"/>
       <scope name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;"/>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;" path="tests/basic_names.java">
+  <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/:doit:79:289/Baz;" path="tests/basic_names.java">
     <field name="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" static="false" type="I"/>
-    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="211" start="144" type="55"/>
       <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;">
         <node data="uninitialized" id="K6_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -158,8 +158,8 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" style="instance">
-      <caller name="Ldom/meep/basic_names;.doit()V"/>
+    <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.moo()V" name="moo" style="instance">
+      <caller id="Ldom/meep/basic_names;.doit()V"/>
       <ast end="201" start="187" type="31"/>
       <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201">
         <node id="M7_moo_N1" kind="input" ref="#this" type="Ldom/meep/basic_names/:doit:79:289/Baz;"/>

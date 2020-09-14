@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
     <field name="@Lbasic_poly_Foo;/.x" static="false" type="I"/>
-    <method abstract="false" name="Lbasic_poly_Foo;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Lbasic_poly_Foo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="108" start="0" type="55"/>
       <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">
         <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
@@ -13,10 +13,10 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" style="instance">
-      <caller name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
-      <caller name="Lbasic_poly;.main([Ljava/lang/String;)V"/>
-      <overrider name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
+    <method id="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" name="moo" style="instance">
+      <caller id="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
+      <caller id="Lbasic_poly;.main([Ljava/lang/String;)V"/>
+      <overrider id="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="106" start="42" type="31"/>
       <scope name="Lbasic_poly_Foo;.:moo:42:106">
         <node id="M2_moo_N1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
@@ -49,14 +49,14 @@
       </scope>
     </method>
   </class>
-  <class extends="Lbasic_poly_Foo;" interface="false" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
-    <method abstract="false" name="Lbasic_poly_Baa;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Lbasic_poly_Foo;" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
+    <method id="Lbasic_poly_Baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="275" start="110" type="55"/>
       <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" style="instance">
-      <caller name="Lbasic_poly;.main([Ljava/lang/String;)V"/>
-      <overriding name="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I"/>
+    <method id="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" name="moo" style="instance">
+      <caller id="Lbasic_poly;.main([Ljava/lang/String;)V"/>
+      <overriding id="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I"/>
       <ast end="273" start="160" type="31"/>
       <scope name="Lbasic_poly_Baa;.:moo:160:273">
         <node id="M4_moo_N1" kind="input" ref="#arg0" type="Lbasic_poly_Foo;">
@@ -110,12 +110,12 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_poly;" path="tests/basic_poly.java">
-    <method abstract="false" name="Lbasic_poly;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_poly;" path="tests/basic_poly.java">
+    <method id="Lbasic_poly;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="730" start="277" type="55"/>
       <scope name="Lbasic_poly;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_poly;.main([Ljava/lang/String;)V" style="static">
+    <method id="Lbasic_poly;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="728" start="307" type="31"/>
       <scope name="Lbasic_poly;.:main:307:728">
         <node id="M6_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">

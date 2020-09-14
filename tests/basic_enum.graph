@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Enum&lt;LE;&gt;;" interface="false" name="LE;" path="tests/basic_enum.java">
+  <class extends="Ljava/lang/Enum&lt;LE;&gt;;" name="LE;" path="tests/basic_enum.java">
     <field name="@LE;/.Moo" static="true" type="LE;"/>
     <field name="@LE;/.Baa" static="true" type="LE;"/>
     <field name="@LE;/.x" static="false" type="I"/>
-    <method abstract="false" name="LE;.&lt;clinit&gt;()V" style="initializer">
+    <method id="LE;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="102" start="0" type="71"/>
       <scope name="LE;.&lt;clinit&gt;">
         <node data="uninitialized" id="K1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
@@ -13,7 +13,7 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="LE;.&lt;init&gt;(I)LE;" style="constructor">
+    <method id="LE;.&lt;init&gt;(I)LE;" name="&lt;init&gt;" style="constructor">
       <ast end="100" start="56" type="31"/>
       <scope name="LE;.:E:56:100">
         <node id="M2_&lt;init&gt;_N1" kind="input" ref="#arg0" type="I">
@@ -46,12 +46,12 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_enum;" path="tests/basic_enum.java">
-    <method abstract="false" name="Lbasic_enum;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_enum;" path="tests/basic_enum.java">
+    <method id="Lbasic_enum;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="294" start="104" type="55"/>
       <scope name="Lbasic_enum;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_enum;.foo()V" style="static">
+    <method id="Lbasic_enum;.foo()V" name="foo" style="static">
       <ast end="292" start="134" type="31"/>
       <scope name="Lbasic_enum;.:foo:134:292">
         <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_enum;"/>

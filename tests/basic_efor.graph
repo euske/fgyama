@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_xfor;" path="tests/basic_efor.java">
-    <method abstract="false" name="Lbasic_xfor;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="Lbasic_xfor;" path="tests/basic_efor.java">
+    <method id="Lbasic_xfor;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="129" start="0" type="55"/>
       <scope name="Lbasic_xfor;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="Lbasic_xfor;.foo([I)I" style="static">
+    <method id="Lbasic_xfor;.foo([I)I" name="foo" style="static">
       <ast end="127" start="31" type="31"/>
       <scope name="Lbasic_xfor;.:foo:31:127">
         <node id="M2_foo_N1" kind="input" ref="#arg0" type="[I">

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="true" name="LMoo;" path="tests/basic_lambda.java">
-    <method abstract="false" name="LMoo;.&lt;clinit&gt;()V" style="initializer">
+    <method id="LMoo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="79" start="30" type="55"/>
       <scope name="LMoo;.&lt;clinit&gt;"/>
     </method>
   </class>
-  <class extends="Ljava/lang/Object;" interface="false" name="Lbasic_lambda;" path="tests/basic_lambda.java">
+  <class extends="Ljava/lang/Object;" name="Lbasic_lambda;" path="tests/basic_lambda.java">
     <field name="@Lbasic_lambda;/.isZero" static="false" type="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;"/>
-    <method abstract="false" name="Lbasic_lambda;.&lt;clinit&gt;()V" style="initializer">
+    <method id="Lbasic_lambda;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="393" start="81" type="55"/>
       <scope name="Lbasic_lambda;.&lt;clinit&gt;">
         <node id="K2_&lt;clinit&gt;_N1" kind="capture" type="Lbasic_lambda/&lt;clinit&gt;/:lambda:143:154;">
@@ -19,7 +19,7 @@
         </node>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_lambda;.main([Ljava/lang/String;)V" style="static">
+    <method id="Lbasic_lambda;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="308" start="162" type="31"/>
       <scope name="Lbasic_lambda;.:main:162:308">
         <node id="M3_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
@@ -74,8 +74,8 @@
         </scope>
       </scope>
     </method>
-    <method abstract="false" name="Lbasic_lambda;.bar(LMoo;)V" style="static">
-      <caller name="Lbasic_lambda;.main([Ljava/lang/String;)V"/>
+    <method id="Lbasic_lambda;.bar(LMoo;)V" name="bar" style="static">
+      <caller id="Lbasic_lambda;.main([Ljava/lang/String;)V"/>
       <ast end="391" start="314" type="31"/>
       <scope name="Lbasic_lambda;.:bar:314:391">
         <node id="M4_bar_N1" kind="input" ref="#arg0" type="LMoo;">
@@ -121,9 +121,9 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;" interface="false" name="Lbasic_lambda/&lt;clinit&gt;/:lambda:143:154;" path="tests/basic_lambda.java">
-    <method abstract="false" name="Lbasic_lambda/&lt;clinit&gt;/:lambda:143:154;.#f(Ljava/lang/Integer;)Z" style="lambda">
-      <overriding name="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;.test(Ljava/lang/Integer;)Z"/>
+  <class extends="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;" name="Lbasic_lambda/&lt;clinit&gt;/:lambda:143:154;" path="tests/basic_lambda.java">
+    <method id="Lbasic_lambda/&lt;clinit&gt;/:lambda:143:154;.#f(Ljava/lang/Integer;)Z" name="#f" style="lambda">
+      <overriding id="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;.test(Ljava/lang/Integer;)Z"/>
       <ast end="154" start="143" type="86"/>
       <scope name="Lbasic_lambda;.&lt;clinit&gt;.:lambda:143:154.#f">
         <node id="M5_#f_N1" kind="input" ref="#arg0" type="Ljava/lang/Integer;">
@@ -156,10 +156,10 @@
       </scope>
     </method>
   </class>
-  <class extends="LMoo;" interface="false" name="Lbasic_lambda/:main:162:308/:methodref:219:236;" path="tests/basic_lambda.java"/>
-  <class extends="LMoo;" interface="false" name="Lbasic_lambda/:main:162:308/:lambda:292:300;" path="tests/basic_lambda.java">
-    <method abstract="false" name="Lbasic_lambda/:main:162:308/:lambda:292:300;.#f(I)Ljava/lang/String;" style="lambda">
-      <overriding name="LMoo;.moo(I)Ljava/lang/String;"/>
+  <class extends="LMoo;" name="Lbasic_lambda/:main:162:308/:methodref:219:236;" path="tests/basic_lambda.java"/>
+  <class extends="LMoo;" name="Lbasic_lambda/:main:162:308/:lambda:292:300;" path="tests/basic_lambda.java">
+    <method id="Lbasic_lambda/:main:162:308/:lambda:292:300;.#f(I)Ljava/lang/String;" name="#f" style="lambda">
+      <overriding id="LMoo;.moo(I)Ljava/lang/String;"/>
       <ast end="300" start="292" type="86"/>
       <scope name="Lbasic_lambda;.:main:162:308.:B:201:308.:lambda:292:300.#f">
         <node id="M6_#f_N1" kind="input" ref="#arg0" type="I">
