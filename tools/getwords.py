@@ -4,6 +4,8 @@ import re
 
 NAME = re.compile(r'\w+$', re.U)
 def stripid(name):
+    if name.startswith('%'):
+        return stripid(name[1:-1])
     m = NAME.search(name)
     if m:
         return m.group(0)

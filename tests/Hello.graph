@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
-  <class extends="Ljava/lang/Object;" interface="false" name="LHello;" path="Hello.java">
-    <method abstract="false" name="LHello;.&lt;clinit&gt;()V" style="initializer">
+  <class extends="Ljava/lang/Object;" name="LHello;" path="/home/euske/work/r/fgyama/tests/Hello.java">
+    <method id="LHello;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="141" start="0" type="55"/>
       <scope name="LHello;.&lt;clinit&gt;"/>
     </method>
-    <method abstract="false" name="LHello;.main([Ljava/lang/String;)V" style="static">
+    <method id="LHello;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="139" start="25" type="31"/>
       <scope name="LHello;.:main:25:139">
         <node id="M2_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">

@@ -100,6 +100,29 @@
     </jar>
   </target>
 
+  <target name="sample" depends="build">
+    <java classname="net.tabesugi.fgyama.Java2DF">
+      <arg value="-v" />
+      <arg value="-a" />
+      <arg value="-S" />
+      <arg value="-o" />
+      <arg file="tests/Hello.graph" />
+      <arg file="tests/Hello.java" />
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+    </java>
+    <java classname="net.tabesugi.fgyama.Java2DF">
+      <arg value="-v" />
+      <arg value="-a" />
+      <arg value="-S" />
+      <arg value="-o" />
+      <arg file="tests/App1.graph" />
+      <arg file="tests/App1.java" />
+      <classpath location="${buildDir}" />
+      <classpath refid="build.classpath"/>
+    </java>
+  </target>
+
   <target name="test" depends="build">
     <junit fork="yes">
       <jvmarg value="-ea" />
