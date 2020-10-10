@@ -980,10 +980,13 @@ public abstract class DFGraph {
             DFNode node = exit.getNode();
             DFRef ref = node.getRef();
             if (exit.getFrame() != loopFrame) {
-                JoinNode join = new JoinNode(
-                    this, scope, ref.getRefType(), ref, null, condValue);
-                join.recv(true, node);
-                exit.setNode(join);
+                if (!((node instanceof JoinNode) &&
+                      ((JoinNode)node).canMerge())) {
+                    JoinNode join = new JoinNode(
+                        this, scope, ref.getRefType(), ref, null, condValue);
+                    join.recv(true, node);
+                    exit.setNode(join);
+                }
             } else if (exit instanceof ContinueExit) {
                 DFNode end = ends.get(ref);
                 if (end == null) {
