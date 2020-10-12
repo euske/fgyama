@@ -43,10 +43,10 @@ public class DFRootTypeSpace extends DFTypeSpace {
         return "";
     }
 
-    public void loadJarFile(String jarPath)
+    public void loadJarFile(File file)
         throws IOException {
-        Logger.info("Loading:", jarPath);
-        JarFile jarFile = new JarFile(jarPath);
+        Logger.info("Loading:", file);
+        JarFile jarFile = new JarFile(file);
         try {
             for (Enumeration<JarEntry> es = jarFile.entries(); es.hasMoreElements(); ) {
                 JarEntry jarEntry = es.nextElement();

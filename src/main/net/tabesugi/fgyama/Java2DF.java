@@ -45,12 +45,12 @@ public class Java2DF {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
-        _rootSpace.loadJarFile(rtFile.getAbsolutePath());
+        _rootSpace.loadJarFile(rtFile);
         DFBuiltinTypes.initialize(_rootSpace);
     }
 
-    public void loadJarFile(String path) throws IOException {
-        _rootSpace.loadJarFile(path);
+    public void loadJarFile(File file) throws IOException {
+        _rootSpace.loadJarFile(file);
     }
 
     public void clearSourceFiles() {
@@ -63,7 +63,7 @@ public class Java2DF {
 
     public void addSourceFile(String path)
         throws IOException {
-        CompilationUnit cunit = Utils.parseFile(path);
+        CompilationUnit cunit = Utils.parseFile(new File(path));
         this.addSourceFile(path, cunit);
     }
 
@@ -351,7 +351,7 @@ public class Java2DF {
         Java2DF converter = new Java2DF();
         converter.loadDefaults();
         for (String path : jarfiles) {
-            converter.loadJarFile(path);
+            converter.loadJarFile(new File(path));
         }
         for (String path : files) {
             Logger.info("Parsing:", path);

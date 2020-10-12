@@ -100,6 +100,7 @@ public class Utils {
 
     public static String readFile(File file)
         throws IOException {
+        // Regularlize DOS/Unix newlines.
         BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder b = new StringBuilder();
         while (true) {
@@ -110,11 +111,6 @@ public class Utils {
         }
         reader.close();
         return b.toString();
-    }
-
-    public static CompilationUnit parseFile(String path)
-        throws IOException {
-        return parseFile(new File(path));
     }
 
     public static CompilationUnit parseFile(File file)
@@ -128,6 +124,7 @@ public class Utils {
         parser.setResolveBindings(false);
         parser.setEnvironment(null, null, null, false);
         parser.setCompilerOptions(options);
+        // XXX throw an error for unsyntactic source code.
         return (CompilationUnit)parser.createAST(null);
     }
 
