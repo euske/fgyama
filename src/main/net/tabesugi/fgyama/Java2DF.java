@@ -14,24 +14,31 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Java2DF {
 
-    private class Entry {
-        String key;
-        CompilationUnit cunit;
-        public Entry(String key, CompilationUnit cunit) {
-            this.key = key;
+    private class SourceFile {
+
+        public String path;
+        public CompilationUnit cunit;
+
+        public SourceFile(String path, CompilationUnit cunit) {
+            this.path = path;
             this.cunit = cunit;
+        }
+
+        @Override
+        public String toString() {
+            return "<"+this.path+">";
         }
     }
 
     private DFRootTypeSpace _rootSpace;
     private DFGlobalScope _globalScope =
         new DFGlobalScope();
-    private List<Entry> _sourceFiles =
-        new ArrayList<Entry>();
-    private Map<String, DFFileScope> _fileScope =
-        new HashMap<String, DFFileScope>();
-    private Map<String, List<DFSourceKlass>> _fileKlasses =
-        new HashMap<String, List<DFSourceKlass>>();
+    private List<SourceFile> _sourceFiles =
+        new ArrayList<SourceFile>();
+    private Map<SourceFile, DFFileScope> _fileScope =
+        new HashMap<SourceFile, DFFileScope>();
+    private Map<SourceFile, List<DFSourceKlass>> _fileKlasses =
+        new HashMap<SourceFile, List<DFSourceKlass>>();
 
     /// Top-level functions.
 
@@ -57,8 +64,8 @@ public class Java2DF {
         _sourceFiles.clear();
     }
 
-    public void addSourceFile(String key, CompilationUnit cunit) {
-        _sourceFiles.add(new Entry(key, cunit));
+    public void addSourceFile(String name, CompilationUnit cunit) {
+        _sourceFiles.add(new SourceFile(name, cunit));
     }
 
     public void addSourceFile(String path)
@@ -71,23 +78,23 @@ public class Java2DF {
         throws InvalidSyntax {
 
         // Stage1: populate TypeSpaces.
-        for (Entry e : _sourceFiles) {
-            Logger.info("Stage1:", e.key);
-            this.buildTypeSpace(e.key, e.cunit);
+        for (SourceFile src : _sourceFiles) {
+            Logger.info("Stage1:", src);
+            this.buildTypeSpace(src);
         }
 
         // Stage2: set references to external Klasses.
-        for (Entry e : _sourceFiles) {
-            Logger.info("Stage2:", e.key);
-            this.setTypeFinder(e.key, e.cunit);
+        for (SourceFile src : _sourceFiles) {
+            Logger.info("Stage2:", src);
+            this.setTypeFinder(src);
         }
 
         // Stage3: list class definitions and define parameterized Klasses.
         ConsistentHashSet<DFSourceKlass> klasses =
             new ConsistentHashSet<DFSourceKlass>();
-        for (Entry e : _sourceFiles) {
-            Logger.info("Stage3:", e.key);
-            this.listUsedKlasses(e.key, e.cunit, klasses);
+        for (SourceFile src : _sourceFiles) {
+            Logger.info("Stage3:", src);
+            this.listUsedKlasses(src, klasses);
         }
 
         // Stage4: expand classes.
@@ -98,34 +105,34 @@ public class Java2DF {
     }
 
     @SuppressWarnings("unchecked")
-    private void buildTypeSpace(String key, CompilationUnit cunit)
+    private void buildTypeSpace(SourceFile src)
         throws InvalidSyntax {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
-        DFFileScope fileScope = new DFFileScope(_globalScope, key);
-        _fileScope.put(key, fileScope);
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(src.cunit.getPackage());
+        DFFileScope fileScope = new DFFileScope(_globalScope, src.path);
+        _fileScope.put(src, fileScope);
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
-                 (List<AbstractTypeDeclaration>) cunit.types()) {
+                 (List<AbstractTypeDeclaration>) src.cunit.types()) {
             DFSourceKlass klass = new AbstTypeDeclKlass(
-                abstTypeDecl, packageSpace, null, fileScope, key);
+                abstTypeDecl, packageSpace, null, fileScope, src.path);
             packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
             Logger.debug("Stage1: Created:", klass);
             klasses.add(klass);
         }
-        _fileKlasses.put(key, klasses);
+        _fileKlasses.put(src, klasses);
     }
 
     @SuppressWarnings("unchecked")
-    private void setTypeFinder(String key, CompilationUnit cunit) {
+    private void setTypeFinder(SourceFile src) {
         // Search path for types: ROOT -> java.lang -> package -> imports.
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = new DFTypeFinder(_rootSpace.lookupSpace("java.lang"), finder);
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(cunit.getPackage());
+        DFTypeSpace packageSpace = _rootSpace.lookupSpace(src.cunit.getPackage());
         finder = new DFTypeFinder(packageSpace, finder);
         // Populate the import space.
-        DFTypeSpace importSpace = new DFTypeSpace("import:"+key);
+        DFTypeSpace importSpace = new DFTypeSpace("import:"+src.path);
         for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
+                 (List<ImportDeclaration>) src.cunit.imports()) {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 Logger.debug("Import:", name+".*");
@@ -144,19 +151,19 @@ public class Java2DF {
         }
         // Set a top-level finder.
         finder = new DFTypeFinder(importSpace, finder);
-        for (DFSourceKlass klass : _fileKlasses.get(key)) {
+        for (DFSourceKlass klass : _fileKlasses.get(src)) {
             klass.setBaseFinder(finder);
         }
     }
 
     @SuppressWarnings("unchecked")
     private void listUsedKlasses(
-        String key, CompilationUnit cunit, Collection<DFSourceKlass> klasses)
+        SourceFile src, Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // Process static imports.
-        DFFileScope fileScope = _fileScope.get(key);
+        DFFileScope fileScope = _fileScope.get(src);
         for (ImportDeclaration importDecl :
-                 (List<ImportDeclaration>) cunit.imports()) {
+                 (List<ImportDeclaration>) src.cunit.imports()) {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
@@ -169,7 +176,7 @@ public class Java2DF {
             }
         }
         // List all the klasses used.
-        for (DFSourceKlass klass : _fileKlasses.get(key)) {
+        for (DFSourceKlass klass : _fileKlasses.get(src)) {
             klass.listUsedKlasses(klasses);
         }
     }
