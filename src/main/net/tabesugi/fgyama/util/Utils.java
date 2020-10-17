@@ -128,6 +128,23 @@ public class Utils {
         return (CompilationUnit)parser.createAST(null);
     }
 
+    public static File[] enumerateFiles(File file) {
+        List<File> files = new ArrayList<File>();
+        enumerateFiles(files, file);
+        File[] a = new File[files.size()];
+        files.toArray(a);
+        return a;
+    }
+    public static void enumerateFiles(List<File> files, File file) {
+        if (file.isDirectory()) {
+            for (File f1 : file.listFiles()) {
+                enumerateFiles(files, f1);
+            }
+        } else {
+            files.add(file);
+        }
+    }
+
     public static Document createXml()
         throws ParserConfigurationException {
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
