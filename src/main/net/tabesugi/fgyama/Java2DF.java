@@ -35,8 +35,8 @@ public class Java2DF {
     private DFRootTypeSpace _rootSpace;
     private DFGlobalScope _globalScope =
         new DFGlobalScope();
-    private List<SourceFile> _sourceFiles =
-        new ArrayList<SourceFile>();
+    private Map<String, SourceFile> _sourceFiles =
+        new ConsistentHashMap<String, SourceFile>();
     private Map<SourceFile, DFFileScope> _fileScope =
         new HashMap<SourceFile, DFFileScope>();
     private Map<SourceFile, List<DFSourceKlass>> _fileKlasses =
@@ -66,27 +66,25 @@ public class Java2DF {
         _sourceFiles.clear();
     }
 
-    public void addSourceFile(String name, CompilationUnit cunit, boolean analyze) {
-        _sourceFiles.add(new SourceFile(name, cunit, analyze));
-    }
-
     public void addSourceFile(String path, boolean analyze)
         throws IOException {
-        CompilationUnit cunit = Utils.parseFile(new File(path));
-        this.addSourceFile(path, cunit, analyze);
+        File file = new File(path);
+        path = file.getCanonicalPath();
+        CompilationUnit cunit = Utils.parseFile(file);
+        _sourceFiles.put(path, new SourceFile(path, cunit, analyze));
     }
 
     public Collection<DFSourceKlass> getSourceKlasses()
         throws InvalidSyntax {
 
         // Stage1: populate TypeSpaces.
-        for (SourceFile src : _sourceFiles) {
+        for (SourceFile src : _sourceFiles.values()) {
             Logger.info("Stage1:", src);
             this.buildTypeSpace(src);
         }
 
         // Stage2: set references to external Klasses.
-        for (SourceFile src : _sourceFiles) {
+        for (SourceFile src : _sourceFiles.values()) {
             Logger.info("Stage2:", src);
             this.setTypeFinder(src);
         }
@@ -94,7 +92,7 @@ public class Java2DF {
         // Stage3: list class definitions and define parameterized Klasses.
         ConsistentHashSet<DFSourceKlass> klasses =
             new ConsistentHashSet<DFSourceKlass>();
-        for (SourceFile src : _sourceFiles) {
+        for (SourceFile src : _sourceFiles.values()) {
             Logger.info("Stage3:", src);
             this.listUsedKlasses(src, klasses);
         }
@@ -354,9 +352,27 @@ public class Java2DF {
             }
         }
 
-        // Process files.
         Java2DF converter = new Java2DF();
         converter.loadDefaults();
+
+        // Add the target souce files first.
+        for (String path : files) {
+            for (File file : Utils.enumerateFiles(path)) {
+                String name = file.getPath();
+                if (name.endsWith(".java")) {
+                    Logger.info("Parsing:", name);
+                    try {
+                        converter.addSourceFile(name, true);
+                    } catch (IOException e) {
+                        Logger.error("Parsing: IOException at "+path);
+                        throw e;
+                    }
+                }
+            }
+        }
+
+        // Add the source files from the classpath.
+        // (ones which are already added are skipped.)
         for (String path : classpath) {
             if (path.endsWith(".jar")) {
                 converter.loadJarFile(new File(path));
@@ -370,20 +386,6 @@ public class Java2DF {
                             Logger.error("Parsing: IOException at "+path);
                             throw e;
                         }
-                    }
-                }
-            }
-        }
-        for (String path : files) {
-            for (File file : Utils.enumerateFiles(path)) {
-                String name = file.getPath();
-                if (name.endsWith(".java")) {
-                    Logger.info("Parsing:", name);
-                    try {
-                        converter.addSourceFile(name, true);
-                    } catch (IOException e) {
-                        Logger.error("Parsing: IOException at "+path);
-                        throw e;
                     }
                 }
             }
