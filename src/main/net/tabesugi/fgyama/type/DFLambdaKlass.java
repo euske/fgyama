@@ -192,7 +192,7 @@ class DFLambdaKlass extends DFSourceKlass {
         throws InvalidSyntax {
         super(Utils.encodeASTNode(lambda),
               outerSpace, outerKlass, outerScope,
-              outerKlass.getFilePath());
+              outerKlass.getFilePath(), outerKlass.isAnalyze());
         _lambda = lambda;
         _lambdaScope = new LambdaScope(outerScope, Utils.encodeASTNode(lambda));
     }

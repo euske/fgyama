@@ -166,7 +166,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         throws InvalidSyntax {
         super(Utils.encodeASTNode(methodRef),
               outerSpace, outerKlass, outerScope,
-              outerKlass.getFilePath());
+              outerKlass.getFilePath(), outerKlass.isAnalyze());
 
         _methodRef = methodRef;
     }

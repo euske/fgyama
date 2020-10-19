@@ -27,6 +27,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     // These fields are set at the constructor.
     private String _filePath;
+    private boolean _analyze;
 
     // This field is available after setBaseFinder(). (Stage2)
     private boolean _loaded = false;
@@ -54,10 +55,11 @@ public abstract class DFSourceKlass extends DFKlass {
     protected DFSourceKlass(
         String name,
         DFTypeSpace outerSpace, DFSourceKlass outerKlass, DFVarScope outerScope,
-        String filePath) {
+        String filePath, boolean analyze) {
         super(name, outerSpace, outerKlass, outerScope);
 
         _filePath = filePath;
+        _analyze = analyze;
     }
 
     // Constructor for a parameterized klass.
@@ -95,6 +97,10 @@ public abstract class DFSourceKlass extends DFKlass {
 
     public String getFilePath() {
         return _filePath;
+    }
+
+    public boolean isAnalyze() {
+        return _analyze;
     }
 
     public abstract ASTNode getAST();
@@ -235,7 +241,7 @@ public abstract class DFSourceKlass extends DFKlass {
                 String id = abstTypeDecl.getName().getIdentifier();
                 DFSourceKlass klass = new AbstTypeDeclKlass(
                     abstTypeDecl, this, this, this.getKlassScope(),
-                    this.getFilePath());
+                    _filePath, _analyze);
                 this.addKlass(id, klass);
 
             } else if (body instanceof FieldDeclaration) {

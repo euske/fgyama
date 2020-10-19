@@ -18,10 +18,10 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     public AbstTypeDeclKlass(
         AbstractTypeDeclaration abstTypeDecl,
         DFTypeSpace outerSpace, DFSourceKlass outerKlass, DFVarScope outerScope,
-        String filePath)
+        String filePath, boolean analyze)
         throws InvalidSyntax {
         super(abstTypeDecl.getName().getIdentifier(),
-              outerSpace, outerKlass, outerScope, filePath);
+              outerSpace, outerKlass, outerScope, filePath, analyze);
 
         _abstTypeDecl = abstTypeDecl;
         if (_abstTypeDecl instanceof TypeDeclaration) {

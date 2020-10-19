@@ -241,7 +241,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = abstTypeDecl.getName().getIdentifier();
             DFSourceKlass klass = new AbstTypeDeclKlass(
                 abstTypeDecl, this, _srcklass, outerScope,
-                _srcklass.getFilePath());
+                _srcklass.getFilePath(), _srcklass.isAnalyze());
             klass.setBaseFinder(_finder);
             this.addKlass(id, klass);
 
@@ -367,8 +367,7 @@ public abstract class DFSourceMethod extends DFMethod {
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
                 DFSourceKlass anonKlass = new AnonymousKlass(
-                    cstr,
-                    this, _srcklass, _srcklass.getFilePath(), outerScope);
+                    cstr, this, _srcklass, outerScope);
                 anonKlass.setBaseFinder(_finder);
                 this.addKlass(id, anonKlass);
             }
@@ -1913,10 +1912,11 @@ class AnonymousKlass extends DFSourceKlass {
     protected AnonymousKlass(
         ClassInstanceCreation cstr,
         DFTypeSpace outerSpace, DFSourceKlass outerKlass,
-        String filePath, DFVarScope outerScope)
+        DFVarScope outerScope)
         throws InvalidSyntax {
         super(Utils.encodeASTNode(cstr),
-              outerSpace, outerKlass, outerScope, filePath);
+              outerSpace, outerKlass, outerScope,
+              outerKlass.getFilePath(), outerKlass.isAnalyze());
         _cstr = cstr;
         this.buildTypeFromDecls(
             cstr.getAnonymousClassDeclaration().bodyDeclarations());

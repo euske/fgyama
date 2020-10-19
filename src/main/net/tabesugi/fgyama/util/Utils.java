@@ -128,6 +128,9 @@ public class Utils {
         return (CompilationUnit)parser.createAST(null);
     }
 
+    public static File[] enumerateFiles(String path) {
+        return enumerateFiles(new File(path));
+    }
     public static File[] enumerateFiles(File file) {
         List<File> files = new ArrayList<File>();
         enumerateFiles(files, file);

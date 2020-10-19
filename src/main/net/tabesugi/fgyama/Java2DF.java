@@ -18,10 +18,12 @@ public class Java2DF {
 
         public String path;
         public CompilationUnit cunit;
+        public boolean analyze;
 
-        public SourceFile(String path, CompilationUnit cunit) {
+        public SourceFile(String path, CompilationUnit cunit, boolean analyze) {
             this.path = path;
             this.cunit = cunit;
+            this.analyze = analyze;
         }
 
         @Override
@@ -64,14 +66,14 @@ public class Java2DF {
         _sourceFiles.clear();
     }
 
-    public void addSourceFile(String name, CompilationUnit cunit) {
-        _sourceFiles.add(new SourceFile(name, cunit));
+    public void addSourceFile(String name, CompilationUnit cunit, boolean analyze) {
+        _sourceFiles.add(new SourceFile(name, cunit, analyze));
     }
 
-    public void addSourceFile(String path)
+    public void addSourceFile(String path, boolean analyze)
         throws IOException {
         CompilationUnit cunit = Utils.parseFile(new File(path));
-        this.addSourceFile(path, cunit);
+        this.addSourceFile(path, cunit, analyze);
     }
 
     public Collection<DFSourceKlass> getSourceKlasses()
@@ -114,7 +116,8 @@ public class Java2DF {
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) src.cunit.types()) {
             DFSourceKlass klass = new AbstTypeDeclKlass(
-                abstTypeDecl, packageSpace, null, fileScope, src.path);
+                abstTypeDecl, packageSpace, null, fileScope,
+                src.path, src.analyze);
             packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
             Logger.debug("Stage1: Created:", klass);
             klasses.add(klass);
@@ -288,8 +291,7 @@ public class Java2DF {
 
         // Parse the options.
         List<String> files = new ArrayList<String>();
-        List<String> jarfiles = new ArrayList<String>();
-        Collection<String> toprocess = new HashSet<String>();
+        List<String> classpath = new ArrayList<String>();
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
@@ -302,6 +304,8 @@ public class Java2DF {
                 while (i < args.length) {
                     files.add(args[++i]);
                 }
+            } else if (arg.equals("-v")) {
+                Logger.LogLevel++;
             } else if (arg.equals("-i")) {
                 String path = args[++i];
                 InputStream input = System.in;
@@ -320,8 +324,6 @@ public class Java2DF {
                 } catch (IOException e) {
                     System.err.println("Cannot open input file: "+path);
                 }
-            } else if (arg.equals("-v")) {
-                Logger.LogLevel++;
             } else if (arg.equals("-o")) {
                 String path = args[++i];
                 try {
@@ -332,21 +334,19 @@ public class Java2DF {
                 }
             } else if (arg.equals("-C")) {
                 for (String path : args[++i].split(sep)) {
-                    jarfiles.add(path);
+                    classpath.add(path);
                 }
-            } else if (arg.equals("-p")) {
-                toprocess.add(args[++i]);
+            } else if (arg.equals("-a")) {
+                DFSourceMethod.setDefaultTransparent(true);
             } else if (arg.equals("-S")) {
                 strict = true;
             } else if (arg.equals("-s")) {
                 reformat = false;
-            } else if (arg.equals("-a")) {
-                DFSourceMethod.setDefaultTransparent(true);
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
-                    "usage: Java2DF [-v] [-a] [-S] [-i input] [-o output]" +
-                    " [-C jar] [-p path] [-s] [path ...]");
+                    "usage: Java2DF [-v] [-i input] [-o output]" +
+                    " [-C classpath] [-a] [-S] [-s] [path ...]");
                 System.exit(1);
                 return;
             } else {
@@ -357,16 +357,35 @@ public class Java2DF {
         // Process files.
         Java2DF converter = new Java2DF();
         converter.loadDefaults();
-        for (String path : jarfiles) {
-            converter.loadJarFile(new File(path));
+        for (String path : classpath) {
+            if (path.endsWith(".jar")) {
+                converter.loadJarFile(new File(path));
+            } else {
+                for (File file : Utils.enumerateFiles(path)) {
+                    String name = file.getPath();
+                    if (name.endsWith(".java")) {
+                        try {
+                            converter.addSourceFile(name, false);
+                        } catch (IOException e) {
+                            Logger.error("Parsing: IOException at "+path);
+                            throw e;
+                        }
+                    }
+                }
+            }
         }
         for (String path : files) {
-            Logger.info("Parsing:", path);
-            try {
-                converter.addSourceFile(path);
-            } catch (IOException e) {
-                Logger.error("Parsing: IOException at "+path);
-                throw e;
+            for (File file : Utils.enumerateFiles(path)) {
+                String name = file.getPath();
+                if (name.endsWith(".java")) {
+                    Logger.info("Parsing:", name);
+                    try {
+                        converter.addSourceFile(name, true);
+                    } catch (IOException e) {
+                        Logger.error("Parsing: IOException at "+path);
+                        throw e;
+                    }
+                }
             }
         }
 
@@ -379,7 +398,7 @@ public class Java2DF {
 
         XmlExporter exporter = new XmlExporter((temp != null)? temp : output);
         for (DFSourceKlass klass : klasses) {
-            if (!toprocess.isEmpty() && !toprocess.contains(klass.getFilePath())) continue;
+            if (!klass.isAnalyze()) continue;
             try {
                 converter.analyzeKlass(exporter, klass, strict);
             } catch (EntityNotFound e) {
