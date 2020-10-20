@@ -69,9 +69,11 @@ public class Java2DF {
     public void addSourceFile(String path, boolean analyze)
         throws IOException {
         File file = new File(path);
-        path = file.getCanonicalPath();
-        CompilationUnit cunit = Utils.parseFile(file);
-        _sourceFiles.put(path, new SourceFile(path, cunit, analyze));
+        String key = file.getCanonicalPath();
+        if (!_sourceFiles.containsKey(key)) {
+            CompilationUnit cunit = Utils.parseFile(file);
+            _sourceFiles.put(key, new SourceFile(path, cunit, analyze));
+        }
     }
 
     public Collection<DFSourceKlass> getSourceKlasses()
