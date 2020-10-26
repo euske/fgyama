@@ -165,7 +165,7 @@ class DFNode:
 
     def __repr__(self):
         if self.data is not None:
-            return (f'<DFNode({self.nid}): {self.kind}({self.ntype}) {self.ref}, data={self.data}>')
+            return (f'<DFNode({self.nid}): {self.kind}({self.ntype}) {self.ref}, data={self.data!r}>')
         else:
             return (f'<DFNode({self.nid}): {self.kind}({self.ntype}) {self.ref}>')
 
