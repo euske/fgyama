@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graph import get_graphs
-
+from interproc import IDFBuilder
 
 def main(argv):
     import getopt
@@ -14,31 +13,35 @@ def main(argv):
         return usage()
 
     verbose = 0
+    maxoverrides = 1
     for (k, v) in opts:
         if k == '-v': verbose += 1
+        elif k == '-M': maxoverrides = int(v)
 
-    methods = []
+    builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        methods.extend(get_graphs(path))
+        print(f'Loading: {path!r}...', file=sys.stderr)
+        builder.load(path)
 
-    m = methods[-1]
-    cur = list(m)[-1]
+    builder.run()
+
+    m = builder.methods[-1]
+    current = builder.getvtx(list(m)[-1])
     cmd0 = None
     while True:
         nav = {}
-        a = sorted(cur.inputs.items())
-        for (i,(k,n)) in enumerate(a):
-            i = -(len(a)-i)
-            nav[i] = n
-            print(f' {i}:{k} {n!r}')
-        print(f'   {cur!r}')
-        for (i,(k,n)) in enumerate(cur.outputs):
+        for (i,(label,vtx,funcall)) in enumerate(current.inputs):
+            i = -(len(current.inputs)-i)
+            nav[i] = vtx
+            print(f' {i}:{label} {vtx.node!r}')
+        print(f'   {current.node!r}')
+        for (i,(label,vtx,funcall)) in enumerate(current.outputs):
             i = i+1
-            nav[i] = n
-            print(f' +{i}:{k} {n!r}')
+            nav[i] = vtx
+            print(f' +{i}:{label} {vtx.node!r}')
 
         try:
-            cmd1 = input('] ')
+            cmd1 = input(f'[{current.node.method.name}] ')
         except EOFError:
             break
         if not cmd1:
@@ -53,7 +56,7 @@ def main(argv):
             except ValueError:
                 d = None
         if d in nav:
-            cur = nav[d]
+            current = nav[d]
         cmd0 = cmd1
 
     return 0

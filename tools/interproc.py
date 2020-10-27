@@ -73,8 +73,8 @@ class IPVertex:
         IPVertex.vid_base += 1
         self.vid = self.vid_base
         self.node = node
-        self.inputs = []
-        self.outputs = []
+        self.inputs = []   # [(label,node,funcall), ...]
+        self.outputs = []  # [(label,node,funcall), ...]
         return
 
     def __repr__(self):
