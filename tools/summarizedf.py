@@ -76,10 +76,10 @@ class IRefComponent:
         self.irefs.append(iref)
         return
 
-    def fixate(self, sc):
+    def fixate(self, ref2cpt):
         for iref0 in self.irefs:
             for iref1 in iref0.linkto:
-                cpt = sc[iref1]
+                cpt = ref2cpt[iref1]
                 if cpt is self: continue
                 self.linkto.add(cpt)
                 cpt.linkfrom.add(self)
@@ -87,41 +87,41 @@ class IRefComponent:
 
     @classmethod
     def fromitems(klass, irefs):
-        S = []
-        P = []
-        sc = {}
-        po = {}
+        ref2cpt = {}
         cpts = []
+        # Tarjan's algorithm.
+        stack = []
+        index = {}
+        lowlink = {}
+        onstack = set()
         def visit(v0):
-            if v0 in po: return
-            po[v0] = len(po)
-            S.append(v0)
-            P.append(v0)
-            for v in v0.linkto:
-                if v not in po:
-                    visit(v)
-                elif v not in sc:
-                    # assert(po[w] < po[v0])
-                    i = len(P)
-                    while po[v] < po[P[i-1]]:
-                        i -= 1
-                    P[i:] = []
-            if P[-1] is v0:
-                c = klass(len(cpts)+1)
-                while S:
-                    v = S.pop()
-                    c.add(v)
+            i = len(index)
+            index[v0] = i
+            lowlink[v0] = i
+            stack.append(v0)
+            onstack.add(v0)
+            for v1 in v0.linkto:
+                if v1 not in index:
+                    visit(v1)
+                    lowlink[v0] = min(lowlink[v0], lowlink[v1])
+                elif v1 in onstack:
+                    lowlink[v0] = min(lowlink[v0], index[v1])
+            if index[v0] == lowlink[v0]:
+                cpt = klass(len(cpts)+1)
+                while True:
+                    v = stack.pop()
+                    onstack.remove(v)
+                    cpt.add(v)
+                    ref2cpt[v] = cpt
                     if v is v0: break
-                assert P.pop() is v0
-                for v in c:
-                    sc[v] = c
-                cpts.append(c)
+                cpts.append(cpt)
+        #
         for iref in irefs:
-            if iref not in sc:
+            if iref not in ref2cpt:
                 visit(iref)
-        for c in cpts:
-            c.fixate(sc)
-        return (sc, cpts)
+        for cpt in cpts:
+            cpt.fixate(ref2cpt)
+        return (ref2cpt, cpts)
 
 # trace()
 IGNORED = {
