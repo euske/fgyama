@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from interproc import IDFBuilder
+from graphs import IDFBuilder
 
 def main(argv):
     import getopt

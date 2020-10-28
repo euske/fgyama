@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
 import re
-from graph import get_graphs
-from getwords import stripid, splitwords, postag
+from graphs import get_graphs, stripid
+from words import splitwords, postag
 
 def main(argv):
     import getopt

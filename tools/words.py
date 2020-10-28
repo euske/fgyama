@@ -2,33 +2,6 @@
 import sys
 import re
 
-NAME = re.compile(r'\w+$', re.U)
-def stripid(name):
-    if name.startswith('%'):
-        return stripid(name[1:-1])
-    m = NAME.search(name)
-    if m:
-        return m.group(0)
-    else:
-        return None
-
-def stripgeneric(name):
-    (base,_,_) = name.partition('<')
-    return base
-
-def stripref(name):
-    assert not name.startswith('%')
-    return stripid(name)
-
-def splitmethodname(name):
-    assert '(' in name and ')' in name
-    i = name.index('(')
-    j = name.index(')')
-    (name, args, retype) = (name[:i], name[i:j+1], name[j+1:])
-    if name.endswith(';.<init>'):
-        name = name[:-8]
-    return (stripid(name), args, retype)
-
 WORD = re.compile(r'[0-9]*[a-z]+[A-Z]?|[0-9]*[A-Z]+')
 def splitwords(s):
     """

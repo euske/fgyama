@@ -2,8 +2,7 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graph import get_graphs
-from getwords import stripid, splitmethodname
+from graphs import get_graphs, stripid, splitmethodname
 
 def q(s):
     if s:

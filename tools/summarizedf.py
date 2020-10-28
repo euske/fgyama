@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import sys
-from interproc import IDFBuilder, Cons, clen
-from getwords import splitmethodname, stripid
+from graphs import IDFBuilder, Cons, clen, splitmethodname, stripid
 
 debug = 0
 MAXNAMES = 5

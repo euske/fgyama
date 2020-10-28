@@ -3,7 +3,7 @@ import sys
 import re
 from math import sqrt, log
 from srcdb import SourceDB
-from graph import get_graphs
+from graphs import get_graphs
 
 def find_lcs_len(s1, s2):
     m = [ [ 0 for x in s2 ] for y in s1 ]

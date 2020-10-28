@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
-from interproc import IDFBuilder, Cons, clen
-from getwords import splitmethodname, stripid, splitwords
+from graphs import IDFBuilder, Cons, clen, stripid, splitmethodname
+from words import splitwords
 
 debug = 0
 

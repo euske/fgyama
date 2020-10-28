@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import re
 import os.path
 import xml.sax
 import xml.sax.handler
@@ -12,11 +13,38 @@ def ns(x):
     else:
         return 'N'+str(x)
 
-def sp(x):
-    if x:
-        return x.split(' ')
+def clen(x):
+    if x is None:
+        return 0
     else:
-        return []
+        return len(x)
+
+NAME = re.compile(r'\w+$', re.U)
+def stripid(name):
+    if name.startswith('%'):
+        return stripid(name[1:-1])
+    m = NAME.search(name)
+    if m:
+        return m.group(0)
+    else:
+        return None
+
+def stripgeneric(name):
+    (base,_,_) = name.partition('<')
+    return base
+
+def stripref(name):
+    assert not name.startswith('%')
+    return stripid(name)
+
+def splitmethodname(name):
+    assert '(' in name and ')' in name
+    i = name.index('(')
+    j = name.index(')')
+    (name, args, retype) = (name[:i], name[i:j+1], name[j+1:])
+    if name.endswith(';.<init>'):
+        name = name[:-8]
+    return (stripid(name), args, retype)
 
 
 ##  DFKlass
@@ -412,14 +440,9 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             raise ValueError(f'Invalid tag: {name}')
 
 
-##  load_graphs
+##  get_graphs
 ##
-def load_graphs(fp, gid=0):
-    return FGYamaParser(gid).parse(fp)
-
-
-# get_graphs
-def get_graphs(arg):
+def get_graphs(arg, gid=0):
     (path,_,ext) = arg.partition(':')
     if ext:
         gids = map(int, ext.split(','))
@@ -428,8 +451,10 @@ def get_graphs(arg):
 
     fp = None
     if path == '-':
-        methods = load_graphs(sys.stdin)
+        methods = FGYamaParser(gid).parse(sys.stdin)
     elif path.endswith('.db'):
+        from graph2index import GraphDB
+        if not os.path.exists(path): raise IOError(path)
         db = GraphDB(path)
         if gids is None:
             methods = db.get_allmethods()
@@ -437,7 +462,7 @@ def get_graphs(arg):
             methods = ( db.get_method(gid) for gid in gids )
     else:
         fp = open(path)
-        methods = load_graphs(fp)
+        methods = FGYamaParser(gid).parse(fp)
 
     for method in methods:
         if gids is None or method.gid in gids:
@@ -470,323 +495,228 @@ LIBS = (
 )
 CLASSPATH = [ os.path.join(LIBDIR, name) for name in LIBS ]
 CLASSPATH.append(os.path.join(BASEDIR, 'target'))
-def run_fgyama(path):
+def run_fgyama(path, gid=0):
     args = ['java', '-cp', ':'.join(CLASSPATH),
             'net.tabesugi.fgyama.Java2DF', path]
     print(f'run_fgyama: {args!r}')
     p = Popen(args, stdout=PIPE)
-    methods = list(load_graphs(p.stdout))
+    methods = list(FGYamaParser(gid).parse(p.stdout))
     p.wait()
     return methods
 
 
-##  GraphDB
+##  Cons
 ##
-def fetch1(cur, name):
-    x = cur.fetchone()
-    if x is None:
-        raise ValueError(name)
-    return x
+class Cons:
 
-class GraphDB:
-
-    def __init__(self, conn):
-        self._conn = conn
-        self._cur = self._conn.cursor()
-        self._cur.executescript('''
-CREATE TABLE IF NOT EXISTS ASTNode (
-    Aid INTEGER PRIMARY KEY,
-    Type INTEGER,
-    Start INTEGER,
-    End INTEGER
-);
-
-CREATE TABLE IF NOT EXISTS DFKlass (
-    Kid INTEGER PRIMARY KEY,
-    Name TEXT,
-    Path TEXT,
-    Interface INTEGER,
-    Extends TEXT,
-    Implements TEXT,
-    Generic INTEGER
-);
-CREATE INDEX IF NOT EXISTS DFKlassNameIndex ON DFKlass(Name);
-
-CREATE TABLE IF NOT EXISTS DFMethod (
-    Gid INTEGER PRIMARY KEY,
-    Kid INTEGER,
-    Name TEXT,
-    Style TEXT
-);
-CREATE INDEX IF NOT EXISTS DFMethodKidIndex ON DFMethod(Kid);
-CREATE INDEX IF NOT EXISTS DFMethodNameIndex ON DFMethod(Name);
-
-CREATE TABLE IF NOT EXISTS DFScope (
-    Sid INTEGER PRIMARY KEY,
-    Gid INTEGER,
-    Parent INTEGER,
-    Name TEXT
-);
-CREATE INDEX IF NOT EXISTS DFScopeGidIndex ON DFScope(Gid);
-
-CREATE TABLE IF NOT EXISTS DFNode (
-    Nid INTEGER PRIMARY KEY,
-    Gid INTEGER,
-    Sid INTEGER,
-    Aid INTEGER,
-    Kind TEXT,
-    Ref TEXT,
-    Data TEXT,
-    Type TEXT
-);
-CREATE INDEX IF NOT EXISTS DFNodeGidIndex ON DFNode(Gid);
-
-CREATE TABLE IF NOT EXISTS DFLink (
-    Lid INTEGER PRIMARY KEY,
-    Nid0 INTEGER,
-    Nid1 INTEGER,
-    Label TEXT
-);
-CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
-''')
+    def __init__(self, car, cdr=None):
+        self.car = car
+        self.cdr = cdr
+        self.length = 1
+        if (cdr is not None):
+            self.length = cdr.length+1
         return
 
-    def __enter__(self):
-        return self
+    def __len__(self):
+        return self.length
 
-    def __exit__(self):
-        self.close()
+    def __hash__(self):
+        return id(self)
+
+    def __iter__(self):
+        c = self
+        while c is not None:
+            yield c.car
+            c = c.cdr
         return
 
-    def close(self):
-        self._conn.commit()
+    def __eq__(self, c1):
+        c0 = self
+        while c0 is not c1:
+            if c0 is None or c1 is None: return False
+            if c0.car != c1.car: return False
+            (c0,c1) = (c0.cdr, c1.cdr)
+        return True
+
+    def __contains__(self, obj0):
+        for obj in self:
+            if obj is obj0: return True
+        return False
+
+    @classmethod
+    def fromseq(self, seq):
+        c = None
+        for x in seq:
+            c = Cons(x, c)
+        return c
+
+
+##  IPVertex (Inter-Procedural Vertex)
+##  (why vertex? because calling this another "node" is confusing!)
+##
+class IPVertex:
+
+    vid_base = 0
+
+    def __init__(self, node):
+        IPVertex.vid_base += 1
+        self.vid = self.vid_base
+        self.node = node
+        self.inputs = []   # [(label,node,funcall), ...]
+        self.outputs = []  # [(label,node,funcall), ...]
         return
 
-    def add_klass(self, klass):
-        cur = self._cur
-        cur.execute(
-            'INSERT INTO DFKlass VALUES (NULL,?,?,?,?,?,?)',
-            (klass.name, klass.path, klass.interface, klass.extends,
-             ' '.join(klass.implements), klass.generic))
-        kid = cur.lastrowid
-        klass.kid = kid
-        return kid
+    def __repr__(self):
+        return (f'<IPVertex({self.vid})>')
 
-    def add_method(self, method):
-        assert method.klass.kid is not None
-        cur = self._cur
-        cur.execute(
-            'INSERT INTO DFMethod VALUES (NULL,?,?,?);',
-            (method.klass.kid, method.name, method.style))
-        gid = cur.lastrowid
-        method.gid = gid
-        nids = {}
-
-        def add_node(sid, node):
-            aid = 0
-            if node.ast is not None:
-                cur.execute(
-                    'INSERT INTO ASTNode VALUES (NULL,?,?,?);',
-                    node.ast)
-                aid = cur.lastrowid
-            cur.execute(
-                'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
-                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
-            nid = cur.lastrowid
-            node.nid = nid
-            return nid
-
-        def add_scope(scope, parent=0):
-            cur.execute(
-                'INSERT INTO DFScope VALUES (NULL,?,?,?);',
-                (gid, parent, scope.name))
-            sid = cur.lastrowid
-            scope.sid = sid
-            for node in scope.nodes:
-                nids[node] = add_node(sid, node)
-            for child in scope.children:
-                add_scope(child, sid)
-            return
-
-        def add_link(node, src, label):
-            cur.execute(
-                'INSERT INTO DFLink VALUES (NULL,?,?,?);',
-                (nids[node], nids[src], label))
-            return
-
-        add_scope(method.root)
-        for node in method:
-            for (label,src) in node.inputs.items():
-                add_link(node, src, label)
-        return gid
-
-    def get_kids(self):
-        cur = self._conn.cursor()
-        for (kid,) in cur.execute('SELECT Kid FROM DFKlass;'):
-            yield kid
+    def connect(self, label, output, funcall=None):
+        #print(f'# connect: {self}-{label}-{output}')
+        #assert output is not self
+        assert isinstance(label, str)
+        assert isinstance(output, IPVertex)
+        self.outputs.append((label, output, funcall))
+        output.inputs.append((label, self, funcall))
         return
 
-    def get_kidbyname(self, name):
-        cur = self._cur
-        cur.execute(
-            'SELECT Kid FROM DFKlass WHERE Name=?;',
-            (name,))
-        (kid,) = fetch1(cur, f'DFKlass({name})')
-        return kid
 
-    def get_gids(self):
-        cur = self._conn.cursor()
-        for (gid,) in cur.execute('SELECT Gid FROM DFMethod;'):
-            yield gid
+##  IDFBuilder
+##
+class IDFBuilder:
+
+    def __init__(self, maxoverrides=1, dbg=None):
+        self.maxoverrides = maxoverrides
+        self.dbg = dbg
+        self.methods = []
+        self.srcmap = {}
+        self.gid2method = {}
+        self.funcalls = {}
+        self.vtxs = {}
         return
 
-    def get_gidsbykid(self, kid):
-        cur = self._conn.cursor()
-        for (gid,) in cur.execute(
-            'SELECT Gid FROM DFMethod WHERE Kid=?;',
-            (kid,)):
-            yield gid
+    def __len__(self):
+        return len(self.vtxs)
+
+    # List all the vertexes.
+    def __iter__(self):
+        return iter(self.vtxs.values())
+
+    # Load methods.
+    def load(self, path, fp=None, filter=None):
+        for method in get_graphs(path):
+            if method.style == 'initializer': continue
+            if filter is not None and not filter(method): continue
+            path = method.klass.path
+            if path not in self.srcmap:
+                fid = len(self.srcmap)
+                self.srcmap[path] = fid
+                src = (fid, path)
+                if fp is not None:
+                    fp.write(f'+SOURCE {src}\n')
+            self.methods.append(method)
+            self.gid2method[method.name] = method
         return
 
-    def get_gidbyname(self, name):
-        cur = self._cur
-        cur.execute(
-            'SELECT Gid FROM DFMethod WHERE Name=?;',
-            (name,))
-        (gid,) = fetch1(cur, f'DFMethod({name})')
-        return gid
-
-    def get_klass(self, kid):
-        cur = self._cur
-        cur.execute(
-            'SELECT Name,Path,Interface,Extends,Implements,Generic FROM DFKlass WHERE Kid=?;',
-            (kid,))
-        (name,path,interface,extends,impls,generic) = fetch1(cur, f'DFKlass({kid})')
-        if impls:
-            implements = impls.split(' ')
+    # Get a source.
+    def getsrc(self, node, resolve=True):
+        if node.ast is None: return None
+        if isinstance(node, DFMethod):
+            path = node.klass.path
         else:
-            implements = []
-        return DFKlass(name, path, interface, extends, implements, generic, kid)
+            path = node.method.klass.path
+        (_,start,end) = node.ast
+        if resolve:
+            fid = self.srcmap[path]
+            return (fid, start, end)
+        else:
+            return (path, start, end)
 
-    def get_method(self, gid, klass=None):
-        cur = self._cur
-        cur.execute(
-            'SELECT Kid,Name,Style FROM DFMethod WHERE Gid=?;',
-            (gid,))
-        (kid,name,style) = fetch1(cur, f'DFMethod({gid})')
-        if klass is None:
-            klass = self.get_klass(kid)
-        method = DFMethod(klass, name, style, gid)
-        rows = cur.execute(
-            'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
-            (gid,))
-        pids = {}
-        scopes = method.scopes
-        for (sid,parent,name) in rows:
-            scope = DFScope(method, sid, name)
-            scopes[sid] = scope
-            pids[sid] = parent
-            if parent == 0:
-                method.root = scope
-        for (sid,parent) in pids.items():
-            if parent != 0:
-                scopes[sid].set_parent(scopes[parent])
-        rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
-            (gid,))
-        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
-            scope = scopes[sid]
-            node = DFNode(method, nid, scope, kind, ref, data, ntype)
-            rows = cur.execute(
-                'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
-                (aid,))
-            for (t,s,e) in rows:
-                node.ast = (t,s,e)
-            method.nodes[nid] = node
-            scope.nodes.append(node)
-        for (nid0,node) in method.nodes.items():
-            rows = cur.execute(
-                'SELECT Lid,Nid1,Label FROM DFLink WHERE Nid0=?;',
-                (nid0,))
-            for (lid,nid1,label) in rows:
-                node.inputs[label] = nid1
-        method.fixate()
-        return method
+    # Register a funcall.
+    def addcall(self, x, y): # (caller, callee)
+        if self.dbg is not None:
+            self.dbg.write(f'# addcall {x.method.name}: {y}\n')
+        if y in self.funcalls:
+            a = self.funcalls[y]
+        else:
+            a = self.funcalls[y] = []
+        if x not in a:
+            a.append(x)
+        return
 
-    def get_allmethods(self):
-        for kid in self.get_kids():
-            klass = self.get_klass(kid)
-            for gid in self.get_gidsbykid(kid):
-                yield self.get_method(gid, klass)
+    # Create a IPVertex.
+    def getvtx(self, node):
+        if node in self.vtxs:
+            vtx = self.vtxs[node]
+        else:
+            vtx = self.vtxs[node] = IPVertex(node)
+            if self.dbg is not None:
+                self.dbg.write(f'# getvtx {vtx}: {node.kind}({node.data!r})\n')
+        return vtx
+
+    def run(self):
+        # Enumerate caller/callee relationships.
+        for src in self.methods:
+            for node in src:
+                if node.is_funcall():
+                    funcs = node.data.split(' ')
+                    for gid in funcs[:self.maxoverrides]:
+                        self.addcall(node, gid)
+
+        # Convert every node to IPVertex.
+        for method in self.methods:
+            for node in method:
+                if node.is_funcall():
+                    funcs = node.data.split(' ')
+                    for callee in funcs[:self.maxoverrides]:
+                        if callee not in self.gid2method: continue
+                        for n1 in self.gid2method[callee]:
+                            if n1.kind == 'input':
+                                label = n1.ref
+                                if label in node.inputs:
+                                    n0 = node.inputs[label]
+                                    vtx0 = self.getvtx(n0)
+                                    vtx0.connect(label, self.getvtx(n1), node)
+                                    #print(f'# send: {n0} {label} -> {n1}')
+                            elif n1.kind == 'output':
+                                vtx1 = self.getvtx(n1)
+                                for (label,n2) in node.outputs:
+                                    assert n2.kind in ('receive', 'throw')
+                                    assert n2.ref == label or n2.ref is None
+                                    if not label: label = '#return'
+                                    if n1.ref != label: continue
+                                    vtx1.connect(label, self.getvtx(n2), node)
+                                    #print(f'# recv: {n1} -> {label} {n2}')
+                vtx = self.getvtx(node)
+                for (label,n1) in node.outputs:
+                    vtx.connect(label, self.getvtx(n1))
         return
 
 
 # main
 def main(argv):
     import getopt
-    import sqlite3
-    from xml.etree.ElementTree import dump
     def usage():
-        print(f'usage: {argv[0]} [-d] [-o output.db] [file ...]')
+        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [graph ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:')
+        (opts, args) = getopt.getopt(argv[1:], 'dM:')
     except getopt.GetoptError:
         return usage()
     debug = 0
-    output = None
+    maxoverrides = 1
     for (k, v) in opts:
         if k == '-d': debug += 1
-        elif k == '-o': output = v
+        elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
 
-    nklasses = nmethods = nnodes = 0
-
-    outconn = outdb = None
-    if output is not None:
-        if os.path.exists(output):
-            print(f'Already exists: {output!r}')
-            return 1
-        print(f'Output GraphDB: {output!r}', file=sys.stderr)
-        outconn = sqlite3.connect(output)
-        outdb = GraphDB(outconn)
-
+    builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        rconn = rdb = None
-        if path.endswith('.db'):
-            if not os.path.exists(path):
-                print(f'Not found: {path!r}')
-                return 1
-            rconn = sqlite3.connect(path)
-            rdb = GraphDB(rconn)
-            methods = rdb.get_allmethods()
-        else:
-            methods = get_graphs(path)
-        klass = None
-        for method in methods:
-            if klass is not method.klass:
-                klass = method.klass
-                nklasses += 1
-                if outdb is not None:
-                    outdb.add_klass(klass)
-            nmethods += 1
-            nnodes += len(method.nodes)
-            if debug:
-                dump(method.toxml())
-            if outdb is not None:
-                outdb.add_method(method)
-                sys.stderr.write('.'); sys.stderr.flush()
-        print(f'\n{path}: {nklasses} classes, {nmethods} methods, {nnodes} nodes',
-              file=sys.stderr)
-        if rdb is not None:
-            rdb.close()
-        if rconn is not None:
-            rconn.close()
+        print(f'Loading: {path!r}...', file=sys.stderr)
+        builder.load(path)
 
-    if outdb is not None:
-        outdb.close()
-    if outconn is not None:
-        outconn.close()
+    builder.run()
+    nfuncalls = sum( len(a) for a in builder.funcalls.values() )
+    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
+          file=sys.stderr)
 
     return 0
 

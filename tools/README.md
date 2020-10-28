@@ -3,11 +3,10 @@
 ## General tools
 
 - `java2df.sh`: Java2DF command line wrapper.
-- `graph.py`: Base library for parsing/manipulating graphs.
-  (defines: DFNode, DFKlass, DFMethod, GraphDB)
-- `interproc.py`: Handle interprocedural graphs.
-- `getwords.py`: Identifier manipulation.
-- `graph2db.py`: Creates graph indices.
+- `graphs.py`: Base library for parsing/manipulating graphs.
+  (defines: DFNode, DFKlass, DFMethod, IDFBuilder)
+- `words.py`: Words manipulation.
+- `graph2index.py`: Creates graph indices.
 - `graph2gv.py`: Convert a graph into GraphViz.
 - `viewgraph.py`: Command line graph viewer.
 - `naivebayes.py`: Naive Bayes framework.

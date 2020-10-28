@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 from srcdb import SourceDB
-from graph import get_graphs
+from graphs import get_graphs
 
 def splitcamel(s):
     a = []
