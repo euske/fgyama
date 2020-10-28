@@ -66,6 +66,11 @@ public class Java2DF {
         _sourceFiles.clear();
     }
 
+    public void addSourceFile(String path)
+        throws IOException {
+        return addSourceFile(path, true);
+    }
+
     public void addSourceFile(String path, boolean analyze)
         throws IOException {
         File file = new File(path);
