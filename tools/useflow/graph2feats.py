@@ -6,7 +6,7 @@ import json
 from interproc import IDFBuilder, Cons, clen
 from srcdb import SourceDB, SourceAnnot
 from featdb import FeatDB
-from getwords import stripref, splitmethodname, splitwords, gettypewords
+from getwords import stripid, splitmethodname, splitwords, gettypewords
 
 CALLS = ('call', 'new')
 REFS = ('ref_var', 'ref_field', 'ref_array')
@@ -84,7 +84,7 @@ class FeatGenerator:
                 return []
             else:
                 if self.namefeat:
-                    return [ f'{n.kind}:{w}' for w in splitwords(stripref(n.ref)) ]
+                    return [ f'{n.kind}:{w}' for w in splitwords(stripid(n.ref)) ]
                 else:
                     return [ n.kind ]
         else:

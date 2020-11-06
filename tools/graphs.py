@@ -33,10 +33,6 @@ def stripgeneric(name):
     (base,_,_) = name.partition('<')
     return base
 
-def stripref(name):
-    assert not name.startswith('%')
-    return stripid(name)
-
 def splitmethodname(name):
     assert '(' in name and ')' in name
     i = name.index('(')
