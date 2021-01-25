@@ -68,7 +68,7 @@ public class Java2DF {
 
     public void addSourceFile(String path)
         throws IOException {
-        return addSourceFile(path, true);
+        addSourceFile(path, true);
     }
 
     public void addSourceFile(String path, boolean analyze)
