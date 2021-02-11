@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 #
+# Requires: requests
+#
 # usage:
 #   $ ./list_github_repos -L java > repos-java.tmp
 #   $ ./list_github_repos repos-java.tmp > repos-java.out
@@ -18,12 +20,14 @@ import os.path
 import sys
 import json
 import time
-from urllib.request import URLopener
+import requests
+import logging
 from urllib.parse import urljoin
 
 URLBASE = 'https://api.github.com/'
 with open(os.path.expanduser('~/.github_token')) as fp:
     TOKEN = fp.read().strip()
+SESSION = requests.Session()
 
 def get_search_url(language, minstars=100, perpage=100, page=1):
     return urljoin(
@@ -36,13 +40,16 @@ def get_repo_url(full_name, branch_name):
         URLBASE,
         '/repos/%s/branches/%s' % (full_name, branch_name))
 
-def call_api(url, wait=1):
+def call_api(url, wait=0.5):
+    logging.debug(f'call_api: {url!r}...')
     time.sleep(wait)
-    req = URLopener()
-    req.addheader('Authorization', 'token '+TOKEN)
-    fp = req.open(url)
-    data = json.load(fp)
-    fp.close()
+    headers = { 'Authorization': f'token {TOKEN}' }
+    resp = SESSION.get(url, headers=headers)
+    if not resp.ok:
+        logging.error(f'call_api: {resp.text!r}')
+        raise IOError(resp.text)
+    data = resp.json()
+    resp.close()
     return data
 
 def list_repos(language, npages=10):
@@ -69,19 +76,24 @@ def list_commits(args):
 def main(argv):
     import getopt
     def usage():
-        print('usage: %s [-n npages] [-L language] [commit ...]' %
+        print('usage: %s [-d] [-n npages] [-L language] [commit ...]' %
               argv[0])
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'n:L:')
+        (opts, args) = getopt.getopt(argv[1:], 'dn:L:')
     except getopt.GetoptError:
         return usage()
 
+    level = logging.INFO
     npages = 10
     language = None
     for (k, v) in opts:
-        if k == '-n': npages = int(v)
+        if k == '-d': level = logging.DEBUG
+        elif k == '-n': npages = int(v)
         elif k == '-L': language = v
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
+
     if language is not None:
         list_repos(language, npages=npages)
     else:
