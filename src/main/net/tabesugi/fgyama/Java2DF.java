@@ -176,11 +176,15 @@ public class Java2DF {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 DFKlass klass = _rootSpace.getKlass(name);
-                fileScope.importStatic(klass);
+                if (klass != null) {
+                    fileScope.importStatic(klass);
+                }
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
-                fileScope.importStatic(klass, qname.getName());
+                if (klass != null) {
+                    fileScope.importStatic(klass, qname.getName());
+                }
             }
         }
         // List all the klasses used.
