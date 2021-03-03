@@ -100,16 +100,15 @@ public class Utils {
 
     public static String readFile(File file)
         throws IOException {
-        // Regularlize DOS/Unix newlines.
-        BufferedReader reader = new BufferedReader(new FileReader(file));
         StringBuilder b = new StringBuilder();
-        while (true) {
-            String line = reader.readLine();
-            if (line == null) break;
-            b.append(line);
-            b.append("\n");
+        try (FileReader fp = new FileReader(file)) {
+            char[] buf = new char[8192];
+            while (true) {
+                int n = fp.read(buf, 0, buf.length);
+                if (n < 0) break;
+                b.append(buf, 0, n);
+            }
         }
-        reader.close();
         return b.toString();
     }
 
