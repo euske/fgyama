@@ -102,7 +102,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             // If this is a generic klass,
             DFKlass defaultKlass = _typeSlots.get(id);
             if (defaultKlass != null) return defaultKlass;
-            return super.getKlass(id);
         }
 
         if (_paramTypes != null) {

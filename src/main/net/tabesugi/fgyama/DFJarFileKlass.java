@@ -159,19 +159,19 @@ public class DFJarFileKlass extends DFKlass {
 
     @Override
     public DFKlass getKlass(String id) {
-        this.preload();
+        this.loadJarFile();
         return super.getKlass(id);
     }
 
     @Override
     public DFKlass getConcreteKlass(DFKlass[] argTypes) {
-        this.preload();
+        this.loadJarFile();
         return super.getConcreteKlass(argTypes);
     }
 
     @Override
     public boolean isResolved() {
-        this.preload();
+        this.loadJarFile();
         return super.isResolved();
     }
 
@@ -189,7 +189,9 @@ public class DFJarFileKlass extends DFKlass {
         return _id2jarklass.get(id);
     }
 
-    private void preload() {
+    // loadJarFile():
+    // Load a jarfile class before inspecting anything about the class.
+    private void loadJarFile() {
         if (_jklass != null) return;
 
         assert this.getGenericKlass() == null;
@@ -206,7 +208,7 @@ public class DFJarFileKlass extends DFKlass {
             }
         } catch (IOException e) {
             Logger.error(
-                "DFJarFileKlass.preload: IOException",
+                "DFJarFileKlass.loadJarFile: IOException",
                 this, _jarPath+"/"+_entPath);
             return;
         }
@@ -228,6 +230,7 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     protected void load() {
+        this.loadJarFile();
         if (!_loaded) {
             _loaded = true;
             //Logger.info("build:", this);
@@ -236,7 +239,6 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     protected void build() {
-        this.preload();
         assert _jklass != null;
         //Logger.info("DFJarFileKlass.build:", this);
         _interface = _jklass.isInterface();

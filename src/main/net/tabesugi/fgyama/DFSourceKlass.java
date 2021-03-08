@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 //  Usage:
 //    1. new DFSourceKlass()
-//    2. setBaseFinder(finder)
+//    2. initializeFinder(finder)
 //    3. getXXX(), ...
 //    4. listUsedKlass(used)
 //    5. listDefinedKlass(defined)
@@ -29,7 +29,7 @@ public abstract class DFSourceKlass extends DFKlass {
     private String _filePath;
     private boolean _analyze;
 
-    // This field is available after setBaseFinder(). (Stage2)
+    // This field is available after initializeFinder(). (Stage2)
     private boolean _loaded = false;
     private DFTypeFinder _finder = null;
 
@@ -206,12 +206,12 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    public void setBaseFinder(DFTypeFinder baseFinder) {
+    public void initializeFinder(DFTypeFinder parentFinder) {
         assert _finder == null;
-        _finder = new DFTypeFinder(this, baseFinder);
+        _finder = new DFTypeFinder(this, parentFinder);
         for (DFKlass klass : this.getInnerKlasses()) {
             if (klass instanceof DFSourceKlass) {
-                ((DFSourceKlass)klass).setBaseFinder(_finder);
+                ((DFSourceKlass)klass).initializeFinder(_finder);
             }
         }
     }

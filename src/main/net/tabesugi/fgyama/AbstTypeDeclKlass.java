@@ -56,7 +56,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         DFTypeFinder finder = this.getFinder();
         for (DFKlass klass : this.getInnerKlasses()) {
             if (klass instanceof DFSourceKlass) {
-                ((DFSourceKlass)klass).setBaseFinder(finder);
+                ((DFSourceKlass)klass).initializeFinder(finder);
             }
         }
     }
@@ -65,11 +65,11 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         return _abstTypeDecl;
     }
 
-    public void setBaseFinder(DFTypeFinder baseFinder) {
-        super.setBaseFinder(baseFinder);
+    public void initializeFinder(DFTypeFinder parentFinder) {
+        super.initializeFinder(parentFinder);
         if (_defaultKlasses != null) {
             for (DefaultKlass klass : _defaultKlasses) {
-                klass.setFinder(baseFinder);
+                klass.setFinder(parentFinder);
             }
         }
     }

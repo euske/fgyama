@@ -242,7 +242,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFSourceKlass klass = new AbstTypeDeclKlass(
                 abstTypeDecl, this, _srcklass, outerScope,
                 _srcklass.getFilePath(), _srcklass.isAnalyze());
-            klass.setBaseFinder(_finder);
+            klass.initializeFinder(_finder);
             this.addKlass(id, klass);
 
         } else {
@@ -368,7 +368,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 String id = Utils.encodeASTNode(cstr);
                 DFSourceKlass anonKlass = new AnonymousKlass(
                     cstr, this, _srcklass, outerScope);
-                anonKlass.setBaseFinder(_finder);
+                anonKlass.initializeFinder(_finder);
                 this.addKlass(id, anonKlass);
             }
 
@@ -385,7 +385,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(lambda);
             DFSourceKlass lambdaKlass = new DFLambdaKlass(
                 lambda, this, _srcklass, outerScope);
-            lambdaKlass.setBaseFinder(_finder);
+            lambdaKlass.initializeFinder(_finder);
             this.addKlass(id, lambdaKlass);
 
         } else if (expr instanceof MethodReference) {
@@ -397,7 +397,7 @@ public abstract class DFSourceMethod extends DFMethod {
             String id = Utils.encodeASTNode(methodref);
             DFSourceKlass methodRefKlass = new DFMethodRefKlass(
                 methodref, this, _srcklass, outerScope);
-            methodRefKlass.setBaseFinder(_finder);
+            methodRefKlass.initializeFinder(_finder);
             this.addKlass(id, methodRefKlass);
 
         } else {
