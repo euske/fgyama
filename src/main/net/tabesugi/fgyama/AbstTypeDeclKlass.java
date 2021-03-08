@@ -137,9 +137,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
 
         @Override
         public String getTypeName() {
-            if (_finder == null) return "?";
-            this.load();
-            return _baseKlass.getTypeName();
+            return this.getName();
         }
 
         public boolean isInterface() {
