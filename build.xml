@@ -67,6 +67,7 @@
     <mkdir dir="${tmpDir}" />
     <java classname="net.tabesugi.fgyama.Java2DF" fork="yes">
       <jvmarg value="-ea" />
+      <jvmarg value="-Xss256k" /> <!-- deliberately use a small stack -->
       <arg value="-v" />
       <arg value="-v" />
       <arg value="-S" />
