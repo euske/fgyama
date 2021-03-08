@@ -89,6 +89,13 @@ public class Utils {
         return b.toString();
     }
 
+    public static String stackTrace() {
+        StackTraceElement[] stes = new Throwable().getStackTrace();
+        StackTraceElement[] a = new StackTraceElement[stes.length-1];
+        System.arraycopy(stes, 1, a, 0, a.length);
+        return join(a);
+    }
+
     public static String hashString(String s) {
         return Integer.toHexString(s.hashCode());
     }

@@ -1140,12 +1140,12 @@ public abstract class DFSourceMethod extends DFMethod {
 
         } else if (expr instanceof TypeLiteral) {
             // "A.class"
+            // returns Class<A>.
             Type value = ((TypeLiteral)expr).getType();
             try {
                 DFKlass typeval = _finder.resolve(value).toKlass();
-                DFKlass klass = DFBuiltinTypes.getClassKlass().getConcreteKlass(
-                    new DFKlass[] { typeval });
-                return klass;
+                DFKlass klass = DFBuiltinTypes.getClassKlass();
+                return klass.getConcreteKlass(new DFKlass[] { typeval });
             } catch (TypeNotFound e) {
                 return null;
             }

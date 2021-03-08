@@ -372,6 +372,7 @@ public abstract class DFGraph {
 
             } else if (expr instanceof TypeLiteral) {
                 // "A.class"
+                // returns Class<A>.
                 Type value = ((TypeLiteral)expr).getType();
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass();

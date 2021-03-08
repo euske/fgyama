@@ -68,8 +68,9 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     public void initializeFinder(DFTypeFinder parentFinder) {
         super.initializeFinder(parentFinder);
         if (_defaultKlasses != null) {
+            DFTypeFinder finder = this.getFinder();
             for (DefaultKlass klass : _defaultKlasses) {
-                klass.setFinder(parentFinder);
+                klass.setFinder(finder);
             }
         }
     }
@@ -127,6 +128,11 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         public DefaultKlass(String name, List<Type> types) {
             super(name, AbstTypeDeclKlass.this, null, null);
             _types = types;
+        }
+
+        @Override
+        public String toString() {
+            return ("<DefaultKlass("+this.getName()+")");
         }
 
         @Override
