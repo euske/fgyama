@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.dom.*;
 //
 public abstract class DFKlass extends DFTypeSpace implements DFType {
 
+    public static final int MAX_REIFY_DEPTH = 2;
+
     // These fields are available upon construction.
     private String _name;
     private DFTypeSpace _outerSpace;
@@ -35,6 +37,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private Map<String, DFKlass> _paramTypes = null;
+    private int _reifyDepth = 0;
 
     // Normal constructor.
     public DFKlass(
@@ -58,6 +61,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
+        for (DFKlass klass : paramTypes.values()) {
+            _reifyDepth = Math.max(_reifyDepth, klass._reifyDepth+1);
+        }
     }
 
     @Override
@@ -199,11 +205,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         for (String key : _typeSlots.keys()) {
             DFKlass type = _typeSlots.get(key);
             if (argTypes != null && i < argTypes.length) {
-                type = argTypes[i];
+                DFKlass argType = argTypes[i];
+                if (argType._reifyDepth < MAX_REIFY_DEPTH) {
+                    type = argType;
+                }
             }
             paramTypes.put(key, type);
             i++;
         }
+        // Try to reuse an existing class.
         String name = DFTypeSpace.getReifiedName(paramTypes);
         DFKlass klass = _reifiedKlasses.get(name);
         if (klass == null) {
