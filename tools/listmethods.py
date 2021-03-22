@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import re
-from graphs import get_graphs, splitmethodname
+from graphs import get_graphs, parsemethodname
 from words import splitwords, postag
 
 def main(argv):
@@ -24,9 +24,8 @@ def main(argv):
     words = {}
     for path in args:
         for method in get_graphs(path):
-            (name,args,retype) = splitmethodname(method.name)
-            if name is None: continue
-            #print(name)
+            (klass,name,_) = parsemethodname(method.name)
+            if name.startswith('<'): continue
             for (pos,w) in postag(reversed(splitwords(name))):
                 if pos in words:
                     d = words[pos]

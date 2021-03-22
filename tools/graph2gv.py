@@ -2,7 +2,7 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graphs import get_graphs, stripid, splitmethodname
+from graphs import get_graphs, stripid, parsemethodname
 
 def q(s):
     if s:
@@ -40,9 +40,9 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({stripid(node.ref)})'
         elif kind in ('call','new'):
-            (name,_,_) = splitmethodname(node.data)
+            (klass,name,_) = parsemethodname(node.data)
             styles['fontname'] = 'courier'
-            styles['label'] = name
+            styles['label'] = klass.name
         elif kind is not None and kind.startswith('op_'):
             styles['fontname'] = 'courier'
             styles['label'] = (node.data or kind)
@@ -76,7 +76,8 @@ def run_dot(methods, type='svg'):
     print(f'run_dot: {args!r}', file=sys.stderr)
     data = io.StringIO()
     for method in methods:
-        write_gv(data, method.root, name=method.name)
+        (klass,name,_) = parsemethodname(method.name)
+        write_gv(data, method.root, name=name)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
     (stdout, _) = p.communicate(data.getvalue())
     a = []
@@ -130,8 +131,9 @@ def main(argv):
         output.write('</body>')
     else:
         for method in methods:
+            (klass,name,_) = parsemethodname(method.name)
             write_gv(output, method.root,
-                     highlight=highlight, name=method.name)
+                     highlight=highlight, name=f'{klass}.{name}')
 
     output.close()
     return 0

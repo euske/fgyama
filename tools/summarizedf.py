@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graphs import IDFBuilder, Cons, clen, splitmethodname, stripid
+from graphs import IDFBuilder, Cons, clen, parsemethodname, stripid
 
 debug = 0
 MAXNAMES = 5
@@ -213,7 +213,7 @@ def main(argv):
     for method in builder.methods:
         # Filter "top-level" methods only which aren't called by anyone else.
         if method.callers: continue
-        (name,_,_) = splitmethodname(method.name)
+        (klass,name,_) = parsemethodname(method.name)
         if methods and (name not in methods) and (method.name not in methods): continue
         print(f'method: {method.name}', file=sys.stderr)
         for node in method:

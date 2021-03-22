@@ -100,7 +100,7 @@ class DFType:
                 (i2, t) = klass.parse(s, i2)
                 args.append(t)
             (i2, retype) = klass.parse(s, i2+1)
-            return (i2, DFFuncType(retype, params))
+            return (i2, DFFuncType(retype, args))
         raise ValueError(c)
 
 class DFBasicType(DFType):
@@ -150,6 +150,17 @@ class DFKlassType(DFType):
             params = ",".join(map(repr, self.params))
             return f'<{name}<{params}>>'
 
+def parsemethodname(s):
+    if s.startswith('!'):
+        return (None, s[1:], None)
+    else:
+        (i, obj) = DFType.parse(s)
+        assert s[i] == '.'
+        j = s.index('(', i+1)
+        name = s[i+1:j]
+        (_, func) = DFType.parse(s, j)
+        return (obj, name, func)
+        
 
 ##  DFKlass
 ##
