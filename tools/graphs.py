@@ -43,6 +43,114 @@ def splitmethodname(name):
     return (stripid(name), args, retype)
 
 
+##  DFType
+##
+class DFType:
+
+    @classmethod
+    def parse(klass, s, i=0):
+        assert i < len(s)
+        c = s[i]
+        if c in 'BCSIJFDZV':
+            return (i+1, DFBasicType(c))
+        elif c == 'L':
+            prev = None
+            i2 = i+1
+            while i2 < len(s):
+                c = s[i2]
+                if c == ';':
+                    return (i2+1, DFKlassType(s[i+1:i2], prev))
+                elif c == '<':
+                    # generics
+                    name = s[i+1:i2]
+                    i2 += 1
+                    params = []
+                    while s[i2] != '>':
+                        (i2, t) = klass.parse(s, i2)
+                        params.append(t)
+                    t = DFKlassType(name, prev, params)
+                    c = s[i2]
+                    if c == ';':
+                        return (i2+1, t)
+                    elif c3 == '.':
+                        i2 += 1
+                        prev = t
+                    else:
+                        raise ValueError(c3)
+                else:
+                    i2 += 1
+        elif c == 'T':
+            i2 = i+1
+            while i2 < len(s):
+                c = s[i2]
+                if c == ';':
+                    return (i2+1, DFKlassType(s[i+1:i2]))
+                else:
+                    i2 += 1
+        elif c == '[':
+            (i2, t) = klass.parse(s, i+1)
+            return (i2, DFArrayType(t))
+        elif c in '+-*':
+            # XXX
+            return klass.parse(s, i+1)
+        elif c == '(':
+            i2 = i+1
+            args = []
+            while s[i2] != ')':
+                (i2, t) = klass.parse(s, i2)
+                args.append(t)
+            (i2, retype) = klass.parse(s, i2+1)
+            return (i2, DFFuncType(retype, params))
+        raise ValueError(c)
+
+class DFBasicType(DFType):
+
+    def __init__(self, name):
+        self.name = name
+        return
+
+    def __repr__(self):
+        return f'<{self.name}>'
+
+class DFArrayType(DFType):
+
+    def __init__(self, name):
+        self.name = name
+        return
+
+    def __repr__(self):
+        return f'<[{self.name}]>'
+
+class DFFuncType(DFType):
+
+    def __init__(self, retype, args):
+        self.retype = retype
+        self.args = args
+        return
+
+    def __repr__(self):
+        return f'<({self.name}){self.retype}>'
+
+class DFKlassType(DFType):
+
+    def __init__(self, name, prev=None, params=None):
+        self.name = name
+        self.prev = prev
+        self.params = params
+        return
+
+    def __repr__(self):
+        if self.prev is None:
+            name = self.name
+        else:
+            name = f'{self.prev}.{self.name}'
+        if self.params is None:
+            return f'<{name}>'
+        else:
+            params = ",".join(map(repr, self.params))
+            return f'<{name}<{params}>>'
+
+
 ##  DFKlass
 ##
 class DFKlass:
