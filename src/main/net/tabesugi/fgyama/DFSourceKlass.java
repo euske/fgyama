@@ -320,7 +320,7 @@ public abstract class DFSourceKlass extends DFKlass {
         throws InvalidSyntax {
         // Get superclass.
         DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
-        _baseKlass = enumKlass.getConcreteKlass(new DFKlass[] { this });
+        _baseKlass = enumKlass.getReifiedKlass(new DFKlass[] { this });
         // Get interfaces.
         List<Type> ifaces = enumDecl.superInterfaceTypes();
         _baseIfaces = new DFKlass[ifaces.size()];

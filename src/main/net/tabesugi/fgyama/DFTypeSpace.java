@@ -80,7 +80,7 @@ public class DFTypeSpace {
         return _id2klass.get(id);
     }
 
-    public static String getConcreteName(Map<String, DFKlass> paramTypes) {
+    public static String getReifiedName(Map<String, DFKlass> paramTypes) {
         String[] keys = new String[paramTypes.size()];
         paramTypes.keySet().toArray(keys);
         Arrays.sort(keys);

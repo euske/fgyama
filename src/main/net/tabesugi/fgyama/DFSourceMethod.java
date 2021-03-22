@@ -1145,7 +1145,7 @@ public abstract class DFSourceMethod extends DFMethod {
             try {
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass();
-                return klass.getConcreteKlass(new DFKlass[] { typeval });
+                return klass.getReifiedKlass(new DFKlass[] { typeval });
             } catch (TypeNotFound e) {
                 return null;
             }

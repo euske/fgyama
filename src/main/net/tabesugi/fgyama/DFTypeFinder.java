@@ -172,7 +172,7 @@ public class DFTypeFinder {
         for (int i = 0; i < typeArgs.size(); i++) {
             paramTypes[i] = this.resolve(typeArgs.get(i)).toKlass();
         }
-        return klass.getConcreteKlass(paramTypes);
+        return klass.getReifiedKlass(paramTypes);
     }
 
     // dump: for debugging.

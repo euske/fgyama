@@ -69,7 +69,7 @@ public class JNITypeParser {
                     for (int j = 0; j < types.length; j++) {
                         paramTypes[j] = types[j].toKlass();
                     }
-                    klass = klass.getConcreteKlass(paramTypes);
+                    klass = klass.getReifiedKlass(paramTypes);
                     char c3 = _text.charAt(_pos);
                     if (c3 == ';') {
                         _pos++;

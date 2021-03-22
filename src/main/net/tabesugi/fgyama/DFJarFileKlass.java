@@ -164,9 +164,9 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public DFKlass getConcreteKlass(DFKlass[] argTypes) {
+    public DFKlass getReifiedKlass(DFKlass[] argTypes) {
         this.loadJarFile();
-        return super.getConcreteKlass(argTypes);
+        return super.getReifiedKlass(argTypes);
     }
 
     @Override

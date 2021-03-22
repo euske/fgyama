@@ -30,7 +30,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFKlass> _typeSlots = null;
-    private ConsistentHashMap<String, DFKlass> _concreteKlasses = null;
+    private ConsistentHashMap<String, DFKlass> _reifiedKlasses = null;
 
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
@@ -53,7 +53,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     protected DFKlass(DFKlass genericKlass, Map<String, DFKlass> paramTypes) {
         // A parameterized Klass has its own separate typespace
         // that is NOT accessible from the outside.
-        this(genericKlass.getName() + DFTypeSpace.getConcreteName(paramTypes),
+        this(genericKlass.getName() + DFTypeSpace.getReifiedName(paramTypes),
              genericKlass._outerSpace, genericKlass._outerKlass, genericKlass._outerScope);
 
         _genericKlass = genericKlass;
@@ -189,8 +189,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     // Creates a parameterized klass.
-    public DFKlass getConcreteKlass(DFKlass[] argTypes) {
-        //Logger.info("DFKlass.getConcreteKlass:", this, Utils.join(argTypes));
+    public DFKlass getReifiedKlass(DFKlass[] argTypes) {
+        //Logger.info("DFKlass.getReifiedKlass:", this, Utils.join(argTypes));
         assert _typeSlots != null;
         assert _paramTypes == null;
         assert argTypes.length <= _typeSlots.size();
@@ -204,11 +204,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             paramTypes.put(key, type);
             i++;
         }
-        String name = DFTypeSpace.getConcreteName(paramTypes);
-        DFKlass klass = _concreteKlasses.get(name);
+        String name = DFTypeSpace.getReifiedName(paramTypes);
+        DFKlass klass = _reifiedKlasses.get(name);
         if (klass == null) {
             klass = this.parameterize(paramTypes);
-            _concreteKlasses.put(name, klass);
+            _reifiedKlasses.put(name, klass);
         }
         return klass;
     }
@@ -281,7 +281,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             try {
                 int dist = method1.canAccept(argTypes, typeMap);
                 if (bestDist < 0 || dist < bestDist) {
-                    DFMethod method = method1.getConcreteMethod(typeMap);
+                    DFMethod method = method1.getReifiedMethod(typeMap);
                     if (method != null) {
                         bestDist = dist;
                         bestMethod = method;
@@ -389,8 +389,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                 }
             }
         }
-        if (_concreteKlasses != null) {
-            for (DFKlass pklass : _concreteKlasses.values()) {
+        if (_reifiedKlasses != null) {
+            for (DFKlass pklass : _reifiedKlasses.values()) {
                 writer.writeStartElement("parameterized");
                 writer.writeAttribute("type", pklass.getTypeName());
                 writer.writeEndElement();
@@ -419,9 +419,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         assert typeSlots != null;
         assert _typeSlots == null;
         assert _paramTypes == null;
-        assert _concreteKlasses == null;
+        assert _reifiedKlasses == null;
         _typeSlots = typeSlots;
-        _concreteKlasses = new ConsistentHashMap<String, DFKlass>();
+        _reifiedKlasses = new ConsistentHashMap<String, DFKlass>();
     }
 
     @Override

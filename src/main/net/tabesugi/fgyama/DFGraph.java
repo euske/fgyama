@@ -378,7 +378,7 @@ public abstract class DFGraph {
                 DFKlass klass = DFBuiltinTypes.getClassKlass();
                 return new ConstNode(
                     this, scope,
-                    klass.getConcreteKlass(new DFKlass[] { typeval }),
+                    klass.getReifiedKlass(new DFKlass[] { typeval }),
                     expr, Utils.getTypeName(value));
 
             } else if (expr instanceof PrefixExpression) {

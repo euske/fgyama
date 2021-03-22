@@ -56,7 +56,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     // These fields are available only for generic methods.
     private ConsistentHashMap<String, DFMapType> _mapTypes = null;
-    private ConsistentHashMap<String, DFMethod> _concreteMethods = null;
+    private ConsistentHashMap<String, DFMethod> _reifiedMethods = null;
 
     // These fields are available only for parameterized methods.
     private DFMethod _genericMethod = null;
@@ -89,10 +89,10 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         DFMethod genericMethod, Map<String, DFKlass> paramTypes) {
         // A parameterized method has its own separate typespace
         // that is NOT accessible from the outside.
-        super(genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes),
+        super(genericMethod._methodId + DFTypeSpace.getReifiedName(paramTypes),
               genericMethod._klass);
 
-        _methodId = genericMethod._methodId + DFTypeSpace.getConcreteName(paramTypes);
+        _methodId = genericMethod._methodId + DFTypeSpace.getReifiedName(paramTypes);
         _klass = genericMethod._klass;
         _callStyle = genericMethod._callStyle;
         _abstract = genericMethod._abstract;
@@ -135,9 +135,9 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     // Creates a parameterized method.
-    public DFMethod getConcreteMethod(Map<DFMapType, DFKlass> typeMap) {
+    public DFMethod getReifiedMethod(Map<DFMapType, DFKlass> typeMap) {
         if (_mapTypes == null) return this;
-        //Logger.info("DFMethod.getConcreteMethod:", this, typeMap);
+        //Logger.info("DFMethod.getReifiedMethod:", this, typeMap);
         List<DFMapType> mapTypes = _mapTypes.values();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
         for (int i = 0; i < mapTypes.size(); i++) {
@@ -148,11 +148,11 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             }
             paramTypes.put(mapType.getName(), type);
         }
-        String name = DFTypeSpace.getConcreteName(paramTypes);
-        DFMethod method = _concreteMethods.get(name);
+        String name = DFTypeSpace.getReifiedName(paramTypes);
+        DFMethod method = _reifiedMethods.get(name);
         if (method == null) {
             method = this.parameterize(paramTypes);
-            _concreteMethods.put(name, method);
+            _reifiedMethods.put(name, method);
         }
         return method;
     }
@@ -198,9 +198,9 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _genericMethod;
     }
 
-    public List<DFMethod> getConcreteMethods() {
-        assert _concreteMethods != null;
-        return _concreteMethods.values();
+    public List<DFMethod> getReifiedMethods() {
+        assert _reifiedMethods != null;
+        return _reifiedMethods.values();
     }
 
     public void addCaller(DFMethod method) {
@@ -262,12 +262,12 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         assert mapTypes != null;
         assert _mapTypes == null;
         assert _paramTypes == null;
-        assert _concreteMethods == null;
+        assert _reifiedMethods == null;
         _mapTypes = new ConsistentHashMap<String, DFMapType>();
         for (DFMapType mapType : mapTypes) {
             _mapTypes.put(mapType.getName(), mapType);
         }
-        _concreteMethods = new ConsistentHashMap<String, DFMethod>();
+        _reifiedMethods = new ConsistentHashMap<String, DFMethod>();
     }
 
     // Overrider

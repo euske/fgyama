@@ -263,7 +263,7 @@ public class Java2DF {
             for (DFMethod method : klass.getMethods()) {
                 methods.add(method);
                 if (method.isGeneric()) {
-                    methods.addAll(method.getConcreteMethods());
+                    methods.addAll(method.getReifiedMethods());
                 }
             }
             for (DFMethod method : methods) {
@@ -475,7 +475,7 @@ class DFFileScope extends DFVarScope {
             try {
                 int dist = method1.canAccept(argTypes, typeMap);
                 if (bestDist < 0 || dist < bestDist) {
-                    DFMethod method = method1.getConcreteMethod(typeMap);
+                    DFMethod method = method1.getReifiedMethod(typeMap);
                     if (method != null) {
                         bestDist = dist;
                         bestMethod = method;
