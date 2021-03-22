@@ -164,13 +164,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             return dist;
         }
 
-        if (klass instanceof DFLambdaKlass ||
-            klass instanceof DFMethodRefKlass) {
-            if (this.isFuncInterface()) {
-                return 0;
-            } else {
-                throw new TypeIncompatible(this, klass);
-            }
+        if (klass instanceof DFLambdaKlass) {
+            return ((DFLambdaKlass)klass).canConvertTo(this);
+        } else if (klass instanceof DFMethodRefKlass) {
+            return ((DFMethodRefKlass)klass).canConvertTo(this);
         }
 
         DFKlass baseKlass = klass.getBaseKlass();
@@ -256,23 +253,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _klassScope;
     }
 
-    public boolean isFuncInterface() {
-        if (!this.isInterface()) return false;
-        // Count the number of abstract methods.
-        int n = 0;
+    public DFMethod getFuncMethod() {
+        if (!this.isInterface()) return null;
+        DFMethod funcMethod = null;
         for (DFMethod method : this.getMethods()) {
             if (method.isAbstract()) {
-                n++;
+                if (funcMethod != null) return null; // More than one.
+                funcMethod = method;
             }
         }
-        return (n == 1);
-    }
-
-    public DFMethod getFuncMethod() {
-        for (DFMethod method : this.getMethods()) {
-            if (method.isAbstract()) return method;
-        }
-        return null;
+        return funcMethod;
     }
 
     protected DFMethod findMethod1(

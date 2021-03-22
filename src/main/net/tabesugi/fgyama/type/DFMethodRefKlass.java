@@ -128,7 +128,10 @@ class DFMethodRefKlass extends DFSourceKlass {
                     }
                 }
                 if (klass == null) {
-                    klass = (DFKlass)this.listDefinedExpr(defined, this.getScope(), expr1);
+                    DFType type = this.listDefinedExpr(defined, this.getScope(), expr1);
+                    if (type != null) {
+                        klass = type.toKlass();
+                    }
                 }
                 if (klass != null) {
                     // XXX ignored: exprmref.typeArguments()
@@ -217,6 +220,15 @@ class DFMethodRefKlass extends DFSourceKlass {
     protected void build() {
         DFTypeFinder finder = this.getFinder();
         _funcMethod = new FunctionalMethod("#f", this.getKlassScope(), finder);
+    }
+
+    public int canConvertTo(DFKlass klass)
+        throws TypeIncompatible {
+        DFMethod method = klass.getFuncMethod();
+        if (method == null) {
+            throw new TypeIncompatible(klass, this);
+        }
+        return 0;
     }
 
     public void setBaseKlass(DFKlass baseKlass) {

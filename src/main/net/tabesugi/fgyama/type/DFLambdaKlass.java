@@ -249,6 +249,17 @@ class DFLambdaKlass extends DFSourceKlass {
         }
     }
 
+    public int canConvertTo(DFKlass klass)
+        throws TypeIncompatible {
+        DFMethod method = klass.getFuncMethod();
+        if (method != null) {
+            int nrecv = _lambda.parameters().size();
+            int nsend = method.getFuncType().getRealArgTypes().length;
+            if (nrecv == nsend) return 0;
+        }
+        throw new TypeIncompatible(klass, this);
+    }
+
     public void setBaseKlass(DFKlass baseKlass) {
         this.load();
         assert _baseKlass == null;

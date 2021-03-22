@@ -3,6 +3,9 @@ import java.util.function.*;
 interface Moo {
     abstract String moo(int x);
 }
+interface Foo {
+    abstract int foo(int x, int y);
+}
 
 public class basic_lambda {
 
@@ -12,10 +15,13 @@ public class basic_lambda {
         Moo a = Integer::toString;
         String y = "abc";
         bar(a);
-        bar(z -> y+z);
+        bar((b,c) -> b+c);
     }
 
     public static void bar(Moo m) {
         System.out.println(m.moo(123));
+    }
+    public static void bar(Foo f) {
+        System.out.println(f.foo(2, 3));
     }
 }
