@@ -585,9 +585,10 @@ public abstract class DFGraph {
 
             } else if (expr instanceof ArrayInitializer) {
                 ArrayInitializer init = (ArrayInitializer)expr;
-                assert type instanceof DFArrayType;
                 DFNode array = new ValueSetNode(this, scope, type, expr);
-                DFType elemType = ((DFArrayType)type).getElemType();
+                DFType elemType = (type instanceof DFArrayType)?
+                    ((DFArrayType)type).getElemType() :
+                    DFUnknownType.UNKNOWN;
                 DFRef ref = scope.lookupArray(array.getNodeType());
                 List<Expression> exprs = (List<Expression>) init.expressions();
                 int i = 0;
