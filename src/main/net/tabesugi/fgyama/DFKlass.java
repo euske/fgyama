@@ -50,6 +50,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         _outerKlass = outerKlass;
         _outerScope = outerScope;
         _klassScope = new KlassScope(outerScope, name);
+        if (_outerKlass != null) {
+            _reifyDepth = _outerKlass._reifyDepth;
+        }
     }
 
     // Protected constructor for a parameterized klass.
@@ -61,6 +64,9 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
+        if (_genericKlass._outerKlass != null) {
+            _reifyDepth = _genericKlass._outerKlass._reifyDepth;
+        }
         for (DFKlass klass : paramTypes.values()) {
             _reifyDepth = Math.max(_reifyDepth, klass._reifyDepth+1);
         }
