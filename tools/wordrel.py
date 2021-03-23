@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-from graphs import IDFBuilder, Cons, clen, stripid, splitmethodname
+from graphs import IDFBuilder, Cons, clen, stripid, parsemethodname
 from words import splitwords
 
 debug = 0
@@ -204,7 +204,7 @@ def main(argv):
     # Enumerate all the assignments.
     links = {}
     for method in builder.methods:
-        (name,_,_) = splitmethodname(method.name)
+        (klass,name,func) = parsemethodname(method.name)
         if debug:
             print(f'method: {method.name}', file=sys.stderr)
         for node in method:

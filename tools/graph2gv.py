@@ -40,7 +40,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({stripid(node.ref)})'
         elif kind in ('call','new'):
-            (klass,name,_) = parsemethodname(node.data)
+            (klass,name,func) = parsemethodname(node.data)
             styles['fontname'] = 'courier'
             styles['label'] = klass.name
         elif kind is not None and kind.startswith('op_'):
@@ -76,7 +76,7 @@ def run_dot(methods, type='svg'):
     print(f'run_dot: {args!r}', file=sys.stderr)
     data = io.StringIO()
     for method in methods:
-        (klass,name,_) = parsemethodname(method.name)
+        (klass,name,func) = parsemethodname(method.name)
         write_gv(data, method.root, name=name)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
     (stdout, _) = p.communicate(data.getvalue())
@@ -131,7 +131,7 @@ def main(argv):
         output.write('</body>')
     else:
         for method in methods:
-            (klass,name,_) = parsemethodname(method.name)
+            (klass,name,func) = parsemethodname(method.name)
             write_gv(output, method.root,
                      highlight=highlight, name=f'{klass}.{name}')
 

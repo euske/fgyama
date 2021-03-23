@@ -213,7 +213,7 @@ def main(argv):
     for method in builder.methods:
         # Filter "top-level" methods only which aren't called by anyone else.
         if method.callers: continue
-        (klass,name,_) = parsemethodname(method.name)
+        (klass,name,func) = parsemethodname(method.name)
         if methods and (name not in methods) and (method.name not in methods): continue
         print(f'method: {method.name}', file=sys.stderr)
         for node in method:

@@ -24,7 +24,7 @@ def main(argv):
     words = {}
     for path in args:
         for method in get_graphs(path):
-            (klass,name,_) = parsemethodname(method.name)
+            (klass,name,func) = parsemethodname(method.name)
             if name.startswith('<'): continue
             for (pos,w) in postag(reversed(splitwords(name))):
                 if pos in words:

@@ -68,15 +68,16 @@ class DFType:
                     while s[i2] != '>':
                         (i2, t) = klass.parse(s, i2)
                         params.append(t)
+                    i2 += 1
                     t = DFKlassType(name, prev, params)
                     c = s[i2]
                     if c == ';':
                         return (i2+1, t)
-                    elif c3 == '.':
+                    elif c == '.':
                         i2 += 1
                         prev = t
                     else:
-                        raise ValueError(c3)
+                        raise ValueError(s[i2:])
                 else:
                     i2 += 1
         elif c == 'T':
@@ -150,17 +151,18 @@ class DFKlassType(DFType):
             params = ",".join(map(repr, self.params))
             return f'<{name}<{params}>>'
 
+# parsemethodname: returns (klass, name, func).
 def parsemethodname(s):
     if s.startswith('!'):
         return (None, s[1:], None)
     else:
-        (i, obj) = DFType.parse(s)
+        (i, klass) = DFType.parse(s)
         assert s[i] == '.'
         j = s.index('(', i+1)
         name = s[i+1:j]
         (_, func) = DFType.parse(s, j)
-        return (obj, name, func)
-        
+        return (klass, name, func)
+
 
 ##  DFKlass
 ##
