@@ -145,7 +145,7 @@ class DFMethodRefKlass extends DFSourceKlass {
 
             if (_refMethod == null) {
                 Logger.error(
-                    "DFMethodRefKlass.setRefMethod: MethodNotFound",
+                    "DFMethodRefKlass.listDefinedKlasses: MethodNotFound",
                     this, _methodRef);
             }
         }

@@ -41,7 +41,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
                 this.setTypeSlots(typeSlots);
             }
         }
-        this.buildTypeFromDecls(abstTypeDecl.bodyDeclarations());
+        this.buildTypeFromDecls(_abstTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")

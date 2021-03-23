@@ -240,7 +240,8 @@ public class Java2DF {
             DFSourceMethod callee = queue.remove();
             for (DFMethod caller : callee.getCallers()) {
                 if (caller instanceof DFSourceMethod) {
-                    if (((DFSourceMethod)caller).expandRefs(callee)) {
+                    int added = ((DFSourceMethod)caller).expandRefs(callee);
+                    if (0 < added) {
                         queue.add((DFSourceMethod)caller);
                     }
                 }

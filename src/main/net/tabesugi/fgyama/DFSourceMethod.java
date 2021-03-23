@@ -1587,18 +1587,19 @@ public abstract class DFSourceMethod extends DFMethod {
 
     /// Expand References.
 
-    public boolean expandRefs(DFSourceMethod callee) {
-        boolean added = false;
+    public int expandRefs(DFSourceMethod callee) {
+        if (this == callee) return 0;
+        int added = 0;
         for (DFRef ref : callee._inputRefs) {
             if (!_inputRefs.contains(ref)) {
                 _inputRefs.add(ref);
-                added = true;
+                added++;
             }
         }
         for (DFRef ref : callee._outputRefs) {
             if (!_outputRefs.contains(ref)) {
                 _outputRefs.add(ref);
-                added = true;
+                added++;
             }
         }
         return added;

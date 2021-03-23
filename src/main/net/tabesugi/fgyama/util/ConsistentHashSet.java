@@ -100,16 +100,16 @@ public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
 
     @Override
     public int size() {
-        return _set.size();
+        return _list.size();
     }
 
     @Override
     public <T> T[] toArray(T[] a) {
-        return _set.toArray(a);
+        return _list.toArray(a);
     }
 
     @Override
     public Object[] toArray() {
-        return _set.toArray();
+        return _list.toArray();
     }
 }

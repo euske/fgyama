@@ -89,11 +89,18 @@ public class Utils {
         return b.toString();
     }
 
-    public static String stackTrace() {
+    public static String stackTrace(int n) {
         StackTraceElement[] stes = new Throwable().getStackTrace();
-        StackTraceElement[] a = new StackTraceElement[stes.length-1];
+        if (n == 0) {
+            n = stes.length-1;
+        }
+        n = Math.min(n, stes.length-1);
+        StackTraceElement[] a = new StackTraceElement[n];
         System.arraycopy(stes, 1, a, 0, a.length);
         return join(a);
+    }
+    public static String stackTrace() {
+        return stackTrace(0);
     }
 
     public static String hashString(String s) {
