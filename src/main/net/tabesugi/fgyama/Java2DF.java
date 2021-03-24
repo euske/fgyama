@@ -346,6 +346,8 @@ public class Java2DF {
                 for (String path : args[++i].split(sep)) {
                     classpath.add(path);
                 }
+            } else if (arg.equals("-D")) {
+                DFKlass.MaxReifyDepth = Integer.parseInt(args[++i]);
             } else if (arg.equals("-a")) {
                 DFSourceMethod.setDefaultTransparent(true);
             } else if (arg.equals("-S")) {
@@ -356,7 +358,7 @@ public class Java2DF {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
                     "usage: Java2DF [-v] [-i input] [-o output]" +
-                    " [-C classpath] [-a] [-S] [-s] [path ...]");
+                    " [-C classpath] [-D depth] [-a] [-S] [-s] [path ...]");
                 System.exit(1);
                 return;
             } else {

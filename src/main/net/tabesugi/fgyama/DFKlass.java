@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public abstract class DFKlass extends DFTypeSpace implements DFType {
 
-    public static final int MAX_REIFY_DEPTH = 2;
+    public static int MaxReifyDepth = 2;
 
     // These fields are available upon construction.
     private String _name;
@@ -209,7 +209,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             DFKlass type = _typeSlots.get(key);
             if (argTypes != null && i < argTypes.length) {
                 DFKlass argType = argTypes[i];
-                if (argType._reifyDepth < MAX_REIFY_DEPTH) {
+                if (argType._reifyDepth < MaxReifyDepth) {
                     type = argType;
                 }
             }
