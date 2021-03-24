@@ -64,9 +64,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         _genericKlass = genericKlass;
         _paramTypes = paramTypes;
-        if (_genericKlass._outerKlass != null) {
-            _reifyDepth = _genericKlass._outerKlass._reifyDepth;
-        }
+        _reifyDepth = _genericKlass._reifyDepth;
         for (DFKlass klass : paramTypes.values()) {
             _reifyDepth = Math.max(_reifyDepth, klass._reifyDepth+1);
         }
@@ -200,7 +198,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // Creates a parameterized klass.
     public DFKlass getReifiedKlass(DFKlass[] argTypes) {
         //Logger.info("DFKlass.getReifiedKlass:", this, Utils.join(argTypes));
-        assert _typeSlots != null;
+        if (_typeSlots == null) return this;
         assert _paramTypes == null;
         assert argTypes.length <= _typeSlots.size();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
@@ -209,7 +207,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             DFKlass type = _typeSlots.get(key);
             if (argTypes != null && i < argTypes.length) {
                 DFKlass argType = argTypes[i];
-                if (argType._reifyDepth < MaxReifyDepth) {
+                if (argType.getReifyDepth() < MaxReifyDepth) {
                     type = argType;
                 }
             }
@@ -352,6 +350,12 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
         return null;
+    }
+
+    public int getReifyDepth() {
+        DFKlass baseKlass = this.getBaseKlass();
+        int depth = (baseKlass != null)? baseKlass.getReifyDepth() : 0;
+        return Math.max(_reifyDepth, depth);
     }
 
     public abstract boolean isInterface();

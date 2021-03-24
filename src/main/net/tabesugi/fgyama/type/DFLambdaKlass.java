@@ -211,6 +211,11 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
+    public int getReifyDepth() {
+        return this.getOuterKlass().getReifyDepth();
+    }
+
+    @Override
     public DFKlass getBaseKlass() {
         assert _baseKlass != null;
         return _baseKlass;
