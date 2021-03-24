@@ -673,7 +673,8 @@ class DefinedMethod extends DFSourceMethod {
                     mapType = (DFMapType)klass;
                 } else {
                     mapType = new DFMapType(
-                        id, outerSpace, finder, tp.typeBounds());
+                        id, outerSpace, this.getKlass(),
+                        finder, tp.typeBounds());
                     outerSpace.addKlass(id, mapType);
                 }
                 mapTypes[i] = mapType;

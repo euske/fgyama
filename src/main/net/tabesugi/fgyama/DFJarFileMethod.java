@@ -70,7 +70,8 @@ public class DFJarFileMethod extends DFMethod {
                 int i = 0;
                 for (JNITypeParser.TypeSlot slot : slots) {
                     mapTypes[i++] = new DFMapType(
-                        slot.id, this, _finder, slot.sig);
+                        slot.id, this, this.getKlass(),
+                        _finder, slot.sig);
                 }
                 this.setMapTypes(mapTypes);
             }

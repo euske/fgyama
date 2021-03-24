@@ -20,21 +20,24 @@ public class DFMapType extends DFKlass {
     private DFKlass _baseKlass = null;
 
     private DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder) {
-        super(name, outerSpace, null, null);
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        DFTypeFinder finder) {
+        super(name, outerSpace, outerKlass, null);
         _name = name;
         _finder = finder;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder, List<Type> types) {
-        this(name, outerSpace, finder);
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        DFTypeFinder finder, List<Type> types) {
+        this(name, outerSpace, outerKlass, finder);
         _types = types;
     }
 
     public DFMapType(
-        String name, DFTypeSpace outerSpace, DFTypeFinder finder, String sig) {
-        this(name, outerSpace, finder);
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
+        DFTypeFinder finder, String sig) {
+        this(name, outerSpace, outerKlass, finder);
         _sig = sig;
     }
 
