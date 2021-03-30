@@ -1,7 +1,9 @@
 # FGyama
 
-FGyama, or Flow Graph yama is an *interprocedural* static code analyzer
-that extracts dataflow graph from Java code.
+FGyama, or Flow Graph yama is a static source code analyzer
+that extracts an *interprocedural* dataflow graph from
+Java source code. It's designed to be scalable so that
+it can be applied to a large code base.
 
 
 ## What It Does
@@ -10,7 +12,7 @@ that extracts dataflow graph from Java code.
 
     public class Hello {
         public static void main(String[] args) {
-    	String name = args[0];
+            String name = args[0];
             System.out.println("Hello, "+name);
         }
     }
