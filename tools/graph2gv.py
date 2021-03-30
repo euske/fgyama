@@ -19,7 +19,7 @@ def r(s):
 def write_gv(out, scope, highlight=None, level=0, name=None):
     h = ' '*level
     if name is None:
-        name = scope.name
+        name = scope.name.split('.')[-1]
     if level == 0:
         out.write(f'digraph {q(name)} {{\n')
     else:
@@ -39,16 +39,23 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         elif kind in ('input','output','receive'):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({stripid(node.ref)})'
-        elif kind in ('call','new'):
+        elif kind == 'new':
             (klass,name,func) = parsemethodname(node.data)
             styles['fontname'] = 'courier'
             styles['label'] = klass.name
+        elif kind == 'call':
+            (klass,name,func) = parsemethodname(node.data)
+            styles['fontname'] = 'courier'
+            styles['label'] = name
         elif kind is not None and kind.startswith('op_'):
             styles['fontname'] = 'courier'
             styles['label'] = (node.data or kind)
-        else:
+        elif kind is not None:
             if node.ref is not None:
                 styles['label'] = f'{kind} ({stripid(node.ref)})'
+        else:
+            if node.ref is not None:
+                styles['label'] = f'({stripid(node.ref)})'
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
         out.write(h+f' N{r(node.nid)} [{qp(styles)}];\n')
