@@ -29,6 +29,9 @@ class DFMethodRefKlass extends DFSourceKlass {
 
         protected void setFuncType(DFFuncType funcType) {
             assert _funcType == null;
+            if (funcType == null) {
+                funcType = new DFFuncType(new DFType[] {}, DFUnknownType.UNKNOWN);
+            }
             _funcType = funcType;
         }
 
@@ -238,8 +241,11 @@ class DFMethodRefKlass extends DFSourceKlass {
         DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
-        if (funcMethod == null) return;
-        _funcMethod.setFuncType(funcMethod.getFuncType());
+        if (funcMethod == null) {
+            _funcMethod.setFuncType(null);
+        } else {
+            _funcMethod.setFuncType(funcMethod.getFuncType());
+        }
     }
 
     @Override

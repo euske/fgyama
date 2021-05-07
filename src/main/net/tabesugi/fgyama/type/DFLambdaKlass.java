@@ -44,6 +44,9 @@ class DFLambdaKlass extends DFSourceKlass {
         @SuppressWarnings("unchecked")
         protected void setFuncType(DFFuncType funcType)
             throws InvalidSyntax {
+            if (funcType == null) {
+                funcType = new DFFuncType(new DFType[] {}, DFUnknownType.UNKNOWN);
+            }
             _funcType = funcType;
             DFTypeFinder finder = this.getFinder();
             MethodScope methodScope = (MethodScope)this.getScope();
@@ -258,9 +261,12 @@ class DFLambdaKlass extends DFSourceKlass {
         throws TypeIncompatible {
         DFMethod method = klass.getFuncMethod();
         if (method != null) {
-            int nrecv = _lambda.parameters().size();
-            int nsend = method.getFuncType().getRealArgTypes().length;
-            if (nrecv == nsend) return 0;
+            DFFuncType funcType = method.getFuncType();
+            if (funcType != null) {
+                int nrecv = _lambda.parameters().size();
+                int nsend = funcType.getRealArgTypes().length;
+                if (nrecv == nsend) return 0;
+            }
         }
         throw new TypeIncompatible(klass, this);
     }
@@ -274,9 +280,12 @@ class DFLambdaKlass extends DFSourceKlass {
         DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
-        if (funcMethod == null) return;
         try {
-            _funcMethod.setFuncType(funcMethod.getFuncType());
+            if (funcMethod == null) {
+                _funcMethod.setFuncType(null);
+            } else {
+                _funcMethod.setFuncType(funcMethod.getFuncType());
+            }
         } catch (InvalidSyntax e) {
         }
     }
