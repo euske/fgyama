@@ -12,52 +12,52 @@
         </node>
         <node id="M2_foo_N2" kind="assign_var" ref="$Lbasic_if;.:foo:29:126/$x" type="I">
           <ast end="57" start="52" type="44"/>
-          <link src="M2_foo_N1"/>
+          <accept src="M2_foo_N1"/>
         </node>
         <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_if;"/>
         <scope name="Lbasic_if;.:foo:29:126.:B:59:126">
           <node id="M2_foo_N4" kind="ref_var" ref="$Lbasic_if;.:foo:29:126/$x" type="I">
             <ast end="75" start="74" type="42"/>
-            <link src="M2_foo_N2"/>
+            <accept src="M2_foo_N2"/>
           </node>
           <node data="0" id="M2_foo_N5" kind="value" type="I">
             <ast end="80" start="79" type="34"/>
           </node>
           <node data="==" id="M2_foo_N6" kind="op_infix" type="Z">
             <ast end="80" start="74" type="27"/>
-            <link label="L" src="M2_foo_N4"/>
-            <link label="R" src="M2_foo_N5"/>
+            <accept label="L" src="M2_foo_N4"/>
+            <accept label="R" src="M2_foo_N5"/>
           </node>
           <node id="M2_foo_N13" kind="join" ref="$Lbasic_if;.:foo:29:126.:B:59:126/$y" type="I">
             <ast end="120" start="70" type="25"/>
-            <link label="cond" src="M2_foo_N6"/>
-            <link label="true" src="M2_foo_N7"/>
-            <link label="false" src="M2_foo_N10"/>
+            <accept label="cond" src="M2_foo_N6"/>
+            <accept label="true" src="M2_foo_N7"/>
+            <accept label="false" src="M2_foo_N10"/>
           </node>
           <scope name="Lbasic_if;.:foo:29:126.:B:59:126.:B:82:98">
             <node id="M2_foo_N7" kind="assign_var" ref="$Lbasic_if;.:foo:29:126.:B:59:126/$y" type="I">
               <ast end="90" start="89" type="42"/>
-              <link src="M2_foo_N9"/>
+              <accept src="M2_foo_N9"/>
             </node>
             <node data="1" id="M2_foo_N8" kind="value" type="I">
               <ast end="94" start="93" type="34"/>
             </node>
             <node data="=" id="M2_foo_N9" kind="op_assign" ref="$Lbasic_if;.:foo:29:126.:B:59:126/$y" type="I">
               <ast end="94" start="89" type="7"/>
-              <link label="R" src="M2_foo_N8"/>
+              <accept label="R" src="M2_foo_N8"/>
             </node>
           </scope>
           <scope name="Lbasic_if;.:foo:29:126.:B:59:126.:B:104:120">
             <node id="M2_foo_N10" kind="assign_var" ref="$Lbasic_if;.:foo:29:126.:B:59:126/$y" type="I">
               <ast end="112" start="111" type="42"/>
-              <link src="M2_foo_N12"/>
+              <accept src="M2_foo_N12"/>
             </node>
             <node data="2" id="M2_foo_N11" kind="value" type="I">
               <ast end="116" start="115" type="34"/>
             </node>
             <node data="=" id="M2_foo_N12" kind="op_assign" ref="$Lbasic_if;.:foo:29:126.:B:59:126/$y" type="I">
               <ast end="116" start="111" type="7"/>
-              <link label="R" src="M2_foo_N11"/>
+              <accept label="R" src="M2_foo_N11"/>
             </node>
           </scope>
         </scope>

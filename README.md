@@ -1,7 +1,7 @@
 # FGyama
 
 FGyama, or Flow Graph yama is a static source code analyzer
-that extracts an *interprocedural* dataflow graph from
+that extracts an interprocedural dataflow graph from
 Java source code. It's designed to be scalable so that
 it can be applied to a large code base.
 
@@ -37,7 +37,7 @@ it can be applied to a large code base.
             </node>
             <node id="M2_main_N2" kind="assign_var" ref="$LHello;.:main:25:139/$args" type="[Ljava/lang/String;">
               <ast end="62" start="49" type="44"/>
-              <link src="M2_main_N1"/>
+              <accept src="M2_main_N1"/>
             </node>
             <node id="M2_main_N3" kind="input" ref="#this" type="LHello;"/>
             <node id="M2_main_N4" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
@@ -45,45 +45,45 @@ it can be applied to a large code base.
             <scope name="LHello;.:main:25:139.:B:64:139">
               <node id="M2_main_N6" kind="ref_var" ref="$LHello;.:main:25:139/$args" type="[Ljava/lang/String;">
                 <ast end="85" start="81" type="42"/>
-                <link src="M2_main_N2"/>
+                <accept src="M2_main_N2"/>
               </node>
               <node data="0" id="M2_main_N7" kind="value" type="I">
                 <ast end="87" start="86" type="34"/>
               </node>
               <node id="M2_main_N8" kind="ref_array" ref="%Ljava/lang/String;" type="Ljava/lang/String;">
                 <ast end="88" start="81" type="2"/>
-                <link label="array" src="M2_main_N6"/>
-                <link label="index" src="M2_main_N7"/>
-                <link src="M2_main_N4"/>
+                <accept label="array" src="M2_main_N6"/>
+                <accept label="index" src="M2_main_N7"/>
+                <accept src="M2_main_N4"/>
               </node>
               <node id="M2_main_N9" kind="assign_var" ref="$LHello;.:main:25:139.:B:64:139/$name" type="Ljava/lang/String;">
                 <ast end="88" start="74" type="59"/>
-                <link src="M2_main_N8"/>
+                <accept src="M2_main_N8"/>
               </node>
               <node id="M2_main_N10" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
                 <ast end="108" start="98" type="40"/>
-                <link src="M2_main_N5"/>
+                <accept src="M2_main_N5"/>
               </node>
               <node data="Hello, " id="M2_main_N11" kind="value" type="Ljava/lang/String;">
                 <ast end="126" start="117" type="45"/>
               </node>
               <node id="M2_main_N12" kind="ref_var" ref="$LHello;.:main:25:139.:B:64:139/$name" type="Ljava/lang/String;">
                 <ast end="131" start="127" type="42"/>
-                <link src="M2_main_N9"/>
+                <accept src="M2_main_N9"/>
               </node>
               <node data="+" id="M2_main_N13" kind="op_infix" type="Ljava/lang/String;">
                 <ast end="131" start="117" type="27"/>
-                <link label="L" src="M2_main_N11"/>
-                <link label="R" src="M2_main_N12"/>
+                <accept label="L" src="M2_main_N11"/>
+                <accept label="R" src="M2_main_N12"/>
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="M2_main_N14" kind="call" type="V">
                 <ast end="132" start="98" type="32"/>
-                <link label="#this" src="M2_main_N10"/>
-                <link label="#arg0" src="M2_main_N13"/>
+                <accept label="#this" src="M2_main_N10"/>
+                <accept label="#arg0" src="M2_main_N13"/>
               </node>
               <node id="M2_main_N15" kind="receive" type="V">
                 <ast end="132" start="98" type="32"/>
-                <link src="M2_main_N14"/>
+                <accept src="M2_main_N14"/>
               </node>
             </scope>
           </scope>

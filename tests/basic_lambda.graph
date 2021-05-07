@@ -21,7 +21,7 @@
         </node>
         <node id="K3_&lt;clinit&gt;_N2" kind="assign_var" ref="@Lbasic_lambda;/.isZero" type="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;">
           <ast end="209" start="187" type="59"/>
-          <link src="K3_&lt;clinit&gt;_N1"/>
+          <accept src="K3_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -33,7 +33,7 @@
         </node>
         <node id="M4_main_N2" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366/$args" type="[Ljava/lang/String;">
           <ast end="253" start="240" type="44"/>
-          <link src="M4_main_N1"/>
+          <accept src="M4_main_N1"/>
         </node>
         <node id="M4_main_N3" kind="input" ref="#this" type="Lbasic_lambda;"/>
         <scope name="Lbasic_lambda;.:main:216:366.:B:255:366">
@@ -42,39 +42,39 @@
           </node>
           <node id="M4_main_N5" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
             <ast end="290" start="269" type="59"/>
-            <link src="M4_main_N4"/>
+            <accept src="M4_main_N4"/>
           </node>
           <node data="abc" id="M4_main_N6" kind="value" type="Ljava/lang/String;">
             <ast end="316" start="311" type="45"/>
           </node>
           <node id="M4_main_N7" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$y" type="Ljava/lang/String;">
             <ast end="316" start="307" type="59"/>
-            <link src="M4_main_N6"/>
+            <accept src="M4_main_N6"/>
           </node>
           <node id="M4_main_N8" kind="ref_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
             <ast end="331" start="330" type="42"/>
-            <link src="M4_main_N5"/>
+            <accept src="M4_main_N5"/>
           </node>
           <node data="Lbasic_lambda;.bar(LMoo;)V" id="M4_main_N9" kind="call" type="V">
             <ast end="332" start="326" type="32"/>
-            <link label="#this" src="M4_main_N3"/>
-            <link label="#arg0" src="M4_main_N8"/>
+            <accept label="#this" src="M4_main_N3"/>
+            <accept label="#arg0" src="M4_main_N8"/>
           </node>
           <node id="M4_main_N10" kind="receive" type="V">
             <ast end="332" start="326" type="32"/>
-            <link src="M4_main_N9"/>
+            <accept src="M4_main_N9"/>
           </node>
           <node id="M4_main_N11" kind="capture" type="Lbasic_lambda/:main:216:366/:lambda:346:358;">
             <ast end="358" start="346" type="86"/>
           </node>
           <node data="Lbasic_lambda;.bar(LFoo;)V" id="M4_main_N12" kind="call" type="V">
             <ast end="359" start="342" type="32"/>
-            <link label="#this" src="M4_main_N3"/>
-            <link label="#arg0" src="M4_main_N11"/>
+            <accept label="#this" src="M4_main_N3"/>
+            <accept label="#arg0" src="M4_main_N11"/>
           </node>
           <node id="M4_main_N13" kind="receive" type="V">
             <ast end="359" start="342" type="32"/>
-            <link src="M4_main_N12"/>
+            <accept src="M4_main_N12"/>
           </node>
         </scope>
       </scope>
@@ -88,39 +88,39 @@
         </node>
         <node id="M5_bar_N2" kind="assign_var" ref="$Lbasic_lambda;.:bar:372:449/$m" type="LMoo;">
           <ast end="400" start="395" type="44"/>
-          <link src="M5_bar_N1"/>
+          <accept src="M5_bar_N1"/>
         </node>
         <node id="M5_bar_N3" kind="input" ref="#this" type="Lbasic_lambda;"/>
         <node id="M5_bar_N5" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <scope name="Lbasic_lambda;.:bar:372:449.:B:402:449">
           <node id="M5_bar_N4" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="422" start="412" type="40"/>
-            <link src="M5_bar_N5"/>
+            <accept src="M5_bar_N5"/>
           </node>
           <node id="M5_bar_N6" kind="ref_var" ref="$Lbasic_lambda;.:bar:372:449/$m" type="LMoo;">
             <ast end="432" start="431" type="42"/>
-            <link src="M5_bar_N2"/>
+            <accept src="M5_bar_N2"/>
           </node>
           <node data="123" id="M5_bar_N7" kind="value" type="I">
             <ast end="440" start="437" type="34"/>
           </node>
           <node data="LMoo;.moo(I)Ljava/lang/String;" id="M5_bar_N8" kind="call" type="Ljava/lang/String;">
             <ast end="441" start="431" type="32"/>
-            <link label="#this" src="M5_bar_N6"/>
-            <link label="#arg0" src="M5_bar_N7"/>
+            <accept label="#this" src="M5_bar_N6"/>
+            <accept label="#arg0" src="M5_bar_N7"/>
           </node>
           <node id="M5_bar_N9" kind="receive" type="Ljava/lang/String;">
             <ast end="441" start="431" type="32"/>
-            <link src="M5_bar_N8"/>
+            <accept src="M5_bar_N8"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="M5_bar_N10" kind="call" type="V">
             <ast end="442" start="412" type="32"/>
-            <link label="#this" src="M5_bar_N4"/>
-            <link label="#arg0" src="M5_bar_N9"/>
+            <accept label="#this" src="M5_bar_N4"/>
+            <accept label="#arg0" src="M5_bar_N9"/>
           </node>
           <node id="M5_bar_N11" kind="receive" type="V">
             <ast end="442" start="412" type="32"/>
-            <link src="M5_bar_N10"/>
+            <accept src="M5_bar_N10"/>
           </node>
         </scope>
       </scope>
@@ -134,18 +134,18 @@
         </node>
         <node id="M6_bar_N2" kind="assign_var" ref="$Lbasic_lambda;.:bar:454:532/$f" type="LFoo;">
           <ast end="482" start="477" type="44"/>
-          <link src="M6_bar_N1"/>
+          <accept src="M6_bar_N1"/>
         </node>
         <node id="M6_bar_N3" kind="input" ref="#this" type="Lbasic_lambda;"/>
         <node id="M6_bar_N5" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <scope name="Lbasic_lambda;.:bar:454:532.:B:484:532">
           <node id="M6_bar_N4" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="504" start="494" type="40"/>
-            <link src="M6_bar_N5"/>
+            <accept src="M6_bar_N5"/>
           </node>
           <node id="M6_bar_N6" kind="ref_var" ref="$Lbasic_lambda;.:bar:454:532/$f" type="LFoo;">
             <ast end="514" start="513" type="42"/>
-            <link src="M6_bar_N2"/>
+            <accept src="M6_bar_N2"/>
           </node>
           <node data="2" id="M6_bar_N7" kind="value" type="I">
             <ast end="520" start="519" type="34"/>
@@ -155,22 +155,22 @@
           </node>
           <node data="LFoo;.foo(II)I" id="M6_bar_N9" kind="call" type="I">
             <ast end="524" start="513" type="32"/>
-            <link label="#this" src="M6_bar_N6"/>
-            <link label="#arg0" src="M6_bar_N7"/>
-            <link label="#arg1" src="M6_bar_N8"/>
+            <accept label="#this" src="M6_bar_N6"/>
+            <accept label="#arg0" src="M6_bar_N7"/>
+            <accept label="#arg1" src="M6_bar_N8"/>
           </node>
           <node id="M6_bar_N10" kind="receive" type="I">
             <ast end="524" start="513" type="32"/>
-            <link src="M6_bar_N9"/>
+            <accept src="M6_bar_N9"/>
           </node>
           <node data="Ljava/io/PrintStream;.println(I)V" id="M6_bar_N11" kind="call" type="V">
             <ast end="525" start="494" type="32"/>
-            <link label="#this" src="M6_bar_N4"/>
-            <link label="#arg0" src="M6_bar_N10"/>
+            <accept label="#this" src="M6_bar_N4"/>
+            <accept label="#arg0" src="M6_bar_N10"/>
           </node>
           <node id="M6_bar_N12" kind="receive" type="V">
             <ast end="525" start="494" type="32"/>
-            <link src="M6_bar_N11"/>
+            <accept src="M6_bar_N11"/>
           </node>
         </scope>
       </scope>
@@ -186,27 +186,27 @@
         </node>
         <node id="M7_#f_N2" kind="assign_var" ref="$Lbasic_lambda;.&lt;clinit&gt;.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
           <ast end="198" start="197" type="59"/>
-          <link src="M7_#f_N1"/>
+          <accept src="M7_#f_N1"/>
         </node>
         <node id="M7_#f_N3" kind="input" ref="#this" type="Lbasic_lambda;"/>
         <node id="M7_#f_N4" kind="return" ref="#return" type="Z">
           <ast end="208" start="202" type="27"/>
-          <link src="M7_#f_N7"/>
+          <accept src="M7_#f_N7"/>
         </node>
         <node id="M7_#f_N5" kind="ref_var" ref="$Lbasic_lambda;.&lt;clinit&gt;.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
           <ast end="203" start="202" type="42"/>
-          <link src="M7_#f_N2"/>
+          <accept src="M7_#f_N2"/>
         </node>
         <node data="0" id="M7_#f_N6" kind="value" type="I">
           <ast end="208" start="207" type="34"/>
         </node>
         <node data="==" id="M7_#f_N7" kind="op_infix" type="Z">
           <ast end="208" start="202" type="27"/>
-          <link label="L" src="M7_#f_N5"/>
-          <link label="R" src="M7_#f_N6"/>
+          <accept label="L" src="M7_#f_N5"/>
+          <accept label="R" src="M7_#f_N6"/>
         </node>
         <node id="M7_#f_N8" kind="output" ref="#return" type="Z">
-          <link src="M7_#f_N4"/>
+          <accept src="M7_#f_N4"/>
         </node>
       </scope>
     </method>
@@ -222,35 +222,35 @@
         </node>
         <node id="M8_#f_N2" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366.:lambda:346:358.#f/$b" type="I">
           <ast end="348" start="347" type="59"/>
-          <link src="M8_#f_N1"/>
+          <accept src="M8_#f_N1"/>
         </node>
         <node id="M8_#f_N3" kind="input" ref="#arg1" type="I">
           <ast end="350" start="349" type="59"/>
         </node>
         <node id="M8_#f_N4" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366.:lambda:346:358.#f/$c" type="I">
           <ast end="350" start="349" type="59"/>
-          <link src="M8_#f_N3"/>
+          <accept src="M8_#f_N3"/>
         </node>
         <node id="M8_#f_N5" kind="input" ref="#this" type="Lbasic_lambda;"/>
         <node id="M8_#f_N6" kind="return" ref="#return" type="I">
           <ast end="358" start="355" type="27"/>
-          <link src="M8_#f_N9"/>
+          <accept src="M8_#f_N9"/>
         </node>
         <node id="M8_#f_N7" kind="ref_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366.:lambda:346:358.#f/$b" type="I">
           <ast end="356" start="355" type="42"/>
-          <link src="M8_#f_N2"/>
+          <accept src="M8_#f_N2"/>
         </node>
         <node id="M8_#f_N8" kind="ref_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366.:lambda:346:358.#f/$c" type="I">
           <ast end="358" start="357" type="42"/>
-          <link src="M8_#f_N4"/>
+          <accept src="M8_#f_N4"/>
         </node>
         <node data="+" id="M8_#f_N9" kind="op_infix" type="I">
           <ast end="358" start="355" type="27"/>
-          <link label="L" src="M8_#f_N7"/>
-          <link label="R" src="M8_#f_N8"/>
+          <accept label="L" src="M8_#f_N7"/>
+          <accept label="R" src="M8_#f_N8"/>
         </node>
         <node id="M8_#f_N10" kind="output" ref="#return" type="I">
-          <link src="M8_#f_N6"/>
+          <accept src="M8_#f_N6"/>
         </node>
       </scope>
     </method>
