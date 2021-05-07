@@ -209,7 +209,7 @@ public class DFJarFileKlass extends DFKlass {
         } catch (IOException e) {
             Logger.error(
                 "DFJarFileKlass.loadJarFile: IOException",
-                this, _jarPath+"/"+_entPath);
+                _jarPath+"/"+_entPath, this);
             return;
         }
 
@@ -257,7 +257,7 @@ public class DFJarFileKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFJarFileKlass.build: TypeNotFound (baseKlass)",
-                    this, e.name, sig);
+                    e.name, sig, this);
             }
             List<DFKlass> ifaces = new ArrayList<DFKlass>();
             for (;;) {
@@ -267,7 +267,7 @@ public class DFJarFileKlass extends DFKlass {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileKlass.build: TypeNotFound (iface)",
-                        this, e.name, sig);
+                        e.name, sig, this);
                 }
                 if (iface == null) break;
                 ifaces.add(iface.toKlass());
@@ -284,7 +284,7 @@ public class DFJarFileKlass extends DFKlass {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileKlass.build: TypeNotFound (baseKlass)",
-                        this, e.name);
+                        e.name, this);
                 }
             }
             String[] ifaces = _jklass.getInterfaceNames();
@@ -297,7 +297,7 @@ public class DFJarFileKlass extends DFKlass {
                     } catch (TypeNotFound e) {
                         Logger.error(
                             "DFJarFileKlass.build: TypeNotFound (iface)",
-                            this, e.name);
+                            e.name, this);
                     }
                     _baseIfaces[i] = iface;
                 }
@@ -321,7 +321,7 @@ public class DFJarFileKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFJarFileKlass.build: TypeNotFound (field)",
-                    this, e.name, sig);
+                    e.name, sig, this);
                 type = DFUnknownType.UNKNOWN;
             }
             this.addField(type, fld.getName(), fld.isStatic());
@@ -425,7 +425,7 @@ public class DFJarFileKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DefaultKlass.load: TypeNotFound",
-                    this, e.name, _sig, _finder);
+                    e.name, _sig, _finder, this);
             }
         }
     }

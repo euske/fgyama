@@ -1714,13 +1714,13 @@ public abstract class DFSourceMethod extends DFMethod {
             e.setMethod(this);
             Logger.error(
                 "DFSourceMethod.processMethod: MethodNotFound",
-                this, e.name+"("+Utils.join(e.argTypes)+")");
+                e.name+"("+Utils.join(e.argTypes)+")", this);
             throw e;
         } catch (EntityNotFound e) {
             e.setMethod(this);
             Logger.error(
                 "DFSourceMethod.processMethod: EntityNotFound",
-                this, e.name);
+                e.name, this);
             throw e;
         }
 
@@ -1936,7 +1936,7 @@ class AnonymousKlass extends DFSourceKlass {
         try {
             this.buildMembersFromAnonDecl(_cstr);
         } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.build:", e);
+            Logger.error("AnonymousKlass.build:", e, this);
         }
     }
 
@@ -1948,7 +1948,7 @@ class AnonymousKlass extends DFSourceKlass {
             this.listUsedDecls(
                 klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.listUsedKlasses:", e);
+            Logger.error("AnonymousKlass.listUsedKlasses:", e, this);
         }
         return true;
     }

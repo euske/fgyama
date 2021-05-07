@@ -145,7 +145,7 @@ public class DFMapType extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFMapType.build: TypeNotFound",
-                    this, e.name, _sig, _finder);
+                    e.name, _sig, _finder, this);
             }
         } else if (_types != null) {
             try {
@@ -156,7 +156,7 @@ public class DFMapType extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFMapType.build: TypeNotFound",
-                    this, e.name, _types, _finder);
+                    e.name, _types, _finder, this);
             }
         }
     }

@@ -253,7 +253,7 @@ class DFLambdaKlass extends DFSourceKlass {
         try {
             _funcMethod = new FunctionalMethod("#f", finder);
         } catch (InvalidSyntax e) {
-            Logger.error("DFLambdaKlass.build:", e);
+            Logger.error("DFLambdaKlass.build:", e, this);
         }
     }
 

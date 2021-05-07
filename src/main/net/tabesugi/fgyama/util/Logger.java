@@ -14,25 +14,27 @@ public class Logger {
 
     public static void debug(Object ... a) {
         if (2 <= LogLevel) {
-            println(a);
+            println(a, Integer.MAX_VALUE);
         }
     }
 
     public static void info(Object ... a) {
         if (1 <= LogLevel) {
-            println(a);
+            println(a, Integer.MAX_VALUE);
         }
     }
 
     public static void error(Object ... a) {
-        if (0 <= LogLevel) {
-            println(a);
+        if (2 <= LogLevel) {
+            println(a, Integer.MAX_VALUE);
+        } else if (0 <= LogLevel) {
+            println(a, 2);
         }
     }
 
-    private static void println(Object[] a) {
+    private static void println(Object[] a, int maxargs) {
         StringBuilder b = new StringBuilder();
-        for (int i = 0; i < a.length; i++) {
+        for (int i = 0; i < Math.min(maxargs, a.length); i++) {
             if (i != 0) {
                 b.append(" ");
             }

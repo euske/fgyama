@@ -516,7 +516,7 @@ public abstract class DFGraph {
                         method = instKlass.createFallbackMethod(id, argTypes);
                         Logger.error(
                             "DFGraph.processExpression: MethodNotFound",
-                            this, instKlass, expr);
+                            expr, instKlass, this);
                         Logger.info("Fallback method:", method);
                     }
                 }
@@ -556,7 +556,7 @@ public abstract class DFGraph {
                     method = baseKlass.createFallbackMethod(id, argTypes);
                     Logger.error(
                         "DFGraph.processExpression: MethodNotFound",
-                        this, baseKlass, expr);
+                        expr, baseKlass, this);
                     Logger.info("Fallback method:", method);
                 }
                 DFMethod[] methods = new DFMethod[] { method };
@@ -1361,7 +1361,7 @@ public abstract class DFGraph {
                             src.merge(dst);
                             dst = src;
                         } else {
-                            Logger.error("DFGraph.catch: Conflict:", dst, "<-", src);
+                            Logger.error("DFGraph.catch: Conflict:", dst+" <- "+src);
                             continue;
                         }
                         ctx.set(dst);

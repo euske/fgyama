@@ -274,7 +274,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
-                    this, e.name);
+                    e.name, this);
             }
         }
         this.buildMembers(cstr.getAnonymousClassDeclaration().bodyDeclarations());
@@ -294,7 +294,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
-                    this, e.name);
+                    e.name, this);
             }
         }
         // Get interfaces.
@@ -307,7 +307,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromTypeDecl: TypeNotFound (iface)",
-                    this, e.name);
+                    e.name, this);
             }
             _baseIfaces[i] = iface;
         }
@@ -331,7 +331,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromEnumDecl: TypeNotFound (iface)",
-                    this, e.name);
+                    e.name, this);
             }
             _baseIfaces[i] = iface;
         }
@@ -556,7 +556,7 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.build: ", e);
+            Logger.error("DFSourceKlass.build: ", e, this);
         }
     }
 
@@ -583,7 +583,7 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listUsedKlasses: ", e);
+            Logger.error("DFSourceKlass.listUsedKlasses: ", e, this);
         }
     }
 
@@ -613,7 +613,7 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listDefinedKlasses: ", e);
+            Logger.error("DFSourceKlass.listDefinedKlasses: ", e, this);
         }
     }
 
@@ -628,7 +628,7 @@ class InitMethod extends DFSourceMethod {
         try {
             this.processBodyDecls(graph, ctx, _decls);
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.writeGraph: ", e);
+            Logger.error("DFSourceKlass.writeGraph: ", e, this);
         }
         return graph;
     }
@@ -746,7 +746,7 @@ class DefinedMethod extends DFSourceMethod {
                 methodScope.buildInternalRefs(_methodDecl.parameters());
                 methodScope.buildStmt(finder, stmt);
             } catch (InvalidSyntax e) {
-                Logger.error("DFSourceKlass.build:", e);
+                Logger.error("DFSourceKlass.build:", e, this);
             }
         }
     }
@@ -771,7 +771,7 @@ class DefinedMethod extends DFSourceMethod {
             try {
                 this.listUsedStmt(klasses, _methodDecl.getBody());
             } catch (InvalidSyntax e) {
-                Logger.error("DFSourceKlass.listUsedKlasses:", e);
+                Logger.error("DFSourceKlass.listUsedKlasses:", e, this);
             }
         }
     }
@@ -793,7 +793,7 @@ class DefinedMethod extends DFSourceMethod {
         try {
             this.listDefinedStmt(defined, scope, _methodDecl.getBody());
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listDefinedKlasses:", e);
+            Logger.error("DFSourceKlass.listDefinedKlasses:", e, this);
         }
     }
 
@@ -823,7 +823,7 @@ class DefinedMethod extends DFSourceMethod {
         try {
             this.processMethodBody(graph, ctx, body);
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.writeGraph:", e);
+            Logger.error("DFSourceKlass.writeGraph:", e, this);
         }
         return graph;
     }

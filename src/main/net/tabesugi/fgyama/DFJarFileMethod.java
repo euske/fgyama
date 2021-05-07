@@ -80,7 +80,7 @@ public class DFJarFileMethod extends DFMethod {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFJarFileMethod.build: TypeNotFound (method)",
-                    this, e.name, sig);
+                    e.name, sig, this);
                 return;
             }
         } else {
@@ -106,7 +106,7 @@ public class DFJarFileMethod extends DFMethod {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileMethod.build: TypeNotFound (exception)",
-                        this, e.name);
+                        e.name, this);
                     klass = DFUnknownType.UNKNOWN.toKlass();
                 }
                 exceptions[i] = klass;

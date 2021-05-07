@@ -91,7 +91,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
                     (AnnotationTypeDeclaration)_abstTypeDecl);
             }
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.build:", e);
+            Logger.error("AbstTypeDeclKlass.build:", e, this);
         }
     }
 
@@ -101,7 +101,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         try {
             return new AbstTypeDeclKlass(this, paramTypes);
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.parameterize:", e);
+            Logger.error("AbstTypeDeclKlass.parameterize:", e, this);
             return this;
         }
     }
@@ -113,7 +113,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         try {
             this.listUsedDecls(klasses, _abstTypeDecl.bodyDeclarations());
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.listUsedKlasses:", e);
+            Logger.error("AbstTypeDeclKlass.listUsedKlasses:", e, this);
         }
         return true;
     }
@@ -190,7 +190,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DefaultKlass.load: TypeNotFound",
-                    this, e.name, _types);
+                    e.name, _types, this);
             }
         }
     }
