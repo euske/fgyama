@@ -18,10 +18,10 @@ public class DFNode implements Comparable<DFNode> {
     private DFType _type;
     private DFRef _ref;
     private ASTNode _ast;
-    private Link _link0;
+    private Edge _edge0;
 
-    private List<Link> _links =
-        new ArrayList<Link>();
+    private List<Edge> _edges =
+        new ArrayList<Edge>();
     private List<DFNode> _outputs =
         new ArrayList<DFNode>();
 
@@ -66,8 +66,8 @@ public class DFNode implements Comparable<DFNode> {
         if (_ast != null) {
             Utils.writeXML(writer, _ast);
         }
-        for (Link link : _links) {
-            link.writeXML(writer);
+        for (Edge edge : _edges) {
+            edge.writeXML(writer);
         }
         writer.writeEndElement();
     }
@@ -97,26 +97,26 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     public boolean hasValue() {
-        return _link0 != null;
+        return _edge0 != null;
     }
 
-    public Link accept(DFNode node) {
+    public Edge accept(DFNode node) {
         return this.accept(node, null);
     }
 
-    public Link accept(DFNode node, String label) {
+    public Edge accept(DFNode node, String label) {
         assert node != null;
-        Link link = new Link(node, label);
-        _links.add(link);
+        Edge edge = new Edge(node, label);
+        _edges.add(edge);
         node._outputs.add(this);
         if (label == null) {
-            assert _link0 == null;
+            assert _edge0 == null;
             if (_type instanceof DFUnknownType) {
                 _type = node.getNodeType();
             }
-            _link0 = link;
+            _edge0 = edge;
         }
-        return link;
+        return edge;
     }
 
     public boolean canMerge() {
@@ -128,21 +128,21 @@ public class DFNode implements Comparable<DFNode> {
 
     public boolean purge() {
         if (this.getKind() == null && this.hasValue()) {
-            assert _link0 != null;
-            this.unlink(_link0._src);
+            assert _edge0 != null;
+            this.disconnect(_edge0._src);
             return true;
         }
         return false;
     }
 
-    protected void unlink(DFNode src) {
-        for (Link link : _links) {
-            link._src._outputs.remove(this);
+    protected void disconnect(DFNode src) {
+        for (Edge edge : _edges) {
+            edge._src._outputs.remove(this);
         }
         for (DFNode node : _outputs) {
-            for (Link link : node._links) {
-                if (link._src == this) {
-                    link._src = src;
+            for (Edge edge : node._edges) {
+                if (edge._src == this) {
+                    edge._src = src;
                     src._outputs.add(node);
                 }
             }
@@ -186,14 +186,14 @@ public class DFNode implements Comparable<DFNode> {
         }
     }
 
-    //  Link
+    //  Edge
     //
-    public class Link {
+    public class Edge {
 
         private DFNode _src;
         private String _label;
 
-        public Link(DFNode src, String label) {
+        public Edge(DFNode src, String label) {
             _src = src;
             _label = label;
         }
@@ -213,12 +213,12 @@ public class DFNode implements Comparable<DFNode> {
 
         @Override
         public String toString() {
-            return ("<Link "+DFNode.this+"<-"+_src+">");
+            return ("<Edge "+DFNode.this+"<-"+_src+">");
         }
 
         public void writeXML(XMLStreamWriter writer)
             throws XMLStreamException {
-            writer.writeStartElement("link");
+            writer.writeStartElement("accept");
             writer.writeAttribute("src", _src.getNodeId());
             if (_label != null) {
                 writer.writeAttribute("label", _label);

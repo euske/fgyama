@@ -2044,15 +2044,15 @@ class CaptureNode extends DFNode {
 // JoinNode
 class JoinNode extends DFNode {
 
-    private DFNode.Link _linkCond;
-    private DFNode.Link _linkTrue = null;
-    private DFNode.Link _linkFalse = null;
+    private DFNode.Edge _edgeCond;
+    private DFNode.Edge _edgeTrue = null;
+    private DFNode.Edge _edgeFalse = null;
 
     public JoinNode(
         DFGraph graph, DFVarScope scope, DFType type, DFRef ref,
         ASTNode ast, DFNode cond) {
         super(graph, scope, type, ref, ast);
-        _linkCond = this.accept(cond, "cond");
+        _edgeCond = this.accept(cond, "cond");
     }
 
     @Override
@@ -2062,27 +2062,27 @@ class JoinNode extends DFNode {
 
     public void recv(boolean cond, DFNode node) {
         if (cond) {
-            assert _linkTrue == null;
-            _linkTrue = this.accept(node, "true");
+            assert _edgeTrue == null;
+            _edgeTrue = this.accept(node, "true");
         } else {
-            assert _linkFalse == null;
-            _linkFalse = this.accept(node, "false");
+            assert _edgeFalse == null;
+            _edgeFalse = this.accept(node, "false");
         }
     }
 
     @Override
     public boolean canMerge() {
-        return (_linkTrue == null || _linkFalse == null);
+        return (_edgeTrue == null || _edgeFalse == null);
     }
 
     @Override
     public void merge(DFNode node) {
-        if (_linkTrue == null) {
-            assert _linkFalse != null;
-            _linkTrue = this.accept(node, "true");
-        } else if (_linkFalse == null) {
-            assert _linkTrue != null;
-            _linkFalse = this.accept(node, "false");
+        if (_edgeTrue == null) {
+            assert _edgeFalse != null;
+            _edgeTrue = this.accept(node, "true");
+        } else if (_edgeFalse == null) {
+            assert _edgeTrue != null;
+            _edgeFalse = this.accept(node, "false");
         } else {
             Logger.error("JoinNode: cannot merge:", this, node);
             assert false;
@@ -2091,29 +2091,29 @@ class JoinNode extends DFNode {
 
     @Override
     public boolean purge() {
-        if (_linkTrue == null) {
-            assert _linkFalse != null;
-            unlink(_linkFalse.getSrc());
+        if (_edgeTrue == null) {
+            assert _edgeFalse != null;
+            this.disconnect(_edgeFalse.getSrc());
             return true;
-        } else if (_linkFalse == null) {
-            assert _linkTrue != null;
-            unlink(_linkTrue.getSrc());
+        } else if (_edgeFalse == null) {
+            assert _edgeTrue != null;
+            this.disconnect(_edgeTrue.getSrc());
             return true;
         } else {
-            DFNode srcTrue = _linkTrue.getSrc();
+            DFNode srcTrue = _edgeTrue.getSrc();
             if (srcTrue instanceof JoinNode &&
-                ((JoinNode)srcTrue)._linkCond.getSrc() == _linkCond.getSrc() &&
-                ((JoinNode)srcTrue)._linkFalse != null &&
-                ((JoinNode)srcTrue)._linkFalse.getSrc() == _linkFalse.getSrc()) {
-                unlink(srcTrue);
+                ((JoinNode)srcTrue)._edgeCond.getSrc() == _edgeCond.getSrc() &&
+                ((JoinNode)srcTrue)._edgeFalse != null &&
+                ((JoinNode)srcTrue)._edgeFalse.getSrc() == _edgeFalse.getSrc()) {
+                this.disconnect(srcTrue);
                 return true;
             }
-            DFNode srcFalse = _linkFalse.getSrc();
+            DFNode srcFalse = _edgeFalse.getSrc();
             if (srcFalse instanceof JoinNode &&
-                ((JoinNode)srcFalse)._linkCond.getSrc() == _linkCond.getSrc() &&
-                ((JoinNode)srcFalse)._linkTrue != null &&
-                ((JoinNode)srcFalse)._linkTrue.getSrc() == _linkTrue.getSrc()) {
-                unlink(srcFalse);
+                ((JoinNode)srcFalse)._edgeCond.getSrc() == _edgeCond.getSrc() &&
+                ((JoinNode)srcFalse)._edgeTrue != null &&
+                ((JoinNode)srcFalse)._edgeTrue.getSrc() == _edgeTrue.getSrc()) {
+                this.disconnect(srcFalse);
                 return true;
             }
             return false;
@@ -2363,7 +2363,7 @@ class CatchNode extends SingleAssignNode {
     }
 
     @Override
-    public Link accept(DFNode node) {
+    public Edge accept(DFNode node) {
         String label = "exc"+(_nexcs++);
         return this.accept(node, label);
     }
