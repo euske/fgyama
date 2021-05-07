@@ -333,16 +333,16 @@ class DFNode:
             east.set('end', str(aend))
             enode.append(east)
         for (label,src) in self.inputs.items():
-            elink = Element('link')
+            eedge = Element('accept')
             if label:
-                elink.set('label', label)
-            elink.set('src', ns(src.nid))
-            enode.append(elink)
+                eedge.set('label', label)
+            eedge.set('src', ns(src.nid))
+            enode.append(eedge)
         return enode
 
     def get_inputs(self):
         for (label,src) in self.inputs.items():
-            # links with _ in its name is informational.
+            # edges with _ in its name is informational.
             # and should not be considered as a real dataflow.
             if not label.startswith('_'):
                 yield (label, src)
@@ -546,7 +546,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
                 int(attrs.get('start')),
                 int(attrs.get('end')))
             return
-        elif name == 'link':
+        elif name == 'accept':
             label = attrs.get('label', '')
             src = attrs.get('src')
             assert label not in self.node.inputs, self.node.inputs
