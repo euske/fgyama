@@ -155,7 +155,7 @@ public class Java2DF {
                     String id = ((QualifiedName)name).getName().getIdentifier();
                     importSpace.addKlass(id, klass);
                 } else {
-                    Logger.error("Import: Class not found:", Utils.getASTSource(name));
+                    Logger.error("Stage2: Class not found:", Utils.getASTSource(name));
                 }
             }
         }
