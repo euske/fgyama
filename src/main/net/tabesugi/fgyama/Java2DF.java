@@ -77,7 +77,9 @@ public class Java2DF {
         String key = file.getCanonicalPath();
         if (!_sourceFiles.containsKey(key)) {
             CompilationUnit cunit = Utils.parseFile(file);
-            _sourceFiles.put(key, new SourceFile(path, cunit, analyze));
+            cunit.setProperty("path", path);
+            SourceFile srcFile = new SourceFile(path, cunit, analyze);
+            _sourceFiles.put(key, srcFile);
         }
     }
 
@@ -153,7 +155,7 @@ public class Java2DF {
                     String id = ((QualifiedName)name).getName().getIdentifier();
                     importSpace.addKlass(id, klass);
                 } else {
-                    Logger.error("Import: Class not found:", name);
+                    Logger.error("Import: Class not found:", Utils.getASTSource(name));
                 }
             }
         }

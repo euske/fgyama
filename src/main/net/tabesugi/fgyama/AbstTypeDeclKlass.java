@@ -91,7 +91,9 @@ class AbstTypeDeclKlass extends DFSourceKlass {
                     (AnnotationTypeDeclaration)_abstTypeDecl);
             }
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.build:", e, this);
+            Logger.error(
+                "AbstTypeDeclKlass.build:",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -101,7 +103,9 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         try {
             return new AbstTypeDeclKlass(this, paramTypes);
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.parameterize:", e, this);
+            Logger.error(
+                "AbstTypeDeclKlass.parameterize:",
+                Utils.getASTSource(e.ast), this);
             return this;
         }
     }
@@ -113,7 +117,9 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         try {
             this.listUsedDecls(klasses, _abstTypeDecl.bodyDeclarations());
         } catch (InvalidSyntax e) {
-            Logger.error("AbstTypeDeclKlass.listUsedKlasses:", e, this);
+            Logger.error(
+                "AbstTypeDeclKlass.listUsedKlasses:",
+                Utils.getASTSource(e.ast), this);
         }
         return true;
     }
@@ -182,15 +188,15 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             assert _finder != null;
             if (_baseKlass != null) return;
             _baseKlass = DFBuiltinTypes.getObjectKlass();
-            try {
-                for (Type type : _types) {
+            for (Type type : _types) {
+                try {
                     _baseKlass = _finder.resolve(type).toKlass();
-                    break;
+                } catch (TypeNotFound e) {
+                    Logger.error(
+                        "DefaultKlass.load: TypeNotFound",
+                        Utils.getASTSource(type), this);
                 }
-            } catch (TypeNotFound e) {
-                Logger.error(
-                    "DefaultKlass.load: TypeNotFound",
-                    e.name, _types, this);
+                break;
             }
         }
     }

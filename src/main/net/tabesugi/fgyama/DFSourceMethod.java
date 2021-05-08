@@ -1936,7 +1936,9 @@ class AnonymousKlass extends DFSourceKlass {
         try {
             this.buildMembersFromAnonDecl(_cstr);
         } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.build:", e, this);
+            Logger.error(
+                "AnonymousKlass.build:",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -1948,7 +1950,9 @@ class AnonymousKlass extends DFSourceKlass {
             this.listUsedDecls(
                 klasses, _cstr.getAnonymousClassDeclaration().bodyDeclarations());
         } catch (InvalidSyntax e) {
-            Logger.error("AnonymousKlass.listUsedKlasses:", e, this);
+            Logger.error(
+                "AnonymousKlass.listUsedKlasses:",
+                Utils.getASTSource(e.ast), this);
         }
         return true;
     }

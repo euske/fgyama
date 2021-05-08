@@ -79,7 +79,9 @@ class DFMethodRefKlass extends DFSourceKlass {
                     this.listUsedExpr(
                         klasses, exprmref.getExpression());
                 } catch (InvalidSyntax e) {
-                    Logger.error("DFMethodRefKlass.listUsedKlasses:", e, this);
+                    Logger.error(
+                        "DFMethodRefKlass.listUsedKlasses:",
+                        Utils.getASTSource(e.ast), this);
                 }
             }
         }
@@ -149,7 +151,7 @@ class DFMethodRefKlass extends DFSourceKlass {
             if (_refMethod == null) {
                 Logger.error(
                     "DFMethodRefKlass.listDefinedKlasses: MethodNotFound",
-                    _methodRef, this);
+                    Utils.getASTSource(_methodRef), this);
             }
         }
 

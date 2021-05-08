@@ -232,6 +232,18 @@ public class Utils {
         writer.writeEndElement();
     }
 
+    public static String getASTSource(ASTNode node) {
+        String path = "?";
+        ASTNode root = node.getRoot();
+        if (root instanceof CompilationUnit) {
+            Object obj = root.getProperty("path");
+            if (obj instanceof String) {
+                path = (String)obj;
+            }
+        }
+        return node.toString()+" ("+path+":"+node.getStartPosition()+")";
+    }
+
     public static String encodeASTNode(ASTNode node) {
         int start = node.getStartPosition();
         int end = start + node.getLength();

@@ -516,7 +516,7 @@ public abstract class DFGraph {
                         method = instKlass.createFallbackMethod(id, argTypes);
                         Logger.error(
                             "DFGraph.processExpression: MethodNotFound",
-                            expr, instKlass, this);
+                            Utils.getASTSource(expr), instKlass, this);
                         Logger.info("Fallback method:", method);
                     }
                 }
@@ -556,7 +556,7 @@ public abstract class DFGraph {
                     method = baseKlass.createFallbackMethod(id, argTypes);
                     Logger.error(
                         "DFGraph.processExpression: MethodNotFound",
-                        expr, baseKlass, this);
+                        Utils.getASTSource(expr), baseKlass, this);
                     Logger.info("Fallback method:", method);
                 }
                 DFMethod[] methods = new DFMethod[] { method };

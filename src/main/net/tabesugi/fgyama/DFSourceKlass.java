@@ -274,7 +274,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromAnonDecl: TypeNotFound (baseKlass)",
-                    e.name, this);
+                    Utils.getASTSource(superClass), this);
             }
         }
         this.buildMembers(cstr.getAnonymousClassDeclaration().bodyDeclarations());
@@ -294,7 +294,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromTypeDecl: TypeNotFound (baseKlass)",
-                    e.name, this);
+                    Utils.getASTSource(superClass), this);
             }
         }
         // Get interfaces.
@@ -307,7 +307,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromTypeDecl: TypeNotFound (iface)",
-                    e.name, this);
+                    Utils.getASTSource(ifaces.get(i)), this);
             }
             _baseIfaces[i] = iface;
         }
@@ -331,7 +331,7 @@ public abstract class DFSourceKlass extends DFKlass {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFKlass.buildMembersFromEnumDecl: TypeNotFound (iface)",
-                    e.name, this);
+                    Utils.getASTSource(ifaces.get(i)), this);
             }
             _baseIfaces[i] = iface;
         }
@@ -556,7 +556,9 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.build: ", e, this);
+            Logger.error(
+                "DFSourceKlass.build: ",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -583,7 +585,9 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listUsedKlasses: ", e, this);
+            Logger.error(
+                "DFSourceKlass.listUsedKlasses: ",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -613,7 +617,9 @@ class InitMethod extends DFSourceMethod {
                 }
             }
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listDefinedKlasses: ", e, this);
+            Logger.error(
+                "DFSourceKlass.listDefinedKlasses: ",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -628,7 +634,9 @@ class InitMethod extends DFSourceMethod {
         try {
             this.processBodyDecls(graph, ctx, _decls);
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.writeGraph: ", e, this);
+            Logger.error(
+                "DFSourceKlass.writeGraph: ",
+                Utils.getASTSource(e.ast), this);
         }
         return graph;
     }
@@ -746,7 +754,9 @@ class DefinedMethod extends DFSourceMethod {
                 methodScope.buildInternalRefs(_methodDecl.parameters());
                 methodScope.buildStmt(finder, stmt);
             } catch (InvalidSyntax e) {
-                Logger.error("DFSourceKlass.build:", e, this);
+                Logger.error(
+                    "DFSourceKlass.build:",
+                    Utils.getASTSource(e.ast), this);
             }
         }
     }
@@ -771,7 +781,9 @@ class DefinedMethod extends DFSourceMethod {
             try {
                 this.listUsedStmt(klasses, _methodDecl.getBody());
             } catch (InvalidSyntax e) {
-                Logger.error("DFSourceKlass.listUsedKlasses:", e, this);
+                Logger.error(
+                    "DFSourceKlass.listUsedKlasses:",
+                    Utils.getASTSource(e.ast), this);
             }
         }
     }
@@ -793,7 +805,9 @@ class DefinedMethod extends DFSourceMethod {
         try {
             this.listDefinedStmt(defined, scope, _methodDecl.getBody());
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.listDefinedKlasses:", e, this);
+            Logger.error(
+                "DFSourceKlass.listDefinedKlasses:",
+                Utils.getASTSource(e.ast), this);
         }
     }
 
@@ -823,7 +837,9 @@ class DefinedMethod extends DFSourceMethod {
         try {
             this.processMethodBody(graph, ctx, body);
         } catch (InvalidSyntax e) {
-            Logger.error("DFSourceKlass.writeGraph:", e, this);
+            Logger.error(
+                "DFSourceKlass.writeGraph:",
+                Utils.getASTSource(e.ast), this);
         }
         return graph;
     }

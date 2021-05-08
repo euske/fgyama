@@ -171,7 +171,7 @@ public class DFFrame {
                 } catch (VariableNotFound e) {
                     Logger.error(
                         "DFFrame.buildStmt: VariableNotFound (decl)",
-                        e.name, frag, this);
+                        Utils.getASTSource(frag.getName()), this);
                 }
                 Expression init = frag.getInitializer();
                 if (init != null) {
@@ -233,7 +233,7 @@ public class DFFrame {
                             } else {
                                 Logger.error(
                                     "DFFrame.buildStmt: VariableNotFound (switch)",
-                                    expr, this);
+                                    Utils.getASTSource(expr), this);
                             }
                         } else {
                             caseFrame.buildExpr(expr);
@@ -347,7 +347,7 @@ public class DFFrame {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (catch)",
-                        e.name, decl, this);
+                        Utils.getASTSource(decl.getType()), this);
                 }
                 tryFrame = tryFrame.addChild(catchKlass, tryStmt, tryScope);
             }
@@ -380,7 +380,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (ci)",
-                        arg, this);
+                        Utils.getASTSource(arg), this);
                     return;
                 }
                 argTypes[i] = type;
@@ -400,7 +400,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (ci)",
-                    ci, this);
+                    Utils.getASTSource(ci), this);
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -418,7 +418,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (sci)",
-                        arg, this);
+                        Utils.getASTSource(arg), this);
                     return;
                 }
                 argTypes[i] = type;
@@ -436,7 +436,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (sci)",
-                    sci, this);
+                    Utils.getASTSource(sci), this);
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -510,7 +510,7 @@ public class DFFrame {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (this)",
-                        e.name, expr, this);
+                        Utils.getASTSource(name), this);
                     return null;
                 }
             } else {
@@ -550,7 +550,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (const)",
-                    e.name, expr, this);
+                    Utils.getASTSource(value), this);
                 return null;
             }
 
@@ -614,7 +614,7 @@ public class DFFrame {
                 } catch (VariableNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: VariableNotFound (decl)",
-                        e.name, frag, this);
+                        Utils.getASTSource(frag.getName()), this);
                 }
             }
             return null; // XXX what type?
@@ -646,7 +646,7 @@ public class DFFrame {
                     if (type == null) {
                         Logger.error(
                             "DFFrame.buildExpr: Type unknown (invoke)",
-                            expr1, this);
+                            Utils.getASTSource(expr1), this);
                         return null;
                     }
                     klass = type.toKlass();
@@ -660,7 +660,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (invoke)",
-                        arg, this);
+                        Utils.getASTSource(arg), this);
                     return null;
                 }
                 argTypes[i] = type;
@@ -681,7 +681,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (invoke)",
-                    invoke, this);
+                    Utils.getASTSource(invoke), this);
                 return DFUnknownType.UNKNOWN;
             }
 
@@ -696,7 +696,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (sinvoke)",
-                        arg, this);
+                        Utils.getASTSource(arg), this);
                     return null;
                 }
                 argTypes[i] = type;
@@ -719,7 +719,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (sinvoke)",
-                    sinvoke, this);
+                    Utils.getASTSource(sinvoke), this);
                 return DFUnknownType.UNKNOWN;
             }
 
@@ -738,7 +738,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (array)",
-                    e.name, expr, this);
+                    Utils.getASTSource(ac.getType()), this);
                 return null;
             }
 
@@ -779,7 +779,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (fieldaccess)",
-                        expr1, this);
+                        Utils.getASTSource(expr1), this);
                     return null;
                 }
             }
@@ -792,7 +792,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: VariableNotFound (fieldref)",
-                    expr, this);
+                    Utils.getASTSource(fieldName), this);
                 return null;
             }
 
@@ -810,7 +810,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: VariableNotFound (superfieldref)",
-                    expr, this);
+                    Utils.getASTSource(fieldName), this);
                 return null;
             }
 
@@ -823,7 +823,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (cast)",
-                    e.name, expr, this);
+                    Utils.getASTSource(cast.getType()), this);
                 return null;
             }
 
@@ -838,7 +838,7 @@ public class DFFrame {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (anondecl)",
-                        e.name, cstr, this);
+                        Utils.getASTSource(cstr), this);
                     return null;
                 }
             } else {
@@ -847,7 +847,7 @@ public class DFFrame {
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFFrame.buildExpr: TypeNotFound (new)",
-                        e.name, expr, this);
+                        Utils.getASTSource(cstr.getType()), this);
                     return null;
                 }
             }
@@ -863,7 +863,7 @@ public class DFFrame {
                 if (type == null) {
                     Logger.error(
                         "DFFrame.buildExpr: Type unknown (new)",
-                        arg, this);
+                        Utils.getASTSource(arg), this);
                     return null;
                 }
                 argTypes[i] = type;
@@ -883,7 +883,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (cstr)",
-                    cstr, this);
+                    Utils.getASTSource(cstr), this);
             }
             return instKlass;
 
@@ -913,7 +913,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (lambda)",
-                    e.name, lambda, this);
+                    Utils.getASTSource(lambda), this);
                 return null;
             }
 
@@ -928,7 +928,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (methodref)",
-                    e.name, methodref, this);
+                    Utils.getASTSource(methodref), this);
                 return null;
             }
 
@@ -945,7 +945,7 @@ public class DFFrame {
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFFrame.buildExpr: TypeNotFound (methodref)",
-                    e.name, methodref, this);
+                    Utils.getASTSource(methodref), this);
                 return null;
             }
 
@@ -969,7 +969,7 @@ public class DFFrame {
                 } catch (VariableNotFound e) {
                     Logger.error(
                         "DFFrame.buildAssignment: VariableNotFound (name)",
-                        e.name, name, this);
+                        Utils.getASTSource(name), this);
                     return null;
                 }
             } else {
@@ -983,7 +983,7 @@ public class DFFrame {
                     } catch (TypeNotFound e) {
                         Logger.error(
                             "DFFrame.buildAssignment: VariableNotFound (name)",
-                            e.name, name, this);
+                            Utils.getASTSource(qname.getQualifier()), this);
                         return null;
                     }
                 }
@@ -994,7 +994,7 @@ public class DFFrame {
                 if (ref == null) {
                     Logger.error(
                         "DFFrame.buildAssignment: VariableNotFound (name)",
-                        name, this);
+                        Utils.getASTSource(fieldName), this);
                     return null;
                 }
             }
@@ -1037,7 +1037,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (fieldassign)",
-                    expr, this);
+                    Utils.getASTSource(fieldName), this);
                 return null;
             }
 
@@ -1055,7 +1055,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildAssigmnent: VariableNotFound (superfieldassign)",
-                    expr, this);
+                    Utils.getASTSource(fieldName), this);
                 return null;
             }
 
