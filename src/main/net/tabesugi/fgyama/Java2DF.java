@@ -122,12 +122,16 @@ public class Java2DF {
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) src.cunit.types()) {
-            DFSourceKlass klass = new AbstTypeDeclKlass(
-                abstTypeDecl, packageSpace, null, fileScope,
-                src.path, src.analyze);
-            packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
-            Logger.debug("Stage1: Created:", klass);
-            klasses.add(klass);
+            try {
+                DFSourceKlass klass = new AbstTypeDeclKlass(
+                    abstTypeDecl, packageSpace, null, fileScope,
+                    src.path, src.analyze);
+                packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
+                Logger.debug("Stage1: Created:", klass);
+                klasses.add(klass);
+            } catch (EntityDuplicate e) {
+                Logger.error("Stage1: Class duplicate:", e.name);
+            }
         }
         _fileKlasses.put(src, klasses);
     }
@@ -153,7 +157,11 @@ public class Java2DF {
                 if (klass != null) {
                     Logger.debug("Import:", name);
                     String id = ((QualifiedName)name).getName().getIdentifier();
-                    importSpace.addKlass(id, klass);
+                    try {
+                        importSpace.addKlass(id, klass);
+                    } catch (EntityDuplicate e) {
+                        Logger.error("Stage2: Class duplicate:", e.name);
+                    }
                 } else {
                     Logger.error("Stage2: Class not found:", Utils.getASTSource(name));
                 }

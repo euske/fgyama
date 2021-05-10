@@ -233,7 +233,7 @@ public abstract class DFSourceKlass extends DFKlass {
 
     @SuppressWarnings("unchecked")
     protected void buildTypeFromDecls(List<BodyDeclaration> decls)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -242,7 +242,12 @@ public abstract class DFSourceKlass extends DFKlass {
                 DFSourceKlass klass = new AbstTypeDeclKlass(
                     abstTypeDecl, this, this, this.getKlassScope(),
                     _filePath, _analyze);
-                this.addKlass(id, klass);
+                try {
+                    this.addKlass(id, klass);
+                } catch (TypeDuplicate e) {
+                    e.setAst(abstTypeDecl);
+                    throw e;
+                }
 
             } else if (body instanceof FieldDeclaration) {
 
@@ -263,7 +268,7 @@ public abstract class DFSourceKlass extends DFKlass {
     @SuppressWarnings("unchecked")
     protected void buildMembersFromAnonDecl(
         ClassInstanceCreation cstr)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         // Get superclass.
         assert _finder != null;
         _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -283,7 +288,7 @@ public abstract class DFSourceKlass extends DFKlass {
     @SuppressWarnings("unchecked")
     protected void buildMembersFromTypeDecl(
         TypeDeclaration typeDecl)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         _interface = typeDecl.isInterface();
         // Get superclass.
         _baseKlass = DFBuiltinTypes.getObjectKlass();
@@ -317,7 +322,7 @@ public abstract class DFSourceKlass extends DFKlass {
     @SuppressWarnings("unchecked")
     protected void buildMembersFromEnumDecl(
         EnumDeclaration enumDecl)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         // Get superclass.
         DFKlass enumKlass = DFBuiltinTypes.getEnumKlass();
         _baseKlass = enumKlass.getReifiedKlass(new DFKlass[] { this });
@@ -348,13 +353,13 @@ public abstract class DFSourceKlass extends DFKlass {
     @SuppressWarnings("unchecked")
     protected void buildMembersFromAnnotTypeDecl(
         AnnotationTypeDeclaration annotTypeDecl)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         this.buildMembers(annotTypeDecl.bodyDeclarations());
     }
 
     @SuppressWarnings("unchecked")
     private void buildMembers(List<BodyDeclaration> decls)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
 
         assert _initMethod == null;
         _initMethod = new InitMethod(this, decls, _finder);
@@ -557,8 +562,12 @@ class InitMethod extends DFSourceMethod {
             }
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.build: ",
+                "DFSourceKlass.build: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
+        } catch (EntityDuplicate e) {
+            Logger.error(
+                "DFSourceKlass.build: EntityDuplicate: ",
+                e.name, this);
         }
     }
 
@@ -660,7 +669,8 @@ class DefinedMethod extends DFSourceMethod {
         DFSourceKlass srcklass, CallStyle callStyle,
         boolean isAbstract, String methodId, String methodName,
         MethodDeclaration methodDecl, DFTypeFinder finder,
-        DFTypeSpace outerSpace) {
+        DFTypeSpace outerSpace)
+        throws EntityDuplicate {
         super(srcklass, callStyle,
               isAbstract, methodId, methodName,
               srcklass.getKlassScope(), finder);
@@ -755,8 +765,12 @@ class DefinedMethod extends DFSourceMethod {
                 methodScope.buildStmt(finder, stmt);
             } catch (InvalidSyntax e) {
                 Logger.error(
-                    "DFSourceKlass.build:",
+                    "DFSourceKlass.build: InvalidSyntax: ",
                     Utils.getASTSource(e.ast), this);
+            } catch (EntityDuplicate e) {
+                Logger.error(
+                    "DFSourceKlass.build: EntityDuplicate: ",
+                    e.name, this);
             }
         }
     }

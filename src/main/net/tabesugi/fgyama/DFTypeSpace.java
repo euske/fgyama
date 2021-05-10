@@ -58,12 +58,14 @@ public class DFTypeSpace {
         return space;
     }
 
-    public DFKlass addKlass(String id, DFKlass klass) {
+    public void addKlass(String id, DFKlass klass)
+        throws TypeDuplicate {
         assert id.indexOf('.') < 0;
-        //assert !_id2klass.containsKey(id);
+        if (_id2klass.containsKey(id)) {
+            throw new TypeDuplicate(id);
+        }
         _id2klass.put(id, klass);
         //Logger.info("DFTypeSpace.addKlass:", this, ":", id);
-        return klass;
     }
 
     public DFKlass getKlass(Name name) {

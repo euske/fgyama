@@ -17,7 +17,7 @@ class DFLambdaKlass extends DFSourceKlass {
         private DFFuncType _funcType = null;
 
         public FunctionalMethod(String id, DFTypeFinder finder)
-            throws InvalidSyntax {
+            throws InvalidSyntax, EntityDuplicate {
             super(DFLambdaKlass.this, CallStyle.Lambda,
                   false, id, id, _lambdaScope, finder);
 
@@ -25,7 +25,7 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         private void build()
-            throws InvalidSyntax {
+            throws InvalidSyntax, EntityDuplicate {
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
                 this.buildTypeFromStmt((Statement)body, this.getScope());
@@ -254,8 +254,12 @@ class DFLambdaKlass extends DFSourceKlass {
             _funcMethod = new FunctionalMethod("#f", finder);
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFLambdaKlass.build:",
+                "DFLambdaKlass.build: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
+        } catch (EntityDuplicate e) {
+            Logger.error(
+                "DFLambdaKlass.build: EntityDuplicate: ",
+                e.name, this);
         }
     }
 

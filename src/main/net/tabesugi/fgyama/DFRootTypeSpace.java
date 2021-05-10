@@ -50,7 +50,11 @@ public class DFRootTypeSpace extends DFTypeSpace {
         try {
             for (Enumeration<JarEntry> es = jarFile.entries(); es.hasMoreElements(); ) {
                 JarEntry jarEntry = es.nextElement();
-                addFile(jarFile, jarEntry);
+                try {
+                    addFile(jarFile, jarEntry);
+                } catch (EntityDuplicate e) {
+                    Logger.info("loadJarFile: duplicate: ", e.name, jarFile, jarEntry);
+                }
             }
         } finally {
             jarFile.close();
@@ -58,7 +62,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
     }
 
     private void addFile(JarFile jarFile, JarEntry jarEntry)
-        throws IOException {
+        throws IOException, EntityDuplicate {
         String jarPath = jarFile.getName();
         String entPath = jarEntry.getName();
         if (!entPath.endsWith(".class")) return;

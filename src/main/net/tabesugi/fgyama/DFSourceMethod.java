@@ -85,7 +85,7 @@ public abstract class DFSourceMethod extends DFMethod {
     @SuppressWarnings("unchecked")
     protected void buildTypeFromStmt(
         Statement stmt, DFLocalScope outerScope)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         assert stmt != null;
 
         if (stmt instanceof AssertStatement) {
@@ -243,7 +243,12 @@ public abstract class DFSourceMethod extends DFMethod {
                 abstTypeDecl, this, _srcklass, outerScope,
                 _srcklass.getFilePath(), _srcklass.isAnalyze());
             klass.initializeFinder(_finder);
-            this.addKlass(id, klass);
+            try {
+                this.addKlass(id, klass);
+            } catch (TypeDuplicate e) {
+                e.setAst(abstTypeDecl);
+                throw e;
+            }
 
         } else {
             throw new InvalidSyntax(stmt);
@@ -254,7 +259,7 @@ public abstract class DFSourceMethod extends DFMethod {
     @SuppressWarnings("unchecked")
     protected void buildTypeFromExpr(
         Expression expr, DFVarScope outerScope)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         assert expr != null;
 
         if (expr instanceof Annotation) {
@@ -369,7 +374,12 @@ public abstract class DFSourceMethod extends DFMethod {
                 DFSourceKlass anonKlass = new AnonymousKlass(
                     cstr, this, _srcklass, outerScope);
                 anonKlass.initializeFinder(_finder);
-                this.addKlass(id, anonKlass);
+                try {
+                    this.addKlass(id, anonKlass);
+                } catch (TypeDuplicate e) {
+                    e.setAst(cstr);
+                    throw e;
+                }
             }
 
         } else if (expr instanceof ConditionalExpression) {
@@ -386,7 +396,12 @@ public abstract class DFSourceMethod extends DFMethod {
             DFSourceKlass lambdaKlass = new DFLambdaKlass(
                 lambda, this, _srcklass, outerScope);
             lambdaKlass.initializeFinder(_finder);
-            this.addKlass(id, lambdaKlass);
+            try {
+                this.addKlass(id, lambdaKlass);
+            } catch (TypeDuplicate e) {
+                e.setAst(lambda);
+                throw e;
+            }
 
         } else if (expr instanceof MethodReference) {
             //  CreationReference
@@ -398,7 +413,12 @@ public abstract class DFSourceMethod extends DFMethod {
             DFSourceKlass methodRefKlass = new DFMethodRefKlass(
                 methodref, this, _srcklass, outerScope);
             methodRefKlass.initializeFinder(_finder);
-            this.addKlass(id, methodRefKlass);
+            try {
+                this.addKlass(id, methodRefKlass);
+            } catch (TypeDuplicate e) {
+                e.setAst(methodref);
+                throw e;
+            }
 
         } else {
             // ???
@@ -1914,7 +1934,7 @@ class AnonymousKlass extends DFSourceKlass {
         ClassInstanceCreation cstr,
         DFTypeSpace outerSpace, DFSourceKlass outerKlass,
         DFVarScope outerScope)
-        throws InvalidSyntax {
+        throws InvalidSyntax, EntityDuplicate {
         super(Utils.encodeASTNode(cstr),
               outerSpace, outerKlass, outerScope,
               outerKlass.getFilePath(), outerKlass.isAnalyze());
@@ -1937,8 +1957,12 @@ class AnonymousKlass extends DFSourceKlass {
             this.buildMembersFromAnonDecl(_cstr);
         } catch (InvalidSyntax e) {
             Logger.error(
-                "AnonymousKlass.build:",
+                "AnonymousKlass.build: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
+        } catch (EntityDuplicate e) {
+            Logger.error(
+                "AnonymousKlass.build: EntityDuplicate: ",
+                e.name, this);
         }
     }
 

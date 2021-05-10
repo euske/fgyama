@@ -54,7 +54,8 @@ public class DFJarFileKlass extends DFKlass {
 
     // Protected constructor for a parameterized klass.
     protected DFJarFileKlass(
-        DFJarFileKlass genericKlass, Map<String, DFKlass> paramTypes) {
+        DFJarFileKlass genericKlass, Map<String, DFKlass> paramTypes)
+        throws TypeDuplicate {
         super(genericKlass, paramTypes);
 
         _finder = new DFTypeFinder(this, genericKlass._finder);
@@ -154,7 +155,14 @@ public class DFJarFileKlass extends DFKlass {
     @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
-        return new DFJarFileKlass(this, paramTypes);
+        try {
+            return new DFJarFileKlass(this, paramTypes);
+        } catch (EntityDuplicate e) {
+            Logger.error(
+                "DFJarFileKlass.parameterize: EntityDuplicate: ",
+                e.name, this);
+            return this;
+        }
     }
 
     @Override
@@ -177,7 +185,8 @@ public class DFJarFileKlass extends DFKlass {
 
     // for loading nested klasses.
 
-    protected DFJarFileKlass addInnerKlass(String id, DFJarFileKlass klass) {
+    protected DFJarFileKlass addInnerKlass(String id, DFJarFileKlass klass)
+        throws TypeDuplicate {
         super.addKlass(id, klass);
         assert id.indexOf('.') < 0;
         _id2jarklass.put(id, klass);
