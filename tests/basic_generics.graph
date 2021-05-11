@@ -8,90 +8,94 @@
       <ast end="612" start="370" type="31"/>
       <scope name="Lbasic_generics;.:test:370:612">
         <node id="M2_test_N1" kind="input" ref="#this" type="Lbasic_generics;"/>
+        <node id="M2_test_N2" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
+        <node id="M2_test_N24" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <accept src="M2_test_N2"/>
+        </node>
         <scope name="Lbasic_generics;.:test:370:612.:B:396:612">
-          <node data="moo" id="M2_test_N2" kind="value" type="Ljava/lang/String;">
+          <node data="moo" id="M2_test_N3" kind="value" type="Ljava/lang/String;">
             <ast end="445" start="440" type="45"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N3" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N4" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="446" start="424" type="14"/>
-            <accept label="#arg0" src="M2_test_N2"/>
+            <accept label="#arg0" src="M2_test_N3"/>
           </node>
-          <node id="M2_test_N4" kind="receive" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="M2_test_N5" kind="receive" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="446" start="424" type="14"/>
-            <accept src="M2_test_N3"/>
-          </node>
-          <node id="M2_test_N5" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <ast end="446" start="418" type="59"/>
             <accept src="M2_test_N4"/>
           </node>
-          <node id="M2_test_N6" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <ast end="470" start="467" type="42"/>
+          <node id="M2_test_N6" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+            <ast end="446" start="418" type="59"/>
             <accept src="M2_test_N5"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get()Ljava/lang/String;" id="M2_test_N7" kind="call" type="Ljava/lang/String;">
+          <node id="M2_test_N7" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+            <ast end="470" start="467" type="42"/>
+            <accept src="M2_test_N6"/>
+          </node>
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get()Ljava/lang/String;" id="M2_test_N8" kind="call" type="Ljava/lang/String;">
             <ast end="476" start="467" type="32"/>
-            <accept label="#this" src="M2_test_N6"/>
+            <accept label="#this" src="M2_test_N7"/>
           </node>
-          <node id="M2_test_N8" kind="receive" type="Ljava/lang/String;">
+          <node id="M2_test_N9" kind="receive" type="Ljava/lang/String;">
             <ast end="476" start="467" type="32"/>
-            <accept src="M2_test_N7"/>
+            <accept src="M2_test_N8"/>
           </node>
-          <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="M2_test_N9" kind="call" type="Ljava/lang/String;">
+          <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="M2_test_N10" kind="call" type="Ljava/lang/String;">
             <ast end="490" start="467" type="32"/>
-            <accept label="#this" src="M2_test_N8"/>
+            <accept label="#this" src="M2_test_N9"/>
           </node>
-          <node id="M2_test_N10" kind="receive" type="Ljava/lang/String;">
+          <node id="M2_test_N11" kind="receive" type="Ljava/lang/String;">
             <ast end="490" start="467" type="32"/>
-            <accept src="M2_test_N9"/>
-          </node>
-          <node id="M2_test_N11" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$b" type="Ljava/lang/String;">
-            <ast end="490" start="463" type="59"/>
             <accept src="M2_test_N10"/>
           </node>
-          <node id="M2_test_N12" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <ast end="514" start="511" type="42"/>
-            <accept src="M2_test_N5"/>
+          <node id="M2_test_N12" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$b" type="Ljava/lang/String;">
+            <ast end="490" start="463" type="59"/>
+            <accept src="M2_test_N11"/>
           </node>
           <node id="M2_test_N13" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+            <ast end="514" start="511" type="42"/>
+            <accept src="M2_test_N6"/>
+          </node>
+          <node id="M2_test_N14" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="523" start="520" type="42"/>
-            <accept src="M2_test_N5"/>
+            <accept src="M2_test_N6"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get2(Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;" id="M2_test_N14" kind="call" type="Ljava/lang/String;">
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.get2(Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;)Ljava/lang/String;" id="M2_test_N15" kind="call" type="Ljava/lang/String;">
             <ast end="524" start="511" type="32"/>
-            <accept label="#this" src="M2_test_N12"/>
-            <accept label="#arg0" src="M2_test_N13"/>
+            <accept label="#this" src="M2_test_N13"/>
+            <accept label="#arg0" src="M2_test_N14"/>
           </node>
-          <node id="M2_test_N15" kind="receive" type="Ljava/lang/String;">
+          <node id="M2_test_N16" kind="receive" type="Ljava/lang/String;">
             <ast end="524" start="511" type="32"/>
-            <accept src="M2_test_N14"/>
+            <accept src="M2_test_N15"/>
           </node>
-          <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="M2_test_N16" kind="call" type="Ljava/lang/String;">
+          <node data="Ljava/lang/String;.toLowerCase()Ljava/lang/String;" id="M2_test_N17" kind="call" type="Ljava/lang/String;">
             <ast end="538" start="511" type="32"/>
-            <accept label="#this" src="M2_test_N15"/>
+            <accept label="#this" src="M2_test_N16"/>
           </node>
-          <node id="M2_test_N17" kind="receive" type="Ljava/lang/String;">
+          <node id="M2_test_N18" kind="receive" type="Ljava/lang/String;">
             <ast end="538" start="511" type="32"/>
-            <accept src="M2_test_N16"/>
-          </node>
-          <node id="M2_test_N18" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$c" type="Ljava/lang/String;">
-            <ast end="538" start="507" type="59"/>
             <accept src="M2_test_N17"/>
           </node>
-          <node id="M2_test_N19" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="M2_test_N19" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$c" type="Ljava/lang/String;">
+            <ast end="538" start="507" type="59"/>
+            <accept src="M2_test_N18"/>
+          </node>
+          <node id="M2_test_N20" kind="ref_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$moo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="569" start="566" type="42"/>
-            <accept src="M2_test_N5"/>
+            <accept src="M2_test_N6"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N20" kind="call" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N21" kind="call" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="576" start="566" type="32"/>
-            <accept label="#this" src="M2_test_N19"/>
+            <accept label="#this" src="M2_test_N20"/>
           </node>
-          <node id="M2_test_N21" kind="receive" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="M2_test_N22" kind="receive" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="576" start="566" type="32"/>
-            <accept src="M2_test_N20"/>
-          </node>
-          <node id="M2_test_N22" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
-            <ast end="576" start="560" type="59"/>
             <accept src="M2_test_N21"/>
+          </node>
+          <node id="M2_test_N23" kind="assign_var" ref="$Lbasic_generics;.:test:370:612.:B:396:612/$boo" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+            <ast end="576" start="560" type="59"/>
+            <accept src="M2_test_N22"/>
           </node>
         </scope>
       </scope>
@@ -159,6 +163,9 @@
           <accept src="M5_&lt;init&gt;_N1"/>
         </node>
         <node id="M5_&lt;init&gt;_N3" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
+        <node id="M5_&lt;init&gt;_N8" kind="output" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <accept src="M5_&lt;init&gt;_N5"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:Moo:80:124.:B:89:124">
           <node id="M5_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="107" start="103" type="52"/>
@@ -184,19 +191,19 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196">
         <node id="M6_get_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
-        <node id="M6_get_N3" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
+        <node id="M6_get_N2" kind="input" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
         <node id="M6_get_N7" kind="output" ref="#return" type="TT;">
           <accept src="M6_get_N5"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196.:B:142:196">
-          <node id="M6_get_N2" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <node id="M6_get_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
             <ast end="163" start="162" type="42"/>
             <accept label="obj" src="M6_get_N1"/>
-            <accept src="M6_get_N3"/>
+            <accept src="M6_get_N2"/>
           </node>
           <node id="M6_get_N4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196.:B:142:196/$y" type="TT;">
             <ast end="163" start="158" type="59"/>
-            <accept src="M6_get_N2"/>
+            <accept src="M6_get_N3"/>
           </node>
           <node id="M6_get_N5" kind="return" ref="#return" type="TT;">
             <ast end="186" start="177" type="41"/>
@@ -247,23 +254,27 @@
       <ast end="335" start="276" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:copy:276:335">
         <node id="M8_copy_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
-        <node id="M8_copy_N4" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
+        <node id="M8_copy_N2" kind="input" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
         <node id="M8_copy_N7" kind="output" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
-          <accept src="M8_copy_N2"/>
+          <accept src="M8_copy_N3"/>
         </node>
+        <node id="M8_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <accept src="M8_copy_N9"/>
+        </node>
+        <node id="M8_copy_N9" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:copy:276:335.:B:290:335">
-          <node id="M8_copy_N2" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
+          <node id="M8_copy_N3" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="325" start="304" type="41"/>
             <accept src="M8_copy_N6"/>
           </node>
-          <node id="M8_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <node id="M8_copy_N4" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
             <ast end="323" start="322" type="42"/>
             <accept label="obj" src="M8_copy_N1"/>
-            <accept src="M8_copy_N4"/>
+            <accept src="M8_copy_N2"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;TT;&gt;;.&lt;init&gt;(TT;)Lbasic_generics/Moo&lt;TT;&gt;;" id="M8_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="324" start="311" type="14"/>
-            <accept label="#arg0" src="M8_copy_N3"/>
+            <accept label="#arg0" src="M8_copy_N4"/>
           </node>
           <node id="M8_copy_N6" kind="receive" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="324" start="311" type="14"/>
@@ -299,6 +310,9 @@
           <accept src="M10_&lt;init&gt;_N1"/>
         </node>
         <node id="M10_&lt;init&gt;_N3" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
+        <node id="M10_&lt;init&gt;_N8" kind="output" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <accept src="M10_&lt;init&gt;_N5"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:Moo:80:124.:B:89:124">
           <node id="M10_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="107" start="103" type="52"/>
@@ -324,19 +338,19 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196">
         <node id="M11_get_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
-        <node id="M11_get_N3" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
+        <node id="M11_get_N2" kind="input" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
         <node id="M11_get_N7" kind="output" ref="#return" type="TT;">
           <accept src="M11_get_N5"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196.:B:142:196">
-          <node id="M11_get_N2" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <node id="M11_get_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
             <ast end="163" start="162" type="42"/>
             <accept label="obj" src="M11_get_N1"/>
-            <accept src="M11_get_N3"/>
+            <accept src="M11_get_N2"/>
           </node>
           <node id="M11_get_N4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;TT;&gt;;.:get:134:196.:B:142:196/$y" type="TT;">
             <ast end="163" start="158" type="59"/>
-            <accept src="M11_get_N2"/>
+            <accept src="M11_get_N3"/>
           </node>
           <node id="M11_get_N5" kind="return" ref="#return" type="TT;">
             <ast end="186" start="177" type="41"/>
@@ -387,23 +401,26 @@
       <ast end="335" start="276" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:copy:276:335">
         <node id="M13_copy_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;TT;&gt;;"/>
-        <node id="M13_copy_N4" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
+        <node id="M13_copy_N2" kind="input" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;"/>
         <node id="M13_copy_N7" kind="output" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
+          <accept src="M13_copy_N3"/>
+        </node>
+        <node id="M13_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
           <accept src="M13_copy_N2"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:copy:276:335.:B:290:335">
-          <node id="M13_copy_N2" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
+          <node id="M13_copy_N3" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="325" start="304" type="41"/>
             <accept src="M13_copy_N6"/>
           </node>
-          <node id="M13_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
+          <node id="M13_copy_N4" kind="ref_field" ref="@Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
             <ast end="323" start="322" type="42"/>
             <accept label="obj" src="M13_copy_N1"/>
-            <accept src="M13_copy_N4"/>
+            <accept src="M13_copy_N2"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;TT;&gt;;.&lt;init&gt;(TT;)Lbasic_generics/Moo&lt;TT;&gt;;" id="M13_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="324" start="311" type="14"/>
-            <accept label="#arg0" src="M13_copy_N3"/>
+            <accept label="#arg0" src="M13_copy_N4"/>
           </node>
           <node id="M13_copy_N6" kind="receive" type="Lbasic_generics/Moo&lt;TT;&gt;;">
             <ast end="324" start="311" type="14"/>
@@ -451,6 +468,9 @@
           <accept src="M17_&lt;init&gt;_N1"/>
         </node>
         <node id="M17_&lt;init&gt;_N3" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
+        <node id="M17_&lt;init&gt;_N8" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <accept src="M17_&lt;init&gt;_N5"/>
+        </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124.:B:89:124">
           <node id="M17_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="107" start="103" type="52"/>
@@ -477,19 +497,19 @@
       <ast end="196" start="134" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:get:134:196">
         <node id="M18_get_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
-        <node id="M18_get_N3" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
+        <node id="M18_get_N2" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
         <node id="M18_get_N7" kind="output" ref="#return" type="Ljava/lang/String;">
           <accept src="M18_get_N5"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:get:134:196.:B:142:196">
-          <node id="M18_get_N2" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="M18_get_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <ast end="163" start="162" type="42"/>
             <accept label="obj" src="M18_get_N1"/>
-            <accept src="M18_get_N3"/>
+            <accept src="M18_get_N2"/>
           </node>
           <node id="M18_get_N4" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:get:134:196.:B:142:196/$y" type="Ljava/lang/String;">
             <ast end="163" start="158" type="59"/>
-            <accept src="M18_get_N2"/>
+            <accept src="M18_get_N3"/>
           </node>
           <node id="M18_get_N5" kind="return" ref="#return" type="Ljava/lang/String;">
             <ast end="186" start="177" type="41"/>
@@ -576,23 +596,26 @@
       <ast end="335" start="276" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:copy:276:335">
         <node id="M21_copy_N1" kind="input" ref="#this" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
-        <node id="M21_copy_N4" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
+        <node id="M21_copy_N2" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;"/>
         <node id="M21_copy_N7" kind="output" ref="#return" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <accept src="M21_copy_N3"/>
+        </node>
+        <node id="M21_copy_N8" kind="output" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
           <accept src="M21_copy_N2"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:copy:276:335.:B:290:335">
-          <node id="M21_copy_N2" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="M21_copy_N3" kind="return" ref="#return" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="325" start="304" type="41"/>
             <accept src="M21_copy_N6"/>
           </node>
-          <node id="M21_copy_N3" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="M21_copy_N4" kind="ref_field" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <ast end="323" start="322" type="42"/>
             <accept label="obj" src="M21_copy_N1"/>
-            <accept src="M21_copy_N4"/>
+            <accept src="M21_copy_N2"/>
           </node>
           <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M21_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="324" start="311" type="14"/>
-            <accept label="#arg0" src="M21_copy_N3"/>
+            <accept label="#arg0" src="M21_copy_N4"/>
           </node>
           <node id="M21_copy_N6" kind="receive" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="324" start="311" type="14"/>

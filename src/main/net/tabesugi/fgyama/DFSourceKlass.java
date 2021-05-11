@@ -807,11 +807,9 @@ class DefinedMethod extends DFSourceMethod {
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
         if (this.getCallStyle() == CallStyle.Constructor) {
-            if (this.isTransparent()) {
-                for (DFKlass.FieldRef ref : this.getKlass().getFields()) {
-                    if (!ref.isStatic()) {
-                        this.getOutputRefs().add(ref);
-                    }
+            for (DFKlass.FieldRef ref : this.getKlass().getFields()) {
+                if (!ref.isStatic()) {
+                    this.getOutputRefs().add(ref);
                 }
             }
         }

@@ -71,12 +71,10 @@ public abstract class DFSourceMethod extends DFMethod {
     }
 
     public Collection<DFRef> getInputRefs() {
-        assert this.isTransparent();
         return _inputRefs;
     }
 
     public Collection<DFRef> getOutputRefs() {
-        assert this.isTransparent();
         return _outputRefs;
     }
 
@@ -1685,22 +1683,18 @@ public abstract class DFSourceMethod extends DFMethod {
         assert _finder != null;
 
         // Create input nodes.
-        if (this.isTransparent()) {
-            for (DFRef ref : this.getInputRefs()) {
-                DFNode input = new InputNode(graph, _methodScope, ref, null);
-                ctx.set(input);
-            }
+        for (DFRef ref : this.getInputRefs()) {
+            DFNode input = new InputNode(graph, _methodScope, ref, null);
+            ctx.set(input);
         }
 
         graph.processBodyDecls(
             ctx, _methodScope, _srcklass, decls);
 
         // Create output nodes.
-        if (this.isTransparent()) {
-            for (DFRef ref : this.getOutputRefs()) {
-                DFNode output = new OutputNode(graph, _methodScope, ref, null);
-                output.accept(ctx.get(ref));
-            }
+        for (DFRef ref : this.getOutputRefs()) {
+            DFNode output = new OutputNode(graph, _methodScope, ref, null);
+            output.accept(ctx.get(ref));
         }
 
         graph.cleanup(null);
@@ -1720,12 +1714,10 @@ public abstract class DFSourceMethod extends DFMethod {
             ctx.set(input);
             preserved.add(input);
         }
-        if (this.isTransparent()) {
-            for (DFRef ref : this.getInputRefs()) {
-                DFNode input = new InputNode(graph, _methodScope, ref, null);
-                ctx.set(input);
-                preserved.add(input);
-            }
+        for (DFRef ref : this.getInputRefs()) {
+            DFNode input = new InputNode(graph, _methodScope, ref, null);
+            ctx.set(input);
+            preserved.add(input);
         }
 
         try {
@@ -1760,12 +1752,10 @@ public abstract class DFSourceMethod extends DFMethod {
                 preserved.add(output);
             }
         }
-        if (this.isTransparent()) {
-            for (DFRef ref : this.getOutputRefs()) {
-                DFNode output = new OutputNode(graph, _methodScope, ref, null);
-                output.accept(ctx.get(ref));
-                preserved.add(output);
-            }
+        for (DFRef ref : this.getOutputRefs()) {
+            DFNode output = new OutputNode(graph, _methodScope, ref, null);
+            output.accept(ctx.get(ref));
+            preserved.add(output);
         }
 
         // Do not remove input/output nodes.
