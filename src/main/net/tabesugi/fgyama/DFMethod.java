@@ -252,6 +252,27 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return this.getFuncType().canAccept(argTypes, typeMap);
     }
 
+    // Returns true if it is an abstract, non-Object method.
+    public boolean isFuncMethod() {
+        if (_callStyle != CallStyle.InstanceMethod) return false;
+        if (!_abstract) return false;
+        String sig = this.getFuncType().getTypeName();
+        // Check if this is one of Object methods.
+        if (_methodName.equals("equals")) {
+            return (!sig.equals("(Ljava/lang/Object;)Z"));
+        }
+        if (_methodName.equals("hashCode")) {
+            return (!sig.equals("()I"));
+        }
+        if (_methodName.equals("toString")) {
+            return (!sig.equals("()Ljava/lang/String;"));
+        }
+        if (_methodName.equals("clone")) {
+            return (!sig.equals("()Ljava/lang/Object;"));
+        }
+        return true;
+    }
+
     // Get the method signature.
     public abstract DFFuncType getFuncType();
 

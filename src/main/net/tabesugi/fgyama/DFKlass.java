@@ -261,7 +261,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (!this.isInterface()) return null;
         DFMethod funcMethod = null;
         for (DFMethod method : this.getMethods()) {
-            if (method.isAbstract()) {
+            if (method.isFuncMethod()) {
                 if (funcMethod != null) return null; // More than one.
                 funcMethod = method;
             }

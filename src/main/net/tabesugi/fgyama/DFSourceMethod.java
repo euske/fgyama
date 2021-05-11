@@ -1807,12 +1807,14 @@ public abstract class DFSourceMethod extends DFMethod {
         }
 
         protected void buildInternalRefs(List<VariableDeclaration> parameters) {
+            // could be a wrong funcType when the lambda is undefined.
             DFFuncType funcType = DFSourceMethod.this.getFuncType();
-            _return = new InternalRef(funcType.getReturnType(), "return");
-            _arguments = new InternalRef[parameters.size()];
             DFType[] argTypes = funcType.getRealArgTypes();
+            _return = new InternalRef(funcType.getReturnType(), "return");
+            _arguments = new InternalRef[argTypes.length];
             int i = 0;
             for (VariableDeclaration decl : parameters) {
+                if (argTypes.length <= i) break;
                 DFType argType = argTypes[i];
                 int ndims = decl.getExtraDimensions();
                 if (ndims != 0) {
