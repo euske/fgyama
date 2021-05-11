@@ -14,6 +14,7 @@ public class SCCFinder<T> {
         public List<SCC> to = new ArrayList<SCC>();
         public List<SCC> from = new ArrayList<SCC>();
         public boolean visited = false;
+        private boolean _fixated = false;
 
         public SCC(int cid, List<T> items) {
             this.cid = cid;
@@ -26,6 +27,8 @@ public class SCCFinder<T> {
         }
 
         private void fixate() {
+            if (_fixated) return;
+            _fixated = true;
             for (T v0 : items) {
                 for (T v1 : _mapper.get(v0)) {
                     SCC scc = _item2scc.get(v1);
@@ -59,7 +62,7 @@ public class SCCFinder<T> {
         }
     }
 
-    public void add(Collection<T> items) {
+    public void add(Iterable<T> items) {
         for (T v : items) {
             this.add(v);
         }
