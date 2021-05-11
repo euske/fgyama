@@ -207,7 +207,7 @@ public class Java2DF {
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
-        Queue<DFSourceMethod> queue = new ArrayDeque<DFSourceMethod>();
+        List<DFSourceMethod> methods = new ArrayList<DFSourceMethod>();
 
         // List method overrides.
         for (DFSourceKlass klass : klasses) {
@@ -220,7 +220,7 @@ public class Java2DF {
             klass.listDefinedKlasses(defined);
             for (DFMethod method : klass.getMethods()) {
                 if (method instanceof DFSourceMethod) {
-                    queue.add((DFSourceMethod)method);
+                    methods.add((DFSourceMethod)method);
                 }
             }
         }
@@ -237,7 +237,7 @@ public class Java2DF {
                 klass.listDefinedKlasses(tmp);
                 for (DFMethod method : klass.getMethods()) {
                     if (method instanceof DFSourceMethod) {
-                        queue.add((DFSourceMethod)method);
+                        methods.add((DFSourceMethod)method);
                     }
                 }
             }
@@ -246,15 +246,58 @@ public class Java2DF {
 
         // Expand input/output refs of each method
         // based on the methods it calls.
-        while (!queue.isEmpty()) {
-            DFSourceMethod callee = queue.remove();
-            for (DFMethod caller : callee.getCallers()) {
-                if (caller instanceof DFSourceMethod) {
-                    int added = ((DFSourceMethod)caller).expandRefs(callee);
-                    if (0 < added) {
-                        queue.add((DFSourceMethod)caller);
+        // Identify SCCs from the call graph:
+        //   SCC.to: caller.
+        //   SCC.from: callee.
+        SCCFinder<DFSourceMethod> f = new SCCFinder<DFSourceMethod>(
+            (DFSourceMethod method) -> {
+                List<DFSourceMethod> callers = new ArrayList<DFSourceMethod>();
+                for (DFMethod caller : method.getCallers()) {
+                    if (caller instanceof DFSourceMethod) {
+                        callers.add((DFSourceMethod)caller);
                     }
                 }
+                return callers;
+            });
+        f.add(methods);
+        // RefSet: holds input/output variables for each SCC.
+        class RefSet {
+            SCCFinder<DFSourceMethod>.SCC scc;
+            Set<DFRef> inputRefs = new ConsistentHashSet<DFRef>();
+            Set<DFRef> outputRefs = new ConsistentHashSet<DFRef>();
+            RefSet(SCCFinder<DFSourceMethod>.SCC scc) {
+                this.scc = scc;
+                for (DFSourceMethod method : scc.items) {
+                    inputRefs.addAll(method.getInputRefs());
+                    outputRefs.addAll(method.getOutputRefs());
+                }
+            }
+            void fixate() {
+                for (DFSourceMethod method : scc.items) {
+                    method.expandRefs(this.inputRefs, this.outputRefs);
+                }
+            }
+            void expandRefs(RefSet rset) {
+                inputRefs.addAll(rset.inputRefs);
+                outputRefs.addAll(rset.outputRefs);
+            }
+        };
+        // SCCs are topologically sorted from caller -> callee.
+        List<RefSet> rsets = new ArrayList<RefSet>();
+        Map<SCCFinder<DFSourceMethod>.SCC, RefSet> scc2rset =
+            new HashMap<SCCFinder<DFSourceMethod>.SCC, RefSet>();
+        for (SCCFinder<DFSourceMethod>.SCC scc : f.getSCCs()) {
+            RefSet rset = new RefSet(scc);
+            rsets.add(rset);
+            scc2rset.put(scc, rset);
+        }
+        // Reverse the list and start from the bottom callees.
+        Collections.reverse(rsets);
+        for (RefSet r0 : rsets) {
+            r0.fixate();
+            for (SCCFinder<DFSourceMethod>.SCC scc : r0.scc.to) {
+                RefSet r1 = scc2rset.get(scc);
+                r1.expandRefs(r0);
             }
         }
     }

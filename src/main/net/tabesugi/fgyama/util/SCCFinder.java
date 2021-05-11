@@ -13,7 +13,6 @@ public class SCCFinder<T> {
         public List<T> items;
         public List<SCC> to = new ArrayList<SCC>();
         public List<SCC> from = new ArrayList<SCC>();
-        public boolean visited = false;
         private boolean _fixated = false;
 
         public SCC(int cid, List<T> items) {
