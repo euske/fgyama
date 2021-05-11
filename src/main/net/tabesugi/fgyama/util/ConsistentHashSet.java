@@ -21,6 +21,10 @@ public class ConsistentHashSet<E> implements Set<E>, Iterable<E> {
         _list = new ArrayList<E>(c._list);
     }
 
+    public E get(int i) {
+        return _list.get(i);
+    }
+
     @Override
     public String toString() {
         return _set.toString();

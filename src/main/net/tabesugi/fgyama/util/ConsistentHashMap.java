@@ -11,6 +11,10 @@ public class ConsistentHashMap<K,V> implements Map<K,V> {
     private Map<K,V> _map = new HashMap<K,V>();
     private List<K> _keys = new ArrayList<K>();
 
+    public K getKey(int i) {
+        return _keys.get(i);
+    }
+
     @Override
     public String toString() {
         return _map.toString();
