@@ -99,16 +99,17 @@ public class Java2DF {
         }
 
         // Stage3: list class definitions and define parameterized Klasses.
-        ConsistentHashSet<DFSourceKlass> klasses =
-            new ConsistentHashSet<DFSourceKlass>();
+        Set<DFSourceKlass> klasses = new ConsistentHashSet<DFSourceKlass>();
         for (SourceFile src : _sourceFiles.values()) {
             Logger.info("Stage3:", src);
             this.listUsedKlasses(src, klasses);
         }
 
-        // Stage4: expand classes.
+        // Stage4: expand classes and method refs.
         Logger.info("Stage4: expanding "+klasses.size()+" klasses...");
-        this.expandKlasses(klasses);
+        List<DFSourceMethod> methods = this.expandKlasses(klasses);
+        Logger.info("Stage4: expanding "+methods.size()+" method refs...");
+        this.expandRefs(methods);
 
         return klasses;
     }
@@ -203,7 +204,7 @@ public class Java2DF {
         }
     }
 
-    private void expandKlasses(Collection<DFSourceKlass> klasses)
+    private List<DFSourceMethod> expandKlasses(Collection<DFSourceKlass> klasses)
         throws InvalidSyntax {
         // At this point, all the methods in all the used classes
         // (public, inner, in-statement and anonymous) are known.
@@ -244,6 +245,10 @@ public class Java2DF {
             defined = tmp;
         }
 
+        return methods;
+    }
+
+    private void expandRefs(Collection<DFSourceMethod> methods) {
         // Expand input/output refs of each method
         // based on the methods it calls.
         // Identify SCCs from the call graph:
@@ -260,6 +265,7 @@ public class Java2DF {
                 return callers;
             });
         f.add(methods);
+
         // RefSet: holds input/output variables for each SCC.
         class RefSet {
             SCCFinder<DFSourceMethod>.SCC scc;
@@ -282,6 +288,7 @@ public class Java2DF {
                 outputRefs.addAll(rset.outputRefs);
             }
         };
+
         // SCCs are topologically sorted from caller -> callee.
         List<RefSet> rsets = new ArrayList<RefSet>();
         Map<SCCFinder<DFSourceMethod>.SCC, RefSet> scc2rset =
@@ -291,6 +298,7 @@ public class Java2DF {
             rsets.add(rset);
             scc2rset.put(scc, rset);
         }
+
         // Reverse the list and start from the bottom callees.
         Collections.reverse(rsets);
         for (RefSet r0 : rsets) {
