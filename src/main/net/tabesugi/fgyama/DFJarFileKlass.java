@@ -166,9 +166,9 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public DFKlass getKlass(String id) {
+    public DFKlass lookupKlass(String id) {
         this.loadJarFile();
-        return super.getKlass(id);
+        return super.lookupKlass(id);
     }
 
     @Override
