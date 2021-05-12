@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import sys
+import logging
 from graphs import IDFBuilder, Cons, clen, parsemethodname, stripid
 
-debug = 0
 MAXNAMES = 5
 
 def q(s):
@@ -135,8 +135,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
     if k in ctx2iref:
         iref1 = ctx2iref[k]
         if iref0 is not None:
-            if debug:
-                print(f'{clen(cc)} {iref1!r} -> {iref0!r}')
+            logging.debug(f'{clen(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         return
     n1 = v1.node
@@ -151,8 +150,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
         else:
             iref1 = IRef.get(None, ref1)
         if iref0 is not None:
-            if debug:
-                print(f'{clen(cc)} {iref1!r} -> {iref0!r}')
+            logging.debug(f'{clen(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         ctx2iref[k] = iref1
     for (link,v2,funcall) in v1.inputs:
@@ -170,7 +168,6 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
 
 # main
 def main(argv):
-    global debug
     import fileinput
     import getopt
     def usage():
@@ -180,18 +177,21 @@ def main(argv):
         (opts, args) = getopt.getopt(argv[1:], 'do:M:r:f:')
     except getopt.GetoptError:
         return usage()
+    level = logging.INFO
     outpath = None
     maxoverrides = 1
     ratio = 0.9
     maxfan = 5
     methods = set()
     for (k, v) in opts:
-        if k == '-d': debug += 1
+        if k == '-d': level = logging.DEBUG
         elif k == '-o': outpath = v
         elif k == '-M': maxoverrides = int(v)
         elif k == '-r': ratio = float(v)
         elif k == '-f': methods.update(v.split(','))
     if not args: return usage()
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
 
     out = sys.stdout
     if outpath is not None:
@@ -199,12 +199,11 @@ def main(argv):
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        print(f'Loading: {path}...', file=sys.stderr)
+        logging.info(f'Loading: {path}...')
         builder.load(path)
     builder.run()
     nfuncalls = sum( len(a) for a in builder.funcalls.values() )
-    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
-          file=sys.stderr)
+    logging.info(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes')
 
     # Enumerate all the flows.
     irefs = set()
@@ -215,7 +214,7 @@ def main(argv):
         if method.callers: continue
         (klass,name,func) = parsemethodname(method.name)
         if methods and (name not in methods) and (method.name not in methods): continue
-        print(f'method: {method.name}', file=sys.stderr)
+        logging.info(f'method: {method.name}')
         for node in method:
             vtx = builder.vtxs[node]
             if vtx.outputs: continue
@@ -229,12 +228,12 @@ def main(argv):
                 irefs.add(iref0)
                 irefs.add(iref1)
                 nlinks += 1
-    print(f'irefs: {len(irefs)}', file=sys.stderr)
-    print(f'links: {nlinks}', file=sys.stderr)
+    logging.info(f'irefs: {len(irefs)}')
+    logging.info(f'links: {nlinks}')
 
     # Discover strong components.
     (ref2cpt, allcpts) = IRefComponent.fromitems(irefs)
-    print(f'allcpts: {len(allcpts)}', file=sys.stderr)
+    logging.info(f'allcpts: {len(allcpts)}')
 
     # Discover the most significant edges.
     incount = {}
@@ -275,11 +274,11 @@ def main(argv):
             if maxcount < count:
                 maxcount = count
         if len(cpt0) < 2: continue
-        if debug:
-            print(f'cpt: {cpt0}', file=sys.stderr)
+        if level == logging.DEBUG:
+            logging.debug(f'cpt: {cpt0}')
             for iref in cpt0:
-                print(f'  {iref!r}', file=sys.stderr)
-    print(f'maxcount: {maxcount}', file=sys.stderr)
+                logging.debug(f'  {iref!r}')
+    logging.info(f'maxcount: {maxcount}')
 
     # Traverse the edges.
     maxlinks = set()
@@ -302,11 +301,11 @@ def main(argv):
                 maxlinks.add((cpt0, cpt1))
                 trav_back(cpt0)
                 trav_forw(cpt1)
-    print(f'maxlinks: {len(maxlinks)}', file=sys.stderr)
+    logging.info(f'maxlinks: {len(maxlinks)}')
 
     maxcpts = set( cpt0 for (cpt0,_) in maxlinks )
     maxcpts.update( cpt1 for (_,cpt1) in maxlinks )
-    print(f'maxcpts: {len(maxcpts)}', file=sys.stderr)
+    logging.info(f'maxcpts: {len(maxcpts)}')
 
     # Generate a trimmed graph.
     out.write(f'digraph {q(path)} {{\n')
