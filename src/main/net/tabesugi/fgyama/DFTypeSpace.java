@@ -92,9 +92,6 @@ public class DFTypeSpace {
         Arrays.sort(keys);
         StringBuilder b = new StringBuilder();
         for (String k : keys) {
-            if (0 < b.length()) {
-                b.append(",");
-            }
             DFKlass type = paramTypes.get(k);
             b.append(type.getTypeName());
         }

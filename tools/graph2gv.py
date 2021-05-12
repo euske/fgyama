@@ -2,7 +2,7 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graphs import get_graphs, stripid, parsemethodname
+from graphs import get_graphs, stripid, parsemethodname, DFType
 
 def q(s):
     if s:
@@ -40,7 +40,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({stripid(node.ref)})'
         elif kind == 'new':
-            (klass,name,func) = parsemethodname(node.data)
+            (_, klass) = DFType.parse(node.ntype)
             styles['fontname'] = 'courier'
             styles['label'] = klass.name
         elif kind == 'call':

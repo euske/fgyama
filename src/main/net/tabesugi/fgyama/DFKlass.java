@@ -90,9 +90,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_typeSlots != null) {
             StringBuilder b = new StringBuilder();
             for (String k : _typeSlots.keys()) {
-                if (0 < b.length()) {
-                    b.append(",");
-                }
                 b.append(_typeSlots.get(k).getTypeName());
             }
             return "L"+_outerSpace.getSpaceName()+_name+"<"+b.toString()+">;";
