@@ -310,7 +310,7 @@ public abstract class DFGraph {
                         klass = obj.getNodeType().toKlass();
                     } catch (EntityNotFound e) {
                         // Turned out it's a class variable.
-                        klass = _finder.lookupKlass(qname.getQualifier());
+                        klass = _finder.resolveKlass(qname.getQualifier());
                     }
                     SimpleName fieldName = qname.getName();
                     DFRef ref = klass.getField(fieldName);
@@ -326,7 +326,7 @@ public abstract class DFGraph {
                 Name name = thisExpr.getQualifier();
                 DFRef ref;
                 if (name != null) {
-                    DFKlass klass = _finder.lookupKlass(name);
+                    DFKlass klass = _finder.resolveKlass(name);
                     ref = klass.getKlassScope().lookupThis();
                 } else {
                     ref = scope.lookupThis();
@@ -482,7 +482,7 @@ public abstract class DFGraph {
                     if (expr1 instanceof Name) {
                         // "ClassName.method()"
                         try {
-                            instKlass = _finder.lookupKlass((Name)expr1);
+                            instKlass = _finder.resolveKlass((Name)expr1);
                             callStyle = DFMethod.CallStyle.StaticMethod;
                         } catch (TypeNotFound e) {
                         }
@@ -623,7 +623,7 @@ public abstract class DFGraph {
                 DFKlass instKlass = null;
                 if (expr1 instanceof Name) {
                     try {
-                        instKlass = _finder.lookupKlass((Name)expr1);
+                        instKlass = _finder.resolveKlass((Name)expr1);
                     } catch (TypeNotFound e) {
                     }
                 }
@@ -666,7 +666,7 @@ public abstract class DFGraph {
                 if (cstr.getAnonymousClassDeclaration() != null) {
                     // Anonymous classes are processed separately.
                     String id = Utils.encodeASTNode(cstr);
-                    instKlass = _finder.lookupKlass(id);
+                    instKlass = _finder.resolveKlass(id);
                 } else {
                     instKlass = _finder.resolve(cstr.getType()).toKlass();
                 }
@@ -724,7 +724,7 @@ public abstract class DFGraph {
                 // "x -> { ... }"
                 LambdaExpression lambda = (LambdaExpression)expr;
                 String id = Utils.encodeASTNode(lambda);
-                DFKlass lambdaKlass = _finder.lookupKlass(id);
+                DFKlass lambdaKlass = _finder.resolveKlass(id);
                 assert lambdaKlass instanceof DFLambdaKlass;
                 // Capture values.
                 CaptureNode node = new CaptureNode(this, scope, lambdaKlass, lambda);
@@ -738,7 +738,7 @@ public abstract class DFGraph {
             } else if (expr instanceof ExpressionMethodReference) {
                 ExpressionMethodReference methodref = (ExpressionMethodReference)expr;
                 String id = Utils.encodeASTNode(methodref);
-                DFKlass methodRefKlass = _finder.lookupKlass(id);
+                DFKlass methodRefKlass = _finder.resolveKlass(id);
                 assert methodRefKlass instanceof DFMethodRefKlass;
                 CaptureNode node = new CaptureNode(this, scope, methodRefKlass, methodref);
                 try {
@@ -758,7 +758,7 @@ public abstract class DFGraph {
                 //  TypeMethodReference
                 MethodReference methodref = (MethodReference)expr;
                 String id = Utils.encodeASTNode(methodref);
-                DFKlass methodRefKlass = _finder.lookupKlass(id);
+                DFKlass methodRefKlass = _finder.resolveKlass(id);
                 assert methodRefKlass instanceof DFMethodRefKlass;
                 return new CaptureNode(this, scope, methodRefKlass, methodref);
 
@@ -805,7 +805,7 @@ public abstract class DFGraph {
                     type = obj.getNodeType();
                 } catch (EntityNotFound e) {
                     // Turned out it's a class variable.
-                    type = _finder.lookupKlass(qname.getQualifier());
+                    type = _finder.resolveKlass(qname.getQualifier());
                 }
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();

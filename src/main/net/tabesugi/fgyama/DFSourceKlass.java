@@ -222,6 +222,7 @@ public abstract class DFSourceKlass extends DFKlass {
     }
 
     protected void load() {
+        assert _finder != null;
         if (!_loaded) {
             _loaded = true;
             //Logger.info("build:", this);

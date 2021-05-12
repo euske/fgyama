@@ -289,7 +289,7 @@ public class DFJarFileKlass extends DFKlass {
             String superClass = _jklass.getSuperclassName();
             if (superClass != null && !superClass.equals(_jklass.getClassName())) {
                 try {
-                    _baseKlass = _finder.lookupKlass(superClass);
+                    _baseKlass = _finder.resolveKlass(superClass);
                 } catch (TypeNotFound e) {
                     Logger.error(
                         "DFJarFileKlass.build: TypeNotFound (baseKlass)",
@@ -302,7 +302,7 @@ public class DFJarFileKlass extends DFKlass {
                 for (int i = 0; i < ifaces.length; i++) {
                     DFKlass iface = DFBuiltinTypes.getObjectKlass();
                     try {
-                        iface = _finder.lookupKlass(ifaces[i]);
+                        iface = _finder.resolveKlass(ifaces[i]);
                     } catch (TypeNotFound e) {
                         Logger.error(
                             "DFJarFileKlass.build: TypeNotFound (iface)",

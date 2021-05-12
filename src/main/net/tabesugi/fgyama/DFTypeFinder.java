@@ -36,12 +36,12 @@ public class DFTypeFinder {
         return ("<DFTypeFinder: "+Utils.join(path)+">");
     }
 
-    public DFKlass lookupKlass(Name name)
+    public DFKlass resolveKlass(Name name)
         throws TypeNotFound {
-        return this.lookupKlass(name.getFullyQualifiedName());
+        return this.resolveKlass(name.getFullyQualifiedName());
     }
 
-    public DFKlass lookupKlass(String name)
+    public DFKlass resolveKlass(String name)
         throws TypeNotFound {
         name = name.replace('$', '.');
         DFTypeFinder finder = this;
@@ -58,7 +58,7 @@ public class DFTypeFinder {
         throws TypeNotFound {
         if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
-            return this.lookupKlass(stype.getName());
+            return this.resolveKlass(stype.getName());
         } else if (type instanceof PrimitiveType) {
             PrimitiveType ptype = (PrimitiveType)type;
             return DFBasicType.getType(ptype.getPrimitiveTypeCode());
@@ -139,7 +139,7 @@ public class DFTypeFinder {
             org.apache.bcel.generic.ObjectType otype =
                 (org.apache.bcel.generic.ObjectType)type;
             String className = otype.getClassName();
-            return this.lookupKlass(className);
+            return this.resolveKlass(className);
         } else {
             // ???
             throw new TypeNotFound(type.toString());
