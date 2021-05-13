@@ -121,7 +121,8 @@ def main(argv):
             html = v.endswith('.html')
         elif k == '-h': highlight = set(( int(nid) for nid in v.split(',') ))
         elif k == '-n': names = [v]
-    if not args: return usage()
+    if not args:
+        args.append('-')
 
     methods = []
     for path in args:
