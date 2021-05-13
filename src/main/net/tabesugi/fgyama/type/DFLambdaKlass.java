@@ -280,9 +280,20 @@ class DFLambdaKlass extends DFSourceKlass {
     public void setBaseKlass(DFKlass baseKlass) {
         this.load();
         assert _baseKlass == null;
-        _baseKlass = baseKlass;
         assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
+        if (baseKlass == this) {
+            // XXX Edge case when the outer function is a generic method
+            // which is reified with this lambda itself.
+            // e.g. <T> foo(T a) { foo(() -> 1); }
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
+            try {
+                _funcMethod.setFuncType(null);
+            } catch (InvalidSyntax e) {
+            }
+            return;
+        }
+        _baseKlass = baseKlass;
         DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
         // This happens when baseKlass type is undefined.
