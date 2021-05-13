@@ -45,6 +45,11 @@ public class DFGlobalScope extends DFVarScope {
         }
 
         @Override
+        public DFVarScope getScope() {
+            return DFGlobalScope.this;
+        }
+
+        @Override
         public boolean isLocal() {
             return false;
         }

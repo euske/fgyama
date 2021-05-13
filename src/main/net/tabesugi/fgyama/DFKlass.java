@@ -475,6 +475,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
 
         @Override
+        public DFVarScope getScope() {
+            return _klassScope;
+        }
+
+        @Override
         public boolean isLocal() {
             return false;
         }
@@ -494,6 +499,11 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private class ThisRef extends DFRef {
         public ThisRef(DFType type) {
             super(type);
+        }
+
+        @Override
+        public DFVarScope getScope() {
+            return _klassScope;
         }
 
         @Override

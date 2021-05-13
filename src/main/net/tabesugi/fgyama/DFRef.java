@@ -31,6 +31,8 @@ public abstract class DFRef {
         return _type;
     }
 
+    public abstract DFVarScope getScope();
+
     public abstract boolean isLocal();
 
     public abstract String getFullName();

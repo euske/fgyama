@@ -169,6 +169,11 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
+        public DFVarScope getScope() {
+            return _lambdaScope;
+        }
+
+        @Override
         public boolean isLocal() {
             return false;
         }

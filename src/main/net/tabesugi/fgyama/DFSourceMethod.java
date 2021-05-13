@@ -1844,6 +1844,11 @@ public abstract class DFSourceMethod extends DFMethod {
             }
 
             @Override
+            public DFVarScope getScope() {
+                return MethodScope.this;
+            }
+
+            @Override
             public boolean isLocal() {
                 return false;
             }
