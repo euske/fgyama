@@ -68,7 +68,7 @@ public class SCCFinder<T> {
     }
 
     public void add(T v0) {
-        if (_item2scc.containsKey(v0)) return;
+        if (_nodenum.containsKey(v0)) return;
         int index = _nodenum.size()+1;
         _stack.add(v0);
         _nodenum.put(v0, index);
