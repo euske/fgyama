@@ -849,9 +849,9 @@ public abstract class DFSourceMethod extends DFMethod {
                 (VariableDeclarationStatement)stmt;
             for (VariableDeclarationFragment frag :
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
-                //_outputRefs.add(scope.lookupVar(frag.getName()));
                 try {
                     DFRef ref = scope.lookupVar(frag.getName());
+                    this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.listDefinedExpr(defined, scope, init);
@@ -900,7 +900,7 @@ public abstract class DFSourceMethod extends DFMethod {
                             // special treatment for enum.
                             DFRef ref = enumKlass.getField((SimpleName)expr1);
                             if (ref != null) {
-                                _inputRefs.add(ref);
+                                this.addInputRef(ref);
                             }
                         } else {
                             this.listDefinedExpr(defined, innerScope, expr1);
@@ -1018,13 +1018,13 @@ public abstract class DFSourceMethod extends DFMethod {
             // necessarily mean this method actually throws as a whole.
             // This should be taken cared of by the "throws" clause.
             //DFRef ref = _methodScope.lookupException(type.toKlass());
-            //_outputRefs.add(ref);
+            //this.addOutputRef(ref);
 
         } else if (stmt instanceof ConstructorInvocation) {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             DFRef ref = scope.lookupThis();
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             int nargs = ci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
@@ -1045,7 +1045,7 @@ public abstract class DFSourceMethod extends DFMethod {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             DFRef ref = scope.lookupThis();
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             int nargs = sci.arguments().size();
@@ -1113,9 +1113,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
             }
-            if (!ref.isLocal()) {
-                _inputRefs.add(ref);
-            }
+            this.addInputRef(ref);
             return ref.getRefType();
 
         } else if (expr instanceof ThisExpression) {
@@ -1133,7 +1131,7 @@ public abstract class DFSourceMethod extends DFMethod {
             } else {
                 ref = scope.lookupThis();
             }
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             return ref.getRefType();
 
         } else if (expr instanceof BooleanLiteral) {
@@ -1230,7 +1228,7 @@ public abstract class DFSourceMethod extends DFMethod {
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 try {
                     DFRef ref = scope.lookupVar(frag.getName());
-                    //_outputRefs.add(ref);
+                    this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.listDefinedExpr(defined, scope, init);
@@ -1249,7 +1247,7 @@ public abstract class DFSourceMethod extends DFMethod {
             if (expr1 == null) {
                 // "method()"
                 DFRef ref = scope.lookupThis();
-                //_inputRefs.add(ref);
+                this.addInputRef(ref);
                 klass = ref.getRefType().toKlass();
                 callStyle = CallStyle.InstanceOrStatic;
             } else {
@@ -1299,7 +1297,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 argTypes[i] = type;
             }
             DFRef ref = scope.lookupThis();
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             DFMethod method1 = baseKlass.findMethod(
@@ -1342,7 +1340,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFType type = this.listDefinedExpr(defined, scope, aa.getArray());
             if (type instanceof DFArrayType) {
                 DFRef ref = scope.lookupArray(type);
-                _inputRefs.add(ref);
+                this.addInputRef(ref);
                 type = ((DFArrayType)type).getElemType();
             }
             return type;
@@ -1366,7 +1364,7 @@ public abstract class DFSourceMethod extends DFMethod {
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref == null) return null;
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             return ref.getRefType();
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -1374,11 +1372,11 @@ public abstract class DFSourceMethod extends DFMethod {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFRef ref = scope.lookupThis();
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 == null) return null;
-            _inputRefs.add(ref2);
+            this.addInputRef(ref2);
             return ref2.getRefType();
 
         } else if (expr instanceof CastExpression) {
@@ -1449,7 +1447,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getKlass(id);
             for (DFLambdaKlass.CapturedRef captured :
                      lambdaKlass.getCapturedRefs()) {
-                _inputRefs.add(captured.getOriginal());
+                this.addInputRef(captured.getOriginal());
             }
             return lambdaKlass;
 
@@ -1494,15 +1492,13 @@ public abstract class DFSourceMethod extends DFMethod {
                         return null;
                     }
                 }
-                //_inputRefs.add(scope.lookupThis());
+                this.addInputRef(scope.lookupThis());
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
             }
-            if (!ref.isLocal()) {
-                _outputRefs.add(ref);
-            }
+            this.addOutputRef(ref);
             return ref;
 
         } else if (expr instanceof ArrayAccess) {
@@ -1512,7 +1508,7 @@ public abstract class DFSourceMethod extends DFMethod {
             this.listDefinedExpr(defined, scope, aa.getIndex());
             if (type instanceof DFArrayType) {
                 DFRef ref = scope.lookupArray(type);
-                _outputRefs.add(ref);
+                this.addOutputRef(ref);
                 return ref;
             }
             return null;
@@ -1536,7 +1532,7 @@ public abstract class DFSourceMethod extends DFMethod {
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref == null) return null;
-            _outputRefs.add(ref);
+            this.addOutputRef(ref);
             return ref;
 
         } else if (expr instanceof SuperFieldAccess) {
@@ -1544,11 +1540,11 @@ public abstract class DFSourceMethod extends DFMethod {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFRef ref = scope.lookupThis();
-            //_inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 == null) return null;
-            _outputRefs.add(ref2);
+            this.addOutputRef(ref2);
             return ref2;
 
         } else if (expr instanceof ParenthesizedExpression) {
@@ -1558,6 +1554,19 @@ public abstract class DFSourceMethod extends DFMethod {
 
         } else {
             throw new InvalidSyntax(expr);
+        }
+    }
+
+    private void addInputRef(DFRef ref) {
+        //Logger.info("addInputRef", ref, ref.getScope(), _methodScope);
+        if (ref.getScope().contains(_methodScope)) {
+            _inputRefs.add(ref);
+        }
+    }
+
+    private void addOutputRef(DFRef ref) {
+        if (ref.getScope().contains(_methodScope)) {
+            _outputRefs.add(ref);
         }
     }
 
@@ -1695,12 +1704,6 @@ public abstract class DFSourceMethod extends DFMethod {
         assert _finder != null;
 
         ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
-        {
-            DFRef ref = _methodScope.lookupThis();
-            DFNode input = new InputNode(graph, _methodScope, ref, null);
-            ctx.set(input);
-            preserved.add(input);
-        }
         for (DFRef ref : this.getInputRefs()) {
             DFNode input = new InputNode(graph, _methodScope, ref, null);
             ctx.set(input);

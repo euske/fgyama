@@ -290,11 +290,11 @@ public abstract class DFGraph {
                 if (name.isSimpleName()) {
                     DFRef ref = scope.lookupVar((SimpleName)name);
                     DFNode node;
-                    if (ref.isLocal()) {
-                        node = new VarRefNode(this, scope, ref, expr);
-                    } else {
+                    if (ref instanceof DFKlass.FieldRef) {
                         DFNode obj = ctx.get(scope.lookupThis());
                         node = new FieldRefNode(this, scope, ref, expr, obj);
+                    } else {
+                        node = new VarRefNode(this, scope, ref, expr);
                     }
                     node.accept(ctx.get(ref));
                     return node;
@@ -788,11 +788,11 @@ public abstract class DFGraph {
             if (name.isSimpleName()) {
                 DFRef ref = scope.lookupVar((SimpleName)name);
                 DFNode node;
-                if (ref.isLocal()) {
-                    return new VarAssignNode(this, scope, ref, expr);
-                } else {
+                if (ref instanceof DFKlass.FieldRef) {
                     DFNode obj = ctx.get(scope.lookupThis());
                     return new FieldAssignNode(this, scope, ref, expr, obj);
+                } else {
+                    return new VarAssignNode(this, scope, ref, expr);
                 }
             } else {
                 QualifiedName qname = (QualifiedName)name;
