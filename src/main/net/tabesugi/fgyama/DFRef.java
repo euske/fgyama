@@ -21,9 +21,9 @@ public abstract class DFRef {
     @Override
     public String toString() {
         if (_type == null) {
-            return ("<DFRef("+this.getFullName()+") ?>");
+            return ("<DFRef "+this.getFullName()+" (?)>");
         } else {
-            return ("<DFRef("+this.getFullName()+") "+_type.toString()+">");
+            return ("<DFRef "+this.getFullName()+" ("+_type.toString()+")>");
         }
     }
 

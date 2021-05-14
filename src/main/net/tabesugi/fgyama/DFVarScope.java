@@ -80,11 +80,6 @@ public abstract class DFVarScope {
         return this.lookupVar(name.getIdentifier());
     }
 
-    public DFRef lookupThis(DFKlass klass) {
-        assert _outer != null;
-        return _outer.lookupThis(klass);
-    }
-
     public DFRef lookupArray(DFType type) {
         assert _outer != null;
         return _outer.lookupArray(type);

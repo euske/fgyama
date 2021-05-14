@@ -208,7 +208,7 @@ public abstract class DFGraph {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             DFKlass klass = _method.getKlass();
-            DFNode obj = ctx.get(scope.lookupThis(klass));
+            DFNode obj = ctx.get(klass.getThisRef());
             int nargs = ci.arguments().size();
             DFNode[] args = new DFNode[nargs];
             DFType[] argTypes = new DFType[nargs];
@@ -224,16 +224,16 @@ public abstract class DFGraph {
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
-                this, scope, ci, funcType, obj, methods);
+                this, scope, ci, funcType, methods);
             call.setArgs(args);
-            this.connectInsAndOuts(ctx, scope, call, methods);
+            this.connectMethodRefs(ctx, scope, call, obj, methods);
             this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             DFKlass klass = _method.getKlass();
-            DFNode obj = ctx.get(scope.lookupThis(klass));
+            DFNode obj = ctx.get(klass.getThisRef());
             int nargs = sci.arguments().size();
             DFNode[] args = new DFNode[nargs];
             DFType[] argTypes = new DFType[nargs];
@@ -251,9 +251,9 @@ public abstract class DFGraph {
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
-                this, scope, sci, funcType, obj, methods);
+                this, scope, sci, funcType, methods);
             call.setArgs(args);
-            this.connectInsAndOuts(ctx, scope, call, methods);
+            this.connectMethodRefs(ctx, scope, call, obj, methods);
             this.catchExceptions(scope, frame, call, funcType.getExceptions());
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -292,7 +292,7 @@ public abstract class DFGraph {
                     DFNode node;
                     if (ref instanceof DFKlass.FieldRef) {
                         DFKlass klass = _method.getKlass();
-                        DFNode obj = ctx.get(scope.lookupThis(klass));
+                        DFNode obj = ctx.get(klass.getThisRef());
                         node = new FieldRefNode(this, scope, ref, expr, obj);
                     } else {
                         node = new VarRefNode(this, scope, ref, expr);
@@ -325,14 +325,13 @@ public abstract class DFGraph {
                 // "this"
                 ThisExpression thisExpr = (ThisExpression)expr;
                 Name name = thisExpr.getQualifier();
-                DFRef ref;
+                DFKlass klass;
                 if (name != null) {
-                    DFKlass klass = _finder.resolveKlass(name);
-                    ref = scope.lookupThis(klass);
+                    klass = _finder.resolveKlass(name);
                 } else {
-                    DFKlass klass = _method.getKlass();
-                    ref = scope.lookupThis(klass);
+                    klass = _method.getKlass();
                 }
+                DFRef ref = klass.getThisRef();
                 DFNode node = new VarRefNode(this, scope, ref, expr);
                 node.accept(ctx.get(ref));
                 return node;
@@ -477,7 +476,7 @@ public abstract class DFGraph {
                 if (expr1 == null) {
                     // "method()"
                     instKlass = _method.getKlass();
-                    obj = ctx.get(scope.lookupThis(instKlass));
+                    obj = ctx.get(instKlass.getThisRef());
                     callStyle = DFMethod.CallStyle.InstanceOrStatic;
                 } else {
                     callStyle = DFMethod.CallStyle.InstanceMethod;
@@ -527,9 +526,9 @@ public abstract class DFGraph {
                 overriders.toArray(methods);
                 DFFuncType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
-                    this, scope, invoke, funcType, obj, methods);
+                    this, scope, invoke, funcType, methods);
                 call.setArgs(args);
-                this.connectInsAndOuts(ctx, scope, call, methods);
+                this.connectMethodRefs(ctx, scope, call, obj, methods);
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
                 return new ReceiveNode(this, scope, call, invoke);
 
@@ -537,7 +536,7 @@ public abstract class DFGraph {
                 // "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
                 DFKlass klass = _method.getKlass();
-                DFNode obj = ctx.get(scope.lookupThis(klass));
+                DFNode obj = ctx.get(klass.getThisRef());
                 int nargs = sinvoke.arguments().size();
                 DFNode[] args = new DFNode[nargs];
                 DFType[] argTypes = new DFType[nargs];
@@ -564,9 +563,9 @@ public abstract class DFGraph {
                 DFMethod[] methods = new DFMethod[] { method };
                 DFFuncType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
-                    this, scope, sinvoke, funcType, obj, methods);
+                    this, scope, sinvoke, funcType, methods);
                 call.setArgs(args);
-                this.connectInsAndOuts(ctx, scope, call, methods);
+                this.connectMethodRefs(ctx, scope, call, obj, methods);
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
                 return new ReceiveNode(this, scope, call, sinvoke);
 
@@ -645,7 +644,7 @@ public abstract class DFGraph {
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
                 DFKlass klass = _method.getKlass();
-                DFNode obj = ctx.get(scope.lookupThis(klass));
+                DFNode obj = ctx.get(klass.getThisRef());
                 DFKlass baseKlass = klass.getBaseKlass();
                 DFRef ref = baseKlass.getField(fieldName);
                 if (ref == null) throw new VariableNotFound("."+fieldName);
@@ -693,9 +692,9 @@ public abstract class DFGraph {
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFuncType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
-                    this, scope, instKlass, constructor, cstr, obj);
+                    this, scope, instKlass, constructor, cstr);
                 call.setArgs(args);
-                this.connectInsAndOuts(ctx, scope, call, methods);
+                this.connectMethodRefs(ctx, scope, call, obj, methods);
                 this.catchExceptions(scope, frame, call, funcType.getExceptions());
                 return new ReceiveNode(this, scope, call, cstr);
 
@@ -794,7 +793,7 @@ public abstract class DFGraph {
                 DFNode node;
                 if (ref instanceof DFKlass.FieldRef) {
                     DFKlass klass = _method.getKlass();
-                    DFNode obj = ctx.get(scope.lookupThis(klass));
+                    DFNode obj = ctx.get(klass.getThisRef());
                     return new FieldAssignNode(this, scope, ref, expr, obj);
                 } else {
                     return new VarAssignNode(this, scope, ref, expr);
@@ -846,7 +845,7 @@ public abstract class DFGraph {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFKlass klass = _method.getKlass();
-            DFNode obj = ctx.get(scope.lookupThis(klass));
+            DFNode obj = ctx.get(klass.getThisRef());
             DFKlass baseKlass = klass.getBaseKlass();
             DFRef ref = baseKlass.getField(fieldName);
             if (ref == null) throw new VariableNotFound("."+fieldName);
@@ -1412,9 +1411,10 @@ public abstract class DFGraph {
         }
     }
 
-    // connectInsAndOuts: connect input/output nodes for methods.
-    private void connectInsAndOuts(
-        DFContext ctx, DFLocalScope scope, CallNode call, DFMethod[] methods) {
+    // connectMethodRefs: connect input/output nodes for methods.
+    private void connectMethodRefs(
+        DFContext ctx, DFLocalScope scope,
+        CallNode call, DFNode obj, DFMethod[] methods) {
         ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
@@ -1423,7 +1423,11 @@ public abstract class DFGraph {
             }
         }
         for (DFRef ref : refs) {
-            call.accept(ctx.get(ref), ref.getFullName());
+            if (ref instanceof DFKlass.ThisRef && obj != null) {
+                call.accept(obj, ref.getFullName());
+            } else {
+                call.accept(ctx.get(ref), ref.getFullName());
+            }
         }
         refs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
@@ -2252,13 +2256,9 @@ class MethodCallNode extends CallNode {
     public MethodCallNode(
         DFGraph graph, DFVarScope scope,
         ASTNode ast, DFFuncType funcType,
-        DFNode obj, DFMethod[] methods) {
+        DFMethod[] methods) {
         super(graph, scope, funcType.getReturnType(), null,
               ast, funcType);
-        if (obj != null) {
-            DFKlass klass = obj.getNodeType().toKlass();
-            this.accept(obj, "#"+klass.getTypeName());
-        }
         this.methods = methods;
     }
 
@@ -2305,13 +2305,9 @@ class CreateObjectNode extends CallNode {
 
     public CreateObjectNode(
         DFGraph graph, DFVarScope scope, DFType type, DFMethod constructor,
-        ASTNode ast, DFNode obj) {
+        ASTNode ast) {
         super(graph, scope, type, null,
               ast, constructor.getFuncType());
-        if (obj != null) {
-            DFKlass klass = obj.getNodeType().toKlass();
-            this.accept(obj, "#"+klass.getTypeName());
-        }
         this.constructor = constructor;
     }
 

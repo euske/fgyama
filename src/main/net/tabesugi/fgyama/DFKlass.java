@@ -29,6 +29,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     private DFKlass _outerKlass;  // can be the same as outerSpace, or null.
     private DFVarScope _outerScope;
     private KlassScope _klassScope;
+    private DFRef _this;
 
     // These fields are available only for generic klasses.
     private ConsistentHashMap<String, DFKlass> _typeSlots = null;
@@ -53,6 +54,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         if (_outerKlass != null) {
             _reifyDepth = _outerKlass._reifyDepth;
         }
+        _this = new ThisRef();
     }
 
     // Protected constructor for a parameterized klass.
@@ -254,6 +256,10 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return _klassScope;
     }
 
+    public DFRef getThisRef() {
+        return _this;
+    }
+
     public DFMethod getFuncMethod() {
         if (!this.isInterface()) return null;
         DFMethod funcMethod = null;
@@ -446,6 +452,23 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
         if (_genericKlass != null) {
             _genericKlass.dump(out, indent);
+        }
+    }
+
+    public class ThisRef extends DFRef {
+
+        public ThisRef() {
+            super(DFKlass.this);
+        }
+
+        @Override
+        public DFVarScope getScope() {
+            return _klassScope;
+        }
+
+        @Override
+        public String getFullName() {
+            return "#"+DFKlass.this.getTypeName();
         }
     }
 

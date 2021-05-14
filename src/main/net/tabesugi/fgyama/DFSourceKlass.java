@@ -835,6 +835,7 @@ class DefinedMethod extends DFSourceMethod {
         MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
         MethodScope scope = this.getScope();
         DFContext ctx = new DFContext(graph, scope);
+        DFKlass klass = this.getKlass();
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)_methodDecl.parameters()) {
