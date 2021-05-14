@@ -479,11 +479,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             return _klassScope;
         }
 
-        @Override
-        public boolean isLocal() {
-            return false;
-        }
-
         public boolean isStatic() {
             return _static;
         }
@@ -504,11 +499,6 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         @Override
         public DFVarScope getScope() {
             return _klassScope;
-        }
-
-        @Override
-        public boolean isLocal() {
-            return false;
         }
 
         @Override

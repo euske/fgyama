@@ -498,11 +498,6 @@ public class DFLocalScope extends DFVarScope {
         }
 
         @Override
-        public boolean isLocal() {
-            return true;
-        }
-
-        @Override
         public String getFullName() {
             return "$"+DFLocalScope.this.getScopeName()+"/$"+_name;
         }

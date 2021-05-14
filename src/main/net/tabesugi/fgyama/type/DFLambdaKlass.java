@@ -174,11 +174,6 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
-        public boolean isLocal() {
-            return false;
-        }
-
-        @Override
         public String getFullName() {
             return "@"+DFLambdaKlass.this.getTypeName()+"/="+_name;
         }

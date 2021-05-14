@@ -33,7 +33,5 @@ public abstract class DFRef {
 
     public abstract DFVarScope getScope();
 
-    public abstract boolean isLocal();
-
     public abstract String getFullName();
 }

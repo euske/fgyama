@@ -50,11 +50,6 @@ public class DFGlobalScope extends DFVarScope {
         }
 
         @Override
-        public boolean isLocal() {
-            return false;
-        }
-
-        @Override
         public String getFullName() {
             return "%"+this.getRefType().getTypeName();
         }

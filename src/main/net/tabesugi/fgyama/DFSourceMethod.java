@@ -1852,11 +1852,6 @@ public abstract class DFSourceMethod extends DFMethod {
             }
 
             @Override
-            public boolean isLocal() {
-                return false;
-            }
-
-            @Override
             public String getFullName() {
                 return "#"+_name;
             }
