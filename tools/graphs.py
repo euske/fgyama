@@ -102,6 +102,8 @@ class DFType:
                 args.append(t)
             (i2, retype) = klass.parse(s, i2+1)
             return (i2, DFFuncType(retype, args))
+        elif c == '?':
+            return (i+1, DFUnknownType())
         raise ValueError(c)
 
 class DFBasicType(DFType):
@@ -150,6 +152,9 @@ class DFKlassType(DFType):
         else:
             params = ",".join(map(repr, self.params))
             return f'<{name}<{params}>>'
+
+class DFUnknownType(DFType):
+    pass
 
 # parsemethodname: returns (klass, name, func).
 def parsemethodname(s):
