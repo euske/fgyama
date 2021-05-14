@@ -1551,11 +1551,11 @@ public abstract class DFGraph {
     }
 
     @SuppressWarnings("unchecked")
-    public void processBodyDecls(
-        DFContext ctx, DFLocalScope scope,
-        DFKlass klass, List<BodyDeclaration> decls)
+    public void processDecls(
+        DFContext ctx, List<BodyDeclaration> decls)
         throws InvalidSyntax, EntityNotFound {
 
+        DFLocalScope scope = _method.getScope();
         DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
 
         for (BodyDeclaration body : decls) {
@@ -1566,7 +1566,7 @@ public abstract class DFGraph {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                    DFRef ref = klass.getField(frag.getName());
+                    DFRef ref = _method.getKlass().getField(frag.getName());
                     if (ref == null) throw new VariableNotFound("."+frag.getName());
                     DFNode value = null;
                     Expression init = frag.getInitializer();
@@ -1605,10 +1605,10 @@ public abstract class DFGraph {
     }
 
     public void processMethodBody(
-        DFContext ctx, DFLocalScope scope,
-        ASTNode body)
+        DFContext ctx, ASTNode body)
         throws InvalidSyntax, EntityNotFound {
 
+        DFLocalScope scope = _method.getScope();
         DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
 
         if (body instanceof Statement) {

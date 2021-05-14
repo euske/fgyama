@@ -56,7 +56,11 @@ public abstract class DFSourceMethod extends DFMethod {
         return _finder;
     }
 
-    public DFLocalScope getScope() {
+    public DFSourceKlass getSourceKlass() {
+        return _srcklass;
+    }
+
+    public MethodScope getScope() {
         return _methodScope;
     }
 
@@ -1666,7 +1670,7 @@ public abstract class DFSourceMethod extends DFMethod {
     }
 
     @SuppressWarnings("unchecked")
-    public void processBodyDecls(
+    public void processDecls(
         DFGraph graph, DFContext ctx, List<BodyDeclaration> decls)
         throws InvalidSyntax, EntityNotFound {
         assert _methodScope != null;
@@ -1678,8 +1682,7 @@ public abstract class DFSourceMethod extends DFMethod {
             ctx.set(input);
         }
 
-        graph.processBodyDecls(
-            ctx, _methodScope, _srcklass, decls);
+        graph.processDecls(ctx, decls);
 
         // Create output nodes.
         for (DFRef ref : this.getOutputRefs()) {
@@ -1705,7 +1708,7 @@ public abstract class DFSourceMethod extends DFMethod {
         }
 
         try {
-            graph.processMethodBody(ctx, _methodScope, body);
+            graph.processMethodBody(ctx, body);
         } catch (MethodNotFound e) {
             e.setMethod(this);
             Logger.error(

@@ -642,7 +642,7 @@ class InitMethod extends DFSourceMethod {
         DFContext ctx = new DFContext(graph, scope);
 
         try {
-            this.processBodyDecls(graph, ctx, _decls);
+            this.processDecls(graph, ctx, _decls);
         } catch (InvalidSyntax e) {
             Logger.error(
                 "DFSourceKlass.writeGraph: ",
@@ -728,7 +728,7 @@ class DefinedMethod extends DFSourceMethod {
     @SuppressWarnings("unchecked")
     private void build() {
         DFTypeFinder finder = this.getFinder();
-        MethodScope methodScope = (MethodScope)this.getScope();
+        MethodScope methodScope = this.getScope();
 
         List<SingleVariableDeclaration> varDecls = _methodDecl.parameters();
         DFType[] argTypes = new DFType[varDecls.size()];
@@ -833,7 +833,7 @@ class DefinedMethod extends DFSourceMethod {
 
         int graphId = exporter.getNewId();
         MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
-        MethodScope scope = (MethodScope)this.getScope();
+        MethodScope scope = this.getScope();
         DFContext ctx = new DFContext(graph, scope);
         int i = 0;
         for (VariableDeclaration decl :

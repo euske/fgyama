@@ -12,14 +12,12 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     private DFFrame _outer;
-    private ASTNode _ast;
+    private String _id;
     private DFTypeFinder _finder;
     private String _label;
     private DFKlass _catchKlass;
     private DFLocalScope _scope;
 
-    private List<DFFrame> _children =
-        new ArrayList<DFFrame>();
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
     private ConsistentHashSet<DFRef> _inputRefs =
@@ -37,7 +35,7 @@ public class DFFrame {
     public DFFrame(DFTypeFinder finder, String label, DFLocalScope scope) {
         assert label != null;
         _outer = null;
-        _ast = null;
+        _id = null;
         _finder = finder;
         _label = label;
         _catchKlass = null;
@@ -45,11 +43,11 @@ public class DFFrame {
     }
 
     private DFFrame(
-        DFFrame outer, ASTNode ast, String label,
+        DFFrame outer, String id, String label,
         DFKlass catchKlass, DFLocalScope scope) {
         assert label != null;
         _outer = outer;
-        _ast = ast;
+        _id = id;
         _finder = outer._finder;
         _label = label;
         _catchKlass = catchKlass;
@@ -58,26 +56,26 @@ public class DFFrame {
 
     @Override
     public String toString() {
-        if (_ast != null) {
-            return ("<DFFrame("+_label+" "+Utils.encodeASTNode(_ast)+")>");
+        if (_id != null) {
+            return ("<DFFrame("+_label+" "+_id+")>");
         } else {
             return ("<DFFrame("+_label+")>");
         }
     }
 
     private DFFrame addChild(String label, ASTNode ast, DFLocalScope scope) {
+        String id = Utils.encodeASTNode(ast);
         DFFrame frame = new DFFrame(
-            this, ast, label, null, scope);
-        _children.add(frame);
-        _ast2child.put(Utils.encodeASTNode(ast), frame);
+            this, id, label, null, scope);
+        _ast2child.put(id, frame);
         return frame;
     }
 
     private DFFrame addChild(DFKlass catchKlass, ASTNode ast, DFLocalScope scope) {
+        String id = Utils.encodeASTNode(ast);
         DFFrame frame = new DFFrame(
-            this, ast, catchKlass.getTypeName(), catchKlass, scope);
-        _children.add(frame);
-        _ast2child.put(Utils.encodeASTNode(ast), frame);
+            this, id, catchKlass.getTypeName(), catchKlass, scope);
+        _ast2child.put(id, frame);
         return frame;
     }
 
@@ -1090,7 +1088,7 @@ public class DFFrame {
         for (DFExit exit : this.getExits()) {
             out.println(i2+"exit: "+exit);
         }
-        for (DFFrame frame : _children) {
+        for (DFFrame frame : _ast2child.values()) {
             frame.dump(out, i2);
         }
         out.println(indent+"}");

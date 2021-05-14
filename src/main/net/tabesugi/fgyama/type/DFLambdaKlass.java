@@ -49,7 +49,7 @@ class DFLambdaKlass extends DFSourceKlass {
             }
             _funcType = funcType;
             DFTypeFinder finder = this.getFinder();
-            MethodScope methodScope = (MethodScope)this.getScope();
+            MethodScope methodScope = this.getScope();
             methodScope.buildInternalRefs(_lambda.parameters());
             ASTNode body = _lambda.getBody();
             if (body instanceof Statement) {
@@ -102,7 +102,7 @@ class DFLambdaKlass extends DFSourceKlass {
             throws InvalidSyntax, EntityNotFound {
             int graphId = exporter.getNewId();
             MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
-            MethodScope methodScope = (MethodScope)this.getScope();
+            MethodScope methodScope = this.getScope();
             DFContext ctx = new DFContext(graph, methodScope);
             int i = 0;
             for (VariableDeclaration decl :
