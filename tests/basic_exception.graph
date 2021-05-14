@@ -124,33 +124,32 @@
       <caller id="Lbasic_exception;.foo()V"/>
       <ast end="475" start="386" type="31"/>
       <scope name="Lbasic_exception;.:moo:386:475">
-        <node id="M3_moo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
-        <node id="M3_moo_N9" kind="output" ref="#return" type="Ljava/lang/String;">
-          <accept src="M3_moo_N7"/>
+        <node id="M3_moo_N8" kind="output" ref="#return" type="Ljava/lang/String;">
+          <accept src="M3_moo_N6"/>
         </node>
-        <node id="M3_moo_N10" kind="output" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
-          <accept src="M3_moo_N5"/>
+        <node id="M3_moo_N9" kind="output" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+          <accept src="M3_moo_N4"/>
         </node>
         <scope name="Lbasic_exception;.:moo:386:475.:B:415:475">
-          <node data="true" id="M3_moo_N2" kind="value" type="Z">
+          <node data="true" id="M3_moo_N1" kind="value" type="Z">
             <ast end="433" start="429" type="9"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M3_moo_N3" kind="new" type="Lbasic_exception/A;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M3_moo_N2" kind="new" type="Lbasic_exception/A;">
             <ast end="448" start="441" type="14"/>
           </node>
-          <node id="M3_moo_N4" kind="receive" type="Lbasic_exception/A;">
+          <node id="M3_moo_N3" kind="receive" type="Lbasic_exception/A;">
             <ast end="448" start="441" type="14"/>
+            <accept src="M3_moo_N2"/>
+          </node>
+          <node id="M3_moo_N4" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+            <ast end="449" start="435" type="53"/>
             <accept src="M3_moo_N3"/>
           </node>
-          <node id="M3_moo_N5" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
-            <ast end="449" start="435" type="53"/>
-            <accept src="M3_moo_N4"/>
-          </node>
-          <node id="M3_moo_N7" kind="return" ref="#return" type="Ljava/lang/String;">
+          <node id="M3_moo_N6" kind="return" ref="#return" type="Ljava/lang/String;">
             <ast end="469" start="458" type="41"/>
-            <accept src="M3_moo_N8"/>
+            <accept src="M3_moo_N7"/>
           </node>
-          <node data="a" id="M3_moo_N8" kind="value" type="Ljava/lang/String;">
+          <node data="a" id="M3_moo_N7" kind="value" type="Ljava/lang/String;">
             <ast end="468" start="465" type="45"/>
           </node>
         </scope>

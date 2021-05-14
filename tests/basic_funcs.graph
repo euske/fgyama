@@ -31,8 +31,8 @@
           <ast end="114" start="101" type="44"/>
           <accept src="M2_main_N1"/>
         </node>
-        <node id="M2_main_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
-        <node id="M2_main_N4" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N4" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M2_main_N5" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="M2_main_N6" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
         <node id="M2_main_N7" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
@@ -54,7 +54,7 @@
             <ast end="144" start="137" type="2"/>
             <accept label="array" src="M2_main_N8"/>
             <accept label="index" src="M2_main_N9"/>
-            <accept src="M2_main_N4"/>
+            <accept src="M2_main_N3"/>
           </node>
           <node id="M2_main_N11" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$a" type="Ljava/lang/String;">
             <ast end="144" start="133" type="59"/>
@@ -85,7 +85,7 @@
           </node>
           <node data="Lbasic_funcs;.moo(I)I" id="M2_main_N18" kind="call" type="I">
             <ast end="205" start="199" type="32"/>
-            <accept label="#this" src="M2_main_N3"/>
+            <accept label="#this" src="M2_main_N4"/>
             <accept label="#arg0" src="M2_main_N17"/>
           </node>
           <node id="M2_main_N19" kind="receive" type="I">
@@ -131,11 +131,11 @@
         <node id="M3_moo_N3" kind="input" ref="#this" type="Lbasic_funcs;"/>
         <node id="M3_moo_N4" kind="input" ref="@Lbasic_funcs;/.z" type="I"/>
         <node id="M3_moo_N5" kind="input" ref="@Lbasic_funcs;/.y" type="I"/>
-        <node id="M3_moo_N28" kind="output" ref="#return" type="I">
-          <accept src="M3_moo_N26"/>
+        <node id="M3_moo_N32" kind="output" ref="#return" type="I">
+          <accept src="M3_moo_N28"/>
         </node>
-        <node id="M3_moo_N29" kind="output" ref="@Lbasic_funcs;/.z" type="I">
-          <accept src="M3_moo_N6"/>
+        <node id="M3_moo_N33" kind="output" ref="@Lbasic_funcs;/.z" type="I">
+          <accept src="M3_moo_N29"/>
         </node>
         <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="M3_moo_N6" kind="assign_field" ref="@Lbasic_funcs;/.z" type="I">
@@ -163,10 +163,15 @@
             <accept label="L" src="M3_moo_N9"/>
             <accept label="R" src="M3_moo_N10"/>
           </node>
-          <node id="M3_moo_N26" kind="join" ref="#return" type="I">
+          <node id="M3_moo_N28" kind="join" ref="#return" type="I">
             <accept label="cond" src="M3_moo_N11"/>
             <accept label="true" src="M3_moo_N12"/>
-            <accept label="false" src="M3_moo_N16"/>
+            <accept label="false" src="M3_moo_N17"/>
+          </node>
+          <node id="M3_moo_N29" kind="join" ref="@Lbasic_funcs;/.z" type="I">
+            <accept label="cond" src="M3_moo_N11"/>
+            <accept label="true" src="M3_moo_N6"/>
+            <accept label="false" src="M3_moo_N6"/>
           </node>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:316:353">
             <node id="M3_moo_N12" kind="return" ref="#return" type="I">
@@ -183,38 +188,38 @@
             </node>
           </scope>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:359:401">
-            <node id="M3_moo_N16" kind="return" ref="#return" type="I">
+            <node id="M3_moo_N17" kind="return" ref="#return" type="I">
               <ast end="391" start="373" type="41"/>
-              <accept src="M3_moo_N25"/>
+              <accept src="M3_moo_N26"/>
             </node>
-            <node id="M3_moo_N18" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
+            <node id="M3_moo_N19" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
               <ast end="385" start="384" type="42"/>
               <accept src="M3_moo_N2"/>
             </node>
-            <node data="1" id="M3_moo_N20" kind="value" type="I">
+            <node data="1" id="M3_moo_N21" kind="value" type="I">
               <ast end="387" start="386" type="34"/>
             </node>
-            <node data="-" id="M3_moo_N21" kind="op_infix" type="I">
+            <node data="-" id="M3_moo_N22" kind="op_infix" type="I">
               <ast end="387" start="384" type="27"/>
-              <accept label="L" src="M3_moo_N18"/>
-              <accept label="R" src="M3_moo_N20"/>
+              <accept label="L" src="M3_moo_N19"/>
+              <accept label="R" src="M3_moo_N21"/>
             </node>
-            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N22" kind="call" type="I">
+            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N23" kind="call" type="I">
               <ast end="388" start="380" type="32"/>
               <accept label="#this" src="M3_moo_N3"/>
-              <accept label="#arg0" src="M3_moo_N21"/>
+              <accept label="#arg0" src="M3_moo_N22"/>
             </node>
-            <node id="M3_moo_N23" kind="receive" type="I">
+            <node id="M3_moo_N24" kind="receive" type="I">
               <ast end="388" start="380" type="32"/>
-              <accept src="M3_moo_N22"/>
+              <accept src="M3_moo_N23"/>
             </node>
-            <node data="2" id="M3_moo_N24" kind="value" type="I">
+            <node data="2" id="M3_moo_N25" kind="value" type="I">
               <ast end="390" start="389" type="34"/>
             </node>
-            <node data="+" id="M3_moo_N25" kind="op_infix" type="I">
+            <node data="+" id="M3_moo_N26" kind="op_infix" type="I">
               <ast end="390" start="380" type="27"/>
-              <accept label="L" src="M3_moo_N23"/>
-              <accept label="R" src="M3_moo_N24"/>
+              <accept label="L" src="M3_moo_N24"/>
+              <accept label="R" src="M3_moo_N25"/>
             </node>
           </scope>
         </scope>

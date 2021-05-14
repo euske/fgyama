@@ -14,8 +14,8 @@
           <ast end="62" start="49" type="44"/>
           <accept src="M2_main_N1"/>
         </node>
-        <node id="M2_main_N3" kind="input" ref="#this" type="LHello;"/>
-        <node id="M2_main_N4" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
+        <node id="M2_main_N4" kind="input" ref="#this" type="LHello;"/>
         <node id="M2_main_N5" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <scope name="LHello;.:main:25:146.:B:64:146">
           <node id="M2_main_N6" kind="ref_var" ref="$LHello;.:main:25:146/$args" type="[Ljava/lang/String;">
@@ -29,7 +29,7 @@
             <ast end="95" start="88" type="2"/>
             <accept label="array" src="M2_main_N6"/>
             <accept label="index" src="M2_main_N7"/>
-            <accept src="M2_main_N4"/>
+            <accept src="M2_main_N3"/>
           </node>
           <node id="M2_main_N9" kind="assign_var" ref="$LHello;.:main:25:146.:B:64:146/$name" type="Ljava/lang/String;">
             <ast end="95" start="81" type="59"/>

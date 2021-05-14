@@ -20,9 +20,6 @@
         <node id="M2_doit_N1" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
         <node id="M2_doit_N2" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="M2_doit_N3" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
-        <node id="M2_doit_N19" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-          <accept src="M2_doit_N12"/>
-        </node>
         <scope name="Ldom/meep/basic_names;.:doit:79:289.:B:98:289">
           <node id="M2_doit_N4" kind="ref_field" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="118" start="108" type="40"/>
@@ -117,10 +114,6 @@
         <node id="M4_main_N3" kind="input" ref="#this" type="Ldom/meep/basic_names;"/>
         <node id="M4_main_N4" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
         <node id="M4_main_N5" kind="input" ref="@Ldom/meep/basic_names;/.y" type="I"/>
-        <node id="M4_main_N12" kind="output" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
-          <accept src="M4_main_N13"/>
-        </node>
-        <node id="M4_main_N13" ref="@Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I"/>
         <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N6" kind="new" type="Ldom/meep/basic_names;">
             <ast end="441" start="424" type="14"/>
@@ -171,7 +164,6 @@
       <caller id="Ldom/meep/basic_names;.doit()V"/>
       <ast end="201" start="187" type="31"/>
       <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201">
-        <node id="M7_moo_N1" kind="input" ref="#this" type="Ldom/meep/basic_names/:doit:79:289/Baz;"/>
         <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:moo:187:201.:B:198:201"/>
       </scope>
     </method>

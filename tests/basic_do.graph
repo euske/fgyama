@@ -14,93 +14,92 @@
           <ast end="56" start="51" type="44"/>
           <accept src="M2_foo_N1"/>
         </node>
-        <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_do;"/>
-        <node id="M2_foo_N25" kind="output" ref="#return" type="I">
-          <accept src="M2_foo_N23"/>
+        <node id="M2_foo_N24" kind="output" ref="#return" type="I">
+          <accept src="M2_foo_N22"/>
         </node>
         <scope name="Lbasic_do;.:foo:29:135.:B:58:135">
-          <node data="0" id="M2_foo_N4" kind="value" type="I">
+          <node data="0" id="M2_foo_N3" kind="value" type="I">
             <ast end="70" start="69" type="34"/>
           </node>
-          <node id="M2_foo_N5" kind="assign_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+          <node id="M2_foo_N4" kind="assign_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
             <ast end="70" start="65" type="59"/>
-            <accept src="M2_foo_N4"/>
+            <accept src="M2_foo_N3"/>
           </node>
-          <node id="M2_foo_N23" kind="return" ref="#return" type="I">
+          <node id="M2_foo_N22" kind="return" ref="#return" type="I">
             <ast end="129" start="120" type="41"/>
-            <accept src="M2_foo_N24"/>
+            <accept src="M2_foo_N23"/>
           </node>
-          <node id="M2_foo_N24" kind="ref_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+          <node id="M2_foo_N23" kind="ref_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
             <ast end="128" start="127" type="42"/>
-            <accept src="M2_foo_N22"/>
+            <accept src="M2_foo_N21"/>
           </node>
           <scope name="Lbasic_do;.:foo:29:135.:B:58:135.:do:73:118">
-            <node data="0" id="M2_foo_N14" kind="value" type="I">
+            <node data="0" id="M2_foo_N13" kind="value" type="I">
               <ast end="112" start="111" type="34"/>
             </node>
-            <node id="M2_foo_N15" kind="ref_var" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+            <node id="M2_foo_N14" kind="ref_var" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
               <ast end="116" start="115" type="42"/>
-              <accept src="M2_foo_N6"/>
+              <accept src="M2_foo_N5"/>
             </node>
-            <node data="&lt;" id="M2_foo_N16" kind="op_infix" type="Z">
+            <node data="&lt;" id="M2_foo_N15" kind="op_infix" type="Z">
               <ast end="116" start="111" type="27"/>
-              <accept label="L" src="M2_foo_N14"/>
-              <accept label="R" src="M2_foo_N15"/>
+              <accept label="L" src="M2_foo_N13"/>
+              <accept label="R" src="M2_foo_N14"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N17" kind="begin" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+            <node data=":do:73:118" id="M2_foo_N16" kind="begin" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
               <ast end="118" start="73" type="19"/>
               <accept label="init" src="M2_foo_N2"/>
-              <accept label="cont" src="M2_foo_N18"/>
+              <accept label="cont" src="M2_foo_N17"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N18" kind="repeat" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+            <node data=":do:73:118" id="M2_foo_N17" kind="repeat" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
               <ast end="118" start="73" type="19"/>
-              <accept label="_end" src="M2_foo_N19"/>
+              <accept label="_end" src="M2_foo_N18"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N19" kind="end" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+            <node data=":do:73:118" id="M2_foo_N18" kind="end" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
               <ast end="118" start="73" type="19"/>
-              <accept label="cond" src="M2_foo_N16"/>
-              <accept label="_repeat" src="M2_foo_N18"/>
-              <accept src="M2_foo_N6"/>
+              <accept label="cond" src="M2_foo_N15"/>
+              <accept label="_repeat" src="M2_foo_N17"/>
+              <accept src="M2_foo_N5"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N20" kind="begin" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+            <node data=":do:73:118" id="M2_foo_N19" kind="begin" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
               <ast end="118" start="73" type="19"/>
-              <accept label="init" src="M2_foo_N5"/>
-              <accept label="cont" src="M2_foo_N21"/>
+              <accept label="init" src="M2_foo_N4"/>
+              <accept label="cont" src="M2_foo_N20"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N21" kind="repeat" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+            <node data=":do:73:118" id="M2_foo_N20" kind="repeat" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
               <ast end="118" start="73" type="19"/>
-              <accept label="_end" src="M2_foo_N22"/>
+              <accept label="_end" src="M2_foo_N21"/>
             </node>
-            <node data=":do:73:118" id="M2_foo_N22" kind="end" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+            <node data=":do:73:118" id="M2_foo_N21" kind="end" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
               <ast end="118" start="73" type="19"/>
-              <accept label="cond" src="M2_foo_N16"/>
-              <accept label="_repeat" src="M2_foo_N21"/>
-              <accept src="M2_foo_N10"/>
+              <accept label="cond" src="M2_foo_N15"/>
+              <accept label="_repeat" src="M2_foo_N20"/>
+              <accept src="M2_foo_N9"/>
             </node>
             <scope name="Lbasic_do;.:foo:29:135.:B:58:135.:do:73:118.:B:76:103">
-              <node id="M2_foo_N6" kind="assign_var" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+              <node id="M2_foo_N5" kind="assign_var" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
                 <ast end="84" start="83" type="42"/>
-                <accept src="M2_foo_N9"/>
+                <accept src="M2_foo_N8"/>
               </node>
-              <node data="2" id="M2_foo_N7" kind="value" type="I">
+              <node data="2" id="M2_foo_N6" kind="value" type="I">
                 <ast end="89" start="88" type="34"/>
               </node>
-              <node data="/=" id="M2_foo_N9" kind="op_assign" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
+              <node data="/=" id="M2_foo_N8" kind="op_assign" ref="$Lbasic_do;.:foo:29:135/$x" type="I">
                 <ast end="89" start="83" type="7"/>
-                <accept label="L" src="M2_foo_N17"/>
-                <accept label="R" src="M2_foo_N7"/>
+                <accept label="L" src="M2_foo_N16"/>
+                <accept label="R" src="M2_foo_N6"/>
               </node>
-              <node id="M2_foo_N10" kind="assign_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+              <node id="M2_foo_N9" kind="assign_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
                 <ast end="97" start="96" type="42"/>
+                <accept src="M2_foo_N10"/>
+              </node>
+              <node data="++" id="M2_foo_N10" kind="op_postfix" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+                <ast end="99" start="96" type="37"/>
                 <accept src="M2_foo_N11"/>
               </node>
-              <node data="++" id="M2_foo_N11" kind="op_postfix" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
-                <ast end="99" start="96" type="37"/>
-                <accept src="M2_foo_N12"/>
-              </node>
-              <node id="M2_foo_N12" kind="ref_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
+              <node id="M2_foo_N11" kind="ref_var" ref="$Lbasic_do;.:foo:29:135.:B:58:135/$n" type="I">
                 <ast end="97" start="96" type="42"/>
-                <accept src="M2_foo_N20"/>
+                <accept src="M2_foo_N19"/>
               </node>
             </scope>
           </scope>
