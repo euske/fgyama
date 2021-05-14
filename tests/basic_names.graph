@@ -133,6 +133,9 @@
           <node data="Ldom/meep/basic_names;.doit()V" id="M4_main_N10" kind="call" type="V">
             <ast end="461" start="451" type="32"/>
             <accept label="#this" src="M4_main_N9"/>
+            <accept label="#this" src="M4_main_N3"/>
+            <accept label="@Ljava/lang/System;/.out" src="M4_main_N4"/>
+            <accept label="@Ldom/meep/basic_names;/.y" src="M4_main_N5"/>
           </node>
           <node id="M4_main_N11" kind="receive" type="V">
             <ast end="461" start="451" type="32"/>

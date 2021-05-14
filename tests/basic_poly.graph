@@ -81,6 +81,8 @@
             <ast end="219" start="205" type="48"/>
             <accept label="#this" src="M4_moo_N3"/>
             <accept label="#arg0" src="M4_moo_N6"/>
+            <accept label="#this" src="M4_moo_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M4_moo_N4"/>
           </node>
           <node id="M4_moo_N8" kind="receive" type="I">
             <ast end="219" start="205" type="48"/>
@@ -153,6 +155,9 @@
             <ast end="428" start="420" type="32"/>
             <accept label="#this" src="M6_main_N9"/>
             <accept label="#arg0" src="M6_main_N10"/>
+            <accept label="#this" src="M6_main_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
+            <accept label="#this" src="M6_main_N3"/>
           </node>
           <node id="M6_main_N12" kind="receive" type="I">
             <ast end="428" start="420" type="32"/>
@@ -189,6 +194,9 @@
             <ast end="527" start="519" type="32"/>
             <accept label="#this" src="M6_main_N18"/>
             <accept label="#arg0" src="M6_main_N19"/>
+            <accept label="#this" src="M6_main_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
+            <accept label="#this" src="M6_main_N3"/>
           </node>
           <node id="M6_main_N21" kind="receive" type="I">
             <ast end="527" start="519" type="32"/>
@@ -214,6 +222,9 @@
             <ast end="581" start="573" type="32"/>
             <accept label="#this" src="M6_main_N24"/>
             <accept label="#arg0" src="M6_main_N25"/>
+            <accept label="#this" src="M6_main_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
+            <accept label="#this" src="M6_main_N3"/>
           </node>
           <node id="M6_main_N27" kind="receive" type="I">
             <ast end="581" start="573" type="32"/>
@@ -250,6 +261,9 @@
             <ast end="684" start="676" type="32"/>
             <accept label="#this" src="M6_main_N33"/>
             <accept label="#arg0" src="M6_main_N34"/>
+            <accept label="#this" src="M6_main_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
+            <accept label="#this" src="M6_main_N3"/>
           </node>
           <node id="M6_main_N36" kind="receive" type="I">
             <ast end="684" start="676" type="32"/>
@@ -275,6 +289,9 @@
             <ast end="738" start="730" type="32"/>
             <accept label="#this" src="M6_main_N39"/>
             <accept label="#arg0" src="M6_main_N40"/>
+            <accept label="#this" src="M6_main_N5"/>
+            <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
+            <accept label="#this" src="M6_main_N3"/>
           </node>
           <node id="M6_main_N42" kind="receive" type="I">
             <ast end="738" start="730" type="32"/>
