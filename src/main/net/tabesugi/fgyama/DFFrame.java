@@ -18,6 +18,8 @@ public class DFFrame {
     private DFKlass _catchKlass;
     private DFLocalScope _scope;
 
+    private List<DFFrame> _children =
+        new ArrayList<DFFrame>();
     private Map<String, DFFrame> _ast2child =
         new HashMap<String, DFFrame>();
     private ConsistentHashSet<DFRef> _inputRefs =
@@ -66,6 +68,7 @@ public class DFFrame {
     private DFFrame addChild(String label, ASTNode ast, DFLocalScope scope) {
         DFFrame frame = new DFFrame(
             this, ast, label, null, scope);
+        _children.add(frame);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
@@ -73,6 +76,7 @@ public class DFFrame {
     private DFFrame addChild(DFKlass catchKlass, ASTNode ast, DFLocalScope scope) {
         DFFrame frame = new DFFrame(
             this, ast, catchKlass.getTypeName(), catchKlass, scope);
+        _children.add(frame);
         _ast2child.put(Utils.encodeASTNode(ast), frame);
         return frame;
     }
@@ -130,12 +134,38 @@ public class DFFrame {
         return _exits;
     }
 
+    private void listInputRefs(Set<DFRef> refs) {
+        for (DFFrame frame : _children) {
+            frame.listInputRefs(refs);
+        }
+        for (DFRef ref : _inputRefs) {
+            DFVarScope scope = ref.getScope();
+            if (!_scope.contains(scope)) {
+                refs.add(ref);
+            }
+        }
+    }
     public Collection<DFRef> getInputRefs() {
-        return _inputRefs;
+        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
+        this.listInputRefs(refs);
+        return refs;
     }
 
+    private void listOutputRefs(Set<DFRef> refs) {
+        for (DFFrame frame : _children) {
+            frame.listOutputRefs(refs);
+        }
+        for (DFRef ref : _outputRefs) {
+            DFVarScope scope = ref.getScope();
+            if (!_scope.contains(scope)) {
+                refs.add(ref);
+            }
+        }
+    }
     public Collection<DFRef> getOutputRefs() {
-        return _outputRefs;
+        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
+        this.listOutputRefs(refs);
+        return refs;
     }
 
     @SuppressWarnings("unchecked")
@@ -155,7 +185,6 @@ public class DFFrame {
                      (List<Statement>) block.statements()) {
                 innerFrame.buildStmt(cstmt);
             }
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof EmptyStatement) {
 
@@ -167,7 +196,7 @@ public class DFFrame {
                      (List<VariableDeclarationFragment>) varStmt.fragments()) {
                 try {
                     DFRef ref = _scope.lookupVar(frag.getName());
-                    _outputRefs.add(ref);
+                    this.addOutputRef(ref);
                 } catch (VariableNotFound e) {
                     Logger.error(
                         "DFFrame.buildStmt: VariableNotFound (decl)",
@@ -192,14 +221,11 @@ public class DFFrame {
             Statement thenStmt = ifStmt.getThenStatement();
             DFFrame thenFrame = ifFrame.addChild("@THEN", thenStmt, _scope);
             thenFrame.buildStmt(thenStmt);
-            ifFrame.expandLocalRefs(thenFrame);
             Statement elseStmt = ifStmt.getElseStatement();
             if (elseStmt != null) {
                 DFFrame elseFrame = ifFrame.addChild("@ELSE", elseStmt, _scope);
                 elseFrame.buildStmt(elseStmt);
-                ifFrame.expandLocalRefs(elseFrame);
             }
-            this.expandLocalRefs(ifFrame);
 
         } else if (stmt instanceof SwitchStatement) {
             // "switch (x) { case 0: ...; }"
@@ -218,9 +244,6 @@ public class DFFrame {
             DFFrame caseFrame = null;
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
-                    if (caseFrame != null) {
-                        switchFrame.expandLocalRefs(caseFrame);
-                    }
                     caseFrame = switchFrame.addChild("@CASE", cstmt, switchScope);
                     SwitchCase switchCase = (SwitchCase)cstmt;
                     Expression expr = switchCase.getExpression();
@@ -229,7 +252,7 @@ public class DFFrame {
                             // special treatment for enum.
                             DFRef ref = enumKlass.getField((SimpleName)expr);
                             if (ref != null) {
-                                _inputRefs.add(ref);
+                                this.addInputRef(ref);
                             } else {
                                 Logger.error(
                                     "DFFrame.buildStmt: VariableNotFound (switch)",
@@ -247,10 +270,6 @@ public class DFFrame {
                     caseFrame.buildStmt(cstmt);
                 }
             }
-            if (caseFrame != null) {
-                switchFrame.expandLocalRefs(caseFrame);
-            }
-            this.expandLocalRefs(switchFrame);
 
         } else if (stmt instanceof SwitchCase) {
             // Invalid "case" placement.
@@ -263,7 +282,6 @@ public class DFFrame {
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt, innerScope);
             this.buildExpr(whileStmt.getExpression());
             innerFrame.buildStmt(whileStmt.getBody());
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof DoStatement) {
             // "do { ... } while (c);"
@@ -272,7 +290,6 @@ public class DFFrame {
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt, innerScope);
             innerFrame.buildStmt(doStmt.getBody());
             this.buildExpr(doStmt.getExpression());
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof ForStatement) {
             // "for (i = 0; i < 10; i++) { ... }"
@@ -290,7 +307,6 @@ public class DFFrame {
             for (Expression update : (List<Expression>) forStmt.updaters()) {
                 innerFrame.buildExpr(update);
             }
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof EnhancedForStatement) {
             // "for (x : array) { ... }"
@@ -299,7 +315,6 @@ public class DFFrame {
             DFLocalScope innerScope = _scope.getChildByAST(stmt);
             DFFrame innerFrame = this.addChild(DFFrame.BREAKABLE, stmt, innerScope);
             innerFrame.buildStmt(eForStmt.getBody());
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof ReturnStatement) {
             // "return 42;"
@@ -323,7 +338,6 @@ public class DFFrame {
             String label = labelName.getIdentifier();
             DFFrame innerFrame = this.addChild(label, stmt, _scope);
             innerFrame.buildStmt(labeledStmt.getBody());
-            this.expandLocalRefs(innerFrame);
 
         } else if (stmt instanceof SynchronizedStatement) {
             // "synchronized (this) { ... }"
@@ -370,7 +384,7 @@ public class DFFrame {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
             DFRef ref = _scope.lookupThis();
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             int nargs = ci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
@@ -392,8 +406,8 @@ public class DFFrame {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
                         if (srcm.isTransparent()) {
-                            _inputRefs.addAll(srcm.getInputRefs());
-                            _outputRefs.addAll(srcm.getOutputRefs());
+                            this.addInputRefs(srcm.getInputRefs());
+                            this.addOutputRefs(srcm.getOutputRefs());
                         }
                     }
                 }
@@ -407,7 +421,7 @@ public class DFFrame {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
             DFRef ref = _scope.lookupThis();
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             int nargs = sci.arguments().size();
@@ -429,8 +443,8 @@ public class DFFrame {
                 if (method1 instanceof DFSourceMethod) {
                     DFSourceMethod srcmethod = (DFSourceMethod)method1;
                     if (srcmethod.isTransparent()) {
-                        _inputRefs.addAll(srcmethod.getInputRefs());
-                        _outputRefs.addAll(srcmethod.getOutputRefs());
+                        this.addInputRefs(srcmethod.getInputRefs());
+                        this.addOutputRefs(srcmethod.getOutputRefs());
                     }
                 }
             } else {
@@ -495,7 +509,7 @@ public class DFFrame {
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
             }
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             return ref.getRefType();
 
         } else if (expr instanceof ThisExpression) {
@@ -516,7 +530,7 @@ public class DFFrame {
             } else {
                 ref = _scope.lookupThis();
             }
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             return ref.getRefType();
 
         } else if (expr instanceof BooleanLiteral) {
@@ -606,7 +620,7 @@ public class DFFrame {
                      (List<VariableDeclarationFragment>) decl.fragments()) {
                 try {
                     DFRef ref = _scope.lookupVar(frag.getName());
-                    _outputRefs.add(ref);
+                    this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
                         this.buildExpr(init);
@@ -627,7 +641,7 @@ public class DFFrame {
             if (expr1 == null) {
                 // "method()"
                 DFRef ref = _scope.lookupThis();
-                _inputRefs.add(ref);
+                this.addInputRef(ref);
                 klass = ref.getRefType().toKlass();
                 callStyle = DFMethod.CallStyle.InstanceOrStatic;
             } else {
@@ -672,8 +686,8 @@ public class DFFrame {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
                         if (srcm.isTransparent()) {
-                            _inputRefs.addAll(srcm.getInputRefs());
-                            _outputRefs.addAll(srcm.getOutputRefs());
+                            this.addInputRefs(srcm.getInputRefs());
+                            this.addOutputRefs(srcm.getOutputRefs());
                         }
                     }
                 }
@@ -702,7 +716,7 @@ public class DFFrame {
                 argTypes[i] = type;
             }
             DFRef ref = _scope.lookupThis();
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             DFMethod method1 = baseKlass.findMethod(
@@ -711,8 +725,8 @@ public class DFFrame {
                 if (method1 instanceof DFSourceMethod) {
                     DFSourceMethod srcmethod = (DFSourceMethod)method1;
                     if (srcmethod.isTransparent()) {
-                        _inputRefs.addAll(srcmethod.getInputRefs());
-                        _outputRefs.addAll(srcmethod.getOutputRefs());
+                        this.addInputRefs(srcmethod.getInputRefs());
+                        this.addOutputRefs(srcmethod.getOutputRefs());
                     }
                 }
                 return method1.getFuncType().getReturnType();
@@ -758,7 +772,7 @@ public class DFFrame {
             DFType type = this.buildExpr(aa.getArray());
             if (type instanceof DFArrayType) {
                 DFRef ref = _scope.lookupArray(type);
-                _inputRefs.add(ref);
+                this.addInputRef(ref);
                 type = ((DFArrayType)type).getElemType();
             }
             return type;
@@ -787,7 +801,7 @@ public class DFFrame {
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref != null) {
-                _inputRefs.add(ref);
+                this.addInputRef(ref);
                 return ref.getRefType();
             } else {
                 Logger.error(
@@ -801,11 +815,11 @@ public class DFFrame {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFRef ref = _scope.lookupThis();
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 != null) {
-                _inputRefs.add(ref2);
+                this.addInputRef(ref2);
                 return ref2.getRefType();
             } else {
                 Logger.error(
@@ -875,8 +889,8 @@ public class DFFrame {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
                         if (srcm.isTransparent()) {
-                            _inputRefs.addAll(srcm.getInputRefs());
-                            _outputRefs.addAll(srcm.getOutputRefs());
+                            this.addInputRefs(srcm.getInputRefs());
+                            this.addOutputRefs(srcm.getOutputRefs());
                         }
                     }
                 }
@@ -907,7 +921,7 @@ public class DFFrame {
                 assert lambdaKlass instanceof DFLambdaKlass;
                 for (DFLambdaKlass.CapturedRef captured :
                          ((DFLambdaKlass)lambdaKlass).getCapturedRefs()) {
-                    _inputRefs.add(captured.getOriginal());
+                    this.addInputRef(captured.getOriginal());
                 }
                 return lambdaKlass;
             } catch (TypeNotFound e) {
@@ -987,7 +1001,7 @@ public class DFFrame {
                         return null;
                     }
                 }
-                _inputRefs.add(_scope.lookupThis());
+                this.addInputRef(_scope.lookupThis());
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
@@ -998,7 +1012,7 @@ public class DFFrame {
                     return null;
                 }
             }
-            _outputRefs.add(ref);
+            this.addOutputRef(ref);
             return ref;
 
         } else if (expr instanceof ArrayAccess) {
@@ -1008,7 +1022,7 @@ public class DFFrame {
             this.buildExpr(aa.getIndex());
             if (type instanceof DFArrayType) {
                 DFRef ref = _scope.lookupArray(type);
-                _outputRefs.add(ref);
+                this.addOutputRef(ref);
                 return ref;
             }
             return null;
@@ -1032,7 +1046,7 @@ public class DFFrame {
             SimpleName fieldName = fa.getName();
             DFRef ref = klass.getField(fieldName);
             if (ref != null) {
-                _outputRefs.add(ref);
+                this.addOutputRef(ref);
                 return ref;
             } else {
                 Logger.error(
@@ -1046,11 +1060,11 @@ public class DFFrame {
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
             DFRef ref = _scope.lookupThis();
-            _inputRefs.add(ref);
+            this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
             DFRef ref2 = klass.getField(fieldName);
             if (ref2 != null) {
-                _outputRefs.add(ref2);
+                this.addOutputRef(ref2);
                 return ref2;
             } else {
                 Logger.error(
@@ -1068,17 +1082,20 @@ public class DFFrame {
         }
     }
 
-    private void expandLocalRefs(DFFrame innerFrame) {
-        for (DFRef ref : innerFrame._inputRefs) {
-            if (_scope.hasRef(ref)) {
-                _inputRefs.add(ref);
-            }
-        }
-        for (DFRef ref : innerFrame._outputRefs) {
-            if (_scope.hasRef(ref)) {
-                _outputRefs.add(ref);
-            }
-        }
+    private void addInputRefs(Collection<DFRef> refs) {
+        _inputRefs.addAll(refs);
+    }
+
+    private void addOutputRefs(Collection<DFRef> refs) {
+        _outputRefs.addAll(refs);
+    }
+
+    private void addInputRef(DFRef ref) {
+        _inputRefs.add(ref);
+    }
+
+    private void addOutputRef(DFRef ref) {
+        _outputRefs.add(ref);
     }
 
     // dump: for debugging.
@@ -1097,7 +1114,7 @@ public class DFFrame {
         for (DFExit exit : this.getExits()) {
             out.println(i2+"exit: "+exit);
         }
-        for (DFFrame frame : _ast2child.values()) {
+        for (DFFrame frame : _children) {
             frame.dump(out, i2);
         }
         out.println(indent+"}");
