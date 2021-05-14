@@ -207,7 +207,8 @@ public abstract class DFGraph {
         } else if (stmt instanceof ConstructorInvocation) {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            DFNode obj = ctx.get(scope.lookupThis());
+            DFKlass klass = _method.getKlass();
+            DFNode obj = ctx.get(scope.lookupThis(klass));
             int nargs = ci.arguments().size();
             DFNode[] args = new DFNode[nargs];
             DFType[] argTypes = new DFType[nargs];
@@ -217,7 +218,6 @@ public abstract class DFGraph {
                 args[i] = node;
                 argTypes[i] = node.getNodeType();
             }
-            DFKlass klass = scope.lookupThis().getRefType().toKlass();
             DFMethod constructor = klass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
             if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
@@ -232,7 +232,8 @@ public abstract class DFGraph {
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            DFNode obj = ctx.get(scope.lookupThis());
+            DFKlass klass = _method.getKlass();
+            DFNode obj = ctx.get(scope.lookupThis(klass));
             int nargs = sci.arguments().size();
             DFNode[] args = new DFNode[nargs];
             DFType[] argTypes = new DFType[nargs];
@@ -242,7 +243,6 @@ public abstract class DFGraph {
                 args[i] = node;
                 argTypes[i] = node.getNodeType();
             }
-            DFKlass klass = obj.getNodeType().toKlass();
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
             DFMethod constructor = baseKlass.findMethod(
@@ -291,7 +291,8 @@ public abstract class DFGraph {
                     DFRef ref = scope.lookupVar((SimpleName)name);
                     DFNode node;
                     if (ref instanceof DFKlass.FieldRef) {
-                        DFNode obj = ctx.get(scope.lookupThis());
+                        DFKlass klass = _method.getKlass();
+                        DFNode obj = ctx.get(scope.lookupThis(klass));
                         node = new FieldRefNode(this, scope, ref, expr, obj);
                     } else {
                         node = new VarRefNode(this, scope, ref, expr);
@@ -327,9 +328,10 @@ public abstract class DFGraph {
                 DFRef ref;
                 if (name != null) {
                     DFKlass klass = _finder.resolveKlass(name);
-                    ref = klass.getKlassScope().lookupThis();
+                    ref = scope.lookupThis(klass);
                 } else {
-                    ref = scope.lookupThis();
+                    DFKlass klass = _method.getKlass();
+                    ref = scope.lookupThis(klass);
                 }
                 DFNode node = new VarRefNode(this, scope, ref, expr);
                 node.accept(ctx.get(ref));
@@ -474,8 +476,8 @@ public abstract class DFGraph {
                 DFKlass instKlass = null;
                 if (expr1 == null) {
                     // "method()"
-                    obj = ctx.get(scope.lookupThis());
-                    instKlass = obj.getNodeType().toKlass();
+                    instKlass = _method.getKlass();
+                    obj = ctx.get(scope.lookupThis(instKlass));
                     callStyle = DFMethod.CallStyle.InstanceOrStatic;
                 } else {
                     callStyle = DFMethod.CallStyle.InstanceMethod;
@@ -534,7 +536,8 @@ public abstract class DFGraph {
             } else if (expr instanceof SuperMethodInvocation) {
                 // "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-                DFNode obj = ctx.get(scope.lookupThis());
+                DFKlass klass = _method.getKlass();
+                DFNode obj = ctx.get(scope.lookupThis(klass));
                 int nargs = sinvoke.arguments().size();
                 DFNode[] args = new DFNode[nargs];
                 DFType[] argTypes = new DFType[nargs];
@@ -544,7 +547,6 @@ public abstract class DFGraph {
                     args[i] = node;
                     argTypes[i] = node.getNodeType();
                 }
-                DFKlass klass = obj.getNodeType().toKlass();
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
                 DFMethod method = baseKlass.findMethod(
@@ -642,9 +644,10 @@ public abstract class DFGraph {
                 // "super.baa"
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
-                DFNode obj = ctx.get(scope.lookupThis());
-                DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-                DFRef ref = klass.getField(fieldName);
+                DFKlass klass = _method.getKlass();
+                DFNode obj = ctx.get(scope.lookupThis(klass));
+                DFKlass baseKlass = klass.getBaseKlass();
+                DFRef ref = baseKlass.getField(fieldName);
                 if (ref == null) throw new VariableNotFound("."+fieldName);
                 DFNode node = new FieldRefNode(this, scope, ref, sfa, obj);
                 node.accept(ctx.get(ref));
@@ -789,7 +792,8 @@ public abstract class DFGraph {
                 DFRef ref = scope.lookupVar((SimpleName)name);
                 DFNode node;
                 if (ref instanceof DFKlass.FieldRef) {
-                    DFNode obj = ctx.get(scope.lookupThis());
+                    DFKlass klass = _method.getKlass();
+                    DFNode obj = ctx.get(scope.lookupThis(klass));
                     return new FieldAssignNode(this, scope, ref, expr, obj);
                 } else {
                     return new VarAssignNode(this, scope, ref, expr);
@@ -840,9 +844,10 @@ public abstract class DFGraph {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFNode obj = ctx.get(scope.lookupThis());
-            DFKlass klass = obj.getNodeType().toKlass().getBaseKlass();
-            DFRef ref = klass.getField(fieldName);
+            DFKlass klass = _method.getKlass();
+            DFNode obj = ctx.get(scope.lookupThis(klass));
+            DFKlass baseKlass = klass.getBaseKlass();
+            DFRef ref = baseKlass.getField(fieldName);
             if (ref == null) throw new VariableNotFound("."+fieldName);
             return new FieldAssignNode(this, scope, ref, expr, obj);
 
@@ -1556,7 +1561,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFLocalScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
+        DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -1609,7 +1614,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFLocalScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_finder, DFFrame.RETURNABLE, scope);
+        DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
 
         if (body instanceof Statement) {
             frame.buildStmt((Statement)body);

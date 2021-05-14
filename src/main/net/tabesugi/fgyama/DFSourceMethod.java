@@ -1017,7 +1017,7 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (stmt instanceof ConstructorInvocation) {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            DFRef ref = scope.lookupThis();
+            DFRef ref = scope.lookupThis(_srcklass);
             this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
             int nargs = ci.arguments().size();
@@ -1038,10 +1038,9 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            DFRef ref = scope.lookupThis();
+            DFRef ref = scope.lookupThis(_srcklass);
             this.addInputRef(ref);
-            DFKlass klass = ref.getRefType().toKlass();
-            DFKlass baseKlass = klass.getBaseKlass();
+            DFKlass baseKlass = _srcklass.getBaseKlass();
             int nargs = sci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -1108,7 +1107,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (ref == null) return null;
             }
             if (ref instanceof DFKlass.FieldRef) {
-                this.addInputRef(scope.lookupThis());
+                this.addInputRef(scope.lookupThis(_srcklass));
             }
             this.addInputRef(ref);
             return ref.getRefType();
@@ -1121,12 +1120,12 @@ public abstract class DFSourceMethod extends DFMethod {
             if (name != null) {
                 try {
                     DFKlass klass = _finder.resolveKlass(name);
-                    ref = klass.getKlassScope().lookupThis();
+                    ref = scope.lookupThis(klass);
                 } catch (TypeNotFound e) {
                     return null;
                 }
             } else {
-                ref = scope.lookupThis();
+                ref = scope.lookupThis(_srcklass);
             }
             this.addInputRef(ref);
             return ref.getRefType();
@@ -1243,9 +1242,9 @@ public abstract class DFSourceMethod extends DFMethod {
             DFKlass klass = null;
             if (expr1 == null) {
                 // "method()"
-                DFRef ref = scope.lookupThis();
+                DFRef ref = scope.lookupThis(_srcklass);
                 this.addInputRef(ref);
-                klass = ref.getRefType().toKlass();
+                klass = _srcklass;
                 callStyle = CallStyle.InstanceOrStatic;
             } else {
                 callStyle = CallStyle.InstanceMethod;
@@ -1293,10 +1292,9 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return null;
                 argTypes[i] = type;
             }
-            DFRef ref = scope.lookupThis();
+            DFRef ref = scope.lookupThis(_srcklass);
             this.addInputRef(ref);
-            DFKlass klass = ref.getRefType().toKlass();
-            DFKlass baseKlass = klass.getBaseKlass();
+            DFKlass baseKlass = _srcklass.getBaseKlass();
             DFMethod method1 = baseKlass.findMethod(
                 CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
             if (method1 == null) return DFUnknownType.UNKNOWN;
@@ -1368,10 +1366,10 @@ public abstract class DFSourceMethod extends DFMethod {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFRef ref = scope.lookupThis();
+            DFRef ref = scope.lookupThis(_srcklass);
             this.addInputRef(ref);
-            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            DFRef ref2 = klass.getField(fieldName);
+            DFKlass baseKlass = _srcklass.getBaseKlass();
+            DFRef ref2 = baseKlass.getField(fieldName);
             if (ref2 == null) return null;
             this.addInputRef(ref2);
             return ref2.getRefType();
@@ -1495,7 +1493,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (ref == null) return null;
             }
             if (ref instanceof DFKlass.FieldRef) {
-                this.addInputRef(scope.lookupThis());
+                this.addInputRef(scope.lookupThis(_srcklass));
             }
             this.addOutputRef(ref);
             return ref;
@@ -1538,10 +1536,10 @@ public abstract class DFSourceMethod extends DFMethod {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFRef ref = scope.lookupThis();
+            DFRef ref = scope.lookupThis(_srcklass);
             this.addInputRef(ref);
-            DFKlass klass = ref.getRefType().toKlass().getBaseKlass();
-            DFRef ref2 = klass.getField(fieldName);
+            DFKlass baseKlass = _srcklass.getBaseKlass();
+            DFRef ref2 = baseKlass.getField(fieldName);
             if (ref2 == null) return null;
             this.addOutputRef(ref2);
             return ref2;
@@ -1772,13 +1770,26 @@ public abstract class DFSourceMethod extends DFMethod {
     // MethodScope
     protected class MethodScope extends DFLocalScope {
 
-        private InternalRef _return = null;
-        private InternalRef[] _arguments = null;
+        private DFRef _return = null;
+        private DFRef[] _arguments = null;
+        private ConsistentHashMap<DFKlass, DFRef> _this =
+            new ConsistentHashMap<DFKlass, DFRef>();
         private ConsistentHashMap<DFType, DFRef> _exceptions =
             new ConsistentHashMap<DFType, DFRef>();
 
         protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
+        }
+
+        @Override
+        public DFRef lookupThis(DFKlass klass) {
+            DFRef ref = _this.get(klass);
+            if (ref == null) {
+                String name = (klass == _srcklass)? "this" : klass.getName()+".this";
+                ref = new InternalRef(klass, name);
+                _this.put(klass, ref);
+            }
+            return ref;
         }
 
         public DFRef lookupArgument(int index) {
@@ -1845,7 +1856,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
             @Override
             public DFVarScope getScope() {
-                return MethodScope.this;
+                return null;
             }
 
             @Override

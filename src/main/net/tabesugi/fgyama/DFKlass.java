@@ -490,41 +490,16 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
 
-    // ThisRef
-    private class ThisRef extends DFRef {
-        public ThisRef(DFType type) {
-            super(type);
-        }
-
-        @Override
-        public DFVarScope getScope() {
-            return _klassScope;
-        }
-
-        @Override
-        public String getFullName() {
-            return "#this";
-        }
-    }
-
     // KlassScope
     private class KlassScope extends DFVarScope {
 
-        private DFRef _this;
-
         public KlassScope(DFVarScope outer, String id) {
             super(outer, id);
-            _this = new ThisRef(DFKlass.this);
         }
 
         @Override
         public String getScopeName() {
             return DFKlass.this.getTypeName();
-        }
-
-        @Override
-        public DFRef lookupThis() {
-            return _this;
         }
 
         @Override
