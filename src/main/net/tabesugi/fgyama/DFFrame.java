@@ -379,10 +379,8 @@ public class DFFrame {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
-                        if (srcm.isTransparent()) {
-                            this.addInputRefs(srcm.getInputRefs());
-                            this.addOutputRefs(srcm.getOutputRefs());
-                        }
+                        this.addInputRefs(srcm.getInputRefs());
+                        this.addOutputRefs(srcm.getOutputRefs());
                     }
                 }
             } else {
@@ -416,10 +414,8 @@ public class DFFrame {
             if (method1 != null) {
                 if (method1 instanceof DFSourceMethod) {
                     DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                    if (srcmethod.isTransparent()) {
-                        this.addInputRefs(srcmethod.getInputRefs());
-                        this.addOutputRefs(srcmethod.getOutputRefs());
-                    }
+                    this.addInputRefs(srcmethod.getInputRefs());
+                    this.addOutputRefs(srcmethod.getOutputRefs());
                 }
             } else {
                 Logger.error(
@@ -659,10 +655,8 @@ public class DFFrame {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
-                        if (srcm.isTransparent()) {
-                            this.addInputRefs(srcm.getInputRefs());
-                            this.addOutputRefs(srcm.getOutputRefs());
-                        }
+                        this.addInputRefs(srcm.getInputRefs());
+                        this.addOutputRefs(srcm.getOutputRefs());
                     }
                 }
                 return method1.getFuncType().getReturnType();
@@ -698,10 +692,8 @@ public class DFFrame {
             if (method1 != null) {
                 if (method1 instanceof DFSourceMethod) {
                     DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                    if (srcmethod.isTransparent()) {
-                        this.addInputRefs(srcmethod.getInputRefs());
-                        this.addOutputRefs(srcmethod.getOutputRefs());
-                    }
+                    this.addInputRefs(srcmethod.getInputRefs());
+                    this.addOutputRefs(srcmethod.getOutputRefs());
                 }
                 return method1.getFuncType().getReturnType();
             } else {
@@ -862,10 +854,8 @@ public class DFFrame {
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
                         DFSourceMethod srcm = (DFSourceMethod)m;
-                        if (srcm.isTransparent()) {
-                            this.addInputRefs(srcm.getInputRefs());
-                            this.addOutputRefs(srcm.getOutputRefs());
-                        }
+                        this.addInputRefs(srcm.getInputRefs());
+                        this.addOutputRefs(srcm.getOutputRefs());
                     }
                 }
             } else {

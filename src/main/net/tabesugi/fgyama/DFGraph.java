@@ -1413,9 +1413,7 @@ public abstract class DFGraph {
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                if (srcmethod.isTransparent()) {
-                    refs.addAll(srcmethod.getInputRefs());
-                }
+                refs.addAll(srcmethod.getInputRefs());
             }
         }
         for (DFRef ref : refs) {
@@ -1425,9 +1423,7 @@ public abstract class DFGraph {
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                if (srcmethod.isTransparent()) {
-                    refs.addAll(srcmethod.getOutputRefs());
-                }
+                refs.addAll(srcmethod.getOutputRefs());
             }
         }
         for (DFRef ref : refs) {

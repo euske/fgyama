@@ -66,11 +66,6 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
-        public boolean isTransparent() {
-            return true;
-        }
-
-        @Override
         public DFFuncType getFuncType() {
             return _funcType;
         }

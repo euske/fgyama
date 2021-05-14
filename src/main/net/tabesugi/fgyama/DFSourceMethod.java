@@ -28,12 +28,6 @@ public abstract class DFSourceMethod extends DFMethod {
     private ConsistentHashSet<DFRef> _inputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _outputRefs = new ConsistentHashSet<DFRef>();
 
-    private static boolean _defaultTransparent = false;
-
-    public static void setDefaultTransparent(boolean transparent) {
-        _defaultTransparent = transparent;
-    }
-
     // Normal constructor.
     protected DFSourceMethod(
         DFSourceKlass srcklass, CallStyle callStyle, boolean isAbstract,
@@ -56,10 +50,6 @@ public abstract class DFSourceMethod extends DFMethod {
         _outerScope = genericMethod._outerScope;
         _finder = new DFTypeFinder(this, genericMethod._finder);
         _methodScope = new MethodScope(_outerScope, this.getMethodId());
-    }
-
-    public boolean isTransparent() {
-        return _defaultTransparent;
     }
 
     protected DFTypeFinder getFinder() {
