@@ -1113,6 +1113,9 @@ public abstract class DFSourceMethod extends DFMethod {
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
             }
+            if (ref instanceof DFKlass.FieldRef) {
+                this.addInputRef(scope.lookupThis());
+            }
             this.addInputRef(ref);
             return ref.getRefType();
 
@@ -1492,11 +1495,13 @@ public abstract class DFSourceMethod extends DFMethod {
                         return null;
                     }
                 }
-                this.addInputRef(scope.lookupThis());
                 DFKlass klass = type.toKlass();
                 SimpleName fieldName = qname.getName();
                 ref = klass.getField(fieldName);
                 if (ref == null) return null;
+            }
+            if (ref instanceof DFKlass.FieldRef) {
+                this.addInputRef(scope.lookupThis());
             }
             this.addOutputRef(ref);
             return ref;
@@ -1558,16 +1563,15 @@ public abstract class DFSourceMethod extends DFMethod {
     }
 
     private void addInputRef(DFRef ref) {
-        //Logger.info("addInputRef", ref, ref.getScope(), _methodScope);
-        if (ref.getScope().contains(_methodScope)) {
-            _inputRefs.add(ref);
-        }
+        DFVarScope scope = ref.getScope();
+        if (_methodScope == scope || _methodScope.contains(scope)) return;
+        _inputRefs.add(ref);
     }
 
     private void addOutputRef(DFRef ref) {
-        if (ref.getScope().contains(_methodScope)) {
-            _outputRefs.add(ref);
-        }
+        DFVarScope scope = ref.getScope();
+        if (_methodScope == scope || _methodScope.contains(scope)) return;
+        _outputRefs.add(ref);
     }
 
     /// Set Lambda types.

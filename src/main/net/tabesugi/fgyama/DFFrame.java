@@ -134,38 +134,12 @@ public class DFFrame {
         return _exits;
     }
 
-    private void listInputRefs(Set<DFRef> refs) {
-        for (DFFrame frame : _children) {
-            frame.listInputRefs(refs);
-        }
-        for (DFRef ref : _inputRefs) {
-            DFVarScope scope = ref.getScope();
-            if (!_scope.contains(scope)) {
-                refs.add(ref);
-            }
-        }
-    }
     public Collection<DFRef> getInputRefs() {
-        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
-        this.listInputRefs(refs);
-        return refs;
+        return _inputRefs;
     }
 
-    private void listOutputRefs(Set<DFRef> refs) {
-        for (DFFrame frame : _children) {
-            frame.listOutputRefs(refs);
-        }
-        for (DFRef ref : _outputRefs) {
-            DFVarScope scope = ref.getScope();
-            if (!_scope.contains(scope)) {
-                refs.add(ref);
-            }
-        }
-    }
     public Collection<DFRef> getOutputRefs() {
-        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
-        this.listOutputRefs(refs);
-        return refs;
+        return _outputRefs;
     }
 
     @SuppressWarnings("unchecked")
@@ -1083,19 +1057,31 @@ public class DFFrame {
     }
 
     private void addInputRefs(Collection<DFRef> refs) {
-        _inputRefs.addAll(refs);
+        for (DFRef ref : refs) {
+            this.addInputRef(ref);
+        }
     }
 
     private void addOutputRefs(Collection<DFRef> refs) {
-        _outputRefs.addAll(refs);
+        for (DFRef ref : refs) {
+            this.addOutputRef(ref);
+        }
     }
 
     private void addInputRef(DFRef ref) {
+        if (_scope.contains(ref.getScope())) return;
         _inputRefs.add(ref);
+        if (_outer != null) {
+            _outer.addInputRef(ref);
+        }
     }
 
     private void addOutputRef(DFRef ref) {
+        if (_scope.contains(ref.getScope())) return;
         _outputRefs.add(ref);
+        if (_outer != null) {
+            _outer.addOutputRef(ref);
+        }
     }
 
     // dump: for debugging.

@@ -60,6 +60,7 @@ public abstract class DFVarScope {
         }
     }
 
+    // Returns true if this scope *strictly* contains the given scope.
     public boolean contains(DFVarScope scope) {
         while (scope != null) {
             scope = scope._outer;
