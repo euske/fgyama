@@ -1785,7 +1785,7 @@ public abstract class DFSourceMethod extends DFMethod {
         public DFRef lookupThis(DFKlass klass) {
             DFRef ref = _this.get(klass);
             if (ref == null) {
-                String name = (klass == _srcklass)? "this" : klass.getName()+".this";
+                String name = "#"+klass.getTypeName();
                 ref = new InternalRef(klass, name);
                 _this.put(klass, ref);
             }
@@ -1807,7 +1807,8 @@ public abstract class DFSourceMethod extends DFMethod {
         public DFRef lookupException(DFType type) {
             DFRef ref = _exceptions.get(type);
             if (ref == null) {
-                ref = new InternalRef(type, type.getTypeName());
+                String name = "!"+type.getTypeName();
+                ref = new InternalRef(type, name);
                 _exceptions.put(type, ref);
             }
             return ref;
@@ -1821,7 +1822,7 @@ public abstract class DFSourceMethod extends DFMethod {
             // could be a wrong funcType when the lambda is undefined.
             DFFuncType funcType = DFSourceMethod.this.getFuncType();
             DFType[] argTypes = funcType.getRealArgTypes();
-            _return = new InternalRef(funcType.getReturnType(), "return");
+            _return = new InternalRef(funcType.getReturnType(), "#return");
             _arguments = new InternalRef[argTypes.length];
             int i = 0;
             for (VariableDeclaration decl : parameters) {
@@ -1837,7 +1838,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 } else {
                     name = "arg"+i;
                 }
-                _arguments[i] = new InternalRef(argType, name);
+                _arguments[i] = new InternalRef(argType, "#"+name);
                 this.addVar(decl.getName(), argType);
                 i++;
             }
@@ -1861,7 +1862,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
             @Override
             public String getFullName() {
-                return "#"+_name;
+                return _name;
             }
         }
     }

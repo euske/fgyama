@@ -747,9 +747,10 @@ public abstract class DFGraph {
                 try {
                     // Try assuming it's an ExpresionMethodReference.
                     // Capture "this".
-                    node.accept(processExpression(
-                                    ctx, scope, frame, methodref.getExpression()),
-                                "#this");
+                    DFNode obj = processExpression(
+                        ctx, scope, frame, methodref.getExpression());
+                    DFKlass klass = obj.getNodeType().toKlass();
+                    node.accept(obj, "#"+klass.getTypeName());
                 } catch (EntityNotFound e) {
                     // Turned out it's a TypeMethodReference.
                 }
@@ -2255,7 +2256,8 @@ class MethodCallNode extends CallNode {
         super(graph, scope, funcType.getReturnType(), null,
               ast, funcType);
         if (obj != null) {
-            this.accept(obj, "#this");
+            DFKlass klass = obj.getNodeType().toKlass();
+            this.accept(obj, "#"+klass.getTypeName());
         }
         this.methods = methods;
     }
@@ -2307,7 +2309,8 @@ class CreateObjectNode extends CallNode {
         super(graph, scope, type, null,
               ast, constructor.getFuncType());
         if (obj != null) {
-            this.accept(obj, "#this");
+            DFKlass klass = obj.getNodeType().toKlass();
+            this.accept(obj, "#"+klass.getTypeName());
         }
         this.constructor = constructor;
     }
