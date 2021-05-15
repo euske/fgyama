@@ -154,4 +154,13 @@ public class UnitTestDF extends XMLTestCase {
     public void test_21_basic_lambda() throws Exception {
         compareXml(TESTDATA+"/basic_lambda.java", TESTDATA+"/basic_lambda.graph");
     }
+
+    @Test
+    public void test_22_sample_hello() throws Exception {
+        compareXml(TESTDATA+"/Hello.java", TESTDATA+"/Hello.graph");
+    }
+    @Test
+    public void test_23_sample_app1() throws Exception {
+        compareXml(TESTDATA+"/App1.java", TESTDATA+"/App1.graph");
+    }
 }

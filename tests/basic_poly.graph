@@ -26,7 +26,7 @@
           <ast end="75" start="57" type="44"/>
           <accept src="M2_moo_N1"/>
         </node>
-        <node id="M2_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
+        <node id="M2_moo_N3" kind="input" ref="#Lbasic_poly_Foo;" type="Lbasic_poly_Foo;"/>
         <node id="M2_moo_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
         <node id="M2_moo_N8" kind="output" ref="#return" type="I">
           <accept src="M2_moo_N5"/>
@@ -66,9 +66,9 @@
           <ast end="193" start="175" type="44"/>
           <accept src="M4_moo_N1"/>
         </node>
-        <node id="M4_moo_N3" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
+        <node id="M4_moo_N3" kind="input" ref="#Lbasic_poly_Baa;" type="Lbasic_poly_Baa;"/>
         <node id="M4_moo_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-        <node id="M4_moo_N5" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
+        <node id="M4_moo_N5" kind="input" ref="#Lbasic_poly_Foo;" type="Lbasic_poly_Foo;"/>
         <node id="M4_moo_N14" kind="output" ref="#return" type="I">
           <accept src="M4_moo_N9"/>
         </node>
@@ -79,9 +79,8 @@
           </node>
           <node data="Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="M4_moo_N7" kind="call" type="I">
             <ast end="219" start="205" type="48"/>
-            <accept label="#this" src="M4_moo_N3"/>
             <accept label="#arg0" src="M4_moo_N6"/>
-            <accept label="#this" src="M4_moo_N5"/>
+            <accept label="#Lbasic_poly_Foo;" src="M4_moo_N3"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M4_moo_N4"/>
           </node>
           <node id="M4_moo_N8" kind="receive" type="I">
@@ -128,9 +127,9 @@
           <ast end="351" start="338" type="44"/>
           <accept src="M6_main_N1"/>
         </node>
-        <node id="M6_main_N3" kind="input" ref="#this" type="Lbasic_poly_Foo;"/>
+        <node id="M6_main_N3" kind="input" ref="#Lbasic_poly_Foo;" type="Lbasic_poly_Foo;"/>
         <node id="M6_main_N4" kind="input" ref="@Lbasic_poly_Foo;/.x" type="I"/>
-        <node id="M6_main_N5" kind="input" ref="#this" type="Lbasic_poly_Baa;"/>
+        <node id="M6_main_N5" kind="input" ref="#Lbasic_poly_Baa;" type="Lbasic_poly_Baa;"/>
         <scope name="Lbasic_poly;.:main:314:777.:B:353:777">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M6_main_N6" kind="new" type="Lbasic_poly_Foo;">
             <ast end="402" start="382" type="14"/>
@@ -153,11 +152,10 @@
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="M6_main_N11" kind="call" type="I">
             <ast end="428" start="420" type="32"/>
-            <accept label="#this" src="M6_main_N9"/>
             <accept label="#arg0" src="M6_main_N10"/>
-            <accept label="#this" src="M6_main_N5"/>
+            <accept label="#Lbasic_poly_Baa;" src="M6_main_N9"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
-            <accept label="#this" src="M6_main_N3"/>
+            <accept label="#Lbasic_poly_Foo;" src="M6_main_N9"/>
           </node>
           <node id="M6_main_N12" kind="receive" type="I">
             <ast end="428" start="420" type="32"/>
@@ -192,11 +190,10 @@
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="M6_main_N20" kind="call" type="I">
             <ast end="527" start="519" type="32"/>
-            <accept label="#this" src="M6_main_N18"/>
             <accept label="#arg0" src="M6_main_N19"/>
-            <accept label="#this" src="M6_main_N5"/>
+            <accept label="#Lbasic_poly_Baa;" src="M6_main_N18"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
-            <accept label="#this" src="M6_main_N3"/>
+            <accept label="#Lbasic_poly_Foo;" src="M6_main_N18"/>
           </node>
           <node id="M6_main_N21" kind="receive" type="I">
             <ast end="527" start="519" type="32"/>
@@ -220,11 +217,10 @@
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I Lbasic_poly_Foo;.moo(Lbasic_poly_Foo;)I" id="M6_main_N26" kind="call" type="I">
             <ast end="581" start="573" type="32"/>
-            <accept label="#this" src="M6_main_N24"/>
             <accept label="#arg0" src="M6_main_N25"/>
-            <accept label="#this" src="M6_main_N5"/>
+            <accept label="#Lbasic_poly_Baa;" src="M6_main_N24"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
-            <accept label="#this" src="M6_main_N3"/>
+            <accept label="#Lbasic_poly_Foo;" src="M6_main_N24"/>
           </node>
           <node id="M6_main_N27" kind="receive" type="I">
             <ast end="581" start="573" type="32"/>
@@ -259,11 +255,10 @@
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" id="M6_main_N35" kind="call" type="I">
             <ast end="684" start="676" type="32"/>
-            <accept label="#this" src="M6_main_N33"/>
             <accept label="#arg0" src="M6_main_N34"/>
-            <accept label="#this" src="M6_main_N5"/>
+            <accept label="#Lbasic_poly_Baa;" src="M6_main_N33"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
-            <accept label="#this" src="M6_main_N3"/>
+            <accept label="#Lbasic_poly_Foo;" src="M6_main_N33"/>
           </node>
           <node id="M6_main_N36" kind="receive" type="I">
             <ast end="684" start="676" type="32"/>
@@ -287,11 +282,10 @@
           </node>
           <node data="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" id="M6_main_N41" kind="call" type="I">
             <ast end="738" start="730" type="32"/>
-            <accept label="#this" src="M6_main_N39"/>
             <accept label="#arg0" src="M6_main_N40"/>
-            <accept label="#this" src="M6_main_N5"/>
+            <accept label="#Lbasic_poly_Baa;" src="M6_main_N39"/>
             <accept label="@Lbasic_poly_Foo;/.x" src="M6_main_N4"/>
-            <accept label="#this" src="M6_main_N3"/>
+            <accept label="#Lbasic_poly_Foo;" src="M6_main_N39"/>
           </node>
           <node id="M6_main_N42" kind="receive" type="I">
             <ast end="738" start="730" type="32"/>

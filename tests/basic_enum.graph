@@ -23,12 +23,12 @@
           <ast end="71" start="66" type="44"/>
           <accept src="M2_&lt;init&gt;_N1"/>
         </node>
-        <node id="M2_&lt;init&gt;_N3" kind="input" ref="#this" type="LE;"/>
+        <node id="M2_&lt;init&gt;_N3" kind="input" ref="#LE;" type="LE;"/>
         <node id="M2_&lt;init&gt;_N8" kind="output" ref="@LE;/.x" type="I">
           <accept src="M2_&lt;init&gt;_N5"/>
         </node>
         <scope name="LE;.:E:56:100.:B:73:100">
-          <node id="M2_&lt;init&gt;_N4" kind="ref_var" ref="#this" type="LE;">
+          <node id="M2_&lt;init&gt;_N4" kind="ref_var" ref="#LE;" type="LE;">
             <ast end="87" start="83" type="52"/>
             <accept src="M2_&lt;init&gt;_N3"/>
           </node>
@@ -57,7 +57,7 @@
     <method id="Lbasic_enum;.foo()V" name="foo" style="static">
       <ast end="292" start="134" type="31"/>
       <scope name="Lbasic_enum;.:foo:134:292">
-        <node id="M4_foo_N1" kind="input" ref="#this" type="Lbasic_enum;"/>
+        <node id="M4_foo_N1" kind="input" ref="#Lbasic_enum;" type="Lbasic_enum;"/>
         <node id="M4_foo_N2" kind="input" ref="@LE;/.Moo" type="LE;"/>
         <node id="M4_foo_N3" kind="input" ref="@LE;/.Baa" type="LE;"/>
         <scope name="Lbasic_enum;.:foo:134:292.:B:159:292">

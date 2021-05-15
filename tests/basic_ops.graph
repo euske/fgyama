@@ -14,7 +14,7 @@
           <ast end="57" start="52" type="44"/>
           <accept src="M2_foo_N1"/>
         </node>
-        <node id="M2_foo_N3" kind="input" ref="#this" type="Lbasic_ops;"/>
+        <node id="M2_foo_N3" kind="input" ref="#Lbasic_ops;" type="Lbasic_ops;"/>
         <node id="M2_foo_N4" kind="input" ref="%I" type="I"/>
         <node id="M2_foo_N42" kind="output" ref="#return" type="I">
           <accept src="M2_foo_N40"/>
@@ -64,7 +64,6 @@
           </node>
           <node data="Lbasic_ops;.moo(II)?" id="M2_foo_N15" kind="call" type="?">
             <ast end="107" start="98" type="32"/>
-            <accept label="#this" src="M2_foo_N3"/>
             <accept label="#arg0" src="M2_foo_N13"/>
             <accept label="#arg1" src="M2_foo_N14"/>
           </node>

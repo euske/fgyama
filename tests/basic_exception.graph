@@ -7,10 +7,10 @@
     <method id="Lbasic_exception;.foo()V" name="foo" style="instance">
       <ast end="380" start="103" type="31"/>
       <scope name="Lbasic_exception;.:foo:103:380">
-        <node id="M2_foo_N1" kind="input" ref="#this" type="Lbasic_exception;"/>
+        <node id="M2_foo_N1" kind="input" ref="#Lbasic_exception;" type="Lbasic_exception;"/>
         <node id="M2_foo_N2" kind="input" ref="@Lbasic_exception/A;/.text" type="Ljava/lang/String;"/>
         <node id="M2_foo_N3" kind="input" ref="@Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M2_foo_N30" kind="output" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+        <node id="M2_foo_N30" kind="output" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
           <accept src="M2_foo_N24"/>
         </node>
         <scope name="Lbasic_exception;.:foo:103:380.:B:130:380">
@@ -21,7 +21,7 @@
             <ast end="155" start="147" type="59"/>
             <accept src="M2_foo_N4"/>
           </node>
-          <node id="M2_foo_N24" kind="catchjoin" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+          <node id="M2_foo_N24" kind="catchjoin" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
             <ast end="307" start="239" type="12"/>
             <accept label="Lbasic_exception/A;" src="M2_foo_N23"/>
           </node>
@@ -33,10 +33,9 @@
               </node>
               <node data="Lbasic_exception;.moo()Ljava/lang/String;" id="M2_foo_N8" kind="call" type="Ljava/lang/String;">
                 <ast end="192" start="187" type="32"/>
-                <accept label="#this" src="M2_foo_N1"/>
               </node>
-              <node id="M2_foo_N9" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
-                <accept label="#Lbasic_exception/A;" src="M2_foo_N8"/>
+              <node id="M2_foo_N9" kind="throw" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
+                <accept label="!Lbasic_exception/A;" src="M2_foo_N8"/>
               </node>
               <node id="M2_foo_N10" kind="receive" type="Ljava/lang/String;">
                 <ast end="192" start="187" type="32"/>
@@ -53,7 +52,7 @@
                 <ast end="227" start="212" type="14"/>
                 <accept src="M2_foo_N12"/>
               </node>
-              <node id="M2_foo_N14" kind="throw" ref="#Ljava/lang/Exception;" type="Ljava/lang/Exception;">
+              <node id="M2_foo_N14" kind="throw" ref="!Ljava/lang/Exception;" type="Ljava/lang/Exception;">
                 <ast end="228" start="206" type="53"/>
                 <accept src="M2_foo_N13"/>
               </node>
@@ -86,7 +85,7 @@
                 <ast end="296" start="295" type="42"/>
                 <accept src="M2_foo_N15"/>
               </node>
-              <node id="M2_foo_N23" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+              <node id="M2_foo_N23" kind="throw" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
                 <ast end="297" start="289" type="53"/>
                 <accept src="M2_foo_N22"/>
               </node>
@@ -108,7 +107,6 @@
               </node>
               <node data="Ljava/io/PrintStream;.println(Ljava/lang/Object;)V" id="M2_foo_N28" kind="call" type="V">
                 <ast end="363" start="342" type="32"/>
-                <accept label="#this" src="M2_foo_N25"/>
                 <accept label="#arg0" src="M2_foo_N27"/>
               </node>
               <node id="M2_foo_N29" kind="receive" type="V">
@@ -127,7 +125,7 @@
         <node id="M3_moo_N8" kind="output" ref="#return" type="Ljava/lang/String;">
           <accept src="M3_moo_N6"/>
         </node>
-        <node id="M3_moo_N9" kind="output" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+        <node id="M3_moo_N9" kind="output" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
           <accept src="M3_moo_N4"/>
         </node>
         <scope name="Lbasic_exception;.:moo:386:475.:B:415:475">
@@ -141,7 +139,7 @@
             <ast end="448" start="441" type="14"/>
             <accept src="M3_moo_N2"/>
           </node>
-          <node id="M3_moo_N4" kind="throw" ref="#Lbasic_exception/A;" type="Lbasic_exception/A;">
+          <node id="M3_moo_N4" kind="throw" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
             <ast end="449" start="435" type="53"/>
             <accept src="M3_moo_N3"/>
           </node>
