@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
-    <field name="@Lbasic_methods;/.x" static="false" type="I"/>
+    <field name=".Lbasic_methods;/.x" static="false" type="I"/>
     <method id="Lbasic_methods;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="452" start="0" type="55"/>
       <scope name="Lbasic_methods;.&lt;clinit&gt;">
         <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
           <ast end="133" start="132" type="34"/>
         </node>
-        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref="@Lbasic_methods;/.x" type="I">
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_methods;/.x" type="I">
           <ast end="133" start="128" type="59"/>
           <accept src="K1_&lt;clinit&gt;_N1"/>
         </node>
@@ -16,9 +16,9 @@
     <method id="Lbasic_methods;.fa()V" name="fa" style="instance">
       <ast end="385" start="139" type="31"/>
       <scope name="Lbasic_methods;.:fa:139:385">
-        <node id="M2_fa_N1" kind="input" ref="#Lbasic_methods;" type="Lbasic_methods;"/>
-        <node id="M2_fa_N2" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
-        <node id="M2_fa_N19" kind="output" ref="@Lbasic_methods;/.x" type="I">
+        <node id="M2_fa_N1" kind="input" ref="@Lbasic_methods;" type="Lbasic_methods;"/>
+        <node id="M2_fa_N2" kind="input" ref=".Lbasic_methods;/.x" type="I"/>
+        <node id="M2_fa_N19" kind="output" ref=".Lbasic_methods;/.x" type="I">
           <accept src="M2_fa_N6"/>
         </node>
         <scope name="Lbasic_methods;.:fa:139:385.:B:156:385">
@@ -33,19 +33,20 @@
             <ast end="225" start="161" type="59"/>
             <accept src="M2_fa_N4"/>
           </node>
-          <node id="M2_fa_N6" kind="assign_field" ref="@Lbasic_methods;/.x" type="I">
+          <node id="M2_fa_N6" kind="assign_field" ref=".Lbasic_methods;/.x" type="I">
             <ast end="306" start="305" type="42"/>
             <accept label="obj" src="M2_fa_N1"/>
             <accept src="M2_fa_N9"/>
           </node>
           <node data="Lbasic_methods;.fb()I" id="M2_fa_N7" kind="call" type="I">
             <ast end="313" start="309" type="32"/>
+            <accept label="@Lbasic_methods;" src="M2_fa_N1"/>
           </node>
           <node id="M2_fa_N8" kind="receive" type="I">
             <ast end="313" start="309" type="32"/>
             <accept src="M2_fa_N7"/>
           </node>
-          <node data="=" id="M2_fa_N9" kind="op_assign" ref="@Lbasic_methods;/.x" type="I">
+          <node data="=" id="M2_fa_N9" kind="op_assign" ref=".Lbasic_methods;/.x" type="I">
             <ast end="313" start="305" type="7"/>
             <accept label="R" src="M2_fa_N8"/>
           </node>
@@ -55,6 +56,7 @@
           </node>
           <node data="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String; Lbasic_methods/A;.toString()Ljava/lang/String;" id="M2_fa_N11" kind="call" type="Ljava/lang/String;">
             <ast end="335" start="323" type="32"/>
+            <accept label="@Lbasic_methods/A;" src="M2_fa_N10"/>
           </node>
           <node id="M2_fa_N12" kind="receive" type="Ljava/lang/String;">
             <ast end="335" start="323" type="32"/>
@@ -77,8 +79,9 @@
           </node>
           <node data="Lbasic_methods/:fa:139:385/moo;.fc()I" id="M2_fa_N17" kind="call" type="I">
             <ast end="378" start="372" type="32"/>
-            <accept label="#Lbasic_methods;" src="M2_fa_N16"/>
-            <accept label="@Lbasic_methods;/.x" src="M2_fa_N6"/>
+            <accept label="@Lbasic_methods;" src="M2_fa_N16"/>
+            <accept label=".Lbasic_methods;/.x" src="M2_fa_N6"/>
+            <accept label="@Lbasic_methods/:fa:139:385/moo;" src="M2_fa_N16"/>
           </node>
           <node id="M2_fa_N18" kind="receive" type="I">
             <ast end="378" start="372" type="32"/>
@@ -174,8 +177,8 @@
       <caller id="Lbasic_methods;.fa()V"/>
       <ast end="293" start="245" type="31"/>
       <scope name="Lbasic_methods/:fa:139:385/moo;.:fc:245:293">
-        <node id="M9_fc_N1" kind="input" ref="#Lbasic_methods;" type="Lbasic_methods;"/>
-        <node id="M9_fc_N2" kind="input" ref="@Lbasic_methods;/.x" type="I"/>
+        <node id="M9_fc_N1" kind="input" ref="@Lbasic_methods;" type="Lbasic_methods;"/>
+        <node id="M9_fc_N2" kind="input" ref=".Lbasic_methods;/.x" type="I"/>
         <node id="M9_fc_N6" kind="output" ref="#return" type="I">
           <accept src="M9_fc_N3"/>
         </node>
@@ -184,11 +187,11 @@
             <ast end="291" start="263" type="41"/>
             <accept src="M9_fc_N5"/>
           </node>
-          <node id="M9_fc_N4" kind="ref_var" ref="#Lbasic_methods;" type="Lbasic_methods;">
+          <node id="M9_fc_N4" kind="ref_var" ref="@Lbasic_methods;" type="Lbasic_methods;">
             <ast end="288" start="270" type="52"/>
             <accept src="M9_fc_N1"/>
           </node>
-          <node id="M9_fc_N5" kind="ref_field" ref="@Lbasic_methods;/.x" type="I">
+          <node id="M9_fc_N5" kind="ref_field" ref=".Lbasic_methods;/.x" type="I">
             <ast end="290" start="270" type="22"/>
             <accept label="obj" src="M9_fc_N4"/>
             <accept src="M9_fc_N2"/>
