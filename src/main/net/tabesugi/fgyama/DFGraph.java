@@ -1422,6 +1422,9 @@ public abstract class DFGraph {
                 refs.addAll(srcmethod.getInputRefs());
             }
         }
+        if (obj != null) {
+            refs.add(obj.getNodeType().toKlass().getThisRef());
+        }
         for (DFRef ref : refs) {
             if (ref instanceof DFKlass.ThisRef && obj != null) {
                 call.accept(obj, ref.getFullName());

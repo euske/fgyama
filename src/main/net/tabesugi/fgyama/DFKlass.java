@@ -468,7 +468,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         @Override
         public String getFullName() {
-            return "#"+DFKlass.this.getTypeName();
+            return "@"+DFKlass.this.getTypeName();
         }
     }
 
@@ -508,7 +508,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         @Override
         public String getFullName() {
-            return "@"+DFKlass.this.getTypeName()+"/."+_name;
+            return "."+DFKlass.this.getTypeName()+"/."+_name;
         }
     }
 
