@@ -132,7 +132,7 @@ class DFFuncType(DFType):
         return
 
     def __repr__(self):
-        return f'<({self.name}){self.retype}>'
+        return f'<({self.args}) {self.retype}>'
 
 class DFKlassType(DFType):
 
@@ -167,6 +167,27 @@ def parsemethodname(s):
         name = s[i+1:j]
         (_, func) = DFType.parse(s, j)
         return (klass, name, func)
+
+def parserefname(name):
+    if name.startswith('@'):    # ThisRef
+        (i, klass) = DFType.parse(name[1:])
+        return klass.name
+    elif name.startswith('#'):  # InternalRef
+        return name[1:]
+    elif name.startswith('%'):  # ElemRef
+        (i, klass) = DFType.parse(name[1:])
+        return f'[{klass.name}]'
+    elif name.startswith('.'):  # FieldRef
+        (_,_,name) = name.rpartition('/')
+        return name
+    elif name.startswith('$'):  # VarRef
+        (_,_,name) = name.rpartition('/$')
+        return name
+    elif name.startswith('!'):  # exception
+        (i, klass) = DFType.parse(name[1:])
+        return f'!{klass.name}'
+    else:
+        raise ValueError(name)
 
 
 ##  DFKlass

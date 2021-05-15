@@ -2,7 +2,7 @@
 import io
 import sys
 from subprocess import Popen, PIPE
-from graphs import get_graphs, stripid, parsemethodname, DFType
+from graphs import get_graphs, parserefname, parsemethodname, DFType
 
 def q(s):
     if s:
@@ -31,14 +31,14 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         if kind in ('join','begin','end','repeat','case'):
             styles['shape'] = 'diamond'
             if node.ref is not None:
-                styles['label'] = f'{kind} ({stripid(node.ref)})'
+                styles['label'] = f'{kind} ({parserefname(node.ref)})'
         elif kind in ('value', 'valueset'):
             styles['shape'] = 'box'
             styles['fontname'] = 'courier'
             styles['label'] = node.data
         elif kind in ('input','output','receive'):
             if node.ref is not None:
-                styles['label'] = f'{kind} ({stripid(node.ref)})'
+                styles['label'] = f'{kind} ({parserefname(node.ref)})'
         elif kind == 'new':
             (_, klass) = DFType.parse(node.ntype)
             styles['fontname'] = 'courier'
@@ -52,10 +52,10 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
             styles['label'] = (node.data or kind)
         elif kind is not None:
             if node.ref is not None:
-                styles['label'] = f'{kind} ({stripid(node.ref)})'
+                styles['label'] = f'{kind} ({parserefname(node.ref)})'
         else:
             if node.ref is not None:
-                styles['label'] = f'({stripid(node.ref)})'
+                styles['label'] = f'({parserefname(node.ref)})'
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
         out.write(h+f' N{r(node.nid)} [{qp(styles)}];\n')
