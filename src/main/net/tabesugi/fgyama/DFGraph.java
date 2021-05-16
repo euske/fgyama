@@ -220,7 +220,7 @@ public abstract class DFGraph {
             }
             DFMethod constructor = klass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            if (constructor == null) throw new MethodNotFound(klass+".<init>", argTypes);
+            if (constructor == null) throw new MethodNotFound(klass+".:init:", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -247,7 +247,7 @@ public abstract class DFGraph {
             assert baseKlass != null;
             DFMethod constructor = baseKlass.findMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            if (constructor == null) throw new MethodNotFound(baseKlass+"<init>", argTypes);
+            if (constructor == null) throw new MethodNotFound(baseKlass+".:init:", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -688,7 +688,7 @@ public abstract class DFGraph {
                 }
                 DFMethod constructor = instKlass.findMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
-                if (constructor == null) throw new MethodNotFound(instKlass+"<init>", argTypes);
+                if (constructor == null) throw new MethodNotFound(instKlass+".:init:", argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFuncType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(
