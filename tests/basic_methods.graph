@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods;" path="tests/basic_methods.java">
     <field name=".Lbasic_methods;/.x" static="false" type="I"/>
-    <method id="Lbasic_methods;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_methods;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="452" start="0" type="55"/>
-      <scope name="Lbasic_methods;.&lt;clinit&gt;">
-        <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
+      <scope name="Lbasic_methods;.:clinit:">
+        <node data="0" id="K1_:clinit:_N1" kind="value" type="I">
           <ast end="133" start="132" type="34"/>
         </node>
-        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_methods;/.x" type="I">
+        <node id="K1_:clinit:_N2" kind="assign_var" ref=".Lbasic_methods;/.x" type="I">
           <ast end="133" start="128" type="59"/>
-          <accept src="K1_&lt;clinit&gt;_N1"/>
+          <accept src="K1_:clinit:_N1"/>
         </node>
       </scope>
     </method>
@@ -118,9 +118,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods/A;" path="tests/basic_methods.java">
-    <method id="Lbasic_methods/A;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_methods/A;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="118" start="34" type="55"/>
-      <scope name="Lbasic_methods/A;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_methods/A;.:clinit:"/>
     </method>
     <method id="Lbasic_methods/A;.toString()Ljava/lang/String;" name="toString" style="instance">
       <caller id="Lbasic_methods;.fa()V"/>
@@ -144,9 +144,9 @@
     </method>
   </class>
   <class extends="Lbasic_methods/A;" name="Lbasic_methods/:fa:139:385/:AST14:165:225;" path="tests/basic_methods.java">
-    <method id="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_methods/:fa:139:385/:AST14:165:225;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="225" start="165" type="14"/>
-      <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_methods/:fa:139:385/:AST14:165:225;.:clinit:"/>
     </method>
     <method id="Lbasic_methods/:fa:139:385/:AST14:165:225;.toString()Ljava/lang/String;" name="toString" style="instance">
       <caller id="Lbasic_methods;.fa()V"/>
@@ -169,9 +169,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_methods/:fa:139:385/moo;" path="tests/basic_methods.java">
-    <method id="Lbasic_methods/:fa:139:385/moo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_methods/:fa:139:385/moo;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="296" start="228" type="55"/>
-      <scope name="Lbasic_methods/:fa:139:385/moo;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_methods/:fa:139:385/moo;.:clinit:"/>
     </method>
     <method id="Lbasic_methods/:fa:139:385/moo;.fc()I" name="fc" style="instance">
       <caller id="Lbasic_methods;.fa()V"/>

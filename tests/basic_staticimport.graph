@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_staticimport;" path="tests/basic_staticimport.java">
-    <method id="Lbasic_staticimport;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_staticimport;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="163" start="69" type="55"/>
-      <scope name="Lbasic_staticimport;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_staticimport;.:clinit:"/>
     </method>
     <method id="Lbasic_staticimport;.foo()V" name="foo" style="static">
       <ast end="161" start="107" type="31"/>

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="LHello;" path="tests/Hello.java">
-    <method id="LHello;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LHello;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="148" start="0" type="55"/>
-      <scope name="LHello;.&lt;clinit&gt;"/>
+      <scope name="LHello;.:clinit:"/>
     </method>
     <method id="LHello;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="146" start="25" type="31"/>

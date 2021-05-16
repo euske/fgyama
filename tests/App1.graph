@@ -2,80 +2,80 @@
   <class extends="Ljava/lang/Object;" name="LRecord;" path="tests/App1.java">
     <field name=".LRecord;/.key" static="false" type="Ljava/lang/String;"/>
     <field name=".LRecord;/.value" static="false" type="Ljava/lang/String;"/>
-    <method id="LRecord;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LRecord;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="173" start="19" type="55"/>
-      <scope name="LRecord;.&lt;clinit&gt;">
-        <node data="uninitialized" id="K1_&lt;clinit&gt;_N1" kind="value" type="@null"/>
-        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".LRecord;/.key" type="Ljava/lang/String;">
+      <scope name="LRecord;.:clinit:">
+        <node data="uninitialized" id="K1_:clinit:_N1" kind="value" type="@null"/>
+        <node id="K1_:clinit:_N2" kind="assign_var" ref=".LRecord;/.key" type="Ljava/lang/String;">
           <ast end="48" start="45" type="59"/>
-          <accept src="K1_&lt;clinit&gt;_N1"/>
+          <accept src="K1_:clinit:_N1"/>
         </node>
-        <node data="uninitialized" id="K1_&lt;clinit&gt;_N3" kind="value" type="@null"/>
-        <node id="K1_&lt;clinit&gt;_N4" kind="assign_var" ref=".LRecord;/.value" type="Ljava/lang/String;">
+        <node data="uninitialized" id="K1_:clinit:_N3" kind="value" type="@null"/>
+        <node id="K1_:clinit:_N4" kind="assign_var" ref=".LRecord;/.value" type="Ljava/lang/String;">
           <ast end="66" start="61" type="59"/>
-          <accept src="K1_&lt;clinit&gt;_N3"/>
+          <accept src="K1_:clinit:_N3"/>
         </node>
       </scope>
     </method>
-    <method id="LRecord;.&lt;init&gt;(Ljava/lang/String;Ljava/lang/String;)LRecord;" name="&lt;init&gt;" style="constructor">
-      <caller id="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;"/>
+    <method id="LRecord;.:init:(Ljava/lang/String;Ljava/lang/String;)LRecord;" name=":init:" style="constructor">
+      <caller id="LDB;.:init:(Ljava/lang/String;)LDB;"/>
       <ast end="171" start="72" type="31"/>
       <scope name="LRecord;.:Record:72:171">
-        <node id="M2_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
+        <node id="M2_:init:_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="96" start="86" type="44"/>
         </node>
-        <node id="M2_&lt;init&gt;_N2" kind="assign_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
+        <node id="M2_:init:_N2" kind="assign_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
           <ast end="96" start="86" type="44"/>
-          <accept src="M2_&lt;init&gt;_N1"/>
+          <accept src="M2_:init:_N1"/>
         </node>
-        <node id="M2_&lt;init&gt;_N3" kind="input" ref="#arg1" type="Ljava/lang/String;">
+        <node id="M2_:init:_N3" kind="input" ref="#arg1" type="Ljava/lang/String;">
           <ast end="110" start="98" type="44"/>
         </node>
-        <node id="M2_&lt;init&gt;_N4" kind="assign_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
+        <node id="M2_:init:_N4" kind="assign_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
           <ast end="110" start="98" type="44"/>
-          <accept src="M2_&lt;init&gt;_N3"/>
+          <accept src="M2_:init:_N3"/>
         </node>
-        <node id="M2_&lt;init&gt;_N5" kind="input" ref="@LRecord;" type="LRecord;"/>
-        <node id="M2_&lt;init&gt;_N14" kind="output" ref=".LRecord;/.key" type="Ljava/lang/String;">
-          <accept src="M2_&lt;init&gt;_N7"/>
+        <node id="M2_:init:_N5" kind="input" ref="@LRecord;" type="LRecord;"/>
+        <node id="M2_:init:_N14" kind="output" ref=".LRecord;/.key" type="Ljava/lang/String;">
+          <accept src="M2_:init:_N7"/>
         </node>
-        <node id="M2_&lt;init&gt;_N15" kind="output" ref=".LRecord;/.value" type="Ljava/lang/String;">
-          <accept src="M2_&lt;init&gt;_N11"/>
+        <node id="M2_:init:_N15" kind="output" ref=".LRecord;/.value" type="Ljava/lang/String;">
+          <accept src="M2_:init:_N11"/>
         </node>
         <scope name="LRecord;.:Record:72:171.:B:112:171">
-          <node id="M2_&lt;init&gt;_N6" kind="ref_var" ref="@LRecord;" type="LRecord;">
+          <node id="M2_:init:_N6" kind="ref_var" ref="@LRecord;" type="LRecord;">
             <ast end="126" start="122" type="52"/>
-            <accept src="M2_&lt;init&gt;_N5"/>
+            <accept src="M2_:init:_N5"/>
           </node>
-          <node id="M2_&lt;init&gt;_N7" kind="assign_field" ref=".LRecord;/.key" type="Ljava/lang/String;">
+          <node id="M2_:init:_N7" kind="assign_field" ref=".LRecord;/.key" type="Ljava/lang/String;">
             <ast end="130" start="122" type="22"/>
-            <accept label="obj" src="M2_&lt;init&gt;_N6"/>
-            <accept src="M2_&lt;init&gt;_N9"/>
+            <accept label="obj" src="M2_:init:_N6"/>
+            <accept src="M2_:init:_N9"/>
           </node>
-          <node id="M2_&lt;init&gt;_N8" kind="ref_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
+          <node id="M2_:init:_N8" kind="ref_var" ref="$LRecord;.:Record:72:171/$key" type="Ljava/lang/String;">
             <ast end="136" start="133" type="42"/>
-            <accept src="M2_&lt;init&gt;_N2"/>
+            <accept src="M2_:init:_N2"/>
           </node>
-          <node data="=" id="M2_&lt;init&gt;_N9" kind="op_assign" ref=".LRecord;/.key" type="Ljava/lang/String;">
+          <node data="=" id="M2_:init:_N9" kind="op_assign" ref=".LRecord;/.key" type="Ljava/lang/String;">
             <ast end="136" start="122" type="7"/>
-            <accept label="R" src="M2_&lt;init&gt;_N8"/>
+            <accept label="R" src="M2_:init:_N8"/>
           </node>
-          <node id="M2_&lt;init&gt;_N10" kind="ref_var" ref="@LRecord;" type="LRecord;">
+          <node id="M2_:init:_N10" kind="ref_var" ref="@LRecord;" type="LRecord;">
             <ast end="150" start="146" type="52"/>
-            <accept src="M2_&lt;init&gt;_N5"/>
+            <accept src="M2_:init:_N5"/>
           </node>
-          <node id="M2_&lt;init&gt;_N11" kind="assign_field" ref=".LRecord;/.value" type="Ljava/lang/String;">
+          <node id="M2_:init:_N11" kind="assign_field" ref=".LRecord;/.value" type="Ljava/lang/String;">
             <ast end="156" start="146" type="22"/>
-            <accept label="obj" src="M2_&lt;init&gt;_N10"/>
-            <accept src="M2_&lt;init&gt;_N13"/>
+            <accept label="obj" src="M2_:init:_N10"/>
+            <accept src="M2_:init:_N13"/>
           </node>
-          <node id="M2_&lt;init&gt;_N12" kind="ref_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
+          <node id="M2_:init:_N12" kind="ref_var" ref="$LRecord;.:Record:72:171/$value" type="Ljava/lang/String;">
             <ast end="164" start="159" type="42"/>
-            <accept src="M2_&lt;init&gt;_N4"/>
+            <accept src="M2_:init:_N4"/>
           </node>
-          <node data="=" id="M2_&lt;init&gt;_N13" kind="op_assign" ref=".LRecord;/.value" type="Ljava/lang/String;">
+          <node data="=" id="M2_:init:_N13" kind="op_assign" ref=".LRecord;/.value" type="Ljava/lang/String;">
             <ast end="164" start="146" type="7"/>
-            <accept label="R" src="M2_&lt;init&gt;_N12"/>
+            <accept label="R" src="M2_:init:_N12"/>
           </node>
         </scope>
       </scope>
@@ -86,29 +86,29 @@
     <field name=".LListy&lt;TT;&gt;;/._n" static="false" type="I"/>
     <field name=".LListy&lt;TT;&gt;;/._max" static="false" type="I"/>
     <field name=".LListy&lt;TT;&gt;;/._objs" static="false" type="[Ljava/lang/Object;"/>
-    <method id="LListy&lt;TT;&gt;;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LListy&lt;TT;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="873" start="175" type="55"/>
-      <scope name="LListy&lt;TT;&gt;;.&lt;clinit&gt;">
-        <node data="0" id="K3_&lt;clinit&gt;_N1" kind="value" type="I">
+      <scope name="LListy&lt;TT;&gt;;.:clinit:">
+        <node data="0" id="K3_:clinit:_N1" kind="value" type="I">
           <ast end="229" start="228" type="34"/>
         </node>
-        <node id="K3_&lt;clinit&gt;_N2" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._n" type="I">
+        <node id="K3_:clinit:_N2" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._n" type="I">
           <ast end="229" start="223" type="59"/>
-          <accept src="K3_&lt;clinit&gt;_N1"/>
+          <accept src="K3_:clinit:_N1"/>
         </node>
-        <node data="0" id="K3_&lt;clinit&gt;_N3" kind="value" type="I">
+        <node data="0" id="K3_:clinit:_N3" kind="value" type="I">
           <ast end="255" start="254" type="34"/>
         </node>
-        <node id="K3_&lt;clinit&gt;_N4" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._max" type="I">
+        <node id="K3_:clinit:_N4" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._max" type="I">
           <ast end="255" start="247" type="59"/>
-          <accept src="K3_&lt;clinit&gt;_N3"/>
+          <accept src="K3_:clinit:_N3"/>
         </node>
-        <node data="null" id="K3_&lt;clinit&gt;_N5" kind="value" type="@null">
+        <node data="null" id="K3_:clinit:_N5" kind="value" type="@null">
           <ast end="290" start="286" type="33"/>
         </node>
-        <node id="K3_&lt;clinit&gt;_N6" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._objs" type="[Ljava/lang/Object;">
+        <node id="K3_:clinit:_N6" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._objs" type="[Ljava/lang/Object;">
           <ast end="290" start="278" type="59"/>
-          <accept src="K3_&lt;clinit&gt;_N5"/>
+          <accept src="K3_:clinit:_N5"/>
         </node>
       </scope>
     </method>
@@ -518,389 +518,389 @@
   </class>
   <class extends="Ljava/lang/Object;" name="LDB;" path="tests/App1.java">
     <field name=".LDB;/._a" static="false" type="LListy&lt;LRecord;&gt;;"/>
-    <method id="LDB;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LDB;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="1634" start="875" type="55"/>
-      <scope name="LDB;.&lt;clinit&gt;">
-        <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="K7_&lt;clinit&gt;_N1" kind="new" type="LListy&lt;LRecord;&gt;;">
+      <scope name="LDB;.:clinit:">
+        <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="K7_:clinit:_N1" kind="new" type="LListy&lt;LRecord;&gt;;">
           <ast end="936" start="917" type="14"/>
         </node>
-        <node id="K7_&lt;clinit&gt;_N2" kind="receive" type="LListy&lt;LRecord;&gt;;">
+        <node id="K7_:clinit:_N2" kind="receive" type="LListy&lt;LRecord;&gt;;">
           <ast end="936" start="917" type="14"/>
-          <accept src="K7_&lt;clinit&gt;_N1"/>
+          <accept src="K7_:clinit:_N1"/>
         </node>
-        <node id="K7_&lt;clinit&gt;_N3" kind="assign_var" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
+        <node id="K7_:clinit:_N3" kind="assign_var" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
           <ast end="936" start="912" type="59"/>
-          <accept src="K7_&lt;clinit&gt;_N2"/>
+          <accept src="K7_:clinit:_N2"/>
         </node>
       </scope>
     </method>
-    <method id="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" name="&lt;init&gt;" style="constructor">
+    <method id="LDB;.:init:(Ljava/lang/String;)LDB;" name=":init:" style="constructor">
       <caller id="LApp1;.main([Ljava/lang/String;)V"/>
       <ast end="1389" start="943" type="31"/>
       <scope name="LDB;.:DB:943:1389">
-        <node id="M8_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
+        <node id="M8_:init:_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="964" start="953" type="44"/>
         </node>
-        <node id="M8_&lt;init&gt;_N2" kind="assign_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
+        <node id="M8_:init:_N2" kind="assign_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
           <ast end="964" start="953" type="44"/>
-          <accept src="M8_&lt;init&gt;_N1"/>
+          <accept src="M8_:init:_N1"/>
         </node>
-        <node id="M8_&lt;init&gt;_N3" kind="input" ref="@LDB;" type="LDB;"/>
-        <node id="M8_&lt;init&gt;_N4" kind="input" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;"/>
-        <node id="M8_&lt;init&gt;_N5" kind="input" ref="@LListy&lt;LRecord;&gt;;" type="LListy&lt;LRecord;&gt;;"/>
-        <node id="M8_&lt;init&gt;_N6" kind="input" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;"/>
-        <node id="M8_&lt;init&gt;_N7" kind="input" ref=".LListy&lt;LRecord;&gt;;/._max" type="I"/>
-        <node id="M8_&lt;init&gt;_N8" kind="input" ref=".LListy&lt;LRecord;&gt;;/._n" type="I"/>
-        <node id="M8_&lt;init&gt;_N9" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
-        <node id="M8_&lt;init&gt;_N10" kind="input" ref="@LRecord;" type="LRecord;"/>
-        <node id="M8_&lt;init&gt;_N82" ref=".LRecord;/.key" type="Ljava/lang/String;"/>
-        <node id="M8_&lt;init&gt;_N86" ref=".LRecord;/.value" type="Ljava/lang/String;"/>
-        <node id="M8_&lt;init&gt;_N103" kind="output" ref="!Ljava/io/FileNotFoundException;" type="Ljava/io/FileNotFoundException;">
-          <accept src="M8_&lt;init&gt;_N13"/>
+        <node id="M8_:init:_N3" kind="input" ref="@LDB;" type="LDB;"/>
+        <node id="M8_:init:_N4" kind="input" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;"/>
+        <node id="M8_:init:_N5" kind="input" ref="@LListy&lt;LRecord;&gt;;" type="LListy&lt;LRecord;&gt;;"/>
+        <node id="M8_:init:_N6" kind="input" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;"/>
+        <node id="M8_:init:_N7" kind="input" ref=".LListy&lt;LRecord;&gt;;/._max" type="I"/>
+        <node id="M8_:init:_N8" kind="input" ref=".LListy&lt;LRecord;&gt;;/._n" type="I"/>
+        <node id="M8_:init:_N9" kind="input" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;"/>
+        <node id="M8_:init:_N10" kind="input" ref="@LRecord;" type="LRecord;"/>
+        <node id="M8_:init:_N82" ref=".LRecord;/.key" type="Ljava/lang/String;"/>
+        <node id="M8_:init:_N86" ref=".LRecord;/.value" type="Ljava/lang/String;"/>
+        <node id="M8_:init:_N103" kind="output" ref="!Ljava/io/FileNotFoundException;" type="Ljava/io/FileNotFoundException;">
+          <accept src="M8_:init:_N13"/>
         </node>
-        <node id="M8_&lt;init&gt;_N104" kind="output" ref="!Ljava/io/IOException;" type="Ljava/io/IOException;">
-          <accept src="M8_&lt;init&gt;_N22"/>
+        <node id="M8_:init:_N104" kind="output" ref="!Ljava/io/IOException;" type="Ljava/io/IOException;">
+          <accept src="M8_:init:_N22"/>
         </node>
-        <node id="M8_&lt;init&gt;_N105" kind="output" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
-          <accept src="M8_&lt;init&gt;_N4"/>
+        <node id="M8_:init:_N105" kind="output" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
+          <accept src="M8_:init:_N4"/>
         </node>
-        <node id="M8_&lt;init&gt;_N106" kind="output" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
-          <accept src="M8_&lt;init&gt;_N42"/>
+        <node id="M8_:init:_N106" kind="output" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+          <accept src="M8_:init:_N42"/>
         </node>
-        <node id="M8_&lt;init&gt;_N107" kind="output" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
-          <accept src="M8_&lt;init&gt;_N43"/>
+        <node id="M8_:init:_N107" kind="output" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+          <accept src="M8_:init:_N43"/>
         </node>
-        <node id="M8_&lt;init&gt;_N108" kind="output" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
-          <accept src="M8_&lt;init&gt;_N44"/>
+        <node id="M8_:init:_N108" kind="output" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+          <accept src="M8_:init:_N44"/>
         </node>
-        <node id="M8_&lt;init&gt;_N109" kind="output" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
-          <accept src="M8_&lt;init&gt;_N45"/>
+        <node id="M8_:init:_N109" kind="output" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+          <accept src="M8_:init:_N45"/>
         </node>
-        <node id="M8_&lt;init&gt;_N110" kind="output" ref=".LRecord;/.key" type="Ljava/lang/String;">
-          <accept src="M8_&lt;init&gt;_N40"/>
+        <node id="M8_:init:_N110" kind="output" ref=".LRecord;/.key" type="Ljava/lang/String;">
+          <accept src="M8_:init:_N40"/>
         </node>
-        <node id="M8_&lt;init&gt;_N111" kind="output" ref=".LRecord;/.value" type="Ljava/lang/String;">
-          <accept src="M8_&lt;init&gt;_N41"/>
+        <node id="M8_:init:_N111" kind="output" ref=".LRecord;/.value" type="Ljava/lang/String;">
+          <accept src="M8_:init:_N41"/>
         </node>
         <scope name="LDB;.:DB:943:1389.:B:985:1389">
-          <node id="M8_&lt;init&gt;_N11" kind="ref_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
+          <node id="M8_:init:_N11" kind="ref_var" ref="$LDB;.:DB:943:1389/$path" type="Ljava/lang/String;">
             <ast end="1057" start="1053" type="42"/>
-            <accept src="M8_&lt;init&gt;_N2"/>
+            <accept src="M8_:init:_N2"/>
           </node>
-          <node data="Ljava/io/FileReader;.&lt;init&gt;(Ljava/lang/String;)V" id="M8_&lt;init&gt;_N12" kind="new" type="Ljava/io/FileReader;">
+          <node data="Ljava/io/FileReader;.&lt;init&gt;(Ljava/lang/String;)V" id="M8_:init:_N12" kind="new" type="Ljava/io/FileReader;">
             <ast end="1058" start="1038" type="14"/>
-            <accept label="#arg0" src="M8_&lt;init&gt;_N11"/>
+            <accept label="#arg0" src="M8_:init:_N11"/>
           </node>
-          <node id="M8_&lt;init&gt;_N13" kind="throw" ref="!Ljava/io/FileNotFoundException;" type="Ljava/io/FileNotFoundException;">
-            <accept label="!Ljava/io/FileNotFoundException;" src="M8_&lt;init&gt;_N12"/>
+          <node id="M8_:init:_N13" kind="throw" ref="!Ljava/io/FileNotFoundException;" type="Ljava/io/FileNotFoundException;">
+            <accept label="!Ljava/io/FileNotFoundException;" src="M8_:init:_N12"/>
           </node>
-          <node id="M8_&lt;init&gt;_N14" kind="receive" type="Ljava/io/FileReader;">
+          <node id="M8_:init:_N14" kind="receive" type="Ljava/io/FileReader;">
             <ast end="1058" start="1038" type="14"/>
-            <accept src="M8_&lt;init&gt;_N12"/>
+            <accept src="M8_:init:_N12"/>
           </node>
-          <node data="Ljava/io/BufferedReader;.&lt;init&gt;(Ljava/io/Reader;)V" id="M8_&lt;init&gt;_N15" kind="new" type="Ljava/io/BufferedReader;">
+          <node data="Ljava/io/BufferedReader;.&lt;init&gt;(Ljava/io/Reader;)V" id="M8_:init:_N15" kind="new" type="Ljava/io/BufferedReader;">
             <ast end="1059" start="1019" type="14"/>
-            <accept label="#arg0" src="M8_&lt;init&gt;_N14"/>
+            <accept label="#arg0" src="M8_:init:_N14"/>
           </node>
-          <node id="M8_&lt;init&gt;_N16" kind="receive" type="Ljava/io/BufferedReader;">
+          <node id="M8_:init:_N16" kind="receive" type="Ljava/io/BufferedReader;">
             <ast end="1059" start="1019" type="14"/>
-            <accept src="M8_&lt;init&gt;_N15"/>
+            <accept src="M8_:init:_N15"/>
           </node>
-          <node id="M8_&lt;init&gt;_N17" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
+          <node id="M8_:init:_N17" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
             <ast end="1059" start="1010" type="59"/>
-            <accept src="M8_&lt;init&gt;_N16"/>
+            <accept src="M8_:init:_N16"/>
           </node>
-          <node data="true" id="M8_&lt;init&gt;_N18" kind="value" type="Z">
+          <node data="true" id="M8_:init:_N18" kind="value" type="Z">
             <ast end="1080" start="1076" type="9"/>
           </node>
           <scope name="LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383">
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N83" kind="begin" ref=".LRecord;/.key" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N83" kind="begin" ref=".LRecord;/.key" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N82"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N68"/>
+              <accept label="init" src="M8_:init:_N82"/>
+              <accept label="cont" src="M8_:init:_N68"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N84" kind="repeat" ref=".LRecord;/.key" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N84" kind="repeat" ref=".LRecord;/.key" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N85"/>
+              <accept label="_end" src="M8_:init:_N85"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N85" kind="end" ref=".LRecord;/.key" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N85" kind="end" ref=".LRecord;/.key" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N84"/>
-              <accept src="M8_&lt;init&gt;_N83"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N84"/>
+              <accept src="M8_:init:_N83"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N87" kind="begin" ref=".LRecord;/.value" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N87" kind="begin" ref=".LRecord;/.value" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N86"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N69"/>
+              <accept label="init" src="M8_:init:_N86"/>
+              <accept label="cont" src="M8_:init:_N69"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N88" kind="repeat" ref=".LRecord;/.value" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N88" kind="repeat" ref=".LRecord;/.value" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N89"/>
+              <accept label="_end" src="M8_:init:_N89"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N89" kind="end" ref=".LRecord;/.value" type="Ljava/lang/String;">
+            <node data=":while:1069:1383" id="M8_:init:_N89" kind="end" ref=".LRecord;/.value" type="Ljava/lang/String;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N88"/>
-              <accept src="M8_&lt;init&gt;_N87"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N88"/>
+              <accept src="M8_:init:_N87"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N90" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N90" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N7"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N77"/>
+              <accept label="init" src="M8_:init:_N7"/>
+              <accept label="cont" src="M8_:init:_N77"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N91" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N91" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N92"/>
+              <accept label="_end" src="M8_:init:_N92"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N92" kind="end" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N92" kind="end" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N91"/>
-              <accept src="M8_&lt;init&gt;_N90"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N91"/>
+              <accept src="M8_:init:_N90"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N93" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N93" kind="begin" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N9"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N78"/>
+              <accept label="init" src="M8_:init:_N9"/>
+              <accept label="cont" src="M8_:init:_N78"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N94" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N94" kind="repeat" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N95"/>
+              <accept label="_end" src="M8_:init:_N95"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N95" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N95" kind="end" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N94"/>
-              <accept src="M8_&lt;init&gt;_N93"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N94"/>
+              <accept src="M8_:init:_N93"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N96" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N96" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N6"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N79"/>
+              <accept label="init" src="M8_:init:_N6"/>
+              <accept label="cont" src="M8_:init:_N79"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N97" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N97" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N98"/>
+              <accept label="_end" src="M8_:init:_N98"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N98" kind="end" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+            <node data=":while:1069:1383" id="M8_:init:_N98" kind="end" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N97"/>
-              <accept src="M8_&lt;init&gt;_N96"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N97"/>
+              <accept src="M8_:init:_N96"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N99" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N99" kind="begin" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="init" src="M8_&lt;init&gt;_N8"/>
-              <accept label="cont" src="M8_&lt;init&gt;_N80"/>
+              <accept label="init" src="M8_:init:_N8"/>
+              <accept label="cont" src="M8_:init:_N80"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N100" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N100" kind="repeat" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="_end" src="M8_&lt;init&gt;_N101"/>
+              <accept label="_end" src="M8_:init:_N101"/>
             </node>
-            <node data=":while:1069:1383" id="M8_&lt;init&gt;_N101" kind="end" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+            <node data=":while:1069:1383" id="M8_:init:_N101" kind="end" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
               <ast end="1383" start="1069" type="61"/>
-              <accept label="cond" src="M8_&lt;init&gt;_N18"/>
-              <accept label="_repeat" src="M8_&lt;init&gt;_N100"/>
-              <accept src="M8_&lt;init&gt;_N99"/>
+              <accept label="cond" src="M8_:init:_N18"/>
+              <accept label="_repeat" src="M8_:init:_N100"/>
+              <accept src="M8_:init:_N99"/>
             </node>
             <scope name="LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383">
-              <node id="M8_&lt;init&gt;_N19" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
+              <node id="M8_:init:_N19" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389/$reader" type="Ljava/io/BufferedReader;">
                 <ast end="1116" start="1110" type="42"/>
-                <accept src="M8_&lt;init&gt;_N17"/>
+                <accept src="M8_:init:_N17"/>
               </node>
-              <node data="Ljava/io/BufferedReader;.readLine()Ljava/lang/String;" id="M8_&lt;init&gt;_N21" kind="call" type="Ljava/lang/String;">
+              <node data="Ljava/io/BufferedReader;.readLine()Ljava/lang/String;" id="M8_:init:_N21" kind="call" type="Ljava/lang/String;">
                 <ast end="1127" start="1110" type="32"/>
-                <accept label="@Ljava/io/BufferedReader;" src="M8_&lt;init&gt;_N19"/>
+                <accept label="@Ljava/io/BufferedReader;" src="M8_:init:_N19"/>
               </node>
-              <node id="M8_&lt;init&gt;_N22" kind="throw" ref="!Ljava/io/IOException;" type="Ljava/io/IOException;">
-                <accept label="!Ljava/io/IOException;" src="M8_&lt;init&gt;_N21"/>
+              <node id="M8_:init:_N22" kind="throw" ref="!Ljava/io/IOException;" type="Ljava/io/IOException;">
+                <accept label="!Ljava/io/IOException;" src="M8_:init:_N21"/>
               </node>
-              <node id="M8_&lt;init&gt;_N23" kind="receive" type="Ljava/lang/String;">
+              <node id="M8_:init:_N23" kind="receive" type="Ljava/lang/String;">
                 <ast end="1127" start="1110" type="32"/>
-                <accept src="M8_&lt;init&gt;_N21"/>
+                <accept src="M8_:init:_N21"/>
               </node>
-              <node id="M8_&lt;init&gt;_N24" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="M8_:init:_N24" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1127" start="1103" type="59"/>
-                <accept src="M8_&lt;init&gt;_N23"/>
+                <accept src="M8_:init:_N23"/>
               </node>
-              <node id="M8_&lt;init&gt;_N25" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="M8_:init:_N25" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1149" start="1145" type="42"/>
-                <accept src="M8_&lt;init&gt;_N24"/>
+                <accept src="M8_:init:_N24"/>
               </node>
-              <node data="null" id="M8_&lt;init&gt;_N26" kind="value" type="@null">
+              <node data="null" id="M8_:init:_N26" kind="value" type="@null">
                 <ast end="1157" start="1153" type="33"/>
               </node>
-              <node data="==" id="M8_&lt;init&gt;_N27" kind="op_infix" type="Z">
+              <node data="==" id="M8_:init:_N27" kind="op_infix" type="Z">
                 <ast end="1157" start="1145" type="27"/>
-                <accept label="L" src="M8_&lt;init&gt;_N25"/>
-                <accept label="R" src="M8_&lt;init&gt;_N26"/>
+                <accept label="L" src="M8_:init:_N25"/>
+                <accept label="R" src="M8_:init:_N26"/>
               </node>
-              <node id="M8_&lt;init&gt;_N40" kind="join" ref=".LRecord;/.key" type="Ljava/lang/String;">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N84"/>
-                <accept label="false" src="M8_&lt;init&gt;_N85"/>
+              <node id="M8_:init:_N40" kind="join" ref=".LRecord;/.key" type="Ljava/lang/String;">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N84"/>
+                <accept label="false" src="M8_:init:_N85"/>
               </node>
-              <node id="M8_&lt;init&gt;_N41" kind="join" ref=".LRecord;/.value" type="Ljava/lang/String;">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N88"/>
-                <accept label="false" src="M8_&lt;init&gt;_N89"/>
+              <node id="M8_:init:_N41" kind="join" ref=".LRecord;/.value" type="Ljava/lang/String;">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N88"/>
+                <accept label="false" src="M8_:init:_N89"/>
               </node>
-              <node id="M8_&lt;init&gt;_N42" kind="join" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N91"/>
-                <accept label="false" src="M8_&lt;init&gt;_N92"/>
+              <node id="M8_:init:_N42" kind="join" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N91"/>
+                <accept label="false" src="M8_:init:_N92"/>
               </node>
-              <node id="M8_&lt;init&gt;_N43" kind="join" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N94"/>
-                <accept label="false" src="M8_&lt;init&gt;_N95"/>
+              <node id="M8_:init:_N43" kind="join" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N94"/>
+                <accept label="false" src="M8_:init:_N95"/>
               </node>
-              <node id="M8_&lt;init&gt;_N44" kind="join" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N97"/>
-                <accept label="false" src="M8_&lt;init&gt;_N98"/>
+              <node id="M8_:init:_N44" kind="join" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N97"/>
+                <accept label="false" src="M8_:init:_N98"/>
               </node>
-              <node id="M8_&lt;init&gt;_N45" kind="join" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
-                <accept label="cond" src="M8_&lt;init&gt;_N27"/>
-                <accept label="true" src="M8_&lt;init&gt;_N100"/>
-                <accept label="false" src="M8_&lt;init&gt;_N101"/>
+              <node id="M8_:init:_N45" kind="join" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+                <accept label="cond" src="M8_:init:_N27"/>
+                <accept label="true" src="M8_:init:_N100"/>
+                <accept label="false" src="M8_:init:_N101"/>
               </node>
-              <node id="M8_&lt;init&gt;_N46" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="M8_:init:_N46" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1190" start="1186" type="42"/>
-                <accept src="M8_&lt;init&gt;_N24"/>
+                <accept src="M8_:init:_N24"/>
               </node>
-              <node data=" " id="M8_&lt;init&gt;_N47" kind="value" type="C">
+              <node data=" " id="M8_:init:_N47" kind="value" type="C">
                 <ast end="1202" start="1199" type="13"/>
               </node>
-              <node data="Ljava/lang/String;.indexOf(I)I" id="M8_&lt;init&gt;_N48" kind="call" type="I">
+              <node data="Ljava/lang/String;.indexOf(I)I" id="M8_:init:_N48" kind="call" type="I">
                 <ast end="1203" start="1186" type="32"/>
-                <accept label="#arg0" src="M8_&lt;init&gt;_N47"/>
-                <accept label="@Ljava/lang/String;" src="M8_&lt;init&gt;_N46"/>
+                <accept label="#arg0" src="M8_:init:_N47"/>
+                <accept label="@Ljava/lang/String;" src="M8_:init:_N46"/>
               </node>
-              <node id="M8_&lt;init&gt;_N49" kind="receive" type="I">
+              <node id="M8_:init:_N49" kind="receive" type="I">
                 <ast end="1203" start="1186" type="32"/>
-                <accept src="M8_&lt;init&gt;_N48"/>
+                <accept src="M8_:init:_N48"/>
               </node>
-              <node id="M8_&lt;init&gt;_N50" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
+              <node id="M8_:init:_N50" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1203" start="1182" type="59"/>
-                <accept src="M8_&lt;init&gt;_N49"/>
+                <accept src="M8_:init:_N49"/>
               </node>
-              <node id="M8_&lt;init&gt;_N51" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="M8_:init:_N51" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1234" start="1230" type="42"/>
-                <accept src="M8_&lt;init&gt;_N24"/>
+                <accept src="M8_:init:_N24"/>
               </node>
-              <node data="0" id="M8_&lt;init&gt;_N52" kind="value" type="I">
+              <node data="0" id="M8_:init:_N52" kind="value" type="I">
                 <ast end="1246" start="1245" type="34"/>
               </node>
-              <node id="M8_&lt;init&gt;_N53" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
+              <node id="M8_:init:_N53" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1249" start="1248" type="42"/>
-                <accept src="M8_&lt;init&gt;_N50"/>
+                <accept src="M8_:init:_N50"/>
               </node>
-              <node data="Ljava/lang/String;.substring(II)Ljava/lang/String;" id="M8_&lt;init&gt;_N54" kind="call" type="Ljava/lang/String;">
+              <node data="Ljava/lang/String;.substring(II)Ljava/lang/String;" id="M8_:init:_N54" kind="call" type="Ljava/lang/String;">
                 <ast end="1250" start="1230" type="32"/>
-                <accept label="#arg0" src="M8_&lt;init&gt;_N52"/>
-                <accept label="#arg1" src="M8_&lt;init&gt;_N53"/>
-                <accept label="@Ljava/lang/String;" src="M8_&lt;init&gt;_N51"/>
+                <accept label="#arg0" src="M8_:init:_N52"/>
+                <accept label="#arg1" src="M8_:init:_N53"/>
+                <accept label="@Ljava/lang/String;" src="M8_:init:_N51"/>
               </node>
-              <node id="M8_&lt;init&gt;_N55" kind="receive" type="Ljava/lang/String;">
+              <node id="M8_:init:_N55" kind="receive" type="Ljava/lang/String;">
                 <ast end="1250" start="1230" type="32"/>
-                <accept src="M8_&lt;init&gt;_N54"/>
+                <accept src="M8_:init:_N54"/>
               </node>
-              <node id="M8_&lt;init&gt;_N56" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
+              <node id="M8_:init:_N56" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
                 <ast end="1250" start="1224" type="59"/>
-                <accept src="M8_&lt;init&gt;_N55"/>
+                <accept src="M8_:init:_N55"/>
               </node>
-              <node id="M8_&lt;init&gt;_N57" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
+              <node id="M8_:init:_N57" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$line" type="Ljava/lang/String;">
                 <ast end="1283" start="1279" type="42"/>
-                <accept src="M8_&lt;init&gt;_N24"/>
+                <accept src="M8_:init:_N24"/>
               </node>
-              <node id="M8_&lt;init&gt;_N58" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
+              <node id="M8_:init:_N58" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$i" type="I">
                 <ast end="1295" start="1294" type="42"/>
-                <accept src="M8_&lt;init&gt;_N50"/>
+                <accept src="M8_:init:_N50"/>
               </node>
-              <node data="1" id="M8_&lt;init&gt;_N59" kind="value" type="I">
+              <node data="1" id="M8_:init:_N59" kind="value" type="I">
                 <ast end="1297" start="1296" type="34"/>
               </node>
-              <node data="+" id="M8_&lt;init&gt;_N60" kind="op_infix" type="I">
+              <node data="+" id="M8_:init:_N60" kind="op_infix" type="I">
                 <ast end="1297" start="1294" type="27"/>
-                <accept label="L" src="M8_&lt;init&gt;_N58"/>
-                <accept label="R" src="M8_&lt;init&gt;_N59"/>
+                <accept label="L" src="M8_:init:_N58"/>
+                <accept label="R" src="M8_:init:_N59"/>
               </node>
-              <node data="Ljava/lang/String;.substring(I)Ljava/lang/String;" id="M8_&lt;init&gt;_N61" kind="call" type="Ljava/lang/String;">
+              <node data="Ljava/lang/String;.substring(I)Ljava/lang/String;" id="M8_:init:_N61" kind="call" type="Ljava/lang/String;">
                 <ast end="1298" start="1279" type="32"/>
-                <accept label="#arg0" src="M8_&lt;init&gt;_N60"/>
-                <accept label="@Ljava/lang/String;" src="M8_&lt;init&gt;_N57"/>
+                <accept label="#arg0" src="M8_:init:_N60"/>
+                <accept label="@Ljava/lang/String;" src="M8_:init:_N57"/>
               </node>
-              <node id="M8_&lt;init&gt;_N62" kind="receive" type="Ljava/lang/String;">
+              <node id="M8_:init:_N62" kind="receive" type="Ljava/lang/String;">
                 <ast end="1298" start="1279" type="32"/>
-                <accept src="M8_&lt;init&gt;_N61"/>
+                <accept src="M8_:init:_N61"/>
               </node>
-              <node id="M8_&lt;init&gt;_N63" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
+              <node id="M8_:init:_N63" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
                 <ast end="1298" start="1271" type="59"/>
-                <accept src="M8_&lt;init&gt;_N62"/>
+                <accept src="M8_:init:_N62"/>
               </node>
-              <node id="M8_&lt;init&gt;_N64" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
+              <node id="M8_:init:_N64" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$key" type="Ljava/lang/String;">
                 <ast end="1339" start="1336" type="42"/>
-                <accept src="M8_&lt;init&gt;_N56"/>
+                <accept src="M8_:init:_N56"/>
               </node>
-              <node id="M8_&lt;init&gt;_N65" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
+              <node id="M8_:init:_N65" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$value" type="Ljava/lang/String;">
                 <ast end="1346" start="1341" type="42"/>
-                <accept src="M8_&lt;init&gt;_N63"/>
+                <accept src="M8_:init:_N63"/>
               </node>
-              <node data="LRecord;.&lt;init&gt;(Ljava/lang/String;Ljava/lang/String;)LRecord;" id="M8_&lt;init&gt;_N66" kind="new" type="LRecord;">
+              <node data="LRecord;.:init:(Ljava/lang/String;Ljava/lang/String;)LRecord;" id="M8_:init:_N66" kind="new" type="LRecord;">
                 <ast end="1347" start="1325" type="14"/>
-                <accept label="#arg0" src="M8_&lt;init&gt;_N64"/>
-                <accept label="#arg1" src="M8_&lt;init&gt;_N65"/>
-                <accept label="@LRecord;" src="M8_&lt;init&gt;_N10"/>
+                <accept label="#arg0" src="M8_:init:_N64"/>
+                <accept label="#arg1" src="M8_:init:_N65"/>
+                <accept label="@LRecord;" src="M8_:init:_N10"/>
               </node>
-              <node id="M8_&lt;init&gt;_N68" kind="receive" ref=".LRecord;/.key" type="Ljava/lang/String;">
-                <accept label=".LRecord;/.key" src="M8_&lt;init&gt;_N66"/>
+              <node id="M8_:init:_N68" kind="receive" ref=".LRecord;/.key" type="Ljava/lang/String;">
+                <accept label=".LRecord;/.key" src="M8_:init:_N66"/>
               </node>
-              <node id="M8_&lt;init&gt;_N69" kind="receive" ref=".LRecord;/.value" type="Ljava/lang/String;">
-                <accept label=".LRecord;/.value" src="M8_&lt;init&gt;_N66"/>
+              <node id="M8_:init:_N69" kind="receive" ref=".LRecord;/.value" type="Ljava/lang/String;">
+                <accept label=".LRecord;/.value" src="M8_:init:_N66"/>
               </node>
-              <node id="M8_&lt;init&gt;_N70" kind="receive" type="LRecord;">
+              <node id="M8_:init:_N70" kind="receive" type="LRecord;">
                 <ast end="1347" start="1325" type="14"/>
-                <accept src="M8_&lt;init&gt;_N66"/>
+                <accept src="M8_:init:_N66"/>
               </node>
-              <node id="M8_&lt;init&gt;_N71" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
+              <node id="M8_:init:_N71" kind="assign_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
                 <ast end="1347" start="1319" type="59"/>
-                <accept src="M8_&lt;init&gt;_N70"/>
+                <accept src="M8_:init:_N70"/>
               </node>
-              <node id="M8_&lt;init&gt;_N73" kind="ref_field" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
+              <node id="M8_:init:_N73" kind="ref_field" ref=".LDB;/._a" type="LListy&lt;LRecord;&gt;;">
                 <ast end="1363" start="1361" type="42"/>
-                <accept label="obj" src="M8_&lt;init&gt;_N3"/>
-                <accept src="M8_&lt;init&gt;_N4"/>
+                <accept label="obj" src="M8_:init:_N3"/>
+                <accept src="M8_:init:_N4"/>
               </node>
-              <node id="M8_&lt;init&gt;_N75" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
+              <node id="M8_:init:_N75" kind="ref_var" ref="$LDB;.:DB:943:1389.:B:985:1389.:while:1069:1383.:B:1082:1383/$rec" type="LRecord;">
                 <ast end="1371" start="1368" type="42"/>
-                <accept src="M8_&lt;init&gt;_N71"/>
+                <accept src="M8_:init:_N71"/>
               </node>
-              <node data="LListy&lt;LRecord;&gt;;.add(LRecord;)V" id="M8_&lt;init&gt;_N76" kind="call" type="V">
+              <node data="LListy&lt;LRecord;&gt;;.add(LRecord;)V" id="M8_:init:_N76" kind="call" type="V">
                 <ast end="1372" start="1361" type="32"/>
-                <accept label="#arg0" src="M8_&lt;init&gt;_N75"/>
-                <accept label="@LListy&lt;LRecord;&gt;;" src="M8_&lt;init&gt;_N73"/>
-                <accept label=".LListy&lt;LRecord;&gt;;/._objs" src="M8_&lt;init&gt;_N97"/>
-                <accept label=".LListy&lt;LRecord;&gt;;/._max" src="M8_&lt;init&gt;_N91"/>
-                <accept label=".LListy&lt;LRecord;&gt;;/._n" src="M8_&lt;init&gt;_N100"/>
-                <accept label="%Ljava/lang/Object;" src="M8_&lt;init&gt;_N94"/>
+                <accept label="#arg0" src="M8_:init:_N75"/>
+                <accept label="@LListy&lt;LRecord;&gt;;" src="M8_:init:_N73"/>
+                <accept label=".LListy&lt;LRecord;&gt;;/._objs" src="M8_:init:_N97"/>
+                <accept label=".LListy&lt;LRecord;&gt;;/._max" src="M8_:init:_N91"/>
+                <accept label=".LListy&lt;LRecord;&gt;;/._n" src="M8_:init:_N100"/>
+                <accept label="%Ljava/lang/Object;" src="M8_:init:_N94"/>
               </node>
-              <node id="M8_&lt;init&gt;_N77" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
-                <accept label=".LListy&lt;LRecord;&gt;;/._max" src="M8_&lt;init&gt;_N76"/>
+              <node id="M8_:init:_N77" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+                <accept label=".LListy&lt;LRecord;&gt;;/._max" src="M8_:init:_N76"/>
               </node>
-              <node id="M8_&lt;init&gt;_N78" kind="receive" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
-                <accept label="%Ljava/lang/Object;" src="M8_&lt;init&gt;_N76"/>
+              <node id="M8_:init:_N78" kind="receive" ref="%Ljava/lang/Object;" type="Ljava/lang/Object;">
+                <accept label="%Ljava/lang/Object;" src="M8_:init:_N76"/>
               </node>
-              <node id="M8_&lt;init&gt;_N79" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
-                <accept label=".LListy&lt;LRecord;&gt;;/._objs" src="M8_&lt;init&gt;_N76"/>
+              <node id="M8_:init:_N79" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+                <accept label=".LListy&lt;LRecord;&gt;;/._objs" src="M8_:init:_N76"/>
               </node>
-              <node id="M8_&lt;init&gt;_N80" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
-                <accept label=".LListy&lt;LRecord;&gt;;/._n" src="M8_&lt;init&gt;_N76"/>
+              <node id="M8_:init:_N80" kind="receive" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+                <accept label=".LListy&lt;LRecord;&gt;;/._n" src="M8_:init:_N76"/>
               </node>
-              <node id="M8_&lt;init&gt;_N81" kind="receive" type="V">
+              <node id="M8_:init:_N81" kind="receive" type="V">
                 <ast end="1372" start="1361" type="32"/>
-                <accept src="M8_&lt;init&gt;_N76"/>
+                <accept src="M8_:init:_N76"/>
               </node>
             </scope>
           </scope>
@@ -1074,34 +1074,34 @@
     <field name=".LListy&lt;LRecord;&gt;;/._n" static="false" type="I"/>
     <field name=".LListy&lt;LRecord;&gt;;/._max" static="false" type="I"/>
     <field name=".LListy&lt;LRecord;&gt;;/._objs" static="false" type="[Ljava/lang/Object;"/>
-    <method id="LListy&lt;LRecord;&gt;;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LListy&lt;LRecord;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="873" start="175" type="55"/>
-      <scope name="LListy&lt;LRecord;&gt;;.&lt;clinit&gt;">
-        <node data="0" id="K10_&lt;clinit&gt;_N1" kind="value" type="I">
+      <scope name="LListy&lt;LRecord;&gt;;.:clinit:">
+        <node data="0" id="K10_:clinit:_N1" kind="value" type="I">
           <ast end="229" start="228" type="34"/>
         </node>
-        <node id="K10_&lt;clinit&gt;_N2" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
+        <node id="K10_:clinit:_N2" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._n" type="I">
           <ast end="229" start="223" type="59"/>
-          <accept src="K10_&lt;clinit&gt;_N1"/>
+          <accept src="K10_:clinit:_N1"/>
         </node>
-        <node data="0" id="K10_&lt;clinit&gt;_N3" kind="value" type="I">
+        <node data="0" id="K10_:clinit:_N3" kind="value" type="I">
           <ast end="255" start="254" type="34"/>
         </node>
-        <node id="K10_&lt;clinit&gt;_N4" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
+        <node id="K10_:clinit:_N4" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._max" type="I">
           <ast end="255" start="247" type="59"/>
-          <accept src="K10_&lt;clinit&gt;_N3"/>
+          <accept src="K10_:clinit:_N3"/>
         </node>
-        <node data="null" id="K10_&lt;clinit&gt;_N5" kind="value" type="@null">
+        <node data="null" id="K10_:clinit:_N5" kind="value" type="@null">
           <ast end="290" start="286" type="33"/>
         </node>
-        <node id="K10_&lt;clinit&gt;_N6" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
+        <node id="K10_:clinit:_N6" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
           <ast end="290" start="278" type="59"/>
-          <accept src="K10_&lt;clinit&gt;_N5"/>
+          <accept src="K10_:clinit:_N5"/>
         </node>
       </scope>
     </method>
     <method id="LListy&lt;LRecord;&gt;;.add(LRecord;)V" name="add" style="instance">
-      <caller id="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;"/>
+      <caller id="LDB;.:init:(Ljava/lang/String;)LDB;"/>
       <ast end="658" start="297" type="31"/>
       <scope name="LListy&lt;LRecord;&gt;;.:add:297:658">
         <node id="M11_add_N1" kind="input" ref="#arg0" type="LRecord;">
@@ -1508,9 +1508,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="LApp1;" path="tests/App1.java">
-    <method id="LApp1;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="LApp1;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="1893" start="1636" type="55"/>
-      <scope name="LApp1;.&lt;clinit&gt;"/>
+      <scope name="LApp1;.:clinit:"/>
     </method>
     <method id="LApp1;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="1891" start="1660" type="31"/>
@@ -1574,7 +1574,7 @@
             <accept label="index" src="M15_main_N18"/>
             <accept src="M15_main_N3"/>
           </node>
-          <node data="LDB;.&lt;init&gt;(Ljava/lang/String;)LDB;" id="M15_main_N20" kind="new" type="LDB;">
+          <node data="LDB;.:init:(Ljava/lang/String;)LDB;" id="M15_main_N20" kind="new" type="LDB;">
             <ast end="1751" start="1736" type="14"/>
             <accept label="#arg0" src="M15_main_N19"/>
             <accept label="@LDB;" src="M15_main_N7"/>
