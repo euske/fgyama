@@ -104,7 +104,7 @@ class DFType:
             return (i2, DFFuncType(retype, args))
         elif c == '?':
             return (i+1, DFUnknownType())
-        raise ValueError(c)
+        raise ValueError(s, s[i:])
 
 class DFBasicType(DFType):
 

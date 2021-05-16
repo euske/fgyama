@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import logging
-from graphs import get_graphs, parsemethodname, Cons, clen
+from graphs import get_graphs, parsemethodname, Cons, clen, stripid
 
 def q(s):
     if s:
@@ -12,7 +12,7 @@ def q(s):
 def topsort(nodes):
     incoming = { n0: [] for n0 in nodes }
     for n0 in incoming:
-        for (label,n1) in n0.outputs:
+        for (label,n1) in n0.inputs.items():
             if label.startswith('_'): continue
             incoming[n1].append(n0)
     out = []
@@ -23,13 +23,17 @@ def topsort(nodes):
             raise ValueError('cycle')
         del incoming[n0]
         out.append(n0)
-        for (label,n1) in n0.outputs:
+        for (label,n1) in n0.inputs.items():
             if label.startswith('_'): continue
             incoming[n1].remove(n0)
     return out
 
 class Vertex:
     vid = 0
+    @classmethod
+    def newvid(klass):
+        klass.vid += 1
+        return klass.vid
 
 # main
 def main(argv):
@@ -75,20 +79,19 @@ def main(argv):
         logging.info(f'trace {method}')
         h = '  '*clen(cc)
         (klass,name,func) = parsemethodname(method.name)
-        Vertex.vid += 1
-        vin = Vertex.vid
-        out.write(h+f'subgraph {q("cluster_"+str(vin))} {{\n')
-        out.write(h+f'  label={q(repr(klass)+name)};\n')
-        out.write(h+f'  V{vin} [label={q("enter "+name)}];\n')
+        vout = Vertex.newvid()
+        out.write(h+f'subgraph {q("cluster_"+str(vout))} {{\n')
+        out.write(h+f'  label={q(stripid(klass.name)+"."+name)};\n')
+        out.write(h+f'  V{vout} [label={q("exit "+name)}];\n')
         for vtx in prevs:
-            outedges.append((vtx, vin))
-        edges = { 'out': set() }
+            outedges.append((vout, vtx))
+        edges = { 'in': set() }
         for n0 in topsort(method):
             if n0 in edges:
                 p = edges[n0]
             else:
-                p = set([vin])
-            if clen(cc) < maxlevel and n0.is_funcall():
+                p = set([vout])
+            if n0.is_funcall() and clen(cc) < maxlevel:
                 funcs = n0.data.split(' ')
                 a = []
                 for gid in funcs[:maxoverrides]:
@@ -99,21 +102,21 @@ def main(argv):
                     a.append(vtx)
                 if a:
                     p = set(a)
-            if n0.outputs:
-                for (label,n1) in n0.outputs:
+            if n0.inputs:
+                for (label,n1) in n0.inputs.items():
+                    if label.startswith('_'): continue
                     if n1 in edges:
                         edges[n1].update(p)
                     else:
                         edges[n1] = p.copy()
             else:
-                edges['out'].update(p)
-        Vertex.vid += 1
-        vout = Vertex.vid
-        out.write(h+f'  V{vout} [label={q("exit "+name)}];\n')
-        for vtx in edges['out']:
-            outedges.append((vtx, vout))
+                edges['in'].update(p)
+        vin = Vertex.newvid()
+        out.write(h+f'  V{vin} [label={q("enter "+name)}];\n')
         out.write(h+f'}}\n')
-        return vout
+        for vtx in edges['in']:
+            outedges.append((vin, vtx))
+        return vin
 
     out.write(f'digraph {q(path)} {{\n')
     for method in methods:
