@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.*;
 //  DFExit
 //  Specifies a designated DFNode coming out of a certain DFFrame.
 //
-public abstract class DFExit implements Comparable<DFExit> {
+public abstract class DFExit {
 
     private DFFrame _frame;
     private DFNode _node;
@@ -24,11 +24,6 @@ public abstract class DFExit implements Comparable<DFExit> {
     @Override
     public String toString() {
         return ("<DFExit("+_node.getRef()+") "+_frame+" <- "+_node+">");
-    }
-
-    @Override
-    public int compareTo(DFExit exit) {
-        return _node.compareTo(exit._node);
     }
 
     public DFFrame getFrame() {

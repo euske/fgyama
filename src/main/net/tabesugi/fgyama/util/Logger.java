@@ -25,10 +25,8 @@ public class Logger {
     }
 
     public static void error(Object ... a) {
-        if (2 <= LogLevel) {
+        if (0 <= LogLevel) {
             println(a, Integer.MAX_VALUE);
-        } else if (0 <= LogLevel) {
-            println(a, 2);
         }
     }
 

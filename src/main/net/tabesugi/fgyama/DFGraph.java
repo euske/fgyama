@@ -53,12 +53,12 @@ public abstract class DFGraph {
         for (DFNode node : toremove) {
             _nodes.remove(node);
         }
-        Collections.sort(_nodes);
     }
 
     public DFNode[] getNodes() {
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
+        Arrays.sort(nodes);
         return nodes;
     }
 
@@ -1487,7 +1487,7 @@ public abstract class DFGraph {
         }
         for (DFRef ref : ref2exits.keys()) {
             List<DFExit> a = ref2exits.get(ref);
-            Collections.sort(a);
+            Collections.sort(a, new ExitComparator(a));
             for (DFExit exit : a) {
                 DFNode src = exit.getNode();
                 DFNode dst = ctx.getLast(ref);
@@ -1525,7 +1525,7 @@ public abstract class DFGraph {
         }
         for (DFRef ref : ref2exits.keys()) {
             List<DFExit> a = ref2exits.get(ref);
-            Collections.sort(a);
+            Collections.sort(a, new ExitComparator(a));
             for (DFExit exit : a) {
                 assert (exit instanceof ReturnExit ||
                         exit instanceof ThrowExit);
@@ -1641,6 +1641,35 @@ public abstract class DFGraph {
     }
 }
 
+// ExitComparator
+class ExitComparator implements Comparator<DFExit> {
+
+    private Map<DFExit, Integer> _index =
+        new HashMap<DFExit, Integer>();
+
+    public ExitComparator(List<DFExit> exits) {
+        for (DFExit exit : exits) {
+            _index.put(exit, _index.size());
+        }
+    }
+
+    public int compare(DFExit exit0, DFExit exit1) {
+        if (exit0 instanceof BreakExit ||
+            exit0 instanceof ReturnExit) {
+            boolean m0 = exit0.getNode().canMerge();
+            boolean m1 = exit1.getNode().canMerge();
+            if (m0 && !m1) {
+                return +1;
+            } else if (!m0 && m1) {
+                return -1;
+            }
+        }
+        // preserve the original order.
+        int index0 = _index.get(exit0);
+        int index1 = _index.get(exit1);
+        return (index0 - index1);
+    }
+}
 
 // BreakExit
 class BreakExit extends DFExit {
@@ -1648,19 +1677,6 @@ class BreakExit extends DFExit {
     public BreakExit(DFFrame frame, DFNode node) {
         super(frame, node);
         // frame.getLabel() can be either @BREAKABLE or a label.
-    }
-
-    @Override
-    public int compareTo(DFExit exit) {
-        boolean m0 = this.getNode().canMerge();
-        boolean m1 = exit.getNode().canMerge();
-        if (m0 && !m1) {
-            return +1;
-        } else if (!m0 && m1) {
-            return -1;
-        } else {
-            return super.compareTo(exit);
-        }
     }
 }
 
@@ -1679,19 +1695,6 @@ class ReturnExit extends DFExit {
     public ReturnExit(DFFrame frame, DFNode node) {
         super(frame, node);
         assert frame.getLabel() == DFFrame.RETURNABLE;
-    }
-
-    @Override
-    public int compareTo(DFExit exit) {
-        boolean m0 = this.getNode().canMerge();
-        boolean m1 = exit.getNode().canMerge();
-        if (m0 && !m1) {
-            return +1;
-        } else if (!m0 && m1) {
-            return -1;
-        } else {
-            return super.compareTo(exit);
-        }
     }
 }
 

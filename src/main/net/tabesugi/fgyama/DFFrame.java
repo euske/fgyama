@@ -665,7 +665,7 @@ public class DFFrame {
             } else {
                 Logger.error(
                     "DFFrame.buildExpr: MethodNotFound (invoke)",
-                    Utils.getASTSource(invoke), this);
+                    Utils.getASTSource(invoke), klass, this);
                 return DFUnknownType.UNKNOWN;
             }
 
