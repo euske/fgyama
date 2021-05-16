@@ -3,8 +3,6 @@ import sys
 import logging
 from graphs import IDFBuilder, Cons, clen, parsemethodname, stripid
 
-MAXNAMES = 5
-
 def q(s):
     if s:
         return '"%s"' % s.replace('"',r'\"')
@@ -51,6 +49,8 @@ class IRef:
 
 class IRefComponent:
 
+    MAXNAMES = 5
+
     def __init__(self, cid, irefs=None):
         if irefs is None:
             irefs = []
@@ -62,8 +62,8 @@ class IRefComponent:
 
     def __repr__(self):
         names = set( str(iref) for iref in self.irefs )
-        if MAXNAMES < len(names):
-            names = list(names)[:MAXNAMES] + ['...']
+        if self.MAXNAMES < len(names):
+            names = list(names)[:self.MAXNAMES] + ['...']
         return '[%s]' % ', '.join(names)
 
     def __len__(self):
@@ -142,7 +142,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
     ref1 = n1.ref
     if n1.kind in IGNORED:
         iref1 = iref0
-    elif ref1 is None or ref1.startswith('#'):
+    elif ref1 is None or not (ref1.startswith('$') or ref1.startswith('.')):
         iref1 = iref0
     else:
         if ref1[0] == '$':
@@ -182,7 +182,7 @@ def main(argv):
     maxoverrides = 1
     ratio = 0.9
     maxfan = 5
-    methods = set()
+    methods = {'main'}
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-o': outpath = v
@@ -213,7 +213,7 @@ def main(argv):
         # Filter "top-level" methods only which aren't called by anyone else.
         if method.callers: continue
         (klass,name,func) = parsemethodname(method.name)
-        if methods and (name not in methods) and (method.name not in methods): continue
+        if (name not in methods) and (method.name not in methods): continue
         logging.info(f'method: {method.name}')
         for node in method:
             vtx = builder.vtxs[node]
@@ -228,6 +228,7 @@ def main(argv):
                 irefs.add(iref0)
                 irefs.add(iref1)
                 nlinks += 1
+        break
     logging.info(f'irefs: {len(irefs)}')
     logging.info(f'links: {nlinks}')
 
