@@ -424,6 +424,12 @@ public class DFJarFileKlass extends DFKlass {
             return null;
         }
 
+        @Override
+        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+            throws TypeIncompatible {
+            return _baseKlass.canConvertFrom(klass, typeMap);
+        }
+
         private void load() {
             if (_baseKlass != null) return;
             _baseKlass = DFBuiltinTypes.getObjectKlass();

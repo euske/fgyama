@@ -100,6 +100,18 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         }
     }
 
+    public DFKlass[] getBaseKlasses() {
+        List<DFKlass> klasses = new ArrayList<DFKlass>();
+        DFKlass klass = this;
+        while (klass != null) {
+            klasses.add(klass);
+            klass = klass.getBaseKlass();
+        }
+        DFKlass[] a = new DFKlass[klasses.size()];
+        klasses.toArray(a);
+        return a;
+    }
+
     @Override
     public DFKlass toKlass() {
         return this;

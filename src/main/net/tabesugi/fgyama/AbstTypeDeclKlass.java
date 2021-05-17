@@ -193,6 +193,13 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             _finder = finder;
         }
 
+        @Override
+        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+            throws TypeIncompatible {
+            this.load();
+            return _baseKlass.canConvertFrom(klass, typeMap);
+        }
+
         private void load() {
             assert _finder != null;
             if (_baseKlass != null) return;
