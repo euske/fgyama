@@ -131,7 +131,7 @@ public class Utils {
         String src = Utils.readFile(file);
         Map<String, String> options = JavaCore.getOptions();
         JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-        ASTParser parser = ASTParser.newParser(AST.JLS8);
+        ASTParser parser = ASTParser.newParser(AST.JLS_Latest);
         parser.setSource(src.toCharArray());
         parser.setKind(ASTParser.K_COMPILATION_UNIT);
         parser.setResolveBindings(false);

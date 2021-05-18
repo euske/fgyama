@@ -221,8 +221,8 @@ public class DFFrame {
                 if (cstmt instanceof SwitchCase) {
                     caseFrame = switchFrame.addChild("@CASE", cstmt, switchScope);
                     SwitchCase switchCase = (SwitchCase)cstmt;
-                    Expression expr = switchCase.getExpression();
-                    if (expr != null) {
+                    for (Expression expr :
+                             (List<Expression>) switchCase.expressions()) {
                         if (enumKlass != null && expr instanceof SimpleName) {
                             // special treatment for enum.
                             DFRef ref = enumKlass.getField((SimpleName)expr);

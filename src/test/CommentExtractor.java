@@ -238,7 +238,7 @@ public class CommentExtractor extends ASTVisitor {
 
             Map<String, String> options = JavaCore.getOptions();
             JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
-            ASTParser parser = ASTParser.newParser(AST.JLS8);
+            ASTParser parser = ASTParser.newParser(AST.JLS_Latest);
             parser.setUnitName(path);
             parser.setSource(src.toCharArray());
             parser.setKind(ASTParser.K_COMPILATION_UNIT);

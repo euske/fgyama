@@ -135,8 +135,8 @@ public abstract class DFSourceMethod extends DFMethod {
 
         } else if (stmt instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)stmt;
-            Expression expr = switchCase.getExpression();
-            if (expr != null) {
+            for (Expression expr :
+                     (List<Expression>) switchCase.expressions()) {
                 this.buildTypeFromExpr(expr, outerScope);
             }
 
@@ -486,8 +486,8 @@ public abstract class DFSourceMethod extends DFMethod {
 
         } else if (stmt instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)stmt;
-            Expression expr = switchCase.getExpression();
-            if (expr != null) {
+            for (Expression expr :
+                     (List<Expression>) switchCase.expressions()) {
                 this.listUsedExpr(klasses, expr);
             }
 
@@ -888,8 +888,8 @@ public abstract class DFSourceMethod extends DFMethod {
             for (Statement cstmt : (List<Statement>) switchStmt.statements()) {
                 if (cstmt instanceof SwitchCase) {
                     SwitchCase switchCase = (SwitchCase)cstmt;
-                    Expression expr1 = switchCase.getExpression();
-                    if (expr1 != null) {
+                    for (Expression expr1 :
+                             (List<Expression>) switchCase.expressions()) {
                         if (enumKlass != null && expr1 instanceof SimpleName) {
                             // special treatment for enum.
                             DFRef ref = enumKlass.getField((SimpleName)expr1);

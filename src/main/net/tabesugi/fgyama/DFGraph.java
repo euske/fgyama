@@ -1169,8 +1169,8 @@ public abstract class DFGraph {
                 caseNode = new CaseNode(this, switchScope, cstmt);
                 caseNode.accept(switchValue);
                 caseCtx = new DFContext(this, switchScope);
-                Expression expr = switchCase.getExpression();
-                if (expr != null) {
+                for (Expression expr :
+                         (List<Expression>) switchCase.expressions()) {
                     if (enumKlass != null && expr instanceof SimpleName) {
                         // special treatment for enum.
                         DFRef ref = enumKlass.getField((SimpleName)expr);
@@ -1183,8 +1183,6 @@ public abstract class DFGraph {
                             processExpression(
                                 ctx, switchScope, caseFrame, expr));
                     }
-                } else {
-                    // "default" case.
                 }
             } else {
                 if (caseFrame == null) {

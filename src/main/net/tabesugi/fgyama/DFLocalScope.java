@@ -146,8 +146,8 @@ public class DFLocalScope extends DFVarScope {
 
         } else if (ast instanceof SwitchCase) {
             SwitchCase switchCase = (SwitchCase)ast;
-            Expression expr = switchCase.getExpression();
-            if (expr != null) {
+            for (Expression expr :
+                     (List<Expression>) switchCase.expressions()) {
                 this.buildExpr(finder, expr);
             }
 
