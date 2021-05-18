@@ -575,7 +575,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
         elif name == 'accept':
             label = attrs.get('label', '')
             src = attrs.get('src')
-            assert label not in self.node.inputs, self.node.inputs
+            #assert label not in self.node.inputs, (label,self.node.inputs)
             assert src is not None, src
             self.node.inputs[label] = src
             return
