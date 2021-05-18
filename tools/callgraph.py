@@ -154,19 +154,30 @@ def main(argv):
     def f(group, level=1):
         h = '  '*level
         (klass,name,func) = parsemethodname(group.method.name)
-        out.write(h+f'subgraph {q("cluster_"+str(group.gid))} {{\n')
-        out.write(h+f'  label={q(stripid(klass.name)+"."+name)};\n')
-        for g in group.children:
-            f(g, level+1)
-        vin = group.vin
-        out.write(h+f'  V{vin.vid} [label={q("enter "+name)}];\n')
-        for vtx in vin.linkto:
-            outedges.append((vin,vtx))
-        vout = group.vout
-        out.write(h+f'  V{vout.vid} [label={q("exit "+name)}];\n')
-        for vtx in vout.linkto:
-            outedges.append((vout,vtx))
-        out.write(h+'}\n')
+        if group.children:
+            out.write(h+f'subgraph {q("cluster_"+str(group.gid))} {{\n')
+            out.write(h+f'  label={q(stripid(klass.name)+"."+name)};\n')
+            vin = group.vin
+            vout = group.vout
+            out.write(h+f'  V{vin.vid} [label={q("enter")}];\n')
+            out.write(h+f'  V{vout.vid} [label={q("exit")}];\n')
+            for vtx in vin.linkto:
+                outedges.append((vin,vtx))
+            for vtx in vout.linkto:
+                outedges.append((vout,vtx))
+            for g in group.children:
+                f(g, level+1)
+            out.write(h+'}\n')
+        else:
+            vin = group.vin
+            vout = group.vout
+            out.write(h+f'  V{vin.vid} [shape=box, label={q(name)}];\n')
+            for vtx in vin.linkto:
+                if vtx is not vout:
+                    outedges.append((vin,vtx))
+            for vtx in vout.linkto:
+                if vtx is not vout:
+                    outedges.append((vin,vtx))
         return
     for group in groups:
         f(group)
