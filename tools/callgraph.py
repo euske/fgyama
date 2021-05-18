@@ -171,7 +171,7 @@ def main(argv):
         else:
             vin = group.vin
             vout = group.vout
-            out.write(h+f'  V{vin.vid} [shape=box, label={q(name)}];\n')
+            out.write(h+f'V{vin.vid} [shape=box, label={q(name)}];\n')
             for vtx in vin.linkto:
                 if vtx is not vout:
                     outedges.append((vin,vtx))
