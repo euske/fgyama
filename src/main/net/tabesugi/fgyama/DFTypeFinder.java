@@ -147,6 +147,11 @@ public class DFTypeFinder {
     }
 
     public DFType resolveSafe(Type type) {
+        if (type instanceof SimpleType) {
+            SimpleType stype = (SimpleType)type;
+            Name name = stype.getName();
+            if (name.getFullyQualifiedName().equals("var")) return null;
+        }
         try {
             return this.resolve(type);
         } catch (TypeNotFound e) {

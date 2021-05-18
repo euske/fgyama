@@ -848,8 +848,9 @@ public abstract class DFSourceMethod extends DFMethod {
                     this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        this.listDefinedExpr(defined, scope, init);
-                        this.setLambdaType(defined, ref.getRefType(), init);
+                        DFType type = this.listDefinedExpr(
+                            defined, scope, init, ref.getRefType());
+                        ref.setRefType(type);
                     }
                 } catch (VariableNotFound e) {
                 }
@@ -951,9 +952,8 @@ public abstract class DFSourceMethod extends DFMethod {
             ReturnStatement rtrnStmt = (ReturnStatement)stmt;
             Expression expr1 = rtrnStmt.getExpression();
             if (expr1 != null) {
-                this.listDefinedExpr(defined, scope, expr1);
-                this.setLambdaType(
-                    defined, this.getFuncType().getReturnType(), expr1);
+                DFType type = this.getFuncType().getReturnType();
+                this.listDefinedExpr(defined, scope, expr1, type);
             }
             // Return is handled as an Exit, not an output.
 
@@ -986,8 +986,9 @@ public abstract class DFSourceMethod extends DFMethod {
                         DFRef ref = tryScope.lookupVar(frag.getName());
                         Expression init = frag.getInitializer();
                         if (init != null) {
-                            this.listDefinedExpr(defined, tryScope, init);
-                            this.setLambdaType(defined, ref.getRefType(), init);
+                            DFType type = this.listDefinedExpr(
+                                defined, tryScope, init, ref.getRefType());
+                            ref.setRefType(type);
                         }
                     } catch (VariableNotFound e) {
                     }
@@ -1031,6 +1032,7 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1 = klass.findMethod(
                 CallStyle.Constructor, (String)null, argTypes);
             if (method1 != null) {
+                method1.addCaller(this);
                 this.setLambdaType(
                     defined, method1.getFuncType(), ci.arguments());
             }
@@ -1067,10 +1069,17 @@ public abstract class DFSourceMethod extends DFMethod {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected DFType listDefinedExpr(
         Collection<DFSourceKlass> defined,
         DFLocalScope scope, Expression expr)
+        throws InvalidSyntax {
+        return this.listDefinedExpr(defined, scope, expr, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected DFType listDefinedExpr(
+        Collection<DFSourceKlass> defined,
+        DFLocalScope scope, Expression expr, DFType expected)
         throws InvalidSyntax {
         assert expr != null;
 
@@ -1199,7 +1208,7 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (expr instanceof ParenthesizedExpression) {
             // "(expr)"
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            return this.listDefinedExpr(defined, scope, paren.getExpression());
+            return this.listDefinedExpr(defined, scope, paren.getExpression(), expected);
 
         } else if (expr instanceof Assignment) {
             // "p = q"
@@ -1210,11 +1219,8 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             DFRef ref = this.listDefinedAssignment(
                 defined, scope, assn.getLeftHandSide());
-            if (ref != null) {
-                this.setLambdaType(
-                    defined, ref.getRefType(), assn.getRightHandSide());
-            }
-            return this.listDefinedExpr(defined, scope, assn.getRightHandSide());
+            return this.listDefinedExpr(
+                defined, scope, assn.getRightHandSide(), ref.getRefType());
 
         } else if (expr instanceof VariableDeclarationExpression) {
             // "int a=2"
@@ -1227,8 +1233,9 @@ public abstract class DFSourceMethod extends DFMethod {
                     this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        this.listDefinedExpr(defined, scope, init);
-                        this.setLambdaType(defined, ref.getRefType(), init);
+                        DFType type = this.listDefinedExpr(
+                            defined, scope, init, ref.getRefType());
+                        ref.setRefType(type);
                     }
                 } catch (VariableNotFound e) {
                 }
@@ -1377,12 +1384,12 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (expr instanceof CastExpression) {
             // "(String)"
             CastExpression cast = (CastExpression)expr;
-            this.listDefinedExpr(defined, scope, cast.getExpression());
             try {
                 DFType type = _finder.resolve(cast.getType());
-                this.setLambdaType(defined, type, cast.getExpression());
+                this.listDefinedExpr(defined, scope, cast.getExpression(), type);
                 return type;
             } catch (TypeNotFound e) {
+                this.listDefinedExpr(defined, scope, cast.getExpression());
                 return null;
             }
 
@@ -1440,6 +1447,12 @@ public abstract class DFSourceMethod extends DFMethod {
             LambdaExpression lambda = (LambdaExpression)expr;
             String id = Utils.encodeASTNode(lambda);
             DFLambdaKlass lambdaKlass = (DFLambdaKlass)this.getKlass(id);
+            if (expected != null) {
+                lambdaKlass.setBaseKlass(expected.toKlass());
+                if (lambdaKlass.isDefined()) {
+                    defined.add(lambdaKlass);
+                }
+            }
             for (DFLambdaKlass.CapturedRef captured :
                      lambdaKlass.getCapturedRefs()) {
                 this.addInputRef(captured.getOriginal());
@@ -1450,6 +1463,12 @@ public abstract class DFSourceMethod extends DFMethod {
             MethodReference methodref = (MethodReference)expr;
             String id = Utils.encodeASTNode(methodref);
             DFMethodRefKlass methodRefKlass = (DFMethodRefKlass)this.getKlass(id);
+            if (expected != null) {
+                methodRefKlass.setBaseKlass(expected.toKlass());
+                if (methodRefKlass.isDefined()) {
+                    defined.add(methodRefKlass);
+                }
+            }
             return methodRefKlass;
 
         } else {

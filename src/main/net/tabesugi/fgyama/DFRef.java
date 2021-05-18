@@ -31,6 +31,12 @@ public abstract class DFRef {
         return _type;
     }
 
+    public void setRefType(DFType type) {
+        if (_type == null) {
+            _type = type;
+        }
+    }
+
     public abstract DFVarScope getScope();
 
     public abstract String getFullName();
