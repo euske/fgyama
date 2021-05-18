@@ -615,8 +615,9 @@ class InitMethod extends DFSourceMethod {
                             DFRef ref = scope.lookupVar(frag.getName());
                             Expression init = frag.getInitializer();
                             if (init != null) {
-                                this.listDefinedExpr(defined, scope, init);
-                                this.setLambdaType(defined, ref.getRefType(), init);
+                                DFType type = this.listDefinedExpr(
+                                    defined, scope, init, ref.getRefType());
+                                ref.setRefType(type);
                             }
                         } catch (VariableNotFound e) {
                         }

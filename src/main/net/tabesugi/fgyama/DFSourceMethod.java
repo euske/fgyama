@@ -1219,8 +1219,9 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             DFRef ref = this.listDefinedAssignment(
                 defined, scope, assn.getLeftHandSide());
+            DFType type = (ref != null)? ref.getRefType() : null;
             return this.listDefinedExpr(
-                defined, scope, assn.getRightHandSide(), ref.getRefType());
+                defined, scope, assn.getRightHandSide(), type);
 
         } else if (expr instanceof VariableDeclarationExpression) {
             // "int a=2"
