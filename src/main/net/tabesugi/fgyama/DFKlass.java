@@ -348,8 +348,15 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.findMethod(callStyle, id, argTypes);
     }
 
-    public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
-        return new FallbackMethod(name, argTypes);
+    public DFMethod createFallbackMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        return new FallbackMethod(id, callStyle, argTypes);
+    }
+
+    public DFMethod createFallbackMethod(
+        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
+        String id = (name == null)? null : name.getIdentifier();
+        return this.findMethod(callStyle, id, argTypes);
     }
 
     public FieldRef getField(SimpleName name) {
@@ -569,8 +576,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         DFFuncType _funcType;
 
         public FallbackMethod(
-            String methodName, DFType[] argTypes) {
-            super(DFKlass.this, CallStyle.InstanceMethod, false, methodName, methodName);
+            String methodName, CallStyle callStyle, DFType[] argTypes) {
+            super(DFKlass.this, callStyle, false, methodName, methodName);
             _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
         }
 

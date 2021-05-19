@@ -125,8 +125,9 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
-        DFMethod method = super.createFallbackMethod(name, argTypes);
+    public DFMethod createFallbackMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        DFMethod method = super.createFallbackMethod(callStyle, id, argTypes);
         this.addMethod(method);
         return method;
     }
