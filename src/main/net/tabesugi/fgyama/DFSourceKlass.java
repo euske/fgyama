@@ -240,7 +240,7 @@ public abstract class DFSourceKlass extends DFKlass {
             if (body instanceof AbstractTypeDeclaration) {
                 AbstractTypeDeclaration abstTypeDecl = (AbstractTypeDeclaration)body;
                 String id = abstTypeDecl.getName().getIdentifier();
-                DFSourceKlass klass = new AbstTypeDeclKlass(
+                DFSourceKlass klass = new DFTypeDeclKlass(
                     abstTypeDecl, this, this, this.getKlassScope(),
                     _filePath, _analyze);
                 try {

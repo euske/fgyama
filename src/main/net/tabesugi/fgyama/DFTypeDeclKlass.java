@@ -7,15 +7,15 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  AbstTypeDeclKlass
+//  DFTypeDeclKlass
 //
-class AbstTypeDeclKlass extends DFSourceKlass {
+class DFTypeDeclKlass extends DFSourceKlass {
 
     private AbstractTypeDeclaration _abstTypeDecl;
     private DefaultKlass[] _defaultKlasses = null;
 
     @SuppressWarnings("unchecked")
-    public AbstTypeDeclKlass(
+    public DFTypeDeclKlass(
         AbstractTypeDeclaration abstTypeDecl,
         DFTypeSpace outerSpace, DFSourceKlass outerKlass, DFVarScope outerScope,
         String filePath, boolean analyze)
@@ -45,8 +45,8 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     }
 
     @SuppressWarnings("unchecked")
-    private AbstTypeDeclKlass(
-        AbstTypeDeclKlass genericKlass, Map<String, DFKlass> paramTypes)
+    private DFTypeDeclKlass(
+        DFTypeDeclKlass genericKlass, Map<String, DFKlass> paramTypes)
         throws InvalidSyntax, EntityDuplicate {
         super(genericKlass, paramTypes);
 
@@ -92,11 +92,11 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             }
         } catch (InvalidSyntax e) {
             Logger.error(
-                "AbstTypeDeclKlass.build: InvalidSyntax: ",
+                "DFTypeDeclKlass.build: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
         } catch (EntityDuplicate e) {
             Logger.error(
-                "AbstTypeDeclKlass.build: EntityDuplicate: ",
+                "DFTypeDeclKlass.build: EntityDuplicate: ",
                 e.name, this);
         }
     }
@@ -105,15 +105,15 @@ class AbstTypeDeclKlass extends DFSourceKlass {
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         try {
-            return new AbstTypeDeclKlass(this, paramTypes);
+            return new DFTypeDeclKlass(this, paramTypes);
         } catch (InvalidSyntax e) {
             Logger.error(
-                "AbstTypeDeclKlass.parameterize: InvalidSyntax: ",
+                "DFTypeDeclKlass.parameterize: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
             return this;
         } catch (EntityDuplicate e) {
             Logger.error(
-                "AbstTypeDeclKlass.parameterize: EntityDuplicate: ",
+                "DFTypeDeclKlass.parameterize: EntityDuplicate: ",
                 e.name, this);
             return this;
         }
@@ -127,7 +127,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
             this.listUsedDecls(klasses, _abstTypeDecl.bodyDeclarations());
         } catch (InvalidSyntax e) {
             Logger.error(
-                "AbstTypeDeclKlass.listUsedKlasses:",
+                "DFTypeDeclKlass.listUsedKlasses:",
                 Utils.getASTSource(e.ast), this);
         }
         return true;
@@ -141,7 +141,7 @@ class AbstTypeDeclKlass extends DFSourceKlass {
         private DFKlass _baseKlass = null;
 
         public DefaultKlass(String name, List<Type> types) {
-            super(name, AbstTypeDeclKlass.this, null, null);
+            super(name, DFTypeDeclKlass.this, null, null);
             _types = types;
         }
 

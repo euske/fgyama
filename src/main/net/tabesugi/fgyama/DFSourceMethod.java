@@ -231,7 +231,7 @@ public abstract class DFSourceMethod extends DFMethod {
             TypeDeclarationStatement typeDeclStmt = (TypeDeclarationStatement)stmt;
             AbstractTypeDeclaration abstTypeDecl = typeDeclStmt.getDeclaration();
             String id = abstTypeDecl.getName().getIdentifier();
-            DFSourceKlass klass = new AbstTypeDeclKlass(
+            DFSourceKlass klass = new DFTypeDeclKlass(
                 abstTypeDecl, this, _srcklass, outerScope,
                 _srcklass.getFilePath(), _srcklass.isAnalyze());
             klass.initializeFinder(_finder);

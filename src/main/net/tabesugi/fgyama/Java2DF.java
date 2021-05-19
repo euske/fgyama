@@ -126,7 +126,7 @@ public class Java2DF {
         for (AbstractTypeDeclaration abstTypeDecl :
                  (List<AbstractTypeDeclaration>) src.cunit.types()) {
             try {
-                DFSourceKlass klass = new AbstTypeDeclKlass(
+                DFSourceKlass klass = new DFTypeDeclKlass(
                     abstTypeDecl, packageSpace, null, fileScope,
                     src.path, src.analyze);
                 packageSpace.addKlass(abstTypeDecl.getName().getIdentifier(), klass);
