@@ -97,18 +97,20 @@ class DFMethodRefKlass extends DFSourceKlass {
                 CreationReference creatmref = (CreationReference)_methodRef;
                 try {
                     DFKlass klass = finder.resolve(creatmref.getType()).toKlass();
-                    _refMethod = klass.findMethod(
+                    _refMethod = klass.lookupMethod(
                         CallStyle.Constructor, (String)null, argTypes);
                 } catch (TypeNotFound e) {
+                } catch (MethodNotFound e) {
                 }
 
             } else if (_methodRef instanceof TypeMethodReference) {
                 TypeMethodReference typemref = (TypeMethodReference)_methodRef;
                 try {
                     DFKlass klass = finder.resolve(typemref.getType()).toKlass();
-                    _refMethod = klass.findMethod(
+                    _refMethod = klass.lookupMethod(
                         CallStyle.StaticMethod, typemref.getName(), argTypes);
                 } catch (TypeNotFound e) {
+                } catch (MethodNotFound e) {
                 }
 
             } else if (_methodRef instanceof SuperMethodReference) {
@@ -117,9 +119,10 @@ class DFMethodRefKlass extends DFSourceKlass {
                     DFKlass klass = finder.resolveKlass(supermref.getQualifier());
                     klass = klass.getBaseKlass();
                     // XXX ignored: supermref.typeArguments()
-                    _refMethod = klass.findMethod(
+                    _refMethod = klass.lookupMethod(
                         CallStyle.StaticMethod, supermref.getName(), argTypes);
                 } catch (TypeNotFound e) {
+                } catch (MethodNotFound e) {
                 }
 
             } else if (_methodRef instanceof ExpressionMethodReference) {
@@ -140,8 +143,11 @@ class DFMethodRefKlass extends DFSourceKlass {
                 }
                 if (klass != null) {
                     // XXX ignored: exprmref.typeArguments()
-                    _refMethod = klass.findMethod(
-                        CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                    try {
+                        _refMethod = klass.lookupMethod(
+                            CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                    } catch (MethodNotFound e) {
+                    }
                 }
 
             } else {

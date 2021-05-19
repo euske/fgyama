@@ -139,10 +139,11 @@ public abstract class DFSourceKlass extends DFKlass {
     }
 
     @Override
-    public DFMethod findMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+    public DFMethod lookupMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes)
+        throws MethodNotFound {
         this.load();
-        return super.findMethod(callStyle, id, argTypes);
+        return super.lookupMethod(callStyle, id, argTypes);
     }
 
     @Override

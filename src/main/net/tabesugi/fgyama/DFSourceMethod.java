@@ -1029,12 +1029,13 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return;
                 argTypes[i] = type;
             }
-            DFMethod method1 = klass.findMethod(
-                CallStyle.Constructor, (String)null, argTypes);
-            if (method1 != null) {
+            try {
+                DFMethod method1 = klass.lookupMethod(
+                    CallStyle.Constructor, (String)null, argTypes);
                 method1.addCaller(this);
                 this.setLambdaType(
                     defined, method1.getFuncType(), ci.arguments());
+            } catch (MethodNotFound e) {
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -1051,12 +1052,13 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return;
                 argTypes[i] = type;
             }
-            DFMethod method1 = baseKlass.findMethod(
-                CallStyle.Constructor, (String)null, argTypes);
-            if (method1 != null) {
+            try {
+                DFMethod method1 = baseKlass.lookupMethod(
+                    CallStyle.Constructor, (String)null, argTypes);
                 method1.addCaller(this);
                 this.setLambdaType(
                     defined, method1.getFuncType(), sci.arguments());
+            } catch (MethodNotFound e) {
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -1279,15 +1281,18 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return null;
                 argTypes[i] = type;
             }
-            DFMethod method1 = klass.findMethod(
-                callStyle, invoke.getName(), argTypes);
-            if (method1 == null) return DFUnknownType.UNKNOWN;
-            for (DFMethod m : method1.getOverriders()) {
-                m.addCaller(this);
+            try {
+                DFMethod method1 = klass.lookupMethod(
+                    callStyle, invoke.getName(), argTypes);
+                for (DFMethod m : method1.getOverriders()) {
+                    m.addCaller(this);
+                }
+                this.setLambdaType(
+                    defined, method1.getFuncType(), invoke.arguments());
+                return method1.getFuncType().getReturnType();
+            } catch (MethodNotFound e) {
+                return DFUnknownType.UNKNOWN;
             }
-            this.setLambdaType(
-                defined, method1.getFuncType(), invoke.arguments());
-            return method1.getFuncType().getReturnType();
 
         } else if (expr instanceof SuperMethodInvocation) {
             // "super.method()"
@@ -1303,13 +1308,16 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = _srcklass.getThisRef();
             this.addInputRef(ref);
             DFKlass baseKlass = _srcklass.getBaseKlass();
-            DFMethod method1 = baseKlass.findMethod(
-                CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
-            if (method1 == null) return DFUnknownType.UNKNOWN;
-            method1.addCaller(this);
-            this.setLambdaType(
-                defined, method1.getFuncType(), sinvoke.arguments());
-            return method1.getFuncType().getReturnType();
+            try {
+                DFMethod method1 = baseKlass.lookupMethod(
+                    CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                method1.addCaller(this);
+                this.setLambdaType(
+                    defined, method1.getFuncType(), sinvoke.arguments());
+                return method1.getFuncType().getReturnType();
+            } catch (MethodNotFound e) {
+                return DFUnknownType.UNKNOWN;
+            }
 
         } else if (expr instanceof ArrayCreation) {
             // "new int[10]"
@@ -1423,12 +1431,13 @@ public abstract class DFSourceMethod extends DFMethod {
                 if (type == null) return null;
                 argTypes[i] = type;
             }
-            DFMethod method1 = instKlass.findMethod(
-                CallStyle.Constructor, (String)null, argTypes);
-            if (method1 != null) {
+            try {
+                DFMethod method1 = instKlass.lookupMethod(
+                    CallStyle.Constructor, (String)null, argTypes);
                 method1.addCaller(this);
                 this.setLambdaType(
                     defined, method1.getFuncType(), cstr.arguments());
+            } catch (MethodNotFound e) {
             }
             return instKlass;
 

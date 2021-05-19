@@ -106,22 +106,11 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public DFMethod findMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+    public DFMethod lookupMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes)
+        throws MethodNotFound {
         this.load();
-        DFMethod method = super.findMethod(callStyle, id, argTypes);
-        if (method != null) return method;
-        if (_baseKlass != null) {
-            method = _baseKlass.findMethod(callStyle, id, argTypes);
-            if (method != null) return method;
-        }
-        if (_baseIfaces != null) {
-            for (DFKlass iface : _baseIfaces) {
-                method = iface.findMethod(callStyle, id, argTypes);
-                if (method != null) return method;
-            }
-        }
-        return null;
+        return super.lookupMethod(callStyle, id, argTypes);
     }
 
     @Override

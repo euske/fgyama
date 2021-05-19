@@ -218,9 +218,8 @@ public abstract class DFGraph {
                 args[i] = node;
                 argTypes[i] = node.getNodeType();
             }
-            DFMethod constructor = klass.findMethod(
+            DFMethod constructor = klass.lookupMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            if (constructor == null) throw new MethodNotFound(klass+".:init:", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -245,9 +244,8 @@ public abstract class DFGraph {
             }
             DFKlass baseKlass = klass.getBaseKlass();
             assert baseKlass != null;
-            DFMethod constructor = baseKlass.findMethod(
+            DFMethod constructor = baseKlass.lookupMethod(
                 DFMethod.CallStyle.Constructor, (String)null, argTypes);
-            if (constructor == null) throw new MethodNotFound(baseKlass+".:init:", argTypes);
             DFMethod[] methods = new DFMethod[] { constructor };
             DFFuncType funcType = constructor.getFuncType();
             MethodCallNode call = new MethodCallNode(
@@ -505,23 +503,14 @@ public abstract class DFGraph {
                     argTypes[i] = node.getNodeType();
                 }
                 // XXX ignored: invoke.typeArguments().
-                DFMethod method = instKlass.findMethod(
-                    callStyle, invoke.getName(), argTypes);
-                if (method == null) {
+                DFMethod method;
+                try {
+                    method = instKlass.lookupMethod(
+                        callStyle, invoke.getName(), argTypes);
+                } catch (MethodNotFound e) {
                     // try static imports.
-                    try {
-                        method = scope.lookupStaticMethod(
-                            invoke.getName(), argTypes);
-                    } catch (MethodNotFound e) {
-                        // fallback method.
-                        String id = invoke.getName().getIdentifier();
-                        method = instKlass.createFallbackMethod(
-                            callStyle, id, argTypes);
-                        Logger.error(
-                            "DFGraph.processExpression: MethodNotFound",
-                            Utils.getASTSource(expr), instKlass, this);
-                        Logger.info("Fallback method:", method);
-                    }
+                    method = scope.lookupStaticMethod(
+                        invoke.getName(), argTypes);
                 }
                 List<DFMethod> overriders = method.getOverriders();
                 DFMethod[] methods = new DFMethod[overriders.size()];
@@ -550,19 +539,9 @@ public abstract class DFGraph {
                 }
                 DFKlass baseKlass = klass.getBaseKlass();
                 assert baseKlass != null;
-                DFMethod method = baseKlass.findMethod(
+                DFMethod method = baseKlass.lookupMethod(
                     DFMethod.CallStyle.InstanceMethod,
                     sinvoke.getName(), argTypes);
-                if (method == null) {
-                    // fallback method.
-                    String id = sinvoke.getName().getIdentifier();
-                    method = baseKlass.createFallbackMethod(
-                        DFMethod.CallStyle.InstanceMethod, id, argTypes);
-                    Logger.error(
-                        "DFGraph.processExpression: MethodNotFound",
-                        Utils.getASTSource(expr), baseKlass, this);
-                    Logger.info("Fallback method:", method);
-                }
                 DFMethod[] methods = new DFMethod[] { method };
                 DFFuncType funcType = method.getFuncType();
                 MethodCallNode call = new MethodCallNode(
@@ -689,9 +668,8 @@ public abstract class DFGraph {
                     args[i] = node;
                     argTypes[i] = node.getNodeType();
                 }
-                DFMethod constructor = instKlass.findMethod(
+                DFMethod constructor = instKlass.lookupMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
-                if (constructor == null) throw new MethodNotFound(instKlass+".:init:", argTypes);
                 DFMethod[] methods = new DFMethod[] { constructor };
                 DFFuncType funcType = constructor.getFuncType();
                 CreateObjectNode call = new CreateObjectNode(

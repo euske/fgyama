@@ -318,34 +318,45 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return bestMethod;
     }
 
-    public DFMethod findMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+    public DFMethod lookupMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes)
+        throws MethodNotFound {
         DFMethod method = this.findMethod1(callStyle, id, argTypes);
         if (method != null) return method;
+
         DFKlass outerKlass = this.getOuterKlass();
         if (outerKlass != null) {
-            method = outerKlass.findMethod(callStyle, id, argTypes);
-            if (method != null) return method;
+            try {
+                return outerKlass.lookupMethod(callStyle, id, argTypes);
+            } catch (MethodNotFound e) {
+            }
         }
         DFKlass baseKlass = this.getBaseKlass();
         if (baseKlass != null) {
-            method = baseKlass.findMethod(callStyle, id, argTypes);
-            if (method != null) return method;
+            try {
+                return baseKlass.lookupMethod(callStyle, id, argTypes);
+            } catch (MethodNotFound e) {
+            }
         }
         DFKlass[] baseIfaces = this.getBaseIfaces();
         if (baseIfaces != null) {
             for (DFKlass iface : baseIfaces) {
-                method = iface.findMethod(callStyle, id, argTypes);
-                if (method != null) return method;
+                try {
+                    return iface.lookupMethod(callStyle, id, argTypes);
+                } catch (MethodNotFound e) {
+                }
             }
         }
-        return null;
+
+        if (id == null) { id = ":init:"; }
+        throw new MethodNotFound(this.getTypeName()+"."+id, argTypes);
     }
 
-    public DFMethod findMethod(
-        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupMethod(
+        DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes)
+        throws MethodNotFound {
         String id = (name == null)? null : name.getIdentifier();
-        return this.findMethod(callStyle, id, argTypes);
+        return this.lookupMethod(callStyle, id, argTypes);
     }
 
     public DFMethod createFallbackMethod(
@@ -356,7 +367,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public DFMethod createFallbackMethod(
         DFMethod.CallStyle callStyle, SimpleName name, DFType[] argTypes) {
         String id = (name == null)? null : name.getIdentifier();
-        return this.findMethod(callStyle, id, argTypes);
+        return this.createFallbackMethod(callStyle, id, argTypes);
     }
 
     public FieldRef getField(SimpleName name) {

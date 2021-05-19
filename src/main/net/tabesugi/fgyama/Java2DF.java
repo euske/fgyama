@@ -574,10 +574,11 @@ class DFFileScope extends DFVarScope {
         if (ref != null) {
             _refs.put(id, ref);
         } else {
-            DFMethod method = klass.findMethod(
-                DFMethod.CallStyle.StaticMethod, name, null);
-            if (method != null) {
+            try {
+                DFMethod method = klass.lookupMethod(
+                    DFMethod.CallStyle.StaticMethod, name, null);
                 _methods.add(method);
+            } catch (MethodNotFound e) {
             }
         }
     }
