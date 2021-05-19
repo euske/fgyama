@@ -116,8 +116,58 @@ class DFLambdaKlass extends DFSourceKlass {
                 ctx.set(assign);
                 i++;
             }
-            ASTNode body = _lambda.getBody();
-            this.processMethodBody(graph, ctx, body);
+
+            ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
+            for (DFRef ref : this.getInputRefs()) {
+                DFNode input = new InputNode(graph, methodScope, ref, null);
+                ctx.set(input);
+                preserved.add(input);
+            }
+
+            try {
+                graph.processMethodBody(ctx, _lambda.getBody());
+            } catch (InvalidSyntax e) {
+                Logger.error(
+                    "DFLambdaKlass.getDFGraph:",
+                    Utils.getASTSource(e.ast), this);
+            } catch (MethodNotFound e) {
+                e.setMethod(this);
+                Logger.error(
+                    "DFLambdaKlass.getDFGraph: MethodNotFound",
+                    e.name+"("+Utils.join(e.argTypes)+")", this);
+                throw e;
+            } catch (EntityNotFound e) {
+                e.setMethod(this);
+                Logger.error(
+                    "DFLambdaKlass.getDFGraph: EntityNotFound",
+                    e.name, this);
+                throw e;
+            }
+
+            // Create output nodes.
+            {
+                DFRef ref = methodScope.lookupReturn();
+                if (ctx.getLast(ref) != null) {
+                    DFNode output = new OutputNode(graph, methodScope, ref, null);
+                    output.accept(ctx.getLast(ref));
+                    preserved.add(output);
+                }
+            }
+            for (DFRef ref : methodScope.getExcRefs()) {
+                if (ctx.getLast(ref) != null) {
+                    DFNode output = new OutputNode(graph, methodScope, ref, null);
+                    output.accept(ctx.getLast(ref));
+                    preserved.add(output);
+                }
+            }
+            for (DFRef ref : this.getOutputRefs()) {
+                DFNode output = new OutputNode(graph, methodScope, ref, null);
+                output.accept(ctx.get(ref));
+                preserved.add(output);
+            }
+
+            // Do not remove input/output nodes.
+            graph.cleanup(preserved);
             return graph;
         }
     }

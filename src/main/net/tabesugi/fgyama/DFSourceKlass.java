@@ -527,6 +527,10 @@ class InitMethod extends DFSourceMethod {
         this.build();
     }
 
+    public ASTNode getAST() {
+        return _ast;
+    }
+
     public DFFuncType getFuncType() {
         return new DFFuncType(new DFType[] {}, DFBasicType.VOID);
     }
@@ -563,11 +567,11 @@ class InitMethod extends DFSourceMethod {
             }
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.build: InvalidSyntax: ",
+                "InitMethod.build: InvalidSyntax: ",
                 Utils.getASTSource(e.ast), this);
         } catch (EntityDuplicate e) {
             Logger.error(
-                "DFSourceKlass.build: EntityDuplicate: ",
+                "InitMethod.build: EntityDuplicate: ",
                 e.name, this);
         }
     }
@@ -596,7 +600,7 @@ class InitMethod extends DFSourceMethod {
             }
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.listUsedKlasses: ",
+                "InitMethod.listUsedKlasses: ",
                 Utils.getASTSource(e.ast), this);
         }
     }
@@ -629,12 +633,13 @@ class InitMethod extends DFSourceMethod {
             }
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.listDefinedKlasses: ",
+                "InitMethod.listDefinedKlasses: ",
                 Utils.getASTSource(e.ast), this);
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public DFGraph getDFGraph(Exporter exporter)
         throws EntityNotFound {
         int graphId = exporter.getNewId();
@@ -642,18 +647,28 @@ class InitMethod extends DFSourceMethod {
         DFLocalScope scope = this.getScope();
         DFContext ctx = new DFContext(graph, scope);
 
+        // Create input nodes.
+        for (DFRef ref : this.getInputRefs()) {
+            DFNode input = new InputNode(graph, scope, ref, null);
+            ctx.set(input);
+        }
+
         try {
-            this.processDecls(graph, ctx, _decls);
+            graph.processDecls(ctx, _decls);
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.writeGraph: ",
+                "InitMethod.getDFGraph: ",
                 Utils.getASTSource(e.ast), this);
         }
-        return graph;
-    }
 
-    public ASTNode getAST() {
-        return _ast;
+        // Create output nodes.
+        for (DFRef ref : this.getOutputRefs()) {
+            DFNode output = new OutputNode(graph, scope, ref, null);
+            output.accept(ctx.get(ref));
+        }
+
+        graph.cleanup(null);
+        return graph;
     }
 }
 
@@ -767,11 +782,11 @@ class DefinedMethod extends DFSourceMethod {
                 methodScope.buildStmt(finder, stmt);
             } catch (InvalidSyntax e) {
                 Logger.error(
-                    "DFSourceKlass.build: InvalidSyntax: ",
+                    "DefinedMethod.build: InvalidSyntax: ",
                     Utils.getASTSource(e.ast), this);
             } catch (EntityDuplicate e) {
                 Logger.error(
-                    "DFSourceKlass.build: EntityDuplicate: ",
+                    "DefinedMethod.build: EntityDuplicate: ",
                     e.name, this);
             }
         }
@@ -798,7 +813,7 @@ class DefinedMethod extends DFSourceMethod {
                 this.listUsedStmt(klasses, _methodDecl.getBody());
             } catch (InvalidSyntax e) {
                 Logger.error(
-                    "DFSourceKlass.listUsedKlasses:",
+                    "DefinedMethod.listUsedKlasses:",
                     Utils.getASTSource(e.ast), this);
             }
         }
@@ -820,7 +835,7 @@ class DefinedMethod extends DFSourceMethod {
             this.listDefinedStmt(defined, scope, _methodDecl.getBody());
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.listDefinedKlasses:",
+                "DefinedMethod.listDefinedKlasses:",
                 Utils.getASTSource(e.ast), this);
         }
     }
@@ -834,28 +849,73 @@ class DefinedMethod extends DFSourceMethod {
 
         int graphId = exporter.getNewId();
         MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
-        MethodScope scope = this.getScope();
-        DFContext ctx = new DFContext(graph, scope);
+        MethodScope methodScope = this.getScope();
+        DFContext ctx = new DFContext(graph, methodScope);
         DFKlass klass = this.getKlass();
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)_methodDecl.parameters()) {
-            DFRef ref = scope.lookupArgument(i);
-            DFNode input = new InputNode(graph, scope, ref, decl);
+            DFRef ref = methodScope.lookupArgument(i);
+            DFNode input = new InputNode(graph, methodScope, ref, decl);
             ctx.set(input);
             DFNode assign = new AssignNode(
-                graph, scope, scope.lookupVar(decl.getName()), decl);
+                graph, methodScope, methodScope.lookupVar(decl.getName()), decl);
             assign.accept(input);
             ctx.set(assign);
             i++;
         }
+
+        ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
+        for (DFRef ref : this.getInputRefs()) {
+            DFNode input = new InputNode(graph, methodScope, ref, null);
+            ctx.set(input);
+            preserved.add(input);
+        }
+
         try {
-            this.processMethodBody(graph, ctx, body);
+            graph.processMethodBody(ctx, body);
         } catch (InvalidSyntax e) {
             Logger.error(
-                "DFSourceKlass.writeGraph:",
+                "DefinedMethod.getDFGraph:",
                 Utils.getASTSource(e.ast), this);
+        } catch (MethodNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "DefinedMethod.getDFGraph: MethodNotFound",
+                e.name+"("+Utils.join(e.argTypes)+")", this);
+            throw e;
+        } catch (EntityNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "DefinedMethod.getDFGraph: EntityNotFound",
+                e.name, this);
+            throw e;
         }
+
+        // Create output nodes.
+        {
+            DFRef ref = methodScope.lookupReturn();
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(graph, methodScope, ref, null);
+                output.accept(ctx.getLast(ref));
+                preserved.add(output);
+            }
+        }
+        for (DFRef ref : methodScope.getExcRefs()) {
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(graph, methodScope, ref, null);
+                output.accept(ctx.getLast(ref));
+                preserved.add(output);
+            }
+        }
+        for (DFRef ref : this.getOutputRefs()) {
+            DFNode output = new OutputNode(graph, methodScope, ref, null);
+            output.accept(ctx.get(ref));
+            preserved.add(output);
+        }
+
+        // Do not remove input/output nodes.
+        graph.cleanup(preserved);
         return graph;
     }
 
