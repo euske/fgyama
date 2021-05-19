@@ -13,7 +13,7 @@ public class DFBuiltinTypes {
         throws IOException, InvalidSyntax {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
-        DFTypeSpace langSpace = rootSpace.lookupSpace("java.lang");
+        DFTypeSpace langSpace = rootSpace.getSubSpace("java.lang");
         _object = (DFJarFileKlass)langSpace.getKlass("Object");
         _class = (DFJarFileKlass)langSpace.getKlass("Class");
         _enum = (DFJarFileKlass)langSpace.getKlass("Enum");

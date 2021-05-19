@@ -119,7 +119,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void buildTypeSpace(SourceFile src)
         throws InvalidSyntax {
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(src.cunit.getPackage());
+        DFTypeSpace packageSpace = _rootSpace.getSubSpace(src.cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, src.path);
         _fileScope.put(src, fileScope);
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();
@@ -143,8 +143,8 @@ public class Java2DF {
     private void setTypeFinder(SourceFile src) {
         // Search path for types: ROOT -> java.lang -> package -> imports.
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
-        finder = new DFTypeFinder(_rootSpace.lookupSpace("java.lang"), finder);
-        DFTypeSpace packageSpace = _rootSpace.lookupSpace(src.cunit.getPackage());
+        finder = new DFTypeFinder(_rootSpace.getSubSpace("java.lang"), finder);
+        DFTypeSpace packageSpace = _rootSpace.getSubSpace(src.cunit.getPackage());
         finder = new DFTypeFinder(packageSpace, finder);
         // Populate the import space.
         DFTypeSpace importSpace = new DFTypeSpace("import:"+src.path);
@@ -153,7 +153,7 @@ public class Java2DF {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 Logger.debug("Import:", name+".*");
-                finder = new DFTypeFinder(_rootSpace.lookupSpace(name), finder);
+                finder = new DFTypeFinder(_rootSpace.getSubSpace(name), finder);
             } else if (!importDecl.isStatic()) {
                 assert name.isQualifiedName();
                 DFKlass klass = _rootSpace.getKlass(name);

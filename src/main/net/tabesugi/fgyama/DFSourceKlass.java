@@ -704,7 +704,7 @@ class DefinedMethod extends DFSourceMethod {
               srcklass.getKlassScope(), finder);
 
         _methodDecl = methodDecl;
-        outerSpace = outerSpace.lookupSpace(methodId);
+        outerSpace = outerSpace.getSubSpace(methodId);
         finder = this.getFinder();
         List<TypeParameter> tps = _methodDecl.typeParameters();
         if (!tps.isEmpty()) {
