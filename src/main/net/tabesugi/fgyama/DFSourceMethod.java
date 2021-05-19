@@ -1659,14 +1659,13 @@ public abstract class DFSourceMethod extends DFMethod {
         throws InvalidSyntax;
 
     // getDFGraph: generate dataflow graphs.
-    public abstract DFGraph getDFGraph(Exporter exporter)
+    public abstract DFGraph getDFGraph(int graphId)
         throws InvalidSyntax, EntityNotFound;
 
     public abstract ASTNode getAST();
 
     public void writeXML(XMLStreamWriter writer, DFGraph graph)
         throws XMLStreamException {
-        writer.writeStartElement("method");
         writer.writeAttribute("id", this.getSignature());
         writer.writeAttribute("name", this.getName());
         writer.writeAttribute("style", this.getCallStyle().toString());
@@ -1695,7 +1694,6 @@ public abstract class DFSourceMethod extends DFMethod {
         }
         DFNode[] nodes = graph.getNodes();
         this.getScope().writeXML(writer, nodes);
-        writer.writeEndElement();
     }
 
     protected class MethodGraph extends DFGraph {

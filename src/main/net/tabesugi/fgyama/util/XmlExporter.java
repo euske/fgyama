@@ -14,9 +14,9 @@ public class XmlExporter extends Exporter {
 
     private XMLStreamWriter _writer;
     private DFKlass _klass = null;
+    private int _baseId = 1;
 
     public XmlExporter(OutputStream stream) {
-        super(1);
         try {
             XMLOutputFactory factory = XMLOutputFactory.newFactory();
             _writer = factory.createXMLStreamWriter(stream, "utf-8");
@@ -29,7 +29,6 @@ public class XmlExporter extends Exporter {
 
     @Override
     public void close() {
-        super.close();
         try {
             _writer.writeEndElement();
             _writer.writeEndDocument();
@@ -63,10 +62,16 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void writeMethod(DFSourceMethod method, DFGraph graph) {
+    public void writeMethod(DFSourceMethod method)
+        throws InvalidSyntax, EntityNotFound {
         assert _klass != null;
+        DFGraph graph = method.getDFGraph(_baseId);
+        if (graph == null) return;
+        _baseId++;
         try {
+            _writer.writeStartElement("method");
             method.writeXML(_writer, graph);
+            _writer.writeEndElement();
         } catch (XMLStreamException e) {
             throw new RuntimeException();
         }

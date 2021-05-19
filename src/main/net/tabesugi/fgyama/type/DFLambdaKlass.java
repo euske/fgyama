@@ -98,9 +98,8 @@ class DFLambdaKlass extends DFSourceKlass {
 
         @Override
         @SuppressWarnings("unchecked")
-        public DFGraph getDFGraph(Exporter exporter)
+        public DFGraph getDFGraph(int graphId)
             throws InvalidSyntax, EntityNotFound {
-            int graphId = exporter.getNewId();
             MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
             MethodScope methodScope = this.getScope();
             DFContext ctx = new DFContext(graph, methodScope);

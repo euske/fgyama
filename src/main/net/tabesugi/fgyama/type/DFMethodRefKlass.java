@@ -162,7 +162,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         }
 
         @Override
-        public DFGraph getDFGraph(Exporter exporter)
+        public DFGraph getDFGraph(int graphId)
             throws InvalidSyntax, EntityNotFound {
             return null;
         }

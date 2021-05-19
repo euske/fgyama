@@ -653,9 +653,8 @@ class InitMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public DFGraph getDFGraph(Exporter exporter)
+    public DFGraph getDFGraph(int graphId)
         throws EntityNotFound {
-        int graphId = exporter.getNewId();
         MethodGraph graph = new MethodGraph("K"+graphId+"_"+this.getName());
         DFLocalScope scope = this.getScope();
         DFContext ctx = new DFContext(graph, scope);
@@ -855,12 +854,11 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public DFGraph getDFGraph(Exporter exporter)
+    public DFGraph getDFGraph(int graphId)
         throws EntityNotFound {
         ASTNode body = _methodDecl.getBody();
         if (body == null) return null;
 
-        int graphId = exporter.getNewId();
         MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
         MethodScope methodScope = this.getScope();
         DFContext ctx = new DFContext(graph, methodScope);
