@@ -292,6 +292,32 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         _reifiedMethods = new ConsistentHashMap<String, DFMethod>();
     }
 
+    public void writeXML(XMLStreamWriter writer, int graphId)
+        throws InvalidSyntax, EntityNotFound, XMLStreamException {
+        writer.writeAttribute("id", this.getSignature());
+        writer.writeAttribute("name", this.getName());
+        writer.writeAttribute("style", this.getCallStyle().toString());
+        if (this.isAbstract()) {
+            writer.writeAttribute("abstract", Boolean.toString(true));
+        }
+        for (DFMethod caller : this.getCallers()) {
+            writer.writeStartElement("caller");
+            writer.writeAttribute("id", caller.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overrider : this.getOverriders()) {
+            if (overrider == this) continue;
+            writer.writeStartElement("overrider");
+            writer.writeAttribute("id", overrider.getSignature());
+            writer.writeEndElement();
+        }
+        for (DFMethod overriding : this.getOverridings()) {
+            writer.writeStartElement("overriding");
+            writer.writeAttribute("id", overriding.getSignature());
+            writer.writeEndElement();
+        }
+    }
+
     // Overrider
     private class Overrider implements Comparable<Overrider> {
 

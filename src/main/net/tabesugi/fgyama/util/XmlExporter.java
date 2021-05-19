@@ -39,7 +39,7 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void startKlass(DFSourceKlass klass) {
+    public void startKlass(DFKlass klass) {
         assert _klass == null;
         _klass = klass;
         try {
@@ -62,15 +62,12 @@ public class XmlExporter extends Exporter {
     }
 
     @Override
-    public void writeMethod(DFSourceMethod method)
+    public void writeMethod(DFMethod method)
         throws InvalidSyntax, EntityNotFound {
         assert _klass != null;
-        DFGraph graph = method.getDFGraph(_baseId);
-        if (graph == null) return;
-        _baseId++;
         try {
             _writer.writeStartElement("method");
-            method.writeXML(_writer, graph);
+            method.writeXML(_writer, _baseId++);
             _writer.writeEndElement();
         } catch (XMLStreamException e) {
             throw new RuntimeException();

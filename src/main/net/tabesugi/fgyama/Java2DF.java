@@ -331,14 +331,11 @@ public class Java2DF {
                 }
             }
             for (DFMethod method : methods) {
-                if (method instanceof DFSourceMethod) {
-                    Logger.info("Stage5:", method.getSignature());
-                    DFSourceMethod srcMethod = (DFSourceMethod)method;
-                    try {
-                        exporter.writeMethod(srcMethod);
-                    } catch (EntityNotFound e) {
-                        if (strict) throw e;
-                    }
+                Logger.info("Stage5:", method.getSignature());
+                try {
+                    exporter.writeMethod(method);
+                } catch (EntityNotFound e) {
+                    if (strict) throw e;
                 }
             }
         } finally {
