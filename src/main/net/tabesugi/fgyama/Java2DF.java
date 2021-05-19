@@ -532,7 +532,8 @@ class DFFileScope extends DFVarScope {
     }
 
     @Override
-    public DFMethod findStaticMethod(SimpleName name, DFType[] argTypes) {
+    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
+        throws MethodNotFound {
         String id = name.getIdentifier();
         int bestDist = -1;
         DFMethod bestMethod = null;
@@ -552,6 +553,7 @@ class DFFileScope extends DFVarScope {
                 continue;
             }
         }
+        if (bestMethod == null) throw new MethodNotFound(name, argTypes);
         return bestMethod;
     }
 

@@ -509,9 +509,10 @@ public abstract class DFGraph {
                     callStyle, invoke.getName(), argTypes);
                 if (method == null) {
                     // try static imports.
-                    method = scope.findStaticMethod(
-                        invoke.getName(), argTypes);
-                    if (method == null) {
+                    try {
+                        method = scope.lookupStaticMethod(
+                            invoke.getName(), argTypes);
+                    } catch (MethodNotFound e) {
                         // fallback method.
                         String id = invoke.getName().getIdentifier();
                         method = instKlass.createFallbackMethod(id, argTypes);
