@@ -384,14 +384,6 @@ public class DFFrame {
                     }
                 }
             } catch (MethodNotFound e) {
-                // fallback method.
-                DFMethod method1 = _klass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, ":init:", argTypes);
-                Logger.error(
-                    "DFFrame.buildExpr: MethodNotFound (ci)",
-                    Utils.getASTSource(ci), this);
-                Logger.info(
-                    "DFFrame.buildExpr: Fallback method:", method1);
             }
 
         } else if (stmt instanceof SuperConstructorInvocation) {
@@ -422,14 +414,6 @@ public class DFFrame {
                     this.addOutputRefs(srcmethod.getOutputRefs());
                 }
             } catch (MethodNotFound e) {
-                // fallback method.
-                DFMethod method1 = baseKlass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, ":init:", argTypes);
-                Logger.error(
-                    "DFFrame.buildExpr: MethodNotFound (sci)",
-                    Utils.getASTSource(sci), this);
-                Logger.info(
-                    "DFFrame.buildExpr: Fallback method:", method1);
             }
 
         } else if (stmt instanceof TypeDeclarationStatement) {
@@ -661,9 +645,8 @@ public class DFFrame {
                 }
                 argTypes[i] = type;
             }
-            DFMethod method1;
             try {
-                method1 = klass.lookupMethod(
+                DFMethod method1 = klass.lookupMethod(
                     callStyle, invoke.getName(), argTypes);
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
@@ -672,23 +655,10 @@ public class DFFrame {
                         this.addOutputRefs(srcm.getOutputRefs());
                     }
                 }
+                return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
-                // try static imports.
-                try {
-                    method1 = _scope.lookupStaticMethod(
-                        invoke.getName(), argTypes);
-                } catch (MethodNotFound ee) {
-                    // fallback method.
-                    method1 = klass.createFallbackMethod(
-                        DFMethod.CallStyle.InstanceMethod, invoke.getName(), argTypes);
-                    Logger.error(
-                        "DFFrame.buildExpr: MethodNotFound (invoke)",
-                        Utils.getASTSource(invoke), klass, this);
-                    Logger.info(
-                        "DFFrame.buildExpr: Fallback method:", method1);
-                }
+                return null;
             }
-            return method1.getFuncType().getReturnType();
 
         } else if (expr instanceof SuperMethodInvocation) {
             // "super.method()"
@@ -709,26 +679,18 @@ public class DFFrame {
             DFRef ref = _klass.getThisRef();
             this.addInputRef(ref);
             DFKlass baseKlass = _klass.getBaseKlass();
-            DFMethod method1;
             try {
-                method1 = baseKlass.lookupMethod(
+                DFMethod method1 = baseKlass.lookupMethod(
                     DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
                 if (method1 instanceof DFSourceMethod) {
                     DFSourceMethod srcmethod = (DFSourceMethod)method1;
                     this.addInputRefs(srcmethod.getInputRefs());
                     this.addOutputRefs(srcmethod.getOutputRefs());
                 }
+                return method1.getFuncType().getReturnType();
             } catch (MethodNotFound e) {
-                // fallback method.
-                method1 = baseKlass.createFallbackMethod(
-                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
-                Logger.error(
-                    "DFFrame.buildExpr: MethodNotFound (sinvoke)",
-                    Utils.getASTSource(sinvoke), this);
-                Logger.info(
-                    "DFFrame.buildExpr: Fallback method:", method1);
+                return null;
             }
-            return method1.getFuncType().getReturnType();
 
         } else if (expr instanceof ArrayCreation) {
             // "new int[10]"
@@ -875,9 +837,8 @@ public class DFFrame {
                 }
                 argTypes[i] = type;
             }
-            DFMethod method1;
             try {
-                method1 = instKlass.lookupMethod(
+                DFMethod method1 = instKlass.lookupMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
@@ -887,14 +848,6 @@ public class DFFrame {
                     }
                 }
             } catch (MethodNotFound e) {
-                // fallback method.
-                method1 = instKlass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, ":init:", argTypes);
-                Logger.error(
-                    "DFFrame.buildExpr: MethodNotFound (cstr)",
-                    Utils.getASTSource(cstr), this);
-                Logger.info(
-                    "DFFrame.buildExpr: Fallback method:", method1);
             }
             return instKlass;
 
