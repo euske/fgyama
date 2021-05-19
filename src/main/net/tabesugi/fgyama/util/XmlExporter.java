@@ -27,7 +27,6 @@ public class XmlExporter extends Exporter {
         }
     }
 
-    @Override
     public void close() {
         try {
             _writer.writeEndElement();

@@ -9,9 +9,6 @@ import java.util.*;
 //
 abstract class Exporter {
 
-    public void close() {
-    }
-
     public abstract void startKlass(DFKlass klass);
     public abstract void endKlass();
     public abstract void writeMethod(DFMethod method)
