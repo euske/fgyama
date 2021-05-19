@@ -82,8 +82,11 @@ public class DFTypeSpace {
         return _id2klass.get(id);
     }
 
-    public DFKlass lookupKlass(String id) {
-        return this.getKlass(id);
+    public DFKlass lookupKlass(String id)
+        throws TypeNotFound {
+        DFKlass klass = this.getKlass(id);
+        if (klass == null) throw new TypeNotFound(id);
+        return klass;
     }
 
     public static String getReifiedName(Map<String, DFKlass> paramTypes) {

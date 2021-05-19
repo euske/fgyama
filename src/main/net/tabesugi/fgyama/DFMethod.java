@@ -122,7 +122,8 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     @Override
-    public DFKlass lookupKlass(String id) {
+    public DFKlass lookupKlass(String id)
+        throws TypeNotFound {
         if (_mapTypes != null) {
             DFMapType mapType = _mapTypes.get(id);
             if (mapType != null) return mapType;

@@ -118,7 +118,8 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @Override
-    public DFKlass lookupKlass(String id) {
+    public DFKlass lookupKlass(String id)
+        throws TypeNotFound {
         if (_typeSlots != null) {
             // If this is a generic klass,
             DFKlass defaultKlass = _typeSlots.get(id);
@@ -135,20 +136,24 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
         DFKlass baseKlass = this.getBaseKlass();
         if (baseKlass != null) {
-            klass = baseKlass.lookupKlass(id);
-            if (klass != null) return klass;
+            try {
+                return baseKlass.lookupKlass(id);
+            } catch (TypeNotFound e) {
+            }
         }
         DFKlass[] baseIfaces = this.getBaseIfaces();
         if (baseIfaces != null) {
             for (DFKlass iface : baseIfaces) {
                 if (iface != null) {
-                    klass = iface.lookupKlass(id);
-                    if (klass != null) return klass;
+                    try {
+                        return iface.lookupKlass(id);
+                    } catch (TypeNotFound e) {
+                    }
                 }
             }
         }
 
-        return null;
+        throw new TypeNotFound(id);
     }
 
     @Override
