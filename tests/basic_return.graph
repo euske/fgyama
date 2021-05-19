@@ -92,5 +92,8 @@
         </scope>
       </scope>
     </method>
+    <method id="Lbasic_return;.f(I)?" name="f" style="instance">
+      <caller id="Lbasic_return;.foo(III)I"/>
+    </method>
   </class>
 </fgyama>

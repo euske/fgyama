@@ -169,5 +169,8 @@
         </scope>
       </scope>
     </method>
+    <method id="Lbasic_ops;.moo(II)?" name="moo" style="instance">
+      <caller id="Lbasic_ops;.foo(I)I"/>
+    </method>
   </class>
 </fgyama>

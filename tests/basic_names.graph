@@ -143,6 +143,9 @@
         </scope>
       </scope>
     </method>
+    <method id="Ldom/meep/basic_names;.m33p()?" name="m33p" style="instance">
+      <caller id="Ldom/meep/basic_names;.meh()V"/>
+    </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
     <method id="Ldom/meep/basic_names/Bar;.:clinit:()V" name=":clinit:" style="initializer">
@@ -155,10 +158,10 @@
     <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="211" start="144" type="55"/>
       <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:">
-        <node data="uninitialized" id="K6_:clinit:_N1" kind="value" type="@null"/>
-        <node id="K6_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+        <node data="uninitialized" id="K7_:clinit:_N1" kind="value" type="@null"/>
+        <node id="K7_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
           <ast end="173" start="172" type="59"/>
-          <accept src="K6_:clinit:_N1"/>
+          <accept src="K7_:clinit:_N1"/>
         </node>
       </scope>
     </method>
