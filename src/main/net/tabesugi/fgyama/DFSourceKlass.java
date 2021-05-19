@@ -635,7 +635,7 @@ class InitMethod extends DFSourceMethod {
     }
 
     @Override
-    public DFGraph getGraph(Exporter exporter)
+    public DFGraph getDFGraph(Exporter exporter)
         throws EntityNotFound {
         int graphId = exporter.getNewId();
         MethodGraph graph = new MethodGraph("K"+graphId+"_"+this.getName());
@@ -827,7 +827,7 @@ class DefinedMethod extends DFSourceMethod {
 
     @Override
     @SuppressWarnings("unchecked")
-    public DFGraph getGraph(Exporter exporter)
+    public DFGraph getDFGraph(Exporter exporter)
         throws EntityNotFound {
         ASTNode body = _methodDecl.getBody();
         if (body == null) return null;

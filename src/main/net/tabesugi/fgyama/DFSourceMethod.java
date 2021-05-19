@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.dom.*;
 //    2. listUsedKlasses()
 //    3. listDefinedKlasses()
 //    4. expandRefs()
-//    5. getGraph()
+//    5. getDFGraph()
 //
 public abstract class DFSourceMethod extends DFMethod {
 
@@ -1649,8 +1649,8 @@ public abstract class DFSourceMethod extends DFMethod {
     public abstract void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax;
 
-    // getGraph: generate graphs.
-    public abstract DFGraph getGraph(Exporter exporter)
+    // getDFGraph: generate dataflow graphs.
+    public abstract DFGraph getDFGraph(Exporter exporter)
         throws InvalidSyntax, EntityNotFound;
 
     public abstract ASTNode getAST();

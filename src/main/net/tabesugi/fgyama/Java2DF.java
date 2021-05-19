@@ -335,7 +335,7 @@ public class Java2DF {
                     DFSourceMethod srcMethod = (DFSourceMethod)method;
                     try {
                         Logger.info("Stage5:", method.getSignature());
-                        DFGraph graph = srcMethod.getGraph(exporter);
+                        DFGraph graph = srcMethod.getDFGraph(exporter);
                         if (graph != null) {
                             exporter.writeMethod(srcMethod, graph);
                         }
