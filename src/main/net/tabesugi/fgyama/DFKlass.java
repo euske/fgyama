@@ -344,7 +344,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
-        return new FallbackMethod(this, name, argTypes);
+        return new FallbackMethod(name, argTypes);
     }
 
     public FieldRef getField(SimpleName name) {
@@ -556,28 +556,26 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
     }
-}
 
+    //  FallbackMethod
+    //  A dummy entry used for an unknown method.
+    class FallbackMethod extends DFMethod {
 
-//  FallbackMethod
-//  A dummy entry used for an unknown method.
-//
-class FallbackMethod extends DFMethod {
+        DFFuncType _funcType;
 
-    DFFuncType _funcType;
+        public FallbackMethod(
+            String methodName, DFType[] argTypes) {
+            super(DFKlass.this, CallStyle.InstanceMethod, false, methodName, methodName);
+            _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
+        }
 
-    public FallbackMethod(
-        DFKlass klass, String methodName, DFType[] argTypes) {
-        super(klass, CallStyle.InstanceMethod, false, methodName, methodName);
-        _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
-    }
+        protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
+            assert false;
+            return null;
+        }
 
-    protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
-        assert false;
-        return null;
-    }
-
-    public DFFuncType getFuncType() {
-        return _funcType;
+        public DFFuncType getFuncType() {
+            return _funcType;
+        }
     }
 }

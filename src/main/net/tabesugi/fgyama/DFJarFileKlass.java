@@ -124,6 +124,13 @@ public class DFJarFileKlass extends DFKlass {
         return null;
     }
 
+    @Override
+    public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
+        DFMethod method = super.createFallbackMethod(name, argTypes);
+        this.addMethod(method);
+        return method;
+    }
+
     private FieldRef addField(
         DFType type, String id, boolean isStatic) {
         return this.addField(new FieldRef(type, id, isStatic));
@@ -352,8 +359,12 @@ public class DFJarFileKlass extends DFKlass {
             DFMethod method = new DFJarFileMethod(
                 this, callStyle, meth.isAbstract(),
                 id, name, meth, _finder);
-            _methods.add(method);
+            this.addMethod(method);
         }
+    }
+
+    private void addMethod(DFMethod method) {
+        _methods.add(method);
     }
 
     @Override

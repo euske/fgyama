@@ -145,6 +145,13 @@ public abstract class DFSourceKlass extends DFKlass {
         return super.findMethod(callStyle, id, argTypes);
     }
 
+    @Override
+    public DFMethod createFallbackMethod(String name, DFType[] argTypes) {
+        DFMethod method = super.createFallbackMethod(name, argTypes);
+        this.addMethod(method);
+        return method;
+    }
+
     public DFMethod getInitMethod() {
         this.load();
         return _initMethod;
@@ -347,7 +354,7 @@ public abstract class DFSourceKlass extends DFKlass {
             this.addField(this, econst.getName(), true);
         }
         // Enum has a special method "values()".
-        _methods.add(new EnumValuesMethod(this));
+        this.addMethod(new EnumValuesMethod(this));
         this.buildMembers(enumDecl.bodyDeclarations());
     }
 
@@ -403,8 +410,8 @@ public abstract class DFSourceKlass extends DFKlass {
                 }
                 DFMethod method = new DefinedMethod(
                     this, callStyle, (stmt == null), id, name, decl, _finder, space);
-                _methods.add(method);
                 _id2method.put(id, method);
+                this.addMethod(method);
 
             } else if (body instanceof EnumConstantDeclaration) {
 
@@ -504,6 +511,10 @@ public abstract class DFSourceKlass extends DFKlass {
             }
         }
         return false;
+    }
+
+    private void addMethod(DFMethod method) {
+        _methods.add(method);
     }
 }
 
