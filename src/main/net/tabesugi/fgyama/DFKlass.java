@@ -582,7 +582,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
 
     //  FallbackMethod
     //  A dummy entry used for an unknown method.
-    class FallbackMethod extends DFMethod {
+    public class FallbackMethod extends DFMethod {
 
         DFFuncType _funcType;
 

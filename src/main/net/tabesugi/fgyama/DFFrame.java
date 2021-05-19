@@ -680,7 +680,7 @@ public class DFFrame {
                 } catch (MethodNotFound ee) {
                     // fallback method.
                     method1 = klass.createFallbackMethod(
-                        callStyle, invoke.getName(), argTypes);
+                        DFMethod.CallStyle.InstanceMethod, invoke.getName(), argTypes);
                     Logger.error(
                         "DFFrame.buildExpr: MethodNotFound (invoke)",
                         Utils.getASTSource(invoke), klass, this);

@@ -338,6 +338,11 @@ public class Java2DF {
                     if (strict) throw e;
                 }
             }
+            for (DFMethod method : klass.getMethods()) {
+                if (method instanceof DFKlass.FallbackMethod) {
+                    exporter.writeMethod(method);
+                }
+            }
         } finally {
             exporter.endKlass();
         }
