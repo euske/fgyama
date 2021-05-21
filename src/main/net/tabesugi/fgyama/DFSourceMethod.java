@@ -27,6 +27,8 @@ public abstract class DFSourceMethod extends DFMethod {
 
     private ConsistentHashSet<DFRef> _inputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _outputRefs = new ConsistentHashSet<DFRef>();
+    private ConsistentHashSet<DFRef> _passInRefs = new ConsistentHashSet<DFRef>();
+    private ConsistentHashSet<DFRef> _passOutRefs = new ConsistentHashSet<DFRef>();
 
     // Normal constructor.
     protected DFSourceMethod(
@@ -70,6 +72,14 @@ public abstract class DFSourceMethod extends DFMethod {
 
     public Collection<DFRef> getOutputRefs() {
         return _outputRefs;
+    }
+
+    public Set<DFRef> getPassInRefs() {
+        return _passInRefs;
+    }
+
+    public Set<DFRef> getPassOutRefs() {
+        return _passOutRefs;
     }
 
     /// TypeSpace construction.
@@ -1690,9 +1700,17 @@ public abstract class DFSourceMethod extends DFMethod {
 
     /// Expand References.
 
-    public void expandRefs(Set<DFRef> inputRefs, Set<DFRef> outputRefs) {
-        _inputRefs.addAll(inputRefs);
-        _outputRefs.addAll(outputRefs);
+    public void expandRefs(Set<DFRef> passInRefs, Set<DFRef> passOutRefs) {
+        for (DFRef ref : passInRefs) {
+            if (!_inputRefs.contains(ref)) {
+                _passInRefs.add(ref);
+            }
+        }
+        for (DFRef ref : passOutRefs) {
+            if (!_outputRefs.contains(ref)) {
+                _passOutRefs.add(ref);
+            }
+        }
     }
 
     /**
@@ -1720,6 +1738,18 @@ public abstract class DFSourceMethod extends DFMethod {
         ASTNode ast = this.getAST();
         if (ast != null) {
             Utils.writeXML(writer, ast);
+        }
+        for (DFRef ref : _passInRefs) {
+            writer.writeStartElement("bypass");
+            writer.writeAttribute("type", "in");
+            writer.writeAttribute("ref", ref.getFullName());
+            writer.writeEndElement();
+        }
+        for (DFRef ref : _passOutRefs) {
+            writer.writeStartElement("bypass");
+            writer.writeAttribute("type", "out");
+            writer.writeAttribute("ref", ref.getFullName());
+            writer.writeEndElement();
         }
         if (graph != null) {
             DFNode[] nodes = graph.getNodes();
