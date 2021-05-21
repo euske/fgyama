@@ -671,6 +671,18 @@ class InitMethod extends DFSourceMethod {
             Logger.error(
                 "InitMethod.getDFGraph: ",
                 Utils.getASTSource(e.ast), this);
+        } catch (MethodNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "InitMethod.getDFGraph: MethodNotFound",
+                e.name+"("+Utils.join(e.argTypes)+")", this);
+            throw e;
+        } catch (EntityNotFound e) {
+            e.setMethod(this);
+            Logger.error(
+                "InitMethod.getDFGraph: EntityNotFound",
+                e.name, this);
+            throw e;
         }
 
         // Create output nodes.
