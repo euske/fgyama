@@ -112,7 +112,7 @@ def main(argv):
                 p = edges[n0]
             else:
                 p = set([vout])
-            if n0.is_funcall() and clen(cc) < maxlevel:
+            if n0.is_funcall() and (maxlevel == 0 or clen(cc) < maxlevel):
                 funcs = n0.data.split(' ')
                 a = []
                 for gid in funcs[:maxoverrides]:
