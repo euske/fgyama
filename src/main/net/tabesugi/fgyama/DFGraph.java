@@ -20,6 +20,8 @@ public abstract class DFGraph {
     private DFTypeFinder _finder;
     private List<DFNode> _nodes =
         new ArrayList<DFNode>();
+    private Set<DFNode> _preserved =
+        new HashSet<DFNode>();
 
     public DFGraph(DFSourceMethod method) {
         _method = method;
@@ -36,12 +38,16 @@ public abstract class DFGraph {
         return _nodes.size();
     }
 
-    public void cleanup(Set<DFNode> preserved) {
+    public void protectNode(DFNode node) {
+        _preserved.add(node);
+    }
+
+    public void cleanup() {
         Set<DFNode> toremove = new HashSet<DFNode>();
         while (true) {
             boolean changed = false;
             for (DFNode node : _nodes) {
-                if (preserved != null && preserved.contains(node)) continue;
+                if (_preserved.contains(node)) continue;
                 if (toremove.contains(node)) continue;
                 if (node.purge()) {
                     toremove.add(node);

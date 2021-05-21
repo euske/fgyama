@@ -116,11 +116,10 @@ class DFLambdaKlass extends DFSourceKlass {
                 i++;
             }
 
-            ConsistentHashSet<DFNode> preserved = new ConsistentHashSet<DFNode>();
             for (DFRef ref : this.getInputRefs()) {
                 DFNode input = new InputNode(graph, methodScope, ref, null);
                 ctx.set(input);
-                preserved.add(input);
+                graph.protectNode(input);
             }
 
             try {
@@ -149,24 +148,24 @@ class DFLambdaKlass extends DFSourceKlass {
                 if (ctx.getLast(ref) != null) {
                     DFNode output = new OutputNode(graph, methodScope, ref, null);
                     output.accept(ctx.getLast(ref));
-                    preserved.add(output);
+                    graph.protectNode(output);
                 }
             }
             for (DFRef ref : methodScope.getExcRefs()) {
                 if (ctx.getLast(ref) != null) {
                     DFNode output = new OutputNode(graph, methodScope, ref, null);
                     output.accept(ctx.getLast(ref));
-                    preserved.add(output);
+                    graph.protectNode(output);
                 }
             }
             for (DFRef ref : this.getOutputRefs()) {
                 DFNode output = new OutputNode(graph, methodScope, ref, null);
                 output.accept(ctx.get(ref));
-                preserved.add(output);
+                graph.protectNode(output);
             }
 
             // Do not remove input/output nodes.
-            graph.cleanup(preserved);
+            graph.cleanup();
             return graph;
         }
     }
