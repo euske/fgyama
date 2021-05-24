@@ -114,7 +114,13 @@
           <ast end="394" start="381" type="44"/>
           <accept src="M4_main_N1"/>
         </node>
-        <node id="M4_main_N8" kind="passin" type="?"/>
+        <node id="M4_main_N8" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <accept label=".Ljava/lang/System;/.out" src="M4_main_N11"/>
+        </node>
+        <node id="M4_main_N9" ref=".Ldom/meep/basic_names;/.y" type="I">
+          <accept label=".Ldom/meep/basic_names;/.y" src="M4_main_N11"/>
+        </node>
+        <node id="M4_main_N11" kind="passin" type="?"/>
         <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N3" kind="new" type="Ldom/meep/basic_names;">
             <ast end="441" start="424" type="14"/>
@@ -135,9 +141,9 @@
             <ast end="461" start="451" type="32"/>
             <accept label="@Ldom/meep/basic_names;" src="M4_main_N6"/>
             <accept label=".Ljava/lang/System;/.out" src="M4_main_N8"/>
-            <accept label=".Ldom/meep/basic_names;/.y" src="M4_main_N8"/>
+            <accept label=".Ldom/meep/basic_names;/.y" src="M4_main_N9"/>
           </node>
-          <node id="M4_main_N9" kind="receive" type="V">
+          <node id="M4_main_N10" kind="receive" type="V">
             <ast end="461" start="451" type="32"/>
             <accept src="M4_main_N7"/>
           </node>

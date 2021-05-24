@@ -131,7 +131,10 @@
           <ast end="351" start="338" type="44"/>
           <accept src="M6_main_N1"/>
         </node>
-        <node id="M6_main_N9" kind="passin" type="?"/>
+        <node id="M6_main_N9" ref=".Lbasic_poly_Foo;/.x" type="I">
+          <accept label=".Lbasic_poly_Foo;/.x" src="M6_main_N42"/>
+        </node>
+        <node id="M6_main_N42" kind="passin" type="?"/>
         <scope name="Lbasic_poly;.:main:314:777.:B:353:777">
           <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M6_main_N3" kind="new" type="Lbasic_poly_Foo;">
             <ast end="402" start="382" type="14"/>

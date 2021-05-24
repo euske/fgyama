@@ -18,8 +18,7 @@
       <passin ref=".Lbasic_methods;/.x"/>
       <scope name="Lbasic_methods;.:fa:139:385">
         <node id="M2_fa_N1" kind="input" ref="@Lbasic_methods;" type="Lbasic_methods;"/>
-        <node id="M2_fa_N17" kind="passin" type="?"/>
-        <node id="M2_fa_N19" kind="output" ref=".Lbasic_methods;/.x" type="I">
+        <node id="M2_fa_N18" kind="output" ref=".Lbasic_methods;/.x" type="I">
           <accept src="M2_fa_N5"/>
         </node>
         <scope name="Lbasic_methods;.:fa:139:385.:B:156:385">
@@ -81,10 +80,10 @@
           <node data="Lbasic_methods/:fa:139:385/moo;.fc()I" id="M2_fa_N16" kind="call" type="I">
             <ast end="378" start="372" type="32"/>
             <accept label="@Lbasic_methods;" src="M2_fa_N15"/>
-            <accept label=".Lbasic_methods;/.x" src="M2_fa_N17"/>
+            <accept label=".Lbasic_methods;/.x" src="M2_fa_N5"/>
             <accept label="@Lbasic_methods/:fa:139:385/moo;" src="M2_fa_N15"/>
           </node>
-          <node id="M2_fa_N18" kind="receive" type="I">
+          <node id="M2_fa_N17" kind="receive" type="I">
             <ast end="378" start="372" type="32"/>
             <accept src="M2_fa_N16"/>
           </node>

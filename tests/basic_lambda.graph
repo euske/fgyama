@@ -45,7 +45,10 @@
           <accept src="M6_main_N1"/>
         </node>
         <node id="M6_main_N3" kind="input" ref="@Lbasic_lambda;" type="Lbasic_lambda;"/>
-        <node id="M6_main_N10" kind="passin" type="?"/>
+        <node id="M6_main_N10" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <accept label=".Ljava/lang/System;/.out" src="M6_main_N15"/>
+        </node>
+        <node id="M6_main_N15" kind="passin" type="?"/>
         <scope name="Lbasic_lambda;.:main:216:366.:B:255:366">
           <node id="M6_main_N4" kind="capture" type="Lbasic_lambda/:main:216:366/:methodref:273:290;">
             <ast end="290" start="273" type="90"/>
