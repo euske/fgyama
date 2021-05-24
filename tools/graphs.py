@@ -242,6 +242,8 @@ class DFMethod:
         self.callers = []
         self.overrider = []
         self.overriding = []
+        self.passin = []
+        self.passout = []
         self.ast = None
         return
 
@@ -532,6 +534,12 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
                 self.method, self.sid, sname)
             self.method.root = self.scope
             return self.handleScope
+        elif name == 'passin':
+            self.method.passin.append(attrs.get('ref'))
+            return
+        elif name == 'passout':
+            self.method.passout.append(attrs.get('ref'))
+            return
         else:
             raise ValueError(f'Invalid tag: {name}')
 

@@ -1739,14 +1739,12 @@ public abstract class DFSourceMethod extends DFMethod {
             Utils.writeXML(writer, ast);
         }
         for (DFRef ref : _passInRefs) {
-            writer.writeStartElement("bypass");
-            writer.writeAttribute("type", "in");
+            writer.writeStartElement("passin");
             writer.writeAttribute("ref", ref.getFullName());
             writer.writeEndElement();
         }
         for (DFRef ref : _passOutRefs) {
-            writer.writeStartElement("bypass");
-            writer.writeAttribute("type", "out");
+            writer.writeStartElement("passout");
             writer.writeAttribute("ref", ref.getFullName());
             writer.writeEndElement();
         }

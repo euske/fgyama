@@ -35,18 +35,24 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         elif kind in ('value', 'valueset'):
             styles['shape'] = 'box'
             styles['fontname'] = 'courier'
-            styles['label'] = node.data
+            styles['label'] = repr(node.data)
         elif kind in ('input','output','receive'):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({parserefname(node.ref)})'
+        elif kind in ('passin','passout'):
+            styles['style'] = 'dotted'
         elif kind == 'new':
             (_, klass) = DFType.parse(node.ntype)
+            styles['shape'] = 'box'
+            styles['style'] = 'rounded'
             styles['fontname'] = 'courier'
-            styles['label'] = klass.name
+            styles['label'] = f'new {klass.name}'
         elif kind == 'call':
             (klass,name,func) = parsemethodname(node.data)
+            styles['shape'] = 'box'
+            styles['style'] = 'rounded'
             styles['fontname'] = 'courier'
-            styles['label'] = name
+            styles['label'] = f'{name}()'
         elif kind is not None and kind.startswith('op_'):
             styles['fontname'] = 'courier'
             styles['label'] = (node.data or kind)

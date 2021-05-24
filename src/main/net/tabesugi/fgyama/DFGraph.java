@@ -22,6 +22,8 @@ public abstract class DFGraph {
         new ArrayList<DFNode>();
     private Set<DFNode> _protected =
         new HashSet<DFNode>();
+    private DFNode _passInNode = null;
+    private DFNode _passOutNode = null;
 
     public DFGraph(DFSourceMethod method) {
         _method = method;
@@ -67,6 +69,20 @@ public abstract class DFGraph {
         for (DFNode node : toremove) {
             _nodes.remove(node);
         }
+    }
+
+    private DFNode getPassInNode() {
+        if (_passInNode == null) {
+            _passInNode = new PassInNode(this, _method.getScope());
+        }
+        return _passInNode;
+    }
+
+    private DFNode getPassOutNode() {
+        if (_passOutNode == null) {
+            _passOutNode = new PassOutNode(this, _method.getScope());
+        }
+        return _passOutNode;
     }
 
     public void writeXML(XMLStreamWriter writer)
@@ -1409,32 +1425,42 @@ public abstract class DFGraph {
     private void connectMethodRefs(
         DFContext ctx, DFLocalScope scope,
         CallNode call, DFNode obj, DFMethod[] methods) {
-        ConsistentHashSet<DFRef> refs = new ConsistentHashSet<DFRef>();
+        Set<DFRef> passInRefs = _method.getPassInRefs();
+        Set<DFRef> passOutRefs = _method.getPassOutRefs();
+
+        ConsistentHashSet<DFRef> inRefs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                refs.addAll(srcmethod.getInputRefs());
+                inRefs.addAll(srcmethod.getInputRefs());
             }
         }
         if (obj != null) {
-            refs.add(obj.getNodeType().toKlass().getThisRef());
+            inRefs.add(obj.getNodeType().toKlass().getThisRef());
         }
-        for (DFRef ref : refs) {
+        for (DFRef ref : inRefs) {
             if (ref instanceof DFKlass.ThisRef && obj != null) {
                 call.accept(obj, ref.getFullName());
+            } else if (passInRefs.contains(ref)) {
+                call.accept(this.getPassInNode(), ref.getFullName());
             } else {
                 call.accept(ctx.get(ref), ref.getFullName());
             }
         }
-        refs = new ConsistentHashSet<DFRef>();
+
+        ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
-                refs.addAll(srcmethod.getOutputRefs());
+                outRefs.addAll(srcmethod.getOutputRefs());
             }
         }
-        for (DFRef ref : refs) {
-            ctx.set(new ReceiveNode(this, scope, call, null, ref));
+        for (DFRef ref : outRefs) {
+            if (passOutRefs.contains(ref)) {
+                this.getPassOutNode().accept(call, ref.getFullName());
+            } else {
+                ctx.set(new ReceiveNode(this, scope, call, null, ref));
+            }
         }
     }
 
@@ -2475,5 +2501,33 @@ class OutputNode extends DFNode {
     @Override
     public String getKind() {
         return "output";
+    }
+}
+
+// PassInNode: represnets an input bypass.
+class PassInNode extends DFNode {
+
+    public PassInNode(
+        DFGraph graph, DFVarScope scope) {
+        super(graph, scope, DFUnknownType.UNKNOWN, null, null);
+    }
+
+    @Override
+    public String getKind() {
+        return "passin";
+    }
+}
+
+// PassOutNode: represnets an output bypass.
+class PassOutNode extends DFNode {
+
+    public PassOutNode(
+        DFGraph graph, DFVarScope scope) {
+        super(graph, scope, DFUnknownType.UNKNOWN, null, null);
+    }
+
+    @Override
+    public String getKind() {
+        return "passout";
     }
 }
