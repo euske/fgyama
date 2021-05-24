@@ -45,6 +45,9 @@ public class DFContext {
         return values;
     }
 
+    public DFNode getFirst(DFRef ref) {
+        return _first.get(ref);
+    }
     public DFNode getLast(DFRef ref) {
         return _last.get(ref);
     }

@@ -1425,8 +1425,6 @@ public abstract class DFGraph {
     private void connectMethodRefs(
         DFContext ctx, DFLocalScope scope,
         CallNode call, DFNode obj, DFMethod[] methods) {
-        Set<DFRef> passInRefs = _method.getPassInRefs();
-        Set<DFRef> passOutRefs = _method.getPassOutRefs();
 
         ConsistentHashSet<DFRef> inRefs = new ConsistentHashSet<DFRef>();
         for (DFMethod method1 : methods) {
@@ -1441,8 +1439,6 @@ public abstract class DFGraph {
         for (DFRef ref : inRefs) {
             if (ref instanceof DFKlass.ThisRef && obj != null) {
                 call.accept(obj, ref.getFullName());
-            } else if (passInRefs.contains(ref)) {
-                call.accept(this.getPassInNode(), ref.getFullName());
             } else {
                 call.accept(ctx.get(ref), ref.getFullName());
             }
@@ -1456,11 +1452,7 @@ public abstract class DFGraph {
             }
         }
         for (DFRef ref : outRefs) {
-            if (passOutRefs.contains(ref)) {
-                this.getPassOutNode().accept(call, ref.getFullName());
-            } else {
-                ctx.set(new ReceiveNode(this, scope, call, null, ref));
-            }
+            ctx.set(new ReceiveNode(this, scope, call, null, ref));
         }
     }
 
@@ -1700,6 +1692,19 @@ public abstract class DFGraph {
             DFNode output = new OutputNode(this, scope, ref, null);
             output.accept(ctx.get(ref));
             this.protectNode(output);
+        }
+
+        for (DFRef ref : _method.getPassInRefs()) {
+            DFNode node = ctx.getFirst(ref);
+            if (node != null) {
+                node.accept(this.getPassInNode(), ref.getFullName());
+            }
+        }
+        for (DFRef ref : _method.getPassOutRefs()) {
+            DFNode node = ctx.getLast(ref);
+            if (node != null) {
+                this.getPassOutNode().accept(node, ref.getFullName());
+            }
         }
 
         // Do not remove input/output nodes.
