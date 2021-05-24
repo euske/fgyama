@@ -35,6 +35,7 @@
     </method>
     <method id="Lbasic_lambda;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="366" start="216" type="31"/>
+      <passin ref=".Ljava/lang/System;/.out"/>
       <scope name="Lbasic_lambda;.:main:216:366">
         <node id="M6_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast end="253" start="240" type="44"/>
@@ -44,35 +45,35 @@
           <accept src="M6_main_N1"/>
         </node>
         <node id="M6_main_N3" kind="input" ref="@Lbasic_lambda;" type="Lbasic_lambda;"/>
-        <node id="M6_main_N4" kind="input" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M6_main_N10" kind="passin" type="?"/>
         <scope name="Lbasic_lambda;.:main:216:366.:B:255:366">
-          <node id="M6_main_N5" kind="capture" type="Lbasic_lambda/:main:216:366/:methodref:273:290;">
+          <node id="M6_main_N4" kind="capture" type="Lbasic_lambda/:main:216:366/:methodref:273:290;">
             <ast end="290" start="273" type="90"/>
           </node>
-          <node id="M6_main_N6" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
+          <node id="M6_main_N5" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
             <ast end="290" start="269" type="59"/>
-            <accept src="M6_main_N5"/>
+            <accept src="M6_main_N4"/>
           </node>
-          <node data="abc" id="M6_main_N7" kind="value" type="Ljava/lang/String;">
+          <node data="abc" id="M6_main_N6" kind="value" type="Ljava/lang/String;">
             <ast end="316" start="311" type="45"/>
           </node>
-          <node id="M6_main_N8" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$y" type="Ljava/lang/String;">
+          <node id="M6_main_N7" kind="assign_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$y" type="Ljava/lang/String;">
             <ast end="316" start="307" type="59"/>
-            <accept src="M6_main_N7"/>
-          </node>
-          <node id="M6_main_N9" kind="ref_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
-            <ast end="331" start="330" type="42"/>
             <accept src="M6_main_N6"/>
           </node>
-          <node data="Lbasic_lambda;.bar(LMoo;)V" id="M6_main_N10" kind="call" type="V">
+          <node id="M6_main_N8" kind="ref_var" ref="$Lbasic_lambda;.:main:216:366.:B:255:366/$a" type="LMoo;">
+            <ast end="331" start="330" type="42"/>
+            <accept src="M6_main_N5"/>
+          </node>
+          <node data="Lbasic_lambda;.bar(LMoo;)V" id="M6_main_N9" kind="call" type="V">
             <ast end="332" start="326" type="32"/>
-            <accept label="#arg0" src="M6_main_N9"/>
+            <accept label="#arg0" src="M6_main_N8"/>
             <accept label="@Lbasic_lambda;" src="M6_main_N3"/>
-            <accept label=".Ljava/lang/System;/.out" src="M6_main_N4"/>
+            <accept label=".Ljava/lang/System;/.out" src="M6_main_N10"/>
           </node>
           <node id="M6_main_N11" kind="receive" type="V">
             <ast end="332" start="326" type="32"/>
-            <accept src="M6_main_N10"/>
+            <accept src="M6_main_N9"/>
           </node>
           <node id="M6_main_N12" kind="capture" type="Lbasic_lambda/:main:216:366/:lambda:346:358;">
             <ast end="358" start="346" type="86"/>
@@ -81,7 +82,7 @@
             <ast end="359" start="342" type="32"/>
             <accept label="#arg0" src="M6_main_N12"/>
             <accept label="@Lbasic_lambda;" src="M6_main_N3"/>
-            <accept label=".Ljava/lang/System;/.out" src="M6_main_N4"/>
+            <accept label=".Ljava/lang/System;/.out" src="M6_main_N10"/>
           </node>
           <node id="M6_main_N14" kind="receive" type="V">
             <ast end="359" start="342" type="32"/>

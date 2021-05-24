@@ -42,6 +42,7 @@
     <method id="Lbasic_fields;.fy(Lbasic_fields/A;)I" name="fy" style="static">
       <caller id="Lbasic_fields;.foo()V"/>
       <ast end="237" start="152" type="31"/>
+      <passout ref=".Lbasic_fields/A;/.x"/>
       <scope name="Lbasic_fields;.:fy:152:237">
         <node id="M3_fy_N1" kind="input" ref="#arg0" type="Lbasic_fields/A;">
           <ast end="176" start="173" type="44"/>
@@ -52,14 +53,14 @@
         </node>
         <node id="M3_fy_N3" kind="input" ref="@Lbasic_fields;" type="Lbasic_fields;"/>
         <node id="M3_fy_N4" kind="input" ref=".Lbasic_fields/A;/.x" type="I"/>
+        <node id="M3_fy_N7" kind="passout" type="?">
+          <accept label=".Lbasic_fields/A;/.x" src="M3_fy_N6"/>
+        </node>
         <node id="M3_fy_N16" kind="output" ref="#return" type="I">
           <accept src="M3_fy_N13"/>
         </node>
         <node id="M3_fy_N17" kind="output" ref=".Lbasic_fields/A;/.y" type="I">
           <accept src="M3_fy_N10"/>
-        </node>
-        <node id="M3_fy_N18" kind="output" ref=".Lbasic_fields/A;/.x" type="I">
-          <accept src="M3_fy_N7"/>
         </node>
         <scope name="Lbasic_fields;.:fy:152:237.:B:178:237">
           <node id="M3_fy_N5" kind="ref_var" ref="$Lbasic_fields;.:fy:152:237/$a" type="Lbasic_fields/A;">
@@ -70,9 +71,6 @@
             <ast end="193" start="188" type="32"/>
             <accept label="#arg0" src="M3_fy_N5"/>
             <accept label="@Lbasic_fields;" src="M3_fy_N3"/>
-          </node>
-          <node id="M3_fy_N7" kind="receive" ref=".Lbasic_fields/A;/.x" type="I">
-            <accept label=".Lbasic_fields/A;/.x" src="M3_fy_N6"/>
           </node>
           <node id="M3_fy_N8" kind="receive" type="V">
             <ast end="193" start="188" type="32"/>
@@ -105,69 +103,65 @@
           <node id="M3_fy_N15" kind="ref_field" ref=".Lbasic_fields/A;/.x" type="I">
             <ast end="230" start="227" type="40"/>
             <accept label="obj" src="M3_fy_N14"/>
-            <accept src="M3_fy_N7"/>
+            <accept src="M3_fy_N4"/>
           </node>
         </scope>
       </scope>
     </method>
     <method id="Lbasic_fields;.foo()V" name="foo" style="static">
       <ast end="330" start="243" type="31"/>
+      <passin ref=".Lbasic_fields/A;/.x"/>
+      <passout ref=".Lbasic_fields/A;/.y"/>
       <scope name="Lbasic_fields;.:foo:243:330">
         <node id="M4_foo_N1" kind="input" ref="@Lbasic_fields;" type="Lbasic_fields;"/>
-        <node id="M4_foo_N2" kind="input" ref=".Lbasic_fields/A;/.x" type="I"/>
-        <node id="M4_foo_N15" kind="output" ref=".Lbasic_fields/A;/.x" type="I">
-          <accept src="M4_foo_N13"/>
+        <node id="M4_foo_N11" kind="passin" type="?"/>
+        <node id="M4_foo_N12" kind="passout" type="?">
+          <accept label=".Lbasic_fields/A;/.y" src="M4_foo_N10"/>
         </node>
-        <node id="M4_foo_N16" kind="output" ref=".Lbasic_fields/A;/.y" type="I">
-          <accept src="M4_foo_N12"/>
+        <node id="M4_foo_N14" kind="output" ref=".Lbasic_fields/A;/.x" type="I">
+          <accept src="M4_foo_N6"/>
         </node>
         <scope name="Lbasic_fields;.:foo:243:330.:B:268:330">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_foo_N3" kind="new" type="Lbasic_fields/A;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_foo_N2" kind="new" type="Lbasic_fields/A;">
             <ast end="291" start="284" type="14"/>
           </node>
-          <node id="M4_foo_N4" kind="receive" type="Lbasic_fields/A;">
+          <node id="M4_foo_N3" kind="receive" type="Lbasic_fields/A;">
             <ast end="291" start="284" type="14"/>
+            <accept src="M4_foo_N2"/>
+          </node>
+          <node id="M4_foo_N4" kind="assign_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
+            <ast end="291" start="280" type="59"/>
             <accept src="M4_foo_N3"/>
           </node>
-          <node id="M4_foo_N5" kind="assign_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
-            <ast end="291" start="280" type="59"/>
+          <node id="M4_foo_N5" kind="ref_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
+            <ast end="302" start="301" type="42"/>
             <accept src="M4_foo_N4"/>
           </node>
-          <node id="M4_foo_N6" kind="ref_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
-            <ast end="302" start="301" type="42"/>
-            <accept src="M4_foo_N5"/>
-          </node>
-          <node id="M4_foo_N7" kind="assign_field" ref=".Lbasic_fields/A;/.x" type="I">
+          <node id="M4_foo_N6" kind="assign_field" ref=".Lbasic_fields/A;/.x" type="I">
             <ast end="304" start="301" type="40"/>
-            <accept label="obj" src="M4_foo_N6"/>
-            <accept src="M4_foo_N9"/>
+            <accept label="obj" src="M4_foo_N5"/>
+            <accept src="M4_foo_N8"/>
           </node>
-          <node data="3" id="M4_foo_N8" kind="value" type="I">
+          <node data="3" id="M4_foo_N7" kind="value" type="I">
             <ast end="308" start="307" type="34"/>
           </node>
-          <node data="=" id="M4_foo_N9" kind="op_assign" ref=".Lbasic_fields/A;/.x" type="I">
+          <node data="=" id="M4_foo_N8" kind="op_assign" ref=".Lbasic_fields/A;/.x" type="I">
             <ast end="308" start="301" type="7"/>
-            <accept label="R" src="M4_foo_N8"/>
+            <accept label="R" src="M4_foo_N7"/>
           </node>
-          <node id="M4_foo_N10" kind="ref_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
+          <node id="M4_foo_N9" kind="ref_var" ref="$Lbasic_fields;.:foo:243:330.:B:268:330/$a" type="Lbasic_fields/A;">
             <ast end="322" start="321" type="42"/>
-            <accept src="M4_foo_N5"/>
+            <accept src="M4_foo_N4"/>
           </node>
-          <node data="Lbasic_fields;.fy(Lbasic_fields/A;)I" id="M4_foo_N11" kind="call" type="I">
+          <node data="Lbasic_fields;.fy(Lbasic_fields/A;)I" id="M4_foo_N10" kind="call" type="I">
             <ast end="323" start="318" type="32"/>
-            <accept label="#arg0" src="M4_foo_N10"/>
+            <accept label="#arg0" src="M4_foo_N9"/>
             <accept label="@Lbasic_fields;" src="M4_foo_N1"/>
-            <accept label=".Lbasic_fields/A;/.x" src="M4_foo_N7"/>
-          </node>
-          <node id="M4_foo_N12" kind="receive" ref=".Lbasic_fields/A;/.y" type="I">
-            <accept label=".Lbasic_fields/A;/.y" src="M4_foo_N11"/>
-          </node>
-          <node id="M4_foo_N13" kind="receive" ref=".Lbasic_fields/A;/.x" type="I">
             <accept label=".Lbasic_fields/A;/.x" src="M4_foo_N11"/>
           </node>
-          <node id="M4_foo_N14" kind="receive" type="I">
+          <node id="M4_foo_N13" kind="receive" type="I">
             <ast end="323" start="318" type="32"/>
-            <accept src="M4_foo_N11"/>
+            <accept src="M4_foo_N10"/>
           </node>
         </scope>
       </scope>

@@ -103,6 +103,9 @@
     </method>
     <method id="Ldom/meep/basic_names;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="468" start="357" type="31"/>
+      <passin ref="@Ldom/meep/basic_names;"/>
+      <passin ref=".Ljava/lang/System;/.out"/>
+      <passin ref=".Ldom/meep/basic_names;/.y"/>
       <scope name="Ldom/meep/basic_names;.:main:357:468">
         <node id="M4_main_N1" kind="input" ref="#arg0" type="[Ljava/lang/String;">
           <ast end="394" start="381" type="44"/>
@@ -111,34 +114,32 @@
           <ast end="394" start="381" type="44"/>
           <accept src="M4_main_N1"/>
         </node>
-        <node id="M4_main_N3" kind="input" ref="@Ldom/meep/basic_names;" type="Ldom/meep/basic_names;"/>
-        <node id="M4_main_N4" kind="input" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M4_main_N5" kind="input" ref=".Ldom/meep/basic_names;/.y" type="I"/>
+        <node id="M4_main_N8" kind="passin" type="?"/>
         <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N6" kind="new" type="Ldom/meep/basic_names;">
+          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N3" kind="new" type="Ldom/meep/basic_names;">
             <ast end="441" start="424" type="14"/>
           </node>
-          <node id="M4_main_N7" kind="receive" type="Ldom/meep/basic_names;">
+          <node id="M4_main_N4" kind="receive" type="Ldom/meep/basic_names;">
             <ast end="441" start="424" type="14"/>
-            <accept src="M4_main_N6"/>
+            <accept src="M4_main_N3"/>
           </node>
-          <node id="M4_main_N8" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
+          <node id="M4_main_N5" kind="assign_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
             <ast end="441" start="418" type="59"/>
-            <accept src="M4_main_N7"/>
+            <accept src="M4_main_N4"/>
           </node>
-          <node id="M4_main_N9" kind="ref_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
+          <node id="M4_main_N6" kind="ref_var" ref="$Ldom/meep/basic_names;.:main:357:468.:B:396:468/$foo" type="Ldom/meep/basic_names;">
             <ast end="454" start="451" type="42"/>
-            <accept src="M4_main_N8"/>
+            <accept src="M4_main_N5"/>
           </node>
-          <node data="Ldom/meep/basic_names;.doit()V" id="M4_main_N10" kind="call" type="V">
+          <node data="Ldom/meep/basic_names;.doit()V" id="M4_main_N7" kind="call" type="V">
             <ast end="461" start="451" type="32"/>
-            <accept label="@Ldom/meep/basic_names;" src="M4_main_N9"/>
-            <accept label=".Ljava/lang/System;/.out" src="M4_main_N4"/>
-            <accept label=".Ldom/meep/basic_names;/.y" src="M4_main_N5"/>
+            <accept label="@Ldom/meep/basic_names;" src="M4_main_N6"/>
+            <accept label=".Ljava/lang/System;/.out" src="M4_main_N8"/>
+            <accept label=".Ldom/meep/basic_names;/.y" src="M4_main_N8"/>
           </node>
-          <node id="M4_main_N11" kind="receive" type="V">
+          <node id="M4_main_N9" kind="receive" type="V">
             <ast end="461" start="451" type="32"/>
-            <accept src="M4_main_N10"/>
+            <accept src="M4_main_N7"/>
           </node>
         </scope>
       </scope>
