@@ -659,12 +659,6 @@ class InitMethod extends DFSourceMethod {
         DFLocalScope scope = this.getScope();
         DFContext ctx = new DFContext(graph, scope);
 
-        // Create input nodes.
-        for (DFRef ref : this.getInputRefs()) {
-            DFNode input = new InputNode(graph, scope, ref, null);
-            ctx.set(input);
-        }
-
         try {
             graph.processDecls(ctx, _decls);
         } catch (InvalidSyntax e) {
@@ -685,13 +679,6 @@ class InitMethod extends DFSourceMethod {
             throw e;
         }
 
-        // Create output nodes.
-        for (DFRef ref : this.getOutputRefs()) {
-            DFNode output = new OutputNode(graph, scope, ref, null);
-            output.accept(ctx.get(ref));
-        }
-
-        graph.cleanup();
         return graph;
     }
 }
@@ -878,20 +865,11 @@ class DefinedMethod extends DFSourceMethod {
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)_methodDecl.parameters()) {
-            DFRef ref = methodScope.lookupArgument(i);
-            DFNode input = new InputNode(graph, methodScope, ref, decl);
-            ctx.set(input);
-            DFNode assign = new AssignNode(
-                graph, methodScope, methodScope.lookupVar(decl.getName()), decl);
-            assign.accept(input);
+            DFRef ref_v = methodScope.lookupArgument(i);
+            DFRef ref_a = methodScope.lookupVar(decl.getName());
+            DFNode assign = graph.createArgNode(ref_v, ref_a, decl);
             ctx.set(assign);
             i++;
-        }
-
-        for (DFRef ref : this.getInputRefs()) {
-            DFNode input = new InputNode(graph, methodScope, ref, null);
-            ctx.set(input);
-            graph.protectNode(input);
         }
 
         try {
@@ -914,30 +892,6 @@ class DefinedMethod extends DFSourceMethod {
             throw e;
         }
 
-        // Create output nodes.
-        {
-            DFRef ref = methodScope.lookupReturn();
-            if (ctx.getLast(ref) != null) {
-                DFNode output = new OutputNode(graph, methodScope, ref, null);
-                output.accept(ctx.getLast(ref));
-                graph.protectNode(output);
-            }
-        }
-        for (DFRef ref : methodScope.getExcRefs()) {
-            if (ctx.getLast(ref) != null) {
-                DFNode output = new OutputNode(graph, methodScope, ref, null);
-                output.accept(ctx.getLast(ref));
-                graph.protectNode(output);
-            }
-        }
-        for (DFRef ref : this.getOutputRefs()) {
-            DFNode output = new OutputNode(graph, methodScope, ref, null);
-            output.accept(ctx.get(ref));
-            graph.protectNode(output);
-        }
-
-        // Do not remove input/output nodes.
-        graph.cleanup();
         return graph;
     }
 

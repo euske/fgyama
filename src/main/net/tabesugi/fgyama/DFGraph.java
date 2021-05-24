@@ -20,7 +20,7 @@ public abstract class DFGraph {
     private DFTypeFinder _finder;
     private List<DFNode> _nodes =
         new ArrayList<DFNode>();
-    private Set<DFNode> _preserved =
+    private Set<DFNode> _protected =
         new HashSet<DFNode>();
 
     public DFGraph(DFSourceMethod method) {
@@ -38,16 +38,24 @@ public abstract class DFGraph {
         return _nodes.size();
     }
 
-    public void protectNode(DFNode node) {
-        _preserved.add(node);
+    public DFNode createArgNode(DFRef ref_v, DFRef ref_a, ASTNode ast) {
+        DFVarScope scope = _method.getScope();
+        DFNode input = new InputNode(this, scope, ref_v, ast);
+        DFNode assign = new VarAssignNode(this, scope, ref_a, ast);
+        assign.accept(input);
+        return assign;
     }
 
-    public void cleanup() {
+    private void protectNode(DFNode node) {
+        _protected.add(node);
+    }
+
+    private void cleanup() {
         Set<DFNode> toremove = new HashSet<DFNode>();
         while (true) {
             boolean changed = false;
             for (DFNode node : _nodes) {
-                if (_preserved.contains(node)) continue;
+                if (_protected.contains(node)) continue;
                 if (toremove.contains(node)) continue;
                 if (node.purge()) {
                     toremove.add(node);
@@ -61,11 +69,12 @@ public abstract class DFGraph {
         }
     }
 
-    public DFNode[] getNodes() {
+    public void writeXML(XMLStreamWriter writer)
+        throws XMLStreamException {
         DFNode[] nodes = new DFNode[_nodes.size()];
         _nodes.toArray(nodes);
         Arrays.sort(nodes);
-        return nodes;
+        _method.getScope().writeXML(writer, nodes);
     }
 
     /**
@@ -1553,8 +1562,14 @@ public abstract class DFGraph {
         DFContext ctx, List<BodyDeclaration> decls)
         throws InvalidSyntax, EntityNotFound {
 
-        DFLocalScope scope = _method.getScope();
+        DFSourceMethod.MethodScope scope = _method.getScope();
         DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
+
+        // Create input nodes.
+        for (DFRef ref : _method.getInputRefs()) {
+            DFNode input = new InputNode(this, scope, ref, null);
+            ctx.set(input);
+        }
 
         for (BodyDeclaration body : decls) {
             if (body instanceof AbstractTypeDeclaration) {
@@ -1600,14 +1615,29 @@ public abstract class DFGraph {
         }
 
         this.closeFrame(ctx, scope, frame);
+
+        // Create output nodes.
+        for (DFRef ref : _method.getOutputRefs()) {
+            DFNode output = new OutputNode(this, scope, ref, null);
+            output.accept(ctx.get(ref));
+        }
+
+        this.cleanup();
     }
 
     public void processMethodBody(
         DFContext ctx, ASTNode body)
         throws InvalidSyntax, EntityNotFound {
 
-        DFLocalScope scope = _method.getScope();
+        DFSourceMethod.MethodScope scope = _method.getScope();
         DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
+
+        // Create input nodes.
+        for (DFRef ref : _method.getInputRefs()) {
+            DFNode input = new InputNode(this, scope, ref, null);
+            ctx.set(input);
+            this.protectNode(input);
+        }
 
         if (body instanceof Statement) {
             frame.buildStmt((Statement)body);
@@ -1623,6 +1653,31 @@ public abstract class DFGraph {
         }
 
         this.closeFrame(ctx, scope, frame);
+
+        // Create output nodes.
+        {
+            DFRef ref = scope.lookupReturn();
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(this, scope, ref, null);
+                output.accept(ctx.getLast(ref));
+                this.protectNode(output);
+            }
+        }
+        for (DFRef ref : scope.getExcRefs()) {
+            if (ctx.getLast(ref) != null) {
+                DFNode output = new OutputNode(this, scope, ref, null);
+                output.accept(ctx.getLast(ref));
+                this.protectNode(output);
+            }
+        }
+        for (DFRef ref : _method.getOutputRefs()) {
+            DFNode output = new OutputNode(this, scope, ref, null);
+            output.accept(ctx.get(ref));
+            this.protectNode(output);
+        }
+
+        // Do not remove input/output nodes.
+        this.cleanup();
     }
 }
 
@@ -2391,4 +2446,34 @@ class CatchJoin extends DFNode {
         this.accept(node);
     }
 
+}
+
+// InputNode: represnets a function argument.
+class InputNode extends DFNode {
+
+    public InputNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "input";
+    }
+}
+
+// OutputNode: represents a return value.
+class OutputNode extends DFNode {
+
+    public OutputNode(
+        DFGraph graph, DFVarScope scope, DFRef ref,
+        ASTNode ast) {
+        super(graph, scope, ref.getRefType(), ref, ast);
+    }
+
+    @Override
+    public String getKind() {
+        return "output";
+    }
 }

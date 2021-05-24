@@ -106,20 +106,11 @@ class DFLambdaKlass extends DFSourceKlass {
             int i = 0;
             for (VariableDeclaration decl :
                      (List<VariableDeclaration>)_lambda.parameters()) {
-                DFRef ref = methodScope.lookupArgument(i);
-                DFNode input = new InputNode(graph, methodScope, ref, decl);
-                ctx.set(input);
-                DFNode assign = new AssignNode(
-                    graph, methodScope, methodScope.lookupVar(decl.getName()), decl);
-                assign.accept(input);
+                DFRef ref_v = methodScope.lookupArgument(i);
+                DFRef ref_a = methodScope.lookupVar(decl.getName());
+                DFNode assign = graph.createArgNode(ref_v, ref_a, decl);
                 ctx.set(assign);
                 i++;
-            }
-
-            for (DFRef ref : this.getInputRefs()) {
-                DFNode input = new InputNode(graph, methodScope, ref, null);
-                ctx.set(input);
-                graph.protectNode(input);
             }
 
             try {
@@ -142,30 +133,6 @@ class DFLambdaKlass extends DFSourceKlass {
                 throw e;
             }
 
-            // Create output nodes.
-            {
-                DFRef ref = methodScope.lookupReturn();
-                if (ctx.getLast(ref) != null) {
-                    DFNode output = new OutputNode(graph, methodScope, ref, null);
-                    output.accept(ctx.getLast(ref));
-                    graph.protectNode(output);
-                }
-            }
-            for (DFRef ref : methodScope.getExcRefs()) {
-                if (ctx.getLast(ref) != null) {
-                    DFNode output = new OutputNode(graph, methodScope, ref, null);
-                    output.accept(ctx.getLast(ref));
-                    graph.protectNode(output);
-                }
-            }
-            for (DFRef ref : this.getOutputRefs()) {
-                DFNode output = new OutputNode(graph, methodScope, ref, null);
-                output.accept(ctx.get(ref));
-                graph.protectNode(output);
-            }
-
-            // Do not remove input/output nodes.
-            graph.cleanup();
             return graph;
         }
     }

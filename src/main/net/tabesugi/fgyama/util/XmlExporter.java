@@ -66,8 +66,11 @@ public class XmlExporter extends Exporter {
         assert _klass != null;
         try {
             _writer.writeStartElement("method");
-            method.writeXML(_writer, _baseId++);
-            _writer.writeEndElement();
+            try {
+                method.writeXML(_writer, _baseId++);
+            } finally {
+                _writer.writeEndElement();
+            }
         } catch (XMLStreamException e) {
             throw new RuntimeException();
         }
