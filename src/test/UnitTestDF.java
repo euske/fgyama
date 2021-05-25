@@ -36,7 +36,7 @@ public class UnitTestDF extends XMLTestCase {
             System.err.println("compareXml: "+javaPath+", "+xmlPath);
             _converter.addSourceFile(javaPath, true);
         }
-        Collection<DFSourceKlass> klasses = _converter.getSourceKlasses(true);
+        Collection<DFSourceKlass> klasses = _converter.getSourceKlasses();
         for (DFSourceKlass klass : klasses) {
             _converter.analyzeKlass(exporter, klass, false);
         }

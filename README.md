@@ -174,7 +174,6 @@ it can be applied to a large code base.
  * `-i filelist`: takes a filename list.
  * `-o output`: specifies the output file.
  * `-C classpath`: add a jar file / directory to the classpath.
- * `-a`: treat all member variables interprocedural.
  * `-S`: strict mode. (stops at a first error)
  * `-s`: serializable format. (no pretty printing)
 

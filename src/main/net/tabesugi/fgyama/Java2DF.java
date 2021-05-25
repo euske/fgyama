@@ -83,7 +83,7 @@ public class Java2DF {
         }
     }
 
-    public Collection<DFSourceKlass> getSourceKlasses(boolean expand)
+    public Collection<DFSourceKlass> getSourceKlasses()
         throws InvalidSyntax {
 
         // Stage1: populate TypeSpaces.
@@ -108,10 +108,8 @@ public class Java2DF {
         // Stage4: expand classes and method refs.
         Logger.info("Stage4: expanding "+klasses.size()+" klasses...");
         List<DFSourceMethod> methods = this.expandKlasses(klasses);
-        if (expand) {
-            Logger.info("Stage4: expanding "+methods.size()+" method refs...");
-            this.expandRefs(methods);
-        }
+        Logger.info("Stage4: expanding "+methods.size()+" method refs...");
+        this.expandRefs(methods);
 
         return klasses;
     }
@@ -362,7 +360,6 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
-        boolean expand = false;
         boolean reformat = true;
         Logger.LogLevel = 0;
 
@@ -406,8 +403,6 @@ public class Java2DF {
                 }
             } else if (arg.equals("-D")) {
                 DFKlass.MaxReifyDepth = Integer.parseInt(args[++i]);
-            } else if (arg.equals("-a")) {
-                expand = true;
             } else if (arg.equals("-S")) {
                 strict = true;
             } else if (arg.equals("-s")) {
@@ -463,7 +458,7 @@ public class Java2DF {
             }
         }
 
-        Collection<DFSourceKlass> klasses = converter.getSourceKlasses(expand);
+        Collection<DFSourceKlass> klasses = converter.getSourceKlasses();
 
         ByteArrayOutputStream temp = null;
         if (reformat) {
