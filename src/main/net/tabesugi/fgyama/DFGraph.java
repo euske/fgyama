@@ -20,8 +20,6 @@ public abstract class DFGraph {
     private DFTypeFinder _finder;
     private List<DFNode> _nodes =
         new ArrayList<DFNode>();
-    private Set<DFNode> _protected =
-        new HashSet<DFNode>();
     private DFNode _passInNode = null;
     private DFNode _passOutNode = null;
 
@@ -48,16 +46,11 @@ public abstract class DFGraph {
         return assign;
     }
 
-    private void protectNode(DFNode node) {
-        _protected.add(node);
-    }
-
     private void cleanup() {
         Set<DFNode> toremove = new HashSet<DFNode>();
         while (true) {
             boolean changed = false;
             for (DFNode node : _nodes) {
-                if (_protected.contains(node)) continue;
                 if (toremove.contains(node)) continue;
                 if (node.purge()) {
                     toremove.add(node);
@@ -1427,6 +1420,7 @@ public abstract class DFGraph {
         CallNode call, DFNode obj, DFMethod[] methods) {
 
         ConsistentHashSet<DFRef> inRefs = new ConsistentHashSet<DFRef>();
+        inRefs.add(scope.lookupBypass());
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
@@ -1445,6 +1439,7 @@ public abstract class DFGraph {
         }
 
         ConsistentHashSet<DFRef> outRefs = new ConsistentHashSet<DFRef>();
+        outRefs.add(scope.lookupBypass());
         for (DFMethod method1 : methods) {
             if (method1 instanceof DFSourceMethod) {
                 DFSourceMethod srcmethod = (DFSourceMethod)method1;
@@ -1640,6 +1635,32 @@ public abstract class DFGraph {
             output.accept(ctx.get(ref));
         }
 
+        for (DFRef ref : _method.getPassInRefs()) {
+            DFNode node = ctx.getFirst(ref);
+            if (node != null) {
+                node.accept(this.getPassInNode(), ref.getFullName());
+            }
+        }
+        {
+            DFNode node = ctx.getFirst(scope.lookupBypass());
+            if (node != null) {
+                node.accept(this.getPassInNode());
+            }
+        }
+
+        for (DFRef ref : _method.getPassOutRefs()) {
+            DFNode node = ctx.getLast(ref);
+            if (node != null) {
+                this.getPassOutNode().accept(node, ref.getFullName());
+            }
+        }
+        {
+            DFNode node = ctx.getLast(scope.lookupBypass());
+            if (node != null) {
+                this.getPassOutNode().accept(node);
+            }
+        }
+
         this.cleanup();
     }
 
@@ -1654,7 +1675,6 @@ public abstract class DFGraph {
         for (DFRef ref : _method.getInputRefs()) {
             DFNode input = new InputNode(this, scope, ref, null);
             ctx.set(input);
-            this.protectNode(input);
         }
 
         if (body instanceof Statement) {
@@ -1678,20 +1698,17 @@ public abstract class DFGraph {
             if (ctx.getLast(ref) != null) {
                 DFNode output = new OutputNode(this, scope, ref, null);
                 output.accept(ctx.getLast(ref));
-                this.protectNode(output);
             }
         }
         for (DFRef ref : scope.getExcRefs()) {
             if (ctx.getLast(ref) != null) {
                 DFNode output = new OutputNode(this, scope, ref, null);
                 output.accept(ctx.getLast(ref));
-                this.protectNode(output);
             }
         }
         for (DFRef ref : _method.getOutputRefs()) {
             DFNode output = new OutputNode(this, scope, ref, null);
             output.accept(ctx.get(ref));
-            this.protectNode(output);
         }
 
         for (DFRef ref : _method.getPassInRefs()) {
@@ -1700,10 +1717,23 @@ public abstract class DFGraph {
                 node.accept(this.getPassInNode(), ref.getFullName());
             }
         }
+        {
+            DFNode node = ctx.getFirst(scope.lookupBypass());
+            if (node != null) {
+                node.accept(this.getPassInNode());
+            }
+        }
+
         for (DFRef ref : _method.getPassOutRefs()) {
             DFNode node = ctx.getLast(ref);
             if (node != null) {
                 this.getPassOutNode().accept(node, ref.getFullName());
+            }
+        }
+        {
+            DFNode node = ctx.getLast(scope.lookupBypass());
+            if (node != null) {
+                this.getPassOutNode().accept(node);
             }
         }
 

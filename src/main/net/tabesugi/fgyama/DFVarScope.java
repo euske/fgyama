@@ -95,6 +95,11 @@ public abstract class DFVarScope {
         return _outer.lookupException(type);
     }
 
+    public DFRef lookupBypass() {
+        assert _outer != null;
+        return _outer.lookupBypass();
+    }
+
     public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
         throws MethodNotFound {
         if (_outer == null) throw new MethodNotFound(name, argTypes);

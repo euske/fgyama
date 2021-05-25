@@ -1779,6 +1779,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
         private DFRef _return = null;
         private DFRef[] _arguments = null;
+        private DFRef _bypass;
         private ConsistentHashMap<DFKlass, DFRef> _this =
             new ConsistentHashMap<DFKlass, DFRef>();
         private ConsistentHashMap<DFType, DFRef> _exceptions =
@@ -1786,6 +1787,7 @@ public abstract class DFSourceMethod extends DFMethod {
 
         protected MethodScope(DFVarScope outer, String name) {
             super(outer, name);
+            _bypass = new InternalRef(DFUnknownType.UNKNOWN, "#bypass");
         }
 
         public DFRef lookupArgument(int index) {
@@ -1808,6 +1810,11 @@ public abstract class DFSourceMethod extends DFMethod {
                 _exceptions.put(type, ref);
             }
             return ref;
+        }
+
+        @Override
+        public DFRef lookupBypass() {
+            return _bypass;
         }
 
         public List<DFRef> getExcRefs() {
