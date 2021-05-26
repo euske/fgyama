@@ -1604,7 +1604,7 @@ public abstract class DFGraph {
                         // uninitialized field: default = null.
                         value = new ConstNode(
                             this, scope,
-                            DFNullType.NULL, null, "uninitialized");
+                            DFNullType.NULL, null, "null");
                     }
                     DFNode assign = new VarAssignNode(
                         this, scope, ref, frag);

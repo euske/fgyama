@@ -18,7 +18,8 @@ public class DFNullType implements DFType {
 
     @Override
     public String getTypeName() {
-        return "@null";
+        // Externally this is treated as DFUnknownType.
+        return "?";
     }
 
     @Override
