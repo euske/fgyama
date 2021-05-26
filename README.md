@@ -175,7 +175,7 @@ it can be applied to a large code base.
  * `-o output`: specifies the output file.
  * `-C classpath`: add a jar file / directory to the classpath.
  * `-S`: strict mode. (stops at a first error)
- * `-s`: serializable format. (no pretty printing)
+ * `-F`: pretty printing XML.
 
 
 ## Development

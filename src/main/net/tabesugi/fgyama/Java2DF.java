@@ -360,7 +360,7 @@ public class Java2DF {
         OutputStream output = System.out;
         String sep = System.getProperty("path.separator");
         boolean strict = false;
-        boolean reformat = true;
+        boolean reformat = false;
         Logger.LogLevel = 0;
 
         for (int i = 0; i < args.length; i++) {
@@ -405,13 +405,13 @@ public class Java2DF {
                 DFKlass.MaxReifyDepth = Integer.parseInt(args[++i]);
             } else if (arg.equals("-S")) {
                 strict = true;
-            } else if (arg.equals("-s")) {
-                reformat = false;
+            } else if (arg.equals("-F")) {
+                reformat = true;
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
                     "usage: Java2DF [-v] [-i input] [-o output]" +
-                    " [-C classpath] [-D depth] [-a] [-S] [-s] [path ...]");
+                    " [-C classpath] [-D depth] [-S] [-F] [path ...]");
                 System.exit(1);
                 return;
             } else {
