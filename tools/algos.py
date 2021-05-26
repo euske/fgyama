@@ -75,15 +75,6 @@ class SCC:
     def __iter__(self):
         return iter(self.nodes)
 
-    def fixate(self, node2cpt):
-        for node0 in self.nodes:
-            for node1 in node0.linkto:
-                cpt = node2cpt[node1]
-                if cpt is self: continue
-                self.linkto.add(cpt)
-                cpt.linkfrom.add(self)
-        return
-
     @classmethod
     def fromnodes(klass, nodes, getnodes):
         node2cpt = {}
@@ -119,8 +110,14 @@ class SCC:
         for node in nodes:
             if node not in node2cpt:
                 visit(node)
-        for cpt in cpts:
-            cpt.fixate(node2cpt)
+        # fixate
+        for cpt0 in cpts:
+            for node0 in cpt0.nodes:
+                for node1 in getnodes(node0):
+                    cpt1 = node2cpt[node1]
+                    if cpt1 is cpt0: continue
+                    cpt0.linkto.add(cpt1)
+                    cpt1.linkfrom.add(cpt0)
         return (cpts, node2cpt)
 
 
