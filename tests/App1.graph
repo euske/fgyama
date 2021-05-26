@@ -5,12 +5,12 @@
     <method id="LRecord;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="173" start="19" type="55"/>
       <scope name="LRecord;.:clinit:">
-        <node data="uninitialized" id="K1_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K1_:clinit:_N1" kind="value" type="?"/>
         <node id="K1_:clinit:_N2" kind="assign_var" ref=".LRecord;/.key" type="Ljava/lang/String;">
           <ast end="48" start="45" type="59"/>
           <accept src="K1_:clinit:_N1"/>
         </node>
-        <node data="uninitialized" id="K1_:clinit:_N3" kind="value" type="@null"/>
+        <node data="null" id="K1_:clinit:_N3" kind="value" type="?"/>
         <node id="K1_:clinit:_N4" kind="assign_var" ref=".LRecord;/.value" type="Ljava/lang/String;">
           <ast end="66" start="61" type="59"/>
           <accept src="K1_:clinit:_N3"/>
@@ -103,7 +103,7 @@
           <ast end="255" start="247" type="59"/>
           <accept src="K3_:clinit:_N3"/>
         </node>
-        <node data="null" id="K3_:clinit:_N5" kind="value" type="@null">
+        <node data="null" id="K3_:clinit:_N5" kind="value" type="?">
           <ast end="290" start="286" type="33"/>
         </node>
         <node id="K3_:clinit:_N6" kind="assign_var" ref=".LListy&lt;TT;&gt;;/._objs" type="[Ljava/lang/Object;">
@@ -145,7 +145,7 @@
             <accept label="obj" src="M4_add_N3"/>
             <accept src="M4_add_N4"/>
           </node>
-          <node data="null" id="M4_add_N9" kind="value" type="@null">
+          <node data="null" id="M4_add_N9" kind="value" type="?">
             <ast end="345" start="341" type="33"/>
           </node>
           <node data="==" id="M4_add_N10" kind="op_infix" type="Z">
@@ -272,7 +272,7 @@
               <accept label="obj" src="M4_add_N3"/>
               <accept src="M4_add_N4"/>
             </node>
-            <node data="null" id="M4_add_N29" kind="value" type="@null">
+            <node data="null" id="M4_add_N29" kind="value" type="?">
               <ast end="469" start="465" type="33"/>
             </node>
             <node data="!=" id="M4_add_N30" kind="op_infix" type="Z">
@@ -463,7 +463,7 @@
             <ast end="815" start="803" type="41"/>
             <accept src="M5_get_N25"/>
           </node>
-          <node data="null" id="M5_get_N25" kind="value" type="@null">
+          <node data="null" id="M5_get_N25" kind="value" type="?">
             <ast end="814" start="810" type="33"/>
           </node>
           <scope name="LListy&lt;TT;&gt;;.:get:664:821.:B:719:821.:B:751:794">
@@ -761,7 +761,7 @@
                 <ast end="1149" start="1145" type="42"/>
                 <accept src="M8_:init:_N23"/>
               </node>
-              <node data="null" id="M8_:init:_N25" kind="value" type="@null">
+              <node data="null" id="M8_:init:_N25" kind="value" type="?">
                 <ast end="1157" start="1153" type="33"/>
               </node>
               <node data="==" id="M8_:init:_N26" kind="op_infix" type="Z">
@@ -1000,7 +1000,7 @@
             <ast end="1626" start="1614" type="41"/>
             <accept src="M9_get_N54"/>
           </node>
-          <node data="null" id="M9_get_N54" kind="value" type="@null">
+          <node data="null" id="M9_get_N54" kind="value" type="?">
             <ast end="1625" start="1621" type="33"/>
           </node>
           <scope name="LDB;.:get:1395:1632.:B:1425:1632.:for:1435:1605">
@@ -1169,7 +1169,7 @@
           <ast end="255" start="247" type="59"/>
           <accept src="K10_:clinit:_N3"/>
         </node>
-        <node data="null" id="K10_:clinit:_N5" kind="value" type="@null">
+        <node data="null" id="K10_:clinit:_N5" kind="value" type="?">
           <ast end="290" start="286" type="33"/>
         </node>
         <node id="K10_:clinit:_N6" kind="assign_var" ref=".LListy&lt;LRecord;&gt;;/._objs" type="[Ljava/lang/Object;">
@@ -1212,7 +1212,7 @@
             <accept label="obj" src="M11_add_N3"/>
             <accept src="M11_add_N4"/>
           </node>
-          <node data="null" id="M11_add_N9" kind="value" type="@null">
+          <node data="null" id="M11_add_N9" kind="value" type="?">
             <ast end="345" start="341" type="33"/>
           </node>
           <node data="==" id="M11_add_N10" kind="op_infix" type="Z">
@@ -1339,7 +1339,7 @@
               <accept label="obj" src="M11_add_N3"/>
               <accept src="M11_add_N4"/>
             </node>
-            <node data="null" id="M11_add_N29" kind="value" type="@null">
+            <node data="null" id="M11_add_N29" kind="value" type="?">
               <ast end="469" start="465" type="33"/>
             </node>
             <node data="!=" id="M11_add_N30" kind="op_infix" type="Z">
@@ -1531,7 +1531,7 @@
             <ast end="815" start="803" type="41"/>
             <accept src="M12_get_N25"/>
           </node>
-          <node data="null" id="M12_get_N25" kind="value" type="@null">
+          <node data="null" id="M12_get_N25" kind="value" type="?">
             <ast end="814" start="810" type="33"/>
           </node>
           <scope name="LListy&lt;LRecord;&gt;;.:get:664:821.:B:719:821.:B:751:794">

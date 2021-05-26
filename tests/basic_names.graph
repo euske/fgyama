@@ -200,7 +200,7 @@
     <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="211" start="144" type="55"/>
       <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:">
-        <node data="uninitialized" id="K7_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K7_:clinit:_N1" kind="value" type="?"/>
         <node id="K7_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
           <ast end="173" start="172" type="59"/>
           <accept src="K7_:clinit:_N1"/>

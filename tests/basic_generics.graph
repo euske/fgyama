@@ -188,7 +188,7 @@
     <method id="Lbasic_generics/Moo&lt;TT;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="364" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:clinit:">
-        <node data="uninitialized" id="K4_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
         <node id="K4_:clinit:_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
           <ast end="69" start="68" type="59"/>
           <accept src="K4_:clinit:_N1"/>
@@ -354,7 +354,7 @@
     <method id="Lbasic_generics/Moo&lt;TT;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="364" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;TT;&gt;;.:clinit:">
-        <node data="uninitialized" id="K9_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K9_:clinit:_N1" kind="value" type="?"/>
         <node id="K9_:clinit:_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;TT;&gt;;/.x" type="TT;">
           <ast end="69" start="68" type="59"/>
           <accept src="K9_:clinit:_N1"/>
@@ -530,7 +530,7 @@
     <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="364" start="35" type="55"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:clinit:">
-        <node data="uninitialized" id="K16_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K16_:clinit:_N1" kind="value" type="?"/>
         <node id="K16_:clinit:_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
           <ast end="69" start="68" type="59"/>
           <accept src="K16_:clinit:_N1"/>

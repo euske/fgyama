@@ -18,7 +18,7 @@
           <accept src="M2_foo_N37"/>
         </node>
         <scope name="Lbasic_exception;.:foo:103:380.:B:130:380">
-          <node data="null" id="M2_foo_N4" kind="value" type="@null">
+          <node data="null" id="M2_foo_N4" kind="value" type="?">
             <ast end="155" start="151" type="33"/>
           </node>
           <node id="M2_foo_N5" kind="assign_var" ref="$Lbasic_exception;.:foo:103:380.:B:130:380/$x" type="Ljava/lang/String;">
@@ -185,7 +185,7 @@
     <method id="Lbasic_exception/A;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="97" start="36" type="55"/>
       <scope name="Lbasic_exception/A;.:clinit:">
-        <node data="uninitialized" id="K4_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
         <node id="K4_:clinit:_N2" kind="assign_var" ref=".Lbasic_exception/A;/.text" type="Ljava/lang/String;">
           <ast end="90" start="86" type="59"/>
           <accept src="K4_:clinit:_N1"/>

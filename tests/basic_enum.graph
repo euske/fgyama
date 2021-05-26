@@ -6,7 +6,7 @@
     <method id="LE;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="102" start="0" type="71"/>
       <scope name="LE;.:clinit:">
-        <node data="uninitialized" id="K1_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K1_:clinit:_N1" kind="value" type="?"/>
         <node id="K1_:clinit:_N2" kind="assign_var" ref=".LE;/.x" type="I">
           <ast end="50" start="49" type="59"/>
           <accept src="K1_:clinit:_N1"/>

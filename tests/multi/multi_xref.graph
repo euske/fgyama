@@ -4,7 +4,7 @@
     <method id="Ldom/meep/multi_xref1;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="256" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref1;.:clinit:">
-        <node data="uninitialized" id="K1_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K1_:clinit:_N1" kind="value" type="?"/>
         <node id="K1_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
           <ast end="68" start="63" type="59"/>
           <accept src="K1_:clinit:_N1"/>
@@ -124,7 +124,7 @@
     <method id="Ldom/meep/multi_xref2;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="297" start="19" type="55"/>
       <scope name="Ldom/meep/multi_xref2;.:clinit:">
-        <node data="uninitialized" id="K4_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
         <node id="K4_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
           <ast end="68" start="63" type="59"/>
           <accept src="K4_:clinit:_N1"/>
@@ -257,7 +257,7 @@
     <method id="Ldom/meep/multi_xref1/baa;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="109" start="75" type="55"/>
       <scope name="Ldom/meep/multi_xref1/baa;.:clinit:">
-        <node data="uninitialized" id="K7_:clinit:_N1" kind="value" type="@null"/>
+        <node data="null" id="K7_:clinit:_N1" kind="value" type="?"/>
         <node id="K7_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1/baa;/.baz" type="I">
           <ast end="102" start="99" type="59"/>
           <accept src="K7_:clinit:_N1"/>
