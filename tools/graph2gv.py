@@ -25,7 +25,9 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
     else:
         out.write(h+f'subgraph {q("cluster_"+name)} {{\n')
     out.write(h+f' label={q(name)};\n')
+    nodes = {-1:[], 0:[], 1:[]}
     for node in scope.nodes:
+        rank = 0
         kind = node.kind
         styles = { 'label':kind }
         if kind in ('join','begin','end','repeat','case'):
@@ -39,8 +41,16 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
         elif kind in ('input','output','receive'):
             if node.ref is not None:
                 styles['label'] = f'{kind} ({parserefname(node.ref)})'
+            if kind == 'input':
+                rank = -1
+            elif kind == 'output':
+                rank = +1
         elif kind in ('passin','passout'):
             styles['style'] = 'dotted'
+            if kind == 'passin':
+                rank = -1
+            elif kind == 'passout':
+                rank = +1
         elif kind == 'new':
             (_, klass) = DFType.parse(node.ntype)
             styles['shape'] = 'box'
@@ -64,7 +74,17 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
                 styles['label'] = f'({parserefname(node.ref)})'
         if highlight is not None and node.nid in highlight:
             styles['style'] = 'filled'
-        out.write(h+f' N{r(node.nid)} [{qp(styles)}];\n')
+        nodes[rank].append((node, styles))
+    for (rank,a) in nodes.items():
+        if not a: continue
+        if rank < 0:
+            out.write(h+'subgraph { rank=source;\n')
+        elif 0 < rank:
+            out.write(h+'subgraph { rank=sink;\n')
+        for (node,styles) in a:
+            out.write(h+f' N{r(node.nid)} [{qp(styles)}];\n')
+        if rank != 0:
+            out.write(h+'}\n')
     for child in scope.children:
         write_gv(out, child, highlight, level=level+1)
     if level == 0:
