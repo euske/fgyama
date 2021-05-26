@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import io
 import sys
+import logging
 from subprocess import Popen, PIPE
 from graphs import get_graphs, parserefname, parsemethodname, DFType
 
@@ -106,7 +107,7 @@ def write_gv(out, scope, highlight=None, level=0, name=None):
 
 def run_dot(methods, type='svg'):
     args = ['dot', '-T'+type]
-    print(f'run_dot: {args!r}', file=sys.stderr)
+    logging.info(f'run_dot: {args!r}')
     data = io.StringIO()
     for method in methods:
         (klass,name,func) = parsemethodname(method.name)

@@ -796,22 +796,23 @@ def main(argv):
         (opts, args) = getopt.getopt(argv[1:], 'dM:')
     except getopt.GetoptError:
         return usage()
-    debug = 0
+    level = logging.INFO
     maxoverrides = 1
     for (k, v) in opts:
-        if k == '-d': debug += 1
+        if k == '-d': level = logging.DEBUG
         elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
 
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
+
     builder = IDFBuilder(maxoverrides=maxoverrides)
     for path in args:
-        print(f'Loading: {path!r}...', file=sys.stderr)
+        logging.info(f'Loading: {path!r}...')
         builder.load(path)
 
     builder.run()
     nfuncalls = sum( len(a) for a in builder.funcalls.values() )
-    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes',
-          file=sys.stderr)
+    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes')
 
     return 0
 
