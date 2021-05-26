@@ -17,6 +17,10 @@
         <node id="M2_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
         <node id="M2_main_N4" kind="input" ref="@LHello;" type="LHello;"/>
         <node id="M2_main_N5" kind="input" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M2_main_N18" kind="passin" type="?"/>
+        <node id="M2_main_N19" kind="passout" type="?">
+          <accept src="M2_main_N16"/>
+        </node>
         <scope name="LHello;.:main:25:146.:B:64:146">
           <node id="M2_main_N6" kind="ref_var" ref="$LHello;.:main:25:146/$args" type="[Ljava/lang/String;">
             <ast end="92" start="88" type="42"/>
@@ -54,9 +58,13 @@
           <node data="Ljava/io/PrintStream;.println(Ljava/lang/String;)V" id="M2_main_N14" kind="call" type="V">
             <ast end="139" start="105" type="32"/>
             <accept label="#arg0" src="M2_main_N13"/>
+            <accept label="#bypass" src="M2_main_N18"/>
             <accept label="@Ljava/io/PrintStream;" src="M2_main_N10"/>
           </node>
-          <node id="M2_main_N15" kind="receive" type="V">
+          <node id="M2_main_N16" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_main_N14"/>
+          </node>
+          <node id="M2_main_N17" kind="receive" type="V">
             <ast end="139" start="105" type="32"/>
             <accept src="M2_main_N14"/>
           </node>

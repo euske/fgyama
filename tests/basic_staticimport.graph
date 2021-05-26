@@ -9,6 +9,10 @@
       <scope name="Lbasic_staticimport;.:foo:107:161">
         <node id="M2_foo_N1" kind="input" ref="@Lbasic_staticimport;" type="Lbasic_staticimport;"/>
         <node id="M2_foo_N2" kind="input" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
+        <node id="M2_foo_N12" kind="passin" type="?"/>
+        <node id="M2_foo_N13" kind="passout" type="?">
+          <accept src="M2_foo_N10"/>
+        </node>
         <scope name="Lbasic_staticimport;.:foo:107:161.:B:132:161">
           <node id="M2_foo_N3" kind="ref_field" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="138" start="135" type="42"/>
@@ -21,20 +25,28 @@
           <node data="Ljava/lang/Math;.sin(D)D" id="M2_foo_N5" kind="call" type="D">
             <ast end="153" start="147" type="32"/>
             <accept label="#arg0" src="M2_foo_N4"/>
+            <accept label="#bypass" src="M2_foo_N12"/>
             <accept label="@Lbasic_staticimport;" src="M2_foo_N1"/>
           </node>
-          <node id="M2_foo_N6" kind="receive" type="D">
+          <node id="M2_foo_N7" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_foo_N5"/>
+          </node>
+          <node id="M2_foo_N8" kind="receive" type="D">
             <ast end="153" start="147" type="32"/>
             <accept src="M2_foo_N5"/>
           </node>
-          <node data="Ljava/io/PrintStream;.println(D)V" id="M2_foo_N7" kind="call" type="V">
+          <node data="Ljava/io/PrintStream;.println(D)V" id="M2_foo_N9" kind="call" type="V">
             <ast end="154" start="135" type="32"/>
-            <accept label="#arg0" src="M2_foo_N6"/>
+            <accept label="#arg0" src="M2_foo_N8"/>
+            <accept label="#bypass" src="M2_foo_N7"/>
             <accept label="@Ljava/io/PrintStream;" src="M2_foo_N3"/>
           </node>
-          <node id="M2_foo_N8" kind="receive" type="V">
+          <node id="M2_foo_N10" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_foo_N9"/>
+          </node>
+          <node id="M2_foo_N11" kind="receive" type="V">
             <ast end="154" start="135" type="32"/>
-            <accept src="M2_foo_N7"/>
+            <accept src="M2_foo_N9"/>
           </node>
         </scope>
       </scope>

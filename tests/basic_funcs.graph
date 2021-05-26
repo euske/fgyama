@@ -37,15 +37,16 @@
         <node id="M2_main_N3" kind="input" ref="%Ljava/lang/String;" type="Ljava/lang/String;"/>
         <node id="M2_main_N4" kind="input" ref="@Lbasic_funcs;" type="Lbasic_funcs;"/>
         <node id="M2_main_N5" kind="input" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;"/>
-        <node id="M2_main_N17" ref=".Lbasic_funcs;/.z" type="I">
-          <accept label=".Lbasic_funcs;/.z" src="M2_main_N26"/>
+        <node id="M2_main_N19" ref=".Lbasic_funcs;/.z" type="I">
+          <accept label=".Lbasic_funcs;/.z" src="M2_main_N30"/>
         </node>
-        <node id="M2_main_N25" kind="output" ref="!Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
-          <accept src="M2_main_N12"/>
+        <node id="M2_main_N29" kind="output" ref="!Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
+          <accept src="M2_main_N14"/>
         </node>
-        <node id="M2_main_N26" kind="passin" type="?"/>
-        <node id="M2_main_N27" kind="passout" type="?">
-          <accept label=".Lbasic_funcs;/.z" src="M2_main_N18"/>
+        <node id="M2_main_N30" kind="passin" type="?"/>
+        <node id="M2_main_N31" kind="passout" type="?">
+          <accept label=".Lbasic_funcs;/.z" src="M2_main_N21"/>
+          <accept src="M2_main_N27"/>
         </node>
         <scope name="Lbasic_funcs;.:main:77:243.:B:116:243">
           <node id="M2_main_N6" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243/$args" type="[Ljava/lang/String;">
@@ -72,55 +73,67 @@
           <node data="Ljava/lang/Integer;.parseInt(Ljava/lang/String;)I" id="M2_main_N11" kind="call" type="I">
             <ast end="181" start="162" type="32"/>
             <accept label="#arg0" src="M2_main_N10"/>
+            <accept label="#bypass" src="M2_main_N30"/>
           </node>
-          <node id="M2_main_N12" kind="throw" ref="!Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
+          <node id="M2_main_N13" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_main_N11"/>
+          </node>
+          <node id="M2_main_N14" kind="throw" ref="!Ljava/lang/NumberFormatException;" type="Ljava/lang/NumberFormatException;">
             <accept label="!Ljava/lang/NumberFormatException;" src="M2_main_N11"/>
           </node>
-          <node id="M2_main_N13" kind="receive" type="I">
+          <node id="M2_main_N15" kind="receive" type="I">
             <ast end="181" start="162" type="32"/>
             <accept src="M2_main_N11"/>
           </node>
-          <node id="M2_main_N14" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
+          <node id="M2_main_N16" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="181" start="158" type="59"/>
-            <accept src="M2_main_N13"/>
+            <accept src="M2_main_N15"/>
           </node>
-          <node id="M2_main_N15" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
+          <node id="M2_main_N17" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$b" type="I">
             <ast end="204" start="203" type="42"/>
-            <accept src="M2_main_N14"/>
-          </node>
-          <node data="Lbasic_funcs;.moo(I)I" id="M2_main_N16" kind="call" type="I">
-            <ast end="205" start="199" type="32"/>
-            <accept label="#arg0" src="M2_main_N15"/>
-            <accept label="@Lbasic_funcs;" src="M2_main_N4"/>
-            <accept label=".Lbasic_funcs;/.z" src="M2_main_N17"/>
-          </node>
-          <node id="M2_main_N18" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
-            <accept label=".Lbasic_funcs;/.z" src="M2_main_N16"/>
-          </node>
-          <node id="M2_main_N19" kind="receive" type="I">
-            <ast end="205" start="199" type="32"/>
             <accept src="M2_main_N16"/>
           </node>
-          <node id="M2_main_N20" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
-            <ast end="205" start="195" type="59"/>
-            <accept src="M2_main_N19"/>
+          <node data="Lbasic_funcs;.moo(I)I" id="M2_main_N18" kind="call" type="I">
+            <ast end="205" start="199" type="32"/>
+            <accept label="#arg0" src="M2_main_N17"/>
+            <accept label="#bypass" src="M2_main_N13"/>
+            <accept label="@Lbasic_funcs;" src="M2_main_N4"/>
+            <accept label=".Lbasic_funcs;/.z" src="M2_main_N19"/>
           </node>
-          <node id="M2_main_N21" kind="ref_field" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
+          <node id="M2_main_N20" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_main_N18"/>
+          </node>
+          <node id="M2_main_N21" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
+            <accept label=".Lbasic_funcs;/.z" src="M2_main_N18"/>
+          </node>
+          <node id="M2_main_N22" kind="receive" type="I">
+            <ast end="205" start="199" type="32"/>
+            <accept src="M2_main_N18"/>
+          </node>
+          <node id="M2_main_N23" kind="assign_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
+            <ast end="205" start="195" type="59"/>
+            <accept src="M2_main_N22"/>
+          </node>
+          <node id="M2_main_N24" kind="ref_field" ref=".Ljava/lang/System;/.out" type="Ljava/io/PrintStream;">
             <ast end="225" start="215" type="40"/>
             <accept src="M2_main_N5"/>
           </node>
-          <node id="M2_main_N22" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
+          <node id="M2_main_N25" kind="ref_var" ref="$Lbasic_funcs;.:main:77:243.:B:116:243/$c" type="I">
             <ast end="235" start="234" type="42"/>
-            <accept src="M2_main_N20"/>
-          </node>
-          <node data="Ljava/io/PrintStream;.println(I)V" id="M2_main_N23" kind="call" type="V">
-            <ast end="236" start="215" type="32"/>
-            <accept label="#arg0" src="M2_main_N22"/>
-            <accept label="@Ljava/io/PrintStream;" src="M2_main_N21"/>
-          </node>
-          <node id="M2_main_N24" kind="receive" type="V">
-            <ast end="236" start="215" type="32"/>
             <accept src="M2_main_N23"/>
+          </node>
+          <node data="Ljava/io/PrintStream;.println(I)V" id="M2_main_N26" kind="call" type="V">
+            <ast end="236" start="215" type="32"/>
+            <accept label="#arg0" src="M2_main_N25"/>
+            <accept label="#bypass" src="M2_main_N20"/>
+            <accept label="@Ljava/io/PrintStream;" src="M2_main_N24"/>
+          </node>
+          <node id="M2_main_N27" kind="receive" ref="#bypass" type="?">
+            <accept label="#bypass" src="M2_main_N26"/>
+          </node>
+          <node id="M2_main_N28" kind="receive" type="V">
+            <ast end="236" start="215" type="32"/>
+            <accept src="M2_main_N26"/>
           </node>
         </scope>
       </scope>
@@ -140,16 +153,19 @@
         </node>
         <node id="M3_moo_N3" kind="input" ref="@Lbasic_funcs;" type="Lbasic_funcs;"/>
         <node id="M3_moo_N4" kind="input" ref=".Lbasic_funcs;/.z" type="I"/>
-        <node id="M3_moo_N29" ref=".Lbasic_funcs;/.y" type="I">
-          <accept label=".Lbasic_funcs;/.y" src="M3_moo_N37"/>
+        <node id="M3_moo_N34" ref=".Lbasic_funcs;/.y" type="I">
+          <accept label=".Lbasic_funcs;/.y" src="M3_moo_N42"/>
         </node>
-        <node id="M3_moo_N35" kind="output" ref="#return" type="I">
-          <accept src="M3_moo_N31"/>
+        <node id="M3_moo_N40" kind="output" ref="#return" type="I">
+          <accept src="M3_moo_N36"/>
         </node>
-        <node id="M3_moo_N36" kind="output" ref=".Lbasic_funcs;/.z" type="I">
-          <accept src="M3_moo_N30"/>
+        <node id="M3_moo_N41" kind="output" ref=".Lbasic_funcs;/.z" type="I">
+          <accept src="M3_moo_N35"/>
         </node>
-        <node id="M3_moo_N37" kind="passin" type="?"/>
+        <node id="M3_moo_N42" kind="passin" type="?"/>
+        <node id="M3_moo_N43" kind="passout" type="?">
+          <accept src="M3_moo_N42"/>
+        </node>
         <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407">
           <node id="M3_moo_N5" kind="assign_field" ref=".Lbasic_funcs;/.z" type="I">
             <ast end="289" start="288" type="42"/>
@@ -176,72 +192,80 @@
             <accept label="L" src="M3_moo_N8"/>
             <accept label="R" src="M3_moo_N9"/>
           </node>
-          <node id="M3_moo_N30" kind="join" ref=".Lbasic_funcs;/.z" type="I">
+          <node id="M3_moo_N35" kind="join" ref=".Lbasic_funcs;/.z" type="I">
             <ast end="401" start="304" type="25"/>
             <accept label="cond" src="M3_moo_N10"/>
-            <accept label="true" src="M3_moo_N15"/>
-            <accept label="false" src="M3_moo_N25"/>
+            <accept label="true" src="M3_moo_N17"/>
+            <accept label="false" src="M3_moo_N29"/>
           </node>
-          <node id="M3_moo_N31" kind="join" ref="#return" type="I">
+          <node id="M3_moo_N36" kind="join" ref="#return" type="I">
             <accept label="cond" src="M3_moo_N10"/>
             <accept label="true" src="M3_moo_N11"/>
-            <accept label="false" src="M3_moo_N17"/>
+            <accept label="false" src="M3_moo_N19"/>
           </node>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:316:353">
             <node id="M3_moo_N11" kind="return" ref="#return" type="I">
               <ast end="343" start="330" type="41"/>
-              <accept src="M3_moo_N16"/>
+              <accept src="M3_moo_N18"/>
             </node>
             <node data="Lbasic_funcs;.foo()I" id="M3_moo_N13" kind="call" type="I">
               <ast end="342" start="337" type="32"/>
+              <accept label="#bypass" src="M3_moo_N42"/>
               <accept label="@Lbasic_funcs;" src="M3_moo_N3"/>
-              <accept label=".Lbasic_funcs;/.y" src="M3_moo_N29"/>
+              <accept label=".Lbasic_funcs;/.y" src="M3_moo_N34"/>
             </node>
-            <node id="M3_moo_N15" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
+            <node id="M3_moo_N16" kind="receive" ref="#bypass" type="?">
+              <accept label="#bypass" src="M3_moo_N13"/>
+            </node>
+            <node id="M3_moo_N17" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
               <accept label=".Lbasic_funcs;/.z" src="M3_moo_N13"/>
             </node>
-            <node id="M3_moo_N16" kind="receive" type="I">
+            <node id="M3_moo_N18" kind="receive" type="I">
               <ast end="342" start="337" type="32"/>
               <accept src="M3_moo_N13"/>
             </node>
           </scope>
           <scope name="Lbasic_funcs;.:moo:249:407.:B:278:407.:B:359:401">
-            <node id="M3_moo_N17" kind="return" ref="#return" type="I">
+            <node id="M3_moo_N19" kind="return" ref="#return" type="I">
               <ast end="391" start="373" type="41"/>
-              <accept src="M3_moo_N28"/>
+              <accept src="M3_moo_N32"/>
             </node>
-            <node id="M3_moo_N19" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
+            <node id="M3_moo_N21" kind="ref_var" ref="$Lbasic_funcs;.:moo:249:407/$x" type="I">
               <ast end="385" start="384" type="42"/>
               <accept src="M3_moo_N2"/>
             </node>
-            <node data="1" id="M3_moo_N21" kind="value" type="I">
+            <node data="1" id="M3_moo_N23" kind="value" type="I">
               <ast end="387" start="386" type="34"/>
             </node>
-            <node data="-" id="M3_moo_N22" kind="op_infix" type="I">
+            <node data="-" id="M3_moo_N24" kind="op_infix" type="I">
               <ast end="387" start="384" type="27"/>
-              <accept label="L" src="M3_moo_N19"/>
-              <accept label="R" src="M3_moo_N21"/>
+              <accept label="L" src="M3_moo_N21"/>
+              <accept label="R" src="M3_moo_N23"/>
             </node>
-            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N23" kind="call" type="I">
+            <node data="Lbasic_funcs;.moo(I)I" id="M3_moo_N25" kind="call" type="I">
               <ast end="388" start="380" type="32"/>
-              <accept label="#arg0" src="M3_moo_N22"/>
+              <accept label="#arg0" src="M3_moo_N24"/>
+              <accept label="#bypass" src="M3_moo_N42"/>
               <accept label="@Lbasic_funcs;" src="M3_moo_N3"/>
               <accept label=".Lbasic_funcs;/.z" src="M3_moo_N5"/>
             </node>
-            <node id="M3_moo_N25" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
-              <accept label=".Lbasic_funcs;/.z" src="M3_moo_N23"/>
+            <node id="M3_moo_N28" kind="receive" ref="#bypass" type="?">
+              <accept label="#bypass" src="M3_moo_N25"/>
             </node>
-            <node id="M3_moo_N26" kind="receive" type="I">
+            <node id="M3_moo_N29" kind="receive" ref=".Lbasic_funcs;/.z" type="I">
+              <accept label=".Lbasic_funcs;/.z" src="M3_moo_N25"/>
+            </node>
+            <node id="M3_moo_N30" kind="receive" type="I">
               <ast end="388" start="380" type="32"/>
-              <accept src="M3_moo_N23"/>
+              <accept src="M3_moo_N25"/>
             </node>
-            <node data="2" id="M3_moo_N27" kind="value" type="I">
+            <node data="2" id="M3_moo_N31" kind="value" type="I">
               <ast end="390" start="389" type="34"/>
             </node>
-            <node data="+" id="M3_moo_N28" kind="op_infix" type="I">
+            <node data="+" id="M3_moo_N32" kind="op_infix" type="I">
               <ast end="390" start="380" type="27"/>
-              <accept label="L" src="M3_moo_N26"/>
-              <accept label="R" src="M3_moo_N27"/>
+              <accept label="L" src="M3_moo_N30"/>
+              <accept label="R" src="M3_moo_N31"/>
             </node>
           </scope>
         </scope>
