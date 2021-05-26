@@ -14,12 +14,6 @@ def ns(x):
     else:
         return 'N'+str(x)
 
-def clen(x):
-    if x is None:
-        return 0
-    else:
-        return len(x)
-
 NAME = re.compile(r'\w+$', re.U)
 def stripid(name):
     if name.startswith('%'):
@@ -655,52 +649,6 @@ def run_fgyama(path, gid=0):
     methods = list(FGYamaParser(gid).parse(p.stdout))
     p.wait()
     return methods
-
-
-##  Cons
-##
-class Cons:
-
-    def __init__(self, car, cdr=None):
-        self.car = car
-        self.cdr = cdr
-        self.length = 1
-        if (cdr is not None):
-            self.length = cdr.length+1
-        return
-
-    def __len__(self):
-        return self.length
-
-    def __hash__(self):
-        return id(self)
-
-    def __iter__(self):
-        c = self
-        while c is not None:
-            yield c.car
-            c = c.cdr
-        return
-
-    def __eq__(self, c1):
-        c0 = self
-        while c0 is not c1:
-            if c0 is None or c1 is None: return False
-            if c0.car != c1.car: return False
-            (c0,c1) = (c0.cdr, c1.cdr)
-        return True
-
-    def __contains__(self, obj0):
-        for obj in self:
-            if obj is obj0: return True
-        return False
-
-    @classmethod
-    def fromseq(self, seq):
-        c = None
-        for x in seq:
-            c = Cons(x, c)
-        return c
 
 
 ##  IPVertex (Inter-Procedural Vertex)

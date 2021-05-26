@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import sys
 import logging
-from graphs import IDFBuilder, Cons, clen, parsemethodname, stripid
+from graphs import IDFBuilder, parsemethodname, stripid
+from algos import Cons, SCC
 
 def q(s):
     if s:
@@ -47,82 +48,6 @@ class IRef:
         iref.linkfrom.append(self)
         return
 
-class IRefComponent:
-
-    MAXNAMES = 5
-
-    def __init__(self, cid, irefs=None):
-        if irefs is None:
-            irefs = []
-        self.cid = cid
-        self.irefs = irefs
-        self.linkto = set()
-        self.linkfrom = set()
-        return
-
-    def __repr__(self):
-        names = set( str(iref) for iref in self.irefs )
-        if self.MAXNAMES < len(names):
-            names = list(names)[:self.MAXNAMES] + ['...']
-        return '[%s]' % ', '.join(names)
-
-    def __len__(self):
-        return len(self.irefs)
-
-    def __iter__(self):
-        return iter(self.irefs)
-
-    def add(self, iref):
-        self.irefs.append(iref)
-        return
-
-    def fixate(self, ref2cpt):
-        for iref0 in self.irefs:
-            for iref1 in iref0.linkto:
-                cpt = ref2cpt[iref1]
-                if cpt is self: continue
-                self.linkto.add(cpt)
-                cpt.linkfrom.add(self)
-        return
-
-    @classmethod
-    def fromitems(klass, irefs):
-        ref2cpt = {}
-        cpts = []
-        # Tarjan's algorithm.
-        stack = []
-        index = {}
-        lowlink = {}
-        onstack = set()
-        def visit(v0):
-            i = len(index)
-            index[v0] = i
-            lowlink[v0] = i
-            stack.append(v0)
-            onstack.add(v0)
-            for v1 in v0.linkto:
-                if v1 not in index:
-                    visit(v1)
-                    lowlink[v0] = min(lowlink[v0], lowlink[v1])
-                elif v1 in onstack:
-                    lowlink[v0] = min(lowlink[v0], index[v1])
-            if index[v0] == lowlink[v0]:
-                cpt = klass(len(cpts)+1)
-                while True:
-                    v = stack.pop()
-                    onstack.remove(v)
-                    cpt.add(v)
-                    ref2cpt[v] = cpt
-                    if v is v0: break
-                cpts.append(cpt)
-        #
-        for iref in irefs:
-            if iref not in ref2cpt:
-                visit(iref)
-        for cpt in cpts:
-            cpt.fixate(ref2cpt)
-        return (ref2cpt, cpts)
-
 # trace()
 IGNORED = {
     'value', 'valueset',
@@ -135,7 +60,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
     if k in ctx2iref:
         iref1 = ctx2iref[k]
         if iref0 is not None:
-            logging.debug(f'{clen(cc)} {iref1!r} -> {iref0!r}')
+            logging.debug(f'{Cons.len(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         return
     n1 = v1.node
@@ -150,7 +75,7 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
         else:
             iref1 = IRef.get(None, ref1)
         if iref0 is not None:
-            logging.debug(f'{clen(cc)} {iref1!r} -> {iref0!r}')
+            logging.debug(f'{Cons.len(cc)} {iref1!r} -> {iref0!r}')
             yield (iref1, iref0)
         ctx2iref[k] = iref1
     for (link,v2,funcall) in v1.inputs:
@@ -233,7 +158,7 @@ def main(argv):
     logging.info(f'links: {nlinks}')
 
     # Discover strong components.
-    (ref2cpt, allcpts) = IRefComponent.fromitems(irefs)
+    (allcpts, ref2cpt) = SCC.fromnodes(irefs, lambda iref: iref.linkto)
     logging.info(f'allcpts: {len(allcpts)}')
 
     # Discover the most significant edges.

@@ -1,32 +1,14 @@
 #!/usr/bin/env python
 import sys
 import logging
-from graphs import get_graphs, parsemethodname, Cons, clen, stripid
+from graphs import get_graphs, parsemethodname, stripid
+from algos import Cons
 
 def q(s):
     if s:
         return '"%s"' % s.replace('"',r'\"')
     else:
         return '""'
-
-def topsort(nodes):
-    incoming = { n0: [] for n0 in nodes }
-    for n0 in incoming:
-        for (label,n1) in n0.inputs.items():
-            if label.startswith('_'): continue
-            incoming[n1].append(n0)
-    out = []
-    while incoming:
-        for (n0,z) in incoming.items():
-            if not z: break
-        else:
-            raise ValueError('cycle')
-        del incoming[n0]
-        out.append(n0)
-        for (label,n1) in n0.inputs.items():
-            if label.startswith('_'): continue
-            incoming[n1].remove(n0)
-    return out
 
 class Group:
 
@@ -107,12 +89,13 @@ def main(argv):
         for vtx in prevs:
             vout.connect(vtx)
         edges = { 'in': set() }
-        for n0 in topsort(method):
+        edgefunc = (lambda n0: ( n1 for (x,n1) in n0.inputs.items() if x.startswith('_') ))
+        for n0 in topsort(method, edgefunc):
             if n0 in edges:
                 p = edges[n0]
             else:
                 p = set([vout])
-            if n0.is_funcall() and (maxlevel == 0 or clen(cc) < maxlevel):
+            if n0.is_funcall() and (maxlevel == 0 or Cons.len(cc) < maxlevel):
                 funcs = n0.data.split(' ')
                 a = []
                 for gid in funcs[:maxoverrides]:
