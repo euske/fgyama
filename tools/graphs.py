@@ -4,6 +4,7 @@ import re
 import os.path
 import xml.sax
 import xml.sax.handler
+import logging
 from subprocess import Popen, PIPE
 from xml.etree.ElementTree import Element
 
@@ -734,14 +735,14 @@ class IPVertex:
 ##
 class IDFBuilder:
 
-    def __init__(self, maxoverrides=1, dbg=None):
+    def __init__(self, maxoverrides=1, mfilter=None):
         self.maxoverrides = maxoverrides
-        self.dbg = dbg
+        self.mfilter = mfilter
         self.methods = []
-        self.srcmap = {}
-        self.gid2method = {}
-        self.funcalls = {}
-        self.vtxs = {}
+        self.srcmap = {}        # {path:fid}
+        self.gid2method = {}    # {gid:method}
+        self.funcalls = {}      # {gid:[call, ...]}
+        self.vtxs = {}          # {node:vtx}
         return
 
     def __len__(self):
@@ -752,20 +753,31 @@ class IDFBuilder:
         return iter(self.vtxs.values())
 
     # Load methods.
-    def load(self, path, fp=None, filter=None):
+    def load(self, path, filter=None):
+        srcs = []
         for method in get_graphs(path):
-            if method.style == 'initializer': continue
-            if filter is not None and not filter(method): continue
+            #if method.style == 'initializer': continue
+            if self.mfilter is not None and not self.mfilter(method): continue
             path = method.klass.path
             if path not in self.srcmap:
                 fid = len(self.srcmap)
                 self.srcmap[path] = fid
-                src = (fid, path)
-                if fp is not None:
-                    fp.write(f'+SOURCE {src}\n')
+                srcs.append((fid, path))
             self.methods.append(method)
             self.gid2method[method.name] = method
-        return
+            # Extract caller/callee relationships.
+            for node in method:
+                if not node.is_funcall(): continue
+                funcs = node.data.split(' ')
+                for callee in funcs[:self.maxoverrides]:
+                    logging.debug(f'addcall {method.name}: {callee}')
+                    if callee in self.funcalls:
+                        a = self.funcalls[callee]
+                    else:
+                        a = self.funcalls[callee] = []
+                    if node not in a:
+                        a.append(node)
+        return srcs
 
     # Get a source.
     def getsrc(self, node, resolve=True):
@@ -781,64 +793,48 @@ class IDFBuilder:
         else:
             return (path, start, end)
 
-    # Register a funcall.
-    def addcall(self, x, y): # (caller, callee)
-        if self.dbg is not None:
-            self.dbg.write(f'# addcall {x.method.name}: {y}\n')
-        if y in self.funcalls:
-            a = self.funcalls[y]
-        else:
-            a = self.funcalls[y] = []
-        if x not in a:
-            a.append(x)
-        return
-
     # Create a IPVertex.
     def getvtx(self, node):
         if node in self.vtxs:
             vtx = self.vtxs[node]
         else:
             vtx = self.vtxs[node] = IPVertex(node)
-            if self.dbg is not None:
-                self.dbg.write(f'# getvtx {vtx}: {node.kind}({node.data!r})\n')
+            logging.debug(f'getvtx {vtx}: {node.kind}({node.data!r})')
         return vtx
 
+    # Convert every node to IPVertex.
     def run(self):
-        # Enumerate caller/callee relationships.
-        for src in self.methods:
-            for node in src:
-                if node.is_funcall():
-                    funcs = node.data.split(' ')
-                    for gid in funcs[:self.maxoverrides]:
-                        self.addcall(node, gid)
-
-        # Convert every node to IPVertex.
         for method in self.methods:
             for node in method:
                 if node.is_funcall():
                     funcs = node.data.split(' ')
                     for callee in funcs[:self.maxoverrides]:
-                        if callee not in self.gid2method: continue
-                        for n1 in self.gid2method[callee]:
-                            if n1.kind == 'input':
-                                label = n1.ref
-                                if label in node.inputs:
-                                    n0 = node.inputs[label]
-                                    vtx0 = self.getvtx(n0)
-                                    vtx0.connect(label, self.getvtx(n1), node)
-                                    #print(f'# send: {n0} {label} -> {n1}')
-                            elif n1.kind == 'output':
-                                vtx1 = self.getvtx(n1)
-                                for (label,n2) in node.outputs:
-                                    assert n2.kind in ('receive', 'throw')
-                                    assert n2.ref == label or n2.ref is None
-                                    if not label: label = '#return'
-                                    if n1.ref != label: continue
-                                    vtx1.connect(label, self.getvtx(n2), node)
-                                    #print(f'# recv: {n1} -> {label} {n2}')
+                        if callee in self.gid2method:
+                            self.connect(node, self.gid2method[callee])
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
+        return
+
+    # Connect nodes interprocedurally.
+    def connect(self, node, extnodes):
+        for n1 in extnodes:
+            if n1.kind == 'input':
+                label = n1.ref
+                if label in node.inputs:
+                    n0 = node.inputs[label]
+                    vtx0 = self.getvtx(n0)
+                    vtx0.connect(label, self.getvtx(n1), node)
+                    #print(f'# send: {n0} {label} -> {n1}')
+            elif n1.kind == 'output':
+                vtx1 = self.getvtx(n1)
+                for (label,n2) in node.outputs:
+                    assert n2.kind in ('receive', 'throw')
+                    assert n2.ref == label or n2.ref is None
+                    if not label: label = '#return'
+                    if n1.ref != label: continue
+                    vtx1.connect(label, self.getvtx(n2), node)
+                    #print(f'# recv: {n1} -> {label} {n2}')
         return
 
 
