@@ -24,7 +24,11 @@ def get_nodekey(node):
 ##
 class GraphDB:
 
-    def __init__(self, path):
+    def __init__(self, path, existing=False):
+        if existing and not os.path.exists(path):
+            raise IOError(f'not found: {path}')
+        elif not existing and os.path.exists(path):
+            raise IOError(f'already exists: {path}')
         self._conn = sqlite3.connect(path)
         self._cur = self._conn.cursor()
         self._cur.executescript('''
@@ -47,7 +51,7 @@ CREATE TABLE IF NOT EXISTS DFKlass (
 CREATE INDEX IF NOT EXISTS DFKlassNameIndex ON DFKlass(Name);
 
 CREATE TABLE IF NOT EXISTS DFMethod (
-    Gid INTEGER PRIMARY KEY,
+    Mid INTEGER PRIMARY KEY,
     Kid INTEGER,
     Name TEXT,
     Style TEXT
@@ -57,15 +61,15 @@ CREATE INDEX IF NOT EXISTS DFMethodNameIndex ON DFMethod(Name);
 
 CREATE TABLE IF NOT EXISTS DFScope (
     Sid INTEGER PRIMARY KEY,
-    Gid INTEGER,
+    Mid INTEGER,
     Parent INTEGER,
     Name TEXT
 );
-CREATE INDEX IF NOT EXISTS DFScopeGidIndex ON DFScope(Gid);
+CREATE INDEX IF NOT EXISTS DFScopeMidIndex ON DFScope(Mid);
 
 CREATE TABLE IF NOT EXISTS DFNode (
     Nid INTEGER PRIMARY KEY,
-    Gid INTEGER,
+    Mid INTEGER,
     Sid INTEGER,
     Aid INTEGER,
     Kind TEXT,
@@ -73,7 +77,7 @@ CREATE TABLE IF NOT EXISTS DFNode (
     Data TEXT,
     Type TEXT
 );
-CREATE INDEX IF NOT EXISTS DFNodeGidIndex ON DFNode(Gid);
+CREATE INDEX IF NOT EXISTS DFNodeMidIndex ON DFNode(Mid);
 
 CREATE TABLE IF NOT EXISTS DFLink (
     Lid INTEGER PRIMARY KEY,
@@ -113,8 +117,8 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         cur.execute(
             'INSERT INTO DFMethod VALUES (NULL,?,?,?);',
             (method.klass.kid, method.name, method.style))
-        gid = cur.lastrowid
-        method.gid = gid
+        mid = cur.lastrowid
+        method.mid = mid
         nids = {}
 
         def add_node(sid, node):
@@ -126,7 +130,7 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
                 aid = cur.lastrowid
             cur.execute(
                 'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
-                (gid, sid, aid, node.kind, node.ref, node.data, node.ntype))
+                (mid, sid, aid, node.kind, node.ref, node.data, node.ntype))
             nid = cur.lastrowid
             node.nid = nid
             return nid
@@ -134,7 +138,7 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         def add_scope(scope, parent=0):
             cur.execute(
                 'INSERT INTO DFScope VALUES (NULL,?,?,?);',
-                (gid, parent, scope.name))
+                (mid, parent, scope.name))
             sid = cur.lastrowid
             scope.sid = sid
             for node in scope.nodes:
@@ -149,11 +153,12 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
                 (nids[node], nids[src], label))
             return
 
-        add_scope(method.root)
-        for node in method:
-            for (label,src) in node.inputs.items():
-                add_link(node, src, label)
-        return gid
+        if method.root is not None:
+            add_scope(method.root)
+            for node in method:
+                for (label,src) in node.inputs.items():
+                    add_link(node, src, label)
+        return mid
 
     def get_kids(self):
         cur = self._conn.cursor()
@@ -169,27 +174,27 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         (kid,) = fetch1(cur, f'DFKlass({name})')
         return kid
 
-    def get_gids(self):
+    def get_mids(self):
         cur = self._conn.cursor()
-        for (gid,) in cur.execute('SELECT Gid FROM DFMethod;'):
-            yield gid
+        for (mid,) in cur.execute('SELECT Mid FROM DFMethod;'):
+            yield mid
         return
 
-    def get_gidsbykid(self, kid):
+    def get_midsbykid(self, kid):
         cur = self._conn.cursor()
-        for (gid,) in cur.execute(
-            'SELECT Gid FROM DFMethod WHERE Kid=?;',
+        for (mid,) in cur.execute(
+            'SELECT Mid FROM DFMethod WHERE Kid=?;',
             (kid,)):
-            yield gid
+            yield mid
         return
 
-    def get_gidbyname(self, name):
+    def get_midbyname(self, name):
         cur = self._cur
         cur.execute(
-            'SELECT Gid FROM DFMethod WHERE Name=?;',
+            'SELECT Mid FROM DFMethod WHERE Name=?;',
             (name,))
-        (gid,) = fetch1(cur, f'DFMethod({name})')
-        return gid
+        (mid,) = fetch1(cur, f'DFMethod({name})')
+        return mid
 
     def get_klass(self, kid):
         cur = self._cur
@@ -203,18 +208,18 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
             implements = []
         return DFKlass(name, path, interface, extends, implements, generic, kid)
 
-    def get_method(self, gid, klass=None):
+    def get_method(self, mid, klass=None):
         cur = self._cur
         cur.execute(
-            'SELECT Kid,Name,Style FROM DFMethod WHERE Gid=?;',
-            (gid,))
-        (kid,name,style) = fetch1(cur, f'DFMethod({gid})')
+            'SELECT Kid,Name,Style FROM DFMethod WHERE Mid=?;',
+            (mid,))
+        (kid,name,style) = fetch1(cur, f'DFMethod({mid})')
         if klass is None:
             klass = self.get_klass(kid)
-        method = DFMethod(klass, name, style, gid)
+        method = DFMethod(klass, name, style, mid)
         rows = cur.execute(
-            'SELECT Sid,Parent,Name FROM DFScope WHERE Gid=?;',
-            (gid,))
+            'SELECT Sid,Parent,Name FROM DFScope WHERE Mid=?;',
+            (mid,))
         pids = {}
         scopes = method.scopes
         for (sid,parent,name) in rows:
@@ -227,8 +232,8 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Gid=?;',
-            (gid,))
+            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Mid=?;',
+            (mid,))
         for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
             scope = scopes[sid]
             node = DFNode(method, nid, scope, kind, ref, data, ntype)
@@ -251,8 +256,8 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
     def get_allmethods(self):
         for kid in self.get_kids():
             klass = self.get_klass(kid)
-            for gid in self.get_gidsbykid(kid):
-                yield self.get_method(gid, klass)
+            for mid in self.get_midsbykid(kid):
+                yield self.get_method(mid, klass)
         return
 
 
@@ -260,7 +265,11 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
 ##
 class IndexDB:
 
-    def __init__(self, path, insert=False):
+    def __init__(self, path, insert=False, existing=False):
+        if existing and not os.path.exists(path):
+            raise IOError(f'not found: {path}')
+        elif not existing and os.path.exists(path):
+            raise IOError(f'already exists: {path}')
         self.insert = insert
         self._conn = sqlite3.connect(path)
         self._cur = self._conn.cursor()
@@ -275,7 +284,7 @@ CREATE INDEX TreeNodePidAndKeyIndex ON TreeNode(Pid, Key);
 
 CREATE TABLE TreeLeaf (
     Tid INTEGER,
-    Gid INTEGER,
+    Mid INTEGER,
     Nid INTEGER
 );
 CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
@@ -327,14 +336,14 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                     tid = self.get(pid, key)
                     cur.execute(
                         'INSERT INTO TreeLeaf VALUES (?,?,?);',
-                        (tid, method.gid, node0.nid))
+                        (tid, method.mid, node0.nid))
                     tids.append(tid)
                 #print ('index:', pids, key, '->', tids)
                 for (label1,src) in node0.get_inputs():
                     index_tree(label1, src, tids)
             else:
                 for (label1,src) in node0.get_inputs():
-                    assert label1 is ''
+                    #assert label1 == ''
                     index_tree(label0, src, pids)
             return
 
@@ -346,11 +355,11 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
 
     # searches subgraphs
     def search_method(self, method, minnodes=2, mindepth=2,
-                     checkgid=(lambda method, gid: True)):
+                     checkmid=(lambda method, mid: True)):
         cur = self._cur
 
         # match_tree:
-        #   result: {gid: [(label,node0,nid1)]}
+        #   result: {mid: [(label,node0,nid1)]}
         #   pid: parent tid.
         #   label0: previous edge label0.
         #   node0: node to match.
@@ -363,16 +372,16 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                 tid = self.get(pid, key)
                 if tid is None: return (0,0)
                 rows = cur.execute(
-                    'SELECT Gid,Nid FROM TreeLeaf WHERE Tid=?;',
+                    'SELECT Mid,Nid FROM TreeLeaf WHERE Tid=?;',
                     (tid,))
-                found = [ (gid1,nid1) for (gid1,nid1) in rows
-                          if checkgid(method, gid1) ]
+                found = [ (mid1,nid1) for (mids1,nid1) in rows
+                          if checkmid(method, mid1) ]
                 if not found: return (0,0)
-                for (gid1,nid1) in found:
-                    if gid1 in result:
-                        pairs = result[gid1]
+                for (mid1,nid1) in found:
+                    if mid1 in result:
+                        pairs = result[mid1]
                     else:
-                        pairs = result[gid1] = []
+                        pairs = result[mid1] = []
                     pairs.append((depth, label0, node0, nid1))
                 #print ('search:', pid, key, '->', tid, pairs)
                 maxnodes = maxdepth = 0
@@ -386,7 +395,7 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                 # skip this node, using the same label.
                 maxnodes = maxdepth = 0
                 for (label1,src) in node0.get_inputs():
-                    assert label1 is ''
+                    assert label1 == ''
                     (n,d) = match_tree(result, pid, label0, src, depth)
                     maxnodes += n
                     maxdepth = max(d, maxdepth)
@@ -400,16 +409,16 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
             (maxnodes,maxdepth) = match_tree(result, 0, '', node)
             if maxnodes < minnodes: continue
             if maxdepth < mindepth: continue
-            for (gid1,pairs) in result.items():
+            for (mid1,pairs) in result.items():
                 maxnodes = len(set( node0.nid for (_,_,node0,_) in pairs ))
                 if maxnodes < minnodes: continue
                 maxnodes = len(set( nid1 for (_,_,_,nid1) in pairs ))
                 if maxnodes < minnodes: continue
                 maxdepth = max( d for (d,_,_,_) in pairs )
                 if maxdepth < mindepth: continue
-                if gid1 not in votes:
-                    votes[gid1] = []
-                votes[gid1].extend(pairs)
+                if mid1 not in votes:
+                    votes[mid1] = []
+                votes[mid1].extend(pairs)
         return votes
 
 # main
@@ -424,23 +433,17 @@ def main(argv):
     except getopt.GetoptError:
         return usage()
 
-    isnew = True
+    existing = False
     for (k, v) in opts:
-        if k == '-c': isnew = False
-
-    def exists(path):
-        print(f'already exists: {path}')
-        return 111
+        if k == '-c': existing = True
 
     if not args: return usage()
     path = args.pop(0)
-    if isnew and os.path.exists(path): return exists(path)
-    graphdb = GraphDB(path)
+    graphdb = GraphDB(path, existing=existing)
 
     if not args: return usage()
     path = args.pop(0)
-    if isnew and os.path.exists(path): return exists(path)
-    indexdb = IndexDB(path, insert=True)
+    indexdb = IndexDB(path, insert=True, existing=existing)
 
     klass = None
     cid = None

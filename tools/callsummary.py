@@ -31,11 +31,11 @@ def main(argv):
     if 0:
         # list all the methods and number of its uses. (being called)
         for method in builder.methods:
-            gid = method.name
-            if gid not in builder.funcalls: continue
+            mname = method.name
+            if mname not in builder.funcalls: continue
             try:
-                (klass,name,func) = parsemethodname(gid)
-                n = len(builder.funcalls[gid])
+                (klass,name,func) = parsemethodname(mname)
+                n = len(builder.funcalls[mname])
                 print(n, name)
             except ValueError:
                 pass

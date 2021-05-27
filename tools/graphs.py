@@ -226,11 +226,11 @@ class DFKlass:
 ##
 class DFMethod:
 
-    def __init__(self, klass, name, style, gid=None):
+    def __init__(self, klass, name, style, mid=None):
         self.klass = klass
         self.name = name
         self.style = style
-        self.gid = gid
+        self.mid = mid
         self.root = None
         self.scopes = {}
         self.nodes = {}
@@ -243,7 +243,7 @@ class DFMethod:
         return
 
     def __repr__(self):
-        return (f'<DFMethod({self.gid}): name={self.name} ({len(self.nodes)} nodes)>')
+        return (f'<DFMethod({self.mid}): name={self.name} ({len(self.nodes)} nodes)>')
 
     def __len__(self):
         return len(self.nodes)
@@ -393,12 +393,12 @@ class DFNode:
 ##
 class FGYamaParser(xml.sax.handler.ContentHandler):
 
-    def __init__(self, gid=0):
+    def __init__(self, mid=0):
         xml.sax.handler.ContentHandler.__init__(self)
         self._stack = []
         self._cur = self.handleRoot
         self._result = []
-        self.gid = gid
+        self.mid = mid
         self.sid = None
         self.klass = None
         self.method = None
@@ -485,11 +485,11 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             return
         elif name == 'method':
             assert self.method is None
-            self.gid += 1
+            self.mid += 1
             gname = attrs.get('id')
             style = attrs.get('style')
             self.method = DFMethod(
-                self.klass, gname, style, gid=self.gid)
+                self.klass, gname, style, mid=self.mid)
             self.klass.add_method(gname)
             return self.handleMethod
         elif name == 'parameterized':
@@ -588,34 +588,33 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
 
 ##  get_graphs
 ##
-def get_graphs(arg, gid=0):
+def get_graphs(arg, mid=0):
     (path,_,ext) = arg.partition(':')
     if ext:
-        gids = map(int, ext.split(','))
+        mids = map(int, ext.split(','))
     else:
-        gids = None
+        mids = None
 
-    fp = None
-    if path == '-':
-        methods = FGYamaParser(gid).parse(sys.stdin)
-    elif path.endswith('.db'):
+    if path.endswith('.db'):
         from graph2index import GraphDB
-        if not os.path.exists(path): raise IOError(path)
-        db = GraphDB(path)
-        if gids is None:
-            methods = db.get_allmethods()
+        db = GraphDB(path, existing=True)
+        if mids is None:
+            for method in db.get_allmethods():
+                yield method
         else:
-            methods = ( db.get_method(gid) for gid in gids )
+            for mid in mids:
+                yield db.get_method(mid)
+    elif path == '-':
+        methods = FGYamaParser(mid).parse(sys.stdin)
+        for method in methods:
+            if mids is None or method.mid in mids:
+                yield method
     else:
-        fp = open(path)
-        methods = FGYamaParser(gid).parse(fp)
-
-    for method in methods:
-        if gids is None or method.gid in gids:
-            yield method
-
-    if fp is not None:
-        fp.close()
+        with open(path) as fp:
+            methods = FGYamaParser(mid).parse(fp)
+            for method in methods:
+                if mids is None or method.mid in mids:
+                    yield method
     return
 
 # run_fgyama
@@ -641,12 +640,12 @@ LIBS = (
 )
 CLASSPATH = [ os.path.join(LIBDIR, name) for name in LIBS ]
 CLASSPATH.append(os.path.join(BASEDIR, 'target'))
-def run_fgyama(path, gid=0):
+def run_fgyama(path, mid=0):
     args = ['java', '-cp', ':'.join(CLASSPATH),
             'net.tabesugi.fgyama.Java2DF', path]
     print(f'run_fgyama: {args!r}')
     p = Popen(args, stdout=PIPE)
-    methods = list(FGYamaParser(gid).parse(p.stdout))
+    methods = list(FGYamaParser(mid).parse(p.stdout))
     p.wait()
     return methods
 
@@ -688,8 +687,8 @@ class IDFBuilder:
         self.mfilter = mfilter
         self.methods = []
         self.srcmap = {}        # {path:fid}
-        self.gid2method = {}    # {gid:method}
-        self.funcalls = {}      # {gid:[call, ...]}
+        self.name2method = {}   # {name:method}
+        self.funcalls = {}      # {name:[call, ...]}
         self.vtxs = {}          # {node:vtx}
         return
 
@@ -712,7 +711,7 @@ class IDFBuilder:
                 self.srcmap[path] = fid
                 srcs.append((fid, path))
             self.methods.append(method)
-            self.gid2method[method.name] = method
+            self.name2method[method.name] = method
             # Extract caller/callee relationships.
             for node in method:
                 if not node.is_funcall(): continue
@@ -757,8 +756,8 @@ class IDFBuilder:
                 if node.is_funcall():
                     funcs = node.data.split(' ')
                     for callee in funcs[:self.maxoverrides]:
-                        if callee in self.gid2method:
-                            self.connect(node, self.gid2method[callee])
+                        if callee in self.name2method:
+                            self.connect(node, self.name2method[callee])
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))

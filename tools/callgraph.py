@@ -73,13 +73,13 @@ def main(argv):
         out = open(outpath, 'w')
 
     methods = []
-    gid2method = {}
+    name2method = {}
     for path in args:
         logging.info(f'Loading: {path}...')
         for method in get_graphs(path):
             if method.style == 'initializer': continue
             methods.append(method)
-            gid2method[method.name] = method
+            name2method[method.name] = method
 
     def trace(method, prevs, cc=None):
         logging.info(f'trace {method}')
@@ -98,9 +98,9 @@ def main(argv):
             if n0.is_funcall() and (maxlevel == 0 or Cons.len(cc) < maxlevel):
                 funcs = n0.data.split(' ')
                 a = []
-                for gid in funcs[:maxoverrides]:
-                    if gid not in gid2method: continue
-                    callee = gid2method[gid]
+                for name in funcs[:maxoverrides]:
+                    if name not in name2method: continue
+                    callee = name2method[name]
                     if cc is not None and callee in cc: continue
                     vtx = trace(callee, p, Cons(method, cc))
                     group.add(vtx.group)
