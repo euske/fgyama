@@ -371,8 +371,12 @@ public class Java2DF {
                 }
             } else if (arg.equals("-v")) {
                 Logger.LogLevel++;
-            } else if (arg.equals("-i")) {
-                String path = args[++i];
+            } else if (arg.equals("-S")) {
+                strict = true;
+            } else if (arg.equals("-F")) {
+                reformat = true;
+            } else if (arg.startsWith("-i")) {
+                String path = ((arg.length() == 2)? args[++i] : arg.substring(2));
                 InputStream input = System.in;
                 try {
                     if (!path.equals("-")) {
@@ -389,29 +393,27 @@ public class Java2DF {
                 } catch (IOException e) {
                     System.err.println("Cannot open input file: "+path);
                 }
-            } else if (arg.equals("-o")) {
-                String path = args[++i];
+            } else if (arg.startsWith("-o")) {
+                String path = ((arg.length() == 2)? args[++i] : arg.substring(2));
                 try {
                     output = new BufferedOutputStream(new FileOutputStream(path));
                     Logger.info("Exporting:", path);
                 } catch (IOException e) {
                     System.err.println("Cannot open output file: "+path);
                 }
-            } else if (arg.equals("-C")) {
-                for (String path : args[++i].split(sep)) {
+            } else if (arg.startsWith("-C")) {
+                String paths = ((arg.length() == 2)? args[++i] : arg.substring(2));
+                for (String path : paths.split(sep)) {
                     classpath.add(path);
                 }
-            } else if (arg.equals("-D")) {
-                DFKlass.MaxReifyDepth = Integer.parseInt(args[++i]);
-            } else if (arg.equals("-S")) {
-                strict = true;
-            } else if (arg.equals("-F")) {
-                reformat = true;
+            } else if (arg.startsWith("-D")) {
+                String v = ((arg.length() == 2)? args[++i] : arg.substring(2));
+                DFKlass.MaxReifyDepth = Integer.parseInt(v);
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
-                    "usage: Java2DF [-v] [-i input] [-o output]" +
-                    " [-C classpath] [-D depth] [-S] [-F] [path ...]");
+                    "usage: Java2DF [-v] [-S] [-F] [-i input] [-o output]" +
+                    " [-C classpath] [-D depth] [path ...]");
                 System.exit(1);
                 return;
             } else {
