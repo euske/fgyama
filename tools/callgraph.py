@@ -96,7 +96,7 @@ def main(argv):
             else:
                 p = set([vout])
             if n0.is_funcall() and (maxlevel == 0 or Cons.len(cc) < maxlevel):
-                funcs = n0.data.split(' ')
+                funcs = n0.data.split()
                 a = []
                 for name in funcs[:maxoverrides]:
                     if name not in name2method: continue

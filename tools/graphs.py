@@ -460,7 +460,7 @@ class FGYamaParser(xml.sax.handler.ContentHandler):
             if impls is None:
                 implements = []
             else:
-                implements = impls.split(' ')
+                implements = impls.split()
             self.klass = DFKlass(
                 name, path, interface,
                 extends, implements, generic)
@@ -715,7 +715,7 @@ class IDFBuilder:
             # Extract caller/callee relationships.
             for node in method:
                 if not node.is_funcall(): continue
-                funcs = node.data.split(' ')
+                funcs = node.data.split()
                 for callee in funcs[:self.maxoverrides]:
                     logging.debug(f'addcall {method.name}: {callee}')
                     if callee in self.funcalls:
@@ -754,7 +754,7 @@ class IDFBuilder:
         for method in self.methods:
             for node in method:
                 if node.is_funcall():
-                    funcs = node.data.split(' ')
+                    funcs = node.data.split()
                     for callee in funcs[:self.maxoverrides]:
                         if callee in self.name2method:
                             self.connect(node, self.name2method[callee])
