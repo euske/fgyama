@@ -668,13 +668,13 @@ class IPVertex:
     def __repr__(self):
         return (f'<IPVertex({self.vid})>')
 
-    def connect(self, label, output, funcall=None):
-        #print(f'# connect: {self}-{label}-{output}')
+    def accept(self, label, vtx, funcall=None):
+        #print(f'# accept: {self}-{label}-{output}')
         #assert output is not self
         assert isinstance(label, str)
-        assert isinstance(output, IPVertex)
-        self.outputs.append((label, output, funcall))
-        output.inputs.append((label, self, funcall))
+        assert isinstance(vtx, IPVertex)
+        self.inputs.append((label, vtx, funcall))
+        vtx.outputs.append((label, self, funcall))
         return
 
 
@@ -761,10 +761,10 @@ class IDFBuilder:
                         for (n0,label,n1) in self.getextnodes(node, method):
                             vtx0 = self.getvtx(n0)
                             vtx1 = self.getvtx(n1)
-                            vtx0.connect(label, vtx1, node)
+                            vtx0.accept(label, vtx1, node)
                 vtx = self.getvtx(node)
-                for (label,n1) in node.outputs:
-                    vtx.connect(label, self.getvtx(n1))
+                for (label,n1) in node.inputs.items():
+                    vtx.accept(label, self.getvtx(n1))
         return
 
     # Connect nodes interprocedurally.
@@ -775,7 +775,7 @@ class IDFBuilder:
                 if label in node.inputs:
                     n0 = node.inputs[label]
                     #print(f'# send: {n0} {label} -> {n1}')
-                    yield (n0, label, n1)
+                    yield (n1, label, n0)
 
             elif n1.kind == 'output':
                 for (label,n2) in node.outputs:
@@ -784,7 +784,7 @@ class IDFBuilder:
                     if not label: label = '#return'
                     if n1.ref != label: continue
                     #print(f'# recv: {n1} -> {label} {n2}')
-                    yield (n1, label, n2)
+                    yield (n2, label, n1)
         return
 
 
