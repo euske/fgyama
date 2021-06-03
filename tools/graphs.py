@@ -756,32 +756,35 @@ class IDFBuilder:
                 if node.is_funcall():
                     funcs = node.data.split()
                     for callee in funcs[:self.maxoverrides]:
-                        if callee in self.name2method:
-                            self.connect(node, self.name2method[callee])
+                        if callee not in self.name2method: continue
+                        method = self.name2method[callee]
+                        for (n0,label,n1) in self.getextnodes(node, method):
+                            vtx0 = self.getvtx(n0)
+                            vtx1 = self.getvtx(n1)
+                            vtx0.connect(label, vtx1, node)
                 vtx = self.getvtx(node)
                 for (label,n1) in node.outputs:
                     vtx.connect(label, self.getvtx(n1))
         return
 
     # Connect nodes interprocedurally.
-    def connect(self, node, extnodes):
-        for n1 in extnodes:
+    def getextnodes(self, node, method):
+        for n1 in method:
             if n1.kind == 'input':
                 label = n1.ref
                 if label in node.inputs:
                     n0 = node.inputs[label]
-                    vtx0 = self.getvtx(n0)
-                    vtx0.connect(label, self.getvtx(n1), node)
                     #print(f'# send: {n0} {label} -> {n1}')
+                    yield (n0, label, n1)
+
             elif n1.kind == 'output':
-                vtx1 = self.getvtx(n1)
                 for (label,n2) in node.outputs:
                     assert n2.kind in ('receive', 'throw')
                     assert n2.ref == label or n2.ref is None
                     if not label: label = '#return'
                     if n1.ref != label: continue
-                    vtx1.connect(label, self.getvtx(n2), node)
                     #print(f'# recv: {n1} -> {label} {n2}')
+                    yield (n1, label, n2)
         return
 
 
