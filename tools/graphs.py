@@ -597,7 +597,7 @@ def get_graphs(arg, mid=0):
 
     if path.endswith('.db'):
         from graph2index import GraphDB
-        db = GraphDB(path, existing=True)
+        db = GraphDB(path)
         if mids is None:
             for method in db.get_allmethods():
                 yield method

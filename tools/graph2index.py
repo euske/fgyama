@@ -2,7 +2,7 @@
 import sys
 import os.path
 import sqlite3
-from graphs import DFMethod, get_graphs
+from graphs import DFKlass, DFMethod, DFScope, DFNode, get_graphs
 
 
 # fetch1
@@ -24,10 +24,10 @@ def get_nodekey(node):
 ##
 class GraphDB:
 
-    def __init__(self, path, existing=False):
-        if existing and not os.path.exists(path):
+    def __init__(self, path, create=False):
+        if not create and not os.path.exists(path):
             raise IOError(f'not found: {path}')
-        elif not existing and os.path.exists(path):
+        elif create and os.path.exists(path):
             raise IOError(f'already exists: {path}')
         self._conn = sqlite3.connect(path)
         self._cur = self._conn.cursor()
@@ -58,6 +58,10 @@ CREATE TABLE IF NOT EXISTS DFMethod (
 );
 CREATE INDEX IF NOT EXISTS DFMethodKidIndex ON DFMethod(Kid);
 CREATE INDEX IF NOT EXISTS DFMethodNameIndex ON DFMethod(Name);
+CREATE TABLE IF NOT EXISTS DFMethodCall (
+    Mid INTEGER,
+    Nid INTEGER
+);
 
 CREATE TABLE IF NOT EXISTS DFScope (
     Sid INTEGER PRIMARY KEY,
@@ -97,8 +101,25 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         return
 
     def close(self):
+        self._list_funcalls()
         self._conn.commit()
         self._conn.close()
+        return
+
+    def _list_funcalls(self):
+        cur2 = self._conn.cursor()
+        rows = self._cur.execute(
+            'SELECT Nid,Data FROM DFNode WHERE Kind="call" OR Kind="new";')
+        for (nid,data) in rows:
+            for name in data.split():
+                mids = cur2.execute(
+                    'SELECT Mid FROM DFMethod WHERE Name=?;',
+                    (name,))
+                for (mid,) in list(mids):
+                    cur2.execute(
+                        'INSERT INTO DFMethodCall VALUES (?,?);',
+                        (mid, nid))
+        cur2.close()
         return
 
     def add_klass(self, klass):
@@ -196,6 +217,13 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         (mid,) = fetch1(cur, f'DFMethod({name})')
         return mid
 
+    def get_funcalls(self, mid):
+        cur = self._cur
+        rows = cur.execute(
+            'SELECT DFNode.Nid, DFNode.Mid FROM DFMethodCall, DFNode WHERE Mid=? AND DFMethodCall.Nid=DFNode.Nid;',
+            (mid,))
+        return list(rows)
+
     def get_klass(self, kid):
         cur = self._cur
         cur.execute(
@@ -265,10 +293,10 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
 ##
 class IndexDB:
 
-    def __init__(self, path, insert=False, existing=False):
-        if existing and not os.path.exists(path):
+    def __init__(self, path, insert=False, create=False):
+        if not create and not os.path.exists(path):
             raise IOError(f'not found: {path}')
-        elif not existing and os.path.exists(path):
+        elif create and os.path.exists(path):
             raise IOError(f'already exists: {path}')
         self.insert = insert
         self._conn = sqlite3.connect(path)
@@ -347,7 +375,6 @@ CREATE INDEX TreeLeafTidIndex ON TreeLeaf(Tid);
                     index_tree(label0, src, pids)
             return
 
-        print (method)
         for node in method:
             if not node.outputs:
                 index_tree('', node, [0])
@@ -426,24 +453,27 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-c)ontinue] graph.db index.db [graph ...]')
+        print(f'usage: {argv[0]} [-c)ontinue] [-i index.db] graph.db [graph ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'c')
+        (opts, args) = getopt.getopt(argv[1:], 'ci:')
     except getopt.GetoptError:
         return usage()
 
-    existing = False
+    create = True
+    indexpath = None
     for (k, v) in opts:
-        if k == '-c': existing = True
+        if k == '-c': create = False
+        elif k == '-i': indexpath = v
 
     if not args: return usage()
-    path = args.pop(0)
-    graphdb = GraphDB(path, existing=existing)
 
-    if not args: return usage()
     path = args.pop(0)
-    indexdb = IndexDB(path, insert=True, existing=existing)
+    graphdb = GraphDB(path, create=create)
+
+    indexdb = None
+    if indexpath is not None:
+        indexdb = IndexDB(indexpath, insert=True, create=create)
 
     klass = None
     cid = None
@@ -454,9 +484,11 @@ def main(argv):
                 klass = method.klass
                 graphdb.add_klass(klass)
             graphdb.add_method(method)
-            indexdb.index_method(method)
+            if indexdb is not None:
+                indexdb.index_method(method)
     graphdb.close()
-    indexdb.close()
+    if indexdb is not None:
+        indexdb.close()
 
     return 0
 
