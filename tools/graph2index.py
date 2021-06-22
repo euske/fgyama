@@ -58,8 +58,9 @@ CREATE TABLE IF NOT EXISTS DFMethod (
 );
 CREATE INDEX IF NOT EXISTS DFMethodKidIndex ON DFMethod(Kid);
 CREATE INDEX IF NOT EXISTS DFMethodNameIndex ON DFMethod(Name);
-CREATE TABLE IF NOT EXISTS DFMethodCall (
-    Mid INTEGER,
+
+CREATE TABLE IF NOT EXISTS DFFuncCall (
+    Name TEXT,
     Nid INTEGER
 );
 
@@ -77,11 +78,17 @@ CREATE TABLE IF NOT EXISTS DFNode (
     Sid INTEGER,
     Aid INTEGER,
     Kind TEXT,
-    Ref TEXT,
+    Rid INTEGER,
     Data TEXT,
     Type TEXT
 );
 CREATE INDEX IF NOT EXISTS DFNodeMidIndex ON DFNode(Mid);
+
+CREATE TABLE IF NOT EXISTS DFRef (
+    Rid INTEGER PRIMARY KEY,
+    Name TEXT
+);
+CREATE INDEX IF NOT EXISTS DFRefNameIndex ON DFRef(Name);
 
 CREATE TABLE IF NOT EXISTS DFLink (
     Lid INTEGER PRIMARY KEY,
@@ -91,6 +98,7 @@ CREATE TABLE IF NOT EXISTS DFLink (
 );
 CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
 ''')
+        self._rids = {}
         return
 
     def __enter__(self):
@@ -101,25 +109,8 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         return
 
     def close(self):
-        self._list_funcalls()
         self._conn.commit()
         self._conn.close()
-        return
-
-    def _list_funcalls(self):
-        cur2 = self._conn.cursor()
-        rows = self._cur.execute(
-            'SELECT Nid,Data FROM DFNode WHERE Kind="call" OR Kind="new";')
-        for (nid,data) in rows:
-            for name in data.split():
-                mids = cur2.execute(
-                    'SELECT Mid FROM DFMethod WHERE Name=?;',
-                    (name,))
-                for (mid,) in list(mids):
-                    cur2.execute(
-                        'INSERT INTO DFMethodCall VALUES (?,?);',
-                        (mid, nid))
-        cur2.close()
         return
 
     def add_klass(self, klass):
@@ -149,11 +140,27 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
                     'INSERT INTO ASTNode VALUES (NULL,?,?,?);',
                     node.ast)
                 aid = cur.lastrowid
+            ref = node.ref
+            rid = 0
+            if ref is not None:
+                if ref in self._rids:
+                    rid = self._rids[ref]
+                else:
+                    rid = len(self._rids)+1
+                    self._rids[ref] = rid
+                    cur.execute(
+                        'INSERT INTO DFRef VALUES (?,?);',
+                        (rid, ref))
             cur.execute(
                 'INSERT INTO DFNode VALUES (NULL,?,?,?,?,?,?,?);',
-                (mid, sid, aid, node.kind, node.ref, node.data, node.ntype))
+                (mid, sid, aid, node.kind, rid, node.data, node.ntype))
             nid = cur.lastrowid
             node.nid = nid
+            if node.is_funcall():
+                for name in node.data.split():
+                    cur.execute(
+                        'INSERT INTO DFFuncCall VALUES (?,?);',
+                        (name, nid))
             return nid
 
         def add_scope(scope, parent=0):
@@ -260,16 +267,23 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
             if parent != 0:
                 scopes[sid].set_parent(scopes[parent])
         rows = cur.execute(
-            'SELECT Nid,Sid,Aid,Kind,Ref,Data,Type FROM DFNode WHERE Mid=?;',
+            'SELECT Nid,Sid,Aid,Kind,Rid,Data,Type FROM DFNode WHERE Mid=?;',
             (mid,))
-        for (nid,sid,aid,kind,ref,data,ntype) in list(rows):
+        for (nid,sid,aid,kind,rid,data,ntype) in list(rows):
             scope = scopes[sid]
+            try:
+                ref = fetch1(cur.execute(
+                    'SELECT Name FROM DFRef WHERE Rid=?;',
+                    (rid,)), f'DFRef({rid})')
+            except ValueError:
+                ref = None
             node = DFNode(method, nid, scope, kind, ref, data, ntype)
-            rows = cur.execute(
-                'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
-                (aid,))
-            for (t,s,e) in rows:
-                node.ast = (t,s,e)
+            try:
+                node.ast = fetch1(cur.execute(
+                    'SELECT Type,Start,End FROM ASTNode WHERE Aid=?;',
+                    (aid,)), f'ASTNode({aid})')
+            except ValueError:
+                pass
             method.nodes[nid] = node
             scope.nodes.append(node)
         for (nid0,node) in method.nodes.items():
@@ -453,17 +467,17 @@ def main(argv):
     import fileinput
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-c)ontinue] [-i index.db] graph.db [graph ...]')
+        print(f'usage: {argv[0]} [-a)ppend] [-i index.db] graph.db [graph ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'ci:')
+        (opts, args) = getopt.getopt(argv[1:], 'ai:')
     except getopt.GetoptError:
         return usage()
 
     create = True
     indexpath = None
     for (k, v) in opts:
-        if k == '-c': create = False
+        if k == '-a': create = False
         elif k == '-i': indexpath = v
 
     if not args: return usage()
