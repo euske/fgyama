@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 import sys
 import logging
-from graphs import IDFBuilder, parsemethodname
+from graphs import IDFBuilder, parsemethodname, parserefname
 from graph2index import GraphDB
 from algos import SCC, Cons
+
+def gettail(name):
+    (_,_,name) = name.rpartition('/')
+    return name.lower()
 
 # main
 def main(argv):
@@ -17,7 +21,7 @@ def main(argv):
         return usage()
     level = logging.INFO
     maxoverrides = 1
-    maxpathlen = 3
+    maxpathlen = 5
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-M': maxoverrides = int(v)
@@ -57,21 +61,39 @@ def main(argv):
         'ref_var', 'ref_array', 'ref_field',
         'call', 'new',
     }
-    def trace(n0, n=maxpathlen):
-        inputs = n0.inputs
-        if 1 < len(inputs) or n0.kind in KINDS:
-            a = [n0.kind]
+    CALLS = {'call', 'new'}
+    REFS = {'ref_var', 'ref_field', 'ref_array'}
+    CONDS = {'join', 'begin', 'end', 'case', 'catchjoin'}
+    def ignored(n):
+        return (len(n.inputs) == 1 and n.kind not in KINDS)
+    def addfeats(out, label, n):
+        if n.kind not in KINDS: return
+        if label.startswith('@'):
+            label = '@'+gettail(parserefname(label))
+        if n.kind in REFS:
+            out.add(f'{label}:{n.kind}:{parserefname(n.ref)}')
+        elif n.kind in CALLS:
+            out.add(f'{label}:{n.kind}:')
+        else:
+            out.add(f'{label}:{n.kind}:{n.data}')
+        return
+    def visit(out, label0, n0, visited, n=maxpathlen):
+        if n0 in visited: return
+        visited.add(n0)
+        if ignored(n0):
+            for (label1,n1) in n0.inputs.items():
+                if label1 == '#bypass': continue
+                if label1.startswith('_'): continue
+                visit(out, label0, n1, visited, n)
+        else:
+            addfeats(out, label0, n0)
             n -= 1
             if 0 < n:
-                for (label,n1) in n0.inputs.items():
-                    z = trace(n1, n)
-                    if z is not None:
-                        a.append(z)
-            return a
-        else:
-            for (_,n1) in n0.inputs.items():
-                return trace(n1, n)
-            return None
+                for (label1,n1) in n0.inputs.items():
+                    if label1.startswith('_'): continue
+                    if label1 == '#bypass': continue
+                    if n1.kind == 'ref_array' and not label1: continue
+                    visit(out, label1, n1, visited, n)
 
     # list all the methods and number of its uses. (being called)
     for method in db.get_allmethods():
@@ -80,8 +102,11 @@ def main(argv):
             for func in node.data.split():
                 if func not in funargs: continue
                 for arg in funargs[func]:
-                    a = trace(node.inputs[arg])
-                    print(node.method, a)
+                    out = set()
+                    visit(out, arg, node.inputs[arg], set())
+                    print(node)
+                    for x in out:
+                        print(' ',x)
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
