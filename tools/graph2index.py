@@ -272,7 +272,7 @@ CREATE INDEX IF NOT EXISTS DFLinkNid0Index ON DFLink(Nid0);
         for (nid,sid,aid,kind,rid,data,ntype) in list(rows):
             scope = scopes[sid]
             try:
-                ref = fetch1(cur.execute(
+                (ref,) = fetch1(cur.execute(
                     'SELECT Name FROM DFRef WHERE Rid=?;',
                     (rid,)), f'DFRef({rid})')
             except ValueError:
