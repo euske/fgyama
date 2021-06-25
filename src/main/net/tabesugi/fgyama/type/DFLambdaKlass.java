@@ -66,6 +66,12 @@ class DFLambdaKlass extends DFSourceKlass {
         }
 
         @Override
+        public boolean addOverrider(DFMethod method) {
+            assert false;
+            return false;
+        }
+
+        @Override
         public DFFuncType getFuncType() {
             return _funcType;
         }
