@@ -106,6 +106,7 @@ public class DFNode implements Comparable<DFNode> {
 
     public Edge accept(DFNode node, String label) {
         assert node != null;
+        assert node != this;
         Edge edge = new Edge(node, label);
         _edges.add(edge);
         node._outputs.add(this);
@@ -136,6 +137,7 @@ public class DFNode implements Comparable<DFNode> {
     }
 
     protected void disconnect(DFNode src) {
+        assert this != src;
         for (Edge edge : _edges) {
             edge._src._outputs.remove(this);
         }
