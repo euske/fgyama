@@ -68,6 +68,7 @@ public abstract class DFSourceKlass extends DFKlass {
         super(genericKlass, paramTypes);
 
         _filePath = genericKlass._filePath;
+        _analyze = genericKlass._analyze;
         _finder = new DFTypeFinder(this, genericKlass._finder);
     }
 

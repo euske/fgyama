@@ -38,6 +38,7 @@ public class UnitTestDF extends XMLTestCase {
         }
         Collection<DFSourceKlass> klasses = _converter.getSourceKlasses();
         for (DFSourceKlass klass : klasses) {
+            if (!klass.isAnalyze()) continue;
             _converter.analyzeKlass(exporter, klass, false);
         }
         exporter.close();
