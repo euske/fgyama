@@ -3,7 +3,7 @@ import sys
 import logging
 from graphs import DFType, parsemethodname, parserefname
 from graph2index import GraphDB
-from algos import SCC, Cons
+from srcdb import SourceDB
 
 def gettail(name):
     (_,_,name) = name.rpartition('/')
@@ -551,19 +551,21 @@ def main(argv):
     global maxpathlen
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [-m maxpathlen] graph.db')
+        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [-m maxpathlen] [-B basedir] graph.db')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'dM:m:')
+        (opts, args) = getopt.getopt(argv[1:], 'dM:m:B:')
     except getopt.GetoptError:
         return usage()
     level = logging.INFO
     maxoverrides = 1
     maxpathlen = 5
+    srcdb = None
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-M': maxoverrides = int(v)
         elif k == '-m': maxpathlen = int(v)
+        elif k == '-B': srcdb = SourceDB(v)
     if not args: return usage()
 
     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
@@ -576,15 +578,25 @@ def main(argv):
 
         # list all the methods and number of its uses. (being called)
         for method in db.get_allmethods():
+            if srcdb is not None:
+                src = srcdb.get(method.klass.path)
+            else:
+                src = None
             for node in method:
                 if not node.is_funcall(): continue
                 for func in node.data.split():
                     if func not in FUNARGS: continue
                     for (cat,i) in FUNARGS[func]:
                         label = f'#arg{i}'
-                        out = set()
-                        visit(out, label, node.inputs[label], set())
-                        print(cat, sorted(out))
+                        n = node.inputs[label]
+                        if n.kind == 'value': continue
+                        if src is not None:
+                            (_,start,end) = n.ast
+                            print(cat, src.data[start:end])
+                        else:
+                            out = set()
+                            visit(out, label, n, set())
+                            print(cat, sorted(out))
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
