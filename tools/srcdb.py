@@ -170,7 +170,7 @@ class SourceDB:
         else:
             path = os.path.join(self.basedir, name)
             try:
-                with open(path, encoding=self.encoding) as fp:
+                with open(path, encoding=self.encoding, newline='') as fp:
                     data = fp.read()
             except IOError:
                 raise KeyError(name)
