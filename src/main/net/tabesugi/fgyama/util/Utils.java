@@ -73,10 +73,10 @@ public class Utils {
         case '\\':
             return "\\\\";
         default:
-            if (Character.isISOControl(c)) {
-                return String.format("\\u%04x", (int)c);
-            } else {
+            if (32 <= c && c < 127) {
                 return Character.toString(c);
+            } else {
+                return String.format("\\u%04x", (int)c);
             }
         }
     }
