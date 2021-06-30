@@ -45,7 +45,12 @@ class DFLambdaKlass extends DFSourceKlass {
         protected void setFuncType(DFFuncType funcType)
             throws InvalidSyntax {
             if (funcType == null) {
-                funcType = new DFFuncType(new DFType[] {}, DFUnknownType.UNKNOWN);
+                // Handle an unresolved lambda.
+                DFType[] argTypes = new DFType[_lambda.parameters().size()];
+                for (int i = 0; i < argTypes.length; i++) {
+                    argTypes[i] = DFUnknownType.UNKNOWN;
+                }
+                funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
             }
             _funcType = funcType;
             DFTypeFinder finder = this.getFinder();
