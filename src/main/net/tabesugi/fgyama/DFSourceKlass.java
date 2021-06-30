@@ -196,23 +196,23 @@ public abstract class DFSourceKlass extends DFKlass {
         // override the methods.
         DFKlass baseKlass = this.getBaseKlass();
         if (baseKlass != null) {
-            for (DFMethod method : this.getMethods()) {
-                this.overrideMethod(baseKlass, method);
-            }
+            this.overrideMethods(baseKlass);
         }
         DFKlass[] baseIfaces = this.getBaseIfaces();
         if (baseIfaces != null) {
-            for (DFMethod method : this.getMethods()) {
-                for (DFKlass iface : baseIfaces) {
-                    this.overrideMethod(iface, method);
-                }
+            for (DFKlass iface : baseIfaces) {
+                this.overrideMethods(iface);
             }
         }
     }
 
-    private void overrideMethod(DFKlass klass, DFMethod method1) {
-        for (DFMethod method0 : klass.getMethods()) {
-            if (method0.addOverrider(method1)) break;
+    private void overrideMethods(DFKlass klass) {
+        for (DFMethod overrider : this.getMethods()) {
+            for (DFMethod method : klass.getMethods()) {
+                // each method of the given klass is overridded by
+                // the corresponding method of the this klass.
+                if (method.addOverrider(overrider)) break;
+            }
         }
     }
 

@@ -589,7 +589,21 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         public FallbackMethod(
             String methodName, CallStyle callStyle, DFType[] argTypes) {
             super(DFKlass.this, callStyle, false, methodName, methodName);
+            // Ugly hack to prevent lambda or methodref from being
+            // used for the argtypes of a fallback method.
+            argTypes = argTypes.clone();
+            for (int i = 0; i < argTypes.length; i++) {
+                if (argTypes[i] instanceof DFLambdaKlass ||
+                    argTypes[i] instanceof DFMethodRefKlass) {
+                    argTypes[i] = DFUnknownType.UNKNOWN;
+                }
+            }
             _funcType = new DFFuncType(argTypes, DFUnknownType.UNKNOWN);
+        }
+
+        @Override
+        public String toString() {
+            return ("<FallbackMethod("+this.getSignature()+")>");
         }
 
         protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {

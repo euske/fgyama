@@ -67,6 +67,7 @@ class DFLambdaKlass extends DFSourceKlass {
 
         @Override
         public boolean addOverrider(DFMethod method) {
+            Logger.error("DFLambdaKlass.FunctionalMethod: cannot override:", method);
             assert false;
             return false;
         }
@@ -309,6 +310,8 @@ class DFLambdaKlass extends DFSourceKlass {
             }
             return;
         }
+        assert !(baseKlass instanceof DFLambdaKlass);
+        assert !(baseKlass instanceof DFMethodRefKlass);
         _baseKlass = baseKlass;
         DFMethod funcMethod = baseKlass.getFuncMethod();
         // BaseKlass does not have a function method.
