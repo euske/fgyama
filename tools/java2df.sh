@@ -3,6 +3,7 @@
 #   java2df.sh [opts] *.java
 BASEDIR="${0%/*}/.."
 LIBDIR="${BASEDIR}/lib"
+JVMOPTS="-ea -XX:MaxJavaStackTraceDepth=1000000"
 CLASSPATH="${BASEDIR}/target"
 CLASSPATH="${CLASSPATH}:${LIBDIR}/bcel-6.2.jar"
 CLASSPATH="${CLASSPATH}:${LIBDIR}/junit-4.12.jar"
@@ -20,4 +21,4 @@ CLASSPATH="${CLASSPATH}:${LIBDIR}/org.eclipse.equinox.preferences-3.8.200.jar"
 CLASSPATH="${CLASSPATH}:${LIBDIR}/org.eclipse.equinox.app-1.5.100.jar"
 CLASSPATH="${CLASSPATH}:${LIBDIR}/org.eclipse.text-3.11.0.jar"
 CLASSPATH="${CLASSPATH}:${LIBDIR}/org.eclipse.osgi-3.16.200.jar"
-exec java -cp "$CLASSPATH" -ea net.tabesugi.fgyama.Java2DF "$@"
+exec java $JVMOPTS -cp "$CLASSPATH" net.tabesugi.fgyama.Java2DF "$@"

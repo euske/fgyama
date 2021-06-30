@@ -67,6 +67,7 @@
     <java classname="net.tabesugi.fgyama.Java2DF" fork="yes">
       <jvmarg value="-ea" />
       <jvmarg value="-Xss256k" /> <!-- deliberately use a small stack -->
+      <jvmarg value="-XX:MaxJavaStackTraceDepth=1000000" /> <!-- show all stacktraces -->
       <arg value="-v" />
       <arg value="-v" />
       <arg value="-S" />
