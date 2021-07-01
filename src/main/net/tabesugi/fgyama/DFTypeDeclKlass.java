@@ -150,11 +150,6 @@ class DFTypeDeclKlass extends DFSourceKlass {
             return ("<DefaultKlass("+this.getName()+")");
         }
 
-        @Override
-        public String getTypeName() {
-            return "T"+this.getName()+";";
-        }
-
         public boolean isInterface() {
             this.load();
             return _baseKlass.isInterface();

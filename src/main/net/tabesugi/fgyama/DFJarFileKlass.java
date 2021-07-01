@@ -387,11 +387,6 @@ public class DFJarFileKlass extends DFKlass {
             _finder = finder;
         }
 
-        @Override
-        public String getTypeName() {
-            return "T"+this.getName()+";";
-        }
-
         public boolean isInterface() {
             this.load();
             return _baseKlass.isInterface();
