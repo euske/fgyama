@@ -530,7 +530,7 @@ class DFFileScope extends DFVarScope {
         DFMethod bestMethod = null;
         for (DFMethod method1 : _methods) {
             if (!id.equals(method1.getName())) continue;
-            Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
+            Map<DFMapKlass, DFKlass> typeMap = new HashMap<DFMapKlass, DFKlass>();
             try {
                 int dist = method1.canAccept(argTypes, typeMap);
                 if (bestDist < 0 || dist < bestDist) {

@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
 
 
-//  DFMapType
+//  DFMapKlass
 //
-public class DFMapType extends DFKlass {
+public class DFMapKlass extends DFKlass {
 
     private String _name;
     private String _sig = null;
@@ -18,20 +18,20 @@ public class DFMapType extends DFKlass {
     private DFTypeFinder _finder = null;
     private DFKlass _baseKlass = null;
 
-    private DFMapType(
+    private DFMapKlass(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
         super(name, outerSpace, outerKlass, null);
         _name = name;
     }
 
-    public DFMapType(
+    public DFMapKlass(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass,
         List<Type> types) {
         this(name, outerSpace, outerKlass);
         _types = types;
     }
 
-    public DFMapType(
+    public DFMapKlass(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass,
         String sig, DFTypeFinder finder) {
         this(name, outerSpace, outerKlass);
@@ -41,7 +41,7 @@ public class DFMapType extends DFKlass {
 
     @Override
     public String toString() {
-        return ("<DFMapType("+this.getTypeName()+")>");
+        return ("<DFMapKlass("+this.getTypeName()+")>");
     }
 
     @Override
@@ -114,7 +114,7 @@ public class DFMapType extends DFKlass {
     }
 
     @Override
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFKlass klass, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
         this.load();
@@ -147,7 +147,7 @@ public class DFMapType extends DFKlass {
                 _baseKlass = parser.resolveType(_finder).toKlass();
             } catch (TypeNotFound e) {
                 Logger.error(
-                    "DFMapType.build: TypeNotFound",
+                    "DFMapKlass.build: TypeNotFound",
                     e.name, _sig, _finder, this);
             }
         } else if (_types != null) {
@@ -158,7 +158,7 @@ public class DFMapType extends DFKlass {
                 }
             } catch (TypeNotFound e) {
                 Logger.error(
-                    "DFMapType.build: TypeNotFound",
+                    "DFMapKlass.build: TypeNotFound",
                     e.name, _types, _finder, this);
             }
         }

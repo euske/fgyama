@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 class DFTypeDeclKlass extends DFSourceKlass {
 
     private AbstractTypeDeclaration _abstTypeDecl;
-    private DFMapType[] _defaultKlasses = null;
+    private DFMapKlass[] _defaultKlasses = null;
 
     @SuppressWarnings("unchecked")
     public DFTypeDeclKlass(
@@ -30,11 +30,11 @@ class DFTypeDeclKlass extends DFSourceKlass {
             if (!tps.isEmpty()) {
                 ConsistentHashMap<String, DFKlass> typeSlots =
                     new ConsistentHashMap<String, DFKlass>();
-                _defaultKlasses = new DFMapType[tps.size()];
+                _defaultKlasses = new DFMapKlass[tps.size()];
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DFMapType klass = new DFMapType(
+                    DFMapKlass klass = new DFMapKlass(
                         id, this, null, tp.typeBounds());
                     typeSlots.put(id, klass);
                     _defaultKlasses[i] = klass;
@@ -70,7 +70,7 @@ class DFTypeDeclKlass extends DFSourceKlass {
         super.initializeFinder(parentFinder);
         if (_defaultKlasses != null) {
             DFTypeFinder finder = this.getFinder();
-            for (DFMapType klass : _defaultKlasses) {
+            for (DFMapKlass klass : _defaultKlasses) {
                 klass.setFinder(finder);
             }
         }

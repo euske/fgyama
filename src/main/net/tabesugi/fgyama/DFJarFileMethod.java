@@ -66,14 +66,14 @@ public class DFJarFileMethod extends DFMethod {
             JNITypeParser parser = new JNITypeParser(sig);
             JNITypeParser.TypeSlot[] slots = parser.getTypeSlots();
             if (slots != null && this.getGenericMethod() == null) {
-                DFMapType[] mapTypes = new DFMapType[slots.length];
+                DFMapKlass[] mapKlasses = new DFMapKlass[slots.length];
                 int i = 0;
                 for (JNITypeParser.TypeSlot slot : slots) {
-                    mapTypes[i++] = new DFMapType(
+                    mapKlasses[i++] = new DFMapKlass(
                         slot.id, this, this.getKlass(),
                         slot.sig, _finder);
                 }
-                this.setMapTypes(mapTypes);
+                this.setMapKlasses(mapKlasses);
             }
             try {
                 _funcType = (DFFuncType)parser.resolveType(_finder);

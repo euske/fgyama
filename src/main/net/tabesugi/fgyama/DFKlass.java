@@ -157,7 +157,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         DFKlass klass = type.toKlass();
@@ -165,7 +165,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
         return this.canConvertFrom(klass, typeMap);
     }
 
-    public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFKlass klass, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
         if (_genericKlass != null && _genericKlass == klass._genericKlass) {
@@ -301,7 +301,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
                    (callStyle1 == DFMethod.CallStyle.InstanceMethod ||
                     callStyle1 == DFMethod.CallStyle.StaticMethod)))) continue;
             if (id != null && !id.equals(method1.getName())) continue;
-            Map<DFMapType, DFKlass> typeMap = new HashMap<DFMapType, DFKlass>();
+            Map<DFMapKlass, DFKlass> typeMap = new HashMap<DFMapKlass, DFKlass>();
             try {
                 int dist = method1.canAccept(argTypes, typeMap);
                 if (bestDist < 0 || dist < bestDist) {

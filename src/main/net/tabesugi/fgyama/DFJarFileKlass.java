@@ -228,7 +228,7 @@ public class DFJarFileKlass extends DFKlass {
                 ConsistentHashMap<String, DFKlass> typeSlots =
                     new ConsistentHashMap<String, DFKlass>();
                 for (JNITypeParser.TypeSlot slot : slots) {
-                    DFMapType klass = new DFMapType(
+                    DFMapKlass klass = new DFMapKlass(
                         slot.id, this, null, slot.sig, _finder);
                     typeSlots.put(slot.id, klass);
                 }

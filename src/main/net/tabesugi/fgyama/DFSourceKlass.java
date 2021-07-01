@@ -709,25 +709,25 @@ class DefinedMethod extends DFSourceMethod {
         finder = this.getFinder();
         List<TypeParameter> tps = _methodDecl.typeParameters();
         if (!tps.isEmpty()) {
-            DFMapType[] mapTypes = new DFMapType[tps.size()];
+            DFMapKlass[] mapKlasses = new DFMapKlass[tps.size()];
             for (int i = 0; i < tps.size(); i++) {
                 TypeParameter tp = tps.get(i);
                 String id = tp.getName().getIdentifier();
                 DFKlass klass = outerSpace.getKlass(id);
-                DFMapType mapType;
+                DFMapKlass mapKlass;
                 if (klass != null) {
-                    assert klass instanceof DFMapType;
-                    mapType = (DFMapType)klass;
+                    assert klass instanceof DFMapKlass;
+                    mapKlass = (DFMapKlass)klass;
                 } else {
-                    mapType = new DFMapType(
+                    mapKlass = new DFMapKlass(
                         id, outerSpace, this.getKlass(),
                         tp.typeBounds());
-                    mapType.setFinder(finder);
-                    outerSpace.addKlass(id, mapType);
+                    mapKlass.setFinder(finder);
+                    outerSpace.addKlass(id, mapKlass);
                 }
-                mapTypes[i] = mapType;
+                mapKlasses[i] = mapKlass;
             }
-            this.setMapTypes(mapTypes);
+            this.setMapKlasses(mapKlasses);
         }
         this.build();
     }

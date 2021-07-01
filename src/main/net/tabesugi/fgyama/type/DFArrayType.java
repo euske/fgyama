@@ -89,7 +89,7 @@ public class DFArrayType extends DFKlass {
     }
 
     @Override
-    public int canConvertFrom(DFType type, Map<DFMapType, DFKlass> typeMap)
+    public int canConvertFrom(DFType type, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         if (type instanceof DFNullType) return 0;
         if (!(type instanceof DFArrayType)) throw new TypeIncompatible(this, type);

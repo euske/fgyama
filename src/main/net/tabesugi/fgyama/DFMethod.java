@@ -55,7 +55,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     private String _methodName;   // Method name (not unique).
 
     // These fields are available only for generic methods.
-    private ConsistentHashMap<String, DFMapType> _mapTypes = null;
+    private ConsistentHashMap<String, DFMapKlass> _mapKlasses = null;
     private ConsistentHashMap<String, DFMethod> _reifiedMethods = null;
 
     // These fields are available only for parameterized methods.
@@ -104,8 +104,8 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
 
     @Override
     public String toString() {
-        if (_mapTypes != null) {
-            return ("<DFMethod("+this.getSignature()+" "+Utils.join(_mapTypes.keys())+")>");
+        if (_mapKlasses != null) {
+            return ("<DFMethod("+this.getSignature()+" "+Utils.join(_mapKlasses.keys())+")>");
         }
         return ("<DFMethod("+this.getSignature()+")>");
     }
@@ -124,9 +124,9 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     @Override
     public DFKlass lookupKlass(String id)
         throws TypeNotFound {
-        if (_mapTypes != null) {
-            DFMapType mapType = _mapTypes.get(id);
-            if (mapType != null) return mapType;
+        if (_mapKlasses != null) {
+            DFMapKlass mapKlass = _mapKlasses.get(id);
+            if (mapKlass != null) return mapKlass;
         }
         if (_paramTypes != null) {
             DFKlass paramType = _paramTypes.get(id);
@@ -136,18 +136,18 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     // Creates a parameterized method.
-    public DFMethod getReifiedMethod(Map<DFMapType, DFKlass> typeMap) {
-        if (_mapTypes == null) return this;
+    public DFMethod getReifiedMethod(Map<DFMapKlass, DFKlass> typeMap) {
+        if (_mapKlasses == null) return this;
         //Logger.info("DFMethod.getReifiedMethod:", this, typeMap);
-        List<DFMapType> mapTypes = _mapTypes.values();
+        List<DFMapKlass> mapKlasses = _mapKlasses.values();
         HashMap<String, DFKlass> paramTypes = new HashMap<String, DFKlass>();
-        for (int i = 0; i < mapTypes.size(); i++) {
-            DFMapType mapType = mapTypes.get(i);
-            DFKlass type = mapType;
-            if (typeMap != null && typeMap.containsKey(mapType)) {
-                type = typeMap.get(mapType);
+        for (int i = 0; i < mapKlasses.size(); i++) {
+            DFMapKlass mapKlass = mapKlasses.get(i);
+            DFKlass type = mapKlass;
+            if (typeMap != null && typeMap.containsKey(mapKlass)) {
+                type = typeMap.get(mapKlass);
             }
-            paramTypes.put(mapType.getName(), type);
+            paramTypes.put(mapKlass.getName(), type);
         }
         String name = DFTypeSpace.getReifiedName(paramTypes);
         DFMethod method = _reifiedMethods.get(name);
@@ -163,7 +163,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     public boolean isGeneric() {
-        return _mapTypes != null;
+        return _mapKlasses != null;
     }
 
     public String getMethodId() {
@@ -248,7 +248,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _overriding;
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapType, DFKlass> typeMap)
+    public int canAccept(DFType[] argTypes, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         return this.getFuncType().canAccept(argTypes, typeMap);
     }
@@ -280,14 +280,14 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     // Parameterize the klass.
     protected abstract DFMethod parameterize(Map<String, DFKlass> paramTypes);
 
-    protected void setMapTypes(DFMapType[] mapTypes) {
-        assert mapTypes != null;
-        assert _mapTypes == null;
+    protected void setMapKlasses(DFMapKlass[] mapKlasses) {
+        assert mapKlasses != null;
+        assert _mapKlasses == null;
         assert _paramTypes == null;
         assert _reifiedMethods == null;
-        _mapTypes = new ConsistentHashMap<String, DFMapType>();
-        for (DFMapType mapType : mapTypes) {
-            _mapTypes.put(mapType.getName(), mapType);
+        _mapKlasses = new ConsistentHashMap<String, DFMapKlass>();
+        for (DFMapKlass mapKlass : mapKlasses) {
+            _mapKlasses.put(mapKlass.getName(), mapKlass);
         }
         _reifiedMethods = new ConsistentHashMap<String, DFMethod>();
     }
