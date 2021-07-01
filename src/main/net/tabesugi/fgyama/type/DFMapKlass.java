@@ -119,7 +119,7 @@ public class DFMapKlass extends DFKlass {
         if (this == klass) return 0;
         this.load();
         if (typeMap == null) {
-            return _baseKlass.canConvertFrom(klass, typeMap);
+            typeMap = new HashMap<DFMapKlass, DFKlass>();
         }
         DFKlass self = typeMap.get(this);
         if (self == null) {
