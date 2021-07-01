@@ -70,13 +70,10 @@ class DFMethodRefKlass extends DFSourceKlass {
 
             } else if (_methodRef instanceof SuperMethodReference) {
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
-                try {
-                    DFKlass klass = finder.resolveKlass(supermref.getQualifier());
-                    // XXX ignored: supermref.typeArguments()
-                    if (klass instanceof DFSourceKlass) {
-                        ((DFSourceKlass)klass).listUsedKlasses(klasses);
-                    }
-                } catch (TypeNotFound e) {
+                DFKlass klass = DFMethodRefKlass.this.getBaseKlass();
+                // XXX ignored: supermref.typeArguments()
+                if (klass instanceof DFSourceKlass) {
+                    ((DFSourceKlass)klass).listUsedKlasses(klasses);
                 }
 
             } else if (_methodRef instanceof ExpressionMethodReference) {
@@ -123,12 +120,10 @@ class DFMethodRefKlass extends DFSourceKlass {
             } else if (_methodRef instanceof SuperMethodReference) {
                 SuperMethodReference supermref = (SuperMethodReference)_methodRef;
                 try {
-                    DFKlass klass = finder.resolveKlass(supermref.getQualifier());
-                    klass = klass.getBaseKlass();
+                    DFKlass klass = DFMethodRefKlass.this.getBaseKlass();
                     // XXX ignored: supermref.typeArguments()
                     _refMethod = klass.lookupMethod(
                         CallStyle.StaticMethod, supermref.getName(), argTypes);
-                } catch (TypeNotFound e) {
                 } catch (MethodNotFound e) {
                 }
 
