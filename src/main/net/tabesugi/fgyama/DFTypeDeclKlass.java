@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 class DFTypeDeclKlass extends DFSourceKlass {
 
     private AbstractTypeDeclaration _abstTypeDecl;
-    private DefaultKlass[] _defaultKlasses = null;
+    private DFMapType[] _defaultKlasses = null;
 
     @SuppressWarnings("unchecked")
     public DFTypeDeclKlass(
@@ -30,11 +30,12 @@ class DFTypeDeclKlass extends DFSourceKlass {
             if (!tps.isEmpty()) {
                 ConsistentHashMap<String, DFKlass> typeSlots =
                     new ConsistentHashMap<String, DFKlass>();
-                _defaultKlasses = new DefaultKlass[tps.size()];
+                _defaultKlasses = new DFMapType[tps.size()];
                 for (int i = 0; i < tps.size(); i++) {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
-                    DefaultKlass klass = new DefaultKlass(id, tp.typeBounds());
+                    DFMapType klass = new DFMapType(
+                        id, this, null, tp.typeBounds());
                     typeSlots.put(id, klass);
                     _defaultKlasses[i] = klass;
                 }
@@ -69,7 +70,7 @@ class DFTypeDeclKlass extends DFSourceKlass {
         super.initializeFinder(parentFinder);
         if (_defaultKlasses != null) {
             DFTypeFinder finder = this.getFinder();
-            for (DefaultKlass klass : _defaultKlasses) {
+            for (DFMapType klass : _defaultKlasses) {
                 klass.setFinder(finder);
             }
         }
@@ -131,84 +132,5 @@ class DFTypeDeclKlass extends DFSourceKlass {
                 Utils.getASTSource(e.ast), this);
         }
         return true;
-    }
-
-    // DefaultKlass
-    class DefaultKlass extends DFKlass {
-
-        private List<Type> _types;
-        private DFTypeFinder _finder = null;
-        private DFKlass _baseKlass = null;
-
-        public DefaultKlass(String name, List<Type> types) {
-            super(name, DFTypeDeclKlass.this, null, null);
-            _types = types;
-        }
-
-        @Override
-        public String toString() {
-            return ("<DefaultKlass("+this.getName()+")");
-        }
-
-        public boolean isInterface() {
-            this.load();
-            return _baseKlass.isInterface();
-        }
-
-        public boolean isEnum() {
-            this.load();
-            return _baseKlass.isEnum();
-        }
-
-        public DFKlass getBaseKlass() {
-            this.load();
-            return _baseKlass;
-        }
-
-        public DFKlass[] getBaseIfaces() {
-            return null;
-        }
-
-        public DFMethod[] getMethods() {
-            this.load();
-            return _baseKlass.getMethods();
-        }
-
-        public FieldRef[] getFields() {
-            this.load();
-            return _baseKlass.getFields();
-        }
-
-        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-            assert false;
-            return null;
-        }
-
-        protected void setFinder(DFTypeFinder finder) {
-            _finder = finder;
-        }
-
-        @Override
-        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
-            throws TypeIncompatible {
-            this.load();
-            return _baseKlass.canConvertFrom(klass, typeMap);
-        }
-
-        private void load() {
-            assert _finder != null;
-            if (_baseKlass != null) return;
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
-            for (Type type : _types) {
-                try {
-                    _baseKlass = _finder.resolve(type).toKlass();
-                } catch (TypeNotFound e) {
-                    Logger.error(
-                        "DefaultKlass.load: TypeNotFound",
-                        Utils.getASTSource(type), this);
-                }
-                break;
-            }
-        }
     }
 }

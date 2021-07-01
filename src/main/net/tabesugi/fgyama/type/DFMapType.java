@@ -12,38 +12,31 @@ import org.eclipse.jdt.core.dom.*;
 public class DFMapType extends DFKlass {
 
     private String _name;
-    private DFTypeFinder _finder;
-
     private String _sig = null;
     private List<Type> _types = null;
 
+    private DFTypeFinder _finder = null;
     private DFKlass _baseKlass = null;
 
     private DFMapType(
-        String name, DFTypeSpace outerSpace, DFKlass outerKlass,
-        DFTypeFinder finder) {
+        String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
         super(name, outerSpace, outerKlass, null);
         _name = name;
-        _finder = finder;
     }
 
     public DFMapType(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass,
-        DFTypeFinder finder, List<Type> types) {
-        this(name, outerSpace, outerKlass, finder);
+        List<Type> types) {
+        this(name, outerSpace, outerKlass);
         _types = types;
     }
 
     public DFMapType(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass,
-        DFTypeFinder finder, String sig) {
-        this(name, outerSpace, outerKlass, finder);
+        String sig, DFTypeFinder finder) {
+        this(name, outerSpace, outerKlass);
         _sig = sig;
-    }
-
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-        assert false;
-        return null;
+        _finder = finder;
     }
 
     @Override
@@ -108,6 +101,16 @@ public class DFMapType extends DFKlass {
         } else {
             return super.getKlass(id);
         }
+    }
+
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+        assert false;
+        return null;
+    }
+
+    protected void setFinder(DFTypeFinder finder) {
+        assert _finder == null;
+        _finder = finder;
     }
 
     @Override

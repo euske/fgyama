@@ -228,7 +228,8 @@ public class DFJarFileKlass extends DFKlass {
                 ConsistentHashMap<String, DFKlass> typeSlots =
                     new ConsistentHashMap<String, DFKlass>();
                 for (JNITypeParser.TypeSlot slot : slots) {
-                    DefaultKlass klass = new DefaultKlass(slot.id, slot.sig, _finder);
+                    DFMapType klass = new DFMapType(
+                        slot.id, this, null, slot.sig, _finder);
                     typeSlots.put(slot.id, klass);
                 }
                 this.setTypeSlots(typeSlots);
@@ -369,76 +370,6 @@ public class DFJarFileKlass extends DFKlass {
                 if (iface != null) {
                     iface.dump(out, indent);
                 }
-            }
-        }
-    }
-
-    // DefaultKlass
-    class DefaultKlass extends DFKlass {
-
-        private String _sig;
-        private DFTypeFinder _finder;
-        private DFKlass _baseKlass = null;
-
-        public DefaultKlass(
-            String name, String sig, DFTypeFinder finder) {
-            super(name, DFJarFileKlass.this, null, null);
-            _sig = sig;
-            _finder = finder;
-        }
-
-        public boolean isInterface() {
-            this.load();
-            return _baseKlass.isInterface();
-        }
-
-        public boolean isEnum() {
-            this.load();
-            return _baseKlass.isEnum();
-        }
-
-        public DFKlass getBaseKlass() {
-            this.load();
-            return _baseKlass;
-        }
-
-        public DFKlass[] getBaseIfaces() {
-            return null;
-        }
-
-        public DFMethod[] getMethods() {
-            this.load();
-            return _baseKlass.getMethods();
-        }
-
-        public FieldRef[] getFields() {
-            this.load();
-            return _baseKlass.getFields();
-        }
-
-        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-            assert false;
-            return null;
-        }
-
-        @Override
-        public int canConvertFrom(DFKlass klass, Map<DFMapType, DFKlass> typeMap)
-            throws TypeIncompatible {
-            this.load();
-            return _baseKlass.canConvertFrom(klass, typeMap);
-        }
-
-        private void load() {
-            if (_baseKlass != null) return;
-            _baseKlass = DFBuiltinTypes.getObjectKlass();
-            JNITypeParser parser = new JNITypeParser(_sig);
-            parser.getTypeSlots();
-            try {
-                _baseKlass = parser.resolveType(_finder).toKlass();
-            } catch (TypeNotFound e) {
-                Logger.error(
-                    "DefaultKlass.load: TypeNotFound",
-                    e.name, _sig, _finder, this);
             }
         }
     }
