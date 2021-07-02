@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class DFMapKlass extends DFKlass {
 
-    private String _name;
     private String _sig = null;
     private List<Type> _types = null;
 
@@ -21,7 +20,6 @@ public class DFMapKlass extends DFKlass {
     private DFMapKlass(
         String name, DFTypeSpace outerSpace, DFKlass outerKlass) {
         super(name, outerSpace, outerKlass, null);
-        _name = name;
     }
 
     public DFMapKlass(
@@ -42,15 +40,6 @@ public class DFMapKlass extends DFKlass {
     @Override
     public String toString() {
         return ("<DFMapKlass("+this.getTypeName()+")>");
-    }
-
-    @Override
-    public boolean equals(DFType type) {
-        return (this == type);
-    }
-
-    public String getName() {
-        return _name;
     }
 
     @Override
@@ -96,10 +85,33 @@ public class DFMapKlass extends DFKlass {
 
     @Override
     public DFKlass getKlass(String id) {
-        if (_name.equals(id)) {
-            return this;
+        return null;
+    }
+
+    @Override
+    public int canConvertFrom(DFKlass klass, Map<DFMapKlass, DFKlass> typeMap)
+        throws TypeIncompatible {
+        if (this == klass) return 0;
+        this.load();
+        if (typeMap == null) {
+            typeMap = new HashMap<DFMapKlass, DFKlass>();
+        }
+        DFKlass mappedKlass = typeMap.get(this);
+        if (mappedKlass == null) {
+            typeMap.put(this, klass);
+            int dist;
+            try {
+                dist = _baseKlass.canConvertFrom(klass, typeMap);
+            } catch (TypeIncompatible e) {
+                // It is possible to ignore the type restriction.
+                // This will eventually cause ClassCastException, but
+                // not entirely illegal. It is considered unlikely here.
+                dist = 99999;   // XXX should be +Infinity.
+            }
+            return dist;
         } else {
-            return super.getKlass(id);
+            // Eventually, mappedKlass == klass or TypeIncompatible.
+            return mappedKlass.canConvertFrom(klass, typeMap);
         }
     }
 
@@ -111,29 +123,6 @@ public class DFMapKlass extends DFKlass {
     protected void setFinder(DFTypeFinder finder) {
         assert _finder == null;
         _finder = finder;
-    }
-
-    @Override
-    public int canConvertFrom(DFKlass klass, Map<DFMapKlass, DFKlass> typeMap)
-        throws TypeIncompatible {
-        if (this == klass) return 0;
-        this.load();
-        if (typeMap == null) {
-            typeMap = new HashMap<DFMapKlass, DFKlass>();
-        }
-        DFKlass self = typeMap.get(this);
-        if (self == null) {
-            typeMap.put(this, klass);
-            int dist;
-            try {
-                dist = _baseKlass.canConvertFrom(klass, typeMap);
-            } catch (TypeIncompatible e) {
-                dist = 9999;    // XXX unchecked conversion.
-            }
-            return dist;
-        } else {
-            return self.canConvertFrom(klass, typeMap);
-        }
     }
 
     protected void load() {
