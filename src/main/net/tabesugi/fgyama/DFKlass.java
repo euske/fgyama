@@ -38,7 +38,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     // These fields are available only for parameterized klasses.
     private DFKlass _genericKlass = null;
     private Map<String, DFKlass> _paramTypes = null;
-    private int _reifyDepth = -1;
+    private int _reifyDepth = -1;  // not computed yet.
 
     // Normal constructor.
     public DFKlass(
@@ -388,17 +388,20 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public int getReifyDepth() {
         if (_reifyDepth < 0) {
             int depth = 0;
-            if (_outerKlass != null) {
-                depth = Math.max(depth, _outerKlass.getReifyDepth()+1);
+            // At least it has the same depth as its base klass.
+            DFKlass baseKlass = this.getBaseKlass();
+            if (baseKlass != null) {
+                depth = Math.max(depth, baseKlass.getReifyDepth());
             }
+            // At least it has the same depth as its outer klass.
+            if (_outerKlass != null) {
+                depth = Math.max(depth, _outerKlass.getReifyDepth());
+            }
+            // It has a higher depth than its paramater klass.
             if (_paramTypes != null) {
                 for (DFKlass klass : _paramTypes.values()) {
                     depth = Math.max(depth, klass.getReifyDepth()+1);
                 }
-            }
-            DFKlass baseKlass = this.getBaseKlass();
-            if (baseKlass != null) {
-                depth = Math.max(depth, baseKlass.getReifyDepth()+1);
             }
             _reifyDepth = depth;
         }
