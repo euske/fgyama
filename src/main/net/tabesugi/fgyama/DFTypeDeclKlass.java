@@ -103,6 +103,7 @@ class DFTypeDeclKlass extends DFSourceKlass {
     }
 
     // Constructor for a parameterized klass.
+    @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
         try {

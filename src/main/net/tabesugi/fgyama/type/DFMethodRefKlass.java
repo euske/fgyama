@@ -22,6 +22,7 @@ class DFMethodRefKlass extends DFSourceKlass {
                   false, id, id, scope, finder);
         }
 
+        @Override
         protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
             assert false;
             return null;
@@ -187,11 +188,6 @@ class DFMethodRefKlass extends DFSourceKlass {
         _methodRef = methodRef;
     }
 
-    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
-        assert false;
-        return null;
-    }
-
     public ASTNode getAST() {
         return _methodRef;
     }
@@ -227,6 +223,12 @@ class DFMethodRefKlass extends DFSourceKlass {
     public void overrideMethods() {
         if (!this.isDefined()) return;
         super.overrideMethods();
+    }
+
+    @Override
+    protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+        assert false;
+        return null;
     }
 
     @Override

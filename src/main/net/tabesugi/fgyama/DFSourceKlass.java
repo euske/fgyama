@@ -16,8 +16,8 @@ import org.eclipse.jdt.core.dom.*;
 //    1. new DFSourceKlass()
 //    2. initializeFinder(finder)
 //    3. getXXX(), ...
-//    4. listUsedKlass(used)
-//    5. listDefinedKlass(defined)
+//    4. listUsedKlasses(used)
+//    5. listDefinedKlasses(defined)
 //
 //  Implement:
 //    parameterize(paramTypes)
@@ -432,7 +432,7 @@ public abstract class DFSourceKlass extends DFKlass {
         }
     }
 
-    // listUsedKlass: enumerate all the klasses used within this klass.
+    // listUsedKlasses: enumerate all the klasses used within this klass.
     public boolean listUsedKlasses(Collection<DFSourceKlass> klasses) {
         if (klasses.contains(this)) return false;
         if (this.getGenericKlass() != null &&
@@ -443,7 +443,7 @@ public abstract class DFSourceKlass extends DFKlass {
         return true;
     }
 
-    // listDefinedKlass: enumerate newly defined klasses (Lambdas).
+    // listDefinedKlasses: enumerate newly defined klasses (Lambdas).
     public void listDefinedKlasses(Collection<DFSourceKlass> defined)
         throws InvalidSyntax {
         this.load();
@@ -549,6 +549,7 @@ class InitMethod extends DFSourceMethod {
         return new DFFuncType(new DFType[] {}, DFBasicType.VOID);
     }
 
+    @Override
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
@@ -917,6 +918,7 @@ class EnumValuesMethod extends DFMethod {
             new DFType[] {}, DFArrayType.getArray(klass, 1));
     }
 
+    @Override
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;

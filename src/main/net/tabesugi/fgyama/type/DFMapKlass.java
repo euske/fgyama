@@ -78,6 +78,13 @@ public class DFMapKlass extends DFKlass {
     }
 
     @Override
+    public DFMethod createFallbackMethod(
+        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
+        this.load();
+        return _baseKlass.createFallbackMethod(callStyle, id, argTypes);
+    }
+
+    @Override
     public FieldRef[] getFields() {
         this.load();
         return _baseKlass.getFields();
@@ -115,6 +122,7 @@ public class DFMapKlass extends DFKlass {
         }
     }
 
+    @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;

@@ -1892,6 +1892,7 @@ class AnonymousKlass extends DFSourceKlass {
             cstr.getAnonymousClassDeclaration().bodyDeclarations());
     }
 
+    @Override
     protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
         assert false;
         return null;
