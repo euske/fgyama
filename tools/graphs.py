@@ -68,7 +68,7 @@ class DFType:
                     c = s[i2]
                     if c == ';':
                         return (i2+1, t)
-                    elif c == '.':
+                    elif c == '/':
                         i2 += 1
                         prev = t
                     else:
@@ -149,7 +149,9 @@ class DFKlassType(DFType):
             return f'<{name}<{params}>>'
 
 class DFUnknownType(DFType):
-    pass
+
+    def __repr__(self):
+        return '<?>'
 
 # parsemethodname: returns (klass, name, func).
 def parsemethodname(s):
