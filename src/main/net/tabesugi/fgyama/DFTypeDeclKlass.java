@@ -35,7 +35,7 @@ class DFTypeDeclKlass extends DFSourceKlass {
                     TypeParameter tp = tps.get(i);
                     String id = tp.getName().getIdentifier();
                     DFMapKlass klass = new DFMapKlass(
-                        id, this, null, tp.typeBounds());
+                        id, this, this, tp.typeBounds());
                     typeSlots.put(id, klass);
                     _defaultKlasses[i] = klass;
                 }
