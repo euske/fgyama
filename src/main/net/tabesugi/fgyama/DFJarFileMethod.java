@@ -19,7 +19,7 @@ public class DFJarFileMethod extends DFMethod {
 
     DFTypeFinder _finder;
     Method _meth;
-    DFFuncType _funcType;
+    DFFuncType _funcType = null;
 
     // Normal constructor.
     public DFJarFileMethod(
@@ -81,9 +81,9 @@ public class DFJarFileMethod extends DFMethod {
                 Logger.error(
                     "DFJarFileMethod.build: TypeNotFound (method)",
                     e.name, sig, this);
-                return;
             }
-        } else {
+        }
+        if (_funcType == null) {
             org.apache.bcel.generic.Type[] args = _meth.getArgumentTypes();
             DFType[] argTypes = new DFType[args.length];
             for (int i = 0; i < args.length; i++) {
