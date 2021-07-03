@@ -237,6 +237,12 @@ class DFLambdaKlass extends DFSourceKlass {
     }
 
     @Override
+    public int getReifyDepth() {
+        // This is always a concrete type.
+        return 0;
+    }
+
+    @Override
     public DFKlass getBaseKlass() {
         assert _baseKlass != null;
         return _baseKlass;
@@ -301,7 +307,7 @@ class DFLambdaKlass extends DFSourceKlass {
         assert _baseKlass == null;
         assert _funcMethod != null;
         assert _funcMethod.getFuncType() == null;
-        if (baseKlass == this) {
+        if (baseKlass instanceof DFLambdaKlass) {
             // XXX Edge case when the outer function is a generic method
             // which is reified with this lambda itself.
             // e.g. <T> foo(T a) { foo(() -> 1); }
@@ -312,7 +318,6 @@ class DFLambdaKlass extends DFSourceKlass {
             }
             return;
         }
-        assert !(baseKlass instanceof DFLambdaKlass);
         assert !(baseKlass instanceof DFMethodRefKlass);
         _baseKlass = baseKlass;
         DFMethod funcMethod = baseKlass.getFuncMethod();

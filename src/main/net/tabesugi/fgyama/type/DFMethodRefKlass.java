@@ -202,6 +202,12 @@ class DFMethodRefKlass extends DFSourceKlass {
     }
 
     @Override
+    public int getReifyDepth() {
+        // This is always a concrete type.
+        return 0;
+    }
+
+    @Override
     public DFKlass getBaseKlass() {
         assert _baseKlass != null;
         return _baseKlass;
@@ -248,8 +254,15 @@ class DFMethodRefKlass extends DFSourceKlass {
 
     public void setBaseKlass(DFKlass baseKlass) {
         this.load();
+        if (baseKlass instanceof DFMethodRefKlass) {
+            // XXX Edge case when the outer function is a generic method
+            // which is reified with this methodref itself.
+            // e.g. <T> foo(T a) { foo(A::foo); }
+            _baseKlass = DFBuiltinTypes.getObjectKlass();
+            _funcMethod.setFuncType(null);
+            return;
+        }
         assert !(baseKlass instanceof DFLambdaKlass);
-        assert !(baseKlass instanceof DFMethodRefKlass);
         assert _baseKlass == null;
         _baseKlass = baseKlass;
         DFMethod funcMethod = baseKlass.getFuncMethod();
