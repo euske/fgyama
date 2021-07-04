@@ -83,7 +83,7 @@ public class Java2DF {
         }
     }
 
-    public Collection<DFSourceKlass> getSourceKlasses()
+    public Collection<DFSourceKlass> getSourceKlasses(boolean expand)
         throws InvalidSyntax {
 
         // Stage1: populate TypeSpaces.
@@ -108,8 +108,10 @@ public class Java2DF {
         // Stage4: expand classes and method refs.
         Logger.info("Stage4: expanding "+klasses.size()+" klasses...");
         List<DFSourceMethod> methods = this.expandKlasses(klasses);
-        Logger.info("Stage4: expanding "+methods.size()+" method refs...");
-        this.expandRefs(methods);
+        if (expand) {
+            Logger.info("Stage4: expanding "+methods.size()+" method refs...");
+            this.expandRefs(methods);
+        }
 
         return klasses;
     }
@@ -361,6 +363,7 @@ public class Java2DF {
         String sep = System.getProperty("path.separator");
         boolean strict = false;
         boolean reformat = false;
+        boolean expand = false;
         Logger.LogLevel = 0;
 
         for (int i = 0; i < args.length; i++) {
@@ -375,6 +378,8 @@ public class Java2DF {
                 strict = true;
             } else if (arg.equals("-F")) {
                 reformat = true;
+            } else if (arg.equals("-E")) {
+                expand = true;
             } else if (arg.startsWith("-i")) {
                 String path = ((arg.length() == 2)? args[++i] : arg.substring(2));
                 InputStream input = System.in;
@@ -412,7 +417,7 @@ public class Java2DF {
             } else if (arg.startsWith("-")) {
                 System.err.println("Unknown option: "+arg);
                 System.err.println(
-                    "usage: Java2DF [-v] [-S] [-F] [-i input] [-o output]" +
+                    "usage: Java2DF [-v] [-S] [-F] [-E] [-i input] [-o output]" +
                     " [-C classpath] [-D depth] [path ...]");
                 System.exit(1);
                 return;
@@ -460,7 +465,7 @@ public class Java2DF {
             }
         }
 
-        Collection<DFSourceKlass> klasses = converter.getSourceKlasses();
+        Collection<DFSourceKlass> klasses = converter.getSourceKlasses(expand);
 
         ByteArrayOutputStream temp = null;
         if (reformat) {
