@@ -1,64 +1,10 @@
 #!/usr/bin/env python
 import sys
 import logging
+import re
 from graphs import DFType, parsemethodname, parserefname
 from graph2index import GraphDB
 from srcdb import SourceDB
-
-def gettail(name):
-    (_,_,name) = name.rpartition('/')
-    return name.lower()
-
-KINDS = {
-    'value', 'valueset',
-    'op_assign', 'op_prefix', 'op_infix', 'op_postfix',
-    'op_typecast', 'op_typecheck',
-    'ref_var', 'ref_array', 'ref_field',
-    'call', 'new',
-}
-VALUES = {'value', 'valueset'}
-CALLS = {'call', 'new'}
-REFS = {'ref_var', 'ref_field', 'ref_array'}
-CONDS = {'join', 'begin', 'end', 'case', 'catchjoin'}
-def ignored(n):
-    return (len(n.inputs) == 1 and n.kind not in KINDS)
-
-def getfeats(label, n):
-    if n.kind not in KINDS: return
-    if label.startswith('@'):
-        label = '@'
-    if n.kind in VALUES:
-        (_,t) = DFType.parse(n.ntype)
-        yield f'{label}:{n.kind}:{t}'
-    elif n.kind in REFS:
-        yield f'{label}:{n.kind}:{parserefname(n.ref)}'
-    elif n.kind in CALLS:
-        methods = n.data.split()
-        (_,name,_) = parsemethodname(methods[0])
-        yield f'{label}:{n.kind}:{name}'
-    else:
-        yield f'{label}:{n.kind}:{n.data}'
-    return
-
-def visit(out, label0, n0, visited, n=0):
-    global maxpathlen
-    if n0 in visited: return
-    visited.add(n0)
-    if ignored(n0):
-        for (label1,n1) in n0.inputs.items():
-            if label1 == '#bypass': continue
-            if label1.startswith('_'): continue
-            visit(out, label0, n1, visited, n)
-    else:
-        for feat in getfeats(label0, n0):
-            out.add((n, feat))
-        n += 1
-        if n < maxpathlen:
-            for (label1,n1) in n0.inputs.items():
-                if label1.startswith('_'): continue
-                if label1 == '#bypass': continue
-                if n1.kind == 'ref_array' and not label1: continue
-                visit(out, label1, n1, visited, n)
 
 args_path = {
     # new java.io.File(path)
@@ -522,7 +468,6 @@ args_dayofmonth = {
     'Ljava/time/LocalDateTime;.of(ILjava/time/Month;IIIII)Ljava/time/LocalDateTime;': [2],
 }
 
-
 FUNARGS = {}
 def add(cat, args):
     for (k,v) in args.items():
@@ -545,13 +490,67 @@ add('year', args_year) # int
 add('month', args_month) # int
 add('dayofmonth', args_dayofmonth) # int
 
+RMSP = re.compile(r'\s+', re.U)
+def rmsp(s):
+    return RMSP.sub('', s)
+
+VALUES = {'value', 'valueset'}
+REFS = {'ref_var', 'ref_field'}
+OPS = {'op_assign', 'op_prefix', 'op_infix', 'ref_array',
+       'op_postfix', 'op_typecast', 'op_typecheck'}
+IGNORED = {'receive', ''}
+def getname1(n):
+    while True:
+        if len(n.inputs) == 1 and n.kind in IGNORED:
+            (n,) = n.inputs.values()
+        else:
+            break
+    if n.kind in VALUES:
+        return (n, '#const')
+    elif n.kind in REFS and not n.ref.startswith('@'):
+        name = parserefname(n.ref)
+        return (n, name)
+    elif n.kind == 'call':
+        methods = n.data.split()
+        (_,name,_) = parsemethodname(methods[0])
+        return (n, '()'+name)
+    else:
+        return (n, None)
+
+def getnames(n0, left=1, done=None):
+    if done is None:
+        done = set()
+    if n0 in done: return
+    done.add(n0)
+    nodes = []
+    if n0.is_funcall():
+        nobj = 0
+        for (label,n1) in n0.inputs.items():
+            if label.startswith('@'):
+                if 0 < nobj: continue
+                nobj += 1
+            elif not label.startswith('#arg'):
+                continue
+            nodes.append(n1)
+    else:
+        for (label,n1) in n0.inputs.items():
+            if label.startswith('_'): continue
+            nodes.append(n1)
+    for n1 in nodes:
+        (n1,name) = getname1(n1)
+        if name is not None:
+            yield name
+        if 0 < left:
+            for x in getnames(n1, left-1, done):
+                yield x
+    return
 
 # main
 def main(argv):
     global maxpathlen
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [-m maxpathlen] [-B basedir] graph.db')
+        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [-m maxdepth] [-B basedir] graph.db')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dM:m:B:')
@@ -559,12 +558,12 @@ def main(argv):
         return usage()
     level = logging.INFO
     maxoverrides = 1
-    maxpathlen = 5
+    maxdepth = 1
     srcdb = None
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-M': maxoverrides = int(v)
-        elif k == '-m': maxpathlen = int(v)
+        elif k == '-m': maxdepth = int(v)
         elif k == '-B': srcdb = SourceDB(v)
     if not args: return usage()
 
@@ -573,9 +572,7 @@ def main(argv):
     for path in args:
         logging.info(f'Loading: {path!r}...')
         db = GraphDB(path)
-        #logging.info(f'Running...')
-        #builder.run()
-
+        print(f'# {path}')
         # list all the methods and number of its uses. (being called)
         for method in db.get_allmethods():
             if srcdb is not None:
@@ -589,14 +586,18 @@ def main(argv):
                     for (cat,i) in FUNARGS[func]:
                         label = f'#arg{i}'
                         n = node.inputs[label]
-                        if n.kind == 'value': continue
+                        (n,name) = getname1(n)
+                        name = name or '#op'
+                        names = getnames(n, maxdepth)
                         if src is not None:
                             (_,start,end) = n.ast
-                            print(cat, src.data[start:end])
+                            text = src.data[start:end]
+                            print(cat, repr(rmsp(text)), name, ' '.join(names))
                         else:
-                            out = set()
-                            visit(out, label, n, set())
-                            print(cat, sorted(out))
+                            print(cat, name, ' '.join(names))
+
+        print()
+
     return 0
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

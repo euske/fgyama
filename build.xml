@@ -71,6 +71,7 @@
       <arg value="-v" />
       <arg value="-v" />
       <arg value="-S" />
+      <arg value="-F" />
       <arg value="-o" />
       <arg file="${output}" />
       <arg file="${input}" />
