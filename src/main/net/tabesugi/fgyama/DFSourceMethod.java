@@ -1042,13 +1042,13 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1;
             try {
                 method1 = klass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes);
+                    CallStyle.Constructor, (String)null, argTypes, null);
                 this.setLambdaType(
                     defined, method1.getFuncType(), ci.arguments());
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = klass.createFallbackMethod(
-                    CallStyle.Constructor, ":init:", argTypes);
+                    CallStyle.Constructor, ":init:", argTypes, null);
                 Logger.error(
                     "DFSourceMethod.listDefinedStmt: MethodNotFound (ci)",
                     Utils.getASTSource(ci), this);
@@ -1074,13 +1074,13 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1;
             try {
                 method1 = baseKlass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes);
+                    CallStyle.Constructor, (String)null, argTypes, null);
                 this.setLambdaType(
                     defined, method1.getFuncType(), sci.arguments());
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = baseKlass.createFallbackMethod(
-                    CallStyle.Constructor, ":init:", argTypes);
+                    CallStyle.Constructor, ":init:", argTypes, null);
                 Logger.error(
                     "DFSourceMethod.listDefinedStmt: MethodNotFound (sci)",
                     Utils.getASTSource(sci), this);
@@ -1312,18 +1312,19 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1;
             try {
                 method1 = klass.lookupMethod(
-                    callStyle, invoke.getName(), argTypes);
+                    callStyle, invoke.getName(), argTypes, expected);
                 this.setLambdaType(
                     defined, method1.getFuncType(), invoke.arguments());
             } catch (MethodNotFound e) {
                 // try static imports.
                 try {
                     method1 = scope.lookupStaticMethod(
-                        invoke.getName(), argTypes);
+                        invoke.getName(), argTypes, expected);
                 } catch (MethodNotFound ee) {
                     // fallback method.
                     method1 = klass.createFallbackMethod(
-                        DFMethod.CallStyle.InstanceMethod, invoke.getName(), argTypes);
+                        DFMethod.CallStyle.InstanceMethod, invoke.getName(),
+                        argTypes, expected);
                     Logger.error(
                         "DFSourceMethod.listDefinedExpr: MethodNotFound (invoke)",
                         Utils.getASTSource(invoke), klass, this);
@@ -1353,13 +1354,15 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1;
             try {
                 method1 = baseKlass.lookupMethod(
-                    CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                    CallStyle.InstanceMethod, sinvoke.getName(),
+                    argTypes, expected);
                 this.setLambdaType(
                     defined, method1.getFuncType(), sinvoke.arguments());
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = baseKlass.createFallbackMethod(
-                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
+                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(),
+                    argTypes, expected);
                 Logger.error(
                     "DFSourceMethod.listDefinedExpr: MethodNotFound (sinvoke)",
                     Utils.getASTSource(sinvoke), this);
@@ -1484,13 +1487,13 @@ public abstract class DFSourceMethod extends DFMethod {
             DFMethod method1;
             try {
                 method1 = instKlass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes);
+                    CallStyle.Constructor, (String)null, argTypes, null);
                 this.setLambdaType(
                     defined, method1.getFuncType(), cstr.arguments());
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = instKlass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, ":init:", argTypes);
+                    DFMethod.CallStyle.Constructor, ":init:", argTypes, null);
                 Logger.error(
                     "DFSourceMethod.listDefinedExpr: MethodNotFound (cstr)",
                     Utils.getASTSource(cstr), this);
@@ -1825,7 +1828,7 @@ public abstract class DFSourceMethod extends DFMethod {
             // could be a wrong funcType when the lambda is undefined.
             DFFuncType funcType = DFSourceMethod.this.getFuncType();
             DFType[] argTypes = funcType.getRealArgTypes();
-            _return = new InternalRef(funcType.getReturnType(), "#return");
+            _return = new InternalRef(funcType.getSafeReturnType(), "#return");
             _arguments = new InternalRef[argTypes.length];
             int i = 0;
             for (VariableDeclaration decl : parameters) {

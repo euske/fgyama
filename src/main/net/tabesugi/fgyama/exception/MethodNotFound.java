@@ -12,13 +12,15 @@ public class MethodNotFound extends EntityNotFound {
     private static final long serialVersionUID = 1L;
 
     public DFType[] argTypes;
+    public DFType returnType;
 
-    public MethodNotFound(String name, DFType[] argTypes) {
+    public MethodNotFound(String name, DFType[] argTypes, DFType returnType) {
         super(name);
         this.argTypes = argTypes;
+        this.returnType = returnType;
     }
 
-    public MethodNotFound(SimpleName name, DFType[] argTypes) {
-        this(name.getIdentifier(), argTypes);
+    public MethodNotFound(SimpleName name, DFType[] argTypes, DFType returnType) {
+        this(name.getIdentifier(), argTypes, returnType);
     }
 }

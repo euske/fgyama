@@ -528,7 +528,8 @@ class DFFileScope extends DFVarScope {
     }
 
     @Override
-    public DFMethod lookupStaticMethod(SimpleName name, DFType[] argTypes)
+    public DFMethod lookupStaticMethod(
+        SimpleName name, DFType[] argTypes, DFType returnType)
         throws MethodNotFound {
         String id = name.getIdentifier();
         int bestDist = -1;
@@ -537,7 +538,7 @@ class DFFileScope extends DFVarScope {
             if (!id.equals(method1.getName())) continue;
             Map<DFMapKlass, DFKlass> typeMap = new HashMap<DFMapKlass, DFKlass>();
             try {
-                int dist = method1.canAccept(argTypes, typeMap);
+                int dist = method1.canAccept(argTypes, returnType, typeMap);
                 if (bestDist < 0 || dist < bestDist) {
                     DFMethod method = method1.getReifiedMethod(typeMap);
                     if (method != null) {
@@ -549,7 +550,7 @@ class DFFileScope extends DFVarScope {
                 continue;
             }
         }
-        if (bestMethod == null) throw new MethodNotFound(name, argTypes);
+        if (bestMethod == null) throw new MethodNotFound(name, argTypes, returnType);
         return bestMethod;
     }
 
@@ -572,7 +573,7 @@ class DFFileScope extends DFVarScope {
         } else {
             try {
                 DFMethod method = klass.lookupMethod(
-                    DFMethod.CallStyle.StaticMethod, name, null);
+                    DFMethod.CallStyle.StaticMethod, name, null, null);
                 _methods.add(method);
             } catch (MethodNotFound e) {
             }

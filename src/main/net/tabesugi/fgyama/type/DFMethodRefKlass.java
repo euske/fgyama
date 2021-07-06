@@ -31,7 +31,7 @@ class DFMethodRefKlass extends DFSourceKlass {
         protected void setFuncType(DFFuncType funcType) {
             assert _funcType == null;
             if (funcType == null) {
-                funcType = new DFFuncType(new DFType[] {}, DFUnknownType.UNKNOWN);
+                funcType = new DFFuncType(new DFType[] {}, null);
             }
             _funcType = funcType;
         }
@@ -98,12 +98,14 @@ class DFMethodRefKlass extends DFSourceKlass {
             DFTypeFinder finder = this.getFinder();
             assert _funcType != null;
             DFType[] argTypes = _funcType.getRealArgTypes();
+            DFType returnType = _funcType.getReturnType();
             if (_methodRef instanceof CreationReference) {
                 CreationReference creatmref = (CreationReference)_methodRef;
                 try {
                     DFKlass klass = finder.resolve(creatmref.getType()).toKlass();
                     _refMethod = klass.lookupMethod(
-                        CallStyle.Constructor, (String)null, argTypes);
+                        CallStyle.Constructor, (String)null,
+                        argTypes, returnType);
                 } catch (TypeNotFound e) {
                 } catch (MethodNotFound e) {
                 }
@@ -113,7 +115,8 @@ class DFMethodRefKlass extends DFSourceKlass {
                 try {
                     DFKlass klass = finder.resolve(typemref.getType()).toKlass();
                     _refMethod = klass.lookupMethod(
-                        CallStyle.StaticMethod, typemref.getName(), argTypes);
+                        CallStyle.StaticMethod, typemref.getName(),
+                        argTypes, returnType);
                 } catch (TypeNotFound e) {
                 } catch (MethodNotFound e) {
                 }
@@ -124,7 +127,8 @@ class DFMethodRefKlass extends DFSourceKlass {
                     DFKlass klass = DFMethodRefKlass.this.getBaseKlass();
                     // XXX ignored: supermref.typeArguments()
                     _refMethod = klass.lookupMethod(
-                        CallStyle.StaticMethod, supermref.getName(), argTypes);
+                        CallStyle.StaticMethod, supermref.getName(),
+                        argTypes, returnType);
                 } catch (MethodNotFound e) {
                 }
 
@@ -148,7 +152,8 @@ class DFMethodRefKlass extends DFSourceKlass {
                     // XXX ignored: exprmref.typeArguments()
                     try {
                         _refMethod = klass.lookupMethod(
-                            CallStyle.InstanceOrStatic, exprmref.getName(), argTypes);
+                            CallStyle.InstanceOrStatic, exprmref.getName(),
+                            argTypes, returnType);
                     } catch (MethodNotFound e) {
                     }
                 }

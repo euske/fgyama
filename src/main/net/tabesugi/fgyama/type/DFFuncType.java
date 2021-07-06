@@ -17,7 +17,6 @@ public class DFFuncType implements DFType {
     private DFKlass[] _exceptions = new DFKlass[] {};
 
     public DFFuncType(DFType[] argTypes, DFType returnType) {
-        assert returnType != null;
         _argTypes = argTypes;
         _returnType = returnType;
     }
@@ -74,14 +73,11 @@ public class DFFuncType implements DFType {
         throws TypeIncompatible {
         if (!(type instanceof DFFuncType)) throw new TypeIncompatible(this, type);
         DFFuncType mtype = (DFFuncType)type;
-        int dist = this.canAccept(mtype._argTypes, typeMap);
-        if (_returnType != null && mtype._returnType != null) {
-            dist += _returnType.canConvertFrom(mtype._returnType, typeMap);
-        }
-        return dist;
+        return this.canAccept(mtype._argTypes, mtype._returnType, typeMap);
     }
 
-    public int canAccept(DFType[] argTypes, Map<DFMapKlass, DFKlass> typeMap)
+    public int canAccept(
+        DFType[] argTypes, DFType returnType, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         // Always accept if the signature is unknown.
         if (_argTypes == null || argTypes == null) return 0;
@@ -93,6 +89,9 @@ public class DFFuncType implements DFType {
             if (argTypes.length != _argTypes.length) throw new TypeIncompatible(this, null);
         }
         int dist = 0;
+        if (_returnType != null && returnType != null) {
+            dist += _returnType.canConvertFrom(returnType, typeMap);
+        }
         for (int i = 0; i < argTypes.length; i++) {
             DFType typePassed = argTypes[i];
             DFType typeRecv = this.getArgType(i);
@@ -126,6 +125,10 @@ public class DFFuncType implements DFType {
 
     public DFType getReturnType() {
         return _returnType;
+    }
+
+    public DFType getSafeReturnType() {
+        return (_returnType != null)? _returnType : DFUnknownType.UNKNOWN;
     }
 
     public void setExceptions(DFKlass[] exceptions) {

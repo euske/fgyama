@@ -141,16 +141,19 @@ public abstract class DFSourceKlass extends DFKlass {
 
     @Override
     public DFMethod lookupMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes)
+        DFMethod.CallStyle callStyle, String id,
+        DFType[] argTypes, DFType returnType)
         throws MethodNotFound {
         this.load();
-        return super.lookupMethod(callStyle, id, argTypes);
+        return super.lookupMethod(callStyle, id, argTypes, returnType);
     }
 
     @Override
     public DFMethod createFallbackMethod(
-        DFMethod.CallStyle callStyle, String id, DFType[] argTypes) {
-        DFMethod method = super.createFallbackMethod(callStyle, id, argTypes);
+        DFMethod.CallStyle callStyle, String id,
+        DFType[] argTypes, DFType returnType) {
+        DFMethod method = super.createFallbackMethod(
+            callStyle, id, argTypes, returnType);
         this.addMethod(method);
         return method;
     }
