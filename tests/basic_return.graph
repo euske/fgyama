@@ -50,7 +50,7 @@
             <accept label="L" src="M2_foo_N8"/>
             <accept label="R" src="M2_foo_N9"/>
           </node>
-          <node data="Lbasic_return;.f(I)?" id="M2_foo_N11" kind="call" type="?">
+          <node data="Lbasic_return;.f(I)I" id="M2_foo_N11" kind="call" type="I">
             <ast end="198" start="190" type="32"/>
             <accept label="#arg0" src="M2_foo_N10"/>
             <accept label="#bypass" src="M2_foo_N24"/>
@@ -59,7 +59,7 @@
           <node id="M2_foo_N13" kind="receive" ref="#bypass" type="?">
             <accept label="#bypass" src="M2_foo_N11"/>
           </node>
-          <node id="M2_foo_N14" kind="receive" type="?">
+          <node id="M2_foo_N14" kind="receive" type="I">
             <ast end="198" start="190" type="32"/>
             <accept src="M2_foo_N11"/>
           </node>
@@ -100,7 +100,7 @@
         </scope>
       </scope>
     </method>
-    <method id="Lbasic_return;.f(I)?" name="f" style="instance">
+    <method id="Lbasic_return;.f(I)I" name="f" style="instance">
       <caller id="Lbasic_return;.foo(III)I"/>
     </method>
   </class>

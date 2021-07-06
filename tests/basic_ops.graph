@@ -66,7 +66,7 @@
           <node data="3" id="M2_foo_N14" kind="value" type="I">
             <ast end="106" start="105" type="34"/>
           </node>
-          <node data="Lbasic_ops;.moo(II)?" id="M2_foo_N15" kind="call" type="?">
+          <node data="Lbasic_ops;.moo(II)I" id="M2_foo_N15" kind="call" type="I">
             <ast end="107" start="98" type="32"/>
             <accept label="#arg0" src="M2_foo_N13"/>
             <accept label="#arg1" src="M2_foo_N14"/>
@@ -76,7 +76,7 @@
           <node id="M2_foo_N17" kind="receive" ref="#bypass" type="?">
             <accept label="#bypass" src="M2_foo_N15"/>
           </node>
-          <node id="M2_foo_N18" kind="receive" type="?">
+          <node id="M2_foo_N18" kind="receive" type="I">
             <ast end="107" start="98" type="32"/>
             <accept src="M2_foo_N15"/>
           </node>
@@ -177,7 +177,7 @@
         </scope>
       </scope>
     </method>
-    <method id="Lbasic_ops;.moo(II)?" name="moo" style="instance">
+    <method id="Lbasic_ops;.moo(II)I" name="moo" style="instance">
       <caller id="Lbasic_ops;.foo(I)I"/>
     </method>
   </class>
