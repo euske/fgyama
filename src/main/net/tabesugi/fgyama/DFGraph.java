@@ -297,9 +297,10 @@ public abstract class DFGraph {
     @SuppressWarnings("unchecked")
     private DFNode processExpression(
         DFContext ctx, DFLocalScope scope, DFFrame frame,
-        Expression expr, DFType type)
+        Expression expr, DFType expected)
         throws InvalidSyntax, EntityNotFound {
         assert expr != null;
+        // expected can be null.
 
         try {
             if (expr instanceof Annotation) {
@@ -591,11 +592,12 @@ public abstract class DFGraph {
                 }
 
             } else if (expr instanceof ArrayInitializer) {
+                // "{ 5, 9, 4, ... }"
                 ArrayInitializer init = (ArrayInitializer)expr;
+                DFType type = (expected != null)? expected : DFUnknownType.UNKNOWN;
                 DFNode array = new ValueSetNode(this, scope, type, expr);
-                DFType elemType = (type instanceof DFArrayType)?
-                    ((DFArrayType)type).getElemType() :
-                    DFUnknownType.UNKNOWN;
+                DFType elemType = (expected instanceof DFArrayType)?
+                    ((DFArrayType)expected).getElemType() : null;
                 DFRef ref = scope.lookupArray(array.getNodeType());
                 List<Expression> exprs = (List<Expression>) init.expressions();
                 int i = 0;
