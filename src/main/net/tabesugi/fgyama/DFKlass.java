@@ -623,6 +623,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             String methodName, CallStyle callStyle,
             DFType[] argTypes, DFType returnType) {
             super(DFKlass.this, callStyle, false, methodName, methodName);
+            assert returnType != null;
             // Ugly hack to prevent lambda or methodref from being
             // used for the argtypes of a fallback method.
             argTypes = argTypes.clone();

@@ -1048,7 +1048,7 @@ public abstract class DFSourceMethod extends DFMethod {
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = klass.createFallbackMethod(
-                    CallStyle.Constructor, ":init:", argTypes, null);
+                    CallStyle.Constructor, ":init:", argTypes, klass);
                 Logger.error(
                     "DFSourceMethod.listDefinedStmt: MethodNotFound (ci)",
                     Utils.getASTSource(ci), this);
@@ -1080,7 +1080,7 @@ public abstract class DFSourceMethod extends DFMethod {
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = baseKlass.createFallbackMethod(
-                    CallStyle.Constructor, ":init:", argTypes, null);
+                    CallStyle.Constructor, ":init:", argTypes, baseKlass);
                 Logger.error(
                     "DFSourceMethod.listDefinedStmt: MethodNotFound (sci)",
                     Utils.getASTSource(sci), this);
@@ -1322,9 +1322,11 @@ public abstract class DFSourceMethod extends DFMethod {
                         invoke.getName(), argTypes, expected);
                 } catch (MethodNotFound ee) {
                     // fallback method.
+                    DFType returnType =
+                        (expected != null)? expected : DFUnknownType.UNKNOWN;
                     method1 = klass.createFallbackMethod(
                         DFMethod.CallStyle.InstanceMethod, invoke.getName(),
-                        argTypes, expected);
+                        argTypes, returnType);
                     Logger.error(
                         "DFSourceMethod.listDefinedExpr: MethodNotFound (invoke)",
                         Utils.getASTSource(invoke), klass, this);
@@ -1360,9 +1362,11 @@ public abstract class DFSourceMethod extends DFMethod {
                     defined, method1.getFuncType(), sinvoke.arguments());
             } catch (MethodNotFound e) {
                 // fallback method.
+                DFType returnType =
+                    (expected != null)? expected : DFUnknownType.UNKNOWN;
                 method1 = baseKlass.createFallbackMethod(
                     DFMethod.CallStyle.InstanceMethod, sinvoke.getName(),
-                    argTypes, expected);
+                    argTypes, returnType);
                 Logger.error(
                     "DFSourceMethod.listDefinedExpr: MethodNotFound (sinvoke)",
                     Utils.getASTSource(sinvoke), this);
@@ -1493,7 +1497,7 @@ public abstract class DFSourceMethod extends DFMethod {
             } catch (MethodNotFound e) {
                 // fallback method.
                 method1 = instKlass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, ":init:", argTypes, null);
+                    DFMethod.CallStyle.Constructor, ":init:", argTypes, instKlass);
                 Logger.error(
                     "DFSourceMethod.listDefinedExpr: MethodNotFound (cstr)",
                     Utils.getASTSource(cstr), this);
