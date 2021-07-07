@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_exception;" path="tests/basic_exception.java">
-    <method id="Lbasic_exception;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_exception;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="477" start="0" type="55"/>
-      <scope name="Lbasic_exception;.:clinit:"/>
+      <scope name="Lbasic_exception;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_exception;.foo()V" name="foo" style="instance">
       <ast end="380" start="103" type="31"/>
@@ -182,13 +182,13 @@
   </class>
   <class extends="Ljava/lang/Exception;" name="Lbasic_exception/A;" path="tests/basic_exception.java">
     <field name=".Lbasic_exception/A;/.text" static="false" type="Ljava/lang/String;"/>
-    <method id="Lbasic_exception/A;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_exception/A;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="97" start="36" type="55"/>
-      <scope name="Lbasic_exception/A;.:clinit:">
-        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
-        <node id="K4_:clinit:_N2" kind="assign_var" ref=".Lbasic_exception/A;/.text" type="Ljava/lang/String;">
+      <scope name="Lbasic_exception/A;.&lt;clinit&gt;">
+        <node data="null" id="K4_&lt;clinit&gt;_N1" kind="value" type="?"/>
+        <node id="K4_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_exception/A;/.text" type="Ljava/lang/String;">
           <ast end="90" start="86" type="59"/>
-          <accept src="K4_:clinit:_N1"/>
+          <accept src="K4_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>

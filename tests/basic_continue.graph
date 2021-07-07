@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_continue;" path="tests/basic_continue.java">
-    <method id="Lbasic_continue;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_continue;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="150" start="0" type="55"/>
-      <scope name="Lbasic_continue;.:clinit:"/>
+      <scope name="Lbasic_continue;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_continue;.foo(I)V" name="foo" style="static">
       <ast end="148" start="35" type="31"/>

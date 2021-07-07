@@ -349,7 +349,7 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
             }
         }
 
-        if (id == null) { id = ":init:"; }
+        if (id == null) { id = "<init>"; }
         throw new MethodNotFound(this.getTypeName()+"."+id, argTypes, returnType);
     }
 

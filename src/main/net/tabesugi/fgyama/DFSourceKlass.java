@@ -401,7 +401,7 @@ public abstract class DFSourceKlass extends DFKlass {
                 String name;
                 DFMethod.CallStyle callStyle;
                 if (decl.isConstructor()) {
-                    name = ":init:";
+                    name = "<init>";
                     callStyle = DFMethod.CallStyle.Constructor;
                 } else {
                     name = decl.getName().getIdentifier();
@@ -536,7 +536,7 @@ class InitMethod extends DFSourceMethod {
         DFSourceKlass klass,
         List<BodyDeclaration> decls, DFTypeFinder finder) {
         super(klass, CallStyle.Initializer,
-              false, ":clinit:", ":clinit:",
+              false, "<clinit>", "<clinit>",
               klass.getKlassScope(), finder);
 
         _ast = klass.getAST();

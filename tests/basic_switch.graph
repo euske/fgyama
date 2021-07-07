@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_switch;" path="tests/basic_switch.java">
-    <method id="Lbasic_switch;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_switch;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="191" start="0" type="55"/>
-      <scope name="Lbasic_switch;.:clinit:"/>
+      <scope name="Lbasic_switch;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_switch;.foo(I)I" name="foo" style="static">
       <ast end="189" start="33" type="31"/>

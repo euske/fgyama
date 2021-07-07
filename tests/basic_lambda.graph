@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" interface="true" name="LMoo;" path="tests/basic_lambda.java">
-    <method id="LMoo;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="LMoo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="79" start="30" type="55"/>
-      <scope name="LMoo;.:clinit:"/>
+      <scope name="LMoo;.&lt;clinit&gt;"/>
     </method>
     <method abstract="true" id="LMoo;.moo(I)Ljava/lang/String;" name="moo" style="instance">
       <caller id="Lbasic_lambda;.bar(LMoo;)V"/>
@@ -10,9 +10,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" interface="true" name="LFoo;" path="tests/basic_lambda.java">
-    <method id="LFoo;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="LFoo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="133" start="80" type="55"/>
-      <scope name="LFoo;.:clinit:"/>
+      <scope name="LFoo;.&lt;clinit&gt;"/>
     </method>
     <method abstract="true" id="LFoo;.foo(II)I" name="foo" style="instance">
       <caller id="Lbasic_lambda;.bar(LFoo;)V"/>
@@ -21,15 +21,15 @@
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_lambda;" path="tests/basic_lambda.java">
     <field name=".Lbasic_lambda;/.isZero" static="false" type="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;"/>
-    <method id="Lbasic_lambda;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_lambda;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="534" start="135" type="55"/>
-      <scope name="Lbasic_lambda;.:clinit:">
-        <node id="K5_:clinit:_N1" kind="capture" type="Lbasic_lambda/:clinit:/:lambda:197:208;">
+      <scope name="Lbasic_lambda;.&lt;clinit&gt;">
+        <node id="K5_&lt;clinit&gt;_N1" kind="capture" type="Lbasic_lambda/&lt;clinit&gt;/:lambda:197:208;">
           <ast end="208" start="197" type="86"/>
         </node>
-        <node id="K5_:clinit:_N2" kind="assign_var" ref=".Lbasic_lambda;/.isZero" type="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;">
+        <node id="K5_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_lambda;/.isZero" type="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;">
           <ast end="209" start="187" type="59"/>
-          <accept src="K5_:clinit:_N1"/>
+          <accept src="K5_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -226,15 +226,15 @@
       </scope>
     </method>
   </class>
-  <class extends="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;" name="Lbasic_lambda/:clinit:/:lambda:197:208;" path="tests/basic_lambda.java">
-    <method id="Lbasic_lambda/:clinit:/:lambda:197:208;.#f(Ljava/lang/Integer;)Z" name="#f" style="lambda">
+  <class extends="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;" name="Lbasic_lambda/&lt;clinit&gt;/:lambda:197:208;" path="tests/basic_lambda.java">
+    <method id="Lbasic_lambda/&lt;clinit&gt;/:lambda:197:208;.#f(Ljava/lang/Integer;)Z" name="#f" style="lambda">
       <overriding id="Ljava/util/function/Predicate&lt;Ljava/lang/Integer;&gt;;.test(Ljava/lang/Integer;)Z"/>
       <ast end="208" start="197" type="86"/>
-      <scope name="Lbasic_lambda;.:clinit:.:lambda:197:208.#f">
+      <scope name="Lbasic_lambda;.&lt;clinit&gt;.:lambda:197:208.#f">
         <node id="M9_#f_N1" kind="input" ref="#arg0" type="Ljava/lang/Integer;">
           <ast end="198" start="197" type="59"/>
         </node>
-        <node id="M9_#f_N2" kind="assign_var" ref="$Lbasic_lambda;.:clinit:.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
+        <node id="M9_#f_N2" kind="assign_var" ref="$Lbasic_lambda;.&lt;clinit&gt;.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
           <ast end="198" start="197" type="59"/>
           <accept src="M9_#f_N1"/>
         </node>
@@ -242,7 +242,7 @@
           <ast end="208" start="202" type="27"/>
           <accept src="M9_#f_N6"/>
         </node>
-        <node id="M9_#f_N4" kind="ref_var" ref="$Lbasic_lambda;.:clinit:.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
+        <node id="M9_#f_N4" kind="ref_var" ref="$Lbasic_lambda;.&lt;clinit&gt;.:lambda:197:208.#f/$i" type="Ljava/lang/Integer;">
           <ast end="203" start="202" type="42"/>
           <accept src="M9_#f_N2"/>
         </node>

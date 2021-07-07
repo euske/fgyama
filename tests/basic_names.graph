@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names;" path="tests/basic_names.java">
     <field name=".Ldom/meep/basic_names;/.y" static="false" type="I"/>
-    <method id="Ldom/meep/basic_names;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/basic_names;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="470" start="19" type="55"/>
-      <scope name="Ldom/meep/basic_names;.:clinit:">
-        <node data="123" id="K1_:clinit:_N1" kind="value" type="I">
+      <scope name="Ldom/meep/basic_names;.&lt;clinit&gt;">
+        <node data="123" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
           <ast end="72" start="69" type="34"/>
         </node>
-        <node id="K1_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/basic_names;/.y" type="I">
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/meep/basic_names;/.y" type="I">
           <ast end="72" start="65" type="59"/>
-          <accept src="K1_:clinit:_N1"/>
+          <accept src="K1_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -190,20 +190,20 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/Bar;" path="tests/basic_names.java">
-    <method id="Ldom/meep/basic_names/Bar;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="56" start="44" type="55"/>
-      <scope name="Ldom/meep/basic_names/Bar;.:clinit:"/>
+      <scope name="Ldom/meep/basic_names/Bar;.&lt;clinit&gt;"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/basic_names/:doit:79:289/Baz;" path="tests/basic_names.java">
     <field name=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" static="false" type="I"/>
-    <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="211" start="144" type="55"/>
-      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.:clinit:">
-        <node data="null" id="K7_:clinit:_N1" kind="value" type="?"/>
-        <node id="K7_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
+      <scope name="Ldom/meep/basic_names/:doit:79:289/Baz;.&lt;clinit&gt;">
+        <node data="null" id="K7_&lt;clinit&gt;_N1" kind="value" type="?"/>
+        <node id="K7_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/meep/basic_names/:doit:79:289/Baz;/.x" type="I">
           <ast end="173" start="172" type="59"/>
-          <accept src="K7_:clinit:_N1"/>
+          <accept src="K7_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>

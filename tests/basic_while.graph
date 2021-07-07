@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_while;" path="tests/basic_while.java">
-    <method id="Lbasic_while;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_while;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="111" start="0" type="55"/>
-      <scope name="Lbasic_while;.:clinit:"/>
+      <scope name="Lbasic_while;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_while;.foo(I)V" name="foo" style="static">
       <ast end="109" start="32" type="31"/>

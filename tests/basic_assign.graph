@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_assign;" path="tests/basic_assign.java">
-    <method id="Lbasic_assign;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_assign;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="144" start="0" type="55"/>
-      <scope name="Lbasic_assign;.:clinit:"/>
+      <scope name="Lbasic_assign;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_assign;.foo(III)V" name="foo" style="static">
       <ast end="142" start="33" type="31"/>

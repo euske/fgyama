@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_poly_Foo;" path="tests/basic_poly.java">
     <field name=".Lbasic_poly_Foo;/.x" static="false" type="I"/>
-    <method id="Lbasic_poly_Foo;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_poly_Foo;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="108" start="0" type="55"/>
-      <scope name="Lbasic_poly_Foo;.:clinit:">
-        <node data="0" id="K1_:clinit:_N1" kind="value" type="I">
+      <scope name="Lbasic_poly_Foo;.&lt;clinit&gt;">
+        <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
           <ast end="36" start="35" type="34"/>
         </node>
-        <node id="K1_:clinit:_N2" kind="assign_var" ref=".Lbasic_poly_Foo;/.x" type="I">
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_poly_Foo;/.x" type="I">
           <ast end="36" start="31" type="59"/>
-          <accept src="K1_:clinit:_N1"/>
+          <accept src="K1_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -50,9 +50,9 @@
     </method>
   </class>
   <class extends="Lbasic_poly_Foo;" name="Lbasic_poly_Baa;" path="tests/basic_poly.java">
-    <method id="Lbasic_poly_Baa;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_poly_Baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="282" start="110" type="55"/>
-      <scope name="Lbasic_poly_Baa;.:clinit:"/>
+      <scope name="Lbasic_poly_Baa;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_poly_Baa;.moo(Lbasic_poly_Foo;)I" name="moo" style="instance">
       <caller id="Lbasic_poly;.main([Ljava/lang/String;)V"/>
@@ -122,9 +122,9 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_poly;" path="tests/basic_poly.java">
-    <method id="Lbasic_poly;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Lbasic_poly;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="779" start="284" type="55"/>
-      <scope name="Lbasic_poly;.:clinit:"/>
+      <scope name="Lbasic_poly;.&lt;clinit&gt;"/>
     </method>
     <method id="Lbasic_poly;.main([Ljava/lang/String;)V" name="main" style="static">
       <ast end="777" start="314" type="31"/>

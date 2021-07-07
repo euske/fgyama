@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1;" path="tests/multi/dom/meep/multi_xref1.java">
     <field name=".Ldom/meep/multi_xref1;/.xref2" static="false" type="Ldom/meep/multi_xref2;"/>
-    <method id="Ldom/meep/multi_xref1;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/multi_xref1;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="256" start="19" type="55"/>
-      <scope name="Ldom/meep/multi_xref1;.:clinit:">
-        <node data="null" id="K1_:clinit:_N1" kind="value" type="?"/>
-        <node id="K1_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
+      <scope name="Ldom/meep/multi_xref1;.&lt;clinit&gt;">
+        <node data="null" id="K1_&lt;clinit&gt;_N1" kind="value" type="?"/>
+        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1;/.xref2" type="Ldom/meep/multi_xref2;">
           <ast end="68" start="63" type="59"/>
-          <accept src="K1_:clinit:_N1"/>
+          <accept src="K1_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -121,13 +121,13 @@
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref2;" path="tests/multi/dom/meep/multi_xref2.java">
     <field name=".Ldom/meep/multi_xref2;/.xref1" static="false" type="Ldom/meep/multi_xref1;"/>
-    <method id="Ldom/meep/multi_xref2;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/multi_xref2;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="297" start="19" type="55"/>
-      <scope name="Ldom/meep/multi_xref2;.:clinit:">
-        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
-        <node id="K4_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
+      <scope name="Ldom/meep/multi_xref2;.&lt;clinit&gt;">
+        <node data="null" id="K4_&lt;clinit&gt;_N1" kind="value" type="?"/>
+        <node id="K4_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/meep/multi_xref2;/.xref1" type="Ldom/meep/multi_xref1;">
           <ast end="68" start="63" type="59"/>
-          <accept src="K4_:clinit:_N1"/>
+          <accept src="K4_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
@@ -254,28 +254,28 @@
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/meep/multi_xref1/baa;" path="tests/multi/dom/meep/multi_xref1.java">
     <field name=".Ldom/meep/multi_xref1/baa;/.baz" static="false" type="I"/>
-    <method id="Ldom/meep/multi_xref1/baa;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="109" start="75" type="55"/>
-      <scope name="Ldom/meep/multi_xref1/baa;.:clinit:">
-        <node data="null" id="K7_:clinit:_N1" kind="value" type="?"/>
-        <node id="K7_:clinit:_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1/baa;/.baz" type="I">
+      <scope name="Ldom/meep/multi_xref1/baa;.&lt;clinit&gt;">
+        <node data="null" id="K7_&lt;clinit&gt;_N1" kind="value" type="?"/>
+        <node id="K7_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/meep/multi_xref1/baa;/.baz" type="I">
           <ast end="102" start="99" type="59"/>
-          <accept src="K7_:clinit:_N1"/>
+          <accept src="K7_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Ldom/dood/multi_xref3;" path="tests/multi/dom/dood/multi_xref3.java">
     <field name=".Ldom/dood/multi_xref3;/.boo" static="true" type="I"/>
-    <method id="Ldom/dood/multi_xref3;.:clinit:()V" name=":clinit:" style="initializer">
+    <method id="Ldom/dood/multi_xref3;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
       <ast end="195" start="48" type="55"/>
-      <scope name="Ldom/dood/multi_xref3;.:clinit:">
-        <node data="100" id="K8_:clinit:_N1" kind="value" type="I">
+      <scope name="Ldom/dood/multi_xref3;.&lt;clinit&gt;">
+        <node data="100" id="K8_&lt;clinit&gt;_N1" kind="value" type="I">
           <ast end="107" start="104" type="34"/>
         </node>
-        <node id="K8_:clinit:_N2" kind="assign_var" ref=".Ldom/dood/multi_xref3;/.boo" type="I">
+        <node id="K8_&lt;clinit&gt;_N2" kind="assign_var" ref=".Ldom/dood/multi_xref3;/.boo" type="I">
           <ast end="107" start="98" type="59"/>
-          <accept src="K8_:clinit:_N1"/>
+          <accept src="K8_&lt;clinit&gt;_N1"/>
         </node>
       </scope>
     </method>
