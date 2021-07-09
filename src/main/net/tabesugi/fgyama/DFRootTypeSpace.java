@@ -29,8 +29,12 @@ public class DFRootTypeSpace extends DFTypeSpace {
         }
     }
 
-    public DFTypeSpace getSubSpace(Name name) {
-        return this.getSubSpace(name.getFullyQualifiedName());
+    public DFTypeSpace addSubSpace(PackageDeclaration pkgDecl) {
+        if (pkgDecl == null) {
+            return this;
+        } else {
+            return this.addSubSpace(pkgDecl.getName());
+        }
     }
 
     @Override
@@ -72,7 +76,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
         int j = fullName.lastIndexOf('/');
         String spaceName = fullName.substring(0, j).replace('/', '.');
         String klassName = fullName.substring(j+1);
-        DFTypeSpace space = this.getSubSpace(spaceName);
+        DFTypeSpace space = this.addSubSpace(spaceName);
         // Create a top-level klass.
         DFTypeFinder finder = _finder;
         DFJarFileKlass klass = (DFJarFileKlass)space.getKlass(klassName);

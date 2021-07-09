@@ -119,7 +119,7 @@ public class Java2DF {
     @SuppressWarnings("unchecked")
     private void buildTypeSpace(SourceFile src)
         throws InvalidSyntax {
-        DFTypeSpace packageSpace = _rootSpace.getSubSpace(src.cunit.getPackage());
+        DFTypeSpace packageSpace = _rootSpace.addSubSpace(src.cunit.getPackage());
         DFFileScope fileScope = new DFFileScope(_globalScope, src.path);
         _fileScope.put(src, fileScope);
         List<DFSourceKlass> klasses = new ArrayList<DFSourceKlass>();

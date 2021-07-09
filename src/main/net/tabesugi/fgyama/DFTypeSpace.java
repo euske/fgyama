@@ -41,11 +41,31 @@ public class DFTypeSpace {
         }
     }
 
+    public DFTypeSpace getSubSpace(Name name) {
+        return this.getSubSpace(name.getFullyQualifiedName());
+    }
+
     public DFTypeSpace getSubSpace(String id) {
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.getSubSpace(id.substring(0, i));
+            if (space == null) return null;
             return space.getSubSpace(id.substring(i+1));
+        }
+        DFKlass klass = _id2klass.get(id);
+        if (klass != null) return klass;
+        return _id2space.get(id);
+    }
+
+    public DFTypeSpace addSubSpace(Name name) {
+        return this.addSubSpace(name.getFullyQualifiedName());
+    }
+
+    public DFTypeSpace addSubSpace(String id) {
+        int i = id.lastIndexOf('.');
+        if (0 <= i) {
+            DFTypeSpace space = this.addSubSpace(id.substring(0, i));
+            return space.addSubSpace(id.substring(i+1));
         }
         DFKlass klass = _id2klass.get(id);
         if (klass != null) return klass;
@@ -77,6 +97,7 @@ public class DFTypeSpace {
         int i = id.lastIndexOf('.');
         if (0 <= i) {
             DFTypeSpace space = this.getSubSpace(id.substring(0, i));
+            if (space == null) return null;
             return space.getKlass(id.substring(i+1));
         }
         return _id2klass.get(id);
