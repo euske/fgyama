@@ -231,7 +231,7 @@ public abstract class DFGraph {
         } else if (stmt instanceof ConstructorInvocation) {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            DFKlass klass = _method.getKlass();
+            DFKlass klass = _method.klass();
             DFNode obj = ctx.get(klass.getThisRef());
             int nargs = ci.arguments().size();
             DFNode[] args = new DFNode[nargs];
@@ -255,7 +255,7 @@ public abstract class DFGraph {
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            DFKlass klass = _method.getKlass();
+            DFKlass klass = _method.klass();
             DFNode obj = ctx.get(klass.getThisRef());
             int nargs = sci.arguments().size();
             DFNode[] args = new DFNode[nargs];
@@ -314,7 +314,7 @@ public abstract class DFGraph {
                     DFRef ref = scope.lookupVar((SimpleName)name);
                     DFNode node;
                     if (ref instanceof DFKlass.FieldRef) {
-                        DFKlass klass = _method.getKlass();
+                        DFKlass klass = _method.klass();
                         DFNode obj = ctx.get(klass.getThisRef());
                         node = new FieldRefNode(this, scope, ref, expr, obj);
                     } else {
@@ -352,7 +352,7 @@ public abstract class DFGraph {
                 if (name != null) {
                     klass = _finder.resolveKlass(name);
                 } else {
-                    klass = _method.getKlass();
+                    klass = _method.klass();
                 }
                 DFRef ref = klass.getThisRef();
                 DFNode node = new VarRefNode(this, scope, ref, expr);
@@ -498,7 +498,7 @@ public abstract class DFGraph {
                 DFKlass instKlass = null;
                 if (expr1 == null) {
                     // "method()"
-                    instKlass = _method.getKlass();
+                    instKlass = _method.klass();
                     obj = ctx.get(instKlass.getThisRef());
                     callStyle = DFMethod.CallStyle.InstanceOrStatic;
                 } else {
@@ -551,7 +551,7 @@ public abstract class DFGraph {
             } else if (expr instanceof SuperMethodInvocation) {
                 // "super.method()"
                 SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-                DFKlass klass = _method.getKlass();
+                DFKlass klass = _method.klass();
                 DFNode obj = ctx.get(klass.getThisRef());
                 int nargs = sinvoke.arguments().size();
                 DFNode[] args = new DFNode[nargs];
@@ -651,7 +651,7 @@ public abstract class DFGraph {
                 // "super.baa"
                 SuperFieldAccess sfa = (SuperFieldAccess)expr;
                 SimpleName fieldName = sfa.getName();
-                DFKlass klass = _method.getKlass();
+                DFKlass klass = _method.klass();
                 DFNode obj = ctx.get(klass.getThisRef());
                 DFKlass baseKlass = klass.getBaseKlass();
                 DFRef ref = baseKlass.getField(fieldName);
@@ -799,7 +799,7 @@ public abstract class DFGraph {
                 DFRef ref = scope.lookupVar((SimpleName)name);
                 DFNode node;
                 if (ref instanceof DFKlass.FieldRef) {
-                    DFKlass klass = _method.getKlass();
+                    DFKlass klass = _method.klass();
                     DFNode obj = ctx.get(klass.getThisRef());
                     return new FieldAssignNode(this, scope, ref, expr, obj);
                 } else {
@@ -851,7 +851,7 @@ public abstract class DFGraph {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFKlass klass = _method.getKlass();
+            DFKlass klass = _method.klass();
             DFNode obj = ctx.get(klass.getThisRef());
             DFKlass baseKlass = klass.getBaseKlass();
             DFRef ref = baseKlass.getField(fieldName);
@@ -1578,7 +1578,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFSourceMethod.MethodScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
+        DFFrame frame = new DFFrame(_method.klass(), _finder, scope);
 
         // Create input nodes.
         for (DFRef ref : _method.getInputRefs()) {
@@ -1594,7 +1594,7 @@ public abstract class DFGraph {
                 FieldDeclaration fieldDecl = (FieldDeclaration)body;
                 for (VariableDeclarationFragment frag :
                          (List<VariableDeclarationFragment>) fieldDecl.fragments()) {
-                    DFRef ref = _method.getKlass().getField(frag.getName());
+                    DFRef ref = _method.klass().getField(frag.getName());
                     if (ref == null) throw new VariableNotFound("."+frag.getName());
                     DFNode value = null;
                     Expression init = frag.getInitializer();
@@ -1671,7 +1671,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFSourceMethod.MethodScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_method.getKlass(), _finder, scope);
+        DFFrame frame = new DFFrame(_method.klass(), _finder, scope);
 
         // Create input nodes.
         for (DFRef ref : _method.getInputRefs()) {

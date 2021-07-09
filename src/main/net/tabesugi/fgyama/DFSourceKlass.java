@@ -724,7 +724,7 @@ class DefinedMethod extends DFSourceMethod {
                     mapKlass = (DFMapKlass)klass;
                 } else {
                     mapKlass = new DFMapKlass(
-                        id, outerSpace, this.getKlass(),
+                        id, outerSpace, this.klass(),
                         tp.typeBounds());
                     mapKlass.setFinder(finder);
                     outerSpace.addKlass(id, mapKlass);
@@ -775,7 +775,7 @@ class DefinedMethod extends DFSourceMethod {
         }
         DFType returnType;
         if (_methodDecl.isConstructor()) {
-            returnType = this.getKlass();
+            returnType = this.klass();
         } else {
             returnType = finder.resolveSafe(_methodDecl.getReturnType2());
         }
@@ -841,7 +841,7 @@ class DefinedMethod extends DFSourceMethod {
         if (_methodDecl.getBody() == null) return;
         // Constructor changes all the member fields.
         if (this.getCallStyle() == CallStyle.Constructor) {
-            for (DFKlass.FieldRef ref : this.getKlass().getFields()) {
+            for (DFKlass.FieldRef ref : this.klass().getFields()) {
                 if (!ref.isStatic()) {
                     this.getOutputRefs().add(ref);
                 }
@@ -867,7 +867,7 @@ class DefinedMethod extends DFSourceMethod {
         MethodGraph graph = new MethodGraph("M"+graphId+"_"+this.getName());
         MethodScope methodScope = this.getScope();
         DFContext ctx = new DFContext(graph, methodScope);
-        DFKlass klass = this.getKlass();
+        DFKlass klass = this.klass();
         int i = 0;
         for (VariableDeclaration decl :
                  (List<VariableDeclaration>)_methodDecl.parameters()) {

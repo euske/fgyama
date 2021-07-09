@@ -169,7 +169,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
         return _methodId;
     }
 
-    public DFKlass getKlass() {
+    public DFKlass klass() {
         return _klass;
     }
 
