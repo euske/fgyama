@@ -122,8 +122,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     @Override
-    public DFKlass lookupKlass(String id)
-        throws TypeNotFound {
+    public DFKlass getKlass(String id) {
         if (_mapKlasses != null) {
             DFMapKlass mapKlass = _mapKlasses.get(id);
             if (mapKlass != null) return mapKlass;
@@ -132,7 +131,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
             DFKlass paramType = _paramTypes.get(id);
             if (paramType != null) return paramType;
         }
-        return super.lookupKlass(id);
+        return super.getKlass(id);
     }
 
     // Creates a parameterized method.

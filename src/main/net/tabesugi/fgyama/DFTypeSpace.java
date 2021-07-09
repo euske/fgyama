@@ -88,26 +88,14 @@ public class DFTypeSpace {
         //Logger.info("DFTypeSpace.addKlass:", this, ":", id);
     }
 
-    public DFKlass getKlass(Name name) {
-        return this.getKlass(name.getFullyQualifiedName());
+    public DFKlass getKlass(SimpleName name) {
+        return this.getKlass(name.getIdentifier());
     }
 
     public DFKlass getKlass(String id) {
         //Logger.info("DFTypeSpace.getKlass:", this, ":", id);
-        int i = id.lastIndexOf('.');
-        if (0 <= i) {
-            DFTypeSpace space = this.getSubSpace(id.substring(0, i));
-            if (space == null) return null;
-            return space.getKlass(id.substring(i+1));
-        }
+        assert id.indexOf('.') < 0;
         return _id2klass.get(id);
-    }
-
-    public DFKlass lookupKlass(String id)
-        throws TypeNotFound {
-        DFKlass klass = this.getKlass(id);
-        if (klass == null) throw new TypeNotFound(id);
-        return klass;
     }
 
     public static String getReifiedName(Map<String, DFKlass> paramTypes) {

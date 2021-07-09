@@ -37,6 +37,17 @@ public class DFRootTypeSpace extends DFTypeSpace {
         }
     }
 
+    public DFKlass getRootKlass(Name name) {
+        if (name.isSimpleName()) {
+            return this.getKlass((SimpleName)name);
+        } else {
+            QualifiedName qname = (QualifiedName)name;
+            DFTypeSpace space = this.getSubSpace(qname.getQualifier());
+            if (space == null) return null;
+            return space.getKlass(qname.getName());
+        }
+    }
+
     @Override
     public String toString() {
         return ("<DFRootTypeSpace>");

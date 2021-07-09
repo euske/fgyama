@@ -166,10 +166,9 @@ public class DFJarFileKlass extends DFKlass {
     }
 
     @Override
-    public DFKlass lookupKlass(String id)
-        throws TypeNotFound {
+    public DFKlass getKlass(String id) {
         this.loadJarFile();
-        return super.lookupKlass(id);
+        return super.getKlass(id);
     }
 
     @Override

@@ -156,7 +156,7 @@ public class Java2DF {
                 finder = new DFTypeFinder(_rootSpace.getSubSpace(name), finder);
             } else if (!importDecl.isStatic()) {
                 assert name.isQualifiedName();
-                DFKlass klass = _rootSpace.getKlass(name);
+                DFKlass klass = _rootSpace.getRootKlass(name);
                 if (klass != null) {
                     Logger.debug("Import:", name);
                     String id = ((QualifiedName)name).getName().getIdentifier();
@@ -188,13 +188,13 @@ public class Java2DF {
             if (!importDecl.isStatic()) continue;
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
-                DFKlass klass = _rootSpace.getKlass(name);
+                DFKlass klass = _rootSpace.getRootKlass(name);
                 if (klass != null) {
                     fileScope.importStatic(klass);
                 }
             } else {
                 QualifiedName qname = (QualifiedName)name;
-                DFKlass klass = _rootSpace.getKlass(qname.getQualifier());
+                DFKlass klass = _rootSpace.getRootKlass(qname.getQualifier());
                 if (klass != null) {
                     fileScope.importStatic(klass, qname.getName());
                 }
