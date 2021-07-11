@@ -21,6 +21,21 @@ args_path = {
     'Ljava/io/FileOutputStream;.<init>(Ljava/lang/String;)V': [0],
     # new java.io.FileOutputStream(path, boolean)
     'Ljava/io/FileOutputStream;.<init>(Ljava/lang/String;Z)V': [0],
+
+    # new java.net.URI(scheme, userinfo, host, port, path, query, fragment)
+    'Ljava/net/URI;.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [4],
+    # new java.net.URI(scheme, host, path, fragment)
+    'Ljava/net/URI;.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [2],
+    # new java.net.URL(protocol, host, port, file)
+    'Ljava/net/URL;.<init>(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V': [3],
+    # new java.net.URL(protocol, host, port, file, handler)
+    'Ljava/net/URL;.<init>(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/net/URLStreamHandler;)V': [3],
+    # new java.net.URL(protocol, host, file)
+    'Ljava/net/URL;.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [2],
+    # java.net.URL.set(protocol, host, port, file, ref)
+    'Ljava/net/URL;.set(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V': [3],
+    # java.net.URL.set(protocol, host, port, authority, userinfo, path, query, ref)
+    'Ljava/net/URL;.set(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [5],
 }
 
 args_url = {
@@ -143,6 +158,16 @@ args_port = {
     # java.net.DatagramSocket.connect(port, addr)
     'Ljava/net/DatagramSocket;connect(Ljava/net/InetAddress;I)V': [0],
 
+    # new java.net.URI(scheme, userinfo, host, port, path, query, fragment)
+    'Ljava/net/URI;.<init>(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [3],
+    # new java.net.URL(protocol, host, port, file)
+    'Ljava/net/URL;.<init>(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V': [2],
+    # new java.net.URL(protocol, host, port, file, handler)
+    'Ljava/net/URL;.<init>(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/net/URLStreamHandler;)V': [2],
+    # java.net.URL.set(protocol, host, port, file, ref)
+    'Ljava/net/URL;.set(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V': [2],
+    # java.net.URL.set(protocol, host, port, authority, userinfo, path, query, ref)
+    'Ljava/net/URL;.set(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V': [2],
 }
 
 args_xcoord = {
@@ -474,8 +499,10 @@ def add(cat, args):
         if k in FUNARGS:
             a = FUNARGS[k]
         else:
-            a = FUNARGS[k] = []
-        a.extend( (cat, i) for i in v )
+            a = FUNARGS[k] = {}
+        for i in v:
+            assert i not in a
+            a[i] = cat
     return
 add('path', args_path) # String
 add('url', args_url)   # String
@@ -499,7 +526,7 @@ REFS = {'ref_var', 'ref_field'}
 OPS = {'op_assign', 'op_prefix', 'op_infix', 'ref_array',
        'op_postfix', 'op_typecast', 'op_typecheck'}
 IGNORED = {'receive', ''}
-def getname1(n):
+def getfeat1(n):
     while True:
         if len(n.inputs) == 1 and n.kind in IGNORED:
             (n,) = n.inputs.values()
@@ -517,11 +544,16 @@ def getname1(n):
     else:
         return (n, None)
 
-def getnames(n0, left=1, done=None):
+def getfeats(n0, maxdepth, depth=0, done=None):
     if done is None:
         done = set()
     if n0 in done: return
     done.add(n0)
+    (n0,feat) = getfeat1(n0)
+    if feat is not None:
+        yield (depth,feat)
+        depth += 1
+    if maxdepth <= depth: return
     nodes = []
     if n0.is_funcall():
         nobj = 0
@@ -537,12 +569,8 @@ def getnames(n0, left=1, done=None):
             if label.startswith('_'): continue
             nodes.append(n1)
     for n1 in nodes:
-        (n1,name) = getname1(n1)
-        if name is not None:
-            yield name
-        if 0 < left:
-            for x in getnames(n1, left-1, done):
-                yield x
+        for x in getfeats(n1, maxdepth, depth, done):
+            yield x
     return
 
 # main
@@ -558,7 +586,7 @@ def main(argv):
         return usage()
     level = logging.INFO
     maxoverrides = 1
-    maxdepth = 1
+    maxdepth = 2
     srcdb = None
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
@@ -583,18 +611,20 @@ def main(argv):
                 if not node.is_funcall(): continue
                 for func in node.data.split():
                     if func not in FUNARGS: continue
-                    for (cat,i) in FUNARGS[func]:
-                        label = f'#arg{i}'
-                        n = node.inputs[label]
-                        (n,name) = getname1(n)
-                        name = name or '#op'
-                        names = getnames(n, maxdepth)
+                    fargs = FUNARGS[func]
+                    for (label,n) in node.inputs.items():
+                        if not label.startswith('#arg'): continue
+                        arg = int(label[4:])
+                        cat = fargs.get(arg, 'other')
+                        (n,feat) = getfeat1(n)
+                        feats = tuple(getfeats(n, maxdepth))
                         if src is not None:
                             (_,start,end) = n.ast
                             text = src.data[start:end]
-                            print(cat, repr(rmsp(text)), name, ' '.join(names))
+                            data = (cat, (func,arg), rmsp(text))
                         else:
-                            print(cat, name, ' '.join(names))
+                            data = (cat, (func,arg))
+                        print(data+feats)
 
         print()
 
