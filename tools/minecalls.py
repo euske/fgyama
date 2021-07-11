@@ -620,8 +620,8 @@ def main(argv):
                         feats = tuple(getfeats(n, maxdepth))
                         if src is not None:
                             (_,start,end) = n.ast
-                            text = src.data[start:end]
-                            data = (cat, (func,arg), rmsp(text))
+                            text = rmsp(src.data[start:end])
+                            data = (cat, (func,arg), (method.klass.path, start, end, text))
                         else:
                             data = (cat, (func,arg))
                         print(data+feats)
