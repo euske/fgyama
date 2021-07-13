@@ -94,6 +94,13 @@ public class DFTypeSpace {
         return _id2klass.get(id);
     }
 
+    public DFKlass addFallbackKlass(String id) {
+        assert _id2klass.get(id) == null;
+        DFKlass klass = new FallbackKlass(id);
+        _id2klass.put(id, klass);
+        return klass;
+    }
+
     public static String getReifiedName(Map<String, DFKlass> paramTypes) {
         String[] keys = new String[paramTypes.size()];
         paramTypes.keySet().toArray(keys);
@@ -128,5 +135,48 @@ public class DFTypeSpace {
         for (Map.Entry<String,DFKlass> e : _id2klass.entrySet()) {
             out.println(indent+"defined: "+e.getKey()+" "+e.getValue());
         }
+    }
+
+    public class FallbackKlass extends DFKlass {
+
+        public FallbackKlass(String name) {
+            super(name, DFTypeSpace.this, null, null);
+        }
+
+        @Override
+        public boolean isInterface() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnum() {
+            return false;
+        }
+
+        @Override
+        public DFKlass getBaseKlass() {
+            return DFBuiltinTypes.getObjectKlass();
+        }
+
+        @Override
+        public DFKlass[] getBaseIfaces() {
+            return null;
+        }
+
+        @Override
+        public DFMethod[] getMethods() {
+            return new DFMethod[] {};
+        }
+
+        @Override
+        public FieldRef[] getFields() {
+            return new FieldRef[] {};
+        }
+
+        @Override
+        protected DFKlass parameterize(Map<String, DFKlass> paramTypes) {
+            return this;
+        }
+
     }
 }
