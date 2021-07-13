@@ -24,10 +24,6 @@ public class DFTypeSpace {
         _outerSpace = outerSpace;
     }
 
-    public DFTypeSpace(String name) {
-        this(name, null);
-    }
-
     @Override
     public String toString() {
         return ("<DFTypeSpace("+this.getSpaceName()+")>");

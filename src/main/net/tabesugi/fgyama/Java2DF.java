@@ -147,7 +147,7 @@ public class Java2DF {
         DFTypeSpace packageSpace = _rootSpace.getSubSpace(src.cunit.getPackage());
         finder = new DFTypeFinder(packageSpace, finder);
         // Populate the import space.
-        DFTypeSpace importSpace = new DFTypeSpace("import:"+src.path);
+        DFTypeSpace importSpace = new DFTypeSpace("import:"+src.path, null);
         for (ImportDeclaration importDecl :
                  (List<ImportDeclaration>) src.cunit.imports()) {
             Name name = importDecl.getName();
