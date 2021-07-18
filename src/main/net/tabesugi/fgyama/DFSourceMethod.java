@@ -800,6 +800,10 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (expr instanceof InstanceofExpression) {
             InstanceofExpression instof = (InstanceofExpression)expr;
             this.listUsedExpr(klasses, instof.getLeftOperand());
+            DFType type = _finder.resolveSafe(instof.getRightOperand());
+            if (type instanceof DFSourceKlass) {
+                ((DFSourceKlass)type).listUsedKlasses(klasses);
+            }
 
         } else if (expr instanceof LambdaExpression) {
             LambdaExpression lambda = (LambdaExpression)expr;
@@ -1031,31 +1035,27 @@ public abstract class DFSourceMethod extends DFMethod {
             DFRef ref = _srcklass.getThisRef();
             this.addInputRef(ref);
             DFKlass klass = ref.getRefType().toKlass();
-            int nargs = ci.arguments().size();
-            DFType[] argTypes = new DFType[nargs];
-            for (int i = 0; i < nargs; i++) {
-                Expression arg = (Expression)ci.arguments().get(i);
-                DFType type = this.listDefinedExpr(defined, scope, arg);
-                if (type == null) return;
-                argTypes[i] = type;
+            DFType[] argTypes = this.listDefinedExprs(
+                defined, scope, ci.arguments());
+            if (argTypes != null) {
+                DFMethod method1;
+                try {
+                    method1 = klass.lookupMethod(
+                        CallStyle.Constructor, (String)null, argTypes, null);
+                    this.setLambdaType(
+                        defined, method1.getFuncType(), ci.arguments());
+                } catch (MethodNotFound e) {
+                    // fallback method.
+                    method1 = klass.createFallbackMethod(
+                        CallStyle.Constructor, "<init>", argTypes, klass);
+                    Logger.error(
+                        "DFSourceMethod.listDefinedStmt: MethodNotFound (ci)",
+                        Utils.getASTSource(ci), this);
+                    Logger.info(
+                        "DFSourceMethod.listDefinedStmt: Fallback method:", method1);
+                }
+                method1.addCaller(this);
             }
-            DFMethod method1;
-            try {
-                method1 = klass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes, null);
-                this.setLambdaType(
-                    defined, method1.getFuncType(), ci.arguments());
-            } catch (MethodNotFound e) {
-                // fallback method.
-                method1 = klass.createFallbackMethod(
-                    CallStyle.Constructor, "<init>", argTypes, klass);
-                Logger.error(
-                    "DFSourceMethod.listDefinedStmt: MethodNotFound (ci)",
-                    Utils.getASTSource(ci), this);
-                Logger.info(
-                    "DFSourceMethod.listDefinedStmt: Fallback method:", method1);
-            }
-            method1.addCaller(this);
 
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
@@ -1064,30 +1064,27 @@ public abstract class DFSourceMethod extends DFMethod {
             this.addInputRef(ref);
             DFKlass baseKlass = _srcklass.getBaseKlass();
             int nargs = sci.arguments().size();
-            DFType[] argTypes = new DFType[nargs];
-            for (int i = 0; i < nargs; i++) {
-                Expression arg = (Expression)sci.arguments().get(i);
-                DFType type = this.listDefinedExpr(defined, scope, arg);
-                if (type == null) return;
-                argTypes[i] = type;
+            DFType[] argTypes = this.listDefinedExprs(
+                defined, scope, sci.arguments());
+            if (argTypes != null) {
+                DFMethod method1;
+                try {
+                    method1 = baseKlass.lookupMethod(
+                        CallStyle.Constructor, (String)null, argTypes, null);
+                    this.setLambdaType(
+                        defined, method1.getFuncType(), sci.arguments());
+                } catch (MethodNotFound e) {
+                    // fallback method.
+                    method1 = baseKlass.createFallbackMethod(
+                        CallStyle.Constructor, "<init>", argTypes, baseKlass);
+                    Logger.error(
+                        "DFSourceMethod.listDefinedStmt: MethodNotFound (sci)",
+                        Utils.getASTSource(sci), this);
+                    Logger.info(
+                        "DFSourceMethod.listDefinedStmt: Fallback method:", method1);
+                }
+                method1.addCaller(this);
             }
-            DFMethod method1;
-            try {
-                method1 = baseKlass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes, null);
-                this.setLambdaType(
-                    defined, method1.getFuncType(), sci.arguments());
-            } catch (MethodNotFound e) {
-                // fallback method.
-                method1 = baseKlass.createFallbackMethod(
-                    CallStyle.Constructor, "<init>", argTypes, baseKlass);
-                Logger.error(
-                    "DFSourceMethod.listDefinedStmt: MethodNotFound (sci)",
-                    Utils.getASTSource(sci), this);
-                Logger.info(
-                    "DFSourceMethod.listDefinedStmt: Fallback method:", method1);
-            }
-            method1.addCaller(this);
 
         } else if (stmt instanceof TypeDeclarationStatement) {
             // "class K { ... }"
@@ -1112,82 +1109,84 @@ public abstract class DFSourceMethod extends DFMethod {
         DFLocalScope scope, Expression expr, DFType expected)
         throws InvalidSyntax {
         assert expr != null;
+        DFType type = null;
 
         if (expr instanceof Annotation) {
             // "@Annotation"
-            return null;
 
         } else if (expr instanceof Name) {
             // "a.b"
             Name name = (Name)expr;
-            DFRef ref;
+            DFRef ref = null;
             if (name.isSimpleName()) {
                 try {
                     ref = scope.lookupVar((SimpleName)name);
                 } catch (VariableNotFound e) {
-                    return null;
                 }
             } else {
                 QualifiedName qname = (QualifiedName)name;
                 // Try assuming it's a variable access.
-                DFType type = this.listDefinedExpr(
+                DFType objType = this.listDefinedExpr(
                     defined, scope, qname.getQualifier());
-                if (type == null) {
+                if (objType == null) {
                     // Turned out it's a class variable.
                     try {
-                        type = _finder.resolveKlass(qname.getQualifier());
+                        objType = _finder.resolveKlass(qname.getQualifier());
                     } catch (TypeNotFound e) {
-                        return null;
                     }
                 }
-                DFKlass klass = type.toKlass();
-                SimpleName fieldName = qname.getName();
-                ref = klass.getField(fieldName);
-                if (ref == null) return null;
+                if (objType != null) {
+                    DFKlass klass = objType.toKlass();
+                    SimpleName fieldName = qname.getName();
+                    ref = klass.getField(fieldName);
+                }
             }
             if (ref instanceof DFKlass.FieldRef) {
                 this.addInputRef(_srcklass.getThisRef());
             }
-            this.addInputRef(ref);
-            return ref.getRefType();
+            if (ref != null) {
+                this.addInputRef(ref);
+                type = ref.getRefType();
+            }
 
         } else if (expr instanceof ThisExpression) {
             // "this"
             ThisExpression thisExpr = (ThisExpression)expr;
             Name name = thisExpr.getQualifier();
-            DFRef ref;
+            DFRef ref = null;
             if (name != null) {
                 try {
                     DFKlass klass = _finder.resolveKlass(name);
                     ref = klass.getThisRef();
                 } catch (TypeNotFound e) {
-                    return null;
                 }
             } else {
                 ref = _srcklass.getThisRef();
             }
-            this.addInputRef(ref);
-            return ref.getRefType();
+            if (ref != null) {
+                this.addInputRef(ref);
+                type = ref.getRefType();
+            }
 
         } else if (expr instanceof BooleanLiteral) {
             // "true", "false"
-            return DFBasicType.BOOLEAN;
+            type = DFBasicType.BOOLEAN;
 
         } else if (expr instanceof CharacterLiteral) {
             // "'c'"
-            return DFBasicType.CHAR;
+            type = DFBasicType.CHAR;
 
         } else if (expr instanceof NullLiteral) {
             // "null"
-            return DFNullType.NULL;
+            type = DFNullType.NULL;
 
         } else if (expr instanceof NumberLiteral) {
             // "42"
-            return DFBasicType.INT;
+            type = DFBasicType.INT;
 
         } else if (expr instanceof StringLiteral) {
             // ""abc""
-            return DFBuiltinTypes.getStringKlass();
+            type = DFBuiltinTypes.getStringKlass();
 
         } else if (expr instanceof TypeLiteral) {
             // "A.class"
@@ -1196,9 +1195,8 @@ public abstract class DFSourceMethod extends DFMethod {
             try {
                 DFKlass typeval = _finder.resolve(value).toKlass();
                 DFKlass klass = DFBuiltinTypes.getClassKlass();
-                return klass.getReifiedKlass(new DFKlass[] { typeval });
+                type = klass.getReifiedKlass(new DFKlass[] { typeval });
             } catch (TypeNotFound e) {
-                return null;
             }
 
         } else if (expr instanceof PrefixExpression) {
@@ -1210,7 +1208,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 op == PrefixExpression.Operator.DECREMENT) {
                 this.listDefinedAssignment(defined, scope, operand);
             }
-            return DFNode.inferPrefixType(
+            type = DFNode.inferPrefixType(
                 this.listDefinedExpr(defined, scope, operand), op);
 
         } else if (expr instanceof PostfixExpression) {
@@ -1222,7 +1220,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 op == PostfixExpression.Operator.DECREMENT) {
                 this.listDefinedAssignment(defined, scope, operand);
             }
-            return this.listDefinedExpr(defined, scope, operand);
+            type = this.listDefinedExpr(defined, scope, operand);
 
         } else if (expr instanceof InfixExpression) {
             // "a+b"
@@ -1232,13 +1230,15 @@ public abstract class DFSourceMethod extends DFMethod {
                 defined, scope, infix.getLeftOperand());
             DFType right = this.listDefinedExpr(
                 defined, scope, infix.getRightOperand());
-            if (left == null || right == null) return null;
-            return DFNode.inferInfixType(left, op, right);
+            if (left != null && right != null) {
+                type = DFNode.inferInfixType(left, op, right);
+            }
 
         } else if (expr instanceof ParenthesizedExpression) {
             // "(expr)"
             ParenthesizedExpression paren = (ParenthesizedExpression)expr;
-            return this.listDefinedExpr(defined, scope, paren.getExpression(), expected);
+            type = this.listDefinedExpr(
+                defined, scope, paren.getExpression(), expected);
 
         } else if (expr instanceof Assignment) {
             // "p = q"
@@ -1249,9 +1249,9 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             DFRef ref = this.listDefinedAssignment(
                 defined, scope, assn.getLeftHandSide());
-            DFType type = (ref != null)? ref.getRefType() : null;
-            return this.listDefinedExpr(
-                defined, scope, assn.getRightHandSide(), type);
+            DFType type1 = (ref != null)? ref.getRefType() : null;
+            type = this.listDefinedExpr(
+                defined, scope, assn.getRightHandSide(), type1);
 
         } else if (expr instanceof VariableDeclarationExpression) {
             // "int a=2"
@@ -1264,117 +1264,110 @@ public abstract class DFSourceMethod extends DFMethod {
                     this.addOutputRef(ref);
                     Expression init = frag.getInitializer();
                     if (init != null) {
-                        DFType type = this.listDefinedExpr(
+                        type = this.listDefinedExpr(
                             defined, scope, init, ref.getRefType());
                         ref.setRefType(type);
                     }
                 } catch (VariableNotFound e) {
                 }
             }
-            return null; // XXX what type?
+            // XXX what type?
 
         } else if (expr instanceof MethodInvocation) {
             MethodInvocation invoke = (MethodInvocation)expr;
             Expression expr1 = invoke.getExpression();
             CallStyle callStyle;
-            DFKlass klass = null;
+            DFKlass instKlass = null;
             if (expr1 == null) {
                 // "method()"
                 DFRef ref = _srcklass.getThisRef();
                 this.addInputRef(ref);
-                klass = _srcklass;
+                instKlass = _srcklass;
                 callStyle = CallStyle.InstanceOrStatic;
             } else {
                 callStyle = CallStyle.InstanceMethod;
                 if (expr1 instanceof Name) {
                     // "ClassName.method()"
                     try {
-                        klass = _finder.resolveKlass((Name)expr1);
+                        instKlass = _finder.resolveKlass((Name)expr1);
                         callStyle = CallStyle.StaticMethod;
                     } catch (TypeNotFound e) {
                     }
                 }
-                if (klass == null) {
+                if (instKlass == null) {
                     // "expr.method()"
-                    DFType type = this.listDefinedExpr(defined, scope, expr1);
-                    if (type == null) return null;
-                    klass = type.toKlass();
+                    DFType type1 = this.listDefinedExpr(defined, scope, expr1);
+                    if (type1 != null) {
+                        instKlass = type1.toKlass();
+                    }
                 }
             }
-            int nargs = invoke.arguments().size();
-            DFType[] argTypes = new DFType[nargs];
-            for (int i = 0; i < nargs; i++) {
-                Expression arg = (Expression)invoke.arguments().get(i);
-                DFType type = this.listDefinedExpr(defined, scope, arg);
-                if (type == null) return null;
-                argTypes[i] = type;
-            }
-            DFMethod method1;
-            try {
-                method1 = klass.lookupMethod(
-                    callStyle, invoke.getName(), argTypes, expected);
-                this.setLambdaType(
-                    defined, method1.getFuncType(), invoke.arguments());
-            } catch (MethodNotFound e) {
-                // try static imports.
+            DFType[] argTypes = this.listDefinedExprs(
+                defined, scope, invoke.arguments());
+            if (instKlass != null && argTypes != null) {
+                DFMethod method1;
                 try {
-                    method1 = scope.lookupStaticMethod(
-                        invoke.getName(), argTypes, expected);
-                } catch (MethodNotFound ee) {
-                    // fallback method.
-                    DFType returnType =
-                        (expected != null)? expected : DFUnknownType.UNKNOWN;
-                    method1 = klass.createFallbackMethod(
-                        DFMethod.CallStyle.InstanceMethod, invoke.getName(),
-                        argTypes, returnType);
-                    Logger.error(
-                        "DFSourceMethod.listDefinedExpr: MethodNotFound (invoke)",
-                        Utils.getASTSource(invoke), klass, this);
-                    Logger.info(
-                        "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
+                    method1 = instKlass.lookupMethod(
+                        callStyle, invoke.getName(), argTypes, expected);
+                    this.setLambdaType(
+                        defined, method1.getFuncType(), invoke.arguments());
+                } catch (MethodNotFound e) {
+                    // try static imports.
+                    try {
+                        method1 = scope.lookupStaticMethod(
+                            invoke.getName(), argTypes, expected);
+                    } catch (MethodNotFound ee) {
+                        // fallback method.
+                        DFType returnType =
+                            (expected != null)? expected : DFUnknownType.UNKNOWN;
+                        method1 = instKlass.createFallbackMethod(
+                            DFMethod.CallStyle.InstanceMethod, invoke.getName(),
+                            argTypes, returnType);
+                        Logger.error(
+                            "DFSourceMethod.listDefinedExpr: MethodNotFound (invoke)",
+                            Utils.getASTSource(invoke), instKlass, this);
+                        Logger.info(
+                            "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
+                    }
                 }
+                for (DFMethod m : method1.getOverriders()) {
+                    m.addCaller(this);
+                }
+                type = method1.getFuncType().getReturnType();
             }
-            for (DFMethod m : method1.getOverriders()) {
-                m.addCaller(this);
-            }
-            return method1.getFuncType().getReturnType();
 
         } else if (expr instanceof SuperMethodInvocation) {
             // "super.method()"
             SuperMethodInvocation sinvoke = (SuperMethodInvocation)expr;
-            int nargs = sinvoke.arguments().size();
-            DFType[] argTypes = new DFType[nargs];
-            for (int i = 0; i < nargs; i++) {
-                Expression arg = (Expression)sinvoke.arguments().get(i);
-                DFType type = this.listDefinedExpr(defined, scope, arg);
-                if (type == null) return null;
-                argTypes[i] = type;
-            }
             DFRef ref = _srcklass.getThisRef();
             this.addInputRef(ref);
             DFKlass baseKlass = _srcklass.getBaseKlass();
-            DFMethod method1;
-            try {
-                method1 = baseKlass.lookupMethod(
-                    CallStyle.InstanceMethod, sinvoke.getName(),
-                    argTypes, expected);
-                this.setLambdaType(
-                    defined, method1.getFuncType(), sinvoke.arguments());
-            } catch (MethodNotFound e) {
-                // fallback method.
-                DFType returnType =
-                    (expected != null)? expected : DFUnknownType.UNKNOWN;
-                method1 = baseKlass.createFallbackMethod(
-                    DFMethod.CallStyle.InstanceMethod, sinvoke.getName(),
-                    argTypes, returnType);
-                Logger.error(
-                    "DFSourceMethod.listDefinedExpr: MethodNotFound (sinvoke)",
-                    Utils.getASTSource(sinvoke), this);
-                Logger.info(
-                    "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
+            DFType[] argTypes = this.listDefinedExprs(
+                defined, scope, sinvoke.arguments());
+            if (argTypes != null) {
+                DFMethod method1;
+                try {
+                    method1 = baseKlass.lookupMethod(
+                        CallStyle.InstanceMethod, sinvoke.getName(),
+                        argTypes, expected);
+                    this.setLambdaType(
+                        defined, method1.getFuncType(), sinvoke.arguments());
+                } catch (MethodNotFound e) {
+                    // fallback method.
+                    DFType returnType =
+                        (expected != null)? expected : DFUnknownType.UNKNOWN;
+                    method1 = baseKlass.createFallbackMethod(
+                        DFMethod.CallStyle.InstanceMethod, sinvoke.getName(),
+                        argTypes, returnType);
+                    Logger.error(
+                        "DFSourceMethod.listDefinedExpr: MethodNotFound (sinvoke)",
+                        Utils.getASTSource(sinvoke), this);
+                    Logger.info(
+                        "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
+                }
+                method1.addCaller(this);
+                type = method1.getFuncType().getReturnType();
             }
-            method1.addCaller(this);
-            return method1.getFuncType().getReturnType();
 
         } else if (expr instanceof ArrayCreation) {
             // "new int[10]"
@@ -1387,37 +1380,32 @@ public abstract class DFSourceMethod extends DFMethod {
                 this.listDefinedExpr(defined, scope, init);
             }
             try {
-                return _finder.resolve(ac.getType().getElementType());
+                type = _finder.resolve(ac.getType().getElementType());
             } catch (TypeNotFound e) {
-                return null;
             }
 
         } else if (expr instanceof ArrayInitializer) {
             // "{ 5,9,4,0 }"
             ArrayInitializer init = (ArrayInitializer)expr;
-            DFType type = null;
             for (Expression expr1 : (List<Expression>) init.expressions()) {
                 type = this.listDefinedExpr(defined, scope, expr1);
             }
-            return type;
 
         } else if (expr instanceof ArrayAccess) {
             // "a[0]"
             ArrayAccess aa = (ArrayAccess)expr;
             this.listDefinedExpr(defined, scope, aa.getIndex());
-            DFType type = this.listDefinedExpr(defined, scope, aa.getArray());
+            type = this.listDefinedExpr(defined, scope, aa.getArray());
             if (type instanceof DFArrayType) {
                 DFRef ref = scope.lookupArray(type);
                 this.addInputRef(ref);
                 type = ((DFArrayType)type).getElemType();
             }
-            return type;
 
         } else if (expr instanceof FieldAccess) {
             // "(expr).foo"
             FieldAccess fa = (FieldAccess)expr;
             Expression expr1 = fa.getExpression();
-            DFType type = null;
             if (expr1 instanceof Name) {
                 try {
                     type = _finder.resolveKlass((Name)expr1);
@@ -1426,14 +1414,16 @@ public abstract class DFSourceMethod extends DFMethod {
             }
             if (type == null) {
                 type = this.listDefinedExpr(defined, scope, expr1);
-                if (type == null) return null;
             }
-            DFKlass klass = type.toKlass();
-            SimpleName fieldName = fa.getName();
-            DFRef ref = klass.getField(fieldName);
-            if (ref == null) return null;
-            this.addInputRef(ref);
-            return ref.getRefType();
+            if (type != null) {
+                DFKlass instKlass = type.toKlass();
+                SimpleName fieldName = fa.getName();
+                DFRef ref = instKlass.getField(fieldName);
+                if (ref != null) {
+                    this.addInputRef(ref);
+                    type = ref.getRefType();
+                }
+            }
 
         } else if (expr instanceof SuperFieldAccess) {
             // "super.baa"
@@ -1443,80 +1433,73 @@ public abstract class DFSourceMethod extends DFMethod {
             this.addInputRef(ref);
             DFKlass baseKlass = _srcklass.getBaseKlass();
             DFRef ref2 = baseKlass.getField(fieldName);
-            if (ref2 == null) return null;
-            this.addInputRef(ref2);
-            return ref2.getRefType();
+            if (ref2 != null) {
+                this.addInputRef(ref2);
+                type = ref2.getRefType();
+            }
 
         } else if (expr instanceof CastExpression) {
             // "(String)"
             CastExpression cast = (CastExpression)expr;
             try {
-                DFType type = _finder.resolve(cast.getType());
+                type = _finder.resolve(cast.getType());
                 this.listDefinedExpr(defined, scope, cast.getExpression(), type);
-                return type;
             } catch (TypeNotFound e) {
                 this.listDefinedExpr(defined, scope, cast.getExpression());
-                return null;
             }
 
         } else if (expr instanceof ClassInstanceCreation) {
             // "new T()"
             ClassInstanceCreation cstr = (ClassInstanceCreation)expr;
-            DFKlass instKlass;
+            DFKlass instKlass = null;
             if (cstr.getAnonymousClassDeclaration() != null) {
                 String id = Utils.encodeASTNode(cstr);
                 instKlass = this.getKlass(id);
-                if (instKlass == null) {
-                    return null;
-                }
             } else {
                 try {
                     instKlass = _finder.resolve(cstr.getType()).toKlass();
                 } catch (TypeNotFound e) {
-                    return null;
                 }
             }
             Expression expr1 = cstr.getExpression();
             if (expr1 != null) {
                 this.listDefinedExpr(defined, scope, expr1);
             }
-            int nargs = cstr.arguments().size();
-            DFType[] argTypes = new DFType[nargs];
-            for (int i = 0; i < nargs; i++) {
-                Expression arg = (Expression)cstr.arguments().get(i);
-                DFType type = this.listDefinedExpr(defined, scope, arg);
-                if (type == null) return null;
-                argTypes[i] = type;
+            DFType[] argTypes = this.listDefinedExprs(
+                defined, scope, cstr.arguments());
+            if (instKlass != null && argTypes != null) {
+                DFMethod method1;
+                try {
+                    method1 = instKlass.lookupMethod(
+                        CallStyle.Constructor, (String)null, argTypes, null);
+                    this.setLambdaType(
+                        defined, method1.getFuncType(), cstr.arguments());
+                } catch (MethodNotFound e) {
+                    // fallback method.
+                    method1 = instKlass.createFallbackMethod(
+                        DFMethod.CallStyle.Constructor, "<init>", argTypes, instKlass);
+                    Logger.error(
+                        "DFSourceMethod.listDefinedExpr: MethodNotFound (cstr)",
+                        Utils.getASTSource(cstr), this);
+                    Logger.info(
+                        "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
+                }
+                method1.addCaller(this);
+                type = instKlass;
             }
-            DFMethod method1;
-            try {
-                method1 = instKlass.lookupMethod(
-                    CallStyle.Constructor, (String)null, argTypes, null);
-                this.setLambdaType(
-                    defined, method1.getFuncType(), cstr.arguments());
-            } catch (MethodNotFound e) {
-                // fallback method.
-                method1 = instKlass.createFallbackMethod(
-                    DFMethod.CallStyle.Constructor, "<init>", argTypes, instKlass);
-                Logger.error(
-                    "DFSourceMethod.listDefinedExpr: MethodNotFound (cstr)",
-                    Utils.getASTSource(cstr), this);
-                Logger.info(
-                    "DFSourceMethod.listDefinedExpr: Fallback method:", method1);
-            }
-            method1.addCaller(this);
-            return instKlass;
 
         } else if (expr instanceof ConditionalExpression) {
             // "c? a : b"
             ConditionalExpression cond = (ConditionalExpression)expr;
             this.listDefinedExpr(defined, scope, cond.getExpression());
             this.listDefinedExpr(defined, scope, cond.getThenExpression());
-            return this.listDefinedExpr(defined, scope, cond.getElseExpression());
+            type = this.listDefinedExpr(defined, scope, cond.getElseExpression());
 
         } else if (expr instanceof InstanceofExpression) {
             // "a instanceof A"
-            return DFBasicType.BOOLEAN;
+            InstanceofExpression instof = (InstanceofExpression)expr;
+            this.listDefinedExpr(defined, scope, instof.getLeftOperand());
+            type = DFBasicType.BOOLEAN;
 
         } else if (expr instanceof LambdaExpression) {
             // "x -> { ... }"
@@ -1533,7 +1516,7 @@ public abstract class DFSourceMethod extends DFMethod {
                      lambdaKlass.getCapturedRefs()) {
                 this.addInputRef(captured.getOriginal());
             }
-            return lambdaKlass;
+            type = lambdaKlass;
 
         } else if (expr instanceof MethodReference) {
             MethodReference methodref = (MethodReference)expr;
@@ -1545,12 +1528,29 @@ public abstract class DFSourceMethod extends DFMethod {
                     defined.add(methodRefKlass);
                 }
             }
-            return methodRefKlass;
+            type = methodRefKlass;
 
         } else {
             // ???
             throw new InvalidSyntax(expr);
         }
+
+        return type;
+    }
+
+    private DFType[] listDefinedExprs(
+        Collection<DFSourceKlass> defined,
+        DFLocalScope scope,  List<Expression> exprs)
+        throws InvalidSyntax {
+        int nexprs = exprs.size();
+        DFType[] types = new DFType[nexprs];
+        for (int i = 0; i < nexprs; i++) {
+            Expression expr1 = exprs.get(i);
+            DFType type1 = this.listDefinedExpr(defined, scope, expr1);
+            if (type1 == null) return null;
+            types[i] = type1;
+        }
+        return types;
     }
 
     private DFRef listDefinedAssignment(
@@ -1582,9 +1582,9 @@ public abstract class DFSourceMethod extends DFMethod {
                         return null;
                     }
                 }
-                DFKlass klass = type.toKlass();
+                DFKlass instKlass = type.toKlass();
                 SimpleName fieldName = qname.getName();
-                ref = klass.getField(fieldName);
+                ref = instKlass.getField(fieldName);
                 if (ref == null) return null;
             }
             if (ref instanceof DFKlass.FieldRef) {
@@ -1620,9 +1620,9 @@ public abstract class DFSourceMethod extends DFMethod {
                 type = this.listDefinedExpr(defined, scope, expr1);
                 if (type == null) return null;
             }
-            DFKlass klass = type.toKlass();
+            DFKlass instKlass = type.toKlass();
             SimpleName fieldName = fa.getName();
-            DFRef ref = klass.getField(fieldName);
+            DFRef ref = instKlass.getField(fieldName);
             if (ref == null) return null;
             this.addOutputRef(ref);
             return ref;
