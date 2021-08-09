@@ -156,17 +156,19 @@ public class Java2DF {
                 finder = new DFTypeFinder(_rootSpace.getSubSpace(name), finder);
             } else if (!importDecl.isStatic()) {
                 assert name.isQualifiedName();
+                Logger.debug("Import:", name);
+                QualifiedName qname = (QualifiedName)name;
+                String id = qname.getName().getIdentifier();
                 DFKlass klass = _rootSpace.getRootKlass(name);
-                if (klass != null) {
-                    Logger.debug("Import:", name);
-                    String id = ((QualifiedName)name).getName().getIdentifier();
-                    try {
-                        importSpace.addKlass(id, klass);
-                    } catch (EntityDuplicate e) {
-                        Logger.error("Stage2: Class duplicate:", e.name);
-                    }
-                } else {
-                    Logger.error("Stage2: Class not found:", Utils.getASTSource(name));
+                if (klass == null) {
+                    DFTypeSpace space = _rootSpace.addSubSpace(qname.getQualifier());
+                    klass = space.addFallbackKlass(id);
+                    Logger.error("Stage2: Fallback class:", klass);
+                }
+                try {
+                    importSpace.addKlass(id, klass);
+                } catch (EntityDuplicate e) {
+                    Logger.error("Stage2: Class duplicate:", e.name);
                 }
             }
         }

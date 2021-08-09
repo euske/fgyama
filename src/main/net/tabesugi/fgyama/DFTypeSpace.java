@@ -144,6 +144,11 @@ public class DFTypeSpace {
         }
 
         @Override
+        public String toString() {
+            return ("<FallbackKlass("+this.getTypeName()+")>");
+        }
+
+        @Override
         public boolean isInterface() {
             return false;
         }
