@@ -25,6 +25,8 @@ public abstract class DFSourceMethod extends DFMethod {
     private DFTypeFinder _finder;
     private MethodScope _methodScope;
 
+    private Map<String, DFType> _exprType = new HashMap<String, DFType>();
+
     private ConsistentHashSet<DFRef> _inputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _outputRefs = new ConsistentHashSet<DFRef>();
     private ConsistentHashSet<DFRef> _passInRefs = new ConsistentHashSet<DFRef>();
@@ -80,6 +82,10 @@ public abstract class DFSourceMethod extends DFMethod {
 
     public Set<DFRef> getPassOutRefs() {
         return _passOutRefs;
+    }
+
+    public DFType getExprType(Expression expr) {
+        return _exprType.get(Utils.encodeASTNode(expr));
     }
 
     /// TypeSpace construction.
@@ -1535,6 +1541,7 @@ public abstract class DFSourceMethod extends DFMethod {
             throw new InvalidSyntax(expr);
         }
 
+        _exprType.put(Utils.encodeASTNode(expr), type);
         return type;
     }
 

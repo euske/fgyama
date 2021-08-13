@@ -1578,7 +1578,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFSourceMethod.MethodScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_method.klass(), _finder, scope);
+        DFFrame frame = new DFFrame(_method, _finder, scope);
 
         // Create input nodes.
         for (DFRef ref : _method.getInputRefs()) {
@@ -1671,7 +1671,7 @@ public abstract class DFGraph {
         throws InvalidSyntax, EntityNotFound {
 
         DFSourceMethod.MethodScope scope = _method.getScope();
-        DFFrame frame = new DFFrame(_method.klass(), _finder, scope);
+        DFFrame frame = new DFFrame(_method, _finder, scope);
 
         // Create input nodes.
         for (DFRef ref : _method.getInputRefs()) {

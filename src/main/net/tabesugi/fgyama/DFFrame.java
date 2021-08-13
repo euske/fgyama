@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.*;
 public class DFFrame {
 
     private DFFrame _outer;
-    private DFKlass _klass;
+    private DFSourceMethod _method;
     private String _id;
     private DFTypeFinder _finder;
     private String _label;
@@ -34,9 +34,9 @@ public class DFFrame {
     // Frame whose name starts with '@'
     // is not selectable with labels and therefore anonymous.
     public DFFrame(
-        DFKlass klass, DFTypeFinder finder, DFLocalScope scope) {
+        DFSourceMethod method, DFTypeFinder finder, DFLocalScope scope) {
         _outer = null;
-        _klass = klass;
+        _method = method;
         _id = null;
         _finder = finder;
         _label = RETURNABLE;
@@ -49,7 +49,7 @@ public class DFFrame {
         DFKlass catchKlass, DFLocalScope scope) {
         assert label != null;
         _outer = outer;
-        _klass = outer._klass;
+        _method = outer._method;
         _id = id;
         _finder = outer._finder;
         _label = label;
@@ -358,7 +358,7 @@ public class DFFrame {
         } else if (stmt instanceof ConstructorInvocation) {
             // "this(args)"
             ConstructorInvocation ci = (ConstructorInvocation)stmt;
-            DFRef ref = _klass.getThisRef();
+            DFRef ref = _method.klass().getThisRef();
             this.addInputRef(ref);
             int nargs = ci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
@@ -374,7 +374,7 @@ public class DFFrame {
                 argTypes[i] = type;
             }
             try {
-                DFMethod method1 = _klass.lookupMethod(
+                DFMethod method1 = _method.klass().lookupMethod(
                     DFMethod.CallStyle.Constructor, (String)null, argTypes);
                 for (DFMethod m : method1.getOverriders()) {
                     if (m instanceof DFSourceMethod) {
@@ -389,9 +389,9 @@ public class DFFrame {
         } else if (stmt instanceof SuperConstructorInvocation) {
             // "super(args)"
             SuperConstructorInvocation sci = (SuperConstructorInvocation)stmt;
-            DFRef ref = _klass.getThisRef();
+            DFRef ref = _method.klass().getThisRef();
             this.addInputRef(ref);
-            DFKlass baseKlass = _klass.getBaseKlass();
+            DFKlass baseKlass = _method.klass().getBaseKlass();
             int nargs = sci.arguments().size();
             DFType[] argTypes = new DFType[nargs];
             for (int i = 0; i < nargs; i++) {
@@ -473,7 +473,7 @@ public class DFFrame {
                 if (ref == null) return null;
             }
             if (ref instanceof DFKlass.FieldRef) {
-                this.addInputRef(_klass.getThisRef());
+                this.addInputRef(_method.klass().getThisRef());
             }
             this.addInputRef(ref);
             return ref.getRefType();
@@ -494,7 +494,7 @@ public class DFFrame {
                     return null;
                 }
             } else {
-                ref = _klass.getThisRef();
+                ref = _method.klass().getThisRef();
             }
             this.addInputRef(ref);
             return ref.getRefType();
@@ -606,9 +606,9 @@ public class DFFrame {
             DFKlass klass = null;
             if (expr1 == null) {
                 // "method()"
-                DFRef ref = _klass.getThisRef();
+                DFRef ref = _method.klass().getThisRef();
                 this.addInputRef(ref);
-                klass = _klass;
+                klass = _method.klass();
                 callStyle = DFMethod.CallStyle.InstanceOrStatic;
             } else {
                 callStyle = DFMethod.CallStyle.InstanceMethod;
@@ -676,9 +676,9 @@ public class DFFrame {
                 }
                 argTypes[i] = type;
             }
-            DFRef ref = _klass.getThisRef();
+            DFRef ref = _method.klass().getThisRef();
             this.addInputRef(ref);
-            DFKlass baseKlass = _klass.getBaseKlass();
+            DFKlass baseKlass = _method.klass().getBaseKlass();
             try {
                 DFMethod method1 = baseKlass.lookupMethod(
                     DFMethod.CallStyle.InstanceMethod, sinvoke.getName(), argTypes);
@@ -769,9 +769,9 @@ public class DFFrame {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFRef ref = _klass.getThisRef();
+            DFRef ref = _method.klass().getThisRef();
             this.addInputRef(ref);
-            DFKlass baseKlass = _klass.getBaseKlass();
+            DFKlass baseKlass = _method.klass().getBaseKlass();
             DFRef ref2 = baseKlass.getField(fieldName);
             if (ref2 != null) {
                 this.addInputRef(ref2);
@@ -962,7 +962,7 @@ public class DFFrame {
                 }
             }
             if (ref instanceof DFKlass.FieldRef) {
-                this.addInputRef(_klass.getThisRef());
+                this.addInputRef(_method.klass().getThisRef());
             }
             this.addOutputRef(ref);
             return ref;
@@ -1011,9 +1011,9 @@ public class DFFrame {
             // "super.baa"
             SuperFieldAccess sfa = (SuperFieldAccess)expr;
             SimpleName fieldName = sfa.getName();
-            DFRef ref = _klass.getThisRef();
+            DFRef ref = _method.klass().getThisRef();
             this.addInputRef(ref);
-            DFKlass baseKlass = _klass.getBaseKlass();
+            DFKlass baseKlass = _method.klass().getBaseKlass();
             DFRef ref2 = baseKlass.getField(fieldName);
             if (ref2 != null) {
                 this.addOutputRef(ref2);
