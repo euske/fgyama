@@ -102,7 +102,7 @@ public class DFRootTypeSpace extends DFTypeSpace {
             int i0 = i+1;
             i = s.indexOf('$', i0);
             String name = s.substring(i0, (0 <= i)? i : s.length());
-            DFJarFileKlass child = klass.getInnerKlass(name);
+            DFJarFileKlass child = (DFJarFileKlass)klass.getInnerKlass(name);
             if (child == null) {
                 child = new DFJarFileKlass(name, klass, klass, finder);
                 klass.addInnerKlass(name, child);

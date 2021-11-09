@@ -8,21 +8,21 @@ import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 
 
-//  DFJarFileMethod
+//  DFClsFileMethod
 //  DFMethod defined in .jar file.
 //
 //  Usage:
-//    1. new DFJarFileMethod(meth, finder)
+//    1. new DFClsFileMethod(meth, finder)
 //    2. getXXX(), ...
 //
-public class DFJarFileMethod extends DFMethod {
+public class DFClsFileMethod extends DFMethod {
 
     DFTypeFinder _finder;
     Method _meth;
     DFFuncType _funcType = null;
 
     // Normal constructor.
-    public DFJarFileMethod(
+    public DFClsFileMethod(
         DFKlass klass, CallStyle callStyle, boolean isAbstract,
         String methodId, String methodName,
         Method meth, DFTypeFinder finder) {
@@ -34,8 +34,8 @@ public class DFJarFileMethod extends DFMethod {
     }
 
     // Protected constructor for a parameterized method.
-    private DFJarFileMethod(
-        DFJarFileMethod genericMethod, Map<String, DFKlass> paramTypes) {
+    private DFClsFileMethod(
+        DFClsFileMethod genericMethod, Map<String, DFKlass> paramTypes) {
         super(genericMethod, paramTypes);
 
         _finder = new DFTypeFinder(this, genericMethod._finder);
@@ -51,7 +51,7 @@ public class DFJarFileMethod extends DFMethod {
     @Override
     protected DFMethod parameterize(Map<String, DFKlass> paramTypes) {
         assert paramTypes != null;
-        return new DFJarFileMethod(this, paramTypes);
+        return new DFClsFileMethod(this, paramTypes);
     }
 
     // Builds the internal structure.
@@ -79,7 +79,7 @@ public class DFJarFileMethod extends DFMethod {
                 _funcType = (DFFuncType)parser.resolveType(_finder);
             } catch (TypeNotFound e) {
                 Logger.error(
-                    "DFJarFileMethod.build: TypeNotFound (method)",
+                    "DFClsFileMethod.build: TypeNotFound (method)",
                     e.name, sig, this);
             }
         }
@@ -105,7 +105,7 @@ public class DFJarFileMethod extends DFMethod {
                     klass = _finder.resolveKlass(excNames[i]);
                 } catch (TypeNotFound e) {
                     Logger.error(
-                        "DFJarFileMethod.build: TypeNotFound (exception)",
+                        "DFClsFileMethod.build: TypeNotFound (exception)",
                         e.name, this);
                     klass = DFUnknownType.UNKNOWN.toKlass();
                 }
