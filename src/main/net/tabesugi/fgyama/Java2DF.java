@@ -5,6 +5,9 @@
 package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
+import java.net.*;
+import java.nio.file.*;
+import java.nio.file.attribute.*;
 import org.w3c.dom.*;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.*;
@@ -54,7 +57,38 @@ public class Java2DF {
         File homeDir = new File(System.getProperty("java.home"));
         File libDir = new File(homeDir, "lib");
         File rtFile = new File(libDir, "rt.jar");
-        _rootSpace.loadJarFile(rtFile);
+        if (rtFile.exists()) {
+            _rootSpace.loadJarFile(rtFile);
+        }
+        // Load the base modules.
+        URI uri = URI.create("jrt:/");
+        try {
+            Path modules = Paths.get(uri).resolve("/modules");
+            Files.walkFileTree(modules, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
+                    String name = path.getFileName().toString();
+                    if (name.endsWith(".class")) {
+                        int n = path.getNameCount();
+                        assert 3 <= n;
+                        Path clspath = path.subpath(2, n);
+                        _rootSpace.addClassPath(path, clspath);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+                @Override
+                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) {
+                    if (2 <= path.getNameCount()) {
+                        String name = path.getName(1).toString();
+                        if (!name.startsWith("java.")) {
+                            return FileVisitResult.SKIP_SUBTREE;
+                        }
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (FileSystemNotFoundException e) {
+        }
         DFBuiltinTypes.initialize(_rootSpace);
     }
 

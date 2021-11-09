@@ -4,6 +4,7 @@ package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
+import java.nio.file.*;
 import org.apache.bcel.*;
 import org.apache.bcel.classfile.*;
 import org.eclipse.jdt.core.*;
@@ -74,6 +75,10 @@ public class DFRootTypeSpace extends DFTypeSpace {
         } finally {
             jarFile.close();
         }
+    }
+
+    public void addClassPath(Path path, Path subpath) {
+        Logger.debug("Loading:", path);
     }
 
     private void addFile(JarFile jarFile, JarEntry jarEntry)
