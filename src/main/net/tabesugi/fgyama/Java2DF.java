@@ -66,23 +66,18 @@ public class Java2DF {
             Path modules = Paths.get(uri).resolve("/modules");
             Files.walkFileTree(modules, new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) {
-                    String name = path.getFileName().toString();
-                    if (name.endsWith(".class")) {
-                        int n = path.getNameCount();
-                        assert 3 <= n;
-                        Path clspath = path.subpath(2, n);
-                        _rootSpace.addClassPath(path, clspath);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-                @Override
-                public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) {
+                public FileVisitResult preVisitDirectory(
+                    Path path, BasicFileAttributes attrs) {
                     if (2 <= path.getNameCount()) {
                         String name = path.getName(1).toString();
-                        if (!name.startsWith("java.")) {
-                            return FileVisitResult.SKIP_SUBTREE;
+                        if (name.startsWith("java.")) {
+                            try {
+                                _rootSpace.loadModule(path);
+                            } catch (IOException e) {
+                                Logger.error("loadDefaults: cannot load module:", path);
+                            }
                         }
+                        return FileVisitResult.SKIP_SUBTREE;
                     }
                     return FileVisitResult.CONTINUE;
                 }
