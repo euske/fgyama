@@ -14,20 +14,20 @@ public class DFBuiltinTypes {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
         DFTypeSpace langSpace = rootSpace.getSubSpace("java.lang");
-        _object = (DFJarFileKlass)langSpace.getKlass("Object");
-        _class = (DFJarFileKlass)langSpace.getKlass("Class");
-        _enum = (DFJarFileKlass)langSpace.getKlass("Enum");
-        _string = (DFJarFileKlass)langSpace.getKlass("String");
-        _byte = (DFJarFileKlass)langSpace.getKlass("Byte");
-        _character = (DFJarFileKlass)langSpace.getKlass("Character");
-        _short = (DFJarFileKlass)langSpace.getKlass("Short");
-        _integer = (DFJarFileKlass)langSpace.getKlass("Integer");
-        _long = (DFJarFileKlass)langSpace.getKlass("Long");
-        _float = (DFJarFileKlass)langSpace.getKlass("Float");
-        _double = (DFJarFileKlass)langSpace.getKlass("Double");
-        _boolean = (DFJarFileKlass)langSpace.getKlass("Boolean");
-        _void = (DFJarFileKlass)langSpace.getKlass("Void");
-        _exception = (DFJarFileKlass)langSpace.getKlass("Exception");
+        _object = (DFClsFileKlass)langSpace.getKlass("Object");
+        _class = (DFClsFileKlass)langSpace.getKlass("Class");
+        _enum = (DFClsFileKlass)langSpace.getKlass("Enum");
+        _string = (DFClsFileKlass)langSpace.getKlass("String");
+        _byte = (DFClsFileKlass)langSpace.getKlass("Byte");
+        _character = (DFClsFileKlass)langSpace.getKlass("Character");
+        _short = (DFClsFileKlass)langSpace.getKlass("Short");
+        _integer = (DFClsFileKlass)langSpace.getKlass("Integer");
+        _long = (DFClsFileKlass)langSpace.getKlass("Long");
+        _float = (DFClsFileKlass)langSpace.getKlass("Float");
+        _double = (DFClsFileKlass)langSpace.getKlass("Double");
+        _boolean = (DFClsFileKlass)langSpace.getKlass("Boolean");
+        _void = (DFClsFileKlass)langSpace.getKlass("Void");
+        _exception = (DFClsFileKlass)langSpace.getKlass("Exception");
     }
 
     private static DFKlass _object = null;

@@ -32,7 +32,7 @@ public abstract class DFClsFileKlass extends DFKlass {
     private DFKlass _baseKlass = null;
     private DFKlass[] _baseIfaces = null;
 
-    private Map<String, DFClsFileKlass> _id2jarklass =
+    private Map<String, DFClsFileKlass> _id2clsklass =
         new ConsistentHashMap<String, DFClsFileKlass>();
 
     private List<DFMethod> _methods =
@@ -175,13 +175,13 @@ public abstract class DFClsFileKlass extends DFKlass {
         throws TypeDuplicate {
         super.addKlass(id, klass);
         assert id.indexOf('.') < 0;
-        _id2jarklass.put(id, klass);
+        _id2clsklass.put(id, klass);
         return klass;
     }
 
     protected DFClsFileKlass getInnerKlass(String id) {
         assert id.indexOf('.') < 0;
-        return _id2jarklass.get(id);
+        return _id2clsklass.get(id);
     }
 
     // loadClsFile():

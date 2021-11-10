@@ -73,7 +73,7 @@ public class DFJarFileKlass extends DFClsFileKlass {
             }
         } catch (IOException e) {
             Logger.error(
-                "DFJarFileKlass.loadJarFile: IOException",
+                "DFJarFileKlass.getClsFile: IOException",
                 _jarPath+"/"+_entPath, this);
         }
         return null;
