@@ -110,6 +110,7 @@ def run_dot(methods, type='svg'):
     logging.info(f'run_dot: {args!r}')
     data = io.StringIO()
     for method in methods:
+        if method.root is None: continue
         (klass,name,func) = parsemethodname(method.name)
         write_gv(data, method.root, name=name)
     p = Popen(args, stdin=PIPE, stdout=PIPE, encoding='utf-8')
@@ -166,6 +167,7 @@ def main(argv):
         output.write('</body>')
     else:
         for method in methods:
+            if method.root is None: continue
             (klass,name,func) = parsemethodname(method.name)
             write_gv(output, method.root,
                      highlight=highlight, name=f'{klass}.{name}')
