@@ -158,7 +158,21 @@ public abstract class DFKlass extends DFTypeSpace implements DFType {
     public int canConvertFrom(DFKlass klass, Map<DFMapKlass, DFKlass> typeMap)
         throws TypeIncompatible {
         if (this == klass) return 0;
-        if (_genericKlass != null && _genericKlass == klass._genericKlass) {
+        if (_typeSlots != null && this == klass._genericKlass) {
+            // A<S1,S2,...> canConvertFrom A<T1,T2,...>?
+            // == Si canConvertFrom T1
+            assert klass._paramTypes != null;
+            assert _typeSlots.size() == klass._paramTypes.size();
+            int dist = 0;
+            for (Map.Entry<String,DFKlass> e : _typeSlots.entrySet()) {
+                String k = e.getKey();
+                DFKlass type0 = e.getValue();
+                DFKlass type1 = klass._paramTypes.get(k);
+                assert type1 != null;
+                dist += type0.canConvertFrom(type1, typeMap);
+            }
+            return dist;
+        } else if (_genericKlass != null && _genericKlass == klass._genericKlass) {
             // A<S1,S2,...> canConvertFrom A<T1,T2,...>?
             // == Si canConvertFrom T1
             assert _paramTypes != null && klass._paramTypes != null;
