@@ -130,12 +130,12 @@
       <formatter type="plain" usefile="false" />
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
-      <test name="UnitTestDF" />
+      <test name="net.tabesugi.fgyama.UnitTestDF" />
     </junit>
   </target>
 
   <target name="java2xml" depends="build">
-    <java classname="Java2Xml">
+    <java classname="net.tabesugi.fgyama.Java2Xml">
       <classpath location="${buildDir}" />
       <classpath refid="build.classpath"/>
       <arg value="-o" />

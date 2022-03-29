@@ -1,6 +1,7 @@
 //  CommentExtractor.java
 //  Feature extractor for comments.
 //
+package net.tabesugi.fgyama;
 
 import java.io.*;
 import java.util.*;

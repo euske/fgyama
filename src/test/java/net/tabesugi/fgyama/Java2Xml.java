@@ -7,6 +7,7 @@
  *   http://stackoverflow.com/questions/37028368/astparser-setting-environment-manually
  *   http://stackoverflow.com/questions/18939857/how-to-get-a-class-name-of-a-method-by-using-eclipse-jdt-astparser
  */
+package net.tabesugi.fgyama;
 
 import java.io.*;
 import java.util.*;
