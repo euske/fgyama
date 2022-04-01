@@ -16,7 +16,7 @@
 
   <path id="build.classpath">
     <pathelement location="${libDir}/bcel-6.2.jar"/>
-    <pathelement location="${libDir}/junit-4.12.jar"/>
+    <pathelement location="${libDir}/junit-4.13.1.jar"/>
     <pathelement location="${libDir}/xmlunit-1.6.jar"/>
     <pathelement location="${libDir}/sqlite-jdbc-3.34.0.jar"/>
     <pathelement location="${libDir}/org.eclipse.jdt.core-3.25.0.jar"/>
@@ -156,8 +156,8 @@
     <mkdir dir="${libDir}"/>
     <get src="https://repo.maven.apache.org/maven2/org/apache/bcel/bcel/6.2/bcel-6.2.jar"
          dest="${libDir}/bcel-6.2.jar" />
-    <get src="https://repo.maven.apache.org/maven2/junit/junit/4.12/junit-4.12.jar"
-         dest="${libDir}/junit-4.12.jar" />
+    <get src="https://repo.maven.apache.org/maven2/junit/junit/4.13.1/junit-4.13.1.jar"
+         dest="${libDir}/junit-4.13.1.jar" />
     <get src="https://repo.maven.apache.org/maven2/xmlunit/xmlunit/1.6/xmlunit-1.6.jar"
          dest="${libDir}/xmlunit-1.6.jar" />
     <get src="https://repo.maven.apache.org/maven2/org/xerial/sqlite-jdbc/3.34.0/sqlite-jdbc-3.34.0.jar"
