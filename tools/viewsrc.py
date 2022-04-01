@@ -2,7 +2,7 @@
 import sys
 import logging
 from graphs import get_graphs
-from srcdb import SourceFile, q
+from srcdb import SourceFile, q, show_html_headers
 
 def main(argv):
     import getopt
@@ -33,22 +33,30 @@ def main(argv):
             (_,s,e) = node.ast
             a.append((s,e,node.nid))
 
-    def astart(nid):
-        return f'<span class="p{nid}">'
-    def aend(anno):
-        return '</span>'
-    def abody(annos, s):
-        return q(s.replace('\n',''))
+    print('<!DOCTYPE html><html><meta charset="UTF-8"><head>')
+    show_html_headers()
+    print('<body><pre>')
+    out = sys.stdout
     for path in args:
         assert path in file2ranges
         with open(path) as fp:
             data = fp.read()
         src = SourceFile(path, data)
         ranges = file2ranges[path]
-        for (lineno, line) in src.chunk(ranges):
+        annos = []
+        for (lineno, chunks) in src.chunk(ranges):
             if lineno is None: continue
-            print(lineno, line)
-
+            buf = ''
+            for (v,anno,s) in chunks:
+                if v < 0:
+                    annos.append(anno)
+                    buf += f'<span class="p{len(annos)}" title="{anno}">'
+                elif 0 < v:
+                    buf += '</span>'
+                    del annos[-1]
+                else:
+                    buf += q(s)
+            out.write(buf)
     return
 
 if __name__ == '__main__': sys.exit(main(sys.argv))

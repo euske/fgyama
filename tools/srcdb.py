@@ -101,10 +101,11 @@ class SourceFile:
     def chunk(self, ranges, ncontext=1):
         if not ranges: return
         triggers = []
-        for (s,e,anno) in ranges:
-            triggers.append((s,-1,anno))
-            triggers.append((e,+1,anno))
-        triggers.sort(key=lambda x: (x[0],x[1]))
+        for (i,(s,e,anno)) in enumerate(ranges):
+            n = e-s+1
+            triggers.append((s,-n,i,anno))
+            triggers.append((e,+n,-i,anno))
+        triggers.sort(key=lambda x: x[:3])
         lines = {}
         loc0 = 0
         i = 0
@@ -114,7 +115,7 @@ class SourceFile:
             pos0 = 0
             out = []
             while i < len(triggers):
-                (loc,v,anno) = triggers[i]
+                (loc,v,_,anno) = triggers[i]
                 if loc1 < loc: break
                 i += 1
                 pos1 = loc - loc0
