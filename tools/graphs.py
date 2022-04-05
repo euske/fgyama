@@ -104,6 +104,7 @@ class DFType:
 class DFBasicType(DFType):
 
     def __init__(self, name):
+        assert isinstance(name, str)
         self.name = name
         return
 
@@ -112,16 +113,18 @@ class DFBasicType(DFType):
 
 class DFArrayType(DFType):
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, elem):
+        assert isinstance(elem, DFType)
+        self.elem = elem
         return
 
     def __repr__(self):
-        return f'<[{self.name}]>'
+        return f'<[{self.elem}]>'
 
 class DFFuncType(DFType):
 
     def __init__(self, retype, args):
+        assert isinstance(retype, DFType)
         self.retype = retype
         self.args = args
         return
@@ -132,6 +135,7 @@ class DFFuncType(DFType):
 class DFKlassType(DFType):
 
     def __init__(self, name, prev=None, params=None):
+        assert isinstance(name, str)
         self.name = name
         self.prev = prev
         self.params = params
