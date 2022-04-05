@@ -141,7 +141,7 @@ public class JNITypeParser {
         return a;
     }
 
-    public class TypeSlot {
+    public static class TypeSlot {
         public String id;
         public String sig;
         public TypeSlot(String id, String sig) {

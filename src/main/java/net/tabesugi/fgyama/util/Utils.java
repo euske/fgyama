@@ -2,6 +2,7 @@
 //
 package net.tabesugi.fgyama;
 import java.io.*;
+import java.nio.charset.*;
 import java.util.*;
 import java.lang.management.*;
 import javax.xml.stream.*;
@@ -115,7 +116,7 @@ public class Utils {
     public static String readFile(File file)
         throws IOException {
         StringBuilder b = new StringBuilder();
-        try (FileReader fp = new FileReader(file)) {
+        try (FileReader fp = new FileReader(file, Charset.defaultCharset())) {
             char[] buf = new char[8192];
             while (true) {
                 int n = fp.read(buf, 0, buf.length);

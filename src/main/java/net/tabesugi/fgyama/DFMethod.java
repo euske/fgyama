@@ -319,7 +319,7 @@ public abstract class DFMethod extends DFTypeSpace implements Comparable<DFMetho
     }
 
     // Overrider
-    private class Overrider implements Comparable<Overrider> {
+    private static class Overrider implements Comparable<Overrider> {
 
         public DFMethod method;
         public int level;

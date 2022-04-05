@@ -6,6 +6,7 @@ package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.nio.charset.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 import org.w3c.dom.*;
@@ -17,7 +18,7 @@ import org.eclipse.jdt.core.dom.*;
 //
 public class Java2DF {
 
-    private class SourceFile {
+    private static class SourceFile {
 
         public String path;
         public CompilationUnit cunit;
@@ -420,7 +421,7 @@ public class Java2DF {
                     }
                     Logger.info("Input file:", path);
                     BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(input));
+                        new InputStreamReader(input, Charset.defaultCharset()));
                     while (true) {
                         String line = reader.readLine();
                         if (line == null) break;

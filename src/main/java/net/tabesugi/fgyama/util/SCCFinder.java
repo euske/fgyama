@@ -81,7 +81,7 @@ public class SCCFinder<T> {
                 _lowlink.put(v0, Math.min(_lowlink.get(v0), _nodenum.get(v1)));
             }
         }
-        if (_nodenum.get(v0) == _lowlink.get(v0)) {
+        if ((int)_nodenum.get(v0) == (int)_lowlink.get(v0)) {
             List<T> items = new ArrayList<T>();
             while (true) {
                 T v = _stack.get(_stack.size()-1);

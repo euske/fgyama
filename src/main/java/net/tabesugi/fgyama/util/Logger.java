@@ -8,7 +8,7 @@ import java.io.*;
 //
 public class Logger {
 
-    public static PrintStream out = System.err;
+    public static final PrintStream out = System.err;
 
     public static int LogLevel = 1;
 
