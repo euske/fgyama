@@ -2490,7 +2490,7 @@ class CatchJoin extends DFNode {
         DFGraph graph, DFVarScope scope, ASTNode ast,
         DFNode node, DFKlass catchKlass) {
         super(graph, scope, node.getNodeType(), node.getRef(), ast);
-        this.accept(node, catchKlass.getTypeName());
+        this.accept(node, "!"+catchKlass.getTypeName());
     }
 
     @Override

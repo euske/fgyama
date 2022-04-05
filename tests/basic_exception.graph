@@ -27,7 +27,7 @@
           </node>
           <node id="M2_foo_N28" kind="catchjoin" ref="!Lbasic_exception/A;" type="Lbasic_exception/A;">
             <ast end="307" start="239" type="12"/>
-            <accept label="Lbasic_exception/A;" src="M2_foo_N27"/>
+            <accept label="!Lbasic_exception/A;" src="M2_foo_N27"/>
           </node>
           <scope name="Lbasic_exception;.:foo:103:380.:B:130:380.:try:165:374">
             <scope name="Lbasic_exception;.:foo:103:380.:B:130:380.:try:165:374.:B:169:238">
