@@ -1053,7 +1053,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 } catch (MethodNotFound e) {
                     // fallback method.
                     method1 = klass.createFallbackMethod(
-                        CallStyle.Constructor, "<init>", argTypes, klass);
+                        CallStyle.Constructor, ":init:", argTypes, klass);
                     Logger.error(
                         "DFSourceMethod.listDefinedStmt: MethodNotFound (ci)",
                         Utils.getASTSource(ci), this);
@@ -1082,7 +1082,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 } catch (MethodNotFound e) {
                     // fallback method.
                     method1 = baseKlass.createFallbackMethod(
-                        CallStyle.Constructor, "<init>", argTypes, baseKlass);
+                        CallStyle.Constructor, ":init:", argTypes, baseKlass);
                     Logger.error(
                         "DFSourceMethod.listDefinedStmt: MethodNotFound (sci)",
                         Utils.getASTSource(sci), this);
@@ -1483,7 +1483,7 @@ public abstract class DFSourceMethod extends DFMethod {
                 } catch (MethodNotFound e) {
                     // fallback method.
                     method1 = instKlass.createFallbackMethod(
-                        DFMethod.CallStyle.Constructor, "<init>", argTypes, instKlass);
+                        DFMethod.CallStyle.Constructor, ":init:", argTypes, instKlass);
                     Logger.error(
                         "DFSourceMethod.listDefinedExpr: MethodNotFound (cstr)",
                         Utils.getASTSource(cstr), this);

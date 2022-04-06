@@ -33,7 +33,7 @@ def splitmethodname(name):
     i = name.index('(')
     j = name.index(')')
     (name, args, retype) = (name[:i], name[i:j+1], name[j+1:])
-    if name.endswith(';.<init>'):
+    if name.endswith(';.:init:'):
         name = name[:-8]
     return (stripid(name), args, retype)
 
