@@ -117,24 +117,25 @@ it can be applied to a large code base.
 
 | Kind         | Data                | Input(s)                       |
 | ------------ | ------------------- | -------------------------------|
-| call         | Method IDs          | #this, #arg0, ..., Fields      |
-| new          | Method ID           | #this, #arg0, ..., Fields      |
+| call         | Method IDs          | @type, #arg0, ..., #bypass, .field, %type |
+| new          | Method ID           | @type, #arg0, ..., #bypass, .field, %type |
 | input        |                     |                                |
 | output       |                     | (default)                      |
 | return       |                     | (default)                      |
 | receive      |                     | (default), Fields              |
-| throw        |                     |                                |
-| catch        |                     |                                |
+| throw        |                     | !type                          |
+| catch        |                     | exc0, ...                      |
+| catchjoin    |                     | !type                          |
 
 ### Control Flow
 
 | Kind         | Data                | Input(s)                       |
 | ------------ | ------------------- | -------------------------------|
 | join         |                     | cond, true, false              |
-| begin        | Loop ID             | enter, repeat                  |
+| begin        | Loop ID             | init, cont                     |
 | end          | Loop ID             | (default), cond, _repeat       |
 | repeat       | Loop ID             | (default), _end                |
-| case         | Label count         | (default), match0, match1, ... |
+| case         | Label count         | (default), match0, ...         |
 
 
 ## How to Build
