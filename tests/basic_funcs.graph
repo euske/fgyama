@@ -2,22 +2,22 @@
   <class extends="Ljava/lang/Object;" name="Lbasic_funcs;" path="tests/basic_funcs.java">
     <field name=".Lbasic_funcs;/.y" static="false" type="I"/>
     <field name=".Lbasic_funcs;/.z" static="false" type="I"/>
-    <method id="Lbasic_funcs;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_funcs;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="479" start="0" type="55"/>
-      <scope name="Lbasic_funcs;.&lt;clinit&gt;">
-        <node data="0" id="K1_&lt;clinit&gt;_N1" kind="value" type="I">
+      <scope name="Lbasic_funcs;.:clinit:">
+        <node data="0" id="K1_:clinit:_N1" kind="value" type="I">
           <ast end="48" start="47" type="34"/>
         </node>
-        <node id="K1_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_funcs;/.y" type="I">
+        <node id="K1_:clinit:_N2" kind="assign_var" ref=".Lbasic_funcs;/.y" type="I">
           <ast end="48" start="43" type="59"/>
-          <accept src="K1_&lt;clinit&gt;_N1"/>
+          <accept src="K1_:clinit:_N1"/>
         </node>
-        <node data="0" id="K1_&lt;clinit&gt;_N3" kind="value" type="I">
+        <node data="0" id="K1_:clinit:_N3" kind="value" type="I">
           <ast end="70" start="69" type="34"/>
         </node>
-        <node id="K1_&lt;clinit&gt;_N4" kind="assign_var" ref=".Lbasic_funcs;/.z" type="I">
+        <node id="K1_:clinit:_N4" kind="assign_var" ref=".Lbasic_funcs;/.z" type="I">
           <ast end="70" start="65" type="59"/>
-          <accept src="K1_&lt;clinit&gt;_N3"/>
+          <accept src="K1_:clinit:_N3"/>
         </node>
       </scope>
     </method>

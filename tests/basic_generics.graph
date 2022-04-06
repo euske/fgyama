@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_generics;" path="tests/basic_generics.java">
-    <method id="Lbasic_generics;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="685" start="0" type="55"/>
-      <scope name="Lbasic_generics;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_generics;.:clinit:"/>
     </method>
     <method id="Lbasic_generics;.test()V" name="test" style="static">
       <ast end="612" start="370" type="31"/>
@@ -22,7 +22,7 @@
           <node data="moo" id="M2_test_N1" kind="value" type="Ljava/lang/String;">
             <ast end="445" start="440" type="45"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N2" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:init:(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M2_test_N2" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="446" start="424" type="14"/>
             <accept label="#arg0" src="M2_test_N1"/>
             <accept label="#bypass" src="M2_test_N31"/>
@@ -185,47 +185,47 @@
     <parameterized type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;"/>
     <parameterized type="Lbasic_generics/Moo&lt;Lbasic_generics/:foo:618:683/T;&gt;;"/>
     <field name=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" static="false" type="Lbasic_generics/Moo/T;"/>
-    <method id="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="364" start="35" type="55"/>
-      <scope name="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.&lt;clinit&gt;">
-        <node data="null" id="K4_&lt;clinit&gt;_N1" kind="value" type="?"/>
-        <node id="K4_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
+      <scope name="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:clinit:">
+        <node data="null" id="K4_:clinit:_N1" kind="value" type="?"/>
+        <node id="K4_:clinit:_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
           <ast end="69" start="68" type="59"/>
-          <accept src="K4_&lt;clinit&gt;_N1"/>
+          <accept src="K4_:clinit:_N1"/>
         </node>
       </scope>
     </method>
-    <method id="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.&lt;init&gt;(Lbasic_generics/Moo/T;)Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" name="&lt;init&gt;" style="constructor">
+    <method id="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:init:(Lbasic_generics/Moo/T;)Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" name=":init:" style="constructor">
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124">
-        <node id="M5_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Lbasic_generics/Moo/T;">
+        <node id="M5_:init:_N1" kind="input" ref="#arg0" type="Lbasic_generics/Moo/T;">
           <ast end="87" start="84" type="44"/>
         </node>
-        <node id="M5_&lt;init&gt;_N2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124/$x" type="Lbasic_generics/Moo/T;">
+        <node id="M5_:init:_N2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124/$x" type="Lbasic_generics/Moo/T;">
           <ast end="87" start="84" type="44"/>
-          <accept src="M5_&lt;init&gt;_N1"/>
+          <accept src="M5_:init:_N1"/>
         </node>
-        <node id="M5_&lt;init&gt;_N3" kind="input" ref="@Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;"/>
-        <node id="M5_&lt;init&gt;_N8" kind="output" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
-          <accept src="M5_&lt;init&gt;_N5"/>
+        <node id="M5_:init:_N3" kind="input" ref="@Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;"/>
+        <node id="M5_:init:_N8" kind="output" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
+          <accept src="M5_:init:_N5"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124.:B:89:124">
-          <node id="M5_&lt;init&gt;_N4" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;">
+          <node id="M5_:init:_N4" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;">
             <ast end="107" start="103" type="52"/>
-            <accept src="M5_&lt;init&gt;_N3"/>
+            <accept src="M5_:init:_N3"/>
           </node>
-          <node id="M5_&lt;init&gt;_N5" kind="assign_field" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
+          <node id="M5_:init:_N5" kind="assign_field" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
             <ast end="109" start="103" type="22"/>
-            <accept label="obj" src="M5_&lt;init&gt;_N4"/>
-            <accept src="M5_&lt;init&gt;_N7"/>
+            <accept label="obj" src="M5_:init:_N4"/>
+            <accept src="M5_:init:_N7"/>
           </node>
-          <node id="M5_&lt;init&gt;_N6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124/$x" type="Lbasic_generics/Moo/T;">
+          <node id="M5_:init:_N6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:Moo:80:124/$x" type="Lbasic_generics/Moo/T;">
             <ast end="113" start="112" type="42"/>
-            <accept src="M5_&lt;init&gt;_N2"/>
+            <accept src="M5_:init:_N2"/>
           </node>
-          <node data="=" id="M5_&lt;init&gt;_N7" kind="op_assign" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
+          <node data="=" id="M5_:init:_N7" kind="op_assign" ref=".Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;/.x" type="Lbasic_generics/Moo/T;">
             <ast end="113" start="103" type="7"/>
-            <accept label="R" src="M5_&lt;init&gt;_N6"/>
+            <accept label="R" src="M5_:init:_N6"/>
           </node>
         </scope>
       </scope>
@@ -322,7 +322,7 @@
             <accept label="obj" src="M8_copy_N1"/>
             <accept src="M8_copy_N2"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.&lt;init&gt;(Lbasic_generics/Moo/T;)Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" id="M8_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;">
+          <node data="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;.:init:(Lbasic_generics/Moo/T;)Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" id="M8_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;">
             <ast end="324" start="311" type="14"/>
             <accept label="#arg0" src="M8_copy_N4"/>
             <accept label="#bypass" src="M8_copy_N10"/>
@@ -339,57 +339,57 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo/Baa;" path="tests/basic_generics.java">
-    <method id="Lbasic_generics/Moo/Baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics/Moo/Baa;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="358" start="345" type="55"/>
-      <scope name="Lbasic_generics/Moo/Baa;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_generics/Moo/Baa;.:clinit:"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" generic="Lbasic_generics/Moo&lt;Lbasic_generics/Moo/T;&gt;;" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" path="tests/basic_generics.java">
     <param name="T" type="Ljava/lang/String;"/>
     <field name=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" static="false" type="Ljava/lang/String;"/>
-    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="364" start="35" type="55"/>
-      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;clinit&gt;">
-        <node data="null" id="K10_&lt;clinit&gt;_N1" kind="value" type="?"/>
-        <node id="K10_&lt;clinit&gt;_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:clinit:">
+        <node data="null" id="K10_:clinit:_N1" kind="value" type="?"/>
+        <node id="K10_:clinit:_N2" kind="assign_var" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
           <ast end="69" start="68" type="59"/>
-          <accept src="K10_&lt;clinit&gt;_N1"/>
+          <accept src="K10_:clinit:_N1"/>
         </node>
       </scope>
     </method>
-    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" name="&lt;init&gt;" style="constructor">
+    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:init:(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" name=":init:" style="constructor">
       <caller id="Lbasic_generics;.test()V"/>
       <caller id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.copy()Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
       <ast end="124" start="80" type="31"/>
       <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124">
-        <node id="M11_&lt;init&gt;_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
+        <node id="M11_:init:_N1" kind="input" ref="#arg0" type="Ljava/lang/String;">
           <ast end="87" start="84" type="44"/>
         </node>
-        <node id="M11_&lt;init&gt;_N2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124/$x" type="Ljava/lang/String;">
+        <node id="M11_:init:_N2" kind="assign_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124/$x" type="Ljava/lang/String;">
           <ast end="87" start="84" type="44"/>
-          <accept src="M11_&lt;init&gt;_N1"/>
+          <accept src="M11_:init:_N1"/>
         </node>
-        <node id="M11_&lt;init&gt;_N3" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
-        <node id="M11_&lt;init&gt;_N8" kind="output" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
-          <accept src="M11_&lt;init&gt;_N5"/>
+        <node id="M11_:init:_N3" kind="input" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;"/>
+        <node id="M11_:init:_N8" kind="output" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <accept src="M11_:init:_N5"/>
         </node>
         <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124.:B:89:124">
-          <node id="M11_&lt;init&gt;_N4" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node id="M11_:init:_N4" kind="ref_var" ref="@Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="107" start="103" type="52"/>
-            <accept src="M11_&lt;init&gt;_N3"/>
+            <accept src="M11_:init:_N3"/>
           </node>
-          <node id="M11_&lt;init&gt;_N5" kind="assign_field" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node id="M11_:init:_N5" kind="assign_field" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <ast end="109" start="103" type="22"/>
-            <accept label="obj" src="M11_&lt;init&gt;_N4"/>
-            <accept src="M11_&lt;init&gt;_N7"/>
+            <accept label="obj" src="M11_:init:_N4"/>
+            <accept src="M11_:init:_N7"/>
           </node>
-          <node id="M11_&lt;init&gt;_N6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124/$x" type="Ljava/lang/String;">
+          <node id="M11_:init:_N6" kind="ref_var" ref="$Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:Moo:80:124/$x" type="Ljava/lang/String;">
             <ast end="113" start="112" type="42"/>
-            <accept src="M11_&lt;init&gt;_N2"/>
+            <accept src="M11_:init:_N2"/>
           </node>
-          <node data="=" id="M11_&lt;init&gt;_N7" kind="op_assign" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
+          <node data="=" id="M11_:init:_N7" kind="op_assign" ref=".Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;/.x" type="Ljava/lang/String;">
             <ast end="113" start="103" type="7"/>
-            <accept label="R" src="M11_&lt;init&gt;_N6"/>
+            <accept label="R" src="M11_:init:_N6"/>
           </node>
         </scope>
       </scope>
@@ -534,7 +534,7 @@
             <accept label="obj" src="M15_copy_N1"/>
             <accept src="M15_copy_N2"/>
           </node>
-          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.&lt;init&gt;(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M15_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
+          <node data="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;.:init:(Ljava/lang/String;)Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;" id="M15_copy_N5" kind="new" type="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;;">
             <ast end="324" start="311" type="14"/>
             <accept label="#arg0" src="M15_copy_N4"/>
             <accept label="#bypass" src="M15_copy_N11"/>
@@ -555,15 +555,15 @@
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;" path="tests/basic_generics.java">
-    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="358" start="345" type="55"/>
-      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/String;&gt;/Baa;.:clinit:"/>
     </method>
   </class>
   <class extends="Ljava/lang/Object;" name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;" path="tests/basic_generics.java">
-    <method id="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="358" start="345" type="55"/>
-      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_generics/Moo&lt;Ljava/lang/Integer;&gt;/Baa;.:clinit:"/>
     </method>
   </class>
 </fgyama>

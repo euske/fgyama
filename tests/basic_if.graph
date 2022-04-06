@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><fgyama>
   <class extends="Ljava/lang/Object;" name="Lbasic_if;" path="tests/basic_if.java">
-    <method id="Lbasic_if;.&lt;clinit&gt;()V" name="&lt;clinit&gt;" style="initializer">
+    <method id="Lbasic_if;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="128" start="0" type="55"/>
-      <scope name="Lbasic_if;.&lt;clinit&gt;"/>
+      <scope name="Lbasic_if;.:clinit:"/>
     </method>
     <method id="Lbasic_if;.foo(I)V" name="foo" style="static">
       <ast end="126" start="29" type="31"/>
