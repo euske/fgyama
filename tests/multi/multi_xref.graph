@@ -52,7 +52,7 @@
             <accept label="obj" src="M2_moo_N3"/>
             <accept src="M2_moo_N9"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_moo_N5" kind="new" type="Ldom/meep/multi_xref2;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M2_moo_N5" kind="new" type="Ldom/meep/multi_xref2;">
             <ast end="166" start="149" type="14"/>
             <accept label="#bypass" src="M2_moo_N26"/>
           </node>
@@ -166,7 +166,7 @@
             <accept label="obj" src="M5_foo_N5"/>
             <accept src="M5_foo_N11"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M5_foo_N7" kind="new" type="Ldom/meep/multi_xref1;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M5_foo_N7" kind="new" type="Ldom/meep/multi_xref1;">
             <ast end="126" start="109" type="14"/>
             <accept label="#bypass" src="M5_foo_N27"/>
           </node>
@@ -287,7 +287,7 @@
           <accept src="M9_baa_N8"/>
         </node>
         <scope name="Ldom/dood/multi_xref3;.:baa:114:193.:B:132:193">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M9_baa_N1" kind="new" type="Ldom/meep/multi_xref1;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M9_baa_N1" kind="new" type="Ldom/meep/multi_xref1;">
             <ast end="172" start="155" type="14"/>
             <accept label="#bypass" src="M9_baa_N10"/>
           </node>

@@ -314,8 +314,9 @@ public abstract class DFClsFileKlass extends DFKlass {
             if (meth.isPrivate()) continue;
             String name = meth.getName();
             DFMethod.CallStyle callStyle;
-            if (meth.getName().equals("<init>")) {
+            if (name.equals("<init>")) {
                 callStyle = DFMethod.CallStyle.Constructor;
+                name = ":init:";
             } else if (meth.isStatic()) {
                 callStyle = DFMethod.CallStyle.StaticMethod;
             } else {

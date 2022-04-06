@@ -521,7 +521,7 @@
     <method id="LDB;.:clinit:()V" name=":clinit:" style="initializer">
       <ast end="1634" start="875" type="55"/>
       <scope name="LDB;.:clinit:">
-        <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="K7_:clinit:_N1" kind="new" type="LListy&lt;LRecord;&gt;;">
+        <node data="Ljava/lang/Object;.:init:()V" id="K7_:clinit:_N1" kind="new" type="LListy&lt;LRecord;&gt;;">
           <ast end="936" start="917" type="14"/>
           <accept label="#bypass" src="K7_:clinit:_N6"/>
         </node>
@@ -608,7 +608,7 @@
             <ast end="1057" start="1053" type="42"/>
             <accept src="M8_:init:_N2"/>
           </node>
-          <node data="Ljava/io/FileReader;.&lt;init&gt;(Ljava/lang/String;)V" id="M8_:init:_N6" kind="new" type="Ljava/io/FileReader;">
+          <node data="Ljava/io/FileReader;.:init:(Ljava/lang/String;)V" id="M8_:init:_N6" kind="new" type="Ljava/io/FileReader;">
             <ast end="1058" start="1038" type="14"/>
             <accept label="#arg0" src="M8_:init:_N5"/>
             <accept label="#bypass" src="M8_:init:_N115"/>
@@ -623,7 +623,7 @@
             <ast end="1058" start="1038" type="14"/>
             <accept src="M8_:init:_N6"/>
           </node>
-          <node data="Ljava/io/BufferedReader;.&lt;init&gt;(Ljava/io/Reader;)V" id="M8_:init:_N11" kind="new" type="Ljava/io/BufferedReader;">
+          <node data="Ljava/io/BufferedReader;.:init:(Ljava/io/Reader;)V" id="M8_:init:_N11" kind="new" type="Ljava/io/BufferedReader;">
             <ast end="1059" start="1019" type="14"/>
             <accept label="#arg0" src="M8_:init:_N10"/>
             <accept label="#bypass" src="M8_:init:_N8"/>

@@ -132,7 +132,7 @@
           <accept src="M4_foo_N13"/>
         </node>
         <scope name="Lbasic_fields;.:foo:243:330.:B:268:330">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_foo_N2" kind="new" type="Lbasic_fields/A;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M4_foo_N2" kind="new" type="Lbasic_fields/A;">
             <ast end="291" start="284" type="14"/>
             <accept label="#bypass" src="M4_foo_N17"/>
           </node>

@@ -45,7 +45,7 @@
             <ast end="134" start="108" type="32"/>
             <accept src="M2_doit_N6"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_doit_N10" kind="new" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M2_doit_N10" kind="new" type="Ldom/meep/basic_names/:doit:79:289/Baz;">
             <ast end="239" start="230" type="14"/>
             <accept label="#bypass" src="M2_doit_N8"/>
           </node>
@@ -149,7 +149,7 @@
           <accept src="M4_main_N12"/>
         </node>
         <scope name="Ldom/meep/basic_names;.:main:357:468.:B:396:468">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M4_main_N3" kind="new" type="Ldom/meep/basic_names;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M4_main_N3" kind="new" type="Ldom/meep/basic_names;">
             <ast end="441" start="424" type="14"/>
             <accept label="#bypass" src="M4_main_N14"/>
           </node>

@@ -26,7 +26,7 @@
           <accept src="M2_fa_N22"/>
         </node>
         <scope name="Lbasic_methods;.:fa:139:385.:B:156:385">
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_fa_N2" kind="new" type="Lbasic_methods/:fa:139:385/:AST14:165:225;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M2_fa_N2" kind="new" type="Lbasic_methods/:fa:139:385/:AST14:165:225;">
             <ast end="225" start="165" type="14"/>
             <accept label="#bypass" src="M2_fa_N25"/>
           </node>
@@ -78,7 +78,7 @@
             <ast end="335" start="323" type="32"/>
             <accept src="M2_fa_N13"/>
           </node>
-          <node data="Ljava/lang/Object;.&lt;init&gt;()V" id="M2_fa_N16" kind="new" type="Lbasic_methods/:fa:139:385/moo;">
+          <node data="Ljava/lang/Object;.:init:()V" id="M2_fa_N16" kind="new" type="Lbasic_methods/:fa:139:385/moo;">
             <ast end="362" start="353" type="14"/>
             <accept label="#bypass" src="M2_fa_N14"/>
           </node>
