@@ -72,9 +72,10 @@ class DFType:
                         i2 += 1
                         prev = t
                     else:
-                        raise ValueError(s[i2:])
+                        raise ValueError(f'uknown character {c!r} at {i2} in {s!r}')
                 else:
                     i2 += 1
+            raise ValueError(f'premature end at {i} in {s!r}')
         elif c == 'T':
             i2 = i+1
             while i2 < len(s):
@@ -83,6 +84,7 @@ class DFType:
                     return (i2+1, DFKlassType(s[i+1:i2]))
                 else:
                     i2 += 1
+            raise ValueError(f'premature end at {i} in {s!r}')
         elif c == '[':
             (i2, t) = klass.parse(s, i+1)
             return (i2, DFArrayType(t))
@@ -99,7 +101,10 @@ class DFType:
             return (i2, DFFuncType(retype, args))
         elif c == '?':
             return (i+1, DFUnknownType())
-        raise ValueError(s, s[i:])
+        else:
+            raise ValueError(f'uknown character {c!r} at {i} in {s!r}')
+        # don't reach here
+        assert 0
 
 class DFBasicType(DFType):
 
