@@ -26,20 +26,7 @@ def is_ignored(label):
 def is_varref(ref):
     return (ref and ref[0] not in '#%!@')
 
-def getfeat1(label, n):
-    if n.is_funcall():
-        (data,_,_) = n.data.partition(' ')
-        (klass,name,func) = parsemethodname(data)
-        return f'{label},{n.kind},{name}'
-    elif n.kind in TYPEOPS:
-        (_,klass) = DFType.parse(n.data)
-        return f'{label},{n.kind},{klass.name}'
-    elif n.data is None:
-        return f'{label},{n.kind}'
-    else:
-        return f'{label},{n.kind},{n.data}'
-
-def getfeat2(label, n):
+def getfeatext(label, n):
     if n.is_funcall():
         (data,_,_) = n.data.partition(' ')
         (klass,name,func) = parsemethodname(data)
@@ -56,6 +43,23 @@ def getfeat2(label, n):
     else:
         return None
 
+def getfeat1(label, n):
+    if n.kind == 'call':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'{label},{n.kind},{name}'
+    elif n.kind == 'new':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'{label},{n.kind},{klass.name}'
+    elif n.kind in TYPEOPS:
+        (_,klass) = DFType.parse(n.data)
+        return f'{label},{n.kind},{klass.name}'
+    elif n.data is None:
+        return f'{label},{n.kind}'
+    else:
+        return f'{label},{n.kind},{n.data}'
+
 def getfeats(n0, label, n1):
     if n1.kind in IGNORED: return []
     if n1.kind == 'op_assign' and n1.data == '=': return []
@@ -65,7 +69,7 @@ def getfeats(n0, label, n1):
         for (k,n2) in n1.inputs.items():
             if is_ignored(k): continue
             if n2 is not n0 and k != label:
-                f2 = getfeat2(k, n2)
+                f2 = getfeatext(k, n2)
                 if f2 is not None:
                     feats.append(f1+'|'+f2)
     return feats
