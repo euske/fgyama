@@ -71,8 +71,8 @@ class SourceFile:
         ranges = []
         for node in nodes:
             if node.ast is None: continue
-            (_,i,n) = node.ast
-            ranges.append((i, i+n, node.nid))
+            (_,s,e) = node.ast
+            ranges.append((s, e, node.nid))
         return self.show(ranges, ncontext=ncontext, skip=skip,
                          astart=astart, aend=aend, abody=abody)
 
