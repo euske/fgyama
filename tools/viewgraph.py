@@ -6,8 +6,50 @@ from graphs import IDFBuilder
 from graphs import DFType, parsemethodname, parserefname
 from srcdb import SourceDB
 
+REFS = {'ref_var', 'ref_field', 'assign_var', 'assign_field'}
+TYPEOPS = {'op_typecast', 'op_typecheck'}
+
 def shownode(n):
-    return f'<{n.kind} {n.data}>'
+    if not n.kind:
+        return '<empty>'
+    elif n.kind == 'call':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'<{n.kind} {name}()>'
+    elif n.kind == 'new':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'<{n.kind} {klass.name}>'
+    elif n.kind in REFS:
+        return f'<{n.kind} {parserefname(n.ref)}>'
+    elif n.kind in TYPEOPS:
+        (_,klass) = DFType.parse(n.data)
+        return f'<{n.kind} {klass.name}>'
+    elif n.data is None:
+        return f'<{n.kind}>'
+    else:
+        return f'<{n.kind} {n.data}>'
+
+def showcall(n):
+    if n is None:
+        return ''
+    elif n.kind == 'call':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'[{name}()]'
+    elif n.kind == 'new':
+        (data,_,_) = n.data.partition(' ')
+        (klass,name,func) = parsemethodname(data)
+        return f'[new {klass.name}]'
+    else:
+        raise ValueError(n)
+
+def showreturn(n):
+    if n is None:
+        return ''
+    else:
+        (klass,name,func) = parsemethodname(n.method.name)
+        return f'[{name}]'
 
 class Viewer:
 
@@ -23,33 +65,35 @@ class Viewer:
         nodes = list(method)
         if nodes:
             self.curvtx = self.builder.getvtx(nodes[0])
+            self.show_nav()
         else:
             self.curvtx = None
-        self.show_current()
         return
 
     def get_vertex(self):
         return self.curvtx
 
-    def show_current(self):
+    def show_nav(self):
+        assert self.curvtx is not None
         self.nav = {}
-        if self.curvtx is None: return
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.inputs):
             i = -(len(self.curvtx.inputs)-i)
             self.nav[i] = vtx
-            print(f' {i}: <-{label}- {shownode(vtx.node)}')
+            print(f' {i}: <-({label})- {shownode(vtx.node)} {showcall(funcall)}')
         node = self.curvtx.node
-        print(f'   {shownode(node)}')
+        print(f'   {node.nid}: {shownode(node)}')
         if self.srcdb is not None:
-            (path,start,end) = self.builder.getsrc(node, False)
-            src = self.srcdb.get(path)
-            for (lineno,line) in src.show_nodes([node]):
-                if lineno is not None:
-                    print(f' {lineno:5d}: {line.rstrip()}')
+            ast = self.builder.getsrc(node, False)
+            if ast is not None:
+                (path,start,end) = ast
+                src = self.srcdb.get(path)
+                for (lineno,line) in src.show_nodes([node]):
+                    if lineno is not None:
+                        print(f' {lineno:5d}: {line.rstrip()}')
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.outputs):
             i = i+1
             self.nav[i] = vtx
-            print(f' +{i}: -{label}-> {shownode(vtx.node)}')
+            print(f' +{i}: -({label})-> {shownode(vtx.node)} {showreturn(funcall)}')
         return
 
     def run(self, cmd, args):
@@ -63,46 +107,60 @@ class Viewer:
                 d = -d
             if d in self.nav:
                 self.curvtx = self.nav[d]
-            self.show_current()
+            self.show_nav()
             return
         if cmd == '.':
-            self.show_current()
+            if self.curvtx is not None:
+                print(self.curvtx.node)
+                self.show_nav()
             return
         if cmd == 't':
             if self.curvtx is None:
-                print('!no node')
+                print('!no method')
                 return
             method = self.curvtx.node.method
             for (i,node) in enumerate(method):
                 if not args or args == node.kind:
-                    print(f'{i}: {node.kind} {node.data}')
+                    print(f' {i}: {node.kind} {node.data}')
             return
         if cmd == 'r':
             if self.curvtx is None:
-                print('!no node')
+                print('!no method')
                 return
             method = self.curvtx.node.method
             for (i,node) in enumerate(method):
                 if not node.ref: continue
                 if not args or args in node.ref:
-                    print(f'{i}: {node.ref} {node.data}')
+                    print(f' {i}: {node.ref} {node.data}')
             return
         if cmd == 'n':
             if self.curvtx is None:
-                print('!no node')
+                print('!no method')
                 return
-            i = int(args)
+            try:
+                i = int(args)
+            except ValueError:
+                print('!invalid number {args}')
+                return
             method = self.curvtx.node.method
-            self.curvtx = self.builder.getvtx(list(method)[i])
-            self.show_current()
-            return
-        if cmd == 's':
-            for (i,method) in enumerate(self.builder.methods):
-                if not args or args in method.name:
-                    print(f'{i}: {method.name}')
+            nodes = list(method)
+            if i < 0 or len(nodes) <= i:
+                print('!invalid node {i}')
+                return
+            self.curvtx = self.builder.getvtx(nodes[i])
+            self.show_nav()
             return
         if cmd == 'm':
-            i = int(args)
+            try:
+                i = int(args)
+            except ValueError:
+                for (i,method) in enumerate(self.builder.methods):
+                    if not args or args in method.name:
+                        print(f' {i}: {method.name}')
+                return
+            if i < 0 or len(self.builder.methods) <= i:
+                print('!invalid method {i}')
+                return
             self.set_method(self.builder.methods[i])
             return
         self.show_help()
