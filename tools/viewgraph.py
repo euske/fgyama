@@ -3,7 +3,11 @@ import sys
 import logging
 import re
 from graphs import IDFBuilder
-from srcdb import SourceDB, SourceAnnot
+from graphs import DFType, parsemethodname, parserefname
+from srcdb import SourceDB
+
+def shownode(n):
+    return f'<{n.kind} {n.data}>'
 
 class Viewer:
 
@@ -12,20 +16,30 @@ class Viewer:
     def __init__(self, builder, srcdb):
         self.builder = builder
         self.srcdb = srcdb
-        self.curvtx = builder.getvtx(list(self.builder.methods[-1])[-1])
+        self.curvtx = None
         return
 
-    def get_current(self):
+    def set_method(self, method):
+        nodes = list(method)
+        if nodes:
+            self.curvtx = self.builder.getvtx(nodes[0])
+        else:
+            self.curvtx = None
+        self.show_current()
+        return
+
+    def get_vertex(self):
         return self.curvtx
 
     def show_current(self):
         self.nav = {}
+        if self.curvtx is None: return
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.inputs):
             i = -(len(self.curvtx.inputs)-i)
             self.nav[i] = vtx
-            print(f' {i}:{label} {vtx.node!r}')
+            print(f' {i}: <-{label}- {shownode(vtx.node)}')
         node = self.curvtx.node
-        print(f'   {node.method.name}: {node.nid}')
+        print(f'   {shownode(node)}')
         if self.srcdb is not None:
             (path,start,end) = self.builder.getsrc(node, False)
             src = self.srcdb.get(path)
@@ -35,7 +49,7 @@ class Viewer:
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.outputs):
             i = i+1
             self.nav[i] = vtx
-            print(f' +{i}:{label} {vtx.node!r}')
+            print(f' +{i}: -{label}-> {shownode(vtx.node)}')
         return
 
     def run(self, cmd, args):
@@ -51,6 +65,37 @@ class Viewer:
                 self.curvtx = self.nav[d]
             self.show_current()
             return
+        if cmd == '.':
+            self.show_current()
+            return
+        if cmd == 't':
+            if self.curvtx is None:
+                print('!no node')
+                return
+            method = self.curvtx.node.method
+            for (i,node) in enumerate(method):
+                if not args or args == node.kind:
+                    print(f'{i}: {node.kind} {node.data}')
+            return
+        if cmd == 'r':
+            if self.curvtx is None:
+                print('!no node')
+                return
+            method = self.curvtx.node.method
+            for (i,node) in enumerate(method):
+                if not node.ref: continue
+                if not args or args in node.ref:
+                    print(f'{i}: {node.ref} {node.data}')
+            return
+        if cmd == 'n':
+            if self.curvtx is None:
+                print('!no node')
+                return
+            i = int(args)
+            method = self.curvtx.node.method
+            self.curvtx = self.builder.getvtx(list(method)[i])
+            self.show_current()
+            return
         if cmd == 's':
             for (i,method) in enumerate(self.builder.methods):
                 if not args or args in method.name:
@@ -58,18 +103,29 @@ class Viewer:
             return
         if cmd == 'm':
             i = int(args)
-            method = self.builder.methods[i]
-            self.curvtx = self.builder.getvtx(list(method)[-1])
-            self.show_current()
+            self.set_method(self.builder.methods[i])
             return
-        print('help: [-+]n, s')
+        self.show_help()
+        return
+
+    def show_help(self):
+        print('help:')
+        print('  .           show the current node.')
+        print('  [-+][n]     move to a next node.')
+        print('  t [kind]    search nodes by kind.')
+        print('  r [ref]     search nodes by ref.')
+        print('  n num       change the current node.')
+        print('  s [method]  search methods.')
+        print('  m num       change the current method.')
+        print('  q           quit.')
+        print()
         return
 
 
 def main(argv):
     import getopt
     def usage():
-        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [graph ...]')
+        print(f'usage: {argv[0]} [-d] [-M maxoverrides] [-c encoding] [-B srcdir] [graph ...]')
         return 100
     try:
         (opts, args) = getopt.getopt(argv[1:], 'dM:c:B:')
@@ -96,12 +152,14 @@ def main(argv):
     builder.run()
 
     viewer = Viewer(builder, srcdb)
-    viewer.show_current()
     line = '?'
     while True:
-        vtx = viewer.get_current()
+        vtx = viewer.get_vertex()
         try:
-            s = input(f'[{vtx.node.method.name}] ')
+            if vtx is None:
+                s = input('[no node] ')
+            else:
+                s = input(f'[{vtx.node.method.name}] ')
         except EOFError:
             break
         if s:
