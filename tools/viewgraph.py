@@ -107,7 +107,7 @@ class Viewer:
             method = self.curvtx.node.method
             for (i,node) in enumerate(method):
                 if not args or args == node.kind:
-                    print(f' {i}: {node.kind} {node.data}')
+                    print(f' {i}: {node.kind} {shownode(node)}')
             return
         if cmd == 'r':
             if self.curvtx is None:
@@ -117,7 +117,35 @@ class Viewer:
             for (i,node) in enumerate(method):
                 if not node.ref: continue
                 if not args or args in node.ref:
-                    print(f' {i}: {node.ref} {node.data}')
+                    print(f' {i}: {node.ref} {shownode(node)}')
+            return
+        if cmd == 'l':
+            if self.curvtx is None:
+                print('!no method')
+                return
+            if self.srcdb is None:
+                print('!no source')
+                return
+            method = self.curvtx.node.method
+            path = method.klass.path
+            src = self.srcdb.get(path)
+            try:
+                i = int(args)
+            except ValueError:
+                (_,s,e) = method.ast
+                for (lineno,(line,loc0,loc1)) in enumerate(src.lines):
+                    if e <= loc0 or loc1 <= s: continue
+                    print(f' {lineno:5d}: {line.rstrip()}')
+                return
+            if i < 0 or len(src.lines) <= i:
+                print('!invalid line {i}')
+                return
+            (_,loc0,loc1) = src.lines[i]
+            for (i,node) in enumerate(method):
+                if not node.ast: continue
+                (_,s,e) = node.ast
+                if e <= loc0 or loc1 <= s: continue
+                print(f' {i}: {shownode(node)}')
             return
         if cmd == 'n':
             if self.curvtx is None:

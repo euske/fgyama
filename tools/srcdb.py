@@ -57,7 +57,12 @@ class SourceFile:
     def __init__(self, name, data):
         self.name = name
         self.data = data
-        self.lines = data.splitlines(True)
+        self.lines = []
+        loc0 = 0
+        for line in data.splitlines(True):
+            loc1 = loc0+len(line)
+            self.lines.append((line, loc0, loc1))
+            loc0 = loc1
         return
 
     def __repr__(self):
@@ -107,11 +112,9 @@ class SourceFile:
             triggers.append((e,+n,-i,anno))
         triggers.sort(key=lambda x: x[:3])
         lines = {}
-        loc0 = 0
         i = 0
         annos = []
-        for (lineno,line) in enumerate(self.lines):
-            loc1 = loc0+len(line)
+        for (lineno,(line,loc0,loc1)) in enumerate(self.lines):
             pos0 = 0
             out = []
             while i < len(triggers):
@@ -132,13 +135,13 @@ class SourceFile:
                 lines[lineno] = out
             elif annos:
                 lines[lineno] = [(0, annos[:], line)]
-            loc0 = loc1
         n = len(self.lines)
         for (lineno,line) in list(lines.items()):
             for i in range(max(0, lineno-ncontext),
                            min(n, lineno+ncontext+1)):
                 if i not in lines:
-                    lines[i] = [(0, [], self.lines[i])]
+                    (line,_,_) = self.lines[i]
+                    lines[i] = [(0, [], line)]
         lineno0 = 0
         for lineno1 in sorted(lines):
             if lineno0 < lineno1:
