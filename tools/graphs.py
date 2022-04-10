@@ -106,6 +106,9 @@ class DFType:
         # don't reach here
         assert 0
 
+    def get_name(self):
+        raise NotImplementedError(self)
+
 class DFBasicType(DFType):
 
     def __init__(self, name):
@@ -116,6 +119,9 @@ class DFBasicType(DFType):
     def __repr__(self):
         return f'<{self.name}>'
 
+    def get_name(self):
+        return self.name
+
 class DFArrayType(DFType):
 
     def __init__(self, elem):
@@ -125,6 +131,9 @@ class DFArrayType(DFType):
 
     def __repr__(self):
         return f'<[{self.elem}]>'
+
+    def get_name(self):
+        return self.elem.get_name()
 
 class DFFuncType(DFType):
 
@@ -156,6 +165,9 @@ class DFKlassType(DFType):
         else:
             params = ",".join(map(repr, self.params))
             return f'<{name}<{params}>>'
+
+    def get_name(self):
+        return self.name
 
 class DFUnknownType(DFType):
 

@@ -38,8 +38,8 @@ def getfeatext(label, n):
     elif n.kind == 'value' and n.ntype == 'Ljava/lang/String;':
         return f'{label},{n.kind},STRING'
     elif n.kind in TYPEOPS:
-        (_,klass) = DFType.parse(n.data)
-        return f'{label},{n.kind},{klass.name}'
+        (_,typ) = DFType.parse(n.data)
+        return f'{label},{n.kind},{typ.get_name()}'
     elif n.kind in EXTOPS:
         return f'{label},{n.kind},{n.data}'
     else:
@@ -55,8 +55,8 @@ def getfeat1(label, n):
         (klass,name,func) = parsemethodname(data)
         return f'{label},{n.kind},{klass.name}'
     elif n.kind in TYPEOPS:
-        (_,klass) = DFType.parse(n.data)
-        return f'{label},{n.kind},{klass.name}'
+        (_,typ) = DFType.parse(n.data)
+        return f'{label},{n.kind},{typ.get_name()}'
     elif n.data is None:
         return f'{label},{n.kind}'
     else:
@@ -78,12 +78,12 @@ def getfeats(n0, label, n1):
 
 def enumkeys(chain, key=None):
     assert chain is not None
-    (_,n1) = chain.car
+    (label,n1) = chain.car
     prev = chain.cdr
     if prev is None:
         yield key
         return
-    (label,n0) = prev.car
+    (_,n0) = prev.car
     feats = getfeats(n0, label, n1)
     if feats is None:
         for z in enumkeys(prev, key):
@@ -153,13 +153,13 @@ def main(argv):
             enumnodes(chains, label1, vtx1, chain)
         return
 
-    def put(nodes, key):
+    def show(nodes, key):
         assert 2 <= len(nodes)
         def f(x):
             if x is None: return 'None'
             return '%d:%d:%d' % x
         fp.write('+CHAIN %s\n' % (' '.join( f(builder.getsrc(n)) for n in nodes )))
-        fp.write(f'+PAIR {nodes[0].ref} {nodes[-1].ref} {" ".join(key)}')
+        fp.write(f'+PAIR {nodes[0].ref} {nodes[-1].ref} {" ".join(key)}\n')
         if srcdb is not None:
             annot = SourceAnnot(srcdb)
             for (i,n) in enumerate(nodes):
@@ -186,7 +186,7 @@ def main(argv):
                 for key in enumkeys(chain):
                     if key is None: continue
                     key = tuple(key)
-                    put(nodes, key)
+                    show(nodes, key)
                     if key in key2pair:
                         p = key2pair[key]
                     else:
@@ -200,6 +200,7 @@ def main(argv):
             n0 = parserefname(ref0)
             n1 = parserefname(ref1)
             fp.write(f'+PAIR {parserefname(ref0)} {parserefname(ref1)}\n')
+        fp.write('\n')
 
     if fp is not sys.stdout:
         fp.close()
