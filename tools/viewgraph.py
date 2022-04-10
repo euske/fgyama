@@ -30,26 +30,12 @@ def shownode(n):
     else:
         return f'<{n.kind} {n.data}>'
 
-def showcall(n):
-    if n is None:
-        return ''
-    elif n.kind == 'call':
-        (data,_,_) = n.data.partition(' ')
-        (klass,name,func) = parsemethodname(data)
-        return f'[{name}()]'
-    elif n.kind == 'new':
-        (data,_,_) = n.data.partition(' ')
-        (klass,name,func) = parsemethodname(data)
-        return f'[new {klass.name}]'
-    else:
-        raise ValueError(n)
-
-def showreturn(n):
-    if n is None:
-        return ''
-    else:
-        (klass,name,func) = parsemethodname(n.method.name)
+def showcall(n0, n1):
+    if n0.method != n1.method:
+        (klass,name,func) = parsemethodname(n1.method.name)
         return f'[{name}]'
+    else:
+        return ''
 
 class Viewer:
 
@@ -75,25 +61,25 @@ class Viewer:
 
     def show_nav(self):
         assert self.curvtx is not None
+        curnode = self.curvtx.node
         self.nav = {}
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.inputs):
             i = -(len(self.curvtx.inputs)-i)
             self.nav[i] = vtx
-            print(f' {i}: <-({label})- {shownode(vtx.node)} {showcall(funcall)}')
-        node = self.curvtx.node
-        print(f'   {node.nid}: {shownode(node)}')
+            print(f' {i}: <-({label})- {shownode(vtx.node)} {showcall(curnode, vtx.node)}')
+        print(f'   {curnode.nid}: {shownode(curnode)}')
         if self.srcdb is not None:
-            ast = self.builder.getsrc(node, False)
+            ast = self.builder.getsrc(curnode, False)
             if ast is not None:
                 (path,start,end) = ast
                 src = self.srcdb.get(path)
-                for (lineno,line) in src.show_nodes([node]):
+                for (lineno,line) in src.show_nodes([curnode]):
                     if lineno is not None:
                         print(f' {lineno:5d}: {line.rstrip()}')
         for (i,(label,vtx,funcall)) in enumerate(self.curvtx.outputs):
             i = i+1
             self.nav[i] = vtx
-            print(f' +{i}: -({label})-> {shownode(vtx.node)} {showreturn(funcall)}')
+            print(f' +{i}: -({label})-> {shownode(vtx.node)} {showcall(curnode, vtx.node)}')
         return
 
     def run(self, cmd, args):
@@ -172,9 +158,9 @@ class Viewer:
         print('  [-+][n]     move to a next node.')
         print('  t [kind]    search nodes by kind.')
         print('  r [ref]     search nodes by ref.')
-        print('  n num       change the current node.')
-        print('  s [method]  search methods.')
-        print('  m num       change the current method.')
+        print('  n #         change the current node.')
+        print('  m [method]  search methods.')
+        print('  m #         change the current method.')
         print('  q           quit.')
         print()
         return
