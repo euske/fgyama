@@ -117,7 +117,7 @@ def main(argv):
     maxoverrides = 1
     encoding = None
     srcdb = None
-    maxlen = 6
+    maxlen = 8
     maxchains = 100
     minkey = 3
     for (k, v) in opts:
@@ -176,7 +176,6 @@ def main(argv):
         fp.write('\n')
         return
 
-    key2pair = {}
     for vtx0 in builder:
         node0 = vtx0.node
         if node0.kind in REFS and is_varref(node0.ref):
@@ -193,20 +192,6 @@ def main(argv):
                     key = tuple(key)
                     if len(key) < minkey: continue
                     show(nodes, key)
-                    if key in key2pair:
-                        p = key2pair[key]
-                    else:
-                        p = key2pair[key] = []
-                    p.append((nodes[0].ref, nodes[-1].ref))
-
-    for (key,pairs) in key2pair.items():
-        if len(pairs) < 2: continue
-        fp.write(f'+GROUP {" ".join(key)}\n')
-        for (ref0,ref1) in pairs:
-            n0 = parserefname(ref0)
-            n1 = parserefname(ref1)
-            fp.write(f'+PAIR {parserefname(ref0)} {parserefname(ref1)}\n')
-        fp.write('\n')
 
     if fp is not sys.stdout:
         fp.close()
