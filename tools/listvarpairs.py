@@ -21,6 +21,10 @@ AUGMENTED = {
     'assign_array', 'assign_field'
 }
 
+def fmtsrc(x):
+    if x is None: return 'None'
+    return '%d:%d:%d' % x
+
 def is_ignored(n, label):
     return (label.startswith('_') or
             (n.is_funcall() and not label.startswith('#arg')))
@@ -101,10 +105,11 @@ def main(argv):
     import getopt
     def usage():
         print(f'usage: {argv[0]} [-d] [-o output] [-M maxoverrides] '
-              '[-m maxlen] [-G] [graph ...]')
+              '[-c encoding] [-B basedir] [-m maxlen] [-C maxchains] [-k minkey] '
+              '[graph ...]')
         return 100
     try:
-        (opts, args) = getopt.getopt(argv[1:], 'do:M:c:B:m:G')
+        (opts, args) = getopt.getopt(argv[1:], 'do:M:c:B:m:C:k:')
     except getopt.GetoptError:
         return usage()
     level = logging.INFO
@@ -112,16 +117,18 @@ def main(argv):
     maxoverrides = 1
     encoding = None
     srcdb = None
-    maxlen = 5
-    maxchains = 32
+    maxlen = 6
+    maxchains = 100
+    minkey = 3
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-o': output = v
         elif k == '-M': maxoverrides = int(v)
-        elif k == '-C': maxchains = int(v)
         elif k == '-c': encoding = v
         elif k == '-B': srcdb = SourceDB(v, encoding)
         elif k == '-m': maxlen = int(v)
+        elif k == '-C': maxchains = int(v)
+        elif k == '-k': minkey = int(v)
     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
     if not args: return usage()
 
@@ -155,11 +162,9 @@ def main(argv):
 
     def show(nodes, key):
         assert 2 <= len(nodes)
-        def f(x):
-            if x is None: return 'None'
-            return '%d:%d:%d' % x
-        fp.write('+CHAIN %s\n' % (' '.join( f(builder.getsrc(n)) for n in nodes )))
-        fp.write(f'+PAIR {nodes[0].ref} {nodes[-1].ref} {" ".join(key)}\n')
+        fp.write(f'+KEY {" ".join(key)}\n')
+        fp.write(f'+REFS {nodes[0].ref} {nodes[-1].ref}\n')
+        fp.write('+CHAIN %s\n' % (' '.join( fmtsrc(builder.getsrc(n)) for n in nodes )))
         if srcdb is not None:
             annot = SourceAnnot(srcdb)
             for (i,n) in enumerate(nodes):
@@ -186,6 +191,7 @@ def main(argv):
                 for key in enumkeys(chain):
                     if key is None: continue
                     key = tuple(key)
+                    if len(key) < minkey: continue
                     show(nodes, key)
                     if key in key2pair:
                         p = key2pair[key]
