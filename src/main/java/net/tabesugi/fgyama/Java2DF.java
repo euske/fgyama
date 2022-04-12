@@ -183,7 +183,12 @@ public class Java2DF {
             Name name = importDecl.getName();
             if (importDecl.isOnDemand()) {
                 Logger.debug("Import:", name+".*");
-                finder = new DFTypeFinder(_rootSpace.getSubSpace(name), finder);
+                DFTypeSpace space = _rootSpace.getSubSpace(name);
+                if (space == null) {
+                    Logger.error("Stage2: Not found:", name);
+                    continue;
+                }
+                finder = new DFTypeFinder(space, finder);
             } else if (!importDecl.isStatic()) {
                 assert name.isQualifiedName();
                 Logger.debug("Import:", name);
