@@ -10,9 +10,10 @@ REFS = {'ref_var', 'ref_field'}
 ASSIGNS = {'assign_var', 'assign_field'}
 TYPEOPS = {'op_typecast', 'op_typecheck'}
 EXTOPS = {'op_infix', 'value'}
+FUNCALL = {'call', 'new', 'input'}
 
 IGNORED = {
-    None, 'receive', 'input', 'output', 'begin', 'end', 'repeat', 'catchjoin'
+    None, 'receive', 'input', 'output', 'return', 'begin', 'end', 'repeat', 'catchjoin'
 }
 
 AUGMENTED = {
@@ -22,12 +23,12 @@ AUGMENTED = {
 }
 
 def fmtsrc(x):
-    if x is None: return 'None'
+    if x is None: return '-'
     return '%d:%d:%d' % x
 
-def is_ignored(n, label):
+def is_ignored(n0, label, n1):
     return (label.startswith('_') or
-            (n.is_funcall() and not label.startswith('#arg')))
+            (n1.kind in FUNCALL and not label.startswith('#arg')))
 
 def is_varref(ref):
     return (ref and ref[0] not in '#%!@')
@@ -73,7 +74,7 @@ def getfeats(n0, label, n1):
     feats = [f1]
     if n1.kind in AUGMENTED:
         for (k,n2) in n1.inputs.items():
-            if is_ignored(n2, k): continue
+            if is_ignored(n2, k, n1): continue
             if n2 is not n0 and k != label:
                 f2 = getfeatext(k, n2)
                 if f2 is not None:
@@ -156,7 +157,7 @@ def main(argv):
             return
         if maxlen <= len(chain): return
         for (label1,vtx1,_) in vtx0.outputs:
-            if is_ignored(n0, label1): continue
+            if is_ignored(n0, label1, vtx1.node): continue
             enumnodes(chains, label1, vtx1, chain)
         return
 
