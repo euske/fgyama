@@ -24,7 +24,7 @@ AUGMENTED = {
 
 def fmtsrc(x):
     if x is None: return '-'
-    return '%d:%d:%d' % x
+    return '%s:%d:%d' % x
 
 def is_ignored(n0, label, n1):
     return (label.startswith('_') or
@@ -164,7 +164,7 @@ def main(argv):
         assert 2 <= len(nodes)
         fp.write(f'+KEY {" ".join(key)}\n')
         fp.write(f'+REFS {nodes[0].ref} {nodes[-1].ref}\n')
-        fp.write('+CHAIN %s\n' % (' '.join( fmtsrc(builder.getsrc(n)) for n in nodes )))
+        fp.write('+CHAIN %s\n' % (' '.join( fmtsrc(builder.getsrc(n, False)) for n in nodes )))
         if srcdb is not None:
             annot = SourceAnnot(srcdb)
             for (i,n) in enumerate(nodes):
