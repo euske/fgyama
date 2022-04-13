@@ -102,7 +102,6 @@ def enumkeys(chain, key=None):
 
 # main
 def main(argv):
-    import fileinput
     import getopt
     def usage():
         print(f'usage: {argv[0]} [-d] [-o output] [-M maxoverrides] '

@@ -811,8 +811,8 @@ class IDFBuilder:
         return
 
 
-# main
-def main(argv):
+# main_idf: boilarplate main for using interproc dataflow.
+def main_idf(argv):
     import getopt
     def usage():
         print(f'usage: {argv[0]} [-d] [-M maxoverrides] [graph ...]')
@@ -827,7 +827,6 @@ def main(argv):
         if k == '-d': level = logging.DEBUG
         elif k == '-M': maxoverrides = int(v)
     if not args: return usage()
-
     logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
 
     builder = IDFBuilder(maxoverrides=maxoverrides)
@@ -836,9 +835,40 @@ def main(argv):
         builder.load(path)
 
     builder.run()
-    nfuncalls = sum( len(a) for a in builder.funcalls.values() )
-    print(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {nfuncalls} funcalls, {len(builder.vtxs)} IPVertexes')
+    logging.info(f'Read: {len(builder.srcmap)} sources, {len(builder.methods)} methods, {len(builder.vtxs)} IPVertexes')
 
     return 0
+
+# main: main for using basic graphs.
+def main(argv):
+    import getopt
+    def usage():
+        print(f'usage: {argv[0]} [-d] [-n ntop] [graph ...]')
+        return 100
+    try:
+        (opts, args) = getopt.getopt(argv[1:], 'dn:')
+    except getopt.GetoptError:
+        return usage()
+    level = logging.INFO
+    ntop = 10
+    for (k, v) in opts:
+        if k == '-d': level = logging.DEBUG
+        elif k == '-n': ntop = int(v)
+    if not args: return usage()
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=level)
+
+    for path in args:
+        methods = []
+        kinds = {}
+        for method in get_graphs(path):
+            methods.append((len(method), method.name))
+            for n in method:
+                kinds[n.kind] = kinds.get(n.kind, 0)+1
+        methods.sort(reverse=True)
+        totalnodes = sum(kinds.values())
+        topkinds = sorted(( (n,k) for (k,n) in kinds.items() ), reverse=True)
+        print(f'{path}: nodes={totalnodes}, methods={len(methods)}, kinds={topkinds}, topmethods={methods[:ntop]}')
+    return 0
+
 
 if __name__ == '__main__': sys.exit(main(sys.argv))
