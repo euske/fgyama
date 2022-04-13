@@ -14,6 +14,7 @@ public class DFBuiltinTypes {
         // Note: manually create some of the built-in classes that are
         // self-referential and cannot be automatically loaded.
         DFTypeSpace langSpace = rootSpace.getSubSpace("java.lang");
+        assert langSpace != null;
         _object = (DFClsFileKlass)langSpace.getKlass("Object");
         _class = (DFClsFileKlass)langSpace.getKlass("Class");
         _enum = (DFClsFileKlass)langSpace.getKlass("Enum");

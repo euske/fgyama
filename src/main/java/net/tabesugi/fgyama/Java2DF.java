@@ -175,6 +175,7 @@ public class Java2DF {
         DFTypeFinder finder = new DFTypeFinder(_rootSpace);
         finder = new DFTypeFinder(_rootSpace.getSubSpace("java.lang"), finder);
         DFTypeSpace packageSpace = _rootSpace.getSubSpace(src.cunit.getPackage());
+        assert packageSpace != null;
         finder = new DFTypeFinder(packageSpace, finder);
         // Populate the import space.
         DFTypeSpace importSpace = new DFTypeSpace("import:"+src.path, null);
