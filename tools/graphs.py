@@ -866,7 +866,7 @@ def main(argv):
                 kinds[n.kind] = kinds.get(n.kind, 0)+1
         methods.sort(reverse=True)
         totalnodes = sum(kinds.values())
-        topkinds = sorted(( (n,k) for (k,n) in kinds.items() ), reverse=True)
+        topkinds = sorted(kinds.items(), key=lambda x:x[1], reverse=True)
         print(f'{path}: nodes={totalnodes}, methods={len(methods)}, kinds={topkinds}, topmethods={methods[:ntop]}')
     return 0
 
