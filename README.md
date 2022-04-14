@@ -142,17 +142,20 @@ it can be applied to a large code base.
 
 ### Prerequisites
 
-  * Java/Ant
+  * Java/Maven
   * Eclipse JDT (automatically downloaded)
   * Graphviz http://graphviz.org/
 
 ### Compiling
 
-    $ ant get-deps clean build
+    $ mvn clean package
 
 ### Testing
 
+    $ mvn exec:java -Dexec.args="./tests/Hello.java" > Hello.graph
+    or
     $ ./tools/java2df.sh ./tests/Hello.java > Hello.graph
+    then
     $ python tools/graph2gv.py Hello.graph | dot -Tsvg > Hello.svg
 
 
