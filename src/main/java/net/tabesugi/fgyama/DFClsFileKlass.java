@@ -231,28 +231,29 @@ public abstract class DFClsFileKlass extends DFKlass {
 
         } else if (sig != null) {
             _baseKlass = DFBuiltinTypes.getObjectKlass();
+            List<DFKlass> ifaces = new ArrayList<DFKlass>();
             //Logger.info("jklass:", this, sig);
             JNITypeParser parser = new JNITypeParser(sig);
             parser.getTypeSlots();
             try {
                 _baseKlass = parser.resolveType(_finder).toKlass();
+                for (;;) {
+                    DFType iface = DFBuiltinTypes.getObjectKlass();
+                    try {
+                        iface = parser.resolveType(_finder);
+                    } catch (TypeNotFound e) {
+                        Logger.error(
+                            "DFClsFileKlass.build: TypeNotFound (iface)",
+                            e.name, sig, this);
+                        break;
+                    }
+                    if (iface == null) break;
+                    ifaces.add(iface.toKlass());
+                }
             } catch (TypeNotFound e) {
                 Logger.error(
                     "DFClsFileKlass.build: TypeNotFound (baseKlass)",
                     e.name, sig, this);
-            }
-            List<DFKlass> ifaces = new ArrayList<DFKlass>();
-            for (;;) {
-                DFType iface = DFBuiltinTypes.getObjectKlass();
-                try {
-                    iface = parser.resolveType(_finder);
-                } catch (TypeNotFound e) {
-                    Logger.error(
-                        "DFClsFileKlass.build: TypeNotFound (iface)",
-                        e.name, sig, this);
-                }
-                if (iface == null) break;
-                ifaces.add(iface.toKlass());
             }
             _baseIfaces = new DFKlass[ifaces.size()];
             ifaces.toArray(_baseIfaces);
