@@ -157,7 +157,9 @@ public class DFTypeFinder {
     }
 
     public DFType resolveSafe(Type type) {
-        assert type != null;
+        if (type == null) {     // null = void.
+            return DFBasicType.VOID;
+        }
         if (type instanceof SimpleType) {
             SimpleType stype = (SimpleType)type;
             Name name = stype.getName();
