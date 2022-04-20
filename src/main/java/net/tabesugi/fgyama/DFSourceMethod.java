@@ -207,9 +207,8 @@ public abstract class DFSourceMethod extends DFMethod {
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
             DFLocalScope innerScope = outerScope.addChild(stmt);
-            for (VariableDeclarationExpression decl :
-                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                this.buildTypeFromExpr(decl, innerScope);
+            for (Expression rsrc : (List<Expression>) tryStmt.resources()) {
+                this.buildTypeFromExpr(rsrc, innerScope);
             }
             this.buildTypeFromStmt(tryStmt.getBody(), innerScope);
             for (CatchClause cc :
@@ -558,9 +557,8 @@ public abstract class DFSourceMethod extends DFMethod {
 
         } else if (stmt instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)stmt;
-            for (VariableDeclarationExpression decl :
-                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                this.listUsedExpr(klasses, decl);
+            for (Expression rsrc : (List<Expression>) tryStmt.resources()) {
+                this.listUsedExpr(klasses, rsrc);
             }
             this.listUsedStmt(klasses, tryStmt.getBody());
             for (CatchClause cc :
@@ -998,21 +996,8 @@ public abstract class DFSourceMethod extends DFMethod {
             // "try { ... } catch (e) { ... }"
             TryStatement tryStmt = (TryStatement)stmt;
             DFLocalScope tryScope = scope.getChildByAST(tryStmt);
-            for (VariableDeclarationExpression decl :
-                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                for (VariableDeclarationFragment frag :
-                         (List<VariableDeclarationFragment>) decl.fragments()) {
-                    try {
-                        DFRef ref = tryScope.lookupVar(frag.getName());
-                        Expression init = frag.getInitializer();
-                        if (init != null) {
-                            DFType type = this.listDefinedExpr(
-                                defined, tryScope, init, ref.getRefType());
-                            ref.setRefType(type);
-                        }
-                    } catch (VariableNotFound e) {
-                    }
-                }
+            for (Expression rsrc : (List<Expression>) tryStmt.resources()) {
+                this.listDefinedExpr(defined, tryScope, rsrc);
             }
             for (CatchClause cc : (List<CatchClause>) tryStmt.catchClauses()) {
                 DFLocalScope catchScope = scope.getChildByAST(cc);

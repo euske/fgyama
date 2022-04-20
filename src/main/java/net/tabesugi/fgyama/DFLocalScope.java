@@ -214,9 +214,8 @@ public class DFLocalScope extends DFVarScope {
         } else if (ast instanceof TryStatement) {
             TryStatement tryStmt = (TryStatement)ast;
             DFLocalScope innerScope = this.getChildByAST(ast);
-            for (VariableDeclarationExpression decl :
-                     (List<VariableDeclarationExpression>) tryStmt.resources()) {
-                innerScope.buildExpr(finder, decl);
+            for (Expression rsrc : (List<Expression>) tryStmt.resources()) {
+                innerScope.buildExpr(finder, rsrc);
             }
             innerScope.buildStmt(finder, tryStmt.getBody());
             for (CatchClause cc :
