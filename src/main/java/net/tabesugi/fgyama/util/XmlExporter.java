@@ -4,8 +4,6 @@ package net.tabesugi.fgyama;
 import java.io.*;
 import java.util.*;
 import javax.xml.stream.*;
-import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.dom.*;
 
 
 //  XmlExporter
