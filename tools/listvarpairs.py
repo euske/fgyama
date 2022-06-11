@@ -119,7 +119,7 @@ def main(argv):
     srcdb = None
     maxlen = 8
     maxchains = 100
-    minkey = 3
+    minkey = 2
     for (k, v) in opts:
         if k == '-d': level = logging.DEBUG
         elif k == '-o': output = v
