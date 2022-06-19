@@ -48,14 +48,14 @@ class IRef:
         iref.linkfrom.append(self)
         return
 
-# trace()
+# enumflow(): trace the dataflow backwards and enumerate the links.
 IGNORED = {
     'value', 'valueset',
     'op_assign', 'op_prefix', 'op_infix', 'op_postfix',
     'op_typecast', 'op_typecheck', 'op_iter',
     'ref_array', 'ref_field',
 }
-def trace(ctx2iref, v1, iref0=None, cc=None):
+def enumflow(ctx2iref, v1, iref0=None, cc=None):
     k = (cc,v1)
     if k in ctx2iref:
         iref1 = ctx2iref[k]
@@ -83,12 +83,12 @@ def trace(ctx2iref, v1, iref0=None, cc=None):
         n2 = v2.node
         if n2.kind == 'output' and funcall is not None:
             if cc is None or funcall not in cc:
-                yield from trace(ctx2iref, v2, iref1, Cons(funcall, cc))
+                yield from enumflow(ctx2iref, v2, iref1, Cons(funcall, cc))
         elif n1.kind == 'input' and funcall is not None:
             if cc is not None and cc.car is funcall:
-                yield from trace(ctx2iref, v2, iref1, cc.cdr)
+                yield from enumflow(ctx2iref, v2, iref1, cc.cdr)
         else:
-            yield from trace(ctx2iref, v2, iref1, cc)
+            yield from enumflow(ctx2iref, v2, iref1, cc)
     return
 
 # main
@@ -138,22 +138,28 @@ def main(argv):
         # Filter "top-level" methods only which aren't called by anyone else.
         if method.callers: continue
         (klass,name,func) = parsemethodname(method.name)
-        if (name not in methods) and (method.name not in methods): continue
+        if name == ':clinit:': continue
+        if name in methods:
+            methods.remove(name)
+        elif method.name in methods:
+            methods.remove(method.name)
+        else:
+            logging.info(f'ignored: {method.name}')
+            continue
         logging.info(f'method: {method.name}')
         for node in method:
             vtx = builder.vtxs[node]
             if vtx.outputs: continue
-            # Filter the output nodes only.
-            for (iref1, iref0) in trace(ctx2iref, vtx):
-                # iref1 -> iref0
-                assert iref1 is not None
-                if iref0 is None: continue
-                if iref0 == iref1: continue
-                iref1.connect(iref0)
-                irefs.add(iref0)
-                irefs.add(iref1)
+            # Filter the last nodes (no output) only.
+            for (refsrc, refdst) in enumflow(ctx2iref, vtx):
+                # refsrc -> refdst
+                assert refsrc is not None
+                if refdst is None: continue
+                if refdst == refsrc: continue
+                refsrc.connect(refdst)
+                irefs.add(refsrc)
+                irefs.add(refdst)
                 nlinks += 1
-        break
     logging.info(f'irefs: {len(irefs)}')
     logging.info(f'links: {nlinks}')
 
